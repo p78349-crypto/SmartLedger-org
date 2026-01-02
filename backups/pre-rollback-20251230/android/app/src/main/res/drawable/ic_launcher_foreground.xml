@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!--
+      Simple "wallet + chart" glyph.
+      Designed to look clean on Samsung One UI adaptive icon masks.
+      Keep generous padding by scaling down inside the 108x108 viewport.
+    -->
+    <group
+        android:scaleX="0.78"
+        android:scaleY="0.78"
+        android:translateX="11.88"
+        android:translateY="11.88">
+
+        <!-- Wallet body -->
+        <path
+            android:fillColor="@color/ic_launcher_pink"
+            android:pathData="M20,36 h68 a6,6 0 0 1 6,6 v32 a6,6 0 0 1 -6,6 h-68 a6,6 0 0 1 -6,-6 v-32 a6,6 0 0 1 6,-6 z" />
+
+        <!-- Wallet flap (cut line) -->
+        <path
+            android:fillColor="@color/ic_launcher_background"
+            android:pathData="M20,44 h74 v6 h-74 z" />
+
+        <!-- Chart bars (white cutouts) -->
+        <path
+            android:fillColor="@color/ic_launcher_green"
+            android:pathData="M33,58 h10 v18 h-10 z" />
+        <path
+            android:fillColor="@color/ic_launcher_green"
+            android:pathData="M47,52 h10 v24 h-10 z" />
+        <path
+            android:fillColor="@color/ic_launcher_green"
+            android:pathData="M61,60 h10 v16 h-10 z" />
+
+        <!-- Simple line chart stroke (green) -->
+        <path
+            android:fillColor="@color/ic_launcher_green"
+            android:pathData="M34,64 L41,61 L52,56 L64,63 L70,59 L72,62 L64,68 L52,62 L41,67 Z" />
+
+        <!-- Wallet button -->
+        <path
+            android:fillColor="@color/ic_launcher_background"
+            android:pathData="M82,58 m-3,0 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0" />
+    </group>
+</vector>

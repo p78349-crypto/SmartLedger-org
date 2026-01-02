@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark-mode launcher icon palette (used by some launchers / caches). -->
+    <color name="ic_launcher_background">#121212</color>
+    <color name="ic_launcher_pink">#F7B6C8</color>
+    <color name="ic_launcher_green">#BDECCB</color>
+</resources>

@@ -1,0 +1,13 @@
+Analyzing vccode1...                                            
+
+  error - The type 'TransactionType' isn't exhaustively matched by the switch cases since it doesn't match the pattern 'TransactionType.refund' - lib\screens\account_stats_screen.dart:120:5 - non_exhaustive_switch_statement
+  error - The type 'TransactionType' isn't exhaustively matched by the switch cases since it doesn't match the pattern 'TransactionType.refund' - lib\screens\account_stats_screen.dart:697:5 - non_exhaustive_switch_statement
+  error - The type 'TransactionType' isn't exhaustively matched by the switch cases since it doesn't match the pattern 'TransactionType.refund' - lib\screens\account_stats_screen.dart:1818:7 - non_exhaustive_switch_statement
+  error - The type 'TransactionType' isn't exhaustively matched by the switch cases since it doesn't match the pattern 'TransactionType.refund' - lib\screens\account_stats_screen.dart:1866:7 - non_exhaustive_switch_statement
+  error - The type 'TransactionType' isn't exhaustively matched by the switch cases since it doesn't match the pattern 'TransactionType.refund' - lib\screens\account_stats_screen.dart:1916:7 - non_exhaustive_switch_statement
+  error - The type 'TransactionType' isn't exhaustively matched by the switch cases since it doesn't match the pattern 'TransactionType.refund' - lib\screens\account_stats_screen.dart:2990:5 - non_exhaustive_switch_statement
+  error - The type 'TransactionType' isn't exhaustively matched by the switch cases since it doesn't match the pattern 'TransactionType.refund' - lib\screens\account_stats_screen.dart:3001:5 - non_exhaustive_switch_statement
+  error - The type 'TransactionType' isn't exhaustively matched by the switch cases since it doesn't match the pattern 'TransactionType.refund' - lib\screens\account_stats_screen.dart:3356:5 - non_exhaustive_switch_statement
+  error - The type 'TransactionType' isn't exhaustively matched by the switch cases since it doesn't match the pattern 'TransactionType.refund' - lib\screens\account_stats_screen.dart:3367:5 - non_exhaustive_switch_statement
+   info - Sort directive sections alphabetically - lib\screens\daily_transactions_screen.dart:9:1 - directives_ordering
+

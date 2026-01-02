@@ -1,0 +1,12 @@
+# IP Evidence SHA-256 Log
+# Generated: 2025-12-27T17:07:51.9150312+09:00
+# Note: Keep this file together with the referenced artifacts.
+
+d15709d6333769141a93293f2408c60e425e59e814d79ae35863e8d7a6ec5cdc  pubspec.lock
+d0f74f589ab19c0c9c85f629f289ff116eecc3972842d2a57ac77476d85a4daa  .dart_tool/package_config.json
+15c78d97a9767f86b32863d9c01471785f558d2e13d3b60b5fb7f15e7b84b472  tools/_flutter_version.txt
+63770648ee09b71907913208eb563a6df9401d077ef6617f6d5d2202072520f4  tools/_dart_version.txt
+cbdaeaee72b76097657a928102b0fb749db8108b1f2130cbbac70b246a01bf7d  docs/IP_COMPLIANCE_CHECK_2025-12-27.md
+8c609fc3c46a11ffea582d4511d2bc2ce2872d4045221a241b892f6ba1cb4f0a  docs/THIRD_PARTY_LICENSES_SUMMARY.md
+098d29fafa02dd16edf1a90af2d11ae0f02484c4fd8557549d2f189b3b2f3da6  tools/generate_third_party_licenses_summary.dart
+401bf0d7b9772d694f745d88db4ce292e8c3d9b17f109df6347446b90fdfe59c  tools/generate_ip_evidence_hashes.ps1

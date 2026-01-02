@@ -1,0 +1,119 @@
+{
+  "version": "1.0",
+  "generatedBy": "GitHub Copilot",
+  "description": "Icon metadata manifest. Map MainFeatureIcon.id -> local asset path and metadata.",
+  "icons": [
+    {
+      "id": "sample_icon_circle",
+      "assetPath": "assets/icons/custom/sample_icon_circle.svg",
+      "designer": "internal",
+      "license": "CC-BY-4.0",
+      "variants": ["default"]
+    },
+    {
+      "id": "sample_icon_star",
+      "assetPath": "assets/icons/custom/sample_icon_star.svg",
+      "designer": "internal",
+      "license": "CC-BY-4.0",
+      "variants": ["default"]
+    },
+    {
+      "id": "sample_icon_spark",
+      "assetPath": "assets/icons/custom/sample_icon_spark.svg",
+      "designer": "internal",
+      "license": "CC-BY-4.0",
+      "variants": ["default"]
+    },
+    {
+      "id": "icon_01",
+      "assetPath": "assets/icons/custom/icon_01.svg",
+      "designer": "internal",
+      "license": "CC-BY-4.0",
+      "variants": ["default"]
+    },
+    {
+      "id": "icon_02",
+      "assetPath": "assets/icons/custom/icon_02.svg",
+      "designer": "internal",
+      "license": "CC-BY-4.0",
+      "variants": ["default"]
+    },
+    {
+      "id": "icon_03",
+      "assetPath": "assets/icons/custom/icon_03.svg",
+      "designer": "internal",
+      "license": "CC-BY-4.0",
+      "variants": ["default"]
+    },
+    {
+      "id": "icon_04",
+      "assetPath": "assets/icons/custom/icon_04.svg",
+      "designer": "internal",
+      "license": "CC-BY-4.0",
+      "variants": ["default"]
+    },
+    {
+      "id": "icon_05",
+      "assetPath": "assets/icons/custom/icon_05.svg",
+      "designer": "internal",
+      "license": "CC-BY-4.0",
+      "variants": ["default"]
+    },
+    {
+      "id": "icon_06",
+      "assetPath": "assets/icons/custom/icon_06.svg",
+      "designer": "internal",
+      "license": "CC-BY-4.0",
+      "variants": ["default"]
+    },
+    {
+      "id": "icon_07",
+      "assetPath": "assets/icons/custom/icon_07.svg",
+      "designer": "internal",
+      "license": "CC-BY-4.0",
+      "variants": ["default"]
+    },
+    {
+      "id": "icon_08",
+      "assetPath": "assets/icons/custom/icon_08.svg",
+      "designer": "internal",
+      "license": "CC-BY-4.0",
+      "variants": ["default"]
+    },
+    {
+      "id": "icon_09",
+      "assetPath": "assets/icons/custom/icon_09.svg",
+      "designer": "internal",
+      "license": "CC-BY-4.0",
+      "variants": ["default"]
+    },
+    {
+      "id": "icon_10",
+      "assetPath": "assets/icons/custom/icon_10.svg",
+      "designer": "internal",
+      "license": "CC-BY-4.0",
+      "variants": ["default"]
+    },
+    {
+      "id": "icon_11",
+      "assetPath": "assets/icons/custom/icon_11.svg",
+      "designer": "internal",
+      "license": "CC-BY-4.0",
+      "variants": ["default"]
+    },
+    {
+      "id": "icon_12",
+      "assetPath": "assets/icons/custom/icon_12.svg",
+      "designer": "internal",
+      "license": "CC-BY-4.0",
+      "variants": ["default"]
+    },
+    {
+      "id": "nutrition_report",
+      "assetPath": "assets/icons/custom/nutrition_report.svg",
+      "designer": "internal",
+      "license": "CC-BY-4.0",
+      "variants": ["default"]
+    }
+  ]
+}

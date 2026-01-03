@@ -340,6 +340,56 @@ class _PeriodStatsScreenState extends State<PeriodStatsScreen> {
             Expanded(child: body),
           ],
         ),
+        floatingActionButton: Transform.translate(
+          offset: const Offset(0, 8),
+          child: SizedBox(
+            width: 160,
+            height: 120,
+            child: Stack(
+              alignment: Alignment.bottomRight,
+              children: [
+                Positioned(
+                  right: 0,
+                  bottom: 0,
+                  child: FloatingActionButton(
+                    heroTag: 'period_stats_trend',
+                    onPressed: () {
+                      // Removed SnackBar help to avoid moving FABs upward.
+                      // Implement navigation or other action here if needed.
+                      debugPrint('대분류 pressed');
+                    },
+                    backgroundColor: Colors.white,
+                    elevation: 4,
+                    child: Icon(
+                      Icons.trending_up,
+                      size: 24,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  right: 72,
+                  bottom: 0,
+                  child: FloatingActionButton(
+                    heroTag: 'period_stats_bar',
+                    onPressed: () {
+                      // Removed SnackBar help to avoid moving FABs upward.
+                      // Implement navigation or other action here if needed.
+                      debugPrint('소분류 pressed');
+                    },
+                    backgroundColor: Colors.white,
+                    elevation: 4,
+                    child: Icon(
+                      Icons.bar_chart,
+                      size: 24,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

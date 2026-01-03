@@ -16,30 +16,30 @@ class PeriodUtils {
         return DateTimeRange(start: start, end: end);
 
       case PeriodType.month:
-        final start = DateTime(now.year, now.month, 1);
+        final start = DateTime(now.year, now.month);
         final end = DateTime(now.year, now.month + 1, 0);
         return DateTimeRange(start: start, end: end);
 
       case PeriodType.quarter:
         final quarterStart = ((now.month - 1) ~/ 3) * 3 + 1;
-        final start = DateTime(now.year, quarterStart, 1);
+        final start = DateTime(now.year, quarterStart);
         final end = DateTime(now.year, quarterStart + 3, 0);
         return DateTimeRange(start: start, end: end);
 
       case PeriodType.halfYear:
         final halfYearStart = now.month <= 6 ? 1 : 7;
-        final start = DateTime(now.year, halfYearStart, 1);
+        final start = DateTime(now.year, halfYearStart);
         final end = DateTime(now.year, halfYearStart + 6, 0);
         return DateTimeRange(start: start, end: end);
 
       case PeriodType.year:
-        final start = DateTime(now.year, 1, 1);
+        final start = DateTime(now.year);
         final end = DateTime(now.year + 1, 1, 0);
         return DateTimeRange(start: start, end: end);
 
       case PeriodType.decade:
         final decadeStart = (now.year ~/ 10) * 10;
-        final start = DateTime(decadeStart, 1, 1);
+        final start = DateTime(decadeStart);
         final end = DateTime(decadeStart + 10, 1, 0);
         return DateTimeRange(start: start, end: end);
     }

@@ -434,14 +434,13 @@ class _ChartDetailScreenState extends State<ChartDetailScreen> {
             ),
           ),
           rightTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
+            
           ),
           topTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
+            
           ),
         ),
         gridData: FlGridData(
-          show: true,
           drawVerticalLine: false,
           horizontalInterval: maxValue / 5,
         ),
@@ -471,7 +470,6 @@ class _ChartDetailScreenState extends State<ChartDetailScreen> {
             color: color,
             barWidth: 2.5,
             dotData: FlDotData(
-              show: true,
               getDotPainter: (spot, percent, barData, index) {
                 return FlDotCirclePainter(
                   radius: 4,
@@ -525,14 +523,13 @@ class _ChartDetailScreenState extends State<ChartDetailScreen> {
             ),
           ),
           rightTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
+            
           ),
           topTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
+            
           ),
         ),
         gridData: FlGridData(
-          show: true,
           drawVerticalLine: false,
           horizontalInterval: maxValue / 5,
         ),

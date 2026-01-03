@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:smart_ledger/models/category_hint.dart';
@@ -10,6 +11,7 @@ import 'package:smart_ledger/models/shopping_points_draft_entry.dart';
 import 'package:smart_ledger/models/transaction.dart';
 import 'package:smart_ledger/navigation/app_routes.dart';
 import 'package:smart_ledger/services/fixed_cost_service.dart';
+import 'package:smart_ledger/services/food_expiry_service.dart';
 import 'package:smart_ledger/services/transaction_service.dart';
 import 'package:smart_ledger/services/user_pref_service.dart';
 import 'package:smart_ledger/utils/benefit_memo_utils.dart';
@@ -20,7 +22,7 @@ import 'package:smart_ledger/utils/date_formats.dart';
 import 'package:smart_ledger/utils/date_formatter.dart';
 import 'package:smart_ledger/utils/shopping_category_utils.dart';
 import 'package:smart_ledger/utils/store_memo_utils.dart';
-import 'package:smart_ledger/widgets/one_ui_input_field.dart';
+import 'package:smart_ledger/widgets/smart_input_field.dart';
 // import 'package:smart_ledger/screens/nutrition_report_screen.dart';
 // Preserved but disabled per request.
 
@@ -56,6 +58,8 @@ class _ShoppingCartQuickTransactionScreenState
   final List<String> _savedBulkItemIds = <String>[];
 
   _InitialQuickTransactionSnapshot? _initialSnapshot;
+
+  bool _addToInventory = false;
 
   @override
   void dispose() {
@@ -117,6 +121,13 @@ class _ShoppingCartQuickTransactionScreenState
     _bulkTotalCount = widget.args.bulkTotalCount;
     _bulkCategoryHintsState =
         widget.args.bulkCategoryHints ?? const <String, CategoryHint>{};
+
+    if (widget.args.martStore != null) {
+      _storeController.text = widget.args.martStore!;
+    }
+    if (widget.args.martPayment != null) {
+      _paymentController.text = widget.args.martPayment!;
+    }
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _loadFavoritesAndPrefill();
@@ -248,7 +259,6 @@ class _ShoppingCartQuickTransactionScreenState
           quantity: _resolvedQty,
           unitPrice: _resolvedUnitPrice ?? 0,
           isPlanned: false,
-          isChecked: false,
           createdAt: now,
           updatedAt: now,
         );
@@ -314,20 +324,6 @@ class _ShoppingCartQuickTransactionScreenState
     if (g.contains(i)) return g;
     if (i.contains(g)) return i;
     return '$g · $i';
-  }
-
-  Future<bool> _ensureMainCategorySelectedForCurrentItem() async {
-    if (_hasSelectedMainCategory) return true;
-
-    // Try auto-suggestion once (rules + learned hints).
-    await _ensureCategorySuggestion();
-    if (!mounted) return false;
-    if (_hasSelectedMainCategory) return true;
-
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('카테고리를 선택하세요.')));
-    return _openCategoryPicker();
   }
 
   Future<void> _saveRemainingBulk() async {
@@ -418,7 +414,7 @@ class _ShoppingCartQuickTransactionScreenState
         type: TransactionType.expense,
         description: cartItem.name,
         amount: total,
-        date: DateTime.now(),
+        date: widget.args.martDate ?? DateTime.now(),
         quantity: qty,
         unitPrice: unit,
         paymentMethod: payment,
@@ -428,12 +424,20 @@ class _ShoppingCartQuickTransactionScreenState
         subCategory: (resolvedMain == CategoryDefinitions.defaultCategory)
             ? null
             : resolvedSub,
-        savingsAllocation: null,
-        weather: null,
       );
 
       try {
         await TransactionService().addTransaction(accountName, tx);
+        if (_addToInventory) {
+          final purchaseDate = widget.args.martDate ?? DateTime.now();
+          await FoodExpiryService.instance.addItem(
+            name: cartItem.name,
+            purchaseDate: purchaseDate,
+            expiryDate: purchaseDate.add(const Duration(days: 7)),
+            quantity: qty.toDouble(),
+            memo: _mergeMemo(memo, cartItem.memo),
+          );
+        }
       } catch (e) {
         if (!mounted) return;
         ScaffoldMessenger.of(
@@ -514,14 +518,12 @@ class _ShoppingCartQuickTransactionScreenState
           quantity: _resolvedQty,
           unitPrice: _resolvedUnitPrice ?? 0,
           isPlanned: false,
-          isChecked: false,
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         );
     final recommended = ShoppingCategoryUtils.suggestCandidates(
       currentItem,
       learnedHints: hints,
-      maxCount: 10,
     );
 
     if (!categoryOptions.containsKey(tempMain)) {
@@ -529,221 +531,243 @@ class _ShoppingCartQuickTransactionScreenState
       tempSub = null;
     }
 
-    final result = await showModalBottomSheet<_CategorySelection>(
+    final result = await showGeneralDialog<_CategorySelection>(
       context: context,
-      isScrollControlled: true,
-      builder: (sheetContext) {
-        var showAll = false;
-        var query = '';
-        return SafeArea(
-          child: Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(sheetContext).viewInsets.bottom + 16,
-              left: 16,
-              right: 16,
-              top: 16,
-            ),
-            child: StatefulBuilder(
-              builder: (context, setSheetState) {
-                Widget choiceChip({
-                  required String label,
-                  required bool selected,
-                  required VoidCallback onSelected,
-                }) {
-                  return ChoiceChip(
-                    label: Text(label),
-                    selected: selected,
-                    onSelected: (_) => onSelected(),
-                  );
-                }
+      pageBuilder: (dialogContext, animation, secondaryAnimation) {
+        String? focusedMain = tempMain == CategoryDefinitions.defaultCategory
+            ? null
+            : tempMain;
 
-                List<Widget> buildRecommendedChips() {
-                  final chips = <Widget>[];
-                  for (final pair in recommended) {
-                    final main = pair.mainCategory;
-                    final sub = pair.subCategory;
-                    final label = (sub == null || sub.trim().isEmpty)
-                        ? main
-                        : '$main · $sub';
-                    final isSelected =
-                        tempMain == main &&
-                        ((sub == null || sub.trim().isEmpty)
-                            ? tempSub == null
-                            : tempSub == sub);
-                    chips.add(
-                      choiceChip(
-                        label: label,
-                        selected: isSelected,
-                        onSelected: () {
-                          setSheetState(() {
-                            tempMain = main;
-                            tempSub = (sub == null || sub.trim().isEmpty)
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            Widget choiceChip({
+              required String label,
+              required bool selected,
+              required VoidCallback onSelected,
+              bool isMain = false,
+              bool isLarge = false,
+            }) {
+              return ChoiceChip(
+                label: Padding(
+                  padding: isLarge
+                      ? const EdgeInsets.symmetric(horizontal: 8, vertical: 4)
+                      : EdgeInsets.zero,
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: isLarge ? 15 : (isMain ? 13 : 12),
+                      fontWeight: isMain || isLarge
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                    ),
+                  ),
+                ),
+                selected: selected,
+                onSelected: (_) => onSelected(),
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              );
+            }
+
+            return Scaffold(
+              appBar: AppBar(
+                title: Text(focusedMain ?? '카테고리 선택'),
+                leading: IconButton(
+                  icon: Icon(
+                    focusedMain == null ? Icons.close : Icons.arrow_back,
+                  ),
+                  onPressed: () {
+                    if (focusedMain == null) {
+                      Navigator.pop(dialogContext);
+                    } else {
+                      setSheetState(() => focusedMain = null);
+                    }
+                  },
+                ),
+                actions: [
+                  if (focusedMain != null)
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(
+                          dialogContext,
+                          _CategorySelection(tempMain, tempSub),
+                        );
+                      },
+                      child: const Text(
+                        '선택 완료',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                ],
+              ),
+              body: ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  // Always show recommendations at the top
+                  if (recommended.isNotEmpty) ...[
+                    Text(
+                      '추천 카테고리',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: recommended.map((pair) {
+                        final main = pair.mainCategory;
+                        final sub = pair.subCategory;
+                        final label = (sub == null || sub.trim().isEmpty)
+                            ? main
+                            : '$main · $sub';
+                        final isSelected =
+                            tempMain == main &&
+                            ((sub == null || sub.trim().isEmpty)
+                                ? tempSub == null
+                                : tempSub == sub);
+                        return choiceChip(
+                          label: label,
+                          selected: isSelected,
+                          onSelected: () {
+                            final selectedMain = main;
+                            final selectedSub =
+                                (sub == null || sub.trim().isEmpty)
                                 ? null
                                 : sub;
-                          });
-                        },
-                      ),
-                    );
-                  }
-                  return chips;
-                }
-
-                return ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxHeight: MediaQuery.of(context).size.height * 0.65,
-                  ),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '카테고리 선택',
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          '추천',
-                          style: Theme.of(context).textTheme.labelLarge,
-                        ),
-                        const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: buildRecommendedChips(),
-                        ),
-                        const SizedBox(height: 12),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: TextButton(
-                            onPressed: () {
-                              setSheetState(() {
-                                showAll = !showAll;
-                                query = '';
-                              });
-                            },
-                            child: Text(showAll ? '추천만 보기' : '전체 카테고리 보기'),
-                          ),
-                        ),
-                        if (showAll) ...[
-                          TextField(
-                            decoration: const InputDecoration(
-                              isDense: true,
-                              hintText: '카테고리 검색',
-                              border: OutlineInputBorder(),
-                            ),
-                            onChanged: (v) {
-                              setSheetState(() => query = v.trim());
-                            },
-                          ),
-                          const SizedBox(height: 12),
-                          ...categoryOptions.entries.map((entry) {
-                            final main = entry.key;
-                            final subs = entry.value;
-                            final isSelectedMain = tempMain == main;
-
-                            bool matches(String label) {
-                              if (query.isEmpty) return true;
-                              return label.contains(query);
-                            }
-
-                            final chips = <Widget>[];
-                            if (matches(main)) {
-                              chips.add(
-                                choiceChip(
-                                  label: main,
-                                  selected: isSelectedMain && tempSub == null,
-                                  onSelected: () {
-                                    setSheetState(() {
-                                      tempMain = main;
-                                      tempSub = null;
-                                    });
-                                  },
-                                ),
-                              );
-                            }
-                            for (final sub in subs) {
-                              final label = '$main · $sub';
-                              if (!matches(label)) continue;
-                              chips.add(
-                                choiceChip(
-                                  label: label,
-                                  selected: isSelectedMain && tempSub == sub,
-                                  onSelected: () {
-                                    setSheetState(() {
-                                      tempMain = main;
-                                      tempSub = sub;
-                                    });
-                                  },
-                                ),
-                              );
-                            }
-
-                            if (chips.isEmpty) return const SizedBox.shrink();
-
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: LayoutBuilder(
-                                builder: (context, constraints) {
-                                  final itemWidth =
-                                      (constraints.maxWidth - 8) / 2;
-                                  return Wrap(
-                                    spacing: 8,
-                                    runSpacing: 8,
-                                    crossAxisAlignment:
-                                        WrapCrossAlignment.start,
-                                    children: [
-                                      for (final chip in chips)
-                                        SizedBox(
-                                          width: itemWidth,
-                                          child: Align(
-                                            alignment: Alignment.topLeft,
-                                            child: chip,
-                                          ),
-                                        ),
-                                    ],
-                                  );
-                                },
-                              ),
+                            Navigator.pop(
+                              dialogContext,
+                              _CategorySelection(selectedMain, selectedSub),
                             );
-                          }),
-                        ],
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            TextButton(
-                              onPressed: () {
+                          },
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 20),
+                    const Divider(),
+                    const SizedBox(height: 12),
+                  ],
+
+                  if (focusedMain == null) ...[
+                    // Step 1: Show Main Categories
+                    Text(
+                      '대분류 선택',
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                    const SizedBox(height: 12),
+                    GridView.count(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 10,
+                      crossAxisSpacing: 10,
+                      childAspectRatio: 2.5,
+                      children: CategoryDefinitions.shoppingMainCategories
+                          .where(
+                            (m) => m != CategoryDefinitions.defaultCategory,
+                          )
+                          .map((main) {
+                            final isSelected = tempMain == main;
+                            return InkWell(
+                              onTap: () {
                                 setSheetState(() {
-                                  tempMain =
-                                      CategoryDefinitions.defaultCategory;
+                                  tempMain = main;
                                   tempSub = null;
+                                  focusedMain = main;
                                 });
                               },
-                              child: const Text('초기화'),
-                            ),
-                            const Spacer(),
-                            TextButton(
-                              onPressed: () => Navigator.pop(sheetContext),
-                              child: const Text('취소'),
-                            ),
-                            const SizedBox(width: 8),
-                            ElevatedButton(
-                              onPressed: () {
-                                Navigator.pop(
-                                  sheetContext,
-                                  _CategorySelection(tempMain, tempSub),
-                                );
-                              },
-                              child: const Text('선택 완료'),
-                            ),
-                          ],
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? Theme.of(
+                                          context,
+                                        ).colorScheme.primaryContainer
+                                      : Theme.of(context)
+                                            .colorScheme
+                                            .surfaceContainerHighest
+                                            .withValues(alpha: 0.3),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: isSelected
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Colors.transparent,
+                                  ),
+                                ),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  main,
+                                  style: TextStyle(
+                                    fontWeight: isSelected
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                    color: isSelected
+                                        ? Theme.of(
+                                            context,
+                                          ).colorScheme.onPrimaryContainer
+                                        : Theme.of(
+                                            context,
+                                          ).colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ),
+                            );
+                          })
+                          .toList(),
+                    ),
+                  ] else ...[
+                    // Step 2: Show Subcategories for focused main
+                    Row(
+                      children: [
+                        Text(
+                          '소분류 선택',
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
+                        const Spacer(),
+                        TextButton.icon(
+                          onPressed: () =>
+                              setSheetState(() => focusedMain = null),
+                          icon: const Icon(Icons.edit, size: 16),
+                          label: const Text('대분류 변경'),
                         ),
                       ],
                     ),
-                  ),
-                );
-              },
-            ),
-          ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      children: [
+                        choiceChip(
+                          label: '전체 ($focusedMain)',
+                          selected: tempMain == focusedMain! && tempSub == null,
+                          onSelected: () {
+                            Navigator.pop(
+                              dialogContext,
+                              _CategorySelection(focusedMain!, null),
+                            );
+                          },
+                          isLarge: true,
+                        ),
+                        ...(categoryOptions[focusedMain!] ?? []).map((sub) {
+                          return choiceChip(
+                            label: sub,
+                            selected:
+                                tempMain == focusedMain! && tempSub == sub,
+                            onSelected: () {
+                              Navigator.pop(
+                                dialogContext,
+                                _CategorySelection(focusedMain!, sub),
+                              );
+                            },
+                            isLarge: true,
+                          );
+                        }),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            );
+          },
         );
       },
     );
@@ -803,7 +827,16 @@ class _ShoppingCartQuickTransactionScreenState
   }
 
   Future<void> _save() async {
+    await _performSave(shouldShowDialog: false);
+  }
+
+  Future<void> _saveWithBenefits() async {
+    await _performSave(shouldShowDialog: true);
+  }
+
+  Future<void> _performSave({required bool shouldShowDialog}) async {
     FocusScope.of(context).unfocus();
+    HapticFeedback.lightImpact();
     final payment = _paymentController.text.trim();
     final memo = _memoController.text.trim();
     final effectiveMemo = _mergeMemo(memo, _bulkCurrentItem?.memo ?? '');
@@ -820,9 +853,11 @@ class _ShoppingCartQuickTransactionScreenState
       return;
     }
 
-    // Category is mandatory (at least main) to keep stats consistent.
-    final hasCategory = await _ensureMainCategorySelectedForCurrentItem();
-    if (!hasCategory || !mounted) return;
+    // Category is optional for speed, but we try to suggest it.
+    if (!_hasSelectedMainCategory) {
+      await _ensureCategorySuggestion();
+    }
+    if (!mounted) return;
 
     final categoryText =
         _selectedMainCategory == CategoryDefinitions.defaultCategory
@@ -839,717 +874,741 @@ class _ShoppingCartQuickTransactionScreenState
     final unit = _resolvedUnitPrice;
     final total = _resolvedTotal;
 
-    final memoSeed = BenefitMemoUtils.parseBenefitByType(effectiveMemo);
-    final benefitRowControllers =
-        <({TextEditingController type, TextEditingController amount})>[
-          for (final e in memoSeed.entries)
-            (
-              type: TextEditingController(text: e.key),
-              amount: TextEditingController(text: e.value.toStringAsFixed(0)),
-            ),
-        ];
+    String? benefitJson;
 
-    if (benefitRowControllers.isEmpty) {
-      benefitRowControllers.add((
-        type: TextEditingController(),
-        amount: TextEditingController(),
-      ));
-    }
+    if (shouldShowDialog) {
+      final memoSeed = BenefitMemoUtils.parseBenefitByType(effectiveMemo);
+      final benefitRowControllers =
+          <({TextEditingController type, TextEditingController amount})>[
+            for (final e in memoSeed.entries)
+              (
+                type: TextEditingController(text: e.key),
+                amount: TextEditingController(text: e.value.toStringAsFixed(0)),
+              ),
+          ];
 
-    final shippingController = TextEditingController(text: '2500');
-    final subscriptionAmountController = TextEditingController();
-    String? benefitJsonFromDialog;
+      if (benefitRowControllers.isEmpty) {
+        benefitRowControllers.add((
+          type: TextEditingController(),
+          amount: TextEditingController(),
+        ));
+      }
 
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) {
-        final lines = widget.args.previewLines;
-        int page = 0;
-        String storePreset = '';
-        bool freeShipping = false;
+      final shippingController = TextEditingController(text: '2500');
+      final subscriptionAmountController = TextEditingController();
 
-        String subscriptionPreset = '';
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) {
+          final lines = widget.args.previewLines;
+          int page = 0;
+          String storePreset = '';
+          bool freeShipping = false;
+          String subscriptionPreset = '';
 
-        void ensureShippingBenefit() {
-          final amountRaw = shippingController.text.trim().replaceAll(',', '');
-          final parsed = double.tryParse(amountRaw);
-          if (parsed == null || parsed <= 0) return;
-
-          for (final row in benefitRowControllers) {
-            if (row.type.text.trim() == '배송') {
-              if (row.amount.text.trim().isEmpty) {
-                row.amount.text = parsed.toStringAsFixed(0);
-              }
-              return;
-            }
-          }
-          benefitRowControllers.add((
-            type: TextEditingController(text: '배송'),
-            amount: TextEditingController(text: parsed.toStringAsFixed(0)),
-          ));
-        }
-
-        double sumBenefitRows() {
-          var sum = 0.0;
-          for (final row in benefitRowControllers) {
-            final raw = row.amount.text.trim().replaceAll(',', '');
-            final v = double.tryParse(raw);
-            if (v == null || v <= 0) continue;
-            sum += v;
-          }
-          return sum;
-        }
-
-        Map<String, double> benefitRowMap() {
-          final byType = <String, double>{};
-          for (final row in benefitRowControllers) {
-            final key = row.type.text.trim();
-            if (key.isEmpty) continue;
-            final raw = row.amount.text.trim().replaceAll(',', '');
-            final v = double.tryParse(raw);
-            if (v == null || v <= 0) continue;
-            byType[key] = (byType[key] ?? 0) + v;
-          }
-          return byType;
-        }
-
-        return StatefulBuilder(
-          builder: (dialogContext, setDialogState) {
-            final charged = _parseCardChargedAmount(
-              _cardChargedAmountController.text,
+          void ensureShippingBenefit() {
+            final amountRaw = shippingController.text.trim().replaceAll(
+              ',',
+              '',
             );
-            final cardBenefit = charged == null ? null : (total - charged);
+            final parsed = double.tryParse(amountRaw);
+            if (parsed == null || parsed <= 0) return;
 
-            final rowSum = sumBenefitRows();
-
-            Widget buildPage1() {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('상품명: $_resolvedDescription'),
-                  if (widget.args.itemCount != null)
-                    Text('체크 항목: ${widget.args.itemCount}개'),
-                  if (unit != null && unit > 0)
-                    Text('가격(단가): ${CurrencyFormatter.format(unit)}'),
-                  if (unit != null && unit > 0) Text('수량: $qty개'),
-                  Text('금액(제시): ${CurrencyFormatter.format(total)}'),
-                  Text('카테고리: $categoryText'),
-                  Text('결제수단: $payment'),
-                  if (effectiveMemo.isNotEmpty) Text('메모: $effectiveMemo'),
-                  if (lines != null && lines.isNotEmpty) ...[
-                    const SizedBox(height: 12),
-                    ...lines.map(Text.new),
-                  ],
-                  const SizedBox(height: 12),
-                  const Divider(),
-                  const SizedBox(height: 8),
-                  Text(
-                    '혜택 입력은 선택입니다.',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                  const SizedBox(height: 8),
-                  if (charged != null)
-                    Text(
-                      cardBenefit == null
-                          ? ''
-                          : (cardBenefit > 0
-                                ? '현재 기준 혜택(제시-실결제): '
-                                      '${CurrencyFormatter.format(cardBenefit)}'
-                                : '현재 기준 혜택: 0원'),
-                      style: Theme.of(context).textTheme.bodySmall,
-                    )
-                  else
-                    Text(
-                      '팁) “금액(제시)” - “카드 청구금액(실결제)” = 혜택(할인/포인트 등)',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                ],
-              );
+            for (final row in benefitRowControllers) {
+              if (row.type.text.trim() == '배송') {
+                if (row.amount.text.trim().isEmpty) {
+                  row.amount.text = parsed.toStringAsFixed(0);
+                }
+                return;
+              }
             }
+            benefitRowControllers.add((
+              type: TextEditingController(text: '배송'),
+              amount: TextEditingController(text: parsed.toStringAsFixed(0)),
+            ));
+          }
 
-            Widget buildBenefitRow(
-              ({TextEditingController type, TextEditingController amount}) row,
-              int index,
-            ) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Row(
+          double sumBenefitRows() {
+            var sum = 0.0;
+            for (final row in benefitRowControllers) {
+              final raw = row.amount.text.trim().replaceAll(',', '');
+              final v = double.tryParse(raw);
+              if (v == null || v <= 0) continue;
+              sum += v;
+            }
+            return sum;
+          }
+
+          Map<String, double> benefitRowMap() {
+            final byType = <String, double>{};
+            for (final row in benefitRowControllers) {
+              final key = row.type.text.trim();
+              if (key.isEmpty) continue;
+              final raw = row.amount.text.trim().replaceAll(',', '');
+              final v = double.tryParse(raw);
+              if (v == null || v <= 0) continue;
+              byType[key] = (byType[key] ?? 0) + v;
+            }
+            return byType;
+          }
+
+          return StatefulBuilder(
+            builder: (dialogContext, setDialogState) {
+              final charged = _parseCardChargedAmount(
+                _cardChargedAmountController.text,
+              );
+              final cardBenefit = charged == null ? null : (total - charged);
+              final rowSum = sumBenefitRows();
+
+              Widget buildPage1() {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      flex: 2,
-                      child: TextField(
-                        controller: row.type,
-                        textInputAction: TextInputAction.next,
-                        decoration: const InputDecoration(
-                          labelText: '종류',
-                          hintText: '예: 카드/쇼핑몰/포인트/배송',
-                          border: OutlineInputBorder(),
-                        ),
-                        onChanged: (_) => setDialogState(() {}),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      flex: 2,
-                      child: TextField(
-                        controller: row.amount,
-                        keyboardType: TextInputType.number,
-                        textInputAction: TextInputAction.done,
-                        decoration: InputDecoration(
-                          labelText: '금액',
-                          hintText: '예: 2500',
-                          border: const OutlineInputBorder(),
-                          suffixIcon: benefitRowControllers.length <= 1
-                              ? null
-                              : IconButton(
-                                  tooltip: '삭제',
-                                  onPressed: () {
-                                    setDialogState(() {
-                                      benefitRowControllers.removeAt(index);
-                                    });
-                                  },
-                                  icon: const Icon(Icons.close),
-                                ),
-                        ),
-                        onChanged: (_) => setDialogState(() {}),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }
-
-            Widget buildPage2() {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('혜택(선택)', style: Theme.of(context).textTheme.titleSmall),
-                  const SizedBox(height: 8),
-                  DropdownButtonFormField<String>(
-                    key: ValueKey(storePreset),
-                    initialValue: storePreset,
-                    decoration: const InputDecoration(
-                      labelText: '쇼핑몰/매장 선택(선택)',
-                      border: OutlineInputBorder(),
-                    ),
-                    items: const [
-                      DropdownMenuItem(value: '', child: Text('선택 안함')),
-                      DropdownMenuItem(
-                        value: '온라인 쇼핑몰',
-                        child: Text('온라인 쇼핑몰'),
-                      ),
-                      DropdownMenuItem(value: '포털 서비스', child: Text('포털 서비스')),
-                      DropdownMenuItem(value: '마트', child: Text('마트')),
+                    Text('상품명: $_resolvedDescription'),
+                    if (widget.args.itemCount != null)
+                      Text('체크 항목: ${widget.args.itemCount}개'),
+                    if (unit != null && unit > 0)
+                      Text('가격(단가): ${CurrencyFormatter.format(unit)}'),
+                    if (unit != null && unit > 0) Text('수량: $qty개'),
+                    Text('금액(제시): ${CurrencyFormatter.format(total)}'),
+                    Text('카테고리: $categoryText'),
+                    Text('결제수단: $payment'),
+                    if (effectiveMemo.isNotEmpty) Text('메모: $effectiveMemo'),
+                    if (lines != null && lines.isNotEmpty) ...[
+                      const SizedBox(height: 12),
+                      ...lines.map(Text.new),
                     ],
-                    onChanged: (v) {
-                      setDialogState(() {
-                        storePreset = v ?? '';
-                        if (storePreset.isNotEmpty) {
-                          _storeController.text = storePreset;
-                        }
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 8),
-                  OneUiInputField(
-                    label: '매장/쇼핑몰(직접입력, 선택)',
-                    hint: '예: 온라인 쇼핑몰, 대형마트, 포털 서비스',
-                    controller: _storeController,
-                    textInputAction: TextInputAction.next,
-                    onChanged: (_) => setDialogState(() {}),
-                  ),
-                  const SizedBox(height: 8),
-                  OneUiInputField(
-                    label: '결제금액(실결제, 선택)',
-                    hint: '예: 12300',
-                    controller: _cardChargedAmountController,
-                    keyboardType: TextInputType.number,
-                    textInputAction: TextInputAction.done,
-                    onChanged: (_) => setDialogState(() {}),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
+                    const SizedBox(height: 12),
+                    const Divider(),
+                    const SizedBox(height: 8),
+                    Text(
+                      '혜택 입력은 선택입니다.',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    const SizedBox(height: 8),
+                    if (charged != null)
+                      Text(
+                        cardBenefit == null
+                            ? ''
+                            : (cardBenefit > 0
+                                  ? '현재 기준 혜택(제시-실결제): '
+                                        '${CurrencyFormatter.format(cardBenefit)}'
+                                  : '현재 기준 혜택: 0원'),
+                        style: Theme.of(context).textTheme.bodySmall,
+                      )
+                    else
+                      Text(
+                        '팁) “금액(제시)” - “카드 청구금액(실결제)” = 혜택(할인/포인트 등)',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                  ],
+                );
+              }
+
+              Widget buildBenefitRow(
+                ({TextEditingController type, TextEditingController amount})
+                row,
+                int index,
+              ) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Row(
                     children: [
                       Expanded(
-                        child: CheckboxListTile(
-                          contentPadding: EdgeInsets.zero,
-                          title: const Text('무료배송'),
-                          value: freeShipping,
-                          controlAffinity: ListTileControlAffinity.leading,
-                          onChanged: (v) {
-                            setDialogState(() {
-                              freeShipping = v ?? false;
-                              if (freeShipping) {
-                                ensureShippingBenefit();
-                              }
-                            });
-                          },
+                        flex: 2,
+                        child: TextField(
+                          controller: row.type,
+                          textInputAction: TextInputAction.next,
+                          decoration: const InputDecoration(
+                            labelText: '종류',
+                            hintText: '예: 카드/마트/포인트/배송',
+                            border: OutlineInputBorder(),
+                          ),
+                          onChanged: (_) => setDialogState(() {}),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        flex: 2,
+                        child: TextField(
+                          controller: row.amount,
+                          keyboardType: TextInputType.number,
+                          textInputAction: TextInputAction.done,
+                          decoration: InputDecoration(
+                            labelText: '금액',
+                            hintText: '예: 2500',
+                            border: const OutlineInputBorder(),
+                            suffixIcon: benefitRowControllers.length <= 1
+                                ? null
+                                : IconButton(
+                                    tooltip: '삭제',
+                                    onPressed: () {
+                                      setDialogState(() {
+                                        benefitRowControllers.removeAt(index);
+                                      });
+                                    },
+                                    icon: const Icon(Icons.close),
+                                  ),
+                          ),
+                          onChanged: (_) => setDialogState(() {}),
                         ),
                       ),
                     ],
                   ),
-                  if (freeShipping) ...[
-                    TextField(
-                      controller: shippingController,
-                      keyboardType: TextInputType.number,
+                );
+              }
+
+              Widget buildPage2() {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '혜택(선택)',
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<String>(
+                      key: ValueKey(storePreset),
+                      initialValue: storePreset,
                       decoration: const InputDecoration(
-                        labelText: '배송비 절약(기본 2500)',
+                        labelText: '마트/쇼핑몰 선택(선택)',
                         border: OutlineInputBorder(),
                       ),
-                      onChanged: (_) {
-                        setDialogState(ensureShippingBenefit);
+                      items: const [
+                        DropdownMenuItem(value: '', child: Text('선택 안함')),
+                        DropdownMenuItem(
+                          value: '온라인 쇼핑몰',
+                          child: Text('온라인 쇼핑몰'),
+                        ),
+                        DropdownMenuItem(
+                          value: '포털 서비스',
+                          child: Text('포털 서비스'),
+                        ),
+                        DropdownMenuItem(value: '마트', child: Text('마트')),
+                      ],
+                      onChanged: (v) {
+                        setDialogState(() {
+                          storePreset = v ?? '';
+                          if (storePreset.isNotEmpty) {
+                            _storeController.text = storePreset;
+                          }
+                        });
                       },
                     ),
                     const SizedBox(height: 8),
-                  ],
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      for (final quick in const [
-                        '카드',
-                        '쇼핑몰',
-                        '포인트',
-                        '배송',
-                        '와우',
-                        '멤버십',
-                      ])
+                    SmartInputField(
+                      label: '마트/쇼핑몰명(직접입력, 선택)',
+                      hint: '예: 온라인 쇼핑몰, 대형마트, 포털 서비스',
+                      controller: _storeController,
+                      textInputAction: TextInputAction.next,
+                      onChanged: (_) => setDialogState(() {}),
+                    ),
+                    const SizedBox(height: 8),
+                    SmartInputField(
+                      label: '결제금액(실결제, 선택)',
+                      hint: '예: 12300',
+                      controller: _cardChargedAmountController,
+                      keyboardType: TextInputType.number,
+                      textInputAction: TextInputAction.done,
+                      onChanged: (_) => setDialogState(() {}),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: CheckboxListTile(
+                            contentPadding: EdgeInsets.zero,
+                            title: const Text('무료배송'),
+                            value: freeShipping,
+                            controlAffinity: ListTileControlAffinity.leading,
+                            onChanged: (v) {
+                              setDialogState(() {
+                                freeShipping = v ?? false;
+                                if (freeShipping) {
+                                  ensureShippingBenefit();
+                                }
+                              });
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (freeShipping) ...[
+                      TextField(
+                        controller: shippingController,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          labelText: '배송비 절약(기본 2500)',
+                          border: OutlineInputBorder(),
+                        ),
+                        onChanged: (_) {
+                          setDialogState(ensureShippingBenefit);
+                        },
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        for (final quick in const [
+                          '카드',
+                          '마트/쇼핑몰',
+                          '포인트',
+                          '배송',
+                          '쿠폰',
+                          '멤버십',
+                        ])
+                          ActionChip(
+                            label: Text(quick),
+                            onPressed: () {
+                              setDialogState(() {
+                                benefitRowControllers.add((
+                                  type: TextEditingController(text: quick),
+                                  amount: TextEditingController(),
+                                ));
+                              });
+                            },
+                          ),
                         ActionChip(
-                          label: Text(quick),
+                          label: const Text('+ 추가'),
                           onPressed: () {
                             setDialogState(() {
                               benefitRowControllers.add((
-                                type: TextEditingController(text: quick),
+                                type: TextEditingController(),
                                 amount: TextEditingController(),
                               ));
                             });
                           },
                         ),
-                      ActionChip(
-                        label: const Text('+ 추가'),
-                        onPressed: () {
-                          setDialogState(() {
-                            benefitRowControllers.add((
-                              type: TextEditingController(),
-                              amount: TextEditingController(),
-                            ));
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  ...benefitRowControllers.asMap().entries.map((e) {
-                    return buildBenefitRow(e.value, e.key);
-                  }),
-                  const SizedBox(height: 8),
-                  const Divider(),
-                  const SizedBox(height: 8),
-                  Text(
-                    '구독(가입비) 미리 등록(선택)',
-                    style: Theme.of(context).textTheme.titleSmall,
-                  ),
-                  const SizedBox(height: 8),
-                  DropdownButtonFormField<String>(
-                    key: ValueKey(subscriptionPreset),
-                    initialValue: subscriptionPreset,
-                    decoration: const InputDecoration(
-                      labelText: '구독 선택',
-                      border: OutlineInputBorder(),
+                      ],
                     ),
-                    items: const [
-                      DropdownMenuItem(value: '', child: Text('선택 안함')),
-                      DropdownMenuItem(
-                        value: '온라인 쇼핑몰 멤버십(연)',
-                        child: Text('온라인 쇼핑몰 멤버십(연)'),
-                      ),
-                      DropdownMenuItem(
-                        value: '포털 멤버십(월)',
-                        child: Text('포털 멤버십(월)'),
-                      ),
-                    ],
-                    onChanged: (v) {
-                      setDialogState(() {
-                        subscriptionPreset = v ?? '';
-                        subscriptionAmountController.clear();
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: subscriptionAmountController,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: '가입비/구독료 금액',
-                      hintText: '예: 4990',
-                      border: OutlineInputBorder(),
+                    const SizedBox(height: 12),
+                    ...benefitRowControllers.asMap().entries.map((e) {
+                      return buildBenefitRow(e.value, e.key);
+                    }),
+                    const SizedBox(height: 8),
+                    const Divider(),
+                    const SizedBox(height: 8),
+                    Text(
+                      '구독(가입비) 미리 등록(선택)',
+                      style: Theme.of(context).textTheme.titleSmall,
                     ),
-                    onChanged: (_) => setDialogState(() {}),
-                  ),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton(
-                      onPressed: subscriptionPreset.trim().isEmpty
-                          ? null
-                          : () async {
-                              final messenger = ScaffoldMessenger.of(context);
-                              final raw = subscriptionAmountController.text
-                                  .trim()
-                                  .replaceAll(',', '');
-                              final amount = double.tryParse(raw);
-                              if (amount == null || amount <= 0) {
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<String>(
+                      key: ValueKey(subscriptionPreset),
+                      initialValue: subscriptionPreset,
+                      decoration: const InputDecoration(
+                        labelText: '구독 선택',
+                        border: OutlineInputBorder(),
+                      ),
+                      items: const [
+                        DropdownMenuItem(value: '', child: Text('선택 안함')),
+                        DropdownMenuItem(
+                          value: '온라인 쇼핑몰 멤버십(연)',
+                          child: Text('온라인 쇼핑몰 멤버십(연)'),
+                        ),
+                        DropdownMenuItem(
+                          value: '포털 멤버십(월)',
+                          child: Text('포털 멤버십(월)'),
+                        ),
+                      ],
+                      onChanged: (v) {
+                        setDialogState(() {
+                          subscriptionPreset = v ?? '';
+                          subscriptionAmountController.clear();
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: subscriptionAmountController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: '가입비/구독료 금액',
+                        hintText: '예: 4990',
+                        border: OutlineInputBorder(),
+                      ),
+                      onChanged: (_) => setDialogState(() {}),
+                    ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton(
+                        onPressed: subscriptionPreset.trim().isEmpty
+                            ? null
+                            : () async {
+                                final messenger = ScaffoldMessenger.of(context);
+                                final raw = subscriptionAmountController.text
+                                    .trim()
+                                    .replaceAll(',', '');
+                                final amount = double.tryParse(raw);
+                                if (amount == null || amount <= 0) {
+                                  if (!mounted) return;
+                                  messenger.showSnackBar(
+                                    const SnackBar(
+                                      content: Text('구독 금액을 입력하세요.'),
+                                    ),
+                                  );
+                                  return;
+                                }
+
+                                final now = DateTime.now();
+                                final vendor =
+                                    subscriptionPreset.contains('온라인 쇼핑몰')
+                                    ? '온라인 쇼핑몰'
+                                    : (subscriptionPreset.contains('포털')
+                                          ? '포털 서비스'
+                                          : null);
+                                final dueDay =
+                                    subscriptionPreset.contains('(월)')
+                                    ? now.day
+                                    : null;
+
+                                await FixedCostService().loadFixedCosts();
+                                final existing = FixedCostService()
+                                    .getFixedCosts(widget.args.accountName)
+                                    .any(
+                                      (c) =>
+                                          c.name.trim() ==
+                                          subscriptionPreset.trim(),
+                                    );
+
                                 if (!mounted) return;
-                                messenger.showSnackBar(
-                                  const SnackBar(
-                                    content: Text('구독 금액을 입력하세요.'),
+                                if (existing) {
+                                  messenger.showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        '이미 등록된 구독입니다: $subscriptionPreset',
+                                      ),
+                                    ),
+                                  );
+                                  return;
+                                }
+
+                                await FixedCostService().addFixedCost(
+                                  widget.args.accountName,
+                                  FixedCost(
+                                    name: subscriptionPreset.trim(),
+                                    amount: amount,
+                                    vendor: vendor,
+                                    paymentMethod: payment.isEmpty
+                                        ? '카드'
+                                        : payment,
+                                    memo: '쇼핑 입력에서 등록',
+                                    dueDay: dueDay,
                                   ),
                                 );
-                                return;
-                              }
 
-                              final now = DateTime.now();
-                              final vendor =
-                                  subscriptionPreset.contains('온라인 쇼핑몰')
-                                  ? '온라인 쇼핑몰'
-                                  : (subscriptionPreset.contains('포털')
-                                        ? '포털 서비스'
-                                        : null);
-                              final dueDay = subscriptionPreset.contains('(월)')
-                                  ? now.day
-                                  : null;
-
-                              await FixedCostService().loadFixedCosts();
-                              final existing = FixedCostService()
-                                  .getFixedCosts(widget.args.accountName)
-                                  .any(
-                                    (c) =>
-                                        c.name.trim() ==
-                                        subscriptionPreset.trim(),
-                                  );
-
-                              if (!mounted) return;
-                              if (existing) {
+                                if (!mounted) return;
                                 messenger.showSnackBar(
                                   SnackBar(
                                     content: Text(
-                                      '이미 등록된 구독입니다: $subscriptionPreset',
+                                      '구독 등록됨: $subscriptionPreset',
                                     ),
                                   ),
                                 );
-                                return;
-                              }
 
-                              await FixedCostService().addFixedCost(
-                                widget.args.accountName,
-                                FixedCost(
-                                  name: subscriptionPreset.trim(),
-                                  amount: amount,
-                                  vendor: vendor,
-                                  paymentMethod: payment.isEmpty
-                                      ? '카드'
-                                      : payment,
-                                  memo: '쇼핑 입력에서 등록',
-                                  dueDay: dueDay,
-                                ),
-                              );
-
-                              if (!mounted) return;
-                              messenger.showSnackBar(
-                                SnackBar(
-                                  content: Text('구독 등록됨: $subscriptionPreset'),
-                                ),
-                              );
-
-                              setDialogState(() {
-                                subscriptionPreset = '';
-                                subscriptionAmountController.clear();
-                              });
-                            },
-                      child: const Text('구독으로 등록'),
+                                setDialogState(() {
+                                  subscriptionPreset = '';
+                                  subscriptionAmountController.clear();
+                                });
+                              },
+                        child: const Text('구독으로 등록'),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
+                    const SizedBox(height: 8),
 
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton(
-                      onPressed: subscriptionPreset.trim().isEmpty
-                          ? null
-                          : () async {
-                              final messenger = ScaffoldMessenger.of(context);
-                              final raw = subscriptionAmountController.text
-                                  .trim()
-                                  .replaceAll(',', '');
-                              final amount = double.tryParse(raw);
-                              if (amount == null || amount <= 0) {
-                                if (!mounted) return;
-                                messenger.showSnackBar(
-                                  const SnackBar(
-                                    content: Text('구독 금액을 입력하세요.'),
-                                  ),
-                                );
-                                return;
-                              }
-
-                              final now = DateTime.now();
-                              final name = subscriptionPreset.trim();
-                              final vendor = name.contains('온라인 쇼핑몰')
-                                  ? '온라인 쇼핑몰'
-                                  : (name.contains('포털') ? '포털 서비스' : null);
-                              final dueDay = name.contains('(월)')
-                                  ? now.day
-                                  : null;
-                              final paymentMethod = payment.isEmpty
-                                  ? '카드'
-                                  : payment;
-
-                              await FixedCostService().loadFixedCosts();
-                              final existing = FixedCostService()
-                                  .getFixedCosts(widget.args.accountName)
-                                  .any((c) => c.name.trim() == name);
-
-                              final txService = TransactionService();
-                              await txService.loadTransactions();
-
-                              DateTime targetDate;
-                              if (dueDay == null) {
-                                targetDate = DateFormatter.stripTime(now);
-                              } else {
-                                final lastDay = DateUtils.getDaysInMonth(
-                                  now.year,
-                                  now.month,
-                                );
-                                final targetDay = dueDay
-                                    .clamp(1, lastDay)
-                                    .toInt();
-                                targetDate = DateFormatter.stripTime(
-                                  DateTime(now.year, now.month, targetDay),
-                                );
-                              }
-
-                              final existingTransactions = txService
-                                  .getTransactions(widget.args.accountName);
-                              final duplicates = existingTransactions
-                                  .where((tx) {
-                                    final sameDay = DateFormatter.isSameDay(
-                                      tx.date,
-                                      targetDate,
-                                    );
-                                    final sameAmount =
-                                        (tx.amount - amount).abs() < 0.01;
-                                    return tx.type == TransactionType.expense &&
-                                        sameDay &&
-                                        sameAmount &&
-                                        tx.description.trim() == name;
-                                  })
-                                  .toList(growable: false);
-
-                              if (!mounted) return;
-
-                              final amountLabel = CurrencyFormatter.format(
-                                amount,
-                              );
-                              final dateLabel = DateFormats.yMd.format(
-                                targetDate,
-                              );
-
-                              final confirm = await showDialog<bool>(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  title: const Text('구독을 지출로 기록할까요?'),
-                                  content: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text('$dateLabel에 $name을(를) 지출로 반영합니다.'),
-                                      const SizedBox(height: 12),
-                                      Text('금액: $amountLabel'),
-                                      Text('결제 수단: $paymentMethod'),
-                                      if (!existing) ...[
-                                        const SizedBox(height: 12),
-                                        const Text('고정비에도 함께 등록됩니다.'),
-                                      ],
-                                      if (duplicates.isNotEmpty) ...[
-                                        const SizedBox(height: 16),
-                                        Text(
-                                          '⚠️ 동일한 금액/이름의 지출이 이미 '
-                                          '${duplicates.length}건 존재합니다. '
-                                          '중복 기록이 필요하지 않은지 확인하세요.',
-                                          style: TextStyle(
-                                            color: Theme.of(
-                                              context,
-                                            ).colorScheme.error,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () =>
-                                          Navigator.of(context).pop(false),
-                                      child: const Text('취소'),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton(
+                        onPressed: subscriptionPreset.trim().isEmpty
+                            ? null
+                            : () async {
+                                final messenger = ScaffoldMessenger.of(context);
+                                final raw = subscriptionAmountController.text
+                                    .trim()
+                                    .replaceAll(',', '');
+                                final amount = double.tryParse(raw);
+                                if (amount == null || amount <= 0) {
+                                  if (!mounted) return;
+                                  messenger.showSnackBar(
+                                    const SnackBar(
+                                      content: Text('구독 금액을 입력하세요.'),
                                     ),
-                                    FilledButton(
-                                      onPressed: () =>
-                                          Navigator.of(context).pop(true),
-                                      child: Text(
-                                        duplicates.isNotEmpty ? '그래도 기록' : '기록',
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
+                                  );
+                                  return;
+                                }
 
-                              if (confirm != true) {
-                                return;
-                              }
+                                final now = DateTime.now();
+                                final name = subscriptionPreset.trim();
+                                final vendor = name.contains('온라인 쇼핑몰')
+                                    ? '온라인 쇼핑몰'
+                                    : (name.contains('포털') ? '포털 서비스' : null);
+                                final dueDay = name.contains('(월)')
+                                    ? now.day
+                                    : null;
+                                final paymentMethod = payment.isEmpty
+                                    ? '카드'
+                                    : payment;
 
-                              try {
-                                if (!existing) {
-                                  await FixedCostService().addFixedCost(
-                                    widget.args.accountName,
-                                    FixedCost(
-                                      name: name,
-                                      amount: amount,
-                                      vendor: vendor,
-                                      paymentMethod: paymentMethod,
-                                      memo: '쇼핑 입력에서 등록',
-                                      dueDay: dueDay,
-                                    ),
+                                await FixedCostService().loadFixedCosts();
+                                final existing = FixedCostService()
+                                    .getFixedCosts(widget.args.accountName)
+                                    .any((c) => c.name.trim() == name);
+
+                                final txService = TransactionService();
+                                await txService.loadTransactions();
+
+                                DateTime targetDate;
+                                if (dueDay == null) {
+                                  targetDate = DateFormatter.stripTime(now);
+                                } else {
+                                  final lastDay = DateUtils.getDaysInMonth(
+                                    now.year,
+                                    now.month,
+                                  );
+                                  final targetDay = dueDay
+                                      .clamp(1, lastDay)
+                                      .toInt();
+                                  targetDate = DateFormatter.stripTime(
+                                    DateTime(now.year, now.month, targetDay),
                                   );
                                 }
 
-                                final txId =
-                                    'tx_'
-                                    '${DateTime.now().microsecondsSinceEpoch}';
-                                await txService.addTransaction(
-                                  widget.args.accountName,
-                                  Transaction(
-                                    id: txId,
-                                    type: TransactionType.expense,
-                                    description: name,
-                                    amount: amount,
-                                    date: targetDate,
-                                    quantity: 1,
-                                    unitPrice: amount,
-                                    paymentMethod: paymentMethod,
-                                    memo: '[구독 즉시기록] ${vendor ?? ''}'.trim(),
-                                    store: vendor,
+                                final existingTransactions = txService
+                                    .getTransactions(widget.args.accountName);
+                                final duplicates = existingTransactions
+                                    .where((tx) {
+                                      final sameDay = DateFormatter.isSameDay(
+                                        tx.date,
+                                        targetDate,
+                                      );
+                                      final sameAmount =
+                                          (tx.amount - amount).abs() < 0.01;
+                                      return tx.type ==
+                                              TransactionType.expense &&
+                                          sameDay &&
+                                          sameAmount &&
+                                          tx.description.trim() == name;
+                                    })
+                                    .toList(growable: false);
+
+                                if (!mounted) return;
+
+                                final amountLabel = CurrencyFormatter.format(
+                                  amount,
+                                );
+                                final dateLabel = DateFormats.yMd.format(
+                                  targetDate,
+                                );
+
+                                final confirm = await showDialog<bool>(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: const Text('구독을 지출로 기록할까요?'),
+                                    content: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          '$dateLabel에 $name을(를) 지출로 반영합니다.',
+                                        ),
+                                        const SizedBox(height: 12),
+                                        Text('금액: $amountLabel'),
+                                        Text('결제 수단: $paymentMethod'),
+                                        if (!existing) ...[
+                                          const SizedBox(height: 12),
+                                          const Text('고정비에도 함께 등록됩니다.'),
+                                        ],
+                                        if (duplicates.isNotEmpty) ...[
+                                          const SizedBox(height: 16),
+                                          Text(
+                                            '⚠️ 동일한 금액/이름의 지출이 이미 '
+                                            '${duplicates.length}건 존재합니다. '
+                                            '중복 기록이 필요하지 않은지 확인하세요.',
+                                            style: TextStyle(
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.error,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.of(context).pop(false),
+                                        child: const Text('취소'),
+                                      ),
+                                      FilledButton(
+                                        onPressed: () =>
+                                            Navigator.of(context).pop(true),
+                                        child: Text(
+                                          duplicates.isNotEmpty
+                                              ? '그래도 기록'
+                                              : '기록',
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 );
-                              } catch (e) {
+
+                                if (confirm != true) {
+                                  return;
+                                }
+
+                                try {
+                                  if (!existing) {
+                                    await FixedCostService().addFixedCost(
+                                      widget.args.accountName,
+                                      FixedCost(
+                                        name: name,
+                                        amount: amount,
+                                        vendor: vendor,
+                                        paymentMethod: paymentMethod,
+                                        memo: '쇼핑 입력에서 등록',
+                                        dueDay: dueDay,
+                                      ),
+                                    );
+                                  }
+
+                                  final txId =
+                                      'tx_'
+                                      '${DateTime.now().microsecondsSinceEpoch}';
+                                  await txService.addTransaction(
+                                    widget.args.accountName,
+                                    Transaction(
+                                      id: txId,
+                                      type: TransactionType.expense,
+                                      description: name,
+                                      amount: amount,
+                                      date: targetDate,
+                                      unitPrice: amount,
+                                      paymentMethod: paymentMethod,
+                                      memo: '[구독 즉시기록] ${vendor ?? ''}'.trim(),
+                                      store: vendor,
+                                    ),
+                                  );
+                                } catch (e) {
+                                  if (!mounted) return;
+                                  messenger.showSnackBar(
+                                    SnackBar(
+                                      content: Text('처리 실패: ${e.toString()}'),
+                                    ),
+                                  );
+                                  return;
+                                }
+
                                 if (!mounted) return;
                                 messenger.showSnackBar(
                                   SnackBar(
-                                    content: Text('처리 실패: ${e.toString()}'),
+                                    content: Text(
+                                      existing
+                                          ? '지출 기록됨: $name'
+                                          : '구독 등록 + 지출 기록됨: $name',
+                                    ),
                                   ),
                                 );
-                                return;
-                              }
 
-                              if (!mounted) return;
-                              messenger.showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    existing
-                                        ? '지출 기록됨: $name'
-                                        : '구독 등록 + 지출 기록됨: $name',
-                                  ),
-                                ),
-                              );
-
-                              setDialogState(() {
-                                subscriptionPreset = '';
-                                subscriptionAmountController.clear();
-                              });
-                            },
-                      child: const Text('등록 + 이번달 지출로 기록'),
+                                setDialogState(() {
+                                  subscriptionPreset = '';
+                                  subscriptionAmountController.clear();
+                                });
+                              },
+                        child: const Text('등록 + 이번달 지출로 기록'),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '입력된 혜택 합계: ${CurrencyFormatter.format(rowSum)}',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                  if (charged != null && cardBenefit != null) ...[
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 4),
                     Text(
-                      '제시-실결제: ${CurrencyFormatter.format(cardBenefit)}',
+                      '입력된 혜택 합계: ${CurrencyFormatter.format(rowSum)}',
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
-                  ],
-                  const SizedBox(height: 2),
-                  Text(
-                    '※ 실결제 입력이 있으면 통계는 “제시-실결제”를 우선으로 봅니다.',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    if (charged != null && cardBenefit != null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        '제시-실결제: ${CurrencyFormatter.format(cardBenefit)}',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                    const SizedBox(height: 2),
+                    Text(
+                      '※ 실결제 입력이 있으면 통계는 “제시-실결제”를 우선으로 봅니다.',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                     ),
+                  ],
+                );
+              }
+
+              return AlertDialog(
+                title: Text(page == 0 ? '$title (1/2)' : '$title (2/2)'),
+                content: SingleChildScrollView(
+                  child: page == 0 ? buildPage1() : buildPage2(),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(dialogContext).pop(false),
+                    child: const Text('취소'),
+                  ),
+                  if (page == 1)
+                    TextButton(
+                      onPressed: () {
+                        setDialogState(() {
+                          page = 0;
+                        });
+                      },
+                      child: const Text('이전'),
+                    )
+                  else
+                    TextButton(
+                      onPressed: () {
+                        setDialogState(() {
+                          page = 1;
+                        });
+                      },
+                      child: const Text('혜택 입력'),
+                    ),
+                  FilledButton(
+                    onPressed: () {
+                      final map = benefitRowMap();
+                      final json = map.isEmpty
+                          ? null
+                          : BenefitMemoUtils.encodeBenefitJson(map);
+                      benefitJson = json;
+                      Navigator.of(dialogContext).pop(true);
+                    },
+                    child: const Text('저장'),
                   ),
                 ],
               );
-            }
+            },
+          );
+        },
+      );
 
-            return AlertDialog(
-              title: Text(page == 0 ? '$title (1/2)' : '$title (2/2)'),
-              content: SingleChildScrollView(
-                child: page == 0 ? buildPage1() : buildPage2(),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(dialogContext).pop(false),
-                  child: const Text('취소'),
-                ),
-                if (page == 1)
-                  TextButton(
-                    onPressed: () {
-                      setDialogState(() {
-                        page = 0;
-                      });
-                    },
-                    child: const Text('이전'),
-                  )
-                else
-                  TextButton(
-                    onPressed: () {
-                      setDialogState(() {
-                        page = 1;
-                      });
-                    },
-                    child: const Text('혜택 입력'),
-                  ),
-                FilledButton(
-                  onPressed: () {
-                    final map = benefitRowMap();
-                    final json = map.isEmpty
-                        ? null
-                        : BenefitMemoUtils.encodeBenefitJson(map);
-                    benefitJsonFromDialog = json;
-                    Navigator.of(dialogContext).pop(true);
-                  },
-                  child: const Text('저장'),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
+      shippingController.dispose();
+      subscriptionAmountController.dispose();
+      for (final row in benefitRowControllers) {
+        row.type.dispose();
+        row.amount.dispose();
+      }
 
-    shippingController.dispose();
-    subscriptionAmountController.dispose();
-    for (final row in benefitRowControllers) {
-      row.type.dispose();
-      row.amount.dispose();
+      if (confirmed != true || !mounted) return;
+    } else {
+      // Fast save: try to parse benefits from memo automatically
+      final memoSeed = BenefitMemoUtils.parseBenefitByType(effectiveMemo);
+      if (memoSeed.isNotEmpty) {
+        benefitJson = BenefitMemoUtils.encodeBenefitJson(memoSeed);
+      }
     }
-
-    if (confirmed != true || !mounted) return;
 
     await _saveFavorite(
       key: _favoritePaymentsKeyForExpense(widget.args.accountName),
@@ -1575,25 +1634,33 @@ class _ShoppingCartQuickTransactionScreenState
       type: TransactionType.expense,
       description: _resolvedDescription,
       amount: total,
-      date: DateTime.now(),
+      date: widget.args.martDate ?? DateTime.now(),
       quantity: qty,
       unitPrice: unit ?? total,
       paymentMethod: payment,
       memo: effectiveMemo,
       store: storeKey,
       cardChargedAmount: charged,
-      benefitJson: benefitJsonFromDialog,
+      benefitJson: benefitJson,
       mainCategory: _selectedMainCategory,
       subCategory:
           (_selectedMainCategory == CategoryDefinitions.defaultCategory)
           ? null
           : _selectedSubCategory,
-      savingsAllocation: null,
-      weather: null,
     );
 
     try {
       await TransactionService().addTransaction(widget.args.accountName, tx);
+      if (_addToInventory) {
+        final purchaseDate = widget.args.martDate ?? DateTime.now();
+        await FoodExpiryService.instance.addItem(
+          name: _resolvedDescription,
+          purchaseDate: purchaseDate,
+          expiryDate: purchaseDate.add(const Duration(days: 7)),
+          quantity: qty.toDouble(),
+          memo: effectiveMemo,
+        );
+      }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(
@@ -1719,20 +1786,34 @@ class _ShoppingCartQuickTransactionScreenState
             ),
           ),
           const SizedBox(height: 12),
-          InputDecorator(
-            decoration: const InputDecoration(
-              labelText: '카테고리',
-              border: OutlineInputBorder(),
+          InkWell(
+            onTap: _openCategoryPicker,
+            borderRadius: BorderRadius.circular(8),
+            child: InputDecorator(
+              decoration: const InputDecoration(
+                labelText: '카테고리',
+                border: OutlineInputBorder(),
+                suffixIcon: Icon(Icons.chevron_right),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.category_outlined,
+                    size: 18,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _categorySummary(),
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            child: Text(_categorySummary()),
           ),
-          const SizedBox(height: 8),
-          OutlinedButton.icon(
-            onPressed: _openCategoryPicker,
-            icon: const Icon(Icons.category_outlined),
-            label: const Text('카테고리 선택'),
-          ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           TextField(
             controller: _paymentController,
             textInputAction: TextInputAction.next,
@@ -1760,7 +1841,7 @@ class _ShoppingCartQuickTransactionScreenState
               labelText: '메모',
               hintText: _favoriteMemos.isNotEmpty
                   ? '예: ${_favoriteMemos.first}'
-                  : '예: 마트 이름 + 간단 메모',
+                  : '예: 마트/쇼핑몰 이름 + 간단 메모',
               border: const OutlineInputBorder(),
             ),
             onSubmitted: (_) => _save(),
@@ -1772,19 +1853,76 @@ class _ShoppingCartQuickTransactionScreenState
             },
           ),
           const SizedBox(height: 12),
+          CheckboxListTile(
+            title: const Text('재고 관리(유통기한)에 추가'),
+            subtitle: const Text('저장 시 식재료 재고 목록에 자동으로 등록합니다.'),
+            value: _addToInventory,
+            onChanged: (v) => setState(() => _addToInventory = v ?? false),
+            controlAffinity: ListTileControlAffinity.leading,
+            contentPadding: EdgeInsets.zero,
+          ),
+          const SizedBox(height: 12),
           if (showSaveRestButton) ...[
             SizedBox(
               width: double.infinity,
-              child: OutlinedButton(
+              height: 48,
+              child: OutlinedButton.icon(
                 onPressed: _saveRemainingBulk,
-                child: const Text('나머지 모두 저장'),
+                icon: const Icon(Icons.auto_awesome_motion_outlined, size: 18),
+                label: const Text('나머지 모두 저장'),
+                style: OutlinedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  foregroundColor: Theme.of(context).colorScheme.secondary,
+                  side: BorderSide(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.secondary.withValues(alpha: 0.5),
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 12),
           ],
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton(onPressed: _save, child: const Text('저장')),
+          Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 52,
+                  child: OutlinedButton(
+                    onPressed: _saveWithBenefits,
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text('혜택 입력'),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: SizedBox(
+                  height: 52,
+                  child: FilledButton(
+                    onPressed: _save,
+                    style: FilledButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      '저장',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),

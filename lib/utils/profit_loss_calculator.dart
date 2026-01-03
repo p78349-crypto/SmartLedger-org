@@ -21,11 +21,11 @@ class ProfitLossCalculator {
   /// 손익 상태 문자열 (통화 포맷 + 또는 -)
   static String formatProfitLoss(double profitLoss) {
     if (profitLoss > 0) {
-      return '+${CurrencyFormatter.format(profitLoss, showUnit: true)}';
+      return '+${CurrencyFormatter.format(profitLoss)}';
     } else if (profitLoss < 0) {
-      return CurrencyFormatter.format(profitLoss, showUnit: true);
+      return CurrencyFormatter.format(profitLoss);
     } else {
-      return CurrencyFormatter.format(0, showUnit: true);
+      return CurrencyFormatter.format(0);
     }
   }
 

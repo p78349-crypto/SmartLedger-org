@@ -357,7 +357,7 @@ class _EmergencyFundScreenState extends State<EmergencyFundScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(ctx).pop(null),
+            onPressed: () => Navigator.of(ctx).pop(),
             child: const Text('취소'),
           ),
         ],
@@ -445,7 +445,7 @@ class _EmergencyDeleteDecisionDialogState
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(null),
+          onPressed: () => Navigator.of(context).pop(),
           child: const Text('취소'),
         ),
         FilledButton(

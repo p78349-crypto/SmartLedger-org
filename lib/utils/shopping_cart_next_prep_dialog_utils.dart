@@ -5,6 +5,7 @@ enum ShoppingCartNextPrepAction {
   recentPurchases20,
   recommendFrequent20,
   recommendFrequent20ByStoreMemo,
+  recipeSearch,
 }
 
 class ShoppingCartNextPrepDialogUtils {
@@ -29,6 +30,8 @@ class ShoppingCartNextPrepDialogUtils {
           return IconCatalog.autoAwesome;
         case ShoppingCartNextPrepAction.recommendFrequent20ByStoreMemo:
           return IconCatalog.shoppingCart;
+        case ShoppingCartNextPrepAction.recipeSearch:
+          return IconCatalog.articleOutlined;
       }
     }
 
@@ -39,7 +42,9 @@ class ShoppingCartNextPrepDialogUtils {
         case ShoppingCartNextPrepAction.recommendFrequent20:
           return '추천 품목 20개';
         case ShoppingCartNextPrepAction.recommendFrequent20ByStoreMemo:
-          return '마트별 추천 20개';
+          return '마트/쇼핑몰별 추천 20개';
+        case ShoppingCartNextPrepAction.recipeSearch:
+          return '요리 레시피 검색';
       }
     }
 
@@ -50,7 +55,9 @@ class ShoppingCartNextPrepDialogUtils {
         case ShoppingCartNextPrepAction.recommendFrequent20:
           return '가계부 입력 이력에서 2회 이상 구매한 품목만 추천합니다.';
         case ShoppingCartNextPrepAction.recommendFrequent20ByStoreMemo:
-          return '가계부 메모(마트명) 기준으로 추천합니다.';
+          return '가계부 메모(마트/쇼핑몰명) 기준으로 추천합니다.';
+        case ShoppingCartNextPrepAction.recipeSearch:
+          return '요리 레시피에서 필요한 식재료를 찾아 추가합니다.';
       }
     }
 

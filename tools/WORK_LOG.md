@@ -61,10 +61,10 @@
 | 2025-12-29 | 계정명: 언어 태그(EN/JP/KR) 강제 삽입 + 복원은 새 계정만 | analyze OK / INDEX validate OK |
 | 2025-12-20 | 메인 15페이지 고정/배너 번호만 + 아이콘관리 막힘 방지(다음 빈 슬롯 안내) + 설정 재구성(초기화 하단) + 언어설정 분리/시작 반영 | (권장) Quality Gate OK |
 | 2025-12-20 | (기반) 1페이지 전체 광고 오버레이 게이트 추가(기본 비노출, 비정식 사용자만 노출 + 터치로 닫기) | analyze OK |
-| 2025-12-18 | (LEGACY) One UI(QuickActions) 시작 고정 + 상단 `+` 제거 + 상단 햄버거(설정 통합) + 인덱스/작업로그 최적화 + (내 자산 흐름) 통계/지출 분리 유틸 추가 | analyze OK / build apk OK |
+| 2025-12-18 | (LEGACY) Smart Ledger(QuickActions) 시작 고정 + 상단 `+` 제거 + 상단 햄버거(설정 통합) + 인덱스/작업로그 최적화 + (내 자산 흐름) 통계/지출 분리 유틸 추가 | analyze OK / build apk OK |
 | 2025-12-18 | QuickActions 완전 삭제(라우트/진입점/상태/PrefKeys/관련 파일·테스트) + 문서(인덱스/로그) 기록 보강 | analyze OK / build apk OK / install OK |
 | 2025-12-18 | AccountMainScreen 모든 UI 삭제(사진 기준: 요약 카드/AppBar 제거) | (권장) analyze / 앱 실행 확인 |
-| 2025-12-18 | (REMOVED) samsung_quick_actions_view.dart 파일 삭제(잔재 정리) | analyze OK |
+| 2025-12-18 | (REMOVED) smart_quick_actions_view.dart 파일 삭제(잔재 정리) | analyze OK |
 
 ---
 
@@ -155,8 +155,8 @@
 > 현재 상태는 같은 날짜의 아래 “QuickActions 완전 삭제” 항목이 최신이며, 문제 발생 시 최신 항목을 우선 참고하세요.
 
 ### 요약
-- 앱 첫 실행/복귀 시 “삼성 One UI(QuickActions)” 화면만 보이도록 시작 진입을 고정하고, 다른 메인(TopLevel/레거시)이 끼어드는 케이스를 차단.
-- Samsung One UI 메인 UI를 PageView + dots + 섹션 타이틀 형태로 고정 렌더링.
+- 앱 첫 실행/복귀 시 “Smart Ledger(QuickActions)” 화면만 보이도록 시작 진입을 고정하고, 다른 메인(TopLevel/레거시)이 끼어드는 케이스를 차단.
+- Smart Ledger 메인 UI를 PageView + dots + 섹션 타이틀 형태로 고정 렌더링.
 - 상단 `+` 버튼 제거.
 - 우측 상단 햄버거 메뉴 추가 + 설정 진입을 메뉴로 통합.
 - “내 자산 흐름” 통계 계산을 utils로 분리(AssetMove 기반 inflow/outflow).
@@ -168,14 +168,14 @@
   - 루트 라우트(`/`)가 다른 메인으로 연결되는 케이스를 차단(항상 LaunchScreen으로 진입).
 
 - UI
-  - SamsungQuickActionsView: 메인 UI를 “페이지 스와이프 + 하단 점(dots) + 섹션 타이틀”로 고정.
+  - SmartQuickActionsView: 메인 UI를 “페이지 스와이프 + 하단 점(dots) + 섹션 타이틀”로 고정.
   - 상단 `+` 제거.
 
 ### 영향 파일(주요)
 - lib/screens/launch_screen.dart
 - lib/main.dart
 - lib/navigation/app_router.dart
-- lib/widgets/samsung_quick_actions_view.dart
+- lib/widgets/smart_quick_actions_view.dart
 - lib/utils/asset_flow_stats.dart
 - tools/INDEX_CODE_FEATURES.md
 
@@ -236,13 +236,13 @@
 
 ---
 
-## 2025-12-18 — (REMOVED) samsung_quick_actions_view.dart 파일 삭제
+## 2025-12-18 — (REMOVED) smart_quick_actions_view.dart 파일 삭제
 
 ### 요약
-- QuickActions 기능 완전 삭제 이후에도 남아있던 레거시 UI 파일(`lib/widgets/samsung_quick_actions_view.dart`)을 **실제 삭제**하여 잔재를 제거.
+- QuickActions 기능 완전 삭제 이후에도 남아있던 레거시 UI 파일(`lib/widgets/smart_quick_actions_view.dart`)을 **실제 삭제**하여 잔재를 제거.
 
 ### 변경 내용(핵심)
-- `lib/widgets/samsung_quick_actions_view.dart` 삭제
+- `lib/widgets/smart_quick_actions_view.dart` 삭제
 
 ### 영향 범위
 - 현재 코드에서 import/사용되지 않는 파일 정리(동작 영향 없음)

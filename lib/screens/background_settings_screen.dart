@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:smart_ledger/services/background_service.dart';
 import 'package:smart_ledger/widgets/background_widget.dart';
 
@@ -62,6 +63,23 @@ class _BackgroundSettingsScreenState extends State<BackgroundSettingsScreen> {
   }
 
   Future<void> _pickImage() async {
+    // Check permissions first
+    final photosStatus = await Permission.photos.status;
+    final storageStatus = await Permission.storage.status;
+
+    if (!photosStatus.isGranted && !storageStatus.isGranted) {
+      final result = await [Permission.photos, Permission.storage].request();
+      if (result[Permission.photos] != PermissionStatus.granted &&
+          result[Permission.storage] != PermissionStatus.granted) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('이미지를 선택하려면 저장소 권한이 필요합니다.')),
+          );
+        }
+        return;
+      }
+    }
+
     final XFile? image = await _imagePicker.pickImage(
       source: ImageSource.gallery,
     );
@@ -75,6 +93,20 @@ class _BackgroundSettingsScreenState extends State<BackgroundSettingsScreen> {
   }
 
   Future<void> _pickImageFromCamera() async {
+    // Camera permission check
+    final cameraStatus = await Permission.camera.status;
+    if (!cameraStatus.isGranted) {
+      final result = await Permission.camera.request();
+      if (!result.isGranted) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('카메라를 사용하려면 카메라 권한이 필요합니다.')),
+          );
+        }
+        return;
+      }
+    }
+
     final XFile? image = await _imagePicker.pickImage(
       source: ImageSource.camera,
     );
@@ -216,7 +248,6 @@ class _BackgroundSettingsScreenState extends State<BackgroundSettingsScreen> {
             const SizedBox(height: 12),
             Slider(
               value: _backgroundBlur,
-              min: 0,
               max: 20,
               divisions: 20,
               label: _backgroundBlur.toStringAsFixed(1),
@@ -303,7 +334,6 @@ class _ColorPickerDialogState extends State<_ColorPickerDialog> {
                 Expanded(
                   child: Slider(
                     value: _hsv.hue,
-                    min: 0,
                     max: 360,
                     onChanged: (value) {
                       setState(() {

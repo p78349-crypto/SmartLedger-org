@@ -65,7 +65,7 @@ Future<void> pruneCache({
 
   final now = DateTime.now();
   final files = <File>[];
-  for (final f in root.listSync(recursive: false)) {
+  for (final f in root.listSync()) {
     if (f is File) {
       final stat = f.statSync();
       // Delete by age first

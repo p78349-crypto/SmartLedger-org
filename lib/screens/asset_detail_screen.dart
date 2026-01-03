@@ -70,7 +70,6 @@ class _AssetDetailScreenState extends State<AssetDetailScreen> {
       ..sort((a, b) => b.date.compareTo(a.date)); // 최신순
     final currentAmountLabel = CurrencyFormatter.format(
       _currentAsset.amount,
-      showUnit: true,
     );
     final categoryLabel =
         '${_currentAsset.category.emoji} ${_currentAsset.category.label}';
@@ -534,7 +533,7 @@ class _AssetDetailScreenState extends State<AssetDetailScreen> {
   }
 
   String _formatAmountWithUnit(num value) {
-    return CurrencyFormatter.format(value, showUnit: true);
+    return CurrencyFormatter.format(value);
   }
 
   String _formatTimestamp(DateTime date) {

@@ -14,14 +14,10 @@ class IconManagement2Screen extends StatelessWidget {
       titleOverride: '아이콘 관리 2',
       prefProfileKey: 'icon_mgmt2',
       initialPageIndex: MainFeatureIconCatalog.pageCount > 0 ? 5 : 0,
-      pagePickerEnabled: true,
       showCurrentPageIndicator: false,
       showClearSelectionAction: false,
       reserveClearSelectionActionSpace: true,
       groupCatalogByModule: true,
-      flattenCatalog: false,
-      showCatalogSectionTitles: true,
-      hiddenPageIndices: const <int>{},
     );
   }
 }

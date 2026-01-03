@@ -62,7 +62,6 @@ class _Page1BottomIconSettingsScreenState
     final rawSlots = await UserPrefService.getPageIconSlots(
       accountName: widget.accountName,
       pageIndex: _pageIndex,
-      slotCount: _slotCount,
     );
 
     final normalized = _normalizeSlots(rawSlots);
@@ -183,7 +182,6 @@ class _Page1BottomIconSettingsScreenState
             crossAxisCount: 3,
             mainAxisSpacing: 10,
             crossAxisSpacing: 10,
-            childAspectRatio: 1,
           ),
           itemCount: _allowedIcons.length,
           itemBuilder: (context, index) {

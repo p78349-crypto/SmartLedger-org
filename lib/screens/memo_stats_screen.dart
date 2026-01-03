@@ -31,7 +31,7 @@ class _MemoStatsScreenState extends State<MemoStatsScreen> {
 
     final service = TransactionService();
     final txs = service.getTransactions(widget.accountName);
-    final result = MemoStatsUtils.memoStats(txs, topN: 10);
+    final result = MemoStatsUtils.memoStats(txs);
 
     setState(() {
       _result = result;

@@ -23,7 +23,7 @@ import 'package:smart_ledger/services/user_pin_service.dart';
 import 'package:smart_ledger/utils/icon_catalog.dart';
 import 'package:smart_ledger/utils/pref_keys.dart';
 import 'package:smart_ledger/utils/utils.dart';
-import 'package:smart_ledger/widgets/one_ui_input_field.dart';
+import 'package:smart_ledger/widgets/smart_input_field.dart';
 
 enum _AssetSubview { none, expenses, savings }
 
@@ -256,14 +256,14 @@ class _AssetTabScreenState extends State<AssetTabScreen> {
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  OneUiInputField(
+                  SmartInputField(
                     label: '새 PIN',
                     controller: pinController,
                     obscureText: true,
                     keyboardType: TextInputType.number,
                   ),
                   const SizedBox(height: 8),
-                  OneUiInputField(
+                  SmartInputField(
                     label: 'PIN 확인',
                     controller: confirmController,
                     obscureText: true,
@@ -937,7 +937,9 @@ class _AssetTabScreenState extends State<AssetTabScreen> {
                                         RadioListTile<String>(
                                           dense: true,
                                           contentPadding: EdgeInsets.zero,
-                                          title: Text('별도 사용 (ROOT 추가 인증)'),
+                                          title: Text(
+                                            '별도 사용 (ROOT 추가 인증)',
+                                          ),
                                           value: 'separate',
                                         ),
                                       ],

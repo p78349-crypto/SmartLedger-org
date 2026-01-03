@@ -6,7 +6,7 @@ import 'package:smart_ledger/services/recent_input_service.dart';
 import 'package:smart_ledger/services/transaction_service.dart';
 import 'package:smart_ledger/utils/date_formatter.dart';
 import 'package:smart_ledger/utils/snackbar_utils.dart';
-import 'package:smart_ledger/widgets/one_ui_input_field.dart';
+import 'package:smart_ledger/widgets/smart_input_field.dart';
 
 class IncomeInputScreen extends StatefulWidget {
   final String accountName;
@@ -293,13 +293,13 @@ class _IncomeInputScreenState extends State<IncomeInputScreen> {
           key: _formKey,
           child: ListView(
             children: [
-              OneUiInputField(
+              SmartInputField(
                 label: '수입명',
                 controller: _nameController,
                 validator: (v) => v == null || v.isEmpty ? '수입명을 입력하세요' : null,
               ),
               const SizedBox(height: 16),
-              OneUiInputField(
+              SmartInputField(
                 label: '금액',
                 controller: _amountController,
                 keyboardType: TextInputType.number,
@@ -338,9 +338,9 @@ class _IncomeInputScreenState extends State<IncomeInputScreen> {
                 decoration: const InputDecoration(labelText: '카테고리'),
               ),
               const SizedBox(height: 16),
-              OneUiInputField(label: '수입처', controller: _sourceController),
+              SmartInputField(label: '수입처', controller: _sourceController),
               const SizedBox(height: 16),
-              OneUiInputField(
+              SmartInputField(
                 label: '메모',
                 controller: _memoController,
                 hint: '',

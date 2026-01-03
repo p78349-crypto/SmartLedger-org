@@ -238,7 +238,7 @@ class _PointsMotivationStatsScreenState
                   const SizedBox(height: 8),
                   Text(
                     '최근 $_lookbackDaysForRate일 동안 혜택/포인트 절감액이 잡히면 '
-                    '카드/마트/온라인 쇼핑/편의점/기타로 자동 표시됩니다.',
+                    '카드/마트/쇼핑몰/편의점/기타로 자동 표시됩니다.',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: scheme.onSurfaceVariant,
                     ),

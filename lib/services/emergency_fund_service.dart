@@ -151,7 +151,6 @@ class EmergencyFundService {
         toAssetId: isCashIncoming ? cashAssetId : null,
         toCategoryName: isCashIncoming ? '비상금' : '비상금',
         amount: delta.abs(),
-        type: AssetMoveType.transfer,
         memo: memo,
         date: DateTime.now(),
       );

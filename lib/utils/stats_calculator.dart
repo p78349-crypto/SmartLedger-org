@@ -177,7 +177,8 @@ class StatsCalculator {
     final grouped = <String, List<Transaction>>{};
 
     for (final tx in filtered) {
-      final category = (tx.subCategory == null || tx.subCategory!.trim().isEmpty)
+      final category =
+          (tx.subCategory == null || tx.subCategory!.trim().isEmpty)
           ? Transaction.defaultMainCategory
           : tx.subCategory!;
       grouped.putIfAbsent(category, () => []).add(tx);
@@ -186,7 +187,9 @@ class StatsCalculator {
     final totalAmount = calculateTotal(filtered);
     final stats = grouped.entries.map((entry) {
       final categoryTotal = calculateTotal(entry.value);
-      final percentage = totalAmount > 0 ? (categoryTotal / totalAmount * 100) : 0.0;
+      final percentage = totalAmount > 0
+          ? (categoryTotal / totalAmount * 100)
+          : 0.0;
       return CategoryStats(
         category: entry.key,
         total: categoryTotal,

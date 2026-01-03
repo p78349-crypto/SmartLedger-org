@@ -268,7 +268,7 @@ class MonthlyAggCacheService {
   }) {
     final out = <String>[];
     for (var i = 0; i < maxMonths; i++) {
-      final d = DateTime(now.year, now.month - i, 1);
+      final d = DateTime(now.year, now.month - i);
       out.add(yearMonthOf(d));
     }
     return out;

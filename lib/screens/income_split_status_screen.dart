@@ -234,7 +234,6 @@ class _IncomeSplitStatusScreenState extends State<IncomeSplitStatusScreen> {
                             barGroups: barGroups,
                             alignment: BarChartAlignment.spaceAround,
                             gridData: FlGridData(
-                              show: true,
                               drawVerticalLine: false,
                               horizontalInterval: interval,
                               getDrawingHorizontalLine: (value) => FlLine(
@@ -245,10 +244,10 @@ class _IncomeSplitStatusScreenState extends State<IncomeSplitStatusScreen> {
                             borderData: FlBorderData(show: false),
                             titlesData: FlTitlesData(
                               topTitles: const AxisTitles(
-                                sideTitles: SideTitles(showTitles: false),
+                                
                               ),
                               rightTitles: const AxisTitles(
-                                sideTitles: SideTitles(showTitles: false),
+                                
                               ),
                               leftTitles: AxisTitles(
                                 sideTitles: SideTitles(
@@ -281,7 +280,6 @@ class _IncomeSplitStatusScreenState extends State<IncomeSplitStatusScreen> {
                                     final label = data[index].label;
                                     return SideTitleWidget(
                                       meta: meta,
-                                      space: 8,
                                       child: SizedBox(
                                         width: 70,
                                         child: Text(

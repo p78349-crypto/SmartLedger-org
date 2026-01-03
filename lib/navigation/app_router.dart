@@ -61,6 +61,7 @@ import 'package:smart_ledger/screens/store_merge_screen.dart';
 import 'package:smart_ledger/screens/theme_settings_screen.dart';
 import 'package:smart_ledger/screens/top_level_main_screen.dart';
 import 'package:smart_ledger/screens/transaction_add_screen.dart';
+import 'package:smart_ledger/screens/transaction_add_detailed_screen.dart';
 import 'package:smart_ledger/screens/transaction_detail_screen.dart';
 import 'package:smart_ledger/screens/trash_screen.dart';
 import 'package:smart_ledger/widgets/asset_route_auth_gate.dart';
@@ -118,6 +119,20 @@ class AppRouter {
         return MaterialPageRoute(
           settings: settings,
           builder: (_) => TransactionAddScreen(
+            accountName: a.accountName,
+            initialTransaction: a.initialTransaction as Transaction?,
+            learnCategoryHintFromDescription:
+                a.learnCategoryHintFromDescription,
+            confirmBeforeSave: a.confirmBeforeSave,
+            treatAsNew: a.treatAsNew,
+          ),
+        );
+
+      case AppRoutes.transactionAddDetailed:
+        final a = args as TransactionAddArgs;
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => TransactionAddDetailedScreen(
             accountName: a.accountName,
             initialTransaction: a.initialTransaction as Transaction?,
             learnCategoryHintFromDescription:
@@ -334,7 +349,7 @@ class AppRouter {
         return MaterialPageRoute(
           settings: settings,
           builder: (_) =>
-              AccountStatsScreen(accountName: a.accountName, embed: false),
+              AccountStatsScreen(accountName: a.accountName),
         );
 
       case AppRoutes.accountStatsDecade:
@@ -343,7 +358,6 @@ class AppRouter {
           settings: settings,
           builder: (_) => AccountStatsScreen(
             accountName: a.accountName,
-            embed: false,
             initialView: 'decade',
             initialRangeView: 'decade',
           ),
@@ -479,7 +493,11 @@ class AppRouter {
         final a = args as ShoppingCartArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => ShoppingCartScreen(accountName: a.accountName),
+          builder: (_) => ShoppingCartScreen(
+            accountName: a.accountName,
+            openPrepOnStart: a.openPrepOnStart,
+            initialItems: a.initialItems,
+          ),
         );
 
       case AppRoutes.shoppingPrep:
@@ -489,6 +507,7 @@ class AppRouter {
           builder: (_) => ShoppingCartScreen(
             accountName: a.accountName,
             openPrepOnStart: true,
+            initialItems: a.initialItems,
           ),
         );
 

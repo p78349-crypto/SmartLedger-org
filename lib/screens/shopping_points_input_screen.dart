@@ -8,7 +8,7 @@ import 'package:smart_ledger/services/user_pref_service.dart';
 import 'package:smart_ledger/utils/benefit_aggregation_utils.dart';
 import 'package:smart_ledger/utils/currency_formatter.dart';
 import 'package:smart_ledger/utils/thousands_input_formatter.dart';
-import 'package:smart_ledger/widgets/one_ui_input_field.dart';
+import 'package:smart_ledger/widgets/smart_input_field.dart';
 
 class ShoppingPointsInputScreen extends StatefulWidget {
   const ShoppingPointsInputScreen({super.key, required this.accountName});
@@ -137,7 +137,7 @@ class _ShoppingPointsInputScreenState extends State<ShoppingPointsInputScreen> {
                 );
 
                 return AlertDialog(
-                  title: const Text('마트,카드 포인트\n혜택받으셨나요'),
+                  title: const Text('마트/쇼핑몰,카드 포인트\n혜택받으셨나요'),
                   content: SingleChildScrollView(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -167,7 +167,7 @@ class _ShoppingPointsInputScreenState extends State<ShoppingPointsInputScreen> {
                           ],
                         ),
                         const SizedBox(height: 8),
-                        OneUiInputField(
+                        SmartInputField(
                           label: '합계금액',
                           controller: totalController,
                           keyboardType: TextInputType.number,
@@ -181,7 +181,7 @@ class _ShoppingPointsInputScreenState extends State<ShoppingPointsInputScreen> {
                           },
                         ),
                         const SizedBox(height: 8),
-                        OneUiInputField(
+                        SmartInputField(
                           label: '카드결제금액',
                           controller: chargedController,
                           focusNode: chargedFocus,
@@ -193,8 +193,8 @@ class _ShoppingPointsInputScreenState extends State<ShoppingPointsInputScreen> {
                           onChanged: (_) => setState(() {}),
                         ),
                         const SizedBox(height: 8),
-                        OneUiInputField(
-                          label: '마트할인',
+                        SmartInputField(
+                          label: '마트/쇼핑몰 할인',
                           controller: martDiscountController,
                           keyboardType: TextInputType.number,
                           inputFormatters: const [ThousandsInputFormatter()],
@@ -203,7 +203,7 @@ class _ShoppingPointsInputScreenState extends State<ShoppingPointsInputScreen> {
                           onChanged: (_) => setState(() {}),
                         ),
                         const SizedBox(height: 8),
-                        OneUiInputField(
+                        SmartInputField(
                           label: '카드할인',
                           controller: cardDiscountController,
                           keyboardType: TextInputType.number,
@@ -213,7 +213,7 @@ class _ShoppingPointsInputScreenState extends State<ShoppingPointsInputScreen> {
                           onChanged: (_) => setState(() {}),
                         ),
                         const SizedBox(height: 8),
-                        OneUiInputField(
+                        SmartInputField(
                           label: '포인트(금액 알고있으면 직접입력)',
                           hint: '입력하면 자동계산을 건너뜁니다',
                           controller: pointsDirectController,
@@ -244,19 +244,19 @@ class _ShoppingPointsInputScreenState extends State<ShoppingPointsInputScreen> {
                           style: theme.textTheme.titleMedium,
                         ),
                         const SizedBox(height: 12),
-                        OneUiInputField(
+                        SmartInputField(
                           label: '구매처(선택)',
                           controller: storeController,
                           compact: true,
                         ),
                         const SizedBox(height: 8),
-                        OneUiInputField(
+                        SmartInputField(
                           label: '사용 카드(선택)',
                           controller: cardController,
                           compact: true,
                         ),
                         const SizedBox(height: 8),
-                        OneUiInputField(
+                        SmartInputField(
                           label: '포인트 메모(선택)',
                           controller: memoController,
                           compact: true,
@@ -370,7 +370,6 @@ class _ShoppingPointsInputScreenState extends State<ShoppingPointsInputScreen> {
         description: '포인트 적립',
         amount: points,
         date: result.at,
-        paymentMethod: '현금',
         memo: memoParts.join(' '),
         savingsAllocation: SavingsAllocation.assetIncrease,
       );

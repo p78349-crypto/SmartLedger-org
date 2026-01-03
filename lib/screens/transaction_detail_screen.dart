@@ -463,7 +463,6 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                 top: 16,
               ),
               child: Column(
-                mainAxisSize: MainAxisSize.max,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Center(
@@ -980,7 +979,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
     final service = TransactionService();
 
     // 현재 월의 거래 가져오기
-    final startOfMonth = DateTime(_currentMonth.year, _currentMonth.month, 1);
+    final startOfMonth = DateTime(_currentMonth.year, _currentMonth.month);
     final endOfMonth = DateTime(
       _currentMonth.year,
       _currentMonth.month + 1,

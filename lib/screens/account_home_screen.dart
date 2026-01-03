@@ -179,7 +179,6 @@ class _AccountHomeScreenState extends State<AccountHomeScreen> {
                                 barGroups: barGroups,
                                 alignment: BarChartAlignment.spaceAround,
                                 gridData: FlGridData(
-                                  show: true,
                                   drawVerticalLine: false,
                                   horizontalInterval: interval,
                                   getDrawingHorizontalLine: (value) => FlLine(
@@ -190,10 +189,10 @@ class _AccountHomeScreenState extends State<AccountHomeScreen> {
                                 borderData: FlBorderData(show: false),
                                 titlesData: FlTitlesData(
                                   topTitles: const AxisTitles(
-                                    sideTitles: SideTitles(showTitles: false),
+                                    
                                   ),
                                   rightTitles: const AxisTitles(
-                                    sideTitles: SideTitles(showTitles: false),
+                                    
                                   ),
                                   leftTitles: AxisTitles(
                                     sideTitles: SideTitles(
@@ -227,7 +226,6 @@ class _AccountHomeScreenState extends State<AccountHomeScreen> {
                                         final label = categories[index];
                                         return SideTitleWidget(
                                           meta: meta,
-                                          space: 8,
                                           child: SizedBox(
                                             width: 80,
                                             child: Text(
@@ -331,7 +329,6 @@ class _AccountHomeScreenState extends State<AccountHomeScreen> {
       await MonthlyAggCacheService().autoEnsureBuiltIfDirtyThrottled(
         accountName: widget.accountName,
         transactions: List<Transaction>.from(txs),
-        includeQuickInput: false,
         // App-start path: lower frequency is fine.
         minIntervalSameMonth: const Duration(hours: 24),
       );

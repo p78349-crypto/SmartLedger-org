@@ -314,7 +314,6 @@ class IncomeSplitService {
         fromAssetId: actualCashAsset.id,
         toAssetId: budgetAsset.id,
         amount: budgetAmount,
-        type: AssetMoveType.transfer,
         memo: '수입 분배: 지출 예산 (${incomeItems.map((i) => i.name).join(', ')})',
         date: now,
         createdAt: now,

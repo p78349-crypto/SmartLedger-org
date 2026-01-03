@@ -24,6 +24,6 @@ class LocalizedDateFormatter {
   }
 
   static String y(BuildContext context, int year) {
-    return DateFormat.y(_localeTag(context)).format(DateTime(year, 1, 1));
+    return DateFormat.y(_localeTag(context)).format(DateTime(year));
   }
 }

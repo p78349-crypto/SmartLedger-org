@@ -141,7 +141,7 @@ class _StoreMergeScreenState extends State<StoreMergeScreen> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(null),
+              onPressed: () => Navigator.of(dialogContext).pop(),
               child: const Text('취소'),
             ),
             if (currentCanonical != null)

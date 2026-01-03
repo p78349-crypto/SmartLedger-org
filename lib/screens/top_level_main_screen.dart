@@ -110,8 +110,7 @@ class _TopLevelMainScreenState extends State<TopLevelMainScreen> {
             );
             if (selected != null && selected.isNotEmpty) {
               if (!mounted) return;
-              await BackupPasswordBootstrapper
-                  .ensureBackupPasswordConfiguredOnEntry(
+              await BackupPasswordBootstrapper.ensureBackupPasswordConfiguredOnEntry(
                 context,
               );
               await BackupService().autoBackupIfNeeded(selected);

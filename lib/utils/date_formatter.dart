@@ -121,7 +121,7 @@ class DateFormatter {
 
   /// 날짜의 월 시작일 반환
   static DateTime getMonthStart(DateTime date) {
-    return DateTime(date.year, date.month, 1);
+    return DateTime(date.year, date.month);
   }
 
   /// 날짜의 월 마지막일 반환

@@ -148,4 +148,5 @@ class IconCatalog {
   static const IconData brightnessAutoOutlined = Icons.brightness_auto_outlined;
   static const IconData lightModeOutlined = Icons.light_mode_outlined;
   static const IconData darkModeOutlined = Icons.dark_mode_outlined;
+  static const IconData postAdd = Icons.post_add;
 }

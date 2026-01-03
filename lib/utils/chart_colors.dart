@@ -40,11 +40,7 @@ class ChartColors {
       return colors[(index - 10) % colors.length];
     } else {
       // 21위 이상: 기타색 (Tertiary 계열)
-      final colors = [
-        scheme.tertiary,
-        scheme.outline,
-        scheme.onSurfaceVariant,
-      ];
+      final colors = [scheme.tertiary, scheme.outline, scheme.onSurfaceVariant];
       return colors[(index - 20) % colors.length];
     }
   }

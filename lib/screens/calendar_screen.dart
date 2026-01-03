@@ -109,7 +109,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
       child: TableCalendar<Transaction>(
-        firstDay: DateTime.utc(2000, 1, 1),
+        firstDay: DateTime.utc(2000),
         lastDay: DateTime.utc(2100, 12, 31),
         focusedDay: _focusedDay,
         calendarFormat: _calendarFormat,
@@ -181,7 +181,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
           markersMaxCount: 0, // 마커(점) 표시 비활성화
           outsideDaysVisible: false,
           cellMargin: const EdgeInsets.all(4),
-          cellPadding: EdgeInsets.zero,
         ),
         rowHeight: 90,
         calendarBuilders: CalendarBuilders(
@@ -254,7 +253,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
             )
           : null,
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           const SizedBox(height: 4),
           // 날짜 숫자

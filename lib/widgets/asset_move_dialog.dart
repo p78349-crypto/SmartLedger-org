@@ -316,7 +316,6 @@ class _AssetMoveDialogState extends State<AssetMoveDialog> {
                                 ),
                                 items: [
                                   const DropdownMenuItem(
-                                    value: null,
                                     child: Text('선택안함'),
                                   ),
                                   ...otherAssets.map((asset) {
@@ -360,7 +359,6 @@ class _AssetMoveDialogState extends State<AssetMoveDialog> {
                           ),
                           items: [
                             const DropdownMenuItem(
-                              value: null,
                               child: Text('선택안함'),
                             ),
                             ...AssetCategory.values.map(

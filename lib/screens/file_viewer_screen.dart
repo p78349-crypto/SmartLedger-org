@@ -32,7 +32,6 @@ class _FileViewerScreenState extends State<FileViewerScreen> {
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: const ['json', 'txt'],
-        withData: false,
       );
 
       if (!mounted) return;

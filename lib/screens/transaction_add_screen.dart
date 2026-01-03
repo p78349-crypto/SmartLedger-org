@@ -20,6 +20,7 @@ import 'package:smart_ledger/utils/icon_catalog.dart';
 import 'package:smart_ledger/utils/income_category_definitions.dart';
 import 'package:smart_ledger/utils/snackbar_utils.dart';
 import 'package:smart_ledger/utils/store_memo_utils.dart';
+import 'package:smart_ledger/widgets/smart_input_field.dart';
 
 // 최근 결제수단/메모 저장 키 및 최대 개수
 const String _recentDescriptionsKey = 'recent_descriptions';
@@ -101,7 +102,13 @@ class _TransactionAddScreenState extends State<TransactionAddScreen> {
           ],
         ),
         body: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.symmetric(
+            horizontal: 16.0,
+            vertical:
+                MediaQuery.of(context).orientation == Orientation.landscape
+                ? 8.0
+                : 16.0,
+          ),
           child: TransactionAddForm(
             key: _formStateKey,
             accountName: widget.accountName,
@@ -205,33 +212,6 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
     canRequestFocus: false,
     skipTraversal: true,
   );
-
-  InputDecoration _standardInputDecoration({
-    required String labelText,
-    String? hintText,
-    Widget? prefixIcon,
-    Widget? suffixIcon,
-    String? suffixText,
-  }) {
-    final isLandscape =
-        MediaQuery.of(context).orientation == Orientation.landscape;
-    final contentPadding = EdgeInsets.symmetric(
-      horizontal: 12,
-      vertical: isLandscape ? 10 : 12,
-    );
-
-    return InputDecoration(
-      labelText: labelText,
-      hintText: hintText,
-      border: const OutlineInputBorder(),
-      isDense: true,
-      contentPadding: contentPadding,
-      prefixIcon: prefixIcon,
-      suffixIcon: suffixIcon,
-      suffixText: suffixText,
-      floatingLabelBehavior: FloatingLabelBehavior.always,
-    );
-  }
 
   TransactionType _selectedType = TransactionType.expense;
   SavingsAllocation _savingsAllocation = SavingsAllocation.assetIncrease;
@@ -627,22 +607,20 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
   Widget _buildStoreOrBuyerField() {
     return KeyedSubtree(
       key: const Key('tx_store'),
-      child: TextFormField(
+      child: SmartInputField(
         controller: _storeController,
         focusNode: _storeFocusNode,
         textInputAction: TextInputAction.next,
         onFieldSubmitted: (_) => _amountFocusNode.requestFocus(),
         onChanged: (_) => setState(() {}),
-        decoration: _standardInputDecoration(
-          labelText: '구매자/거래처(판매자용)',
-          hintText: '선택: 판매자인 경우 구매자 이름',
-          suffixIcon: _storeController.text.isNotEmpty
-              ? IconButton(
-                  icon: const Icon(IconCatalog.clear),
-                  onPressed: () => setState(_storeController.clear),
-                )
-              : null,
-        ),
+        label: '구매자/거래처(판매자용)',
+        hint: '선택: 판매자인 경우 구매자 이름',
+        suffixIcon: _storeController.text.isNotEmpty
+            ? IconButton(
+                icon: const Icon(IconCatalog.clear),
+                onPressed: () => setState(_storeController.clear),
+              )
+            : null,
       ),
     );
   }
@@ -1032,13 +1010,11 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
       date: existing?.date ?? _transactionDate,
       quantity: qty,
       unitPrice: unit,
-      weather: null,
       paymentMethod: payment,
       memo: memo,
       store: storeForSave,
       savingsAllocation: isSavings ? _savingsAllocation : null,
       mainCategory: effectiveMainCategory,
-      subCategory: effectiveSubCategory,
     );
 
     final service = TransactionService();
@@ -1050,14 +1026,12 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
           unawaited(
             CategoryUsageService.increment(
               main: effectiveMainCategory,
-              sub: effectiveSubCategory,
             ),
           );
           unawaited(
             RecentInputService.saveCategory(
               CategoryUsageService.labelFor(
                 main: effectiveMainCategory,
-                sub: effectiveSubCategory,
               ),
             ),
           );
@@ -1105,14 +1079,12 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
           unawaited(
             CategoryUsageService.increment(
               main: effectiveMainCategory,
-              sub: effectiveSubCategory,
             ),
           );
           unawaited(
             RecentInputService.saveCategory(
               CategoryUsageService.labelFor(
                 main: effectiveMainCategory,
-                sub: effectiveSubCategory,
               ),
             ),
           );
@@ -1132,7 +1104,6 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
             keyword: desc,
             hint: CategoryHint(
               mainCategory: effectiveMainCategory,
-              subCategory: effectiveSubCategory,
             ),
           ),
         );
@@ -1346,6 +1317,7 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
         key: _formKey,
         child: ListView(
           padding: EdgeInsets.only(
+            top: 12, // Add top padding to prevent label clipping
             bottom:
                 MediaQuery.of(context).padding.bottom +
                 80, // Add padding for FAB
@@ -1379,14 +1351,11 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
         enableHistory: true,
       ),
       const SizedBox(height: 12),
-      TextFormField(
+      SmartInputField(
         controller: _amountController,
         keyboardType: TextInputType.number,
         textInputAction: TextInputAction.next,
-        decoration: const InputDecoration(
-          labelText: '예금 금액 (원)',
-          border: OutlineInputBorder(),
-        ),
+        label: '예금 금액 (원)',
         validator: (value) => _validatePositiveAmount(value, '예금 금액을 입력하세요.'),
       ),
       const SizedBox(height: 12),
@@ -1440,36 +1409,34 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
   Widget _buildMemoField({required VoidCallback onSubmitted}) {
     return KeyedSubtree(
       key: const Key('tx_memo'),
-      child: TextFormField(
+      child: SmartInputField(
         controller: _memoController,
         focusNode: _memoFocusNode,
         textInputAction: TextInputAction.done,
         onFieldSubmitted: (_) => onSubmitted(),
         onChanged: (_) => setState(() {}),
-        decoration: _standardInputDecoration(
-          labelText: '메모',
-          hintText: '예: 마트 이름 + 간단 메모',
-          suffixIcon: IconButton(
-            tooltip: '입력내용 불러오기',
-            icon: Icon(
-              Icons.list_alt,
-              size: 20,
-              color: Theme.of(context).iconTheme.color,
-            ),
-            onPressed: () => _showRecentInputPicker(
-              context: context,
-              items: _recentMemos,
-              onSelected: (v) {
-                _memoController.text = v;
-                _memoController.selection = TextSelection.fromPosition(
-                  TextPosition(offset: v.length),
-                );
-                setState(() {});
-              },
-              title: '메모 입력내용 불러오기',
-            ),
-            padding: EdgeInsets.zero,
+        label: '메모',
+        hint: '예: 마트 이름 + 간단 메모',
+        suffixIcon: IconButton(
+          tooltip: '입력내용 불러오기',
+          icon: Icon(
+            Icons.list_alt,
+            size: 20,
+            color: Theme.of(context).iconTheme.color,
           ),
+          onPressed: () => _showRecentInputPicker(
+            context: context,
+            items: _recentMemos,
+            onSelected: (v) {
+              _memoController.text = v;
+              _memoController.selection = TextSelection.fromPosition(
+                TextPosition(offset: v.length),
+              );
+              setState(() {});
+            },
+            title: '메모 입력내용 불러오기',
+          ),
+          padding: EdgeInsets.zero,
         ),
       ),
     );
@@ -1485,36 +1452,34 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
     String? emptyErrorText,
     TextInputAction textInputAction = TextInputAction.next,
   }) {
-    return TextFormField(
+    return SmartInputField(
       key: fieldKey,
       focusNode: focusNode,
       controller: controller,
       textInputAction: textInputAction,
       onFieldSubmitted: (_) => onSubmitted(),
-      decoration: _standardInputDecoration(
-        labelText: labelText,
-        hintText: hintText,
-        suffixIcon: IconButton(
-          tooltip: '입력내용 불러오기',
-          icon: Icon(
-            Icons.list_alt,
-            size: 20,
-            color: Theme.of(context).iconTheme.color,
-          ),
-          onPressed: () => _showRecentInputPicker(
-            context: context,
-            items: _recentPayments,
-            onSelected: (v) {
-              controller.text = v;
-              controller.selection = TextSelection.fromPosition(
-                TextPosition(offset: v.length),
-              );
-              setState(() {});
-            },
-            title: '결제수단 입력내용 불러오기',
-          ),
-          padding: EdgeInsets.zero,
+      label: labelText,
+      hint: hintText,
+      suffixIcon: IconButton(
+        tooltip: '입력내용 불러오기',
+        icon: Icon(
+          Icons.list_alt,
+          size: 20,
+          color: Theme.of(context).iconTheme.color,
         ),
+        onPressed: () => _showRecentInputPicker(
+          context: context,
+          items: _recentPayments,
+          onSelected: (v) {
+            controller.text = v;
+            controller.selection = TextSelection.fromPosition(
+              TextPosition(offset: v.length),
+            );
+            setState(() {});
+          },
+          title: '결제수단 입력내용 불러오기',
+        ),
+        padding: EdgeInsets.zero,
       ),
       validator: (value) {
         if (emptyErrorText == null) return null;
@@ -1592,14 +1557,14 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
       const SizedBox(height: 12),
       KeyedSubtree(
         key: const Key('tx_amount'),
-        child: TextFormField(
+        child: SmartInputField(
           focusNode: _amountFocusNode,
           controller: _amountController,
           keyboardType: TextInputType.number,
           textInputAction: TextInputAction.next,
           onFieldSubmitted: (_) => _paymentFocusNode.requestFocus(),
           validator: (value) => _validatePositiveAmount(value, '금액을 입력하세요.'),
-          decoration: _standardInputDecoration(labelText: '금액 (수동 입력)'),
+          label: '금액 (수동 입력)',
         ),
       ),
       const SizedBox(height: 12),
@@ -1609,7 +1574,6 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
         controller: _paymentController,
         onSubmitted: () => FocusScope.of(context).requestFocus(_memoFocusNode),
         labelText: '결제수단',
-        hintText: null,
       ),
       const SizedBox(height: 12),
       _buildMemoField(onSubmitted: _saveTransaction),
@@ -1631,14 +1595,14 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
       const SizedBox(height: 12),
       KeyedSubtree(
         key: const Key('tx_amount'),
-        child: TextFormField(
+        child: SmartInputField(
           focusNode: _amountFocusNode,
           controller: _amountController,
           keyboardType: TextInputType.number,
           textInputAction: TextInputAction.next,
           onFieldSubmitted: (_) => _paymentFocusNode.requestFocus(),
           validator: (value) => _validatePositiveAmount(value, '금액을 입력하세요.'),
-          decoration: _standardInputDecoration(labelText: '반품 금액'),
+          label: '반품 금액',
         ),
       ),
       const SizedBox(height: 12),
@@ -1648,7 +1612,6 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
         controller: _paymentController,
         onSubmitted: () => FocusScope.of(context).requestFocus(_memoFocusNode),
         labelText: '환불 계좌/수단',
-        hintText: null,
         emptyErrorText: '환불 수단 입력',
       ),
       const SizedBox(height: 12),
@@ -1670,7 +1633,7 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
       Row(
         children: [
           Expanded(
-            child: TextFormField(
+            child: SmartInputField(
               key: const Key('tx_unit'),
               controller: _unitPriceController,
               focusNode: _expenseUnitPriceFocusNode,
@@ -1678,7 +1641,7 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
               textInputAction: TextInputAction.next,
               validator: (value) =>
                   value == null || value.trim().isEmpty ? '단가 입력' : null,
-              decoration: _standardInputDecoration(labelText: '단가'),
+              label: '단가',
               onFieldSubmitted: (_) {
                 final raw = _unitPriceController.text.trim();
                 final unit = double.tryParse(raw) ?? 0.0;
@@ -1701,7 +1664,7 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: TextFormField(
+            child: SmartInputField(
               key: const Key('tx_qty'),
               controller: _qtyController,
               focusNode: _expenseQtyFocusNode,
@@ -1709,7 +1672,7 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
               textInputAction: TextInputAction.next,
               validator: (value) =>
                   value == null || value.trim().isEmpty ? '수량 입력' : null,
-              decoration: _standardInputDecoration(labelText: '수량'),
+              label: '수량',
               onFieldSubmitted: (_) {
                 final raw = _qtyController.text.trim();
                 final qty = int.tryParse(raw) ?? 0;
@@ -1732,11 +1695,11 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
       Row(
         children: [
           Expanded(
-            child: TextFormField(
+            child: SmartInputField(
               controller: _amountController,
               focusNode: _calculatedAmountFocusNode,
-              readOnly: true,
-              decoration: _standardInputDecoration(labelText: '금액(자동계산)'),
+              enabled: false, // readOnly equivalent in SmartInputField
+              label: '금액(자동계산)',
             ),
           ),
           const SizedBox(width: 12),
@@ -1748,7 +1711,6 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
               onSubmitted: () =>
                   FocusScope.of(context).requestFocus(_memoFocusNode),
               labelText: '결제수단',
-              hintText: null,
               emptyErrorText: '결제수단 입력',
             ),
           ),
@@ -1902,7 +1864,7 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
   }) {
     return KeyedSubtree(
       key: const Key('tx_desc'),
-      child: TextFormField(
+      child: SmartInputField(
         controller: _descController,
         focusNode: _descFocusNode,
         textInputAction: TextInputAction.next,
@@ -1910,29 +1872,27 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
             value == null || value.trim().isEmpty ? emptyMessage : null,
         onFieldSubmitted: onFieldSubmitted,
         onChanged: (_) => setState(() {}),
-        decoration: _standardInputDecoration(
-          labelText: labelText,
-          suffixIcon: IconButton(
-            tooltip: '입력내용 불러오기',
-            icon: Icon(
-              Icons.list_alt,
-              size: 20,
-              color: Theme.of(context).iconTheme.color,
-            ),
-            onPressed: () => _showRecentInputPicker(
-              context: context,
-              items: _recentDescriptions,
-              onSelected: (v) {
-                _descController.text = v;
-                _descController.selection = TextSelection.fromPosition(
-                  TextPosition(offset: v.length),
-                );
-                setState(() {});
-              },
-              title: '상품명 입력내용 불러오기',
-            ),
-            padding: EdgeInsets.zero,
+        label: labelText,
+        suffixIcon: IconButton(
+          tooltip: '입력내용 불러오기',
+          icon: Icon(
+            Icons.list_alt,
+            size: 20,
+            color: Theme.of(context).iconTheme.color,
           ),
+          onPressed: () => _showRecentInputPicker(
+            context: context,
+            items: _recentDescriptions,
+            onSelected: (v) {
+              _descController.text = v;
+              _descController.selection = TextSelection.fromPosition(
+                TextPosition(offset: v.length),
+              );
+              setState(() {});
+            },
+            title: '상품명 입력내용 불러오기',
+          ),
+          padding: EdgeInsets.zero,
         ),
       ),
     );

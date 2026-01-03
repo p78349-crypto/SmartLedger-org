@@ -98,4 +98,16 @@ class CategoryDefinitions {
 
   static List<String> get mainCategories =>
       categoryOptions.keys.toList(growable: false);
+
+  /// Categories relevant for shopping (mart, online mall, etc.)
+  static const List<String> shoppingMainCategories = [
+    '식품·음료비',
+    '식비',
+    '생활용품비',
+    '의류/잡화',
+    '의료비',
+    '문화/여가/자기개발',
+    '주류',
+    defaultCategory,
+  ];
 }

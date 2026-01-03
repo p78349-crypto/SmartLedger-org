@@ -16,7 +16,6 @@ class ScreenSaverLauncher {
 
     await showGeneralDialog<void>(
       context: context,
-      barrierDismissible: false,
       barrierLabel: ScreenSaverIds.shortcutIconId,
       barrierColor: scrim,
       pageBuilder: (context, a1, a2) {

@@ -15,13 +15,13 @@ class ThemeService extends ChangeNotifier {
 
   /// Current variant used for live preview (falls back to applied icon variant)
   ThemeVariant get current =>
-      _preview ?? _appliedIconVariant ?? ThemeVariant.vibrantBlue;
+      _preview ?? _appliedIconVariant ?? ThemeVariant.miNavy;
 
   Future<void> load() async {
     final iconId = await UserPrefService.getThemeIconBgPresetId();
     final wallId = await UserPrefService.getThemeWallpaperPresetId();
 
-    _appliedIconVariant = ThemeVariant.byId(iconId) ?? ThemeVariant.vibrantBlue;
+    _appliedIconVariant = ThemeVariant.byId(iconId) ?? ThemeVariant.miNavy;
     _appliedWallpaperVariant = ThemeVariant.byId(wallId) ?? _appliedIconVariant;
 
     // Prune cache in background to limit disk usage
@@ -36,16 +36,21 @@ class ThemeService extends ChangeNotifier {
   /// Map theme variant -> wallpaper asset path (app bundle).
   /// Local-first; can be replaced with SAF URI mapping later.
   String wallpaperAssetFor(ThemeVariant v) {
+    // For now, map to existing wallpapers or a default
+    if (v.id.startsWith('fi_') || v.id.startsWith('mi_')) {
+      return 'assets/images/wallpapers/neutral_dark.png';
+    }
+
     switch (v.id) {
-      case 'vibrant_blue':
-        return 'assets/images/wallpapers/vibrant_blue.png';
-      case 'aqua_green':
-        return 'assets/images/wallpapers/aqua_green.png';
-      case 'purple_pink':
+      case 'fl_soft_pink':
+      case 'fl_lavender':
         return 'assets/images/wallpapers/purple_pink.png';
-      case 'warm_orange':
+      case 'fl_peach':
+      case 'fl_mint':
         return 'assets/images/wallpapers/warm_orange.png';
-      case 'neutral_dark':
+      case 'fl_sky':
+      case 'ml_teal':
+        return 'assets/images/wallpapers/aqua_green.png';
       default:
         return 'assets/images/wallpapers/neutral_dark.png';
     }
@@ -76,9 +81,9 @@ class ThemeService extends ChangeNotifier {
   Future<void> clearLocalWallpaper() async {
     await UserPrefService.setThemeLocalWallpaperPath(path: null);
     await UserPrefService.setThemeWallpaperPresetId(
-      presetId: ThemeVariant.vibrantBlue.id,
+      presetId: ThemeVariant.miNavy.id,
     );
-    _appliedWallpaperVariant = ThemeVariant.vibrantBlue;
+    _appliedWallpaperVariant = ThemeVariant.miNavy;
     notifyListeners();
   }
 
@@ -87,7 +92,7 @@ class ThemeService extends ChangeNotifier {
   Future<String> wallpaperForCurrent() async {
     final local = await getLocalWallpaperPath();
     if (local != null && local.isNotEmpty) return local;
-    final applied = appliedWallpaper ?? ThemeVariant.vibrantBlue;
+    final applied = appliedWallpaper ?? ThemeVariant.miNavy;
     return wallpaperAssetFor(applied);
   }
 

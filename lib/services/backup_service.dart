@@ -733,7 +733,6 @@ class BackupService {
       body: 'SmartLedger 백업 파일입니다.',
       recipients: (to == null || to.trim().isEmpty) ? [] : [to.trim()],
       attachmentPaths: [filePath],
-      isHTML: false,
     );
 
     await FlutterEmailSender.send(email);

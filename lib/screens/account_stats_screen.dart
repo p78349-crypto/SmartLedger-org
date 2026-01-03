@@ -201,10 +201,10 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
         gridData: const FlGridData(show: false),
         titlesData: FlTitlesData(
           topTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
+            
           ),
           rightTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
+            
           ),
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
@@ -263,10 +263,10 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
         gridData: const FlGridData(show: false),
         titlesData: FlTitlesData(
           topTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
+            
           ),
           rightTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
+            
           ),
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
@@ -305,7 +305,6 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
             color: color,
             barWidth: 3,
             isStrokeCapRound: true,
-            dotData: const FlDotData(show: true),
             belowBarData: BarAreaData(
               show: true,
               color: _colorWithOpacity(color, 0.15),
@@ -493,10 +492,6 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
     final monthlyAggCache = await MonthlyAggCacheService().ensureBuilt(
       accountName: widget.accountName,
       transactions: transactions,
-      // AccountStats does not depend on quick input; keep it off to avoid
-      // unnecessary work on this screen.
-      includeQuickInput: false,
-      maxMonths: MonthlyAggCacheService.defaultMaxMonths,
     );
     if (!mounted) return;
 
@@ -570,7 +565,7 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
     double savings = 0;
 
     for (var i = 0; i < months; i++) {
-      final monthDate = DateTime(range.end.year, range.end.month - i, 1);
+      final monthDate = DateTime(range.end.year, range.end.month - i);
       final ym = MonthlyAggCacheService.yearMonthOf(monthDate);
       final bucket = cache.months[ym];
       if (bucket == null) continue;
@@ -752,7 +747,6 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: theme.colorScheme.error.withAlpha(128),
-                      width: 1,
                     ),
                   ),
                   child: Row(
@@ -1055,8 +1049,6 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
       }
       return Scaffold(
         appBar: AppBar(
-          automaticallyImplyLeading: true,
-          title: null,
           toolbarHeight: 40,
           elevation: 0,
           backgroundColor: Colors.transparent,
@@ -1090,8 +1082,6 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
         appBar: AppBar(
-          automaticallyImplyLeading: true,
-          title: null,
           toolbarHeight: 40,
           elevation: 0,
           backgroundColor: Colors.transparent,
@@ -1212,7 +1202,7 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
       }
     }
 
-    final fixedCostMonthly = _fixedCostTotalForMonth(DateTime(year, 1));
+    final fixedCostMonthly = _fixedCostTotalForMonth(DateTime(year));
     final fixedCostYearly = _fixedCosts.isEmpty ? 0.0 : fixedCostMonthly * 12;
 
     final hasFixedCosts = _fixedCosts.isNotEmpty;
@@ -1303,7 +1293,6 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
     final start = DateTime(
       _currentMonth.year,
       _currentMonth.month - (months - 1),
-      1,
     );
     final end = DateTime(_currentMonth.year, _currentMonth.month + 1, 0);
     return DateTimeRange(start: start, end: end);
@@ -1322,7 +1311,7 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
   ) {
     var count = 0;
     for (var month = 1; month <= 12; month++) {
-      final monthStart = DateTime(year, month, 1);
+      final monthStart = DateTime(year, month);
       final monthEnd = DateTime(year, month + 1, 0);
       final overlaps =
           !monthEnd.isBefore(rangeStart) && !monthStart.isAfter(rangeEnd);
@@ -1462,17 +1451,17 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
         _buildQuickInputInline(theme),
 
         const SizedBox(height: 24),
-        Text('마트별 제품', style: theme.textTheme.titleMedium),
+        Text('마트/쇼핑몰별 제품', style: theme.textTheme.titleMedium),
         const SizedBox(height: 8),
         _buildStoreProductsInline(theme, transactions),
       ],
     );
   }
 
-  DateTime _monthStart(DateTime month) => DateTime(month.year, month.month, 1);
+  DateTime _monthStart(DateTime month) => DateTime(month.year, month.month);
 
   DateTime _monthEndExclusive(DateTime month) =>
-      DateTime(month.year, month.month + 1, 1);
+      DateTime(month.year, month.month + 1);
 
   String _formatWon(double value) => '${_currencyFormat.format(value)}원';
 
@@ -1539,7 +1528,7 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Text(
-            '마트명이 기록된 거래가 없습니다.',
+            '마트/쇼핑몰명이 기록된 거래가 없습니다.',
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -1608,7 +1597,7 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('기본 마트: $store', style: theme.textTheme.bodySmall),
+            Text('기본 마트/쇼핑몰: $store', style: theme.textTheme.bodySmall),
             const SizedBox(height: 6),
             Text(
               '이번달 총액: ${_formatWon(thisMonthTotal)}',
@@ -1722,7 +1711,6 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
             final monthDate = DateTime(
               _currentMonth.year,
               _currentMonth.month - index,
-              1,
             );
             final ym = MonthlyAggCacheService.yearMonthOf(monthDate);
             final bucket = _monthlyAggCache!.months[ym];
@@ -1863,7 +1851,7 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
             double savings = 0;
             for (var month = 1; month <= 12; month++) {
               final ym = MonthlyAggCacheService.yearMonthOf(
-                DateTime(_currentYear, month, 1),
+                DateTime(_currentYear, month),
               );
               final bucket = cache.months[ym];
               if (bucket == null) continue;
@@ -1873,7 +1861,7 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
             }
 
             final fixedCostMonthly = _fixedCostTotalForMonth(
-              DateTime(_currentYear, 1),
+              DateTime(_currentYear),
             );
             final fixedCostYearly = _fixedCosts.isEmpty
                 ? 0.0
@@ -1903,14 +1891,14 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
         : _calculateYearlySummary(transactions, _currentYear);
 
     final fixedCostMonthlyTotal = _fixedCostTotalForMonth(
-      DateTime(_currentYear, 1),
+      DateTime(_currentYear),
     );
 
     final monthSummaries = List.generate(12, (index) {
       final month = index + 1;
       if (canUseAgg) {
         final ym = MonthlyAggCacheService.yearMonthOf(
-          DateTime(_currentYear, month, 1),
+          DateTime(_currentYear, month),
         );
         final bucket = cache.months[ym];
         final baseTotal = bucket?.amountForType(_currentType) ?? 0.0;
@@ -2018,7 +2006,7 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
         double total = 0.0;
         int count = 0;
         for (var month = 1; month <= 12; month++) {
-          final dt = DateTime(year, month, 1);
+          final dt = DateTime(year, month);
           if (dt.isBefore(range.start) || dt.isAfter(range.end)) continue;
           final ym = MonthlyAggCacheService.yearMonthOf(dt);
           final bucket = _monthlyAggCache!.months[ym];
@@ -2035,7 +2023,7 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
             range.start,
             range.end,
           );
-          total += _fixedCostTotalForMonth(DateTime(year, 1)) * monthsCovered;
+          total += _fixedCostTotalForMonth(DateTime(year)) * monthsCovered;
         }
         yearSummaries.add(_YearSummary(year: year, total: total, count: count));
         continue;
@@ -2053,7 +2041,7 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
           range.start,
           range.end,
         );
-        total += _fixedCostTotalForMonth(DateTime(year, 1)) * monthsCovered;
+        total += _fixedCostTotalForMonth(DateTime(year)) * monthsCovered;
       }
       yearSummaries.add(
         _YearSummary(year: year, total: total, count: yearTransactions.length),
@@ -2239,7 +2227,7 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
     TransactionType type,
   ) {
     // 선택한 타입의 거래만 필터링
-    final startOfMonth = DateTime(_currentMonth.year, _currentMonth.month, 1);
+    final startOfMonth = DateTime(_currentMonth.year, _currentMonth.month);
     final endOfMonth = DateTime(_currentMonth.year, _currentMonth.month + 1, 0);
     final filtered = transactions.where((tx) {
       // 날짜 범위 필터
@@ -2264,7 +2252,7 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
     final Map<String, List<Transaction>> categoryTransactions = {};
 
     for (final tx in filtered) {
-      final category = tx.memo.isEmpty ? '미분류' : tx.memo;
+      final category = tx.mainCategory;
       categoryTotals[category] =
           (categoryTotals[category] ?? 0) + tx.amount.abs();
       categoryTransactions.putIfAbsent(category, () => []).add(tx);
@@ -2348,7 +2336,6 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
                   firstDate: DateTime(
                     _currentMonth.year,
                     _currentMonth.month,
-                    1,
                   ),
                   lastDate: DateTime(
                     _currentMonth.year,
@@ -2554,6 +2541,14 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
                   );
                   final hasRefund = refunds.isNotEmpty;
 
+                  final subDetail = [
+                    if (tx.subCategory != null && tx.subCategory!.isNotEmpty)
+                      tx.subCategory,
+                    if (tx.detailCategory != null &&
+                        tx.detailCategory!.isNotEmpty)
+                      tx.detailCategory,
+                  ].join(' > ');
+
                   return ListTile(
                     dense: true,
                     leading: tx.isRefund
@@ -2566,13 +2561,27 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
                     title: Row(
                       children: [
                         Expanded(
-                          child: Text(
-                            '${_dateFormat.format(tx.date)} ${tx.description}',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              decoration: hasRefund
-                                  ? TextDecoration.lineThrough
-                                  : null,
-                            ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${_dateFormat.format(tx.date)} '
+                                '${tx.description}',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  decoration: hasRefund
+                                      ? TextDecoration.lineThrough
+                                      : null,
+                                ),
+                              ),
+                              if (subDetail.isNotEmpty)
+                                Text(
+                                  subDetail,
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color: theme.colorScheme.primary,
+                                    fontSize: 10,
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
                         if (hasRefund)
@@ -2651,7 +2660,7 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
 
   Widget _buildFixedCostSection(ThemeData theme, {bool annual = false}) {
     final costs = _sortedFixedCosts();
-    final referenceMonth = annual ? DateTime(_currentYear, 1) : _currentMonth;
+    final referenceMonth = annual ? DateTime(_currentYear) : _currentMonth;
     final monthlyTotal = _fixedCostTotalForMonth(referenceMonth);
     final total = annual ? monthlyTotal * 12 : monthlyTotal;
     final titlePrefix = annual ? '연간' : '등록된';
@@ -3043,12 +3052,10 @@ _TxSearchPlan _parseTxSearchPlan(String raw) {
         case '결제':
           filters.paymentContains.add(value);
           continue;
-        case '마트':
-        case '편의점':
-        case '온라인':
-        case '쇼핑몰':
+        case '공급처':
         case '출처':
-        case '매장':
+        case '마트':
+        case '쇼핑몰':
           filters.storeContains.add(value);
           continue;
         case '카테고리':
@@ -3315,7 +3322,6 @@ class _AccountStatsSearchScreenState extends State<AccountStatsSearchScreen> {
           accountName: widget.accountName,
           query: plan.ftsQuery,
           memoOnly: widget.memoOnly,
-          limit: 500,
         );
         if (!mounted || seq != _searchSeq) return;
 
@@ -3420,10 +3426,10 @@ class _AccountStatsSearchScreenState extends State<AccountStatsSearchScreen> {
       final now = DateTime.now();
       final ym = _ym(now);
 
-      final start3m = DateTime(now.year, now.month - 2, 1);
+      final start3m = DateTime(now.year, now.month - 2);
       final start3mYm = _ym(start3m);
 
-      final start6m = DateTime(now.year, now.month - 5, 1);
+      final start6m = DateTime(now.year, now.month - 5);
       final start6mYm = _ym(start6m);
 
       await TransactionBenefitMonthlyAggService().ensureAggregatedFromPrefs();
@@ -3562,7 +3568,7 @@ class _AccountStatsSearchScreenState extends State<AccountStatsSearchScreen> {
 
     () async {
       final now = DateTime.now();
-      final start = DateTime(now.year, now.month - 119, 1);
+      final start = DateTime(now.year, now.month - 119);
       final startYm = _ym(start);
       final endYm = _ym(now);
 
@@ -4156,29 +4162,29 @@ class _PeriodDetailScreenState extends State<_PeriodDetailScreen> {
   DateTimeRange _rangeForView() {
     switch (widget.view) {
       case _StatsView.month:
-        final start = DateTime(_currentMonth.year, _currentMonth.month, 1);
+        final start = DateTime(_currentMonth.year, _currentMonth.month);
         final end = DateTime(_currentMonth.year, _currentMonth.month + 1, 0);
         return DateTimeRange(start: start, end: end);
       case _StatsView.quarter:
-        final start = DateTime(_currentMonth.year, _currentMonth.month - 2, 1);
+        final start = DateTime(_currentMonth.year, _currentMonth.month - 2);
         final end = DateTime(_currentMonth.year, _currentMonth.month + 1, 0);
         return DateTimeRange(start: start, end: end);
       case _StatsView.halfYear:
-        final start = DateTime(_currentMonth.year, _currentMonth.month - 5, 1);
+        final start = DateTime(_currentMonth.year, _currentMonth.month - 5);
         final end = DateTime(_currentMonth.year, _currentMonth.month + 1, 0);
         return DateTimeRange(start: start, end: end);
       case _StatsView.year:
-        final start = DateTime(_currentYear, 1, 1);
+        final start = DateTime(_currentYear);
         final end = DateTime(_currentYear, 12, 31);
         return DateTimeRange(start: start, end: end);
       case _StatsView.decade:
         final startYear = _currentYear - 9;
-        final start = DateTime(startYear, 1, 1);
+        final start = DateTime(startYear);
         final end = DateTime(_currentYear, 12, 31);
         return DateTimeRange(start: start, end: end);
       default:
         final now = DateTime.now();
-        final start = DateTime(now.year, now.month, 1);
+        final start = DateTime(now.year, now.month);
         final end = DateTime(now.year, now.month + 1, 0);
         return DateTimeRange(start: start, end: end);
     }
@@ -4304,7 +4310,6 @@ class _PeriodDetailScreenState extends State<_PeriodDetailScreen> {
                   ),
                   Expanded(
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
                           _rangeLabel(range),

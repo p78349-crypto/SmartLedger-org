@@ -36,7 +36,7 @@ void main() {
           amount: 100,
           type: AssetMoveType.purchase,
           memo: 'buy',
-          date: DateTime(2025, 12, 1),
+          date: DateTime(2025, 12),
         ),
         AssetMove(
           id: '2',
@@ -62,7 +62,6 @@ void main() {
           fromAssetId: 'cash',
           toAssetId: 'savings',
           amount: 999,
-          type: AssetMoveType.transfer,
           memo: 'internal move',
           date: DateTime(2025, 12, 4),
         ),
@@ -95,7 +94,7 @@ void main() {
           fromAssetId: 'cash',
           amount: 100,
           type: AssetMoveType.purchase,
-          date: DateTime(2025, 12, 1),
+          date: DateTime(2025, 12),
         ),
         AssetMove(
           id: '2',

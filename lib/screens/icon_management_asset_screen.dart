@@ -39,7 +39,6 @@ class IconManagementAssetScreen extends StatelessWidget {
       catalogHiddenPageIndices: _catalogHiddenPages(),
       redirectAssetRootToDedicatedScreens: false,
       groupCatalogByModule: true,
-      showCatalogSectionTitles: true,
     );
   }
 }

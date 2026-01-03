@@ -567,7 +567,7 @@ Tree-shaking: MaterialIcons 99.2% 축소 (1.6MB → 12KB)
 
 **측정 환경**:
 - 테스트 일시: 2025년 12월 24일
-- 테스트 기기: Samsung Galaxy (One UI 8.0)
+- 테스트 기기: Android Device (Latest)
 - **Android 버전: 16** (최신)
 - 보안 패치: 2025년 12월 1일
 - APK 버전: app-release.apk (297.4MB)

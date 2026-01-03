@@ -14,7 +14,7 @@ import 'package:smart_ledger/utils/asset_dashboard_utils.dart';
 import 'package:smart_ledger/utils/benefit_aggregation_utils.dart';
 import 'package:smart_ledger/utils/currency_formatter.dart';
 import 'package:smart_ledger/utils/pref_keys.dart';
-import 'package:smart_ledger/widgets/one_ui_input_field.dart';
+import 'package:smart_ledger/widgets/smart_input_field.dart';
 
 /// 자산 대시보드 - 총 자산, 총 손익, 자산별 카드 뷰, 타임라인
 class AssetDashboardScreen extends StatefulWidget {
@@ -263,21 +263,21 @@ class _AssetDashboardScreenState extends State<AssetDashboardScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    OneUiInputField(
+                    SmartInputField(
                       label: '기간(년)',
                       hint: '예: 10',
                       controller: yearsController,
                       keyboardType: TextInputType.number,
                     ),
                     const SizedBox(height: 12),
-                    OneUiInputField(
+                    SmartInputField(
                       label: '목표 금액',
                       hint: '예: 100000000',
                       controller: targetController,
                       keyboardType: TextInputType.number,
                     ),
                     const SizedBox(height: 12),
-                    OneUiInputField(
+                    SmartInputField(
                       label: '안전자산 연이율(%)',
                       hint: '예: 3.0',
                       controller: safeRateController,
@@ -286,7 +286,7 @@ class _AssetDashboardScreenState extends State<AssetDashboardScreen> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    OneUiInputField(
+                    SmartInputField(
                       label: '투자자산 연이율(%)',
                       hint: '예: 6.0',
                       controller: investRateController,
@@ -303,7 +303,7 @@ class _AssetDashboardScreenState extends State<AssetDashboardScreen> {
                           setDialogState(() => includeBenefits = v),
                     ),
                     const SizedBox(height: 12),
-                    OneUiInputField(
+                    SmartInputField(
                       label: '비상금→투자 전환 기준(원)',
                       hint: '예: 100000',
                       controller: cashToInvestController,
@@ -438,27 +438,22 @@ class _AssetDashboardScreenState extends State<AssetDashboardScreen> {
       years: _projectYears,
     );
 
-    final currentLabel = CurrencyFormatter.format(currentTotal, showUnit: true);
+    final currentLabel = CurrencyFormatter.format(currentTotal);
     final projectedLabel = CurrencyFormatter.format(
       projectedTotal,
-      showUnit: true,
     );
     final targetLabel = CurrencyFormatter.format(
       _projectTargetAmount,
-      showUnit: true,
     );
-    final gapLabel = CurrencyFormatter.format(gapAt10y.abs(), showUnit: true);
+    final gapLabel = CurrencyFormatter.format(gapAt10y.abs());
     final extraMonthlyLabel = CurrencyFormatter.format(
       extraMonthlyNeeded,
-      showUnit: true,
     );
     final monthlyBenefitLabel = CurrencyFormatter.format(
       monthlyBenefit,
-      showUnit: true,
     );
     final thresholdLabel = CurrencyFormatter.format(
       _projectCashToInvestThresholdAmount,
-      showUnit: true,
     );
 
     final achieved = gapAt10y <= 0;
@@ -648,7 +643,6 @@ class _AssetDashboardScreenState extends State<AssetDashboardScreen> {
     final allMoves = AssetMoveService().getMoves(widget.accountName);
     final recentMoves = AssetManagementUtils.getRecentMoves(
       allMoves,
-      limit: 10,
     );
 
     if (recentMoves.isEmpty) {

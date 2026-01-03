@@ -64,19 +64,19 @@ class _PeriodStatsScreenState extends State<PeriodStatsScreen> {
           _anchorDay = _anchorDay.subtract(const Duration(days: 7));
           break;
         case period.PeriodType.month:
-          _anchorDay = DateTime(_anchorDay.year, _anchorDay.month - 1, 1);
+          _anchorDay = DateTime(_anchorDay.year, _anchorDay.month - 1);
           break;
         case period.PeriodType.quarter:
-          _anchorDay = DateTime(_anchorDay.year, _anchorDay.month - 3, 1);
+          _anchorDay = DateTime(_anchorDay.year, _anchorDay.month - 3);
           break;
         case period.PeriodType.halfYear:
-          _anchorDay = DateTime(_anchorDay.year, _anchorDay.month - 6, 1);
+          _anchorDay = DateTime(_anchorDay.year, _anchorDay.month - 6);
           break;
         case period.PeriodType.year:
-          _anchorDay = DateTime(_anchorDay.year - 1, _anchorDay.month, 1);
+          _anchorDay = DateTime(_anchorDay.year - 1, _anchorDay.month);
           break;
         case period.PeriodType.decade:
-          _anchorDay = DateTime(_anchorDay.year - 10, _anchorDay.month, 1);
+          _anchorDay = DateTime(_anchorDay.year - 10, _anchorDay.month);
           break;
       }
     });
@@ -91,19 +91,19 @@ class _PeriodStatsScreenState extends State<PeriodStatsScreen> {
           next = _anchorDay.add(const Duration(days: 7));
           break;
         case period.PeriodType.month:
-          next = DateTime(_anchorDay.year, _anchorDay.month + 1, 1);
+          next = DateTime(_anchorDay.year, _anchorDay.month + 1);
           break;
         case period.PeriodType.quarter:
-          next = DateTime(_anchorDay.year, _anchorDay.month + 3, 1);
+          next = DateTime(_anchorDay.year, _anchorDay.month + 3);
           break;
         case period.PeriodType.halfYear:
-          next = DateTime(_anchorDay.year, _anchorDay.month + 6, 1);
+          next = DateTime(_anchorDay.year, _anchorDay.month + 6);
           break;
         case period.PeriodType.year:
-          next = DateTime(_anchorDay.year + 1, _anchorDay.month, 1);
+          next = DateTime(_anchorDay.year + 1, _anchorDay.month);
           break;
         case period.PeriodType.decade:
-          next = DateTime(_anchorDay.year + 10, _anchorDay.month, 1);
+          next = DateTime(_anchorDay.year + 10, _anchorDay.month);
           break;
       }
 
@@ -180,11 +180,7 @@ class _PeriodStatsScreenState extends State<PeriodStatsScreen> {
       return colors[(index - 10) % colors.length];
     } else {
       // 21위 이상: 기타색 (Tertiary 계열)
-      final colors = [
-        scheme.tertiary,
-        scheme.outline,
-        scheme.onSurfaceVariant,
-      ];
+      final colors = [scheme.tertiary, scheme.outline, scheme.onSurfaceVariant];
       return colors[(index - 20) % colors.length];
     }
   }
@@ -315,7 +311,6 @@ class _PeriodStatsScreenState extends State<PeriodStatsScreen> {
                   ),
                   Expanded(
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
                           _rangeLabel(context, range),
@@ -353,7 +348,6 @@ class _PeriodStatsScreenState extends State<PeriodStatsScreen> {
                         MaterialPageRoute(
                           builder: (context) => CategoryStatsScreen(
                             accountName: widget.accountName,
-                            isSubCategory: false,
                             initialDate: _anchorDay,
                             periodType: widget.view,
                           ),

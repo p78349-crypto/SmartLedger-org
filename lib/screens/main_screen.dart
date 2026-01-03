@@ -22,7 +22,7 @@ class MainScreen extends StatelessWidget {
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  // ONE UI: 페이지 5 (자산)
+                  // Smart Ledger: 페이지 5 (자산)
                   builder: (_) => AccountMainScreen(
                     accountName: accountName,
                     initialIndex: 5,

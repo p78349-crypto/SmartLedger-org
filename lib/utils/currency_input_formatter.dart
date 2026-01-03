@@ -15,7 +15,7 @@ class CurrencyInputFormatter extends TextInputFormatter {
   ) {
     final rawText = newValue.text;
     if (rawText.isEmpty) {
-      return const TextEditingValue(text: '');
+      return const TextEditingValue();
     }
 
     // Keep digits and optional single leading minus / decimal part.

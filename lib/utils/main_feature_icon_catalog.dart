@@ -9,7 +9,7 @@ import 'package:smart_ledger/utils/icon_catalog.dart';
 ///
 /// Purpose:
 /// - Keep a single source of truth for feature icons/labels.
-/// - Reuse across redesigned UIs (e.g., Samsung One UI main pages 1..6).
+/// - Reuse across redesigned UIs (e.g., Smart Ledger main pages 1..6).
 /// - Avoid coupling to bottom sheets / gesture-heavy widgets.
 ///
 /// Notes:
@@ -145,6 +145,13 @@ class MainFeatureIconCatalog {
     const MainFeaturePage(
       index: 2,
       items: [
+        MainFeatureIcon(
+          id: 'transaction_add_detailed',
+          label: '지출입력(상세)',
+          labelEn: 'Add Detailed',
+          icon: IconCatalog.postAdd,
+          routeName: AppRoutes.transactionAddDetailed,
+        ),
         MainFeatureIcon(
           id: 'income_add',
           label: '수입 입력',

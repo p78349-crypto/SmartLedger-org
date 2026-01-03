@@ -16,7 +16,6 @@ void main() {
       const MaterialApp(
         home: AccountMainScreen(
           accountName: 'test_account_slots_removed',
-          initialIndex: 0,
         ),
       ),
     );

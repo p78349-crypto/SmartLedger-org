@@ -37,12 +37,12 @@ class _MicroSavingsNudgeScreenState extends State<MicroSavingsNudgeScreen> {
 
   DateTime _startOfThisMonth() {
     final now = DateTime.now();
-    return DateTime(now.year, now.month, 1);
+    return DateTime(now.year, now.month);
   }
 
   DateTime _startOfLookback() {
     final now = DateTime.now();
-    return DateTime(now.year, now.month - 5, 1);
+    return DateTime(now.year, now.month - 5);
   }
 
   _SumCount _sumWhere(
@@ -212,7 +212,6 @@ class _MicroSavingsNudgeScreenState extends State<MicroSavingsNudgeScreen> {
       description: title,
       amount: amount,
       date: DateTime.now(),
-      paymentMethod: '현금',
       memo: memo.isEmpty ? memoTag : '$memoTag $memo',
       savingsAllocation: SavingsAllocation.assetIncrease,
     );
@@ -360,7 +359,6 @@ class _MicroSavingsNudgeScreenState extends State<MicroSavingsNudgeScreen> {
       description: '잔돈 모으기',
       amount: diff,
       date: DateTime.now(),
-      paymentMethod: '현금',
       memo: memo,
       savingsAllocation: SavingsAllocation.assetIncrease,
     );

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-/// One UI style input field - lightweight prototype.
-class OneUiInputField extends StatelessWidget {
+/// Smart style input field - lightweight prototype.
+class SmartInputField extends StatelessWidget {
   final String? label;
   final String? hint;
   final TextEditingController? controller;
@@ -21,8 +21,9 @@ class OneUiInputField extends StatelessWidget {
   final bool obscureText;
   final bool autofocus;
   final bool compact;
+  final FloatingLabelBehavior? floatingLabelBehavior;
 
-  const OneUiInputField({
+  const SmartInputField({
     super.key,
     this.label,
     this.hint,
@@ -42,6 +43,7 @@ class OneUiInputField extends StatelessWidget {
     this.obscureText = false,
     this.autofocus = false,
     this.compact = false,
+    this.floatingLabelBehavior,
   });
 
   @override
@@ -76,6 +78,8 @@ class OneUiInputField extends StatelessWidget {
         prefixIcon: prefixIcon,
         suffixIcon: suffixIcon,
         suffixText: suffixText,
+        floatingLabelBehavior:
+            floatingLabelBehavior ?? FloatingLabelBehavior.always,
       ),
     );
   }

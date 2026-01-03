@@ -55,7 +55,6 @@ class DialogUtils {
       title: '삭제 확인',
       message: message,
       confirmText: '삭제',
-      cancelText: '취소',
       isDangerous: true,
     );
   }
@@ -176,7 +175,7 @@ class DialogUtils {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(null),
+            onPressed: () => Navigator.of(context).pop(),
             child: Text(cancelText),
           ),
           TextButton(
@@ -230,7 +229,7 @@ class DialogUtils {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(null),
+            onPressed: () => Navigator.of(context).pop(),
             child: const Text('취소'),
           ),
         ],

@@ -13,20 +13,18 @@ class PointsStatsUtils {
   const PointsStatsUtils._();
 
   static const String catCard = '카드';
-  static const String catMart = '마트';
-  static const String catOnline = '온라인 쇼핑';
+  static const String catSupplier = '마트/쇼핑몰';
   static const String catConvenience = '편의점';
   static const String catOther = '기타';
 
   static const List<String> categories = <String>[
     catCard,
-    catMart,
-    catOnline,
+    catSupplier,
     catConvenience,
     catOther,
   ];
 
-  /// Normalizes a raw benefit key to one of the 5 display categories.
+  /// Normalizes a raw benefit key to one of the display categories.
   static String normalizeCategoryKey(String rawKey) {
     final key = rawKey.trim();
     if (key.isEmpty) return catOther;
@@ -35,9 +33,12 @@ class PointsStatsUtils {
 
     // Korean keywords.
     if (lowered.contains('카드')) return catCard;
-    if (lowered.contains('마트')) return catMart;
+    if (lowered.contains('마트') ||
+        lowered.contains('온라인') ||
+        lowered.contains('쇼핑')) {
+      return catSupplier;
+    }
     if (lowered.contains('편의점')) return catConvenience;
-    if (lowered.contains('온라인') || lowered.contains('쇼핑')) return catOnline;
 
     return catOther;
   }

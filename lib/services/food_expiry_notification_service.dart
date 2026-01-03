@@ -199,7 +199,6 @@ class FoodExpiryNotificationService {
         tz.TZDateTime.from(notifyAt, tz.local),
         _details(),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        matchDateTimeComponents: null,
       );
       scheduled++;
     }

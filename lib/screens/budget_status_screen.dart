@@ -178,7 +178,6 @@ class _BudgetStatusScreenState extends State<BudgetStatusScreen> {
                                 barGroups: barGroups,
                                 alignment: BarChartAlignment.spaceAround,
                                 gridData: FlGridData(
-                                  show: true,
                                   drawVerticalLine: false,
                                   horizontalInterval: interval,
                                   getDrawingHorizontalLine: (value) => FlLine(
@@ -189,10 +188,10 @@ class _BudgetStatusScreenState extends State<BudgetStatusScreen> {
                                 borderData: FlBorderData(show: false),
                                 titlesData: FlTitlesData(
                                   topTitles: const AxisTitles(
-                                    sideTitles: SideTitles(showTitles: false),
+                                    
                                   ),
                                   rightTitles: const AxisTitles(
-                                    sideTitles: SideTitles(showTitles: false),
+                                    
                                   ),
                                   leftTitles: AxisTitles(
                                     sideTitles: SideTitles(
@@ -226,7 +225,6 @@ class _BudgetStatusScreenState extends State<BudgetStatusScreen> {
                                         final label = categories[index];
                                         return SideTitleWidget(
                                           meta: meta,
-                                          space: 8,
                                           child: SizedBox(
                                             width: 80,
                                             child: Text(

@@ -7,7 +7,7 @@ import 'package:smart_ledger/utils/date_formatter.dart';
 import 'package:smart_ledger/utils/icon_catalog.dart';
 import 'package:smart_ledger/utils/number_formats.dart';
 import 'package:smart_ledger/utils/refund_utils.dart';
-import 'package:smart_ledger/widgets/one_ui_input_field.dart';
+import 'package:smart_ledger/widgets/smart_input_field.dart';
 
 class RefundTransactionsScreen extends StatefulWidget {
   const RefundTransactionsScreen({
@@ -124,7 +124,7 @@ class _RefundTransactionsScreenState extends State<RefundTransactionsScreen> {
   Widget _buildSearchBar(ThemeData theme) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-      child: OneUiInputField(
+      child: SmartInputField(
         hint: '반품 검색 (날짜/상품명/메모/가격/구매자·거래처)',
         controller: _searchController,
         prefixIcon: const Icon(Icons.search),
@@ -297,10 +297,6 @@ class _RefundTransactionsScreenState extends State<RefundTransactionsScreen> {
       description: '',
       amount: 0,
       date: _selectedDay,
-      quantity: 1,
-      unitPrice: 0,
-      paymentMethod: '현금',
-      memo: '',
       mainCategory: Transaction.defaultMainCategory,
       isRefund: true,
     );

@@ -389,7 +389,7 @@ Text(
 - APK 크기: 296.1MB
 - 빌드 시간: 59.8초
 - 설치 시간: 41.3초
-- 대상 기기: SM S926N (Samsung Galaxy S23 Ultra)
+- 대상 기기: Android Device (Latest)
 
 ✅ 컴파일 오류: 0개
 ✅ 런타임 오류: 0개
@@ -494,5 +494,5 @@ Text(
 
 **마지막 업데이트**: 2025-12-10  
 **빌드 버전**: app-release.apk (296.1MB)  
-**설치 기기**: SM S926N (Samsung Galaxy S23 Ultra)  
+**설치 기기**: Android Device (Latest)  
 **구현 파일**: `lib/screens/asset_dashboard_screen.dart`

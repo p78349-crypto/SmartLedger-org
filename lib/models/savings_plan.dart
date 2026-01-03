@@ -101,7 +101,7 @@ class SavingsPlan {
   DateTime get maturityDate => dueDateFor(termMonths - 1);
 
   DateTime dueDateFor(int monthIndex) {
-    final base = DateTime(startDate.year, startDate.month + monthIndex, 1);
+    final base = DateTime(startDate.year, startDate.month + monthIndex);
     final day = startDate.day;
     final lastDayOfMonth = DateTime(base.year, base.month + 1, 0).day;
     final safeDay = day < 1

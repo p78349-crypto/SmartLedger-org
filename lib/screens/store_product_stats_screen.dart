@@ -41,7 +41,7 @@ class _StoreProductStatsScreenState extends State<StoreProductStatsScreen> {
 
   DateTime _startOfThisMonth() {
     final now = DateTime.now();
-    return DateTime(now.year, now.month, 1);
+    return DateTime(now.year, now.month);
   }
 
   Future<void> _load() async {

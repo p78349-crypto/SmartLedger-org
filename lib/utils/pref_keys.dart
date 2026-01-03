@@ -63,6 +63,9 @@ class PrefKeys {
   static const String themeIconBgPresetId = 'theme_icon_bg_preset_id_v1';
   // Wallpaper preset id (for mapping wallpapers to theme variants)
   static const String themeWallpaperPresetId = 'theme_wallpaper_preset_id_v1';
+
+  /// UI Style (Standard, Modern, Classic, Bold)
+  static const String themeUiStyle = 'theme_ui_style_v1';
   // Whether the selected wallpaper preset also applies to
   // the screen saver background
   static const String themeWallpaperSyncScreenSaver =
@@ -101,6 +104,9 @@ class PrefKeys {
   /// - 'integrated': ROOT access is allowed when asset auth session is active.
   /// - 'separate': ROOT access requires an additional device auth step.
   static const String rootAuthMode = 'root_auth_mode';
+
+  /// Whether the user has bypassed the mandatory permission gate.
+  static const String permissionGateBypassed = 'permission_gate_bypassed_v1';
 
   /// Whether ROOT access requires authentication.
   ///

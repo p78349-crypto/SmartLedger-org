@@ -108,7 +108,6 @@ class SavingsPlanService {
           description: '${plan.name} ${monthIndex + 1}회차',
           amount: plan.monthlyAmount,
           date: depositDate,
-          quantity: 1,
           unitPrice: plan.monthlyAmount,
           paymentMethod: '자동이체',
           memo: '예금 자동납입(${plan.id})',

@@ -1,34 +1,75 @@
 import 'package:flutter/material.dart';
 import 'package:smart_ledger/theme/app_colors.dart';
 import 'package:smart_ledger/theme/app_text_styles.dart';
+import 'package:smart_ledger/theme/ui_style.dart';
 
 class AppTheme {
-  // One UI-inspired light theme (seed-based palette + simple surfaces)
-  static ThemeData oneUiLightTheme = buildOneUiTheme(
+  // Smart Ledger style light theme (seed-based palette + simple surfaces)
+  static ThemeData smartLightTheme = buildSmartTheme(
     seedColor: Colors.blue,
     brightness: Brightness.light,
+    uiStyle: UIStyle.standard,
   );
 
-  // One UI-inspired dark theme (seed-based palette + simple surfaces)
-  static final ThemeData oneUiDarkTheme = buildOneUiTheme(
+  // Smart Ledger style dark theme (seed-based palette + simple surfaces)
+  static final ThemeData smartDarkTheme = buildSmartTheme(
     seedColor: Colors.blue,
     brightness: Brightness.dark,
+    uiStyle: UIStyle.standard,
   );
 
-  static ThemeData buildOneUiTheme({
+  static ThemeData buildSmartTheme({
     required Color seedColor,
     required Brightness brightness,
+    required UIStyle uiStyle,
+    Color? backgroundColor,
   }) {
     final scheme = ColorScheme.fromSeed(
       seedColor: seedColor,
       brightness: brightness,
     );
 
+    // UI Style based adjustments
+    double borderRadius;
+    double elevation;
+    double borderWidth;
+    bool showBorders;
+
+    switch (uiStyle) {
+      case UIStyle.modern:
+        borderRadius = 28.0;
+        elevation = 0.0;
+        borderWidth = 0.0;
+        showBorders = false;
+        break;
+      case UIStyle.classic:
+        borderRadius = 4.0;
+        elevation = 1.0;
+        borderWidth = 1.0;
+        showBorders = true;
+        break;
+      case UIStyle.bold:
+        borderRadius = 12.0;
+        elevation = 0.0;
+        borderWidth = 2.0;
+        showBorders = true;
+        break;
+      case UIStyle.standard:
+        borderRadius = 16.0;
+        elevation = 2.0;
+        borderWidth = 1.0;
+        showBorders = false;
+        break;
+    }
+
     return ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
-      // scaffoldBackgroundColor는 각 화면에서 동적으로 설정
-      // scaffoldBackgroundColor: scheme.surfaceContainerLowest,
+      scaffoldBackgroundColor:
+          backgroundColor ??
+          (brightness == Brightness.dark
+              ? null
+              : scheme.surfaceContainerLowest),
       textTheme: ThemeData(brightness: brightness).textTheme.apply(
         bodyColor: scheme.onSurface,
         displayColor: scheme.onSurface,
@@ -37,35 +78,53 @@ class AppTheme {
         centerTitle: true,
         backgroundColor: scheme.surface,
         foregroundColor: scheme.onSurface,
-        elevation: 0,
+        elevation: elevation,
       ),
       cardTheme: CardThemeData(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(borderRadius),
+          side: showBorders
+              ? BorderSide(color: scheme.outlineVariant, width: borderWidth)
+              : BorderSide.none,
+        ),
+        elevation: elevation,
         margin: const EdgeInsets.all(12),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: scheme.surfaceContainerHighest,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: scheme.outlineVariant),
+          borderRadius: BorderRadius.circular(borderRadius / 1.5),
+          borderSide: showBorders
+              ? BorderSide(color: scheme.outlineVariant, width: borderWidth)
+              : BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: scheme.outlineVariant),
+          borderRadius: BorderRadius.circular(borderRadius / 1.5),
+          borderSide: showBorders
+              ? BorderSide(color: scheme.outlineVariant, width: borderWidth)
+              : BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: scheme.primary, width: 2),
+          borderRadius: BorderRadius.circular(borderRadius / 1.5),
+          borderSide: BorderSide(
+            color: scheme.primary,
+            width: borderWidth > 0 ? borderWidth : 2,
+          ),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: scheme.error),
+          borderRadius: BorderRadius.circular(borderRadius / 1.5),
+          borderSide: BorderSide(
+            color: scheme.error,
+            width: borderWidth > 0 ? borderWidth : 1,
+          ),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: scheme.error, width: 2),
+          borderRadius: BorderRadius.circular(borderRadius / 1.5),
+          borderSide: BorderSide(
+            color: scheme.error,
+            width: borderWidth > 0 ? borderWidth : 2,
+          ),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
@@ -79,6 +138,12 @@ class AppTheme {
           color: scheme.onSurfaceVariant.withValues(alpha: 0.90),
         ),
       ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(borderRadius),
+        ),
+        elevation: elevation + 2,
+      ),
     );
   }
 
@@ -88,12 +153,9 @@ class AppTheme {
       primary: AppColors.primary,
       primaryContainer: AppColors.primaryLight,
       secondary: AppColors.savings,
-      surface: AppColors.surface,
       error: AppColors.error,
-      onPrimary: Colors.white,
       onSecondary: Colors.white,
       onSurface: AppColors.textPrimary,
-      onError: Colors.white,
     ),
     // scaffoldBackgroundColor는 각 화면에서 동적으로 설정
     // scaffoldBackgroundColor: AppColors.background,
@@ -240,7 +302,6 @@ class AppTheme {
       surfaceContainerHighest: Color(0xFF374151),
       error: AppColors.error,
       onPrimary: Colors.white,
-      onSecondary: Colors.black,
       onSurface: Color(0xFFF9FAFB),
       onError: Colors.white,
     ),

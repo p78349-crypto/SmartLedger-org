@@ -998,6 +998,50 @@ class UserPrefService {
     await prefs.remove(_shoppingGroceryTemplateKey(accountName));
   }
 
+  // --- Recent Stores & Payments (Per Account) ---
+  static Future<List<String>> getRecentStores(String accountName) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getStringList(
+          PrefKeys.accountKey(accountName, 'recent_stores'),
+        ) ??
+        [];
+  }
+
+  static Future<void> saveRecentStore(String accountName, String store) async {
+    final trimmed = store.trim();
+    if (trimmed.isEmpty) return;
+    final prefs = await SharedPreferences.getInstance();
+    final key = PrefKeys.accountKey(accountName, 'recent_stores');
+    final current = prefs.getStringList(key) ?? [];
+    current.remove(trimmed);
+    current.insert(0, trimmed);
+    if (current.length > 10) current.removeRange(10, current.length);
+    await prefs.setStringList(key, current);
+  }
+
+  static Future<List<String>> getRecentPayments(String accountName) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getStringList(
+          PrefKeys.accountKey(accountName, 'recent_payments'),
+        ) ??
+        [];
+  }
+
+  static Future<void> saveRecentPayment(
+    String accountName,
+    String payment,
+  ) async {
+    final trimmed = payment.trim();
+    if (trimmed.isEmpty) return;
+    final prefs = await SharedPreferences.getInstance();
+    final key = PrefKeys.accountKey(accountName, 'recent_payments');
+    final current = prefs.getStringList(key) ?? [];
+    current.remove(trimmed);
+    current.insert(0, trimmed);
+    if (current.length > 10) current.removeRange(10, current.length);
+    await prefs.setStringList(key, current);
+  }
+
   /// Removes all SharedPreferences keys that are scoped to [accountName].
   ///
   /// Account-scoped keys are consistently stored as `${accountName}_<suffix>`

@@ -11,7 +11,7 @@ import 'package:smart_ledger/utils/number_formats.dart';
 import 'package:smart_ledger/utils/profit_loss_calculator.dart';
 import 'package:smart_ledger/utils/snackbar_utils.dart';
 import 'package:smart_ledger/widgets/asset_move_dialog.dart';
-import 'package:smart_ledger/widgets/one_ui_input_field.dart';
+import 'package:smart_ledger/widgets/smart_input_field.dart';
 import 'package:smart_ledger/widgets/state_placeholders.dart';
 
 class AssetListScreen extends StatefulWidget {
@@ -288,7 +288,7 @@ class _AssetListScreenState extends State<AssetListScreen> {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: OneUiInputField(
+            child: SmartInputField(
               hint: '자산명 또는 메모로 검색',
               controller: _searchController,
               prefixIcon: const Icon(Icons.search),

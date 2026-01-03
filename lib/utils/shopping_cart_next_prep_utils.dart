@@ -13,6 +13,8 @@ import 'package:smart_ledger/utils/shopping_cart_next_prep_dialog_utils.dart';
 import 'package:smart_ledger/utils/shopping_prep_utils.dart';
 import 'package:smart_ledger/utils/store_memo_utils.dart';
 
+import 'package:smart_ledger/screens/nutrition_report_screen.dart';
+
 class ShoppingCartNextPrepUtils {
   ShoppingCartNextPrepUtils._();
 
@@ -65,7 +67,42 @@ class ShoppingCartNextPrepUtils {
           categoryHints: getCategoryHints(),
         );
         return;
+      case ShoppingCartNextPrepAction.recipeSearch:
+        await _openRecipeSearch(
+          context: context,
+          accountName: accountName,
+          existingItems: getItems(),
+          saveItems: saveItems,
+        );
+        return;
     }
+  }
+
+  static Future<void> _openRecipeSearch({
+    required BuildContext context,
+    required String accountName,
+    required List<ShoppingCartItem> existingItems,
+    required Future<void> Function(List<ShoppingCartItem> next) saveItems,
+  }) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => NutritionReportScreen(
+          rawText: '',
+          onAddIngredient: (ingredient) async {
+            final now = DateTime.now();
+            final newItem = ShoppingCartItem(
+              id: 'sc_${now.microsecondsSinceEpoch}',
+              name: ingredient,
+              memo: '레시피에서 추가됨',
+              createdAt: now,
+              updatedAt: now,
+            );
+            final current = existingItems;
+            await saveItems([...current, newItem]);
+          },
+        ),
+      ),
+    );
   }
 
   static Future<String?> _askStoreMemo(
@@ -78,7 +115,7 @@ class ShoppingCartNextPrepUtils {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('마트명(메모) 입력'),
+          title: const Text('마트/쇼핑몰명(메모) 입력'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -87,7 +124,7 @@ class ShoppingCartNextPrepUtils {
                 controller: controller,
                 autofocus: true,
                 decoration: const InputDecoration(
-                  hintText: '예: 대형마트, 창고형마트, 회원제마트',
+                  hintText: '예: 대형마트, 온라인 쇼핑몰, 창고형마트',
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -114,7 +151,7 @@ class ShoppingCartNextPrepUtils {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(null),
+              onPressed: () => Navigator.of(dialogContext).pop(),
               child: const Text('취소'),
             ),
             FilledButton(
@@ -541,8 +578,6 @@ class ShoppingCartNextPrepUtils {
                   name: item.name,
                   quantity: item.quantity <= 0 ? 1 : item.quantity,
                   unitPrice: item.unitPrice,
-                  isPlanned: true,
-                  isChecked: false,
                   createdAt: createdAt,
                   updatedAt: createdAt,
                 ),
@@ -580,8 +615,8 @@ class ShoppingCartNextPrepUtils {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   ListTile(
-                    title: const Text('마트별 추천'),
-                    subtitle: Text('메모(마트명): $storeMemo'),
+                    title: const Text('마트/쇼핑몰별 추천'),
+                    subtitle: Text('메모(마트/쇼핑몰명): $storeMemo'),
                     trailing: IconButton(
                       onPressed: () => Navigator.of(sheetContext).pop(),
                       icon: const Icon(IconCatalog.close),
@@ -703,8 +738,6 @@ class ShoppingCartNextPrepUtils {
             name: c.name,
             quantity: c.quantity <= 0 ? 1 : c.quantity,
             unitPrice: c.unitPrice,
-            isPlanned: true,
-            isChecked: false,
             createdAt: now,
             updatedAt: now,
           );
@@ -999,8 +1032,6 @@ class ShoppingCartNextPrepUtils {
             name: c.name,
             quantity: c.quantity <= 0 ? 1 : c.quantity,
             unitPrice: c.unitPrice,
-            isPlanned: true,
-            isChecked: false,
             createdAt: now,
             updatedAt: now,
           );

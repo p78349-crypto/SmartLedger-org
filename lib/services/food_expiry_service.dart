@@ -55,6 +55,10 @@ class FoodExpiryService {
     String memo = '',
     double quantity = 1.0,
     String unit = '개',
+    String category = '기타',
+    String location = '냉장',
+    double price = 0.0,
+    String supplier = '',
   }) async {
     final now = DateTime.now();
     final id = 'fx_${now.microsecondsSinceEpoch}';
@@ -69,6 +73,10 @@ class FoodExpiryService {
           memo: memo.trim(),
           quantity: quantity,
           unit: unit,
+          category: category,
+          location: location,
+          price: price,
+          supplier: supplier,
         ),
       );
     next.sort((a, b) => a.expiryDate.compareTo(b.expiryDate));
@@ -87,6 +95,10 @@ class FoodExpiryService {
     required String memo,
     required double quantity,
     required String unit,
+    String category = '기타',
+    String location = '냉장',
+    double price = 0.0,
+    String supplier = '',
   }) async {
     final prev = items.value;
     final idx = prev.indexWhere((e) => e.id == id);
@@ -103,6 +115,10 @@ class FoodExpiryService {
       memo: memo.trim(),
       quantity: quantity,
       unit: unit,
+      category: category,
+      location: location,
+      price: price,
+      supplier: supplier,
     );
     next.sort((a, b) => a.expiryDate.compareTo(b.expiryDate));
     items.value = next;

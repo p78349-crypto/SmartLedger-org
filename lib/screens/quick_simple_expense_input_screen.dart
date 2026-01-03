@@ -281,7 +281,6 @@ class _QuickSimpleExpenseInputScreenState
       store: parsed.store == '미지정' ? null : parsed.store,
       memo: memo,
       mainCategory: Transaction.defaultMainCategory,
-      subCategory: null,
     );
 
     await TransactionService().addTransaction(widget.accountName, tx);

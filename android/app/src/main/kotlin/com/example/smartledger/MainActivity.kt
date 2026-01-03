@@ -18,6 +18,8 @@ class MainActivity : FlutterActivity() {
         private const val ICON_THEME_AUTO = "auto"
         private const val ICON_THEME_LIGHT = "light"
         private const val ICON_THEME_DARK = "dark"
+        private const val ICON_THEME_LIGHT_INTENSE = "light_intense"
+        private const val ICON_THEME_DARK_INTENSE = "dark_intense"
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -56,15 +58,15 @@ class MainActivity : FlutterActivity() {
     }
 
     private fun setLauncherIconTheme(theme: String) {
-        val mainComponent = ComponentName(this, "$packageName.MainActivity")
         val aliasMap = mapOf(
             ICON_THEME_AUTO to "$packageName.MainActivityAliasAuto",
             ICON_THEME_LIGHT to "$packageName.MainActivityAliasLight",
             ICON_THEME_DARK to "$packageName.MainActivityAliasDark",
+            ICON_THEME_LIGHT_INTENSE to "$packageName.MainActivityAliasLightIntense",
+            ICON_THEME_DARK_INTENSE to "$packageName.MainActivityAliasDarkIntense",
         )
 
-        val shouldUseAlias = theme == ICON_THEME_LIGHT || theme == ICON_THEME_DARK
-        val aliasToEnable = aliasMap[theme]?.takeIf { shouldUseAlias }
+        val aliasToEnable = aliasMap[theme] ?: aliasMap[ICON_THEME_AUTO]
 
         aliasMap.values.forEach { aliasName ->
             val desiredState = if (aliasName == aliasToEnable) {
@@ -76,12 +78,12 @@ class MainActivity : FlutterActivity() {
             setComponentState(ComponentName(this, aliasName), desiredState)
         }
 
-        val mainState = if (shouldUseAlias && !BuildConfig.DEBUG) {
-            PackageManager.COMPONENT_ENABLED_STATE_DISABLED
-        } else {
+        // MainActivity MUST always be ENABLED because it is the targetActivity for all aliases.
+        // If we disable it, the aliases will also stop working, leading to the "App Info" screen.
+        setComponentState(
+            ComponentName(this, "$packageName.MainActivity"),
             PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-        }
-        setComponentState(mainComponent, mainState)
+        )
     }
 
     private fun setComponentState(component: ComponentName, desiredState: Int) {

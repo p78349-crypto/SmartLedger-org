@@ -184,7 +184,6 @@ class _AssetInputScreenState extends State<AssetInputScreen> {
               DateTime.now().microsecondsSinceEpoch.toString(),
           name: _nameController.text.trim(),
           amount: amount,
-          inputType: AssetInputType.simple,
           memo: _memoController.text.trim(),
           date: _assetDate,
           category: _selectedCategory,
@@ -274,7 +273,6 @@ class _AssetInputScreenState extends State<AssetInputScreen> {
                             Text(
                               CurrencyFormatter.format(
                                 initialAsset.amount,
-                                showUnit: true,
                               ),
                               style: theme.textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
@@ -655,7 +653,7 @@ class _AssetInputScreenState extends State<AssetInputScreen> {
   }
 
   String _targetAmountLabel(num amount) {
-    return '목표액: ${CurrencyFormatter.format(amount, showUnit: true)}';
+    return '목표액: ${CurrencyFormatter.format(amount)}';
   }
 }
 

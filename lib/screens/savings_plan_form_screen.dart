@@ -134,7 +134,6 @@ class _SavingsPlanFormScreenState extends State<SavingsPlanFormScreen> {
     final base = DateTime(
       _startDate.year,
       _startDate.month + termMonths - 1,
-      1,
     );
     final day = _startDate.day;
     final lastDayOfMonth = DateTime(base.year, base.month + 1, 0).day;

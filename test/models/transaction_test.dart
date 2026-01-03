@@ -62,7 +62,6 @@ void main() {
         amount: 3000,
         date: DateTime.now(),
         description: '커피',
-        memo: '',
       );
 
       expect(tx.memo, isEmpty);

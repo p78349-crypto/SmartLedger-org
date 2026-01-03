@@ -517,7 +517,6 @@ class _IconManagementScreenState extends State<IconManagementScreen> {
     final slots = await UserPrefService.getPageIconSlots(
       accountName: widget.accountName,
       pageIndex: _pageIndex,
-      slotCount: _slotCount,
       profileKey: widget.prefProfileKey,
     );
     final settings = await UserPrefService.getPageIconSettings(
@@ -937,7 +936,6 @@ class _IconManagementScreenState extends State<IconManagementScreen> {
                 crossAxisCount: 4,
                 mainAxisSpacing: 10,
                 crossAxisSpacing: 10,
-                childAspectRatio: 1,
               ),
               itemCount: 4,
               itemBuilder: (context, index) {
@@ -1185,7 +1183,6 @@ class _IconManagementScreenState extends State<IconManagementScreen> {
                 crossAxisCount: 3,
                 mainAxisSpacing: 10,
                 crossAxisSpacing: 10,
-                childAspectRatio: 1,
               ),
               itemCount: section.$2.length,
               itemBuilder: (context, index) {
@@ -1227,7 +1224,6 @@ class _IconManagementScreenState extends State<IconManagementScreen> {
           crossAxisCount: 3,
           mainAxisSpacing: 10,
           crossAxisSpacing: 10,
-          childAspectRatio: 1,
         ),
         itemCount: icons.length,
         itemBuilder: (context, index) {
@@ -1286,7 +1282,6 @@ class _IconManagementScreenState extends State<IconManagementScreen> {
               crossAxisCount: 3,
               mainAxisSpacing: 10,
               crossAxisSpacing: 10,
-              childAspectRatio: 1,
             ),
             itemCount: section.icons.length,
             itemBuilder: (context, index) {

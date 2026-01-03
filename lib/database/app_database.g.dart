@@ -408,6 +408,59 @@ class $DbTransactionsTable extends DbTransactions
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _detailCategoryMeta = const VerificationMeta(
+    'detailCategory',
+  );
+  @override
+  late final GeneratedColumn<String> detailCategory = GeneratedColumn<String>(
+    'detail_category',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _locationMeta = const VerificationMeta(
+    'location',
+  );
+  @override
+  late final GeneratedColumn<String> location = GeneratedColumn<String>(
+    'location',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _supplierMeta = const VerificationMeta(
+    'supplier',
+  );
+  @override
+  late final GeneratedColumn<String> supplier = GeneratedColumn<String>(
+    'supplier',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _expiryDateMeta = const VerificationMeta(
+    'expiryDate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> expiryDate = GeneratedColumn<DateTime>(
+    'expiry_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _unitMeta = const VerificationMeta('unit');
+  @override
+  late final GeneratedColumn<String> unit = GeneratedColumn<String>(
+    'unit',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _savingsAllocationMeta = const VerificationMeta(
     'savingsAllocation',
   );
@@ -481,6 +534,11 @@ class $DbTransactionsTable extends DbTransactions
     store,
     mainCategory,
     subCategory,
+    detailCategory,
+    location,
+    supplier,
+    expiryDate,
+    unit,
     savingsAllocation,
     isRefund,
     originalTransactionId,
@@ -605,6 +663,39 @@ class $DbTransactionsTable extends DbTransactions
         ),
       );
     }
+    if (data.containsKey('detail_category')) {
+      context.handle(
+        _detailCategoryMeta,
+        detailCategory.isAcceptableOrUnknown(
+          data['detail_category']!,
+          _detailCategoryMeta,
+        ),
+      );
+    }
+    if (data.containsKey('location')) {
+      context.handle(
+        _locationMeta,
+        location.isAcceptableOrUnknown(data['location']!, _locationMeta),
+      );
+    }
+    if (data.containsKey('supplier')) {
+      context.handle(
+        _supplierMeta,
+        supplier.isAcceptableOrUnknown(data['supplier']!, _supplierMeta),
+      );
+    }
+    if (data.containsKey('expiry_date')) {
+      context.handle(
+        _expiryDateMeta,
+        expiryDate.isAcceptableOrUnknown(data['expiry_date']!, _expiryDateMeta),
+      );
+    }
+    if (data.containsKey('unit')) {
+      context.handle(
+        _unitMeta,
+        unit.isAcceptableOrUnknown(data['unit']!, _unitMeta),
+      );
+    }
     if (data.containsKey('savings_allocation')) {
       context.handle(
         _savingsAllocationMeta,
@@ -712,6 +803,26 @@ class $DbTransactionsTable extends DbTransactions
         DriftSqlType.string,
         data['${effectivePrefix}sub_category'],
       ),
+      detailCategory: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}detail_category'],
+      ),
+      location: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}location'],
+      ),
+      supplier: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}supplier'],
+      ),
+      expiryDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}expiry_date'],
+      ),
+      unit: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}unit'],
+      ),
       savingsAllocation: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}savings_allocation'],
@@ -756,6 +867,11 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
   final String? store;
   final String mainCategory;
   final String? subCategory;
+  final String? detailCategory;
+  final String? location;
+  final String? supplier;
+  final DateTime? expiryDate;
+  final String? unit;
 
   /// Savings allocation option for savings transactions.
   ///
@@ -788,6 +904,11 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
     this.store,
     required this.mainCategory,
     this.subCategory,
+    this.detailCategory,
+    this.location,
+    this.supplier,
+    this.expiryDate,
+    this.unit,
     this.savingsAllocation,
     required this.isRefund,
     this.originalTransactionId,
@@ -816,6 +937,21 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
     map['main_category'] = Variable<String>(mainCategory);
     if (!nullToAbsent || subCategory != null) {
       map['sub_category'] = Variable<String>(subCategory);
+    }
+    if (!nullToAbsent || detailCategory != null) {
+      map['detail_category'] = Variable<String>(detailCategory);
+    }
+    if (!nullToAbsent || location != null) {
+      map['location'] = Variable<String>(location);
+    }
+    if (!nullToAbsent || supplier != null) {
+      map['supplier'] = Variable<String>(supplier);
+    }
+    if (!nullToAbsent || expiryDate != null) {
+      map['expiry_date'] = Variable<DateTime>(expiryDate);
+    }
+    if (!nullToAbsent || unit != null) {
+      map['unit'] = Variable<String>(unit);
     }
     if (!nullToAbsent || savingsAllocation != null) {
       map['savings_allocation'] = Variable<String>(savingsAllocation);
@@ -855,6 +991,19 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
       subCategory: subCategory == null && nullToAbsent
           ? const Value.absent()
           : Value(subCategory),
+      detailCategory: detailCategory == null && nullToAbsent
+          ? const Value.absent()
+          : Value(detailCategory),
+      location: location == null && nullToAbsent
+          ? const Value.absent()
+          : Value(location),
+      supplier: supplier == null && nullToAbsent
+          ? const Value.absent()
+          : Value(supplier),
+      expiryDate: expiryDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(expiryDate),
+      unit: unit == null && nullToAbsent ? const Value.absent() : Value(unit),
       savingsAllocation: savingsAllocation == null && nullToAbsent
           ? const Value.absent()
           : Value(savingsAllocation),
@@ -893,6 +1042,11 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
       store: serializer.fromJson<String?>(json['store']),
       mainCategory: serializer.fromJson<String>(json['mainCategory']),
       subCategory: serializer.fromJson<String?>(json['subCategory']),
+      detailCategory: serializer.fromJson<String?>(json['detailCategory']),
+      location: serializer.fromJson<String?>(json['location']),
+      supplier: serializer.fromJson<String?>(json['supplier']),
+      expiryDate: serializer.fromJson<DateTime?>(json['expiryDate']),
+      unit: serializer.fromJson<String?>(json['unit']),
       savingsAllocation: serializer.fromJson<String?>(
         json['savingsAllocation'],
       ),
@@ -922,6 +1076,11 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
       'store': serializer.toJson<String?>(store),
       'mainCategory': serializer.toJson<String>(mainCategory),
       'subCategory': serializer.toJson<String?>(subCategory),
+      'detailCategory': serializer.toJson<String?>(detailCategory),
+      'location': serializer.toJson<String?>(location),
+      'supplier': serializer.toJson<String?>(supplier),
+      'expiryDate': serializer.toJson<DateTime?>(expiryDate),
+      'unit': serializer.toJson<String?>(unit),
       'savingsAllocation': serializer.toJson<String?>(savingsAllocation),
       'isRefund': serializer.toJson<int>(isRefund),
       'originalTransactionId': serializer.toJson<String?>(
@@ -947,6 +1106,11 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
     Value<String?> store = const Value.absent(),
     String? mainCategory,
     Value<String?> subCategory = const Value.absent(),
+    Value<String?> detailCategory = const Value.absent(),
+    Value<String?> location = const Value.absent(),
+    Value<String?> supplier = const Value.absent(),
+    Value<DateTime?> expiryDate = const Value.absent(),
+    Value<String?> unit = const Value.absent(),
     Value<String?> savingsAllocation = const Value.absent(),
     int? isRefund,
     Value<String?> originalTransactionId = const Value.absent(),
@@ -969,6 +1133,13 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
     store: store.present ? store.value : this.store,
     mainCategory: mainCategory ?? this.mainCategory,
     subCategory: subCategory.present ? subCategory.value : this.subCategory,
+    detailCategory: detailCategory.present
+        ? detailCategory.value
+        : this.detailCategory,
+    location: location.present ? location.value : this.location,
+    supplier: supplier.present ? supplier.value : this.supplier,
+    expiryDate: expiryDate.present ? expiryDate.value : this.expiryDate,
+    unit: unit.present ? unit.value : this.unit,
     savingsAllocation: savingsAllocation.present
         ? savingsAllocation.value
         : this.savingsAllocation,
@@ -1005,6 +1176,15 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
       subCategory: data.subCategory.present
           ? data.subCategory.value
           : this.subCategory,
+      detailCategory: data.detailCategory.present
+          ? data.detailCategory.value
+          : this.detailCategory,
+      location: data.location.present ? data.location.value : this.location,
+      supplier: data.supplier.present ? data.supplier.value : this.supplier,
+      expiryDate: data.expiryDate.present
+          ? data.expiryDate.value
+          : this.expiryDate,
+      unit: data.unit.present ? data.unit.value : this.unit,
       savingsAllocation: data.savingsAllocation.present
           ? data.savingsAllocation.value
           : this.savingsAllocation,
@@ -1038,6 +1218,11 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
           ..write('store: $store, ')
           ..write('mainCategory: $mainCategory, ')
           ..write('subCategory: $subCategory, ')
+          ..write('detailCategory: $detailCategory, ')
+          ..write('location: $location, ')
+          ..write('supplier: $supplier, ')
+          ..write('expiryDate: $expiryDate, ')
+          ..write('unit: $unit, ')
           ..write('savingsAllocation: $savingsAllocation, ')
           ..write('isRefund: $isRefund, ')
           ..write('originalTransactionId: $originalTransactionId, ')
@@ -1048,7 +1233,7 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     accountId,
     type,
@@ -1063,12 +1248,17 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
     store,
     mainCategory,
     subCategory,
+    detailCategory,
+    location,
+    supplier,
+    expiryDate,
+    unit,
     savingsAllocation,
     isRefund,
     originalTransactionId,
     weatherJson,
     benefitJson,
-  );
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1087,6 +1277,11 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
           other.store == this.store &&
           other.mainCategory == this.mainCategory &&
           other.subCategory == this.subCategory &&
+          other.detailCategory == this.detailCategory &&
+          other.location == this.location &&
+          other.supplier == this.supplier &&
+          other.expiryDate == this.expiryDate &&
+          other.unit == this.unit &&
           other.savingsAllocation == this.savingsAllocation &&
           other.isRefund == this.isRefund &&
           other.originalTransactionId == this.originalTransactionId &&
@@ -1109,6 +1304,11 @@ class DbTransactionsCompanion extends UpdateCompanion<DbTransaction> {
   final Value<String?> store;
   final Value<String> mainCategory;
   final Value<String?> subCategory;
+  final Value<String?> detailCategory;
+  final Value<String?> location;
+  final Value<String?> supplier;
+  final Value<DateTime?> expiryDate;
+  final Value<String?> unit;
   final Value<String?> savingsAllocation;
   final Value<int> isRefund;
   final Value<String?> originalTransactionId;
@@ -1130,6 +1330,11 @@ class DbTransactionsCompanion extends UpdateCompanion<DbTransaction> {
     this.store = const Value.absent(),
     this.mainCategory = const Value.absent(),
     this.subCategory = const Value.absent(),
+    this.detailCategory = const Value.absent(),
+    this.location = const Value.absent(),
+    this.supplier = const Value.absent(),
+    this.expiryDate = const Value.absent(),
+    this.unit = const Value.absent(),
     this.savingsAllocation = const Value.absent(),
     this.isRefund = const Value.absent(),
     this.originalTransactionId = const Value.absent(),
@@ -1152,6 +1357,11 @@ class DbTransactionsCompanion extends UpdateCompanion<DbTransaction> {
     this.store = const Value.absent(),
     this.mainCategory = const Value.absent(),
     this.subCategory = const Value.absent(),
+    this.detailCategory = const Value.absent(),
+    this.location = const Value.absent(),
+    this.supplier = const Value.absent(),
+    this.expiryDate = const Value.absent(),
+    this.unit = const Value.absent(),
     this.savingsAllocation = const Value.absent(),
     this.isRefund = const Value.absent(),
     this.originalTransactionId = const Value.absent(),
@@ -1178,6 +1388,11 @@ class DbTransactionsCompanion extends UpdateCompanion<DbTransaction> {
     Expression<String>? store,
     Expression<String>? mainCategory,
     Expression<String>? subCategory,
+    Expression<String>? detailCategory,
+    Expression<String>? location,
+    Expression<String>? supplier,
+    Expression<DateTime>? expiryDate,
+    Expression<String>? unit,
     Expression<String>? savingsAllocation,
     Expression<int>? isRefund,
     Expression<String>? originalTransactionId,
@@ -1200,6 +1415,11 @@ class DbTransactionsCompanion extends UpdateCompanion<DbTransaction> {
       if (store != null) 'store': store,
       if (mainCategory != null) 'main_category': mainCategory,
       if (subCategory != null) 'sub_category': subCategory,
+      if (detailCategory != null) 'detail_category': detailCategory,
+      if (location != null) 'location': location,
+      if (supplier != null) 'supplier': supplier,
+      if (expiryDate != null) 'expiry_date': expiryDate,
+      if (unit != null) 'unit': unit,
       if (savingsAllocation != null) 'savings_allocation': savingsAllocation,
       if (isRefund != null) 'is_refund': isRefund,
       if (originalTransactionId != null)
@@ -1225,6 +1445,11 @@ class DbTransactionsCompanion extends UpdateCompanion<DbTransaction> {
     Value<String?>? store,
     Value<String>? mainCategory,
     Value<String?>? subCategory,
+    Value<String?>? detailCategory,
+    Value<String?>? location,
+    Value<String?>? supplier,
+    Value<DateTime?>? expiryDate,
+    Value<String?>? unit,
     Value<String?>? savingsAllocation,
     Value<int>? isRefund,
     Value<String?>? originalTransactionId,
@@ -1247,6 +1472,11 @@ class DbTransactionsCompanion extends UpdateCompanion<DbTransaction> {
       store: store ?? this.store,
       mainCategory: mainCategory ?? this.mainCategory,
       subCategory: subCategory ?? this.subCategory,
+      detailCategory: detailCategory ?? this.detailCategory,
+      location: location ?? this.location,
+      supplier: supplier ?? this.supplier,
+      expiryDate: expiryDate ?? this.expiryDate,
+      unit: unit ?? this.unit,
       savingsAllocation: savingsAllocation ?? this.savingsAllocation,
       isRefund: isRefund ?? this.isRefund,
       originalTransactionId:
@@ -1302,6 +1532,21 @@ class DbTransactionsCompanion extends UpdateCompanion<DbTransaction> {
     if (subCategory.present) {
       map['sub_category'] = Variable<String>(subCategory.value);
     }
+    if (detailCategory.present) {
+      map['detail_category'] = Variable<String>(detailCategory.value);
+    }
+    if (location.present) {
+      map['location'] = Variable<String>(location.value);
+    }
+    if (supplier.present) {
+      map['supplier'] = Variable<String>(supplier.value);
+    }
+    if (expiryDate.present) {
+      map['expiry_date'] = Variable<DateTime>(expiryDate.value);
+    }
+    if (unit.present) {
+      map['unit'] = Variable<String>(unit.value);
+    }
     if (savingsAllocation.present) {
       map['savings_allocation'] = Variable<String>(savingsAllocation.value);
     }
@@ -1342,6 +1587,11 @@ class DbTransactionsCompanion extends UpdateCompanion<DbTransaction> {
           ..write('store: $store, ')
           ..write('mainCategory: $mainCategory, ')
           ..write('subCategory: $subCategory, ')
+          ..write('detailCategory: $detailCategory, ')
+          ..write('location: $location, ')
+          ..write('supplier: $supplier, ')
+          ..write('expiryDate: $expiryDate, ')
+          ..write('unit: $unit, ')
           ..write('savingsAllocation: $savingsAllocation, ')
           ..write('isRefund: $isRefund, ')
           ..write('originalTransactionId: $originalTransactionId, ')
@@ -2794,6 +3044,11 @@ typedef $$DbTransactionsTableCreateCompanionBuilder =
       Value<String?> store,
       Value<String> mainCategory,
       Value<String?> subCategory,
+      Value<String?> detailCategory,
+      Value<String?> location,
+      Value<String?> supplier,
+      Value<DateTime?> expiryDate,
+      Value<String?> unit,
       Value<String?> savingsAllocation,
       Value<int> isRefund,
       Value<String?> originalTransactionId,
@@ -2817,6 +3072,11 @@ typedef $$DbTransactionsTableUpdateCompanionBuilder =
       Value<String?> store,
       Value<String> mainCategory,
       Value<String?> subCategory,
+      Value<String?> detailCategory,
+      Value<String?> location,
+      Value<String?> supplier,
+      Value<DateTime?> expiryDate,
+      Value<String?> unit,
       Value<String?> savingsAllocation,
       Value<int> isRefund,
       Value<String?> originalTransactionId,
@@ -2924,6 +3184,31 @@ class $$DbTransactionsTableFilterComposer
 
   ColumnFilters<String> get subCategory => $composableBuilder(
     column: $table.subCategory,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get detailCategory => $composableBuilder(
+    column: $table.detailCategory,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get location => $composableBuilder(
+    column: $table.location,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get supplier => $composableBuilder(
+    column: $table.supplier,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get expiryDate => $composableBuilder(
+    column: $table.expiryDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get unit => $composableBuilder(
+    column: $table.unit,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3050,6 +3335,31 @@ class $$DbTransactionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get detailCategory => $composableBuilder(
+    column: $table.detailCategory,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get location => $composableBuilder(
+    column: $table.location,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get supplier => $composableBuilder(
+    column: $table.supplier,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get expiryDate => $composableBuilder(
+    column: $table.expiryDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get unit => $composableBuilder(
+    column: $table.unit,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get savingsAllocation => $composableBuilder(
     column: $table.savingsAllocation,
     builder: (column) => ColumnOrderings(column),
@@ -3157,6 +3467,25 @@ class $$DbTransactionsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get detailCategory => $composableBuilder(
+    column: $table.detailCategory,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get location =>
+      $composableBuilder(column: $table.location, builder: (column) => column);
+
+  GeneratedColumn<String> get supplier =>
+      $composableBuilder(column: $table.supplier, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get expiryDate => $composableBuilder(
+    column: $table.expiryDate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get unit =>
+      $composableBuilder(column: $table.unit, builder: (column) => column);
+
   GeneratedColumn<String> get savingsAllocation => $composableBuilder(
     column: $table.savingsAllocation,
     builder: (column) => column,
@@ -3248,6 +3577,11 @@ class $$DbTransactionsTableTableManager
                 Value<String?> store = const Value.absent(),
                 Value<String> mainCategory = const Value.absent(),
                 Value<String?> subCategory = const Value.absent(),
+                Value<String?> detailCategory = const Value.absent(),
+                Value<String?> location = const Value.absent(),
+                Value<String?> supplier = const Value.absent(),
+                Value<DateTime?> expiryDate = const Value.absent(),
+                Value<String?> unit = const Value.absent(),
                 Value<String?> savingsAllocation = const Value.absent(),
                 Value<int> isRefund = const Value.absent(),
                 Value<String?> originalTransactionId = const Value.absent(),
@@ -3269,6 +3603,11 @@ class $$DbTransactionsTableTableManager
                 store: store,
                 mainCategory: mainCategory,
                 subCategory: subCategory,
+                detailCategory: detailCategory,
+                location: location,
+                supplier: supplier,
+                expiryDate: expiryDate,
+                unit: unit,
                 savingsAllocation: savingsAllocation,
                 isRefund: isRefund,
                 originalTransactionId: originalTransactionId,
@@ -3292,6 +3631,11 @@ class $$DbTransactionsTableTableManager
                 Value<String?> store = const Value.absent(),
                 Value<String> mainCategory = const Value.absent(),
                 Value<String?> subCategory = const Value.absent(),
+                Value<String?> detailCategory = const Value.absent(),
+                Value<String?> location = const Value.absent(),
+                Value<String?> supplier = const Value.absent(),
+                Value<DateTime?> expiryDate = const Value.absent(),
+                Value<String?> unit = const Value.absent(),
                 Value<String?> savingsAllocation = const Value.absent(),
                 Value<int> isRefund = const Value.absent(),
                 Value<String?> originalTransactionId = const Value.absent(),
@@ -3313,6 +3657,11 @@ class $$DbTransactionsTableTableManager
                 store: store,
                 mainCategory: mainCategory,
                 subCategory: subCategory,
+                detailCategory: detailCategory,
+                location: location,
+                supplier: supplier,
+                expiryDate: expiryDate,
+                unit: unit,
                 savingsAllocation: savingsAllocation,
                 isRefund: isRefund,
                 originalTransactionId: originalTransactionId,

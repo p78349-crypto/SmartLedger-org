@@ -1,0 +1,646 @@
+Analyzing SmartLedger...                                        
+
+   info - The value of the argument is redundant because it matches the default value - lib\main.dart:88:28 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\main.dart:98:23 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\main.dart:142:72 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\main.dart:199:19 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\models\savings_plan.dart:104:73 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\navigation\app_router.dart:352:69 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\navigation\app_router.dart:361:20 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_home_screen.dart:182:41 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_home_screen.dart:193:49 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_home_screen.dart:193:72 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_home_screen.dart:196:49 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_home_screen.dart:196:72 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_home_screen.dart:230:50 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_home_screen.dart:334:28 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_main_screen.dart:320:22 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_main_screen.dart:389:22 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_main_screen.dart:820:18 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_main_screen.dart:1261:16 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:204:25 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:204:48 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:207:25 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:207:48 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:266:25 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:266:48 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:269:25 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:269:48 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:308:22 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:308:44 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:498:26 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:499:18 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:573:71 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:755:30 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:1058:38 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:1059:18 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:1093:38 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:1094:18 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:1215:69 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:1306:7 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:1325:48 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:1472:77 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:1475:45 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:1725:15 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:1866:47 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:1876:38 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:1906:30 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:1913:41 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:2021:44 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:2038:59 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:2056:57 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:2242:76 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:2351:21 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:2676:60 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:3338:18 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:3443:57 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:3446:57 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:3585:57 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:4179:73 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:4183:77 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:4187:77 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:4191:49 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:4196:46 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:4201:53 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_stats_screen.dart:4327:43 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\asset_dashboard_screen.dart:441:75 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\asset_dashboard_screen.dart:444:17 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\asset_dashboard_screen.dart:448:17 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\asset_dashboard_screen.dart:450:73 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\asset_dashboard_screen.dart:453:17 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\asset_dashboard_screen.dart:457:17 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\asset_dashboard_screen.dart:461:17 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\asset_dashboard_screen.dart:651:14 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\asset_detail_screen.dart:73:17 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\asset_detail_screen.dart:537:54 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\asset_input_screen.dart:187:22 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\asset_input_screen.dart:277:43 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\asset_input_screen.dart:658:63 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\background_settings_screen.dart:219:20 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\background_settings_screen.dart:306:26 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\budget_status_screen.dart:181:41 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\budget_status_screen.dart:192:49 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\budget_status_screen.dart:192:72 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\budget_status_screen.dart:195:49 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\budget_status_screen.dart:195:72 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\budget_status_screen.dart:229:50 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\calendar_screen.dart:112:41 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\calendar_screen.dart:184:24 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\calendar_screen.dart:257:28 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\chart_detail_screen.dart:437:25 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\chart_detail_screen.dart:437:48 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\chart_detail_screen.dart:440:25 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\chart_detail_screen.dart:440:48 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\chart_detail_screen.dart:444:17 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\chart_detail_screen.dart:474:21 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\chart_detail_screen.dart:528:25 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\chart_detail_screen.dart:528:48 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\chart_detail_screen.dart:531:25 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\chart_detail_screen.dart:531:48 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\chart_detail_screen.dart:535:17 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\emergency_fund_list_screen.dart:218:52 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\emergency_fund_list_screen.dart:723:54 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\emergency_fund_screen.dart:360:52 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\emergency_fund_screen.dart:448:54 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\feature_icons_catalog_screen.dart:136:33 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\file_viewer_screen.dart:35:19 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\fixed_cost_tab_screen.dart:331:17 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\fixed_cost_tab_screen.dart:439:34 - avoid_redundant_argument_values
+   info - Don't put any logic in 'createState' - lib\screens\food_expiry_main_screen.dart:21:48 - no_logic_in_create_state
+  error - The method '_FoodExpiryMainScreenState' isn't defined for the type 'FoodExpiryMainScreen' - lib\screens\food_expiry_main_screen.dart:21:48 - undefined_method
+  error - The name '_RecipeUpsertDialog' isn't a class - lib\screens\food_expiry_main_screen.dart:90:39 - creation_with_non_type
+   info - The value of the argument is redundant because it matches the default value - lib\screens\food_expiry_main_screen.dart:117:70 - avoid_redundant_argument_values
+  error - Undefined name 'theme' - lib\screens\food_expiry_main_screen.dart:192:50 - undefined_identifier
+  error - The method '_RecipeUpsertDialog' isn't defined for the type '_RecipePickerDialogState' - lib\screens\food_expiry_main_screen.dart:209:37 - undefined_method
+  error - The body might complete normally, causing 'null' to be returned, but the return type, 'int', is a potentially non-nullable type - lib\screens\food_expiry_main_screen.dart:266:7 - body_might_complete_normally
+  error - The declaration '_countInStock' isn't referenced - lib\screens\food_expiry_main_screen.dart:266:7 - unused_element
+  error - Classes can't be declared inside other classes - lib\screens\food_expiry_main_screen.dart:269:1 - class_in_class
+  error - Expected a class member - lib\screens\food_expiry_main_screen.dart:269:27 - expected_class_member
+   info - Missing type annotation - lib\screens\food_expiry_main_screen.dart:269:35 - strict_top_level_inference
+   info - The method 'StatefulWidget' should have a return type but doesn't - lib\screens\food_expiry_main_screen.dart:269:35 - always_declare_return_types
+   info - The variable name 'StatefulWidget' isn't a lowerCamelCase identifier - lib\screens\food_expiry_main_screen.dart:269:35 - non_constant_identifier_names
+  error - Methods must have an explicit list of parameters - lib\screens\food_expiry_main_screen.dart:269:35 - missing_method_parameters
+  error - The value of the local variable 'existing' isn't used - lib\screens\food_expiry_main_screen.dart:270:17 - unused_local_variable
+  error - The name '_RecipeUpsertDialog' isn't a class - lib\screens\food_expiry_main_screen.dart:271:9 - creation_with_non_type
+  error - The getter 'existing' isn't defined for the type '_RecipePickerDialogState' - lib\screens\food_expiry_main_screen.dart:271:35 - undefined_getter
+  error - State isn't a type - lib\screens\food_expiry_main_screen.dart:274:3 - not_a_type
+  error - The name '_RecipeUpsertDialog' isn't a type, so it can't be used as a type argument - lib\screens\food_expiry_main_screen.dart:274:9 - non_type_as_type_argument
+  error - The declaration 'createState' isn't referenced - lib\screens\food_expiry_main_screen.dart:274:30 - unused_element
+  error - The method '_RecipeUpsertDialogState' isn't defined for the type '_RecipePickerDialogState' - lib\screens\food_expiry_main_screen.dart:274:47 - undefined_method
+  error - Classes can't be declared inside other classes - lib\screens\food_expiry_main_screen.dart:277:1 - class_in_class
+  error - Expected a class member - lib\screens\food_expiry_main_screen.dart:277:32 - expected_class_member
+   info - Missing type annotation - lib\screens\food_expiry_main_screen.dart:277:40 - strict_top_level_inference
+   info - The method 'State' should have a return type but doesn't - lib\screens\food_expiry_main_screen.dart:277:40 - always_declare_return_types
+   info - The variable name 'State' isn't a lowerCamelCase identifier - lib\screens\food_expiry_main_screen.dart:277:40 - non_constant_identifier_names
+  error - Methods must have an explicit list of parameters - lib\screens\food_expiry_main_screen.dart:277:40 - missing_method_parameters
+   info - The local variable '_nameController' starts with an underscore - lib\screens\food_expiry_main_screen.dart:278:30 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_ingredients' starts with an underscore - lib\screens\food_expiry_main_screen.dart:279:32 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_cuisine' starts with an underscore - lib\screens\food_expiry_main_screen.dart:280:10 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_cuisines' starts with an underscore - lib\screens\food_expiry_main_screen.dart:281:22 - no_leading_underscores_for_local_identifiers
+  error - The declaration 'initState' isn't referenced - lib\screens\food_expiry_main_screen.dart:290:8 - unused_element
+  error - The getter 'existing' isn't defined for the type '_RecipePickerDialog' - lib\screens\food_expiry_main_screen.dart:292:58 - undefined_getter
+  error - The getter 'existing' isn't defined for the type '_RecipePickerDialog' - lib\screens\food_expiry_main_screen.dart:293:23 - undefined_getter
+  error - The getter 'existing' isn't defined for the type '_RecipePickerDialog' - lib\screens\food_expiry_main_screen.dart:294:16 - undefined_getter
+  error - The getter 'existing' isn't defined for the type '_RecipePickerDialog' - lib\screens\food_expiry_main_screen.dart:295:34 - undefined_getter
+  error - The declaration 'dispose' isn't referenced - lib\screens\food_expiry_main_screen.dart:300:8 - unused_element
+   info - The local variable '_addIngredient' starts with an underscore - lib\screens\food_expiry_main_screen.dart:305:8 - no_leading_underscores_for_local_identifiers
+  error - The method '_IngredientUpsertDialog' isn't defined for the type '_RecipePickerDialogState' - lib\screens\food_expiry_main_screen.dart:308:25 - undefined_method
+   info - The local variable '_importFromHistory' starts with an underscore - lib\screens\food_expiry_main_screen.dart:318:16 - no_leading_underscores_for_local_identifiers
+  error - The method '_RecipeHistoryPicker' isn't defined for the type '_RecipePickerDialogState' - lib\screens\food_expiry_main_screen.dart:330:25 - undefined_method
+   info - The local variable '_save' starts with an underscore - lib\screens\food_expiry_main_screen.dart:348:16 - no_leading_underscores_for_local_identifiers
+  error - The getter 'existing' isn't defined for the type '_RecipePickerDialog' - lib\screens\food_expiry_main_screen.dart:353:18 - undefined_getter
+  error - The getter 'existing' isn't defined for the type '_RecipePickerDialog' - lib\screens\food_expiry_main_screen.dart:359:16 - undefined_getter
+  error - The declaration 'build' isn't referenced - lib\screens\food_expiry_main_screen.dart:369:10 - unused_element
+  error - The getter 'existing' isn't defined for the type '_RecipePickerDialog' - lib\screens\food_expiry_main_screen.dart:378:22 - undefined_getter
+  error - The getter 'existing' isn't defined for the type '_RecipePickerDialog' - lib\screens\food_expiry_main_screen.dart:453:28 - undefined_getter
+  error - The getter 'existing' isn't defined for the type '_RecipePickerDialog' - lib\screens\food_expiry_main_screen.dart:460:52 - undefined_getter
+  error - The getter 'existing' isn't defined for the type '_RecipePickerDialog' - lib\screens\food_expiry_main_screen.dart:479:34 - undefined_getter
+  error - Classes can't be declared inside other classes - lib\screens\food_expiry_main_screen.dart:504:1 - class_in_class
+  error - Expected a class member - lib\screens\food_expiry_main_screen.dart:504:31 - expected_class_member
+   info - Missing type annotation - lib\screens\food_expiry_main_screen.dart:504:39 - strict_top_level_inference
+   info - The method 'StatefulWidget' should have a return type but doesn't - lib\screens\food_expiry_main_screen.dart:504:39 - always_declare_return_types
+   info - The variable name 'StatefulWidget' isn't a lowerCamelCase identifier - lib\screens\food_expiry_main_screen.dart:504:39 - non_constant_identifier_names
+  error - Methods must have an explicit list of parameters - lib\screens\food_expiry_main_screen.dart:504:39 - missing_method_parameters
+  error - The name 'StatefulWidget' is already defined - lib\screens\food_expiry_main_screen.dart:504:39 - duplicate_definition
+  error - The value of the local variable 'onAdd' isn't used - lib\screens\food_expiry_main_screen.dart:505:36 - unused_local_variable
+  error - The name '_IngredientUpsertDialog' isn't a class - lib\screens\food_expiry_main_screen.dart:506:9 - creation_with_non_type
+  error - 'required' is deprecated and shouldn't be used. In Dart 2.12 and later, use the built-in `required` keyword to mark a named parameter as required - lib\screens\food_expiry_main_screen.dart:506:34 - deprecated_member_use
+  error - Expected to find ',' - lib\screens\food_expiry_main_screen.dart:506:43 - expected_token
+  error - The getter 'onAdd' isn't defined for the type '_RecipePickerDialogState' - lib\screens\food_expiry_main_screen.dart:506:48 - undefined_getter
+  error - State isn't a type - lib\screens\food_expiry_main_screen.dart:509:3 - not_a_type
+  error - The name '_IngredientUpsertDialog' isn't a type, so it can't be used as a type argument - lib\screens\food_expiry_main_screen.dart:509:9 - non_type_as_type_argument
+  error - The declaration 'createState' isn't referenced - lib\screens\food_expiry_main_screen.dart:509:34 - unused_element
+  error - The method '_IngredientUpsertDialogState' isn't defined for the type '_RecipePickerDialogState' - lib\screens\food_expiry_main_screen.dart:510:7 - undefined_method
+  error - Classes can't be declared inside other classes - lib\screens\food_expiry_main_screen.dart:513:1 - class_in_class
+  error - Expected a class member - lib\screens\food_expiry_main_screen.dart:513:36 - expected_class_member
+   info - Missing type annotation - lib\screens\food_expiry_main_screen.dart:513:44 - strict_top_level_inference
+   info - The method 'State' should have a return type but doesn't - lib\screens\food_expiry_main_screen.dart:513:44 - always_declare_return_types
+   info - The variable name 'State' isn't a lowerCamelCase identifier - lib\screens\food_expiry_main_screen.dart:513:44 - non_constant_identifier_names
+  error - Methods must have an explicit list of parameters - lib\screens\food_expiry_main_screen.dart:513:44 - missing_method_parameters
+  error - The name 'State' is already defined - lib\screens\food_expiry_main_screen.dart:513:44 - duplicate_definition
+   info - The local variable '_nameController' starts with an underscore - lib\screens\food_expiry_main_screen.dart:514:9 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_qtyController' starts with an underscore - lib\screens\food_expiry_main_screen.dart:515:9 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_unitController' starts with an underscore - lib\screens\food_expiry_main_screen.dart:516:9 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_suggestions' starts with an underscore - lib\screens\food_expiry_main_screen.dart:517:16 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_allPossibleNames' starts with an underscore - lib\screens\food_expiry_main_screen.dart:518:16 - no_leading_underscores_for_local_identifiers
+  error - The declaration 'initState' isn't referenced - lib\screens\food_expiry_main_screen.dart:521:8 - unused_element
+  error - Local variable '_loadSuggestions' can't be referenced before it is declared - lib\screens\food_expiry_main_screen.dart:523:5 - referenced_before_declaration
+   info - The local variable '_loadSuggestions' starts with an underscore - lib\screens\food_expiry_main_screen.dart:526:16 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_updateSuggestions' starts with an underscore - lib\screens\food_expiry_main_screen.dart:539:8 - no_leading_underscores_for_local_identifiers
+  error - The declaration 'build' isn't referenced - lib\screens\food_expiry_main_screen.dart:554:10 - unused_element
+  error - The method 'onAdd' isn't defined for the type '_RecipePickerDialog' - lib\screens\food_expiry_main_screen.dart:623:22 - undefined_method
+  error - Classes can't be declared inside other classes - lib\screens\food_expiry_main_screen.dart:636:1 - class_in_class
+  error - Expected a class member - lib\screens\food_expiry_main_screen.dart:636:28 - expected_class_member
+   info - Missing type annotation - lib\screens\food_expiry_main_screen.dart:636:36 - strict_top_level_inference
+   info - The method 'StatefulWidget' should have a return type but doesn't - lib\screens\food_expiry_main_screen.dart:636:36 - always_declare_return_types
+   info - The variable name 'StatefulWidget' isn't a lowerCamelCase identifier - lib\screens\food_expiry_main_screen.dart:636:36 - non_constant_identifier_names
+  error - Methods must have an explicit list of parameters - lib\screens\food_expiry_main_screen.dart:636:36 - missing_method_parameters
+  error - The name 'StatefulWidget' is already defined - lib\screens\food_expiry_main_screen.dart:636:36 - duplicate_definition
+  error - The value of the local variable 'history' isn't used - lib\screens\food_expiry_main_screen.dart:637:40 - unused_local_variable
+  error - The name '_RecipeHistoryPicker' isn't a class - lib\screens\food_expiry_main_screen.dart:638:9 - creation_with_non_type
+  error - 'required' is deprecated and shouldn't be used. In Dart 2.12 and later, use the built-in `required` keyword to mark a named parameter as required - lib\screens\food_expiry_main_screen.dart:638:31 - deprecated_member_use
+  error - Expected to find ',' - lib\screens\food_expiry_main_screen.dart:638:40 - expected_token
+  error - The getter 'history' isn't defined for the type '_RecipePickerDialogState' - lib\screens\food_expiry_main_screen.dart:638:45 - undefined_getter
+  error - State isn't a type - lib\screens\food_expiry_main_screen.dart:641:3 - not_a_type
+  error - The name '_RecipeHistoryPicker' isn't a type, so it can't be used as a type argument - lib\screens\food_expiry_main_screen.dart:641:9 - non_type_as_type_argument
+  error - The declaration 'createState' isn't referenced - lib\screens\food_expiry_main_screen.dart:641:31 - unused_element
+  error - The method '_RecipeHistoryPickerState' isn't defined for the type '_RecipePickerDialogState' - lib\screens\food_expiry_main_screen.dart:641:48 - undefined_method
+  error - Classes can't be declared inside other classes - lib\screens\food_expiry_main_screen.dart:644:1 - class_in_class
+  error - Expected a class member - lib\screens\food_expiry_main_screen.dart:644:33 - expected_class_member
+   info - Missing type annotation - lib\screens\food_expiry_main_screen.dart:644:41 - strict_top_level_inference
+   info - The method 'State' should have a return type but doesn't - lib\screens\food_expiry_main_screen.dart:644:41 - always_declare_return_types
+   info - The variable name 'State' isn't a lowerCamelCase identifier - lib\screens\food_expiry_main_screen.dart:644:41 - non_constant_identifier_names
+  error - Methods must have an explicit list of parameters - lib\screens\food_expiry_main_screen.dart:644:41 - missing_method_parameters
+  error - The name 'State' is already defined - lib\screens\food_expiry_main_screen.dart:644:41 - duplicate_definition
+   info - The local variable '_selected' starts with an underscore - lib\screens\food_expiry_main_screen.dart:645:39 - no_leading_underscores_for_local_identifiers
+  error - The declaration 'build' isn't referenced - lib\screens\food_expiry_main_screen.dart:648:10 - unused_element
+  error - The getter 'history' isn't defined for the type '_RecipePickerDialog' - lib\screens\food_expiry_main_screen.dart:669:35 - undefined_getter
+  error - The getter 'history' isn't defined for the type '_RecipePickerDialog' - lib\screens\food_expiry_main_screen.dart:671:39 - undefined_getter
+  error - Classes can't be declared inside other classes - lib\screens\food_expiry_main_screen.dart:698:1 - class_in_class
+  error - Expected a class member - lib\screens\food_expiry_main_screen.dart:698:34 - expected_class_member
+   info - Missing type annotation - lib\screens\food_expiry_main_screen.dart:698:42 - strict_top_level_inference
+   info - The method 'State' should have a return type but doesn't - lib\screens\food_expiry_main_screen.dart:698:42 - always_declare_return_types
+   info - The variable name 'State' isn't a lowerCamelCase identifier - lib\screens\food_expiry_main_screen.dart:698:42 - non_constant_identifier_names
+  error - Methods must have an explicit list of parameters - lib\screens\food_expiry_main_screen.dart:698:42 - missing_method_parameters
+  error - The name 'State' is already defined - lib\screens\food_expiry_main_screen.dart:698:42 - duplicate_definition
+   info - The type parameter name 'FoodExpiryMainScreen' matches a visible type name - lib\screens\food_expiry_main_screen.dart:698:48 - avoid_types_as_parameter_names
+   info - The local variable '_currentIndex' starts with an underscore - lib\screens\food_expiry_main_screen.dart:699:7 - no_leading_underscores_for_local_identifiers
+  error - The declaration 'initState' isn't referenced - lib\screens\food_expiry_main_screen.dart:702:8 - unused_element
+   info - The local variable '_screens' starts with an underscore - lib\screens\food_expiry_main_screen.dart:708:27 - no_leading_underscores_for_local_identifiers
+  error - The method '_FoodExpiryItemsScreen' isn't defined for the type '_RecipePickerDialogState' - lib\screens\food_expiry_main_screen.dart:709:5 - undefined_method
+  error - Local variable '_openUpsertDialog' can't be referenced before it is declared - lib\screens\food_expiry_main_screen.dart:709:38 - referenced_before_declaration
+  error - The name '_FoodExpiryNotificationsScreen' isn't a class - lib\screens\food_expiry_main_screen.dart:710:11 - creation_with_non_type
+  error - The name '_FoodExpiryPlaceholderScreen' isn't a class - lib\screens\food_expiry_main_screen.dart:711:11 - creation_with_non_type
+  error - The name '_FoodExpiryPlaceholderScreen' isn't a class - lib\screens\food_expiry_main_screen.dart:712:11 - creation_with_non_type
+   info - Use 'const' for final variables initialized to a constant value - lib\screens\food_expiry_main_screen.dart:715:3 - prefer_const_declarations
+   info - The local variable '_navItems' starts with an underscore - lib\screens\food_expiry_main_screen.dart:715:39 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_openUpsertDialog' starts with an underscore - lib\screens\food_expiry_main_screen.dart:726:16 - no_leading_underscores_for_local_identifiers
+  error - The method '_FoodExpiryUpsertDialog' isn't defined for the type '_RecipePickerDialogState' - lib\screens\food_expiry_main_screen.dart:732:25 - undefined_method
+  error - The declaration 'build' isn't referenced - lib\screens\food_expiry_main_screen.dart:737:10 - unused_element
+  error - Classes can't be declared inside other classes - lib\screens\food_expiry_main_screen.dart:761:1 - class_in_class
+  error - Expected a class member - lib\screens\food_expiry_main_screen.dart:761:31 - expected_class_member
+   info - Missing type annotation - lib\screens\food_expiry_main_screen.dart:761:39 - strict_top_level_inference
+   info - The method 'StatefulWidget' should have a return type but doesn't - lib\screens\food_expiry_main_screen.dart:761:39 - always_declare_return_types
+   info - The variable name 'StatefulWidget' isn't a lowerCamelCase identifier - lib\screens\food_expiry_main_screen.dart:761:39 - non_constant_identifier_names
+  error - Methods must have an explicit list of parameters - lib\screens\food_expiry_main_screen.dart:761:39 - missing_method_parameters
+  error - The name 'StatefulWidget' is already defined - lib\screens\food_expiry_main_screen.dart:761:39 - duplicate_definition
+  error - The value of the local variable 'existing' isn't used - lib\screens\food_expiry_main_screen.dart:762:25 - unused_local_variable
+  error - The name '_FoodExpiryUpsertDialog' isn't a class - lib\screens\food_expiry_main_screen.dart:763:9 - creation_with_non_type
+  error - The getter 'existing' isn't defined for the type '_RecipePickerDialogState' - lib\screens\food_expiry_main_screen.dart:763:39 - undefined_getter
+  error - State isn't a type - lib\screens\food_expiry_main_screen.dart:766:3 - not_a_type
+  error - The name '_FoodExpiryUpsertDialog' isn't a type, so it can't be used as a type argument - lib\screens\food_expiry_main_screen.dart:766:9 - non_type_as_type_argument
+  error - The declaration 'createState' isn't referenced - lib\screens\food_expiry_main_screen.dart:766:34 - unused_element
+  error - The method '_FoodExpiryUpsertDialogState' isn't defined for the type '_RecipePickerDialogState' - lib\screens\food_expiry_main_screen.dart:767:7 - undefined_method
+  error - Classes can't be declared inside other classes - lib\screens\food_expiry_main_screen.dart:770:1 - class_in_class
+  error - Expected a class member - lib\screens\food_expiry_main_screen.dart:770:36 - expected_class_member
+   info - Missing type annotation - lib\screens\food_expiry_main_screen.dart:770:44 - strict_top_level_inference
+   info - The method 'State' should have a return type but doesn't - lib\screens\food_expiry_main_screen.dart:770:44 - always_declare_return_types
+   info - The variable name 'State' isn't a lowerCamelCase identifier - lib\screens\food_expiry_main_screen.dart:770:44 - non_constant_identifier_names
+  error - Methods must have an explicit list of parameters - lib\screens\food_expiry_main_screen.dart:770:44 - missing_method_parameters
+  error - The name 'State' is already defined - lib\screens\food_expiry_main_screen.dart:770:44 - duplicate_definition
+   info - The local variable '_nameController' starts with an underscore - lib\screens\food_expiry_main_screen.dart:771:30 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_memoController' starts with an underscore - lib\screens\food_expiry_main_screen.dart:772:30 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_quantityController' starts with an underscore - lib\screens\food_expiry_main_screen.dart:773:30 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_unitController' starts with an underscore - lib\screens\food_expiry_main_screen.dart:774:30 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_priceController' starts with an underscore - lib\screens\food_expiry_main_screen.dart:775:30 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_supplierController' starts with an underscore - lib\screens\food_expiry_main_screen.dart:776:30 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_purchaseDate' starts with an underscore - lib\screens\food_expiry_main_screen.dart:777:17 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_pickedExpiryDate' starts with an underscore - lib\screens\food_expiry_main_screen.dart:778:13 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_category' starts with an underscore - lib\screens\food_expiry_main_screen.dart:780:10 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_location' starts with an underscore - lib\screens\food_expiry_main_screen.dart:781:10 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_addToShoppingList' starts with an underscore - lib\screens\food_expiry_main_screen.dart:782:8 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_categories' starts with an underscore - lib\screens\food_expiry_main_screen.dart:784:22 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_locations' starts with an underscore - lib\screens\food_expiry_main_screen.dart:797:22 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_addQtyController' starts with an underscore - lib\screens\food_expiry_main_screen.dart:805:31 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_subQtyController' starts with an underscore - lib\screens\food_expiry_main_screen.dart:806:31 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_nameFocus' starts with an underscore - lib\screens\food_expiry_main_screen.dart:808:19 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_memoFocus' starts with an underscore - lib\screens\food_expiry_main_screen.dart:809:19 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_importQueue' starts with an underscore - lib\screens\food_expiry_main_screen.dart:812:34 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_importTotal' starts with an underscore - lib\screens\food_expiry_main_screen.dart:813:7 - no_leading_underscores_for_local_identifiers
+  error - The declaration 'initState' isn't referenced - lib\screens\food_expiry_main_screen.dart:816:8 - unused_element
+  error - The getter 'existing' isn't defined for the type '_RecipePickerDialog' - lib\screens\food_expiry_main_screen.dart:818:58 - undefined_getter
+  error - The getter 'existing' isn't defined for the type '_RecipePickerDialog' - lib\screens\food_expiry_main_screen.dart:819:58 - undefined_getter
+  error - The getter 'existing' isn't defined for the type '_RecipePickerDialog' - lib\screens\food_expiry_main_screen.dart:821:20 - undefined_getter
+  error - The getter 'existing' isn't defined for the type '_RecipePickerDialog' - lib\screens\food_expiry_main_screen.dart:823:58 - undefined_getter
+  error - The getter 'existing' isn't defined for the type '_RecipePickerDialog' - lib\screens\food_expiry_main_screen.dart:825:20 - undefined_getter
+  error - The getter 'existing' isn't defined for the type '_RecipePickerDialog' - lib\screens\food_expiry_main_screen.dart:828:20 - undefined_getter
+  error - The getter 'existing' isn't defined for the type '_RecipePickerDialog' - lib\screens\food_expiry_main_screen.dart:830:28 - undefined_getter
+  error - The getter 'existing' isn't defined for the type '_RecipePickerDialog' - lib\screens\food_expiry_main_screen.dart:831:32 - undefined_getter
+  error - The getter 'existing' isn't defined for the type '_RecipePickerDialog' - lib\screens\food_expiry_main_screen.dart:832:24 - undefined_getter
+  error - The getter 'existing' isn't defined for the type '_RecipePickerDialog' - lib\screens\food_expiry_main_screen.dart:833:24 - undefined_getter
+  error - The getter 'existing' isn't defined for the type '_RecipePickerDialog' - lib\screens\food_expiry_main_screen.dart:835:16 - undefined_getter
+  error - Local variable '_updateTotal' can't be referenced before it is declared - lib\screens\food_expiry_main_screen.dart:836:37 - referenced_before_declaration
+  error - Local variable '_updateTotal' can't be referenced before it is declared - lib\screens\food_expiry_main_screen.dart:837:37 - referenced_before_declaration
+  error - The declaration 'dispose' isn't referenced - lib\screens\food_expiry_main_screen.dart:842:8 - unused_element
+   info - The local variable '_historySubtitle' starts with an underscore - lib\screens\food_expiry_main_screen.dart:856:10 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_expiryButtonLabel' starts with an underscore - lib\screens\food_expiry_main_screen.dart:861:10 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_updateTotal' starts with an underscore - lib\screens\food_expiry_main_screen.dart:872:8 - no_leading_underscores_for_local_identifiers
+  error - The getter 'existing' isn't defined for the type '_RecipePickerDialog' - lib\screens\food_expiry_main_screen.dart:873:16 - undefined_getter
+  error - The getter 'existing' isn't defined for the type '_RecipePickerDialog' - lib\screens\food_expiry_main_screen.dart:874:35 - undefined_getter
+   info - The local variable '_showHistoryPicker' starts with an underscore - lib\screens\food_expiry_main_screen.dart:891:16 - no_leading_underscores_for_local_identifiers
+  error - Local variable '_startImport' can't be referenced before it is declared - lib\screens\food_expiry_main_screen.dart:948:35 - referenced_before_declaration
+  error - Local variable '_startImport' can't be referenced before it is declared - lib\screens\food_expiry_main_screen.dart:964:31 - referenced_before_declaration
+   info - The local variable '_startImport' starts with an underscore - lib\screens\food_expiry_main_screen.dart:980:8 - no_leading_underscores_for_local_identifiers
+  error - Local variable '_loadNextFromQueue' can't be referenced before it is declared - lib\screens\food_expiry_main_screen.dart:989:5 - referenced_before_declaration
+   info - The local variable '_loadNextFromQueue' starts with an underscore - lib\screens\food_expiry_main_screen.dart:992:8 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_skipCurrentImport' starts with an underscore - lib\screens\food_expiry_main_screen.dart:1013:8 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_stopImport' starts with an underscore - lib\screens\food_expiry_main_screen.dart:1017:8 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_prediction' starts with an underscore - lib\screens\food_expiry_main_screen.dart:1024:25 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_save' starts with an underscore - lib\screens\food_expiry_main_screen.dart:1032:16 - no_leading_underscores_for_local_identifiers
+  error - The getter 'existing' isn't defined for the type '_RecipePickerDialog' - lib\screens\food_expiry_main_screen.dart:1047:16 - undefined_getter
+  error - The getter 'existing' isn't defined for the type '_RecipePickerDialog' - lib\screens\food_expiry_main_screen.dart:1062:20 - undefined_getter
+   info - The local variable '_buildFieldLabel' starts with an underscore - lib\screens\food_expiry_main_screen.dart:1106:10 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_formInputDecoration' starts with an underscore - lib\screens\food_expiry_main_screen.dart:1119:19 - no_leading_underscores_for_local_identifiers
+  error - The declaration 'build' isn't referenced - lib\screens\food_expiry_main_screen.dart:1146:10 - unused_element
+  error - The getter 'existing' isn't defined for the type '_RecipePickerDialog' - lib\screens\food_expiry_main_screen.dart:1169:30 - undefined_getter
+  error - The getter 'existing' isn't defined for the type '_RecipePickerDialog' - lib\screens\food_expiry_main_screen.dart:1410:32 - undefined_getter
+  error - Classes can't be declared inside other classes - lib\screens\food_expiry_main_screen.dart:1447:1 - class_in_class
+  error - Expected a class member - lib\screens\food_expiry_main_screen.dart:1447:36 - expected_class_member
+   info - Missing type annotation - lib\screens\food_expiry_main_screen.dart:1447:44 - strict_top_level_inference
+   info - The method 'StatelessWidget' should have a return type but doesn't - lib\screens\food_expiry_main_screen.dart:1447:44 - always_declare_return_types
+   info - The variable name 'StatelessWidget' isn't a lowerCamelCase identifier - lib\screens\food_expiry_main_screen.dart:1447:44 - non_constant_identifier_names
+  error - Methods must have an explicit list of parameters - lib\screens\food_expiry_main_screen.dart:1447:44 - missing_method_parameters
+  error - The name '_FoodExpiryPlaceholderScreen' isn't a class - lib\screens\food_expiry_main_screen.dart:1450:9 - creation_with_non_type
+  error - 'required' is deprecated and shouldn't be used. In Dart 2.12 and later, use the built-in `required` keyword to mark a named parameter as required - lib\screens\food_expiry_main_screen.dart:1450:39 - deprecated_member_use
+  error - Expected to find ',' - lib\screens\food_expiry_main_screen.dart:1450:48 - expected_token
+  error - The getter 'title' isn't defined for the type '_RecipePickerDialogState' - lib\screens\food_expiry_main_screen.dart:1450:53 - undefined_getter
+  error - The declaration 'build' isn't referenced - lib\screens\food_expiry_main_screen.dart:1453:10 - unused_element
+  error - The final variable 'title' can't be read because it's potentially unassigned at this point - lib\screens\food_expiry_main_screen.dart:1460:15 - read_potentially_unassigned_final
+  error - Classes can't be declared inside other classes - lib\screens\food_expiry_main_screen.dart:1470:1 - class_in_class
+  error - Expected a class member - lib\screens\food_expiry_main_screen.dart:1470:30 - expected_class_member
+   info - Missing type annotation - lib\screens\food_expiry_main_screen.dart:1470:38 - strict_top_level_inference
+   info - The method 'StatefulWidget' should have a return type but doesn't - lib\screens\food_expiry_main_screen.dart:1470:38 - always_declare_return_types
+   info - The variable name 'StatefulWidget' isn't a lowerCamelCase identifier - lib\screens\food_expiry_main_screen.dart:1470:38 - non_constant_identifier_names
+  error - Methods must have an explicit list of parameters - lib\screens\food_expiry_main_screen.dart:1470:38 - missing_method_parameters
+  error - The name 'StatefulWidget' is already defined - lib\screens\food_expiry_main_screen.dart:1470:38 - duplicate_definition
+  error - The value of the local variable 'onUpsert' isn't used - lib\screens\food_expiry_main_screen.dart:1472:3 - unused_local_variable
+  error - The name '_FoodExpiryItemsScreen' isn't a class - lib\screens\food_expiry_main_screen.dart:1474:9 - creation_with_non_type
+  error - The getter 'onUpsert' isn't defined for the type '_RecipePickerDialogState' - lib\screens\food_expiry_main_screen.dart:1474:38 - undefined_getter
+  error - State isn't a type - lib\screens\food_expiry_main_screen.dart:1477:3 - not_a_type
+  error - The name '_FoodExpiryItemsScreen' isn't a type, so it can't be used as a type argument - lib\screens\food_expiry_main_screen.dart:1477:9 - non_type_as_type_argument
+  error - The declaration 'createState' isn't referenced - lib\screens\food_expiry_main_screen.dart:1477:33 - unused_element
+  error - The method '_FoodExpiryItemsScreenState' isn't defined for the type '_RecipePickerDialogState' - lib\screens\food_expiry_main_screen.dart:1477:50 - undefined_method
+  error - Classes can't be declared inside other classes - lib\screens\food_expiry_main_screen.dart:1480:1 - class_in_class
+  error - Expected a class member - lib\screens\food_expiry_main_screen.dart:1480:35 - expected_class_member
+   info - Missing type annotation - lib\screens\food_expiry_main_screen.dart:1480:43 - strict_top_level_inference
+   info - The method 'State' should have a return type but doesn't - lib\screens\food_expiry_main_screen.dart:1480:43 - always_declare_return_types
+   info - The variable name 'State' isn't a lowerCamelCase identifier - lib\screens\food_expiry_main_screen.dart:1480:43 - non_constant_identifier_names
+  error - Methods must have an explicit list of parameters - lib\screens\food_expiry_main_screen.dart:1480:43 - missing_method_parameters
+  error - The name 'State' is already defined - lib\screens\food_expiry_main_screen.dart:1480:43 - duplicate_definition
+   info - The local variable '_isUsageMode' starts with an underscore - lib\screens\food_expiry_main_screen.dart:1481:8 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_usageMap' starts with an underscore - lib\screens\food_expiry_main_screen.dart:1482:29 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_activeUsageItems' starts with an underscore - lib\screens\food_expiry_main_screen.dart:1483:21 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_addToCart' starts with an underscore - lib\screens\food_expiry_main_screen.dart:1485:16 - no_leading_underscores_for_local_identifiers
+   info - The value of the argument is redundant because it matches the default value - lib\screens\food_expiry_main_screen.dart:1504:18 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\food_expiry_main_screen.dart:1505:18 - avoid_redundant_argument_values
+   info - The local variable '_editQuantity' starts with an underscore - lib\screens\food_expiry_main_screen.dart:1527:16 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_adjustQuantity' starts with an underscore - lib\screens\food_expiry_main_screen.dart:1611:16 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_showItemDetail' starts with an underscore - lib\screens\food_expiry_main_screen.dart:1660:8 - no_leading_underscores_for_local_identifiers
+  error - Local variable '_detailRow' can't be referenced before it is declared - lib\screens\food_expiry_main_screen.dart:1681:13 - referenced_before_declaration
+  error - Local variable '_detailRow' can't be referenced before it is declared - lib\screens\food_expiry_main_screen.dart:1682:13 - referenced_before_declaration
+  error - Local variable '_detailRow' can't be referenced before it is declared - lib\screens\food_expiry_main_screen.dart:1683:13 - referenced_before_declaration
+  error - Local variable '_formatQuantity' can't be referenced before it is declared - lib\screens\food_expiry_main_screen.dart:1683:33 - referenced_before_declaration
+  error - Local variable '_detailRow' can't be referenced before it is declared - lib\screens\food_expiry_main_screen.dart:1684:13 - referenced_before_declaration
+  error - Undefined name 'CurrencyFormatter' - lib\screens\food_expiry_main_screen.dart:1684:33 - undefined_identifier
+  error - Local variable '_detailRow' can't be referenced before it is declared - lib\screens\food_expiry_main_screen.dart:1685:13 - referenced_before_declaration
+  error - Local variable '_detailRow' can't be referenced before it is declared - lib\screens\food_expiry_main_screen.dart:1687:13 - referenced_before_declaration
+  error - Local variable '_detailRow' can't be referenced before it is declared - lib\screens\food_expiry_main_screen.dart:1688:13 - referenced_before_declaration
+  error - The getter 'onUpsert' isn't defined for the type '_RecipePickerDialog' - lib\screens\food_expiry_main_screen.dart:1715:22 - undefined_getter
+   info - The local variable '_detailRow' starts with an underscore - lib\screens\food_expiry_main_screen.dart:1728:10 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_toggleUsageMode' starts with an underscore - lib\screens\food_expiry_main_screen.dart:1753:8 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_toggleItemUsage' starts with an underscore - lib\screens\food_expiry_main_screen.dart:1761:8 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_applyBulkUsage' starts with an underscore - lib\screens\food_expiry_main_screen.dart:1772:16 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_showRecipePicker' starts with an underscore - lib\screens\food_expiry_main_screen.dart:1821:16 - no_leading_underscores_for_local_identifiers
+  error - Local variable '_formatQuantity' can't be referenced before it is declared - lib\screens\food_expiry_main_screen.dart:1845:50 - referenced_before_declaration
+  error - Local variable '_promptAddMissingToCart' can't be referenced before it is declared - lib\screens\food_expiry_main_screen.dart:1869:9 - referenced_before_declaration
+   info - The local variable '_promptAddMissingToCart' starts with an underscore - lib\screens\food_expiry_main_screen.dart:1874:16 - no_leading_underscores_for_local_identifiers
+   info - The value of the argument is redundant because it matches the default value - lib\screens\food_expiry_main_screen.dart:1932:24 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\food_expiry_main_screen.dart:1933:24 - avoid_redundant_argument_values
+  error - The declaration 'build' isn't referenced - lib\screens\food_expiry_main_screen.dart:1966:10 - unused_element
+warning - The operand can't be 'null', so the condition is always 'true' - lib\screens\food_expiry_main_screen.dart:2038:37 - unnecessary_null_comparison
+warning - The '!' will have no effect because the receiver can't be null - lib\screens\food_expiry_main_screen.dart:2038:59 - unnecessary_non_null_assertion
+warning - The '!' will have no effect because the receiver can't be null - lib\screens\food_expiry_main_screen.dart:2051:40 - unnecessary_non_null_assertion
+  error - Local variable '_formatQuantity' can't be referenced before it is declared - lib\screens\food_expiry_main_screen.dart:2097:31 - referenced_before_declaration
+  error - Local variable '_formatQuantity' can't be referenced before it is declared - lib\screens\food_expiry_main_screen.dart:2121:36 - referenced_before_declaration
+  error - The method '_UsageInput' isn't defined for the type '_RecipePickerDialogState' - lib\screens\food_expiry_main_screen.dart:2128:27 - undefined_method
+  error - Local variable '_itemSubtitleText' can't be referenced before it is declared - lib\screens\food_expiry_main_screen.dart:2148:19 - referenced_before_declaration
+  error - The argument for the named parameter 'onTap' was already specified - lib\screens\food_expiry_main_screen.dart:2152:17 - duplicate_named_argument
+  error - The getter 'onUpsert' isn't defined for the type '_RecipePickerDialog' - lib\screens\food_expiry_main_screen.dart:2154:28 - undefined_getter
+   info - The local variable '_formatQuantity' starts with an underscore - lib\screens\food_expiry_main_screen.dart:2200:10 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_itemSubtitleText' starts with an underscore - lib\screens\food_expiry_main_screen.dart:2206:10 - no_leading_underscores_for_local_identifiers
+warning - The operand can't be 'null', so the condition is always 'true' - lib\screens\food_expiry_main_screen.dart:2211:23 - unnecessary_null_comparison
+warning - The '!' will have no effect because the receiver can't be null - lib\screens\food_expiry_main_screen.dart:2211:47 - unnecessary_non_null_assertion
+warning - The operand can't be 'null', so the condition is always 'true' - lib\screens\food_expiry_main_screen.dart:2214:20 - unnecessary_null_comparison
+warning - The '!' will have no effect because the receiver can't be null - lib\screens\food_expiry_main_screen.dart:2214:41 - unnecessary_non_null_assertion
+  error - Classes can't be declared inside other classes - lib\screens\food_expiry_main_screen.dart:2224:1 - class_in_class
+  error - Expected a class member - lib\screens\food_expiry_main_screen.dart:2224:19 - expected_class_member
+   info - Missing type annotation - lib\screens\food_expiry_main_screen.dart:2224:27 - strict_top_level_inference
+   info - The method 'StatefulWidget' should have a return type but doesn't - lib\screens\food_expiry_main_screen.dart:2224:27 - always_declare_return_types
+   info - The variable name 'StatefulWidget' isn't a lowerCamelCase identifier - lib\screens\food_expiry_main_screen.dart:2224:27 - non_constant_identifier_names
+  error - Methods must have an explicit list of parameters - lib\screens\food_expiry_main_screen.dart:2224:27 - missing_method_parameters
+  error - The name 'StatefulWidget' is already defined - lib\screens\food_expiry_main_screen.dart:2224:27 - duplicate_definition
+  error - The value of the local variable 'initialValue' isn't used - lib\screens\food_expiry_main_screen.dart:2225:17 - unused_local_variable
+  error - The value of the local variable 'max' isn't used - lib\screens\food_expiry_main_screen.dart:2226:16 - unused_local_variable
+  error - The value of the local variable 'unit' isn't used - lib\screens\food_expiry_main_screen.dart:2227:16 - unused_local_variable
+  error - The value of the local variable 'onChanged' isn't used - lib\screens\food_expiry_main_screen.dart:2228:31 - unused_local_variable
+  error - The name '_UsageInput' isn't a class - lib\screens\food_expiry_main_screen.dart:2230:9 - creation_with_non_type
+  error - The getter 'initialValue' isn't defined for the type '_RecipePickerDialogState' - lib\screens\food_expiry_main_screen.dart:2231:10 - undefined_getter
+  error - 'required' is deprecated and shouldn't be used. In Dart 2.12 and later, use the built-in `required` keyword to mark a named parameter as required - lib\screens\food_expiry_main_screen.dart:2232:5 - deprecated_member_use
+  error - Expected to find ',' - lib\screens\food_expiry_main_screen.dart:2232:14 - expected_token
+  error - The getter 'max' isn't defined for the type '_RecipePickerDialogState' - lib\screens\food_expiry_main_screen.dart:2232:19 - undefined_getter
+  error - 'required' is deprecated and shouldn't be used. In Dart 2.12 and later, use the built-in `required` keyword to mark a named parameter as required - lib\screens\food_expiry_main_screen.dart:2233:5 - deprecated_member_use
+  error - Expected to find ',' - lib\screens\food_expiry_main_screen.dart:2233:14 - expected_token
+  error - The getter 'unit' isn't defined for the type '_RecipePickerDialogState' - lib\screens\food_expiry_main_screen.dart:2233:19 - undefined_getter
+  error - 'required' is deprecated and shouldn't be used. In Dart 2.12 and later, use the built-in `required` keyword to mark a named parameter as required - lib\screens\food_expiry_main_screen.dart:2234:5 - deprecated_member_use
+  error - Expected to find ',' - lib\screens\food_expiry_main_screen.dart:2234:14 - expected_token
+  error - The getter 'onChanged' isn't defined for the type '_RecipePickerDialogState' - lib\screens\food_expiry_main_screen.dart:2234:19 - undefined_getter
+  error - State isn't a type - lib\screens\food_expiry_main_screen.dart:2238:3 - not_a_type
+  error - The name '_UsageInput' isn't a type, so it can't be used as a type argument - lib\screens\food_expiry_main_screen.dart:2238:9 - non_type_as_type_argument
+  error - The declaration 'createState' isn't referenced - lib\screens\food_expiry_main_screen.dart:2238:22 - unused_element
+  error - The method '_UsageInputState' isn't defined for the type '_RecipePickerDialogState' - lib\screens\food_expiry_main_screen.dart:2238:39 - undefined_method
+  error - Classes can't be declared inside other classes - lib\screens\food_expiry_main_screen.dart:2241:1 - class_in_class
+  error - Expected a class member - lib\screens\food_expiry_main_screen.dart:2241:24 - expected_class_member
+   info - Missing type annotation - lib\screens\food_expiry_main_screen.dart:2241:32 - strict_top_level_inference
+   info - The method 'State' should have a return type but doesn't - lib\screens\food_expiry_main_screen.dart:2241:32 - always_declare_return_types
+   info - The variable name 'State' isn't a lowerCamelCase identifier - lib\screens\food_expiry_main_screen.dart:2241:32 - non_constant_identifier_names
+  error - Methods must have an explicit list of parameters - lib\screens\food_expiry_main_screen.dart:2241:32 - missing_method_parameters
+  error - The name 'State' is already defined - lib\screens\food_expiry_main_screen.dart:2241:32 - duplicate_definition
+   info - The local variable '_controller' starts with an underscore - lib\screens\food_expiry_main_screen.dart:2242:30 - no_leading_underscores_for_local_identifiers
+  error - The declaration 'initState' isn't referenced - lib\screens\food_expiry_main_screen.dart:2245:8 - unused_element
+  error - The getter 'initialValue' isn't defined for the type '_RecipePickerDialog' - lib\screens\food_expiry_main_screen.dart:2248:20 - undefined_getter
+  error - The declaration 'didUpdateWidget' isn't referenced - lib\screens\food_expiry_main_screen.dart:2253:8 - unused_element
+  error - The argument type '_UsageInput' can't be assigned to the parameter type '_RecipePickerDialog'.  - lib\screens\food_expiry_main_screen.dart:2254:27 - argument_type_not_assignable
+  error - The getter 'initialValue' isn't defined for the type '_RecipePickerDialog' - lib\screens\food_expiry_main_screen.dart:2255:16 - undefined_getter
+  error - The property 'initialValue' can't be unconditionally accessed because the receiver can be 'null' - lib\screens\food_expiry_main_screen.dart:2255:42 - unchecked_use_of_nullable_value
+  error - The getter 'initialValue' isn't defined for the type '_RecipePickerDialog' - lib\screens\food_expiry_main_screen.dart:2256:31 - undefined_getter
+  error - The declaration 'dispose' isn't referenced - lib\screens\food_expiry_main_screen.dart:2264:8 - unused_element
+   info - The local variable '_update' starts with an underscore - lib\screens\food_expiry_main_screen.dart:2269:8 - no_leading_underscores_for_local_identifiers
+  error - The method 'onChanged' isn't defined for the type '_RecipePickerDialog' - lib\screens\food_expiry_main_screen.dart:2270:12 - undefined_method
+  error - The declaration 'build' isn't referenced - lib\screens\food_expiry_main_screen.dart:2274:10 - unused_element
+  error - The getter 'max' isn't defined for the type '_RecipePickerDialog' - lib\screens\food_expiry_main_screen.dart:2286:62 - undefined_getter
+   info - The value of the argument is redundant because it matches the default value - lib\screens\food_expiry_main_screen.dart:2310:26 - avoid_redundant_argument_values
+  error - The getter 'max' isn't defined for the type '_RecipePickerDialog' - lib\screens\food_expiry_main_screen.dart:2334:60 - undefined_getter
+  error - The getter 'max' isn't defined for the type '_RecipePickerDialog' - lib\screens\food_expiry_main_screen.dart:2347:43 - undefined_getter
+  error - Classes can't be declared inside other classes - lib\screens\food_expiry_main_screen.dart:2362:1 - class_in_class
+  error - Expected a class member - lib\screens\food_expiry_main_screen.dart:2362:38 - expected_class_member
+   info - Missing type annotation - lib\screens\food_expiry_main_screen.dart:2362:46 - strict_top_level_inference
+   info - The method 'StatefulWidget' should have a return type but doesn't - lib\screens\food_expiry_main_screen.dart:2362:46 - always_declare_return_types
+   info - The variable name 'StatefulWidget' isn't a lowerCamelCase identifier - lib\screens\food_expiry_main_screen.dart:2362:46 - non_constant_identifier_names
+  error - Methods must have an explicit list of parameters - lib\screens\food_expiry_main_screen.dart:2362:46 - missing_method_parameters
+  error - The name 'StatefulWidget' is already defined - lib\screens\food_expiry_main_screen.dart:2362:46 - duplicate_definition
+  error - The name '_FoodExpiryNotificationsScreen' isn't a class - lib\screens\food_expiry_main_screen.dart:2363:9 - creation_with_non_type
+  error - State isn't a type - lib\screens\food_expiry_main_screen.dart:2366:3 - not_a_type
+  error - The name '_FoodExpiryNotificationsScreen' isn't a type, so it can't be used as a type argument - lib\screens\food_expiry_main_screen.dart:2366:9 - non_type_as_type_argument
+  error - The declaration 'createState' isn't referenced - lib\screens\food_expiry_main_screen.dart:2366:41 - unused_element
+  error - The method '_FoodExpiryNotificationsScreenState' isn't defined for the type '_RecipePickerDialogState' - lib\screens\food_expiry_main_screen.dart:2367:7 - undefined_method
+  error - Classes can't be declared inside other classes - lib\screens\food_expiry_main_screen.dart:2370:1 - class_in_class
+  error - Expected a class member - lib\screens\food_expiry_main_screen.dart:2371:5 - expected_class_member
+   info - Missing type annotation - lib\screens\food_expiry_main_screen.dart:2371:13 - strict_top_level_inference
+   info - The method 'State' should have a return type but doesn't - lib\screens\food_expiry_main_screen.dart:2371:13 - always_declare_return_types
+   info - The variable name 'State' isn't a lowerCamelCase identifier - lib\screens\food_expiry_main_screen.dart:2371:13 - non_constant_identifier_names
+  error - Methods must have an explicit list of parameters - lib\screens\food_expiry_main_screen.dart:2371:13 - missing_method_parameters
+  error - The name 'State' is already defined - lib\screens\food_expiry_main_screen.dart:2371:13 - duplicate_definition
+   info - The local variable '_settings' starts with an underscore - lib\screens\food_expiry_main_screen.dart:2372:35 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_lastScheduledCount' starts with an underscore - lib\screens\food_expiry_main_screen.dart:2373:8 - no_leading_underscores_for_local_identifiers
+   info - The local variable '_saving' starts with an underscore - lib\screens\food_expiry_main_screen.dart:2374:8 - no_leading_underscores_for_local_identifiers
+  error - The declaration 'initState' isn't referenced - lib\screens\food_expiry_main_screen.dart:2377:8 - unused_element
+  error - Local variable '_load' can't be referenced before it is declared - lib\screens\food_expiry_main_screen.dart:2379:5 - referenced_before_declaration
+   info - The local variable '_load' starts with an underscore - lib\screens\food_expiry_main_screen.dart:2382:16 - no_leading_underscores_for_local_identifiers
+  error - Local variable '_reschedule' can't be referenced before it is declared - lib\screens\food_expiry_main_screen.dart:2388:11 - referenced_before_declaration
+   info - The local variable '_update' starts with an underscore - lib\screens\food_expiry_main_screen.dart:2391:16 - no_leading_underscores_for_local_identifiers
+  error - Local variable '_reschedule' can't be referenced before it is declared - lib\screens\food_expiry_main_screen.dart:2397:11 - referenced_before_declaration
+   info - The local variable '_reschedule' starts with an underscore - lib\screens\food_expiry_main_screen.dart:2404:16 - no_leading_underscores_for_local_identifiers
+  error - The declaration 'build' isn't referenced - lib\screens\food_expiry_main_screen.dart:2415:10 - unused_element
+  error - Expected to find '}' - lib\screens\food_expiry_main_screen.dart:2502:1 - expected_token
+   info - The value of the argument is redundant because it matches the default value - lib\screens\icon_management2_screen.dart:17:26 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\icon_management2_screen.dart:22:23 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\icon_management2_screen.dart:23:33 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\icon_management2_screen.dart:24:26 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\icon_management_asset_screen.dart:42:33 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\icon_management_root_screen.dart:40:33 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\icon_management_screen.dart:520:18 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\icon_management_screen.dart:940:35 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\icon_management_screen.dart:1188:35 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\icon_management_screen.dart:1230:29 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\icon_management_screen.dart:1289:33 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\income_split_screen.dart:588:37 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\income_split_status_screen.dart:237:37 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\income_split_status_screen.dart:248:45 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\income_split_status_screen.dart:248:68 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\income_split_status_screen.dart:251:45 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\income_split_status_screen.dart:251:68 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\income_split_status_screen.dart:284:46 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\input_stats_screen.dart:53:42 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\input_stats_screen.dart:75:62 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\input_stats_screen.dart:79:72 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\memo_stats_screen.dart:34:56 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\micro_savings_nudge_screen.dart:40:42 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\micro_savings_nudge_screen.dart:45:46 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\micro_savings_nudge_screen.dart:215:22 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\micro_savings_nudge_screen.dart:363:22 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\page1_bottom_icon_settings_screen.dart:65:18 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\page1_bottom_icon_settings_screen.dart:186:31 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\period_detail_stats_screen.dart:119:42 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\period_detail_stats_screen.dart:125:9 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\period_detail_stats_screen.dart:204:11 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\period_stats_screen.dart:67:72 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\period_stats_screen.dart:70:72 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\period_stats_screen.dart:73:72 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\period_stats_screen.dart:76:72 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\period_stats_screen.dart:79:73 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\period_stats_screen.dart:94:66 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\period_stats_screen.dart:97:66 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\period_stats_screen.dart:100:66 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\period_stats_screen.dart:103:66 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\period_stats_screen.dart:106:67 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\period_stats_screen.dart:318:43 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\period_stats_screen.dart:356:44 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\quick_simple_expense_input_screen.dart:284:20 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\refund_transactions_screen.dart:300:17 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\refund_transactions_screen.dart:301:18 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\refund_transactions_screen.dart:302:22 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\refund_transactions_screen.dart:303:13 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\savings_plan_form_screen.dart:137:7 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\shopping_cart_quick_transaction_screen.dart:262:22 - avoid_redundant_argument_values
+  error - The declaration '_ensureMainCategorySelectedForCurrentItem' isn't referenced - lib\screens\shopping_cart_quick_transaction_screen.dart:330:16 - unused_element
+   info - The value of the argument is redundant because it matches the default value - lib\screens\shopping_cart_quick_transaction_screen.dart:442:28 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\shopping_cart_quick_transaction_screen.dart:443:18 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\shopping_cart_quick_transaction_screen.dart:455:19 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\shopping_cart_quick_transaction_screen.dart:539:22 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\shopping_cart_quick_transaction_screen.dart:546:17 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\shopping_cart_quick_transaction_screen.dart:556:27 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\shopping_cart_quick_transaction_screen.dart:1493:49 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\shopping_cart_quick_transaction_screen.dart:1652:26 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\shopping_cart_quick_transaction_screen.dart:1653:16 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\shopping_cart_quick_transaction_screen.dart:1665:17 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\shopping_cart_screen.dart:358:62 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\shopping_cart_screen.dart:552:28 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\shopping_cart_screen.dart:778:18 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\shopping_cart_screen.dart:779:18 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\shopping_cart_screen.dart:1254:56 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\shopping_points_input_screen.dart:373:24 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\store_merge_screen.dart:144:64 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\store_product_stats_screen.dart:44:42 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\theme_settings_screen.dart:90:37 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\theme_settings_screen.dart:107:37 - avoid_redundant_argument_values
+  error - The value of the field '_sortedMainCategories' isn't used - lib\screens\transaction_add_detailed_screen.dart:358:16 - unused_field
+  error - The declaration '_persistLastCategoryForType' isn't referenced - lib\screens\transaction_add_detailed_screen.dart:841:16 - unused_element
+   info - The value of the argument is redundant because it matches the default value - lib\screens\transaction_add_detailed_screen.dart:1092:16 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\transaction_add_detailed_screen.dart:1123:24 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\transaction_add_detailed_screen.dart:1124:24 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\transaction_add_detailed_screen.dart:1716:19 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\transaction_add_detailed_screen.dart:1755:19 - avoid_redundant_argument_values
+  error - The value of the local variable 'theme' isn't used - lib\screens\transaction_add_detailed_screen.dart:1766:11 - unused_local_variable
+   info - The value of the argument is redundant because it matches the default value - lib\screens\transaction_add_detailed_screen.dart:1890:25 - avoid_redundant_argument_values
+   info - Use 'const' for final variables initialized to a constant value - lib\screens\transaction_add_detailed_screen.dart:1956:7 - prefer_const_declarations
+   info - The value of the argument is redundant because it matches the default value - lib\screens\transaction_add_screen.dart:1035:16 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\transaction_add_screen.dart:1041:20 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\transaction_add_screen.dart:1053:20 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\transaction_add_screen.dart:1060:22 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\transaction_add_screen.dart:1108:20 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\transaction_add_screen.dart:1115:22 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\transaction_add_screen.dart:1135:28 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\transaction_add_screen.dart:1612:19 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\transaction_add_screen.dart:1651:19 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\transaction_add_screen.dart:1751:25 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\transaction_detail_screen.dart:466:31 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\screens\transaction_detail_screen.dart:983:76 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\services\account_service.dart:152:24 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\services\account_service.dart:153:24 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\services\account_service.dart:154:26 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\services\backup_service.dart:736:15 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\services\emergency_fund_service.dart:154:15 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\services\food_expiry_notification_service.dart:202:34 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\services\income_split_service.dart:317:15 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\services\monthly_agg_cache_service.dart:271:51 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\services\savings_plan_service.dart:111:21 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\services\secure_storage_service.dart:11:15 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\theme\app_theme.dart:91:16 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\theme\app_theme.dart:93:18 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\theme\app_theme.dart:96:16 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\theme\app_theme.dart:243:20 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\utils\asset_dashboard_utils.dart:85:19 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\utils\asset_dashboard_utils.dart:113:73 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\utils\asset_dashboard_utils.dart:115:66 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\utils\currency_input_formatter.dart:18:43 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\utils\date_formatter.dart:124:44 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\utils\dialog_utils.dart:58:19 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\utils\dialog_utils.dart:179:56 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\utils\dialog_utils.dart:233:56 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\utils\icon_launch_utils.dart:21:17 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\utils\icon_launch_utils.dart:22:18 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\utils\icon_launch_utils.dart:23:22 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\utils\icon_launch_utils.dart:24:13 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\utils\image_utils.dart:68:44 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\utils\localized_date_formatter.dart:27:71 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\utils\main_page_migration.dart:34:22 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\utils\period_utils.dart:19:53 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\utils\period_utils.dart:25:56 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\utils\period_utils.dart:31:57 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\utils\period_utils.dart:36:45 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\utils\period_utils.dart:42:48 - avoid_redundant_argument_values
+   info - Statements in an if should be enclosed in a block - lib\utils\points_stats_utils.dart:38:33 - curly_braces_in_flow_control_structures
+   info - The value of the argument is redundant because it matches the default value - lib\utils\profit_loss_calculator.dart:24:65 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\utils\profit_loss_calculator.dart:26:61 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\utils\profit_loss_calculator.dart:28:52 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\utils\screen_saver_launcher.dart:19:27 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\utils\shopping_cart_bulk_ledger_utils.dart:188:25 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\utils\shopping_cart_bulk_ledger_utils.dart:189:26 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\utils\shopping_cart_bulk_ledger_utils.dart:191:26 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\utils\shopping_cart_next_prep_utils.dart:96:25 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\utils\shopping_cart_next_prep_utils.dart:97:26 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\utils\shopping_cart_next_prep_utils.dart:101:26 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\utils\shopping_cart_next_prep_utils.dart:102:26 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\utils\shopping_cart_next_prep_utils.dart:158:64 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\utils\shopping_cart_next_prep_utils.dart:585:30 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\utils\shopping_cart_next_prep_utils.dart:586:30 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\utils\shopping_cart_next_prep_utils.dart:747:24 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\utils\shopping_cart_next_prep_utils.dart:748:24 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\utils\shopping_cart_next_prep_utils.dart:1043:24 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\utils\shopping_cart_next_prep_utils.dart:1044:24 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\utils\thousands_input_formatter.dart:16:60 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\widgets\asset_move_dialog.dart:319:44 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\widgets\asset_move_dialog.dart:363:38 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\widgets\in_app_screen_saver.dart:125:30 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\widgets\in_app_screen_saver.dart:775:29 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\widgets\in_app_screen_saver.dart:775:52 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\widgets\in_app_screen_saver.dart:778:29 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\widgets\in_app_screen_saver.dart:778:52 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\widgets\in_app_screen_saver.dart:781:29 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\widgets\in_app_screen_saver.dart:781:52 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\widgets\search_bar_widget.dart:194:34 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\widgets\theme_preview_widget.dart:162:33 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - test\models\transaction_test.dart:65:15 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - test\screens\account_main_move_icon_test.dart:45:75 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - test\screens\account_main_move_icon_test.dart:112:75 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - test\screens\account_main_restore_test.dart:19:25 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - test\screens\account_main_screen_slots_test.dart:19:25 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - test\screens\shopping_cart_enter_navigation_test.dart:15:19 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - test\screens\shopping_cart_enter_navigation_test.dart:16:20 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - test\screens\shopping_cart_enter_navigation_test.dart:23:19 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - test\screens\shopping_cart_enter_navigation_test.dart:24:20 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - test\utils\asset_flow_stats_test.dart:39:36 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - test\utils\asset_flow_stats_test.dart:65:17 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - test\utils\asset_flow_stats_test.dart:98:36 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - test\utils\validators_test.dart:33:59 - avoid_redundant_argument_values
+

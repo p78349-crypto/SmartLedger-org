@@ -1,6 +1,6 @@
-# One UI Form Tokens
+# Smart Ledger Form Tokens
 
-This document defines the One UI style tokens used for input fields across the app.
+This document defines the Smart Ledger style tokens used for input fields across the app.
 
 ## Geometry
 - Field height: 56dp (single-line input)

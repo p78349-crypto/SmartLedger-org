@@ -6,7 +6,7 @@ import 'package:smart_ledger/services/income_split_service.dart';
 import 'package:smart_ledger/utils/category_definitions.dart';
 import 'package:smart_ledger/utils/income_category_definitions.dart';
 import 'package:smart_ledger/utils/utils.dart';
-import 'package:smart_ledger/widgets/one_ui_input_field.dart';
+import 'package:smart_ledger/widgets/smart_input_field.dart';
 
 class IncomeSplitScreen extends StatefulWidget {
   final String accountName;
@@ -450,7 +450,7 @@ class _IncomeSplitScreenState extends State<IncomeSplitScreen> {
                                       ),
                                     ),
                                     const SizedBox(height: 6),
-                                    OneUiInputField(
+                                    SmartInputField(
                                       controller: controller,
                                       focusNode: focusNode,
                                       keyboardType: TextInputType.number,
@@ -585,7 +585,6 @@ class _IncomeSplitScreenState extends State<IncomeSplitScreen> {
                         CurrencyFormatter.formatRatio(
                           entry.value,
                           total,
-                          decimals: 1,
                         ),
                         style: TextStyle(
                           fontSize: 12,
@@ -750,7 +749,7 @@ class _IncomeSplitScreenState extends State<IncomeSplitScreen> {
                   const SizedBox(height: 24),
                 ],
               ),
-            OneUiInputField(
+            SmartInputField(
               label: '💰 총 수입',
               hint: '이번 달 총 수입을 입력하세요',
               controller: _incomeController,
@@ -794,7 +793,7 @@ class _IncomeSplitScreenState extends State<IncomeSplitScreen> {
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            OneUiInputField(
+            SmartInputField(
               label: '🌱 예금 (예금)',
               hint: '은행 예금할 금액',
               controller: _savingsController,
@@ -807,7 +806,7 @@ class _IncomeSplitScreenState extends State<IncomeSplitScreen> {
               prefixIcon: const Icon(Icons.savings),
             ),
             const SizedBox(height: 12),
-            OneUiInputField(
+            SmartInputField(
               label: '💳 지출 예산',
               hint: '생활비로 쓸 금액',
               controller: _budgetController,
@@ -830,7 +829,7 @@ class _IncomeSplitScreenState extends State<IncomeSplitScreen> {
               _buildCategoryBudgetCard(),
             ],
             const SizedBox(height: 12),
-            OneUiInputField(
+            SmartInputField(
               label: '🚨 비상금',
               hint: '비상시를 위한 금액',
               controller: _emergencyController,
@@ -843,7 +842,7 @@ class _IncomeSplitScreenState extends State<IncomeSplitScreen> {
               prefixIcon: const Icon(Icons.warning_amber),
             ),
             const SizedBox(height: 12),
-            OneUiInputField(
+            SmartInputField(
               label: '🏦 자산 이동',
               hint: '자산으로 옮길 금액',
               controller: _assetController,
@@ -1301,7 +1300,7 @@ class _IncomeSplitScreenState extends State<IncomeSplitScreen> {
                                   ),
                                 ),
                                 const SizedBox(height: 6),
-                                OneUiInputField(
+                                SmartInputField(
                                   controller: controller,
                                   focusNode: focusNode,
                                   keyboardType: TextInputType.number,

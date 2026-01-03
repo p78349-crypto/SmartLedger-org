@@ -865,7 +865,7 @@
 ### 지원 환경
 - **최소 요구사항**: Android 13+
 - **테스트 환경**: Android 16 (최신)
-- **플랫폼**: Samsung Galaxy (One UI 8.0)
+- **플랫폼**: Android Device (Latest)
 - **성능**: 모든 기능 완벽 작동
 
 ---
@@ -932,7 +932,7 @@
 - **개발자**: Financial Management Team
 - **버전**: 1.0.0
 - **마지막 업데이트**: 2025년 12월 24일
-- **테스트 기기**: Samsung Galaxy (Android 16)
+- **테스트 기기**: Android Device (Android 16)
 - **성능 상태**: ✅ 완벽 작동
 
 ---

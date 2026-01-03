@@ -42,7 +42,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: const AccountMainScreen(accountName: account, initialIndex: 0),
+        home: const AccountMainScreen(accountName: account),
         onGenerateRoute: (settings) {
           return MaterialPageRoute<void>(
             builder: (_) => const Scaffold(body: SizedBox.shrink()),
@@ -109,7 +109,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: const AccountMainScreen(accountName: account, initialIndex: 0),
+        home: const AccountMainScreen(accountName: account),
         onGenerateRoute: (settings) {
           return MaterialPageRoute<void>(
             builder: (_) => const Scaffold(body: SizedBox.shrink()),

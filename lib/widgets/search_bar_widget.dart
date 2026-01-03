@@ -191,7 +191,7 @@ class CompactSearchBar extends StatelessWidget {
       ),
       onChanged: (query) {
         onSearchChanged(
-          SearchFilter(category: SearchCategory.productName, query: query),
+          SearchFilter(query: query),
         );
       },
     );

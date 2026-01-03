@@ -24,22 +24,46 @@ class CategoryMemoInsight {
   });
 }
 
+class Category3TierStatEntry {
+  final String label; // "Main > Sub > Detail"
+  final double totalAmount;
+  final int count;
+
+  const Category3TierStatEntry({
+    required this.label,
+    required this.totalAmount,
+    required this.count,
+  });
+}
+
 class MemoStatsResult {
   final double totalMemoAmount;
   final int memoTransactionCount;
   final List<MemoStatEntry> top10;
   final CategoryMemoInsight? topCategoryInsight;
+  final List<Category3TierStatEntry> topCategories3Tier;
 
   const MemoStatsResult({
     required this.totalMemoAmount,
     required this.memoTransactionCount,
     required this.top10,
     required this.topCategoryInsight,
+    this.topCategories3Tier = const [],
   });
 }
 
 class MemoStatsUtils {
   const MemoStatsUtils._();
+
+  static String _labelFor(Transaction tx) {
+    final parts = [
+      tx.mainCategory,
+      if (tx.subCategory != null && tx.subCategory!.isNotEmpty) tx.subCategory,
+      if (tx.detailCategory != null && tx.detailCategory!.isNotEmpty)
+        tx.detailCategory,
+    ];
+    return parts.join(' > ');
+  }
 
   /// memoStats: 메모가 있는 거래들을 가격(총액) 기준으로 내림차순 정렬하여 TOP N을 계산.
   ///
@@ -60,12 +84,24 @@ class MemoStatsUtils {
     final categoryCounts = <String, int>{};
     final categoryTotals = <String, double>{};
 
+    final cat3Totals = <String, double>{};
+    final cat3Counts = <String, int>{};
+
     for (final tx in transactions) {
       final memo = tx.memo.trim();
-      if (memo.isEmpty) continue;
-      if (!tx.type.isOutflow) continue;
+      final isOutflow = tx.type.isOutflow;
 
       final amountAbs = tx.amount.abs();
+
+      if (isOutflow) {
+        final cat3Label = _labelFor(tx);
+        cat3Totals[cat3Label] = (cat3Totals[cat3Label] ?? 0) + amountAbs;
+        cat3Counts[cat3Label] = (cat3Counts[cat3Label] ?? 0) + 1;
+      }
+
+      if (memo.isEmpty) continue;
+      if (!isOutflow) continue;
+
       totalMemoAmount += amountAbs;
       memoTxCount += 1;
 
@@ -111,11 +147,24 @@ class MemoStatsUtils {
       topCategory = cats.first;
     }
 
+    final cat3Entries =
+        cat3Totals.entries
+            .map(
+              (e) => Category3TierStatEntry(
+                label: e.key,
+                totalAmount: e.value,
+                count: cat3Counts[e.key] ?? 0,
+              ),
+            )
+            .toList()
+          ..sort((a, b) => b.totalAmount.compareTo(a.totalAmount));
+
     return MemoStatsResult(
       totalMemoAmount: totalMemoAmount,
       memoTransactionCount: memoTxCount,
       top10: entries.take(topN).toList(),
       topCategoryInsight: topCategory,
+      topCategories3Tier: cat3Entries.take(topN).toList(),
     );
   }
 }

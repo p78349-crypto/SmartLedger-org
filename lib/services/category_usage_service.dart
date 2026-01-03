@@ -9,13 +9,19 @@ class CategoryUsageService {
 
   const CategoryUsageService._();
 
-  static String labelFor({required String main, String? sub}) {
+  static String labelFor({required String main, String? sub, String? detail}) {
     final normalizedMain = main.trim();
     final normalizedSub = sub?.trim();
-    if (normalizedSub == null || normalizedSub.isEmpty) {
-      return normalizedMain;
+    final normalizedDetail = detail?.trim();
+
+    String label = normalizedMain;
+    if (normalizedSub != null && normalizedSub.isNotEmpty) {
+      label += '$separator$normalizedSub';
+      if (normalizedDetail != null && normalizedDetail.isNotEmpty) {
+        label += '$separator$normalizedDetail';
+      }
     }
-    return '$normalizedMain$separator$normalizedSub';
+    return label;
   }
 
   static Future<Map<String, int>> loadCounts() async {
@@ -70,8 +76,12 @@ class CategoryUsageService {
     return sum;
   }
 
-  static Future<void> increment({required String main, String? sub}) async {
-    final label = labelFor(main: main, sub: sub);
+  static Future<void> increment({
+    required String main,
+    String? sub,
+    String? detail,
+  }) async {
+    final label = labelFor(main: main, sub: sub, detail: detail);
     if (label.trim().isEmpty) return;
 
     final prefs = await SharedPreferences.getInstance();

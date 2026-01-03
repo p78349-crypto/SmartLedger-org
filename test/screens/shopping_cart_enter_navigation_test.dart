@@ -12,16 +12,12 @@ void main() {
       ShoppingCartItem(
         id: 'a',
         name: 'A',
-        quantity: 1,
-        unitPrice: 0,
         createdAt: now,
         updatedAt: now,
       ),
       ShoppingCartItem(
         id: 'b',
         name: 'B',
-        quantity: 1,
-        unitPrice: 0,
         createdAt: now,
         updatedAt: now,
       ),

@@ -9,8 +9,10 @@ import 'package:smart_ledger/services/food_expiry_prediction_engine.dart';
 import 'package:smart_ledger/services/food_expiry_service.dart';
 import 'package:smart_ledger/services/recipe_service.dart';
 import 'package:smart_ledger/services/user_pref_service.dart';
+import 'package:smart_ledger/utils/currency_formatter.dart';
 import 'package:smart_ledger/utils/icon_catalog.dart';
 import 'package:smart_ledger/utils/interaction_blockers.dart';
+import 'package:smart_ledger/navigation/app_routes.dart';
 
 /// 식품 유통기한 관리 전용 메인 네비게이션 화면
 class FoodExpiryMainScreen extends StatefulWidget {
@@ -29,6 +31,9 @@ class _RecipePickerDialog extends StatefulWidget {
 
 class _RecipePickerDialogState extends State<_RecipePickerDialog> {
   String _selectedCuisine = 'All';
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
+
   final List<String> _cuisines = [
     'All',
     'Korean',
@@ -39,20 +44,55 @@ class _RecipePickerDialogState extends State<_RecipePickerDialog> {
   ];
 
   @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  List<FoodExpiryItem> _getMatchedItems(
+    Recipe recipe,
+    List<FoodExpiryItem> inventory,
+  ) {
+    final matched = <FoodExpiryItem>[];
+    for (var ing in recipe.ingredients) {
+      final matches = inventory.where(
+        (it) => it.name.contains(ing.name) || ing.name.contains(it.name),
+      );
+      matched.addAll(matches);
+    }
+    // Remove duplicates
+    final seen = <String>{};
+    return matched.where((it) => seen.add(it.id)).toList();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final allRecipes = RecipeService.instance.recipes.value;
-    final filteredRecipes = _selectedCuisine == 'All'
-        ? allRecipes
-        : allRecipes.where((r) => r.cuisine == _selectedCuisine).toList();
+    final inventory = FoodExpiryService.instance.items.value;
+
+    final filteredRecipes = allRecipes.where((r) {
+      final matchesCuisine =
+          _selectedCuisine == 'All' || r.cuisine == _selectedCuisine;
+      if (!matchesCuisine) return false;
+
+      if (_searchQuery.isEmpty) return true;
+      final query = _searchQuery.toLowerCase();
+      final matchesName = r.name.toLowerCase().contains(query);
+      final matchesIngredient = r.ingredients.any(
+        (ing) => ing.name.toLowerCase().contains(query),
+      );
+      return matchesName || matchesIngredient;
+    }).toList();
 
     return AlertDialog(
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text('Select Recipe'),
+          const Text('레시피 선택'),
           IconButton(
             icon: const Icon(Icons.add),
-            tooltip: 'Add New Recipe',
+            tooltip: '새 레시피 추가',
             onPressed: () async {
               await showDialog(
                 context: context,
@@ -68,6 +108,26 @@ class _RecipePickerDialogState extends State<_RecipePickerDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: '레시피 또는 식재료 검색',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          _searchController.clear();
+                          setState(() => _searchQuery = '');
+                        },
+                      )
+                    : null,
+                border: const OutlineInputBorder(),
+                contentPadding: const EdgeInsets.symmetric(),
+              ),
+              onChanged: (v) => setState(() => _searchQuery = v),
+            ),
+            const SizedBox(height: 12),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
@@ -90,18 +150,76 @@ class _RecipePickerDialogState extends State<_RecipePickerDialog> {
             const SizedBox(height: 16),
             Expanded(
               child: filteredRecipes.isEmpty
-                  ? const Center(child: Text('No recipes in this category.'))
+                  ? const Center(child: Text('검색 결과가 없습니다.'))
                   : ListView.builder(
                       shrinkWrap: true,
                       itemCount: filteredRecipes.length,
                       itemBuilder: (ctx, i) {
                         final r = filteredRecipes[i];
+                        final matchedItems = _getMatchedItems(r, inventory);
+                        final inStock = r.ingredients
+                            .where(
+                              (ing) => inventory.any(
+                                (it) =>
+                                    it.name.contains(ing.name) ||
+                                    ing.name.contains(it.name),
+                              ),
+                            )
+                            .length;
+                        final total = r.ingredients.length;
+                        final allInStock = inStock == total && total > 0;
+
                         return ListTile(
-                          title: Text(r.name),
-                          subtitle: Text(
-                            r.ingredients.map((e) => e.name).join(', '),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                          title: Text(
+                            r.name,
+                            style: TextStyle(
+                              fontWeight: allInStock
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                            ),
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                r.ingredients.map((e) => e.name).join(', '),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                              Row(
+                                children: [
+                                  Text(
+                                    '재고: $inStock / $total',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: allInStock
+                                          ? Colors.green
+                                          : (inStock > 0
+                                                ? Colors.orange
+                                                : Colors.grey),
+                                    ),
+                                  ),
+                                  if (matchedItems.isNotEmpty) ...[
+                                    const SizedBox(width: 8),
+                                    InkWell(
+                                      onTap: () => _showMatchedItemsDetail(
+                                        context,
+                                        matchedItems,
+                                      ),
+                                      child: Text(
+                                        '[상세보기]',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          color: theme.colorScheme.primary,
+                                          decoration: TextDecoration.underline,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ],
                           ),
                           onTap: () => Navigator.pop(ctx, r),
                           trailing: IconButton(
@@ -125,9 +243,52 @@ class _RecipePickerDialogState extends State<_RecipePickerDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: const Text('취소'),
         ),
       ],
+    );
+  }
+
+  void _showMatchedItemsDetail(
+    BuildContext context,
+    List<FoodExpiryItem> items,
+  ) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('매칭된 재고 상세'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: items.length,
+            itemBuilder: (ctx, i) {
+              final it = items[i];
+              return ListTile(
+                title: Text(it.name),
+                subtitle: Text(
+                  '${it.category} | ${it.location} | ${it.quantity}${it.unit}',
+                ),
+                trailing: Text(
+                  '${it.daysLeft(DateTime.now())}일 남음',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: it.daysLeft(DateTime.now()) <= 2
+                        ? Colors.red
+                        : Colors.grey,
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('닫기'),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -200,11 +361,7 @@ class _RecipeUpsertDialogState extends State<_RecipeUpsertDialog> {
       setState(() {
         for (var item in selected) {
           _ingredients.add(
-            RecipeIngredient(
-              name: item.name,
-              quantity: 1, // Default
-              unit: 'ea', // Default
-            ),
+            RecipeIngredient(name: item.name, quantity: 1, unit: '개'),
           );
         }
       });
@@ -241,14 +398,14 @@ class _RecipeUpsertDialogState extends State<_RecipeUpsertDialog> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              widget.existing == null ? 'Add New Recipe' : 'Edit Recipe',
+              widget.existing == null ? '새 레시피 추가' : '레시피 수정',
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _nameController,
               decoration: const InputDecoration(
-                labelText: 'Recipe Name',
+                labelText: '레시피 이름',
                 border: OutlineInputBorder(),
               ),
             ),
@@ -256,7 +413,7 @@ class _RecipeUpsertDialogState extends State<_RecipeUpsertDialog> {
             DropdownButtonFormField<String>(
               initialValue: _cuisines.contains(_cuisine) ? _cuisine : 'Other',
               decoration: const InputDecoration(
-                labelText: 'Category',
+                labelText: '카테고리',
                 border: OutlineInputBorder(),
               ),
               items: _cuisines
@@ -270,18 +427,18 @@ class _RecipeUpsertDialogState extends State<_RecipeUpsertDialog> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Ingredients'),
+                const Text('식재료 목록'),
                 Row(
                   children: [
                     IconButton(
                       onPressed: _importFromHistory,
                       icon: const Icon(Icons.history),
-                      tooltip: 'Import from History',
+                      tooltip: '쇼핑 기록에서 가져오기',
                     ),
                     IconButton(
                       onPressed: _addIngredient,
                       icon: const Icon(Icons.add),
-                      tooltip: 'Add Ingredient',
+                      tooltip: '식재료 직접 추가',
                     ),
                   ],
                 ),
@@ -322,17 +479,19 @@ class _RecipeUpsertDialogState extends State<_RecipeUpsertDialog> {
                       final confirm = await showDialog<bool>(
                         context: context,
                         builder: (ctx) => AlertDialog(
-                          title: const Text('Delete Recipe'),
-                          content: Text("Delete '${widget.existing!.name}'?"),
+                          title: const Text('레시피 삭제'),
+                          content: Text(
+                            "'${widget.existing!.name}' 레시피를 삭제하시겠습니까?",
+                          ),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(ctx, false),
-                              child: const Text('Cancel'),
+                              child: const Text('취소'),
                             ),
                             TextButton(
                               onPressed: () => Navigator.pop(ctx, true),
                               child: const Text(
-                                'Delete',
+                                '삭제',
                                 style: TextStyle(color: Colors.red),
                               ),
                             ),
@@ -349,15 +508,15 @@ class _RecipeUpsertDialogState extends State<_RecipeUpsertDialog> {
                       }
                     },
                     style: TextButton.styleFrom(foregroundColor: Colors.red),
-                    child: const Text('Delete'),
+                    child: const Text('삭제'),
                   ),
                 const Spacer(),
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Cancel'),
+                  child: const Text('취소'),
                 ),
                 const SizedBox(width: 8),
-                FilledButton(onPressed: _save, child: const Text('Save')),
+                FilledButton(onPressed: _save, child: const Text('저장')),
               ],
             ),
           ],
@@ -379,26 +538,90 @@ class _IngredientUpsertDialog extends StatefulWidget {
 class _IngredientUpsertDialogState extends State<_IngredientUpsertDialog> {
   final _nameController = TextEditingController();
   final _qtyController = TextEditingController(text: '1');
-  final _unitController = TextEditingController(text: 'ea');
+  final _unitController = TextEditingController(text: '개');
+  List<String> _suggestions = [];
+  List<String> _allPossibleNames = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSuggestions();
+  }
+
+  Future<void> _loadSuggestions() async {
+    final inventory = FoodExpiryService.instance.items.value
+        .map((e) => e.name)
+        .toList();
+    final accountName = await UserPrefService.getLastAccountName();
+    List<String> history = [];
+    if (accountName != null) {
+      final h = await UserPrefService.getShoppingCartHistory(
+        accountName: accountName,
+      );
+      history = h.map((e) => e.name).toList();
+    }
+    setState(() {
+      _allPossibleNames = {...inventory, ...history}.toList();
+    });
+  }
+
+  void _updateSuggestions(String query) {
+    if (query.isEmpty) {
+      setState(() => _suggestions = []);
+      return;
+    }
+    final q = query.toLowerCase();
+    setState(() {
+      _suggestions = _allPossibleNames
+          .where((name) => name.toLowerCase().contains(q))
+          .take(5)
+          .toList();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Add Ingredient'),
+      title: const Text('식재료 추가'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
             controller: _nameController,
-            decoration: const InputDecoration(labelText: 'Name'),
+            decoration: const InputDecoration(
+              labelText: '이름',
+              hintText: '예: 아몬드 분말',
+            ),
             autofocus: true,
+            onChanged: _updateSuggestions,
           ),
+          if (_suggestions.isNotEmpty)
+            Container(
+              constraints: const BoxConstraints(maxHeight: 150),
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: _suggestions.length,
+                itemBuilder: (ctx, i) {
+                  final name = _suggestions[i];
+                  return ListTile(
+                    title: Text(name),
+                    dense: true,
+                    onTap: () {
+                      setState(() {
+                        _nameController.text = name;
+                        _suggestions = [];
+                      });
+                    },
+                  );
+                },
+              ),
+            ),
           Row(
             children: [
               Expanded(
                 child: TextField(
                   controller: _qtyController,
-                  decoration: const InputDecoration(labelText: 'Quantity'),
+                  decoration: const InputDecoration(labelText: '수량'),
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
@@ -408,7 +631,7 @@ class _IngredientUpsertDialogState extends State<_IngredientUpsertDialog> {
               Expanded(
                 child: TextField(
                   controller: _unitController,
-                  decoration: const InputDecoration(labelText: 'Unit'),
+                  decoration: const InputDecoration(labelText: '단위'),
                 ),
               ),
             ],
@@ -418,7 +641,7 @@ class _IngredientUpsertDialogState extends State<_IngredientUpsertDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: const Text('취소'),
         ),
         FilledButton(
           onPressed: () {
@@ -432,7 +655,7 @@ class _IngredientUpsertDialogState extends State<_IngredientUpsertDialog> {
               Navigator.pop(context);
             }
           },
-          child: const Text('Add'),
+          child: const Text('추가'),
         ),
       ],
     );
@@ -578,8 +801,29 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
   late TextEditingController _memoController;
   late TextEditingController _quantityController;
   late TextEditingController _unitController;
+  late TextEditingController _priceController;
+  late TextEditingController _supplierController;
   late DateTime _purchaseDate;
   DateTime? _pickedExpiryDate;
+
+  String _category = '기타';
+  String _location = '냉장';
+  bool _addToShoppingList = false;
+
+  final List<String> _categories = [
+    '채소',
+    '과일',
+    '육류',
+    '수산물',
+    '유제품',
+    '냉동식품',
+    '가공식품',
+    '음료',
+    '양념/소스',
+    '기타',
+  ];
+
+  final List<String> _locations = ['냉장', '냉동', '실온', '팬트리'];
 
   // Adjustment fields for existing items
   final TextEditingController _addQtyController = TextEditingController();
@@ -601,8 +845,16 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
       text: widget.existing?.quantity.toString() ?? '1',
     );
     _unitController = TextEditingController(text: widget.existing?.unit ?? '개');
+    _priceController = TextEditingController(
+      text: widget.existing?.price.toString() ?? '0',
+    );
+    _supplierController = TextEditingController(
+      text: widget.existing?.supplier ?? '',
+    );
     _purchaseDate = widget.existing?.purchaseDate ?? DateTime.now();
     _pickedExpiryDate = widget.existing?.expiryDate;
+    _category = widget.existing?.category ?? '기타';
+    _location = widget.existing?.location ?? '냉장';
 
     if (widget.existing != null) {
       _addQtyController.addListener(_updateTotal);
@@ -616,6 +868,8 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
     _memoController.dispose();
     _quantityController.dispose();
     _unitController.dispose();
+    _priceController.dispose();
+    _supplierController.dispose();
     _addQtyController.dispose();
     _subQtyController.dispose();
     _nameFocus.dispose();
@@ -799,31 +1053,6 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
     );
   }
 
-  String _riskLabel(FoodExpiryRisk r) {
-    switch (r) {
-      case FoodExpiryRisk.safe:
-        return 'Safe';
-      case FoodExpiryRisk.caution:
-        return 'Caution';
-      case FoodExpiryRisk.danger:
-        return 'Danger';
-      case FoodExpiryRisk.stable:
-        return 'Stable';
-    }
-  }
-
-  Color _riskColor(ThemeData theme, FoodExpiryRisk r) {
-    switch (r) {
-      case FoodExpiryRisk.danger:
-        return theme.colorScheme.error;
-      case FoodExpiryRisk.caution:
-        return theme.colorScheme.tertiary;
-      case FoodExpiryRisk.safe:
-      case FoodExpiryRisk.stable:
-        return theme.colorScheme.primary;
-    }
-  }
-
   Future<void> _save() async {
     final name = _nameController.text.trim();
     final p = _prediction();
@@ -832,10 +1061,10 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
     final unit = _unitController.text.trim().isEmpty
         ? '개'
         : _unitController.text.trim();
+    final price = double.tryParse(_priceController.text) ?? 0.0;
+    final supplier = _supplierController.text.trim();
 
     if (name.isEmpty || effective == null) {
-      // If in import mode, maybe just skip? But user clicked Save.
-      // Let's just return and let user fix it.
       return;
     }
 
@@ -847,6 +1076,10 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
         memo: _memoController.text,
         quantity: quantity,
         unit: unit,
+        category: _category,
+        location: _location,
+        price: price,
+        supplier: supplier,
       );
     } else {
       await FoodExpiryService.instance.updateItem(
@@ -857,7 +1090,34 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
         memo: _memoController.text,
         quantity: quantity,
         unit: unit,
+        category: _category,
+        location: _location,
+        price: price,
+        supplier: supplier,
       );
+    }
+
+    // Handle "Add to shopping list" if checked
+    if (_addToShoppingList) {
+      final accountName = await UserPrefService.getLastAccountName();
+      if (accountName != null) {
+        final currentItems = await UserPrefService.getShoppingCartItems(
+          accountName: accountName,
+        );
+        final now = DateTime.now();
+        final newItem = ShoppingCartItem(
+          id: 'sc_${now.microsecondsSinceEpoch}',
+          name: name,
+          quantity: quantity.toInt(),
+          unitPrice: price,
+          createdAt: now,
+          updatedAt: now,
+        );
+        await UserPrefService.setShoppingCartItems(
+          accountName: accountName,
+          items: [newItem, ...currentItems],
+        );
+      }
     }
 
     if (_importQueue.isNotEmpty) {
@@ -867,370 +1127,343 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
     }
   }
 
+  Widget _buildFieldLabel(String label, ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8, top: 12),
+      child: Text(
+        label,
+        style: theme.textTheme.titleSmall?.copyWith(
+          fontWeight: FontWeight.bold,
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
+      ),
+    );
+  }
+
+  InputDecoration _formInputDecoration({
+    String? hintText,
+    Widget? suffixIcon,
+    EdgeInsets? contentPadding,
+  }) {
+    return InputDecoration(
+      hintText: hintText,
+      suffixIcon: suffixIcon,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(width: 1.5),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey.shade400, width: 1.5),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(width: 2),
+      ),
+      contentPadding:
+          contentPadding ??
+          const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      isDense: true,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final p = _prediction();
-    final suggestedText = p == null
-        ? null
-        : '${DateFormat('yyyy-MM-dd').format(p.suggestedExpiryDate)} '
-              '(+${p.adjustedDays}일, ${p.category})';
 
     final isImporting = _importQueue.isNotEmpty || _importTotal > 0;
     final remaining = _importQueue.length;
-    final currentImportIndex =
-        _importTotal -
-        remaining; // 1-based index for display? No, 0 items done.
-    // If queue has 4 items, total 5. 1 is current.
-    // Display: "Importing 1 / 5"
+    final currentImportIndex = _importTotal - remaining;
 
     return Dialog(
-      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      child: SizedBox(
-        width: double.maxFinite,
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 450),
+        padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Column(
                   children: [
                     Text(
-                      widget.existing == null ? '유통기한 추가' : '유통기한 수정',
-                      style: theme.textTheme.titleLarge,
-                    ),
-                    if (isImporting)
-                      Chip(
-                        label: Text(
-                          '${currentImportIndex + 1} / $_importTotal',
-                        ),
-                        backgroundColor: theme.colorScheme.secondaryContainer,
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _nameController,
-                        focusNode: _nameFocus,
-                        decoration: const InputDecoration(
-                          labelText: '상품명',
-                          hintText: '예: 우유, 계란, 두부',
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 12,
-                          ),
-                        ),
-                        textInputAction: TextInputAction.next,
-                        onChanged: (_) => setState(() {}),
-                        onSubmitted: (_) => _memoFocus.requestFocus(),
+                      widget.existing == null ? '식재료 등록' : '식재료 정보 수정',
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.5,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    IconButton.filledTonal(
-                      onPressed: _memoFocus.requestFocus,
-                      icon: const Icon(Icons.arrow_downward),
-                      tooltip: '다음 입력',
-                    ),
-                    const SizedBox(width: 4),
-                    IconButton.outlined(
-                      onPressed: _showHistoryPicker,
-                      icon: const Icon(IconCatalog.history),
-                      tooltip: '쇼핑 기록 불러오기',
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _quantityController,
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
-                        ),
-                        decoration: const InputDecoration(
-                          labelText: '수량',
-                          hintText: '숫자만 입력 (예: 1)',
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 12,
-                          ),
-                        ),
-                        onChanged: (_) => setState(() {}),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: TextField(
-                        controller: _unitController,
-                        decoration: const InputDecoration(
-                          labelText: '단위',
-                          hintText: 'g, kg, ml 등',
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 12,
-                          ),
-                        ),
-                        onChanged: (_) => setState(() {}),
+                    const SizedBox(height: 8),
+                    Container(
+                      height: 3,
+                      width: 40,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary,
+                        borderRadius: BorderRadius.circular(2),
                       ),
                     ),
                   ],
                 ),
-                if (widget.existing != null) ...[
-                  const SizedBox(height: 8),
-                  Row(
+              ),
+              const SizedBox(height: 24),
+              if (isImporting)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: Chip(
+                    label: Text(
+                      '가져오기 중 ${currentImportIndex + 1} / $_importTotal',
+                    ),
+                    backgroundColor: theme.colorScheme.secondaryContainer,
+                  ),
+                ),
+
+              // Item Name
+              _buildFieldLabel('품목명', theme),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _nameController,
+                      focusNode: _nameFocus,
+                      decoration: _formInputDecoration(
+                        hintText: '품목명을 입력하세요',
+                        suffixIcon: const Icon(Icons.edit_note, size: 20),
+                      ),
+                      textInputAction: TextInputAction.next,
+                      onChanged: (_) => setState(() {}),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton.outlined(
+                    onPressed: _showHistoryPicker,
+                    icon: const Icon(IconCatalog.history),
+                    tooltip: '쇼핑 기록 불러오기',
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              // Category
+              _buildFieldLabel('카테고리', theme),
+              DropdownButtonFormField<String>(
+                initialValue: _category,
+                decoration: _formInputDecoration(),
+                items: _categories.map((c) {
+                  return DropdownMenuItem(value: c, child: Text(c));
+                }).toList(),
+                onChanged: (val) {
+                  if (val != null) setState(() => _category = val);
+                },
+              ),
+
+              // Quantity & Unit
+              Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildFieldLabel('수량', theme),
+                        TextField(
+                          controller: _quantityController,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          decoration: _formInputDecoration(hintText: '0'),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    flex: 3,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildFieldLabel('단위', theme),
+                        TextField(
+                          controller: _unitController,
+                          decoration: _formInputDecoration(
+                            hintText: '단위 (예: 개, g, kg)',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+
+              // Location
+              _buildFieldLabel('보관 위치', theme),
+              DropdownButtonFormField<String>(
+                initialValue: _location,
+                decoration: _formInputDecoration(),
+                items: _locations.map((l) {
+                  return DropdownMenuItem(value: l, child: Text(l));
+                }).toList(),
+                onChanged: (val) {
+                  if (val != null) setState(() => _location = val);
+                },
+              ),
+
+              // Expiration Date
+              _buildFieldLabel('유통기한', theme),
+              InkWell(
+                onTap: () async {
+                  final initial =
+                      _pickedExpiryDate ??
+                      p?.suggestedExpiryDate ??
+                      DateTime.now();
+                  final picked = await showDatePicker(
+                    context: context,
+                    initialDate: initial,
+                    firstDate: DateTime.now().subtract(
+                      const Duration(days: 365),
+                    ),
+                    lastDate: DateTime.now().add(const Duration(days: 3650)),
+                  );
+                  if (picked != null) {
+                    setState(() => _pickedExpiryDate = picked);
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade400, width: 1.5),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
                     children: [
                       Expanded(
-                        child: TextField(
-                          controller: _addQtyController,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                          decoration: const InputDecoration(
-                            labelText: '추가 (+)',
-                            hintText: '0',
-                            border: OutlineInputBorder(),
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 12,
-                            ),
-                            prefixIcon: Icon(Icons.add, size: 16),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: TextField(
-                          controller: _subQtyController,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                          decoration: const InputDecoration(
-                            labelText: '사용 (-)',
-                            hintText: '0',
-                            border: OutlineInputBorder(),
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 12,
-                            ),
-                            prefixIcon: Icon(Icons.remove, size: 16),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-                const SizedBox(height: 12),
-                TextField(
-                  controller: _memoController,
-                  focusNode: _memoFocus,
-                  decoration: const InputDecoration(
-                    labelText: '메모(선택)',
-                    hintText: '예: 냉동 / 임박 / 마감세일',
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 12,
-                    ),
-                  ),
-                  onChanged: (_) => setState(() {}),
-                ),
-                const SizedBox(height: 20),
-                Text('구매일', style: theme.textTheme.labelLarge),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () async {
-                          final now = DateTime.now();
-                          final d = await showDatePicker(
-                            context: context,
-                            initialDate: _purchaseDate,
-                            firstDate: DateTime(now.year - 1),
-                            lastDate: DateTime(now.year + 10),
-                          );
-                          if (d != null) {
-                            setState(() => _purchaseDate = d);
-                          }
-                        },
-                        icon: const Icon(IconCatalog.calendarToday, size: 18),
-                        label: Text(
-                          DateFormat('yyyy-MM-dd').format(_purchaseDate),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          alignment: Alignment.centerLeft,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Wrap(
-                        spacing: 8,
-                        children: [
-                          ActionChip(
-                            label: const Text('오늘'),
-                            onPressed: () {
-                              setState(() => _purchaseDate = DateTime.now());
-                            },
-                          ),
-                          ActionChip(
-                            label: const Text('어제'),
-                            onPressed: () {
-                              setState(() {
-                                _purchaseDate = DateTime.now().subtract(
-                                  const Duration(days: 1),
-                                );
-                              });
-                            },
-                          ),
-                          ActionChip(
-                            label: const Text('2일전'),
-                            onPressed: () {
-                              setState(() {
-                                _purchaseDate = DateTime.now().subtract(
-                                  const Duration(days: 2),
-                                );
-                              });
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                if (p != null) ...[
-                  Card(
-                    color: theme.colorScheme.surfaceContainerHighest,
-                    elevation: 0,
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                'AI Prediction',
-                                style: theme.textTheme.titleSmall,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                _riskLabel(p.risk),
-                                style: TextStyle(
-                                  color: _riskColor(theme, p.risk),
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 6),
-                          Text(suggestedText ?? ''),
-                          const SizedBox(height: 6),
-                          ...p.reasons
-                              .take(3)
-                              .map(
-                                (e) => Text(
-                                  '• $e',
-                                  style: theme.textTheme.bodySmall,
-                                ),
-                              ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                ],
-                Text('유통기한', style: theme.textTheme.labelLarge),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () async {
-                          final now = DateTime.now();
-                          final d = await showDatePicker(
-                            context: context,
-                            initialDate:
-                                _pickedExpiryDate ??
-                                p?.suggestedExpiryDate ??
-                                now,
-                            firstDate: DateTime(now.year - 1),
-                            lastDate: DateTime(now.year + 10),
-                          );
-                          if (d != null) {
-                            setState(() => _pickedExpiryDate = d);
-                          }
-                        },
-                        style: OutlinedButton.styleFrom(
-                          alignment: Alignment.centerLeft,
-                        ),
-                        child: Text(_expiryButtonLabel(p?.suggestedExpiryDate)),
-                      ),
-                    ),
-                    if (p != null) ...[
-                      const SizedBox(width: 8),
-                      TextButton(
-                        onPressed: () {
-                          setState(() {
-                            _pickedExpiryDate = p.suggestedExpiryDate;
-                          });
-                        },
-                        child: const Text('예측 적용'),
-                      ),
-                    ],
-                  ],
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    if (isImporting) ...[
-                      TextButton(
-                        onPressed: _stopImport,
-                        child: const Text('가져오기 중단'),
-                      ),
-                      const SizedBox(width: 8),
-                      OutlinedButton(
-                        onPressed: _skipCurrentImport,
-                        child: const Text('건너뛰기'),
-                      ),
-                      const SizedBox(width: 8),
-                      FilledButton(
-                        onPressed: _save,
                         child: Text(
-                          remaining > 0 ? '저장 후 다음($remaining개)' : '저장 및 완료',
+                          _expiryButtonLabel(p?.suggestedExpiryDate),
+                          style: theme.textTheme.bodyMedium,
                         ),
                       ),
-                    ] else ...[
-                      TextButton(
-                        onPressed: Navigator.of(context).pop,
-                        child: const Text('취소'),
-                      ),
-                      const SizedBox(width: 8),
-                      FilledButton(
-                        onPressed: _save,
-                        child: Text(widget.existing == null ? '등록' : '저장'),
-                      ),
+                      const Icon(Icons.calendar_today_outlined, size: 18),
                     ],
+                  ),
+                ),
+              ),
+
+              // Price
+              _buildFieldLabel('가격', theme),
+              TextField(
+                controller: _priceController,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                decoration: _formInputDecoration(hintText: '0'),
+              ),
+
+              // Supplier
+              _buildFieldLabel('구입처', theme),
+              TextField(
+                controller: _supplierController,
+                decoration: _formInputDecoration(
+                  hintText: '구입처를 입력하세요',
+                  suffixIcon: const Icon(Icons.keyboard_arrow_down),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+              // Add to shopping list checkbox
+              Row(
+                children: [
+                  SizedBox(
+                    height: 24,
+                    width: 24,
+                    child: Checkbox(
+                      value: _addToShoppingList,
+                      onChanged: (val) =>
+                          setState(() => _addToShoppingList = val ?? false),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    '장바구니에 추가',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 32),
+              // Actions
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text(
+                        '취소',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: _save,
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(
+                        widget.existing == null ? '등록하기' : '수정하기',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              if (isImporting) ...[
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: _skipCurrentImport,
+                        child: const Text('Skip This Item'),
+                      ),
+                    ),
+                    Expanded(
+                      child: TextButton(
+                        onPressed: _stopImport,
+                        child: const Text(
+                          'Stop Import',
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ],
-            ),
+            ],
           ),
         ),
       ),
@@ -1274,6 +1507,7 @@ class _FoodExpiryItemsScreen extends StatefulWidget {
 class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
   bool _isUsageMode = false;
   final Map<String, double> _usageMap = {};
+  final Set<String> _activeUsageItems = {};
 
   Future<void> _addToCart(BuildContext context, FoodExpiryItem item) async {
     final accountName = await UserPrefService.getLastAccountName();
@@ -1294,8 +1528,6 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
     final newItem = ShoppingCartItem(
       id: 'shop_${now.microsecondsSinceEpoch}',
       name: item.name,
-      isPlanned: true,
-      isChecked: false,
       createdAt: now,
       updatedAt: now,
     );
@@ -1443,6 +1675,146 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
       memo: item.memo,
       quantity: newQty,
       unit: item.unit,
+      category: item.category,
+      location: item.location,
+      price: item.price,
+      supplier: item.supplier,
+    );
+  }
+
+  void _showItemDetail(BuildContext context, FoodExpiryItem item) {
+    final theme = Theme.of(context);
+    final left = item.daysLeft(DateTime.now());
+    final leftColor = left < 0
+        ? theme.colorScheme.error
+        : (left <= 2 ? theme.colorScheme.tertiary : theme.colorScheme.primary);
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(Icons.info_outline, size: 24),
+            const SizedBox(width: 8),
+            Expanded(child: Text(item.name)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _detailRow('카테고리', item.category, Icons.category_outlined, theme),
+            _detailRow(
+              '보관위치',
+              item.location,
+              Icons.location_on_outlined,
+              theme,
+            ),
+            _detailRow(
+              '수량',
+              '${_formatQuantity(item)} ${item.unit}',
+              Icons.inventory_2_outlined,
+              theme,
+            ),
+            _detailRow(
+              '가격',
+              '${CurrencyFormatter.format(item.price)}원',
+              Icons.payments_outlined,
+              theme,
+            ),
+            _detailRow(
+              '구매처',
+              item.supplier.isEmpty ? '-' : item.supplier,
+              Icons.storefront_outlined,
+              theme,
+            ),
+            const Divider(),
+            _detailRow(
+              '구매일',
+              DateFormat('yyyy-MM-dd').format(item.purchaseDate),
+              Icons.calendar_today_outlined,
+              theme,
+            ),
+            _detailRow(
+              '유통기한',
+              '${DateFormat('yyyy-MM-dd').format(item.expiryDate)} ($left일 남음)',
+              Icons.event_available_outlined,
+              theme,
+              valueColor: leftColor,
+            ),
+            if (item.memo.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Text(
+                '메모',
+                style: theme.textTheme.labelSmall?.copyWith(color: Colors.grey),
+              ),
+              const SizedBox(height: 4),
+              Container(
+                width: double.maxFinite,
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.3,
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(item.memo, style: theme.textTheme.bodyMedium),
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              widget.onUpsert?.call(context, existing: item);
+            },
+            child: const Text('수정'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('닫기'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _detailRow(
+    String label,
+    String value,
+    IconData icon,
+    ThemeData theme, {
+    Color? valueColor,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            size: 16,
+            color: theme.colorScheme.primary.withValues(alpha: 0.7),
+          ),
+          const SizedBox(width: 12),
+          SizedBox(
+            width: 70,
+            child: Text(
+              label,
+              style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w500,
+                color: valueColor,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1450,6 +1822,18 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
     setState(() {
       _isUsageMode = !_isUsageMode;
       _usageMap.clear();
+      _activeUsageItems.clear();
+    });
+  }
+
+  void _toggleItemUsage(String id) {
+    setState(() {
+      if (_activeUsageItems.contains(id)) {
+        _activeUsageItems.remove(id);
+        _usageMap.remove(id);
+      } else {
+        _activeUsageItems.add(id);
+      }
     });
   }
 
@@ -1468,39 +1852,36 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
       );
       if (item.id != entry.key) continue;
 
-      final newQty = item.quantity - entry.value;
-      if (newQty <= 0) {
-        await FoodExpiryService.instance.updateItem(
-          id: item.id,
-          name: item.name,
-          purchaseDate: item.purchaseDate,
-          expiryDate: item.expiryDate,
-          memo: item.memo,
-          quantity: 0,
-          unit: item.unit,
-        );
-      } else {
-        await FoodExpiryService.instance.updateItem(
-          id: item.id,
-          name: item.name,
-          purchaseDate: item.purchaseDate,
-          expiryDate: item.expiryDate,
-          memo: item.memo,
-          quantity: newQty,
-          unit: item.unit,
-        );
-      }
+      final newQty = (item.quantity - entry.value).clamp(0.0, double.infinity);
+
+      await FoodExpiryService.instance.updateItem(
+        id: item.id,
+        name: item.name,
+        purchaseDate: item.purchaseDate,
+        expiryDate: item.expiryDate,
+        memo: item.memo,
+        quantity: newQty,
+        unit: item.unit,
+        category: item.category,
+        location: item.location,
+        price: item.price,
+        supplier: item.supplier,
+      );
       updatedCount++;
     }
 
     setState(() {
       _isUsageMode = false;
       _usageMap.clear();
+      _activeUsageItems.clear();
     });
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Usage recorded for $updatedCount items.')),
+        SnackBar(
+          content: Text('$updatedCount개의 항목 사용량이 기록되었습니다.'),
+          behavior: SnackBarBehavior.floating,
+        ),
       );
     }
   }
@@ -1514,13 +1895,14 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
     );
 
     if (selectedRecipe != null) {
+      final List<String> missingIngredients = [];
+      final List<String> matchedInfo = [];
+
       setState(() {
         _isUsageMode = true;
         _usageMap.clear();
 
-        int matchedCount = 0;
         for (var ingredient in selectedRecipe.ingredients) {
-          // Simple name matching
           try {
             final item = items.firstWhere(
               (i) =>
@@ -1528,26 +1910,128 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
                   ingredient.name.contains(i.name),
             );
             _usageMap[item.id] = ingredient.quantity;
-            matchedCount++;
+            matchedInfo.add('${item.name} (재고: ${_formatQuantity(item)})');
           } catch (e) {
-            // Not found in inventory
+            missingIngredients.add(ingredient.name);
           }
         }
 
-        if (matchedCount > 0) {
+        if (matchedInfo.isNotEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                '${selectedRecipe.name} 재료 $matchedCount개가 입력되었습니다.',
+                '${selectedRecipe.name}: ${matchedInfo.length}개 항목 매칭됨\n'
+                '${matchedInfo.take(3).join(", ")}${matchedInfo.length > 3 ? " 등" : ""}',
               ),
+              duration: const Duration(seconds: 3),
             ),
           );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('일치하는 재고 항목을 찾을 수 없습니다.')),
-          );
+        } else if (missingIngredients.isNotEmpty) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('일치하는 재고 항목이 없습니다.')));
         }
       });
+
+      if (missingIngredients.isNotEmpty && mounted) {
+        _promptAddMissingToCart(missingIngredients);
+      }
+    }
+  }
+
+  Future<void> _promptAddMissingToCart(List<String> missingNames) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('부족한 식재료 안내'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('다음 재료는 현재 재고 정보가 없습니다.'),
+            const Text('장바구니에 추가하여 구매를 준비할까요?'),
+            const SizedBox(height: 16),
+            Container(
+              width: double.maxFinite,
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.grey.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: missingNames
+                    .map(
+                      (name) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 2),
+                        child: Text(
+                          '• $name (정보없음)',
+                          style: const TextStyle(color: Colors.redAccent),
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('취소'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('장바구니 추가'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true && mounted) {
+      final accountName = await UserPrefService.getLastAccountName();
+      if (accountName == null) return;
+
+      final currentItems = await UserPrefService.getShoppingCartItems(
+        accountName: accountName,
+      );
+
+      final now = DateTime.now();
+      final List<ShoppingCartItem> newItems = [];
+
+      for (var name in missingNames) {
+        newItems.add(
+          ShoppingCartItem(
+            id: 'shop_${now.microsecondsSinceEpoch}_${newItems.length}',
+            name: name,
+            createdAt: now,
+            updatedAt: now,
+          ),
+        );
+      }
+
+      await UserPrefService.setShoppingCartItems(
+        accountName: accountName,
+        items: [...newItems, ...currentItems],
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${newItems.length}개의 재료를 장바구니에 담았습니다.'),
+            action: SnackBarAction(
+              label: '장바구니 이동',
+              onPressed: () {
+                Navigator.pushNamed(
+                  context,
+                  AppRoutes.shoppingCart,
+                  arguments: ShoppingCartArgs(accountName: accountName),
+                );
+              },
+            ),
+          ),
+        );
+      }
     }
   }
 
@@ -1577,7 +2061,8 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
             ),
         ],
       ),
-      floatingActionButton: _isUsageMode && _usageMap.isNotEmpty
+      floatingActionButton:
+          (_isUsageMode || _activeUsageItems.isNotEmpty) && _usageMap.isNotEmpty
           ? FloatingActionButton.extended(
               onPressed: _applyBulkUsage,
               icon: const Icon(Icons.check),
@@ -1617,17 +2102,59 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
                         ? theme.colorScheme.tertiary
                         : theme.colorScheme.primary);
 
+              final isItemUsageActive =
+                  _isUsageMode || _activeUsageItems.contains(it.id);
+
               return ListTile(
+                onTap: () => _showItemDetail(context, it),
                 title: Row(
                   children: [
+                    if (it.category.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.secondaryContainer,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            it.category,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: theme.colorScheme.onSecondaryContainer,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ),
+                      ),
                     Expanded(
-                      child: Text(
-                        it.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      child: Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              it.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(
+                            Icons.info_outline,
+                            size: 14,
+                            color: theme.colorScheme.primary.withValues(
+                              alpha: 0.5,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    if (!_isUsageMode) ...[
+                    if (!isItemUsageActive) ...[
                       IconButton(
                         icon: const Icon(Icons.remove_circle_outline, size: 20),
                         padding: EdgeInsets.zero,
@@ -1663,42 +2190,34 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
                         onPressed: () => _adjustQuantity(context, it, 1),
                       ),
                     ] else ...[
-                      // Usage Mode: Show input field directly
-                      Text(
-                        '현재: ${_formatQuantity(it)}',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: Colors.grey,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      SizedBox(
-                        width: 80,
-                        height: 36,
-                        child: TextField(
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                          decoration: const InputDecoration(
-                            hintText: '사용',
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 0,
+                      // Usage Mode: Improved UI
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '잔량: ${_formatQuantity(it)}',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: Colors.grey,
+                              fontSize: 11,
                             ),
-                            border: OutlineInputBorder(),
                           ),
-                          onChanged: (val) {
-                            final v = double.tryParse(val);
-                            if (v != null && v > 0) {
+                          const SizedBox(height: 4),
+                          _UsageInput(
+                            initialValue: _usageMap[it.id],
+                            max: it.quantity,
+                            unit: it.unit,
+                            onChanged: (val) {
                               setState(() {
-                                _usageMap[it.id] = v;
+                                if (val == null || val <= 0) {
+                                  _usageMap.remove(it.id);
+                                } else {
+                                  _usageMap[it.id] = val;
+                                }
                               });
-                            } else {
-                              setState(() {
-                                _usageMap.remove(it.id);
-                              });
-                            }
-                          },
-                        ),
+                            },
+                          ),
+                        ],
                       ),
                     ],
                   ],
@@ -1708,28 +2227,39 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                onTap: () {
-                  if (!_isUsageMode) {
-                    widget.onUpsert?.call(context, existing: it);
-                  }
-                },
                 trailing: _isUsageMode
                     ? null
                     : Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(leftText, style: TextStyle(color: color)),
+                          if (!isItemUsageActive)
+                            Text(leftText, style: TextStyle(color: color)),
                           IconButton(
-                            icon: const Icon(IconCatalog.shoppingCart),
-                            tooltip: '장바구니 담기',
-                            onPressed: () => _addToCart(context, it),
+                            icon: Icon(
+                              isItemUsageActive
+                                  ? Icons.close
+                                  : Icons.soup_kitchen,
+                              size: 20,
+                              color: isItemUsageActive
+                                  ? theme.colorScheme.error
+                                  : theme.colorScheme.primary,
+                            ),
+                            tooltip: isItemUsageActive ? '입력 취소' : '사용량 입력',
+                            onPressed: () => _toggleItemUsage(it.id),
                           ),
-                          IconButton(
-                            icon: const Icon(IconCatalog.deleteOutline),
-                            tooltip: '삭제',
-                            onPressed: () =>
-                                FoodExpiryService.instance.deleteById(it.id),
-                          ),
+                          if (!isItemUsageActive) ...[
+                            IconButton(
+                              icon: const Icon(IconCatalog.shoppingCart),
+                              tooltip: '장바구니 담기',
+                              onPressed: () => _addToCart(context, it),
+                            ),
+                            IconButton(
+                              icon: const Icon(IconCatalog.deleteOutline),
+                              tooltip: '삭제',
+                              onPressed: () =>
+                                  FoodExpiryService.instance.deleteById(it.id),
+                            ),
+                          ],
                         ],
                       ),
               );
@@ -1749,10 +2279,157 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
   String _itemSubtitleText(FoodExpiryItem item) {
     final purchase = DateFormat('yyyy-MM-dd').format(item.purchaseDate);
     final expiry = DateFormat('yyyy-MM-dd').format(item.expiryDate);
-    final base = '구매일: $purchase  /  유통기한: $expiry';
+
+    String base = '구매: $purchase / 기한: $expiry';
+    if (item.location.isNotEmpty) {
+      base += '\n위치: ${item.location}';
+    }
+    if (item.price > 0) {
+      base += ' / 가격: ${NumberFormat('#,###').format(item.price)}원';
+    }
+
     final memo = item.memo.trim();
     if (memo.isEmpty) return base;
     return '$base\n메모: $memo';
+  }
+}
+
+class _UsageInput extends StatefulWidget {
+  final double? initialValue;
+  final double max;
+  final String unit;
+  final ValueChanged<double?> onChanged;
+
+  const _UsageInput({
+    this.initialValue,
+    required this.max,
+    required this.unit,
+    required this.onChanged,
+  });
+
+  @override
+  State<_UsageInput> createState() => _UsageInputState();
+}
+
+class _UsageInputState extends State<_UsageInput> {
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(
+      text: widget.initialValue?.toString() ?? '',
+    );
+  }
+
+  @override
+  void didUpdateWidget(_UsageInput oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialValue != oldWidget.initialValue) {
+      final nextText = widget.initialValue?.toString() ?? '';
+      if (_controller.text != nextText) {
+        _controller.text = nextText;
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _update(double? val) {
+    widget.onChanged(val);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          icon: const Icon(Icons.remove_circle_outline, size: 20),
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(),
+          onPressed: () {
+            final current = double.tryParse(_controller.text) ?? 0.0;
+            if (current > 0) {
+              final next = (current - 0.1).clamp(0.0, widget.max);
+              final rounded = double.parse(next.toStringAsFixed(1));
+              _update(rounded == 0 ? null : rounded);
+            }
+          },
+        ),
+        const SizedBox(width: 4),
+        SizedBox(
+          width: 60,
+          height: 32,
+          child: TextField(
+            controller: _controller,
+            textAlign: TextAlign.center,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+            decoration: InputDecoration(
+              hintText: '0.0',
+              contentPadding: EdgeInsets.zero,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(
+                  color: theme.colorScheme.outline,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(
+                  color: theme.colorScheme.primary,
+                  width: 1.5,
+                ),
+              ),
+            ),
+            onChanged: (val) {
+              final v = double.tryParse(val);
+              _update(v);
+            },
+          ),
+        ),
+        const SizedBox(width: 4),
+        IconButton(
+          icon: const Icon(Icons.add_circle_outline, size: 20),
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(),
+          onPressed: () {
+            final current = double.tryParse(_controller.text) ?? 0.0;
+            final next = (current + 0.1).clamp(0.0, widget.max);
+            final rounded = double.parse(next.toStringAsFixed(1));
+            _update(rounded);
+          },
+        ),
+        const SizedBox(width: 8),
+        TextButton(
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            minimumSize: Size.zero,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            backgroundColor: theme.colorScheme.primaryContainer.withValues(
+              alpha: 0.3,
+            ),
+          ),
+          onPressed: () => _update(widget.max),
+          child: Text(
+            '전부',
+            style: TextStyle(
+              fontSize: 12,
+              color: theme.colorScheme.primary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
 

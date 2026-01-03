@@ -22,7 +22,7 @@
 | App entry / routing | lib/screens/launch_screen.dart | 스플래시→마지막 계정 확인→accountMain 이동 | tools/INDEX_CHILD.md#libscreenslaunch_screendart |
 | Navigation | lib/navigation/app_routes.dart | 라우트 문자열 + Args 타입 정의 | tools/INDEX_CHILD.md#libnavigationapp_routesdart |
 | Navigation | lib/navigation/app_router.dart | onGenerateRoute 중앙 라우팅(Args 캐스팅 포함) | tools/INDEX_CHILD.md#libnavigationapp_routerdart |
-| Main UI | lib/screens/account_main_screen.dart | 메인(ONE UI) 페이지/아이콘 그리드 | tools/INDEX_CHILD.md#libscreensaccount_main_screendart |
+| Main UI | lib/screens/account_main_screen.dart | 메인(Smart Ledger) 페이지/아이콘 그리드 | tools/INDEX_CHILD.md#libscreensaccount_main_screendart |
 | Shopping | lib/screens/shopping_cart_screen.dart | 장바구니(체크+물품명+거래추가+삭제) + 쇼핑 준비 | tools/INDEX_CHILD.md#libscreensshopping_cart_screendart |
 | Icon management | lib/screens/icon_management_screen.dart | 아이콘 관리(추가/숨김/슬롯/카탈로그) | tools/INDEX_CHILD.md#libscreensicon_management_screendart |
 | Backup/Restore | lib/screens/backup_screen.dart | 백업/복원 UI(Downloads, 파일 리스트) | tools/INDEX_CHILD.md#libscreensbackup_screendart |

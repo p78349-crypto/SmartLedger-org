@@ -328,7 +328,6 @@ class _FixedCostTabScreenState extends State<FixedCostTabScreen> {
       description: cost.name,
       amount: cost.amount,
       date: targetDate,
-      quantity: 1,
       unitPrice: cost.amount,
       paymentMethod: cost.paymentMethod,
       memo: memoBuffer.toString(),
@@ -436,7 +435,6 @@ class _FixedCostTabScreenState extends State<FixedCostTabScreen> {
                       ),
                       items: [
                         const DropdownMenuItem<int?>(
-                          value: null,
                           child: Text('선택 안 함'),
                         ),
                         ..._dayOptions.map(

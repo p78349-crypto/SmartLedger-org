@@ -28,6 +28,11 @@ class DbTransactions extends Table {
   TextColumn get store => text().nullable()();
   TextColumn get mainCategory => text().withDefault(const Constant('미분류'))();
   TextColumn get subCategory => text().nullable()();
+  TextColumn get detailCategory => text().nullable()();
+  TextColumn get location => text().nullable()();
+  TextColumn get supplier => text().nullable()();
+  DateTimeColumn get expiryDate => dateTime().nullable()();
+  TextColumn get unit => text().nullable()();
 
   /// Savings allocation option for savings transactions.
   ///
@@ -76,7 +81,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -95,6 +100,9 @@ class AppDatabase extends _$AppDatabase {
         'store,'
         'main_category,'
         'sub_category,'
+        'detail_category,'
+        'location,'
+        'supplier,'
         'amount_text,'
         'date_ymd,'
         'date_ym,'
@@ -224,6 +232,38 @@ class AppDatabase extends _$AppDatabase {
         await customStatement(
           'CREATE INDEX IF NOT EXISTS idx_benefit_monthly_account_ym '
           'ON tx_benefit_monthly(account_id, ym)',
+        );
+      }
+
+      if (from < 7) {
+        await migrator.addColumn(dbTransactions, dbTransactions.detailCategory);
+        await migrator.addColumn(dbTransactions, dbTransactions.location);
+        await migrator.addColumn(dbTransactions, dbTransactions.supplier);
+        await migrator.addColumn(dbTransactions, dbTransactions.expiryDate);
+        await migrator.addColumn(dbTransactions, dbTransactions.unit);
+
+        // Recreate FTS to include new fields.
+        await customStatement('DROP TABLE IF EXISTS tx_fts');
+        await customStatement(
+          'CREATE VIRTUAL TABLE IF NOT EXISTS tx_fts USING fts5('
+          'transaction_id UNINDEXED,'
+          'account_name UNINDEXED,'
+          'description,'
+          'memo,'
+          'payment_method,'
+          'store,'
+          'main_category,'
+          'sub_category,'
+          'detail_category,'
+          'location,'
+          'supplier,'
+          'amount_text,'
+          'date_ymd,'
+          'date_ym,'
+          'year_text,'
+          'month_text,'
+          'tokenize=\'unicode61\''
+          ')',
         );
       }
     },

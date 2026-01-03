@@ -116,13 +116,12 @@ class _PeriodDetailStatsScreenState extends State<PeriodDetailStatsScreen> {
 
     if (widget.periodType == period.PeriodType.decade) {
       final startYear = (_currentYear ~/ 10) * 10;
-      startDate = DateTime(startYear, 1, 1);
+      startDate = DateTime(startYear);
       endDate = DateTime(startYear + 10, 12, 31);
     } else {
       startDate = DateTime(
         _currentMonth.year,
         _currentMonth.month - months + 1,
-        1,
       );
       endDate = DateTime(_currentMonth.year, _currentMonth.month + 1, 0);
     }
@@ -201,7 +200,6 @@ class _PeriodDetailStatsScreenState extends State<PeriodDetailStatsScreen> {
         final startMonth = DateTime(
           _currentMonth.year,
           _currentMonth.month - (_monthsInPeriod - 1),
-          1,
         );
         final startLabel = LocalizedDateFormatter.yM(context, startMonth);
         final endLabel = LocalizedDateFormatter.yM(context, _currentMonth);

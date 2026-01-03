@@ -13,7 +13,7 @@ class ThousandsInputFormatter extends TextInputFormatter {
     TextEditingValue newValue,
   ) {
     // Delegate to CurrencyInputFormatter but ensure decimals are removed
-    final delegate = CurrencyInputFormatter(allowNegative: false);
+    final delegate = CurrencyInputFormatter();
     final formatted = delegate.formatEditUpdate(oldValue, newValue);
 
     // Remove decimal part if any (ThousandsInputFormatter is integer-only)

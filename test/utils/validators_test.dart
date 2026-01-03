@@ -30,7 +30,7 @@ void main() {
       });
 
       test('should use default field name if not provided', () {
-        final result = Validators.required('', fieldName: null);
+        final result = Validators.required('');
         expect(result, isNotNull);
         expect(result, contains('항목'));
       });

@@ -122,7 +122,6 @@ class _InAppScreenSaverState extends State<InAppScreenSaver> {
         MonthlyAggCacheService().autoEnsureBuiltIfDirtyThrottled(
           accountName: widget.accountName,
           transactions: txs,
-          includeQuickInput: false,
         ),
       );
 
@@ -772,13 +771,13 @@ class _TrendChartCard extends StatelessWidget {
             borderData: FlBorderData(show: false),
             titlesData: FlTitlesData(
               topTitles: const AxisTitles(
-                sideTitles: SideTitles(showTitles: false),
+                
               ),
               rightTitles: const AxisTitles(
-                sideTitles: SideTitles(showTitles: false),
+                
               ),
               leftTitles: const AxisTitles(
-                sideTitles: SideTitles(showTitles: false),
+                
               ),
               bottomTitles: AxisTitles(
                 sideTitles: SideTitles(

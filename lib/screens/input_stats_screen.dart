@@ -50,7 +50,7 @@ class _InputStatsScreenState extends State<InputStatsScreen> {
 
   DateTime _startOfThisMonth() {
     final now = DateTime.now();
-    return DateTime(now.year, now.month, 1);
+    return DateTime(now.year, now.month);
   }
 
   Future<void> _load() async {
@@ -72,11 +72,11 @@ class _InputStatsScreenState extends State<InputStatsScreen> {
 
     final aliasMap = await StoreAliasService.loadMap(widget.accountName);
 
-    final memoLookback = MemoStatsUtils.memoStats(txs, topN: 10);
+    final memoLookback = MemoStatsUtils.memoStats(txs);
     final txsThisMonth = txs
         .where((t) => !t.date.isBefore(monthStart))
         .toList(growable: false);
-    final memoThisMonth = MemoStatsUtils.memoStats(txsThisMonth, topN: 10);
+    final memoThisMonth = MemoStatsUtils.memoStats(txsThisMonth);
 
     final allEntries = await QuickSimpleExpenseInputHistoryService()
         .loadEntries(widget.accountName);
@@ -141,7 +141,7 @@ class _InputStatsScreenState extends State<InputStatsScreen> {
         title: const Text('입력 통계(1달)'),
         actions: [
           IconButton(
-            tooltip: '마트명 병합/정리',
+            tooltip: '마트/쇼핑몰명 병합/정리',
             icon: const Icon(IconCatalog.compareArrows),
             onPressed: () async {
               await Navigator.of(context).pushNamed(
@@ -233,7 +233,11 @@ class _InputStatsScreenState extends State<InputStatsScreen> {
         const SizedBox(height: 12),
         _buildBenefitTypeByStoreStats(theme),
         const SizedBox(height: 20),
-        Text('마트별 제품', style: theme.textTheme.titleMedium),
+        Text('상세 카테고리(3단계) 상위', style: theme.textTheme.titleMedium),
+        const SizedBox(height: 8),
+        _buildCategory3TierStats(theme),
+        const SizedBox(height: 20),
+        Text('마트/쇼핑몰별 제품', style: theme.textTheme.titleMedium),
         const SizedBox(height: 8),
         _buildStoreProductStats(theme),
       ],
@@ -369,13 +373,13 @@ class _InputStatsScreenState extends State<InputStatsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('쇼핑몰별 혜택 종류', style: theme.textTheme.bodySmall),
+            Text('마트/쇼핑몰별 혜택 종류', style: theme.textTheme.bodySmall),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               key: ValueKey(selected),
               initialValue: selected,
               decoration: const InputDecoration(
-                labelText: '쇼핑몰/매장 선택',
+                labelText: '마트/쇼핑몰 선택',
                 border: OutlineInputBorder(),
               ),
               items: [
@@ -409,7 +413,7 @@ class _InputStatsScreenState extends State<InputStatsScreen> {
             const SizedBox(height: 12),
             if (top.isEmpty)
               Text(
-                '선택한 쇼핑몰의 혜택 데이터가 없습니다.',
+                '선택한 마트/쇼핑몰의 혜택 데이터가 없습니다.',
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -712,7 +716,7 @@ class _InputStatsScreenState extends State<InputStatsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('쇼핑몰/매장별 혜택 상위10', style: theme.textTheme.bodySmall),
+            Text('마트/쇼핑몰별 혜택 상위10', style: theme.textTheme.bodySmall),
             const SizedBox(height: 6),
             Text(
               '이번달 혜택: ${_formatWon(thisMonthTotal)}',
@@ -876,7 +880,7 @@ class _InputStatsScreenState extends State<InputStatsScreen> {
 
     if (storeList.isEmpty) {
       return Text(
-        '마트명이 메모에 기록된 거래가 없습니다.',
+        '마트/쇼핑몰명이 메모에 기록된 거래가 없습니다.',
         style: theme.textTheme.bodyMedium?.copyWith(
           color: theme.colorScheme.onSurfaceVariant,
         ),
@@ -923,7 +927,7 @@ class _InputStatsScreenState extends State<InputStatsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('마트별 제품 상위20', style: theme.textTheme.bodySmall),
+            Text('마트/쇼핑몰별 제품 상위20', style: theme.textTheme.bodySmall),
             const SizedBox(height: 10),
             Text(
               '이번달 총액: ${_formatWon(thisMonthTotal)}',
@@ -950,7 +954,7 @@ class _InputStatsScreenState extends State<InputStatsScreen> {
               key: ValueKey(selected),
               initialValue: selected,
               decoration: const InputDecoration(
-                labelText: '마트 선택',
+                labelText: '마트/쇼핑몰 선택',
                 border: OutlineInputBorder(),
               ),
               items: [
@@ -1146,6 +1150,70 @@ class _InputStatsScreenState extends State<InputStatsScreen> {
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategory3TierStats(ThemeData theme) {
+    final stats = _memoLookback;
+    if (stats == null || stats.topCategories3Tier.isEmpty) {
+      return const Card(
+        child: Padding(padding: EdgeInsets.all(16), child: Text('데이터가 없습니다.')),
+      );
+    }
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '최근 6개월 지출 기준 (상위 10개)',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 12),
+            for (final entry in stats.topCategories3Tier) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            entry.label,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            '${entry.count}건',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      _formatWon(entry.totalAmount),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (entry != stats.topCategories3Tier.last)
+                const Divider(height: 8),
             ],
           ],
         ),

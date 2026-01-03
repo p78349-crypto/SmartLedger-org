@@ -264,9 +264,6 @@ class _AccountMainScreenState extends State<AccountMainScreen>
   Future<void> _normalizeReservedPageIconSlotsBestEffort() async {
     // Fire-and-forget. Avoid blocking first paint.
     try {
-      const slotCount =
-          Page1BottomQuickIcons.slotCount; // 4x6 (aligned with _IconGridPage)
-
       // Asset page policy: asset icons are fixed to the asset page (page 4).
       // Safety: never drops icons; if targets are full, leaves as-is.
       const enforceAssetPlacement = true;
@@ -317,7 +314,6 @@ class _AccountMainScreenState extends State<AccountMainScreen>
         pages[i] = await UserPrefService.getPageIconSlots(
           accountName: widget.accountName,
           pageIndex: i,
-          slotCount: slotCount,
         );
       }
 
@@ -386,7 +382,6 @@ class _AccountMainScreenState extends State<AccountMainScreen>
         final current = await UserPrefService.getPageIconSlots(
           accountName: widget.accountName,
           pageIndex: i,
-          slotCount: slotCount,
         );
         if (_listEquals(current, next)) continue;
         await UserPrefService.setPageIconSlots(
@@ -428,7 +423,7 @@ class _AccountMainScreenState extends State<AccountMainScreen>
 
   @override
   Widget build(BuildContext context) {
-    // Phase 1: Samsung One UI style horizontal main pages (icons-only).
+    // Phase 1: Smart style horizontal main pages (icons-only).
     // Top banner removed: only render the PageView.
     return ValueListenableBuilder<Color>(
       valueListenable: BackgroundHelper.colorNotifier,
@@ -817,7 +812,6 @@ class _IconGridPageState extends State<_IconGridPage> {
     final slots = await UserPrefService.getPageIconSlots(
       accountName: widget.accountName,
       pageIndex: widget.pageIndex,
-      slotCount: _defaultSlotCount,
     );
     final validated = slots.map((s) {
       final id = s.trim();
@@ -1258,7 +1252,6 @@ class _EmptySlotTile extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: null,
         borderRadius: BorderRadius.circular(12),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

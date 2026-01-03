@@ -149,9 +149,6 @@ class AccountService {
     _accounts[index] = Account(
       name: old.name,
       createdAt: old.createdAt,
-      carryoverAmount: 0,
-      overdraftAmount: 0,
-      lastCarryoverDate: null,
     );
   }
 

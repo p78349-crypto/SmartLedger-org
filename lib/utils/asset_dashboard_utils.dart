@@ -82,7 +82,6 @@ class AssetManagementUtils {
       profitLossLabel: ProfitLossCalculator.getProfitLossLabel(totalProfitLoss),
       formattedTotalAssets: CurrencyFormatter.format(
         totalAssets,
-        showUnit: true,
       ),
       formattedProfitLoss: ProfitLossCalculator.formatProfitLoss(
         totalProfitLoss,
@@ -110,9 +109,9 @@ class AssetManagementUtils {
       profitLoss: profitLoss,
       profitLossRate: profitLossRate,
       profitLossColor: profitLossColor,
-      formattedAmount: CurrencyFormatter.format(asset.amount, showUnit: true),
+      formattedAmount: CurrencyFormatter.format(asset.amount),
       formattedCostBasis: asset.costBasis != null && asset.costBasis! > 0
-          ? CurrencyFormatter.format(asset.costBasis!, showUnit: true)
+          ? CurrencyFormatter.format(asset.costBasis!)
           : null,
       formattedProfitLoss: ProfitLossCalculator.formatProfitLoss(profitLoss),
       formattedProfitLossRate: ProfitLossCalculator.formatProfitLossRate(

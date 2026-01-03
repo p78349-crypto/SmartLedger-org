@@ -18,6 +18,8 @@ import 'package:smart_ledger/services/fixed_cost_service.dart';
 import 'package:smart_ledger/services/notification_service.dart';
 import 'package:smart_ledger/services/transaction_service.dart';
 import 'package:smart_ledger/services/user_pref_service.dart';
+import 'package:smart_ledger/services/food_expiry_service.dart';
+import 'package:smart_ledger/services/recipe_service.dart';
 import 'package:smart_ledger/theme/app_theme.dart';
 import 'package:smart_ledger/theme/app_theme_mode_controller.dart';
 import 'package:smart_ledger/theme/app_theme_seed_controller.dart';
@@ -73,6 +75,8 @@ Future<void> main() async {
         FixedCostService().loadFixedCosts(),
         CurrencyFormatter.initCurrencyUnit(),
         NotificationService().initialize(),
+        FoodExpiryService.instance.load(),
+        RecipeService.instance.load(),
       ]);
       // One-off migration: move asset-related icons to the asset page.
       // This operation updates per-account persisted page slots so assets
@@ -81,7 +85,7 @@ Future<void> main() async {
       try {
         // One-off migration: move asset-related icons into the asset page.
         await MainPageMigration.moveAssetIconsToPageForAllAccounts(
-          targetPageIndex: 5,
+          
         );
       } catch (_) {
         // ignore
@@ -91,7 +95,6 @@ Future<void> main() async {
       // with a fresh 15 empty pages (clearing existing prefs first).
       const doMaintenance = bool.fromEnvironment(
         'MAINTENANCE_RECREATE_PAGES',
-        defaultValue: false,
       );
       if (doMaintenance) {
         try {
@@ -135,16 +138,18 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
-    const minimalUi = bool.fromEnvironment('MINIMAL_UI', defaultValue: false);
+    const minimalUi = bool.fromEnvironment('MINIMAL_UI');
     final app = ListenableBuilder(
       listenable: Listenable.merge([
         AppThemeModeController.instance.themeMode,
         AppThemeSeedController.instance.presetId,
+        AppThemeSeedController.instance.uiStyle,
         AppLocaleController.instance.locale,
       ]),
       builder: (context, _) {
         final themeMode = AppThemeModeController.instance.themeMode.value;
         final presetId = AppThemeSeedController.instance.presetId.value;
+        final uiStyle = AppThemeSeedController.instance.uiStyle.value;
         final preset = ThemePresets.byId(presetId);
         final localeOverride = AppLocaleController.instance.locale.value;
 
@@ -170,13 +175,16 @@ class MyApp extends StatelessWidget {
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          theme: AppTheme.buildOneUiTheme(
+          theme: AppTheme.buildSmartTheme(
             seedColor: preset.seedColor,
             brightness: Brightness.light,
+            uiStyle: uiStyle,
           ),
-          darkTheme: AppTheme.buildOneUiTheme(
+          darkTheme: AppTheme.buildSmartTheme(
             seedColor: preset.seedColor,
             brightness: Brightness.dark,
+            uiStyle: uiStyle,
+            backgroundColor: preset.backgroundColor,
           ),
           themeMode: themeMode,
           builder: (context, child) {
@@ -192,7 +200,6 @@ class MyApp extends StatelessWidget {
           },
           home: minimalUi ? const _MinimalBootScreen() : const LaunchScreen(),
           onGenerateRoute: minimalUi ? null : AppRouter.onGenerateRoute,
-          routes: const {},
         );
       },
     );

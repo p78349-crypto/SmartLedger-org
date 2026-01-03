@@ -8,7 +8,7 @@ class SecureStorageService {
   factory SecureStorageService() => _instance;
 
   final FlutterSecureStorage _storage = const FlutterSecureStorage(
-    aOptions: AndroidOptions(),
+    
   );
 
   Future<String?> readString(String key) {

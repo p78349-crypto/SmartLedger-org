@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:smart_ledger/models/category_hint.dart';
 import 'package:smart_ledger/models/shopping_cart_item.dart';
-import 'package:smart_ledger/models/transaction.dart';
 import 'package:smart_ledger/navigation/app_routes.dart';
 import 'package:smart_ledger/services/user_pref_service.dart';
 import 'package:smart_ledger/utils/currency_formatter.dart';
 import 'package:smart_ledger/utils/icon_catalog.dart';
 import 'package:smart_ledger/utils/shopping_cart_bulk_ledger_utils.dart';
 import 'package:smart_ledger/utils/shopping_cart_next_prep_utils.dart';
-import 'package:smart_ledger/widgets/one_ui_input_field.dart';
+import 'package:smart_ledger/widgets/smart_input_field.dart';
 import 'package:smart_ledger/widgets/zero_quick_buttons.dart';
 // import 'package:smart_ledger/screens/nutrition_report_screen.dart';
 // Feature connections removed per request.
@@ -18,10 +17,12 @@ class ShoppingCartScreen extends StatefulWidget {
     super.key,
     required this.accountName,
     this.openPrepOnStart = false,
+    this.initialItems,
   });
 
   final String accountName;
   final bool openPrepOnStart;
+  final List<ShoppingCartItem>? initialItems;
 
   @override
   State<ShoppingCartScreen> createState() => _ShoppingCartScreenState();
@@ -44,9 +45,11 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
 
   final Map<String, TextEditingController> _qtyControllers = {};
   final Map<String, TextEditingController> _unitPriceControllers = {};
+  final Map<String, TextEditingController> _memoControllers = {};
 
   final Map<String, FocusNode> _qtyFocusNodes = {};
   final Map<String, FocusNode> _unitPriceFocusNodes = {};
+  final Map<String, FocusNode> _memoFocusNodes = {};
 
   String _unitPriceTextForInlineEditor(double unitPrice) {
     if (unitPrice <= 0) return '';
@@ -122,10 +125,16 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
     for (final c in _unitPriceControllers.values) {
       c.dispose();
     }
+    for (final c in _memoControllers.values) {
+      c.dispose();
+    }
     for (final n in _qtyFocusNodes.values) {
       n.dispose();
     }
     for (final n in _unitPriceFocusNodes.values) {
+      n.dispose();
+    }
+    for (final n in _memoFocusNodes.values) {
       n.dispose();
     }
     super.dispose();
@@ -151,11 +160,23 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
       _unitPriceControllers.remove(k)?.dispose();
     }
 
+    final memoRemoved = _memoControllers.keys.where((k) => !ids.contains(k));
+    for (final k in memoRemoved.toList(growable: false)) {
+      _memoControllers.remove(k)?.dispose();
+    }
+
     final unitFocusRemoved = _unitPriceFocusNodes.keys.where(
       (k) => !ids.contains(k),
     );
     for (final k in unitFocusRemoved.toList(growable: false)) {
       _unitPriceFocusNodes.remove(k)?.dispose();
+    }
+
+    final memoFocusRemoved = _memoFocusNodes.keys.where(
+      (k) => !ids.contains(k),
+    );
+    for (final k in memoFocusRemoved.toList(growable: false)) {
+      _memoFocusNodes.remove(k)?.dispose();
     }
 
     for (final item in next) {
@@ -227,6 +248,25 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
     final items = await UserPrefService.getShoppingCartItems(
       accountName: widget.accountName,
     );
+
+    // Merge initial items if provided (e.g. from Recipe Picker)
+    if (widget.initialItems != null && widget.initialItems!.isNotEmpty) {
+      for (final initItem in widget.initialItems!) {
+        final exists = items.any(
+          (e) =>
+              e.name.trim().toLowerCase() == initItem.name.trim().toLowerCase(),
+        );
+        if (!exists) {
+          items.add(initItem);
+        }
+      }
+      // Save merged list back to prefs
+      await UserPrefService.setShoppingCartItems(
+        accountName: widget.accountName,
+        items: items,
+      );
+    }
+
     final hints = await UserPrefService.getShoppingCategoryHints(
       accountName: widget.accountName,
     );
@@ -269,6 +309,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
   Future<void> _applyInlineEdits(ShoppingCartItem item) async {
     final qtyRaw = _qtyControllers[item.id]?.text.trim() ?? '';
     final unitRaw = _unitPriceControllers[item.id]?.text.trim() ?? '';
+    final memoRaw = _memoControllers[item.id]?.text.trim() ?? item.memo;
 
     final parsedQty = int.tryParse(qtyRaw);
     final parsedUnit = CurrencyFormatter.parse(unitRaw);
@@ -277,8 +318,11 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
         ? item.quantity
         : (parsedQty <= 0 ? 1 : parsedQty);
     final nextUnit = (parsedUnit == null) ? item.unitPrice : parsedUnit;
+    final nextMemo = memoRaw;
 
-    if (nextQty == item.quantity && nextUnit == item.unitPrice) {
+    if (nextQty == item.quantity &&
+        nextUnit == item.unitPrice &&
+        nextMemo == item.memo) {
       return;
     }
 
@@ -286,6 +330,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
     final updated = item.copyWith(
       quantity: nextQty,
       unitPrice: nextUnit,
+      memo: nextMemo,
       updatedAt: now,
     );
     final next = _items.map((i) => i.id == item.id ? updated : i).toList();
@@ -300,7 +345,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('메모'),
-        content: OneUiInputField(
+        content: SmartInputField(
           hint: '특이사항을 적어두세요',
           controller: controller,
           maxLines: 3,
@@ -308,7 +353,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(null),
+            onPressed: () => Navigator.of(dialogContext).pop(),
             child: const Text('취소'),
           ),
           FilledButton(
@@ -335,6 +380,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
   void _previewInlineEdits(ShoppingCartItem item) {
     final qtyRaw = _qtyControllers[item.id]?.text.trim() ?? '';
     final unitRaw = _unitPriceControllers[item.id]?.text.trim() ?? '';
+    final memoRaw = _memoControllers[item.id]?.text.trim() ?? item.memo;
 
     final parsedQty = int.tryParse(qtyRaw);
     final parsedUnit = CurrencyFormatter.parse(unitRaw);
@@ -343,20 +389,51 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
         ? item.quantity
         : (parsedQty <= 0 ? 1 : parsedQty);
     final nextUnit = (parsedUnit == null) ? item.unitPrice : parsedUnit;
+    final nextMemo = memoRaw;
 
-    if (nextQty == item.quantity && nextUnit == item.unitPrice) {
+    if (nextQty == item.quantity &&
+        nextUnit == item.unitPrice &&
+        nextMemo == item.memo) {
       return;
     }
 
     final updated = item.copyWith(
       quantity: nextQty,
       unitPrice: nextUnit,
+      memo: nextMemo,
       updatedAt: DateTime.now(),
     );
 
     setState(() {
       _items = _items.map((i) => i.id == item.id ? updated : i).toList();
     });
+  }
+
+  Future<void> _navigateToQuickTransaction(
+    ShoppingCartItem item, {
+    required String qtyText,
+    required String unitText,
+  }) async {
+    final parsedQty = int.tryParse(qtyText) ?? item.quantity;
+    final parsedUnit = CurrencyFormatter.parse(unitText) ?? item.unitPrice;
+    final amount = parsedUnit * (parsedQty <= 0 ? 1 : parsedQty);
+
+    final result = await Navigator.of(context).pushNamed(
+      AppRoutes.shoppingCartQuickTransaction,
+      arguments: ShoppingCartQuickTransactionArgs(
+        accountName: widget.accountName,
+        title: '지출 입력',
+        description: item.name,
+        total: amount,
+        quantity: parsedQty <= 0 ? 1 : parsedQty,
+        unitPrice: parsedUnit,
+        previewLines: [item.name],
+      ),
+    );
+
+    if (result == true) {
+      _deleteItem(item);
+    }
   }
 
   void _switchToCart() {
@@ -420,8 +497,169 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
     return true;
   }
 
+  Widget _buildWideItemTile({
+    required BuildContext context,
+    required ShoppingCartItem item,
+    required bool isSelected,
+    required TextEditingController qtyController,
+    required TextEditingController unitController,
+    required TextEditingController memoController,
+    required FocusNode qtyFocusNode,
+    required FocusNode unitFocusNode,
+    required FocusNode memoFocusNode,
+    required ThemeData theme,
+    required Widget memoButton,
+  }) {
+    final isPrep = widget.openPrepOnStart;
+    const unitKeyboardType = TextInputType.numberWithOptions(decimal: true);
+
+    return InkWell(
+      onTap: !isPrep ? () => _toggleCheckedFast(item) : null,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        color: isSelected ? theme.colorScheme.primaryContainer : null,
+        child: Row(
+          children: [
+            if (!isPrep)
+              SizedBox(
+                width: 32,
+                child: Checkbox(
+                  value: item.isChecked,
+                  onChanged: (_) => _toggleCheckedFast(item),
+                  visualDensity: VisualDensity.compact,
+                ),
+              ),
+            const SizedBox(width: 8),
+            Expanded(
+              flex: 4,
+              child: Text(
+                item.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            SizedBox(
+              width: 100,
+              child: TextField(
+                controller: unitController,
+                focusNode: unitFocusNode,
+                keyboardType: unitKeyboardType,
+                style: theme.textTheme.bodySmall,
+                decoration: _inlineFieldDecoration('가격'),
+                onChanged: (_) => _previewInlineEdits(item),
+                onEditingComplete: () => _applyInlineEdits(item),
+              ),
+            ),
+            const SizedBox(width: 8),
+            SizedBox(
+              width: 45,
+              child: TextField(
+                controller: qtyController,
+                focusNode: qtyFocusNode,
+                textAlign: TextAlign.center,
+                keyboardType: TextInputType.number,
+                style: theme.textTheme.bodySmall,
+                decoration: _inlineFieldDecoration('수량'),
+                onChanged: (_) => _previewInlineEdits(item),
+                onEditingComplete: () => _applyInlineEdits(item),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              flex: 3,
+              child: TextField(
+                controller: memoController,
+                focusNode: memoFocusNode,
+                style: theme.textTheme.bodySmall,
+                decoration: _inlineFieldDecoration('메모'),
+                onChanged: (_) => _previewInlineEdits(item),
+                onEditingComplete: () => _applyInlineEdits(item),
+              ),
+            ),
+            const SizedBox(width: 12),
+            SizedBox(
+              width: 90,
+              child: Text(
+                CurrencyFormatter.format(
+                  (CurrencyFormatter.parse(unitController.text) ?? 0) *
+                      (int.tryParse(qtyController.text) ?? 1),
+                ),
+                textAlign: TextAlign.end,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+            ),
+            if (!isPrep) ...[
+              IconButton(
+                tooltip: '지출 입력으로 이동',
+                onPressed: () => _navigateToQuickTransaction(
+                  item,
+                  qtyText: qtyController.text,
+                  unitText: unitController.text,
+                ),
+                icon: const Icon(Icons.open_in_new, size: 20),
+              ),
+              memoButton,
+            ] else
+              IconButton(
+                tooltip: '삭제',
+                onPressed: () => _deleteItemWithUndo(item),
+                icon: const Icon(IconCatalog.deleteOutline),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildModeSwitchBar({required ThemeData theme}) {
     final isPrep = widget.openPrepOnStart;
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+
+    if (isLandscape) {
+      final activeStyle = theme.textTheme.labelLarge?.copyWith(
+        fontWeight: FontWeight.bold,
+        color: theme.colorScheme.primary,
+      );
+      final inactiveStyle = theme.textTheme.labelLarge?.copyWith(
+        fontWeight: FontWeight.w500,
+        color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+      );
+
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          GestureDetector(
+            onTap: _switchToPrep,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Text('쇼핑준비', style: isPrep ? activeStyle : inactiveStyle),
+            ),
+          ),
+          Text(
+            '/',
+            style: TextStyle(
+              color: theme.colorScheme.outlineVariant,
+              fontSize: 12,
+            ),
+          ),
+          GestureDetector(
+            onTap: _switchToCart,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Text('장바구니', style: !isPrep ? activeStyle : inactiveStyle),
+            ),
+          ),
+        ],
+      );
+    }
 
     const height = 36.0;
     const radius = 18.0;
@@ -528,8 +766,6 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
     final item = ShoppingCartItem(
       id: 'shop_${now.microsecondsSinceEpoch}',
       name: name,
-      isPlanned: true,
-      isChecked: false,
       createdAt: now,
       updatedAt: now,
     );
@@ -609,6 +845,33 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
     );
   }
 
+  Future<void> _deleteCheckedItems() async {
+    final checked = _items.where((i) => i.isChecked).toList();
+    if (checked.isEmpty) {
+      _showInlineInputWarning('삭제할 항목을 선택하세요');
+      return;
+    }
+
+    final prev = List<ShoppingCartItem>.from(_items);
+    final next = _items.where((i) => !i.isChecked).toList();
+    await _save(next);
+
+    if (!mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.hideCurrentSnackBar();
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text('${checked.length}개 항목이 삭제되었습니다'),
+        action: SnackBarAction(
+          label: '되돌리기',
+          onPressed: () async {
+            await _save(prev);
+          },
+        ),
+      ),
+    );
+  }
+
   Future<void> _clearAllWithUndo() async {
     if (_items.isEmpty) return;
     final prev = List<ShoppingCartItem>.from(_items);
@@ -641,9 +904,22 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
     );
   }
 
+  Future<void> _addCheckedItemsToLedgerMartShopping() async {
+    await ShoppingCartBulkLedgerUtils.addCheckedItemsToLedgerMartShopping(
+      context: context,
+      accountName: widget.accountName,
+      items: _items,
+      categoryHints: _categoryHints,
+      saveItems: _save,
+      reload: _load,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isPortrait =
+        MediaQuery.of(context).orientation == Orientation.portrait;
     final isPrep = widget.openPrepOnStart;
     const nameFieldHeight = 48.0;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
@@ -687,8 +963,23 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
           ? theme.colorScheme.surfaceContainerLowest
           : theme.colorScheme.surfaceContainerHighest,
       appBar: AppBar(
-        centerTitle: true,
-        title: _buildModeSwitchBar(theme: theme),
+        centerTitle: false,
+        title: Row(
+          children: [
+            _buildModeSwitchBar(theme: theme),
+            if (!isPrep) ...[
+              const SizedBox(width: 8),
+              IconButton(
+                tooltip: '선택 항목 삭제',
+                onPressed: _isLoading ? null : _deleteCheckedItems,
+                icon: Icon(
+                  IconCatalog.deleteOutline,
+                  color: theme.colorScheme.error,
+                ),
+              ),
+            ],
+          ],
+        ),
         actions: widget.openPrepOnStart
             ? [
                 Tooltip(
@@ -705,8 +996,6 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                     ),
                   ),
                 ),
-                // Nutrition report action removed
-                // (feature disabled per request).
               ]
             : [
                 IconButton(
@@ -718,16 +1007,18 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                 ),
               ],
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(68),
+          preferredSize: Size.fromHeight(isPortrait ? 68 : 56),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 10, 10),
+            padding: isPortrait
+                ? const EdgeInsets.fromLTRB(16, 0, 10, 10)
+                : const EdgeInsets.fromLTRB(16, 0, 10, 6),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
                   child: SizedBox(
-                    height: nameFieldHeight,
-                    child: OneUiInputField(
+                    height: isPortrait ? nameFieldHeight : 44,
+                    child: SmartInputField(
                       compact: true,
                       label: '물품 이름',
                       hint: isPrep ? null : '장바구니 모드',
@@ -740,7 +1031,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                 ),
                 const SizedBox(width: 10),
                 SizedBox(
-                  height: nameFieldHeight,
+                  height: isPortrait ? nameFieldHeight : 44,
                   child: FilledButton(
                     onPressed: () => _addItem(keepKeyboardOpen: true),
                     child: const Text('추가'),
@@ -835,11 +1126,16 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                               ),
                             ),
                           );
+                          _memoControllers.putIfAbsent(
+                            item.id,
+                            () => TextEditingController(text: item.memo),
+                          );
                           _qtyFocusNodes.putIfAbsent(item.id, FocusNode.new);
                           _unitPriceFocusNodes.putIfAbsent(
                             item.id,
                             FocusNode.new,
                           );
+                          _memoFocusNodes.putIfAbsent(item.id, FocusNode.new);
 
                           final isCartMode = !widget.openPrepOnStart;
                           final isSelected = isCartMode && item.isChecked;
@@ -847,8 +1143,10 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                           final qtyController = _qtyControllers[item.id]!;
                           final unitController =
                               _unitPriceControllers[item.id]!;
+                          final memoController = _memoControllers[item.id]!;
                           final qtyFocusNode = _qtyFocusNodes[item.id]!;
                           final unitFocusNode = _unitPriceFocusNodes[item.id]!;
+                          final memoFocusNode = _memoFocusNodes[item.id]!;
                           const unitKeyboardType =
                               TextInputType.numberWithOptions(decimal: true);
 
@@ -881,273 +1179,240 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                             );
                           }
 
-                          final screenWidth = MediaQuery.sizeOf(context).width;
-                          // Keep enough room for the item name on narrow
-                          // devices by constraining the trailing editor width.
-                          final maxTrailingWidth = (screenWidth * 0.55).clamp(
-                            200.0,
-                            290.0,
-                          );
-
-                          final tile = ListTile(
-                            contentPadding:
-                                const EdgeInsetsDirectional.fromSTEB(
-                                  12,
-                                  0,
-                                  8,
-                                  0,
-                                ),
-                            dense: true,
-                            visualDensity: const VisualDensity(
-                              horizontal: -2,
-                              vertical: -2,
-                            ),
-                            minVerticalPadding: 0,
-                            selected: isSelected,
-                            selectedTileColor:
-                                theme.colorScheme.primaryContainer,
-                            leading: widget.openPrepOnStart
-                                ? null
-                                : SizedBox(
-                                    width: 40,
-                                    height: 40,
-                                    child: Center(
-                                      child: Transform.scale(
-                                        scale: 0.85,
-                                        child: Checkbox(
-                                          value: item.isChecked,
-                                          onChanged: (_) =>
-                                              _toggleCheckedFast(item),
-                                          visualDensity: VisualDensity.compact,
-                                          materialTapTargetSize:
-                                              MaterialTapTargetSize.shrinkWrap,
-                                        ),
+                          final tile = isPortrait
+                              ? ListTile(
+                                  contentPadding:
+                                      const EdgeInsetsDirectional.fromSTEB(
+                                        12,
+                                        4,
+                                        8,
+                                        4,
                                       ),
+                                  selected: isSelected,
+                                  selectedTileColor:
+                                      theme.colorScheme.primaryContainer,
+                                  leading: widget.openPrepOnStart
+                                      ? null
+                                      : SizedBox(
+                                          width: 40,
+                                          height: 40,
+                                          child: Center(
+                                            child: Transform.scale(
+                                              scale: 0.85,
+                                              child: Checkbox(
+                                                value: item.isChecked,
+                                                onChanged: (_) =>
+                                                    _toggleCheckedFast(item),
+                                                visualDensity:
+                                                    VisualDensity.compact,
+                                                materialTapTargetSize:
+                                                    MaterialTapTargetSize
+                                                        .shrinkWrap,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                  horizontalTitleGap: 6,
+                                  minLeadingWidth: 40,
+                                  title: Padding(
+                                    padding: const EdgeInsets.only(top: 6),
+                                    child: Text(
+                                      item.name,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: theme.textTheme.bodyMedium
+                                          ?.copyWith(
+                                            fontWeight: isSelected
+                                                ? FontWeight.w700
+                                                : FontWeight.w600,
+                                            color: isSelected
+                                                ? theme
+                                                      .colorScheme
+                                                      .onPrimaryContainer
+                                                : theme.colorScheme.onSurface,
+                                          ),
                                     ),
                                   ),
-                            horizontalTitleGap: 6,
-                            minLeadingWidth: 40,
-                            title: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 6),
-                              child: Text(
-                                item.name,
-                                maxLines: isPortrait ? 1 : 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  fontWeight: isSelected
-                                      ? FontWeight.w700
-                                      : FontWeight.w600,
-                                  color: isSelected
-                                      ? theme.colorScheme.onPrimaryContainer
-                                      : theme.colorScheme.onSurface,
-                                ),
-                              ),
-                            ),
-                            subtitle: null,
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                if (!widget.openPrepOnStart) ...[
-                                  ConstrainedBox(
-                                    constraints: BoxConstraints(
-                                      maxWidth: maxTrailingWidth,
-                                    ),
+                                  subtitle: Padding(
+                                    padding: const EdgeInsets.only(bottom: 6),
                                     child: Row(
-                                      mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        // Open full transaction input
-                                        // with this cart item prefilled
+                                        SizedBox(
+                                          width: 120,
+                                          child: TextField(
+                                            controller: unitController,
+                                            focusNode: unitFocusNode,
+                                            keyboardType: unitKeyboardType,
+                                            textInputAction:
+                                                TextInputAction.next,
+                                            style: theme.textTheme.bodySmall,
+                                            decoration: _inlineFieldDecoration(
+                                              '가격',
+                                            ),
+                                            onChanged: (_) =>
+                                                _previewInlineEdits(item),
+                                            onTapOutside: (_) {
+                                              FocusScope.of(context).unfocus();
+                                              _applyInlineEdits(item);
+                                            },
+                                            onEditingComplete: () =>
+                                                _applyInlineEdits(item),
+                                            onSubmitted: (_) {
+                                              final isUnitOk =
+                                                  _isUnitOkForSubmit(
+                                                    unitController.text,
+                                                  );
+                                              if (!isUnitOk) {
+                                                unitFocusNode.requestFocus();
+                                                unitController
+                                                    .selection = TextSelection(
+                                                  baseOffset: 0,
+                                                  extentOffset: unitController
+                                                      .text
+                                                      .length,
+                                                );
+                                                return;
+                                              }
+                                              _applyInlineEdits(item);
+                                              qtyFocusNode.requestFocus();
+                                              _ensureVisible(context);
+                                            },
+                                          ),
+                                        ),
+                                        const Spacer(),
+                                        Text(
+                                          CurrencyFormatter.format(
+                                            (CurrencyFormatter.parse(
+                                                      unitController.text,
+                                                    ) ??
+                                                    0) *
+                                                (int.tryParse(
+                                                      qtyController.text,
+                                                    ) ??
+                                                    1),
+                                          ),
+                                          style: theme.textTheme.labelMedium
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                                color:
+                                                    theme.colorScheme.primary,
+                                              ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  trailing: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      if (!widget.openPrepOnStart) ...[
+                                        SizedBox(
+                                          width: 45,
+                                          child: TextField(
+                                            controller: qtyController,
+                                            focusNode: qtyFocusNode,
+                                            textAlign: TextAlign.center,
+                                            keyboardType: TextInputType.number,
+                                            textInputAction:
+                                                TextInputAction.next,
+                                            style: theme.textTheme.bodySmall
+                                                ?.copyWith(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                            decoration:
+                                                _inlineFieldDecoration(
+                                                  '수량',
+                                                ).copyWith(
+                                                  contentPadding:
+                                                      const EdgeInsets.symmetric(
+                                                        horizontal: 4,
+                                                        vertical: 8,
+                                                      ),
+                                                ),
+                                            onChanged: (_) =>
+                                                _previewInlineEdits(item),
+                                            onTapOutside: (_) {
+                                              FocusScope.of(context).unfocus();
+                                              _applyInlineEdits(item);
+                                            },
+                                            onEditingComplete: () =>
+                                                _applyInlineEdits(item),
+                                            onSubmitted: (_) {
+                                              final isQtyOk = _isQtyOkForSubmit(
+                                                qtyController.text,
+                                              );
+                                              if (!isQtyOk) {
+                                                qtyFocusNode.requestFocus();
+                                                qtyController
+                                                    .selection = TextSelection(
+                                                  baseOffset: 0,
+                                                  extentOffset:
+                                                      qtyController.text.length,
+                                                );
+                                                return;
+                                              }
+                                              _applyInlineEdits(item);
+                                              if (index + 1 < ordered.length) {
+                                                final nextItem =
+                                                    ordered[index + 1];
+                                                final nextId = nextItem.id;
+                                                final nodes =
+                                                    _unitPriceFocusNodes;
+                                                final nextNode = nodes[nextId];
+                                                if (nextNode != null) {
+                                                  nextNode.requestFocus();
+                                                  final liveCtx = _itemContext(
+                                                    nextId,
+                                                  );
+                                                  _ensureVisible(
+                                                    liveCtx,
+                                                    durationMs: 180,
+                                                  );
+                                                } else {
+                                                  qtyFocusNode.requestFocus();
+                                                }
+                                              } else {
+                                                qtyFocusNode.requestFocus();
+                                              }
+                                            },
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        SizedBox(
+                                          width: 80,
+                                          child: TextField(
+                                            controller: memoController,
+                                            focusNode: memoFocusNode,
+                                            style: theme.textTheme.bodySmall,
+                                            decoration: _inlineFieldDecoration(
+                                              '메모',
+                                            ),
+                                            onChanged: (_) =>
+                                                _previewInlineEdits(item),
+                                            onTapOutside: (_) {
+                                              FocusScope.of(context).unfocus();
+                                              _applyInlineEdits(item);
+                                            },
+                                            onEditingComplete: () =>
+                                                _applyInlineEdits(item),
+                                            onSubmitted: (_) =>
+                                                _applyInlineEdits(item),
+                                          ),
+                                        ),
                                         IconButton(
                                           tooltip: '지출 입력으로 이동',
-                                          padding: EdgeInsets.zero,
-                                          constraints: const BoxConstraints(
-                                            minWidth: 44,
-                                            minHeight: 44,
-                                          ),
-                                          onPressed: () {
-                                            final qtyText = qtyController.text
-                                                .trim();
-                                            final unitText = unitController.text
-                                                .trim();
-                                            final parsedQty =
-                                                int.tryParse(qtyText) ??
-                                                item.quantity;
-                                            final parsedUnit =
-                                                CurrencyFormatter.parse(
-                                                  unitText,
-                                                ) ??
-                                                item.unitPrice;
-                                            final amount =
-                                                parsedUnit *
-                                                (parsedQty <= 0
-                                                    ? 1
-                                                    : parsedQty);
-
-                                            final timestamp = DateTime.now()
-                                                .microsecondsSinceEpoch;
-                                            final cartTxId = 'cart_$timestamp';
-                                            final tx = Transaction(
-                                              id: cartTxId,
-                                              type: TransactionType.expense,
-                                              description: item.name,
-                                              amount: amount,
-                                              date: DateTime.now(),
-                                              quantity: parsedQty <= 0
-                                                  ? 1
-                                                  : parsedQty,
-                                              unitPrice: parsedUnit,
-                                              paymentMethod: '',
-                                              memo: item.memo,
-                                            );
-
-                                            Navigator.of(context).pushNamed(
-                                              AppRoutes.transactionAdd,
-                                              arguments: TransactionAddArgs(
-                                                accountName: widget.accountName,
-                                                initialTransaction: tx,
+                                          onPressed: () =>
+                                              _navigateToQuickTransaction(
+                                                item,
+                                                qtyText: qtyController.text,
+                                                unitText: unitController.text,
                                               ),
-                                            );
-                                          },
-                                          icon: const Icon(Icons.open_in_new),
-                                        ),
-                                        Expanded(
-                                          child: Row(
-                                            children: [
-                                              SizedBox(
-                                                width: 96,
-                                                child: TextField(
-                                                  controller: unitController,
-                                                  focusNode: unitFocusNode,
-                                                  textAlign: TextAlign.end,
-                                                  keyboardType:
-                                                      unitKeyboardType,
-                                                  textInputAction:
-                                                      TextInputAction.next,
-                                                  decoration:
-                                                      _inlineFieldDecoration(
-                                                        '가격',
-                                                      ),
-                                                  onChanged: (_) =>
-                                                      _previewInlineEdits(item),
-                                                  onTapOutside: (_) {
-                                                    FocusScope.of(
-                                                      context,
-                                                    ).unfocus();
-                                                    _applyInlineEdits(item);
-                                                  },
-                                                  onEditingComplete: () =>
-                                                      _applyInlineEdits(item),
-                                                  onSubmitted: (_) {
-                                                    final isUnitOk =
-                                                        _isUnitOkForSubmit(
-                                                          unitController.text,
-                                                        );
-                                                    if (!isUnitOk) {
-                                                      unitFocusNode
-                                                          .requestFocus();
-                                                      unitController.selection =
-                                                          TextSelection(
-                                                            baseOffset: 0,
-                                                            extentOffset:
-                                                                unitController
-                                                                    .text
-                                                                    .length,
-                                                          );
-                                                      return;
-                                                    }
-
-                                                    _applyInlineEdits(item);
-
-                                                    // Fast-entry: move focus to
-                                                    // quantity after entering
-                                                    // the unit price.
-                                                    qtyFocusNode.requestFocus();
-                                                    _ensureVisible(context);
-                                                  },
-                                                ),
-                                              ),
-                                              const SizedBox(width: 8),
-                                              SizedBox(
-                                                width: 48,
-                                                child: TextField(
-                                                  controller: qtyController,
-                                                  focusNode: qtyFocusNode,
-                                                  textAlign: TextAlign.end,
-                                                  keyboardType:
-                                                      TextInputType.number,
-                                                  textInputAction:
-                                                      TextInputAction.next,
-                                                  decoration:
-                                                      _inlineFieldDecoration(
-                                                        '수량',
-                                                      ),
-                                                  onChanged: (_) =>
-                                                      _previewInlineEdits(item),
-                                                  onTapOutside: (_) {
-                                                    FocusScope.of(
-                                                      context,
-                                                    ).unfocus();
-                                                    _applyInlineEdits(item);
-                                                  },
-                                                  onEditingComplete: () =>
-                                                      _applyInlineEdits(item),
-                                                  onSubmitted: (_) {
-                                                    final isQtyOk =
-                                                        _isQtyOkForSubmit(
-                                                          qtyController.text,
-                                                        );
-                                                    if (!isQtyOk) {
-                                                      qtyFocusNode
-                                                          .requestFocus();
-                                                      qtyController.selection =
-                                                          TextSelection(
-                                                            baseOffset: 0,
-                                                            extentOffset:
-                                                                qtyController
-                                                                    .text
-                                                                    .length,
-                                                          );
-                                                      return;
-                                                    }
-
-                                                    _applyInlineEdits(item);
-
-                                                    if (index + 1 <
-                                                        ordered.length) {
-                                                      final nextItem =
-                                                          ordered[index + 1];
-                                                      final nextId =
-                                                          nextItem.id;
-                                                      final nodes =
-                                                          _unitPriceFocusNodes;
-                                                      final nextNode =
-                                                          nodes[nextId];
-                                                      if (nextNode != null) {
-                                                        nextNode.requestFocus();
-                                                        final liveCtx =
-                                                            _itemContext(
-                                                              nextId,
-                                                            );
-                                                        _ensureVisible(
-                                                          liveCtx,
-                                                          durationMs: 180,
-                                                        );
-                                                      } else {
-                                                        qtyFocusNode
-                                                            .requestFocus();
-                                                      }
-                                                    } else {
-                                                      qtyFocusNode
-                                                          .requestFocus();
-                                                    }
-                                                  },
-                                                ),
-                                              ),
-                                              const SizedBox(width: 6),
-                                            ],
+                                          icon: const Icon(
+                                            Icons.open_in_new,
+                                            size: 20,
                                           ),
                                         ),
                                         buildMemoButton(),
+                                      ] else
                                         IconButton(
                                           tooltip: '삭제',
                                           padding: EdgeInsets.zero,
@@ -1161,26 +1426,25 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                                             IconCatalog.deleteOutline,
                                           ),
                                         ),
-                                      ],
-                                    ),
+                                    ],
                                   ),
-                                ] else
-                                  IconButton(
-                                    tooltip: '삭제',
-                                    padding: EdgeInsets.zero,
-                                    constraints: const BoxConstraints(
-                                      minWidth: 44,
-                                      minHeight: 44,
-                                    ),
-                                    onPressed: () => _deleteItemWithUndo(item),
-                                    icon: const Icon(IconCatalog.deleteOutline),
-                                  ),
-                              ],
-                            ),
-                            onTap: (!widget.openPrepOnStart)
-                                ? () => _toggleCheckedFast(item)
-                                : null,
-                          );
+                                  onTap: (!widget.openPrepOnStart)
+                                      ? () => _toggleCheckedFast(item)
+                                      : null,
+                                )
+                              : _buildWideItemTile(
+                                  context: context,
+                                  item: item,
+                                  isSelected: isSelected,
+                                  qtyController: qtyController,
+                                  unitController: unitController,
+                                  memoController: memoController,
+                                  qtyFocusNode: qtyFocusNode,
+                                  unitFocusNode: unitFocusNode,
+                                  memoFocusNode: memoFocusNode,
+                                  theme: theme,
+                                  memoButton: buildMemoButton(),
+                                );
 
                           return KeyedSubtree(key: tileKey, child: tile);
                         },
@@ -1214,6 +1478,9 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
       return sum + (item.unitPrice * qty);
     });
 
+    final isPortrait =
+        MediaQuery.of(context).orientation == Orientation.portrait;
+
     return SafeArea(
       top: false,
       child: Material(
@@ -1226,73 +1493,133 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text('장바구니 합계', style: theme.textTheme.bodyMedium),
-                    ),
-                  ),
-                  Text(
-                    CurrencyFormatter.format(cartTotal),
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text('체크 항목', style: theme.textTheme.bodyMedium),
-                    ),
-                  ),
-                  Expanded(
-                    child: Center(
-                      child: Text(
-                        '총액 ${CurrencyFormatter.format(checkedTotal)}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
+          padding: isPortrait
+              ? const EdgeInsets.fromLTRB(16, 14, 16, 16)
+              : const EdgeInsets.fromLTRB(16, 8, 16, 8),
+          child: isPortrait
+              ? Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              '장바구니 합계',
+                              style: theme.textTheme.bodyMedium,
+                            ),
+                          ),
                         ),
+                        Text(
+                          CurrencyFormatter.format(cartTotal),
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              '체크 항목',
+                              style: theme.textTheme.bodyMedium,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Center(
+                            child: Text(
+                              '총액 ${CurrencyFormatter.format(checkedTotal)}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              '$checkedCount개',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: theme.colorScheme.primary,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed:
+                                (!widget.openPrepOnStart && checkedCount > 0)
+                                ? _addCheckedItemsToLedgerMartShopping
+                                : null,
+                            child: const Text('마트 쇼핑 입력'),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: FilledButton(
+                            onPressed:
+                                (!widget.openPrepOnStart && checkedCount > 0)
+                                ? _addCheckedItemsToLedgerBulk
+                                : null,
+                            child: Text('일괄 입력 ($checkedCount)'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                )
+              : Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '합계: ${CurrencyFormatter.format(cartTotal)}',
+                            style: theme.textTheme.bodySmall,
+                          ),
+                          Text(
+                            '체크: ${CurrencyFormatter.format(checkedTotal)} ($checkedCount개)',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                  Expanded(
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: Text(
-                        '$checkedCount개',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.primary,
-                        ),
-                      ),
+                    const SizedBox(width: 16),
+                    OutlinedButton(
+                      onPressed: (!widget.openPrepOnStart && checkedCount > 0)
+                          ? _addCheckedItemsToLedgerMartShopping
+                          : null,
+                      child: const Text('마트 쇼핑'),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: (!widget.openPrepOnStart && checkedCount > 0)
-                      ? _addCheckedItemsToLedgerBulk
-                      : null,
-                  child: Text('체크 항목 거래 입력 ($checkedCount)'),
+                    const SizedBox(width: 8),
+                    FilledButton(
+                      onPressed: (!widget.openPrepOnStart && checkedCount > 0)
+                          ? _addCheckedItemsToLedgerBulk
+                          : null,
+                      child: Text('일괄 입력 ($checkedCount)'),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
         ),
       ),
     );

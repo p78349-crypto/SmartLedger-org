@@ -1,0 +1,31 @@
+PR draft: "Smart Ledger input fields prototype and transaction screen updates"
+
+Summary
+-------
+This PR introduces a Smart Ledger style input field prototype and applies it to the `TransactionAddScreen` inputs.
+
+Changes
+-------
+- `lib/widgets/smart_input_field.dart` (new) — Smart Ledger input field wrapper around `TextFormField` with label, hint, suffix/prefix icons, focus handling and light animation.
+- `lib/screens/transaction_add_screen.dart` — replaced key `TextFormField` usages with `SmartInputField` (description, unit price, qty, amount, payment, memo, store).
+- `docs/SMART_FORM_TOKENS.md` — design tokens for Smart Ledger inputs.
+- `test/widgets/smart_input_field_test.dart` — basic test verifying rendering of label/hint.
+- `CHANGELOG.md` entry added.
+
+Testing
+-------
+- `flutter test` (unit/widget tests) — pass locally.
+- Visual check: run app and open transaction add screen to verify styles and interactions.
+
+Designer checklist
+------------------
+- [x] Verify iconography and sizes *(2026-01-03 · tokens vs. implementation self-review)*
+- [x] Confirm field heights, padding, and corner radius *(Smart Ledger form tokens applied)*
+- [ ] Approve focus/hover states and colors
+- [ ] Accessibility check: labels/semantics and contrast
+
+> 참고: 남은 항목은 디자인 QA에서 색상/포커스와 접근성 기준을 확정한 뒤 업데이트됩니다.
+
+Notes
+-----
+- This is a visual/UX change. The behavior and validation logic were kept unchanged. Additional visual polish and golden tests will follow after design approval.

@@ -133,7 +133,6 @@ class _FeatureIconsCatalogScreenState extends State<FeatureIconsCatalogScreen> {
               crossAxisCount: 4,
               mainAxisSpacing: 12,
               crossAxisSpacing: 12,
-              childAspectRatio: 1,
             ),
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),

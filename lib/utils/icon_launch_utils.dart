@@ -18,10 +18,6 @@ class IconLaunchUtils {
       description: '',
       amount: 0,
       date: DateTime.now(),
-      quantity: 1,
-      unitPrice: 0,
-      paymentMethod: '현금',
-      memo: '',
       mainCategory: Transaction.defaultMainCategory,
     );
   }
@@ -52,6 +48,13 @@ class IconLaunchUtils {
     };
 
     if (routeName == AppRoutes.transactionAdd) {
+      return IconLaunchRequest(
+        routeName: routeName,
+        arguments: TransactionAddArgs(accountName: accountName),
+      );
+    }
+
+    if (routeName == AppRoutes.transactionAddDetailed) {
       return IconLaunchRequest(
         routeName: routeName,
         arguments: TransactionAddArgs(accountName: accountName),

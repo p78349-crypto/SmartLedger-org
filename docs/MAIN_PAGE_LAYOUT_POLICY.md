@@ -1,7 +1,7 @@
 # Main Page Layout Policy (2025-12-30)
 
 ## Overview
-This document defines the page identity and icon distribution for the main Samsung One UI-style icon grid pages.
+This document defines the page identity and icon distribution for the main Smart Ledger icon grid pages.
 
 ## Quick Reference: Pages 1-15 Identity
 

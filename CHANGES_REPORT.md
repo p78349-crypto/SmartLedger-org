@@ -36,7 +36,7 @@
 ## 🆕 추가 변경 (2025-12-18)
 
 ### 메인 가로 PageView 인덱스 저장/복원
-**대상**: AccountMainScreen (One UI 메인 1~6)
+**대상**: AccountMainScreen (Smart Ledger 메인 1~6)
 
 **내용**:
 - 가로 스와이프(PageView) 현재 페이지 인덱스를 계정별로 SharedPreferences에 저장

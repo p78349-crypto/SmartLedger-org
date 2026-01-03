@@ -7,7 +7,7 @@
 
     <!--
       Simple "wallet + chart" glyph.
-      Designed to look clean on Samsung One UI adaptive icon masks.
+      Designed to look clean on Smart Ledger adaptive icon masks.
       Keep generous padding by scaling down inside the 108x108 viewport.
     -->
     <group

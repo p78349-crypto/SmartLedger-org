@@ -25,6 +25,7 @@ class AppRoutes {
   static const refundTransactions = '/transaction/refund';
 
   static const quickSimpleExpenseInput = '/transaction/quick-simple-expense';
+  static const transactionAddDetailed = '/transaction/add-detailed';
 
   static const monthEndCarryover = '/month-end/carryover';
 
@@ -175,8 +176,14 @@ class QuickSimpleExpenseInputArgs {
 }
 
 class ShoppingCartArgs {
-  const ShoppingCartArgs({required this.accountName});
+  const ShoppingCartArgs({
+    required this.accountName,
+    this.openPrepOnStart = false,
+    this.initialItems,
+  });
   final String accountName;
+  final bool openPrepOnStart;
+  final List<ShoppingCartItem>? initialItems;
 }
 
 class ShoppingCartQuickTransactionArgs {
@@ -197,6 +204,9 @@ class ShoppingCartQuickTransactionArgs {
     this.bulkCategoryHints,
     this.bulkGrandTotal,
     this.bulkPreviewLines,
+    this.martStore,
+    this.martPayment,
+    this.martDate,
   });
 
   final String accountName;
@@ -237,6 +247,15 @@ class ShoppingCartQuickTransactionArgs {
 
   /// Optional. Preformatted list of item lines for bulk review.
   final List<String>? bulkPreviewLines;
+
+  /// Optional. Pre-filled store for mart shopping mode.
+  final String? martStore;
+
+  /// Optional. Pre-filled payment for mart shopping mode.
+  final String? martPayment;
+
+  /// Optional. Pre-filled date for mart shopping mode.
+  final DateTime? martDate;
 }
 
 class ShoppingCartQuickTransactionSaveRestResult {

@@ -159,7 +159,6 @@ class _ThemePreviewWidgetState extends State<ThemePreviewWidget> {
 
           // Presets controls + Apply / Cancel + scope selector
           Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               ElevatedButton(
                 onPressed: () async {

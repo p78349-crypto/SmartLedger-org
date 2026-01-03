@@ -68,19 +68,25 @@ class _CategoryStatsScreenState extends State<CategoryStatsScreen> {
           _anchorDate = DateTime(_anchorDate.year, _anchorDate.month + delta);
           break;
         case period.PeriodType.quarter:
-          _anchorDate =
-              DateTime(_anchorDate.year, _anchorDate.month + (3 * delta));
+          _anchorDate = DateTime(
+            _anchorDate.year,
+            _anchorDate.month + (3 * delta),
+          );
           break;
         case period.PeriodType.halfYear:
-          _anchorDate =
-              DateTime(_anchorDate.year, _anchorDate.month + (6 * delta));
+          _anchorDate = DateTime(
+            _anchorDate.year,
+            _anchorDate.month + (6 * delta),
+          );
           break;
         case period.PeriodType.year:
           _anchorDate = DateTime(_anchorDate.year + delta, _anchorDate.month);
           break;
         case period.PeriodType.decade:
-          _anchorDate =
-              DateTime(_anchorDate.year + (10 * delta), _anchorDate.month);
+          _anchorDate = DateTime(
+            _anchorDate.year + (10 * delta),
+            _anchorDate.month,
+          );
           break;
       }
     });
@@ -130,7 +136,9 @@ class _CategoryStatsScreenState extends State<CategoryStatsScreen> {
             title: Text(_isSubCategory ? '소분류 분석' : '대분류 분석'),
             actions: [
               IconButton(
-                icon: Icon(_isSubCategory ? Icons.category : Icons.account_tree),
+                icon: Icon(
+                  _isSubCategory ? Icons.category : Icons.account_tree,
+                ),
                 onPressed: () {
                   setState(() {
                     _isSubCategory = !_isSubCategory;
@@ -207,10 +215,7 @@ class _CategoryStatsScreenState extends State<CategoryStatsScreen> {
             icon: const Icon(Icons.chevron_left),
             onPressed: () => _changePeriod(-1),
           ),
-          Text(
-            label,
-            style: theme.textTheme.titleLarge,
-          ),
+          Text(label, style: theme.textTheme.titleLarge),
           IconButton(
             icon: const Icon(Icons.chevron_right),
             onPressed: () => _changePeriod(1),

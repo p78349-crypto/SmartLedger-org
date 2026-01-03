@@ -13,14 +13,14 @@
  -  2025-12-19 | 기본 페이지명: '기능'→'수입' (보수적 마이그레이션) | 기본 3번째 탭 이름이 '기능' | 기본 3번째 탭 이름을 '수입'으로 변경; 저장된 이름이 “옛 기본값 그대로”인 경우에만 자동 갱신 | Playbook=AccountMainScreen; Why=요구사항(페이지 이름 표시) 반영; Verify=flutter test; Files=lib/screens/account_main_screen.dart |
  -  2025-12-18 | 초기 인덱스 생성 및 3단계 구조로 통합 | tools/USER_MAIN_NAV_MAP.md + tools/LEGACY_USER_MAIN_LOCATION.md + tools/INDEX_CODE_FEATURES.md | tools/INDEX_CODE_FEATURES.md (단일 통합 문서) | 정책/Deepest Paths/Args/Routes 포함 |
  -  2025-12-18 | STEP 3를 “저장소까지” 확장 | STEP 3: 화면→서비스까지만 | STEP 3: prefs/파일/DB(app_database.sqlite)까지 (END) | SharedPreferences 키/파일명/DB 경로 명시 |
- -  2025-12-18 | 메인(삼성 One UI) 고정/정리 | 시작 시 / 라우트로 TopLevel/AccountMain 등이 끼어들 수 있음 | 시작: `/`→LaunchScreen→quickActions, QuickActions가 메인, 상단 `+` 제거 | (LEGACY) 이후 QuickActions는 완전 삭제됨 |
+ -  2025-12-18 | 메인(Smart Ledger) 고정/정리 | 시작 시 / 라우트로 TopLevel/AccountMain 등이 끼어들 수 있음 | 시작: `/`→LaunchScreen→quickActions, QuickActions가 메인, 상단 `+` 제거 | (LEGACY) 이후 QuickActions는 완전 삭제됨 |
  -  2025-12-18 | QuickActions 완전 삭제(기록) | 메인: `/`→LaunchScreen→quickActions | 메인: `/`→LaunchScreen→accountMain | 라우트/진입점/상태/PrefKeys/관련 파일·테스트 제거 |
  -  2025-12-18 | AccountMainScreen 모든 UI 제거(빈 화면) | accountMain에 요약 UI/콘텐츠 표시 | accountMain은 빈 화면(배경만) | 사용자 캡처 기준으로 완전 제거 |
- -  2025-12-18 | (REMOVED) samsung_quick_actions_view.dart 파일 삭제 | lib/widgets/samsung_quick_actions_view.dart 존재 | 파일 삭제됨 | 더 이상 import/사용되지 않아 잔재 정리 |
+ -  2025-12-18 | (REMOVED) smart_quick_actions_view.dart 파일 삭제 | lib/widgets/smart_quick_actions_view.dart 존재 | 파일 삭제됨 | 더 이상 import/사용되지 않아 잔재 정리 |
  -  2025-12-18 | (내 자산 흐름) 통계/지출 분리 유틸 추가 | 자산 이동 기록은 화면에서만 부분 사용 | AssetMove 기반 inflow/outflow/net + outflow breakdown 계산 유틸 추가 | lib/utils/asset_flow_stats.dart |
- -  2025-12-18 | One UI 상단 햄버거 메뉴 추가(설정 통합) | One UI 상단 액션 최소화 | 우측 상단 메뉴(섹션 이동 + 설정) 제공 | (LEGACY) lib/widgets/samsung_quick_actions_view.dart |
+ -  2025-12-18 | Smart Ledger 상단 햄버거 메뉴 추가(설정 통합) | Smart Ledger 상단 액션 최소화 | 우측 상단 메뉴(섹션 이동 + 설정) 제공 | (LEGACY) lib/widgets/smart_quick_actions_view.dart |
  -  2025-12-18 | AccountMainScreen 하단 도트 인디케이터 제거 | PageView 하단에 _MainDotsIndicator 오버레이 표시 | 하단 도트 완전 제거, PageView만 렌더 | lib/screens/account_main_screen.dart |
- -  2025-12-18 | samsung_quick_actions_view.dart의 _DotsIndicator 제거 | _DotsIndicator 위젯 정의 존재 (주석 블록 내) | _DotsIndicator 위젯 삭제 | lib/widgets/samsung_quick_actions_view.dart |
+ -  2025-12-18 | smart_quick_actions_view.dart의 _DotsIndicator 제거 | _DotsIndicator 위젯 정의 존재 (주석 블록 내) | _DotsIndicator 위젯 삭제 | lib/widgets/smart_quick_actions_view.dart |
  -  2025-12-18 | AccountMainScreen 상단 6개 페이지 배너 추가 | 페이지 이동 도구 없음 | 상단 _PageBannerBar 추가: 6개 탭(가족,구매,기능,통계,자산,ROOT), 탭→페이지 이동, 롱프레스→이름 편집 | lib/screens/account_main_screen.dart |
  -  2025-12-19 | 아이콘 숨김 복원 기능 추가 (원위치/빈슬롯 옵션) | 숨김 시 재노출 UI 없음 | 편집 모드에 '숨김 복원' 다이얼로그 추가, '원위치 우선'/'빈 슬롯 우선' 선택 가능, 숨김 시 원위치 인덱스 저장, 복원 로직(원위치→빈슬롯→스왑 확인), prefs에 동기 저장, 관련 위젯 테스트 추가 | lib/screens/account_main_screen.dart, lib/services/user_pref_service.dart, test/screens/account_main_restore_test.dart |
  -  2025-12-19 | UI: 편집 및 숨김 복원 컨트롤 상단 배너로 이동 및 접근 제어 추가 | 편집 버튼이 상단 우측 버튼으로 고정 노출 | 편집/복원 아이콘을 배너 우측(툴팁)으로 이동, 각 페이지 제어용 GlobalKey 추가(부모에서 편집 토글/복원 다이얼로그 호출 가능), 테스트에서 툴팁 기반 셀렉터로 업데이트 | lib/screens/account_main_screen.dart, test/screens/account_main_restore_test.dart, test/screens/account_main_screen_slots_test.dart |
@@ -95,8 +95,8 @@
  -  2025-12-18 | 라우트 추가: ROOT 관련 라우트 | 라우트 없음 | `AppRoutes.rootSearch`, `AppRoutes.rootAccountManage`, `AppRoutes.rootMonthEnd` 추가 및 AppRouter에 케이스 등록 | lib/navigation/app_routes.dart, lib/navigation/app_router.dart |
  -  2025-12-18 | ROOT 기능 분리: 검색/계정관리/월말정산 화면 생성 | TopLevelMainScreen 내부 통합 구현 | `RootSearchScreen`, `RootAccountManageScreen`, `RootMonthEndScreen` 분리 생성, TopLevelMainScreen은 각 화면으로 네비게이트 | lib/screens/root_search_screen.dart, lib/screens/root_account_manage_screen.dart, lib/screens/root_month_end_screen.dart, lib/screens/top_level_main_screen.dart |
  -  2025-12-18 | TopLevelMainScreen: 계정관리 모달 → RootAccountManageScreen 분리 | 계정 관리 모달 내 직접 삭제 처리 | 계정 삭제 로직을 `RootAccountManageScreen`으로 이관, UI/UX 분리 | lib/screens/top_level_main_screen.dart, lib/screens/root_account_manage_screen.dart |
- -  2025-12-18 | Build fix: samsung_quick_actions_view.dart 완전 교체 및 빌드 성공 | 주석 블록 내 코드로 컴파일 에러 발생 | 파일을 1줄로 교체하여 컴파일 오류 제거(빌드 성공) | lib/widgets/samsung_quick_actions_view.dart |
- -  2025-12-18 | samsung_quick_actions_view.dart 주석 블록 완전 제거 | 주석 블록 내 코드로 인한 컴파일 에러 162개 발생 | 파일을 "// QuickActions feature removed." 1줄로 완전 교체 | lib/widgets/samsung_quick_actions_view.dart |
+ -  2025-12-18 | Build fix: smart_quick_actions_view.dart 완전 교체 및 빌드 성공 | 주석 블록 내 코드로 컴파일 에러 발생 | 파일을 1줄로 교체하여 컴파일 오류 제거(빌드 성공) | lib/widgets/smart_quick_actions_view.dart |
+ -  2025-12-18 | smart_quick_actions_view.dart 주석 블록 완전 제거 | 주석 블록 내 코드로 인한 컴파일 에러 162개 발생 | 파일을 "// QuickActions feature removed." 1줄로 완전 교체 | lib/widgets/smart_quick_actions_view.dart |
  -  2025-12-18 | ROOT 통계 로직을 utils로 분리 | TopLevelMainScreen 내부에 통계 계산 로직 포함 | `lib/utils/top_level_stats_utils.dart` 추가, `TopLevelMainScreen`은 utils 호출로 변경 | lib/utils/top_level_stats_utils.dart, lib/screens/top_level_main_screen.dart |
  -  2025-12-19 | CI: PR 레벨에서 INDEX 업데이트 강제 검사 추가 | 없음 | `.github/workflows/index-check.yml` 추가; `CONTRIBUTING.md`에 CI 안내 추가 | PR에서 소스 변경 시 `tools/INDEX_CODE_FEATURES.md` 갱신 필수 ? 누락 시 PR 실패 (자동 보호) |
  -  2025-12-19 | AccountMainScreen: 빈 페이지 2개 추가 (페이지 수 6→8) | 6 페이지(가족,구매,기능,통계,자산,ROOT) | 8 페이지(가족,구매,기능,통계,빈페이지,자산,ROOT,빈페이지2) | `lib/screens/account_main_screen.dart`, `lib/services/user_pref_service.dart` |

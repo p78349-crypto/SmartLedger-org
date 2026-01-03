@@ -31,7 +31,6 @@ class MainPageMigration {
         final slots = await UserPrefService.getPageIconSlots(
           accountName: accountName,
           pageIndex: i,
-          slotCount: Page1BottomQuickIcons.slotCount,
         );
         currentPages[i] = List<String>.from(slots);
         for (final s in slots) {

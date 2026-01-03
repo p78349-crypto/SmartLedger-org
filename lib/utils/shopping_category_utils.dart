@@ -91,8 +91,24 @@ class ShoppingCategoryUtils {
     required Map<String, CategoryHint> learnedHints,
   }) {
     final learned = hintFromLearned(item, learnedHints);
-    if (learned != null) return validateSuggestion(learned);
-    return suggestBuiltIn(item);
+    if (learned != null) {
+      final validated = validateSuggestion(learned);
+      if (CategoryDefinitions.shoppingMainCategories.contains(
+        validated.mainCategory,
+      )) {
+        return validated;
+      }
+    }
+    final builtIn = suggestBuiltIn(item);
+    if (CategoryDefinitions.shoppingMainCategories.contains(
+      builtIn.mainCategory,
+    )) {
+      return builtIn;
+    }
+    return (
+      mainCategory: CategoryDefinitions.defaultCategory,
+      subCategory: null,
+    );
   }
 
   /// Returns multiple candidate suggestions for UI pickers.
@@ -104,13 +120,18 @@ class ShoppingCategoryUtils {
   static List<({String mainCategory, String? subCategory})> suggestCandidates(
     ShoppingCartItem item, {
     required Map<String, CategoryHint> learnedHints,
-    int maxCount = 8,
+    int maxCount = 12,
   }) {
     final out = <({String mainCategory, String? subCategory})>[];
     final seen = <String>{};
 
     void add(({String mainCategory, String? subCategory}) pair) {
       final validated = validateSuggestion(pair);
+      if (!CategoryDefinitions.shoppingMainCategories.contains(
+        validated.mainCategory,
+      )) {
+        return;
+      }
       final k = _pairKey(validated);
       if (seen.contains(k)) return;
       seen.add(k);
@@ -139,6 +160,13 @@ class ShoppingCategoryUtils {
     add(ShoppingCategoryRules.foodGrocery);
     add(ShoppingCategoryRules.foodProcessed);
     add(ShoppingCategoryRules.foodMeat);
+    add(ShoppingCategoryRules.foodSnack);
+    add(ShoppingCategoryRules.foodDrink);
+    add(ShoppingCategoryRules.alcohol);
+    add(ShoppingCategoryRules.suppliesHygiene);
+    add(ShoppingCategoryRules.suppliesPaper);
+    add(ShoppingCategoryRules.suppliesConsumable);
+    add(ShoppingCategoryRules.medicalPharmacy);
 
     if (out.length > maxCount) {
       return out.take(maxCount).toList(growable: false);

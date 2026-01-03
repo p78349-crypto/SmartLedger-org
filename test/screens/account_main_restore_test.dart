@@ -16,7 +16,6 @@ void main() {
       const MaterialApp(
         home: AccountMainScreen(
           accountName: 'test_account_restore_removed',
-          initialIndex: 0,
         ),
       ),
     );

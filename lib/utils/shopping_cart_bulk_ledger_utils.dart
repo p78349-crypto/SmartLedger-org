@@ -185,10 +185,7 @@ class ShoppingCartBulkLedgerUtils {
             orElse: () => ShoppingCartItem(
               id: savedId,
               name: '',
-              quantity: 1,
-              unitPrice: 0,
               isPlanned: false,
-              isChecked: false,
               createdAt: DateTime.now(),
               updatedAt: DateTime.now(),
             ),
@@ -287,5 +284,298 @@ class ShoppingCartBulkLedgerUtils {
     }
 
     await reload();
+  }
+
+  static Future<void> addCheckedItemsToLedgerMartShopping({
+    required BuildContext context,
+    required String accountName,
+    required List<ShoppingCartItem> items,
+    required Map<String, CategoryHint> categoryHints,
+    required Future<void> Function(List<ShoppingCartItem> next) saveItems,
+    required Future<void> Function() reload,
+  }) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+
+    final selected = items.where((i) => i.isChecked).toList();
+    if (selected.isEmpty) {
+      messenger.showSnackBar(const SnackBar(content: Text('체크된 항목이 없습니다.')));
+      return;
+    }
+
+    // 1. Collect common info (Store, Payment, Date)
+    final commonInfo = await showDialog<_MartCommonInfo>(
+      context: context,
+      builder: (context) => _MartCommonInfoDialog(accountName: accountName),
+    );
+
+    if (commonInfo == null || !context.mounted) return;
+
+    // 2. Proceed with bulk entry using common info
+    final total = selected.fold<double>(
+      0.0,
+      (sum, i) => sum + ((i.quantity <= 0 ? 1 : i.quantity) * i.unitPrice),
+    );
+
+    final bulkPreviewLines = selected.map((i) {
+      final qty = i.quantity <= 0 ? 1 : i.quantity;
+      final unit = i.unitPrice;
+      final lineTotal = qty * unit;
+      return '${i.name} ($qty개) = ${CurrencyFormatter.format(lineTotal)}';
+    }).toList();
+
+    var currentItems = items;
+    for (var index = 0; index < selected.length; index++) {
+      if (!context.mounted) return;
+      final item = selected[index];
+      final qty = item.quantity <= 0 ? 1 : item.quantity;
+      final unit = item.unitPrice;
+      final itemTotal = unit * qty;
+      final suggested = ShoppingCategoryUtils.suggest(
+        item,
+        learnedHints: categoryHints,
+      );
+
+      final remaining = selected.sublist(index);
+      final result = await navigator.pushNamed(
+        AppRoutes.shoppingCartQuickTransaction,
+        arguments: ShoppingCartQuickTransactionArgs(
+          accountName: accountName,
+          title: '마트 쇼핑 입력 ${index + 1}/${selected.length}',
+          description: item.name,
+          quantity: qty,
+          unitPrice: unit,
+          total: itemTotal,
+          initialMainCategory: suggested.mainCategory,
+          initialSubCategory: suggested.subCategory,
+          bulkRemainingItems: remaining,
+          bulkIndex: index,
+          bulkTotalCount: selected.length,
+          bulkCategoryHints: categoryHints,
+          bulkGrandTotal: total,
+          bulkPreviewLines: bulkPreviewLines,
+          martStore: commonInfo.store,
+          martPayment: commonInfo.payment,
+          martDate: commonInfo.date,
+        ),
+      );
+
+      if (!context.mounted) return;
+
+      if (result is ShoppingCartQuickTransactionSaveRestResult) {
+        // Handle bulk save rest (similar to existing logic but with mart info)
+        // Actually, the screen itself should handle the mart info
+        // during bulk save.
+        // We just need to make sure the screen uses it.
+        for (final savedId in result.savedItemIds) {
+          final at = DateTime.now();
+          await UserPrefService.addShoppingCartHistoryEntry(
+            accountName: accountName,
+            entry: ShoppingCartHistoryEntry(
+              id: 'hist_${at.microsecondsSinceEpoch}',
+              action: ShoppingCartHistoryAction.addToLedger,
+              itemId: savedId,
+              name: selected.firstWhere((i) => i.id == savedId).name,
+              quantity: selected.firstWhere((i) => i.id == savedId).quantity,
+              unitPrice: selected.firstWhere((i) => i.id == savedId).unitPrice,
+              isPlanned: selected.firstWhere((i) => i.id == savedId).isPlanned,
+              at: at,
+            ),
+          );
+        }
+
+        final ids = result.savedItemIds.toSet();
+        currentItems = currentItems.where((i) => !ids.contains(i.id)).toList();
+        await saveItems(currentItems);
+        await reload();
+
+        if (!context.mounted) return;
+        await navigator.pushNamed(
+          AppRoutes.dailyTransactions,
+          arguments: DailyTransactionsArgs(
+            accountName: accountName,
+            initialDay: commonInfo.date,
+            savedCount: result.savedItemIds.length,
+            showShoppingPointsInputCta: true,
+          ),
+        );
+        return;
+      }
+
+      if (result != true) break;
+
+      final at = DateTime.now();
+      await UserPrefService.addShoppingCartHistoryEntry(
+        accountName: accountName,
+        entry: ShoppingCartHistoryEntry(
+          id: 'hist_${at.microsecondsSinceEpoch}',
+          action: ShoppingCartHistoryAction.addToLedger,
+          itemId: item.id,
+          name: item.name,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          isPlanned: item.isPlanned,
+          at: at,
+        ),
+      );
+
+      currentItems = currentItems.where((i) => i.id != item.id).toList();
+      await saveItems(currentItems);
+
+      if (index == selected.length - 1) {
+        await reload();
+        if (!context.mounted) return;
+        await navigator.pushNamed(
+          AppRoutes.dailyTransactions,
+          arguments: DailyTransactionsArgs(
+            accountName: accountName,
+            initialDay: commonInfo.date,
+            savedCount: selected.length,
+            showShoppingPointsInputCta: true,
+          ),
+        );
+      }
+    }
+    await reload();
+  }
+}
+
+class _MartCommonInfo {
+  final String store;
+  final String payment;
+  final DateTime date;
+  const _MartCommonInfo(this.store, this.payment, this.date);
+}
+
+class _MartCommonInfoDialog extends StatefulWidget {
+  final String accountName;
+  const _MartCommonInfoDialog({required this.accountName});
+
+  @override
+  State<_MartCommonInfoDialog> createState() => _MartCommonInfoDialogState();
+}
+
+class _MartCommonInfoDialogState extends State<_MartCommonInfoDialog> {
+  final _storeController = TextEditingController();
+  final _paymentController = TextEditingController();
+  DateTime _date = DateTime.now();
+
+  List<String> _recentStores = [];
+  List<String> _recentPayments = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRecents();
+  }
+
+  Future<void> _loadRecents() async {
+    final stores = await UserPrefService.getRecentStores(widget.accountName);
+    final payments = await UserPrefService.getRecentPayments(
+      widget.accountName,
+    );
+    if (mounted) {
+      setState(() {
+        _recentStores = stores;
+        _recentPayments = payments;
+        if (stores.isNotEmpty) _storeController.text = stores.first;
+        if (payments.isNotEmpty) _paymentController.text = payments.first;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('마트 쇼핑 정보 입력'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _storeController,
+              decoration: const InputDecoration(
+                labelText: '마트/쇼핑몰',
+                hintText: '예: 이마트, 쿠팡 등',
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 4,
+              children: _recentStores
+                  .take(3)
+                  .map(
+                    (s) => ActionChip(
+                      label: Text(s, style: const TextStyle(fontSize: 11)),
+                      onPressed: () =>
+                          setState(() => _storeController.text = s),
+                    ),
+                  )
+                  .toList(),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _paymentController,
+              decoration: const InputDecoration(
+                labelText: '결제수단',
+                hintText: '예: 현대카드, 현금 등',
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 4,
+              children: _recentPayments
+                  .take(3)
+                  .map(
+                    (p) => ActionChip(
+                      label: Text(p, style: const TextStyle(fontSize: 11)),
+                      onPressed: () =>
+                          setState(() => _paymentController.text = p),
+                    ),
+                  )
+                  .toList(),
+            ),
+            const SizedBox(height: 16),
+            ListTile(
+              title: const Text('쇼핑 날짜'),
+              subtitle: Text('${_date.year}-${_date.month}-${_date.day}'),
+              trailing: const Icon(Icons.calendar_today),
+              onTap: () async {
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate: _date,
+                  firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                  lastDate: DateTime.now().add(const Duration(days: 30)),
+                );
+                if (picked != null) setState(() => _date = picked);
+              },
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('취소'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            if (_storeController.text.trim().isEmpty ||
+                _paymentController.text.trim().isEmpty) {
+              return;
+            }
+            Navigator.pop(
+              context,
+              _MartCommonInfo(
+                _storeController.text.trim(),
+                _paymentController.text.trim(),
+                _date,
+              ),
+            );
+          },
+          child: const Text('시작하기'),
+        ),
+      ],
+    );
   }
 }

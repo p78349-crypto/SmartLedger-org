@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:smart_ledger/models/transaction.dart';
+import 'package:smart_ledger/screens/category_stats_screen.dart';
 import 'package:smart_ledger/services/transaction_service.dart';
 import 'package:smart_ledger/utils/date_formatter.dart';
 import 'package:smart_ledger/utils/localized_date_formatter.dart';
@@ -183,15 +184,48 @@ class _PeriodStatsScreenState extends State<PeriodStatsScreen> {
   }
 
   Color _colorForCategoryRank(ThemeData theme, int index) {
-    final base = (index < 10)
-        ? theme.colorScheme.primary
-        : theme.colorScheme.secondary;
+    final scheme = theme.colorScheme;
 
-    final within = index % 10;
-    final step = within / 9.0;
-    final hsl = HSLColor.fromColor(base);
-    final lightness = (0.65 - step * 0.35).clamp(0.25, 0.75).toDouble();
-    return hsl.withLightness(lightness).toColor();
+    // 상위 10/20/21 색상 구분
+    if (index < 10) {
+      // 상위 1-10: 강조색 (Primary 계열)
+      final colors = [
+        scheme.primary,
+        Colors.blue,
+        Colors.indigo,
+        Colors.cyan,
+        Colors.teal,
+        Colors.green,
+        Colors.lightGreen,
+        Colors.lime,
+        Colors.yellow,
+        Colors.amber,
+      ];
+      return colors[index % colors.length];
+    } else if (index < 20) {
+      // 상위 11-20: 보조색 (Secondary 계열)
+      final colors = [
+        scheme.secondary,
+        Colors.orange,
+        Colors.deepOrange,
+        Colors.red,
+        Colors.pink,
+        Colors.purple,
+        Colors.deepPurple,
+        Colors.brown,
+        Colors.blueGrey,
+        Colors.grey,
+      ];
+      return colors[(index - 10) % colors.length];
+    } else {
+      // 21위 이상: 기타색 (Tertiary 계열)
+      final colors = [
+        scheme.tertiary,
+        scheme.outline,
+        scheme.onSurfaceVariant,
+      ];
+      return colors[(index - 20) % colors.length];
+    }
   }
 
   Widget _buildExpenseCategoryAggregation(
@@ -354,9 +388,15 @@ class _PeriodStatsScreenState extends State<PeriodStatsScreen> {
                   child: FloatingActionButton(
                     heroTag: 'period_stats_trend',
                     onPressed: () {
-                      // Removed SnackBar help to avoid moving FABs upward.
-                      // Implement navigation or other action here if needed.
-                      debugPrint('대분류 pressed');
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => CategoryStatsScreen(
+                            accountName: widget.accountName,
+                            isSubCategory: false,
+                            initialMonth: _anchorDay,
+                          ),
+                        ),
+                      );
                     },
                     backgroundColor: Colors.white,
                     elevation: 4,
@@ -373,9 +413,15 @@ class _PeriodStatsScreenState extends State<PeriodStatsScreen> {
                   child: FloatingActionButton(
                     heroTag: 'period_stats_bar',
                     onPressed: () {
-                      // Removed SnackBar help to avoid moving FABs upward.
-                      // Implement navigation or other action here if needed.
-                      debugPrint('소분류 pressed');
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => CategoryStatsScreen(
+                            accountName: widget.accountName,
+                            isSubCategory: true,
+                            initialMonth: _anchorDay,
+                          ),
+                        ),
+                      );
                     },
                     backgroundColor: Colors.white,
                     elevation: 4,

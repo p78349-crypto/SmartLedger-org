@@ -153,6 +153,39 @@ class StatsCalculator {
     return stats;
   }
 
+  /// 소분류 카테고리별로 그룹화하여 집계
+  static List<CategoryStats> calculateSubCategoryStats(
+    List<Transaction> transactions,
+    TransactionType type,
+  ) {
+    final filtered = filterByType(transactions, type);
+    final grouped = <String, List<Transaction>>{};
+
+    for (final tx in filtered) {
+      final category = (tx.subCategory == null || tx.subCategory!.trim().isEmpty)
+          ? Transaction.defaultMainCategory
+          : tx.subCategory!;
+      grouped.putIfAbsent(category, () => []).add(tx);
+    }
+
+    final totalAmount = calculateTotal(filtered);
+    final stats = grouped.entries.map((entry) {
+      final categoryTotal = calculateTotal(entry.value);
+      final percentage = totalAmount > 0 ? (categoryTotal / totalAmount * 100) : 0.0;
+      return CategoryStats(
+        category: entry.key,
+        total: categoryTotal,
+        count: entry.value.length,
+        percentage: percentage,
+        transactions: entry.value,
+      );
+    }).toList();
+
+    // 금액 내림차순 정렬
+    stats.sort((a, b) => b.total.compareTo(a.total));
+    return stats;
+  }
+
   /// 일별로 그룹화하여 집계
   static List<DailyStats> calculateDailyStats(
     List<Transaction> transactions,

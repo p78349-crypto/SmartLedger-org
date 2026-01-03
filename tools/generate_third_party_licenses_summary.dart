@@ -17,13 +17,15 @@ class PackageInfo {
 
 String _detectLicenseType(String text) {
   final normalized = text.toLowerCase();
-  if (normalized.contains('apache license') && normalized.contains('version 2')) {
+  if (normalized.contains('apache license') &&
+      normalized.contains('version 2')) {
     return 'Apache-2.0 (detected)';
   }
   if (normalized.contains('mit license')) {
     return 'MIT (detected)';
   }
-  if (normalized.contains('mozilla public license') && normalized.contains('2.0')) {
+  if (normalized.contains('mozilla public license') &&
+      normalized.contains('2.0')) {
     return 'MPL-2.0 (detected)';
   }
   if (normalized.contains('gnu general public license')) {
@@ -36,7 +38,10 @@ String _detectLicenseType(String text) {
     if (normalized.contains('version 2.1')) return 'LGPL-2.1 (detected)';
     return 'LGPL (detected)';
   }
-  if (normalized.contains('bsd license') || normalized.contains('redistribution and use in source and binary forms')) {
+  if (normalized.contains('bsd license') ||
+      normalized.contains(
+        'redistribution and use in source and binary forms',
+      )) {
     return 'BSD (detected)';
   }
   if (normalized.contains('isc license')) {
@@ -51,7 +56,9 @@ String _detectLicenseType(String text) {
   return 'Unknown (review)';
 }
 
-Map<String, ({String version, String dependencyKind})> _parsePubspecLock(String lockText) {
+Map<String, ({String version, String dependencyKind})> _parsePubspecLock(
+  String lockText,
+) {
   // Minimal parser for pubspec.lock.
   // It looks for blocks:
   //   <name>:
@@ -174,7 +181,9 @@ Future<void> main(List<String> args) async {
   final lockFile = File(PathUtil.join(root.path, 'pubspec.lock'));
 
   if (!pkgConfig.existsSync()) {
-    stderr.writeln('Missing .dart_tool/package_config.json. Run: flutter pub get');
+    stderr.writeln(
+      'Missing .dart_tool/package_config.json. Run: flutter pub get',
+    );
     exitCode = 2;
     return;
   }
@@ -185,7 +194,8 @@ Future<void> main(List<String> args) async {
   }
 
   final lockMap = _parsePubspecLock(lockFile.readAsStringSync());
-  final pkgJson = jsonDecode(pkgConfig.readAsStringSync()) as Map<String, dynamic>;
+  final pkgJson =
+      jsonDecode(pkgConfig.readAsStringSync()) as Map<String, dynamic>;
   final packages = (pkgJson['packages'] as List).cast<Map<String, dynamic>>();
 
   final infos = <PackageInfo>[];
@@ -216,12 +226,18 @@ Future<void> main(List<String> args) async {
   outMd.writeln('# Third-Party Licenses Summary');
   outMd.writeln();
   outMd.writeln('- Generated: ${DateTime.now().toIso8601String()}');
-  outMd.writeln('- Sources: `.dart_tool/package_config.json` + `pubspec.lock` + local Pub cache (package root folders)');
-  outMd.writeln('- Note: This file intentionally does NOT include full license texts. It only records which license file was found and a best-effort detected license type.');
+  outMd.writeln(
+    '- Sources: `.dart_tool/package_config.json` + `pubspec.lock` + local Pub cache (package root folders)',
+  );
+  outMd.writeln(
+    '- Note: This file intentionally does NOT include full license texts. It only records which license file was found and a best-effort detected license type.',
+  );
   outMd.writeln();
   outMd.writeln('## Package Scan Result');
   outMd.writeln();
-  outMd.writeln('| Package | Version | Dependency | License File | Detected Type |');
+  outMd.writeln(
+    '| Package | Version | Dependency | License File | Detected Type |',
+  );
   outMd.writeln('|---|---:|---|---|---|');
 
   final missing = <String>[];
@@ -235,7 +251,9 @@ Future<void> main(List<String> args) async {
       license = _findLicenseFile(rootDir);
       if (license != null && license.existsSync()) {
         final content = license.readAsStringSync();
-        final head = content.length > 4000 ? content.substring(0, 4000) : content;
+        final head = content.length > 4000
+            ? content.substring(0, 4000)
+            : content;
         detected = _detectLicenseType(head);
       }
     }
@@ -283,4 +301,3 @@ Future<void> main(List<String> args) async {
   stdout.writeln('Packages scanned: ${infos.length}');
   stdout.writeln('Missing license files: ${missing.length}');
 }
-

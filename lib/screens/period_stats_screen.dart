@@ -464,10 +464,9 @@ class _PeriodTransactionsListScreen extends StatelessWidget {
                               : (Colors.amber[700] ??
                                     theme.colorScheme.secondary);
 
-                          final amountText = '${tx.sign}'
-                              '${currencyFormat.format(
-                                tx.amount.abs(),
-                              )}원';
+                          final amountText =
+                              '${tx.sign}'
+                              '${currencyFormat.format(tx.amount.abs())}원';
 
                           return ListTile(
                             leading: Icon(icon, color: color),

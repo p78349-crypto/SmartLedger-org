@@ -984,7 +984,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                                                     : parsedQty);
 
                                             final timestamp = DateTime.now()
-                                              .microsecondsSinceEpoch;
+                                                .microsecondsSinceEpoch;
                                             final cartTxId = 'cart_$timestamp';
                                             final tx = Transaction(
                                               id: cartTxId,
@@ -1023,10 +1023,10 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                                                       unitKeyboardType,
                                                   textInputAction:
                                                       TextInputAction.next,
-                                                    decoration:
-                                                        _inlineFieldDecoration(
-                                                          '가격',
-                                                        ),
+                                                  decoration:
+                                                      _inlineFieldDecoration(
+                                                        '가격',
+                                                      ),
                                                   onChanged: (_) =>
                                                       _previewInlineEdits(item),
                                                   onTapOutside: (_) {
@@ -1077,10 +1077,10 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                                                       TextInputType.number,
                                                   textInputAction:
                                                       TextInputAction.next,
-                                                    decoration:
-                                                        _inlineFieldDecoration(
-                                                          '수량',
-                                                        ),
+                                                  decoration:
+                                                      _inlineFieldDecoration(
+                                                        '수량',
+                                                      ),
                                                   onChanged: (_) =>
                                                       _previewInlineEdits(item),
                                                   onTapOutside: (_) {
@@ -1125,7 +1125,9 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                                                       if (nextNode != null) {
                                                         nextNode.requestFocus();
                                                         final liveCtx =
-                                                          _itemContext(nextId);
+                                                            _itemContext(
+                                                              nextId,
+                                                            );
                                                         _ensureVisible(
                                                           liveCtx,
                                                           durationMs: 180,

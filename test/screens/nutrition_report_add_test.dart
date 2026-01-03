@@ -6,12 +6,14 @@ void main() {
   testWidgets('tapping add on a pairing calls callback', (tester) async {
     String? added;
 
-    await tester.pumpWidget(MaterialApp(
-      home: NutritionReportScreen(
-        rawText: '',
-        onAddIngredient: (s) => added = s,
+    await tester.pumpWidget(
+      MaterialApp(
+        home: NutritionReportScreen(
+          rawText: '',
+          onAddIngredient: (s) => added = s,
+        ),
       ),
-    ));
+    );
 
     // Enter a query
     await tester.enterText(find.byType(TextField), '닭고기');
@@ -26,7 +28,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(added, isNotNull);
-    expect(added, anyOf('브로콜리', '버섯(표고/느타리/팽이)', '양파/마늘', '파프리카/토마토', '현미/귀리(또는 잡곡밥)'));
+    expect(
+      added,
+      anyOf('브로콜리', '버섯(표고/느타리/팽이)', '양파/마늘', '파프리카/토마토', '현미/귀리(또는 잡곡밥)'),
+    );
   });
 }
-

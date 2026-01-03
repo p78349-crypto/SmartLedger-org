@@ -147,4 +147,3 @@ void main() {
     expect(newSlots[0], 'daily_transactions');
   });
 }
-

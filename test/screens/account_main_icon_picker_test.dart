@@ -125,4 +125,3 @@ void main() {
     expect(entButtonAfter.onPressed, isNotNull);
   });
 }
-

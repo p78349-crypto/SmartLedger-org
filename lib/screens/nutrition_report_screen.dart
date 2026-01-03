@@ -97,8 +97,8 @@ class _NutritionReportScreenState extends State<NutritionReportScreen> {
     final totalLabel = report.items.isEmpty
         ? '합계: -'
         : (report.totalMinWon == report.totalMaxWon
-          ? '합계: $totalMinLabel원'
-          : '합계: $totalMinLabel~$totalMaxLabel원');
+              ? '합계: $totalMinLabel원'
+              : '합계: $totalMinLabel~$totalMaxLabel원');
 
     return Scaffold(
       appBar: AppBar(
@@ -456,8 +456,8 @@ class _IngredientRow extends StatelessWidget {
     final minLabel = currency.format(item.priceMinWon);
     final maxLabel = currency.format(item.priceMaxWon);
     final priceLabel = item.priceMinWon == item.priceMaxWon
-      ? '$minLabel원'
-      : '$minLabel~$maxLabel원';
+        ? '$minLabel원'
+        : '$minLabel~$maxLabel원';
 
     return InkWell(
       onTap: onTap,

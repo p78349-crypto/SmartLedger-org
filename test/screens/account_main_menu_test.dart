@@ -124,4 +124,3 @@ void main() {
     expect(find.text('사진 숨기기'), findsNothing);
   });
 }
-

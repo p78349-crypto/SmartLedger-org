@@ -37,7 +37,8 @@ Future<File> processAndCacheImage(
   // Use a cache key based on filename + size + modified timestamp
   final stat = input.statSync();
   final base = p.basename(input.path).replaceAll(RegExp(r'[^a-zA-Z0-9_]'), '_');
-    final key = '${base}_${stat.size}_'
+  final key =
+      '${base}_${stat.size}_'
       '${stat.modified.millisecondsSinceEpoch}_${maxDim}_'
       '$quality.jpg';
 

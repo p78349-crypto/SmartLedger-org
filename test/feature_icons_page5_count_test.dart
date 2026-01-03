@@ -5,8 +5,9 @@ import 'package:smart_ledger/screens/feature_icons_catalog_screen.dart';
 import 'package:smart_ledger/utils/main_feature_icon_catalog.dart';
 
 void main() {
-  testWidgets('Page 5 (asset) icons render with expected labels',
-      (WidgetTester tester) async {
+  testWidgets('Page 5 (asset) icons render with expected labels', (
+    WidgetTester tester,
+  ) async {
     // Ensure page 4 (asset) exists (pages[4] = UI page 5)
     expect(MainFeatureIconCatalog.pages.length > 4, isTrue);
 
@@ -26,8 +27,7 @@ void main() {
 
     final context = tester.element(find.byType(FeatureIconsCatalogScreen));
     // pages[4] = 자산 (Asset) - UI page 5
-    final expectedLabels = MainFeatureIconCatalog.pages[4]
-        .items
+    final expectedLabels = MainFeatureIconCatalog.pages[4].items
         .map((e) => e.labelFor(context))
         .toList();
 
@@ -48,9 +48,10 @@ void main() {
 
     // Verify each expected label for page 5 is present in the widget tree.
     for (final label in expectedLabels) {
-      expect(find.descendant(of: assetSection, matching: find.text(label)),
-          findsOneWidget);
+      expect(
+        find.descendant(of: assetSection, matching: find.text(label)),
+        findsOneWidget,
+      );
     }
   });
 }
-

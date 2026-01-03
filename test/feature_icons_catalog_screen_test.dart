@@ -4,8 +4,9 @@ import 'package:smart_ledger/screens/feature_icons_catalog_screen.dart';
 import 'package:smart_ledger/utils/main_feature_icon_catalog.dart';
 
 void main() {
-  testWidgets('FeatureIconsCatalogScreen renders pages or empty message',
-      (WidgetTester tester) async {
+  testWidgets('FeatureIconsCatalogScreen renders pages or empty message', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       const MaterialApp(home: FeatureIconsCatalogScreen()),
     );
@@ -25,4 +26,3 @@ void main() {
     }
   });
 }
-

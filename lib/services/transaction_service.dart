@@ -6,7 +6,7 @@ import 'package:smart_ledger/database/database_provider.dart';
 import 'package:smart_ledger/models/transaction.dart';
 import 'package:smart_ledger/services/monthly_agg_cache_service.dart';
 import 'package:smart_ledger/services/'
-  'transaction_benefit_monthly_agg_service.dart';
+    'transaction_benefit_monthly_agg_service.dart';
 import 'package:smart_ledger/services/transaction_db_migration_service.dart';
 import 'package:smart_ledger/services/transaction_db_store.dart';
 import 'package:smart_ledger/services/transaction_fts_index_service.dart';

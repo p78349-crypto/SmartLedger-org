@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:smart_ledger/models/transaction.dart';
 import 'package:smart_ledger/navigation/app_routes.dart';
 import 'package:smart_ledger/services/'
-  'quick_simple_expense_input_history_service.dart';
+    'quick_simple_expense_input_history_service.dart';
 import 'package:smart_ledger/services/transaction_service.dart';
 import 'package:smart_ledger/utils/currency_formatter.dart';
 import 'package:smart_ledger/utils/icon_catalog.dart';
@@ -437,11 +437,14 @@ class _QuickSimpleExpenseInputScreenState
                 itemBuilder: (context, index) {
                   final item = _displayedItems[index];
                   final amountLabel = CurrencyFormatter.format(item.amount);
-                  final paymentLabel =
-                      item.payment != '미지정' ? ' · ${item.payment}' : '';
-                  final storeLabel =
-                      item.store != '미지정' ? ' · ${item.store}' : '';
-                    final itemText = '${item.description} · $amountLabel'
+                  final paymentLabel = item.payment != '미지정'
+                      ? ' · ${item.payment}'
+                      : '';
+                  final storeLabel = item.store != '미지정'
+                      ? ' · ${item.store}'
+                      : '';
+                  final itemText =
+                      '${item.description} · $amountLabel'
                       '$paymentLabel$storeLabel';
                   return Card(
                     child: Padding(

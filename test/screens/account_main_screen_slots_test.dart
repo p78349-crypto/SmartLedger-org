@@ -26,4 +26,3 @@ void main() {
     expect(find.byKey(const ValueKey('main_icon_slot_0_11')), findsOneWidget);
   });
 }
-

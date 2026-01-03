@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:smart_ledger/models/transaction.dart';
 import 'package:smart_ledger/navigation/app_routes.dart';
 import 'package:smart_ledger/services/'
-  'quick_simple_expense_input_history_service.dart';
+    'quick_simple_expense_input_history_service.dart';
 import 'package:smart_ledger/services/store_alias_service.dart';
 import 'package:smart_ledger/services/transaction_service.dart';
 import 'package:smart_ledger/utils/benefit_memo_utils.dart';

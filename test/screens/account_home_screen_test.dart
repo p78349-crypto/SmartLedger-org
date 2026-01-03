@@ -35,4 +35,3 @@ void main() {
     expect(find.text('카테고리 예산 사용량 그래프 보기'), findsOneWidget);
   });
 }
-

@@ -130,7 +130,6 @@ class _RecipePickerDialogState extends State<_RecipePickerDialog> {
       ],
     );
   }
-
 }
 
 class _RecipeUpsertDialog extends StatefulWidget {
@@ -711,9 +710,7 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
                           ...items.map((item) {
                             return ListTile(
                               title: Text(item.name),
-                              subtitle: Text(
-                                _historySubtitle(item),
-                              ),
+                              subtitle: Text(_historySubtitle(item)),
                               trailing: IconButton(
                                 icon: const Icon(Icons.playlist_add),
                                 onPressed: () {
@@ -1182,9 +1179,7 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
                         style: OutlinedButton.styleFrom(
                           alignment: Alignment.centerLeft,
                         ),
-                        child: Text(
-                          _expiryButtonLabel(p?.suggestedExpiryDate),
-                        ),
+                        child: Text(_expiryButtonLabel(p?.suggestedExpiryDate)),
                       ),
                     ),
                     if (p != null) ...[

@@ -9,7 +9,10 @@ void main() {
     const account = 'acct_test';
     const page = 2;
 
-    final groups = List<List<String>>.filled(Page1BottomQuickIcons.slotCount, <String>[]);
+    final groups = List<List<String>>.filled(
+      Page1BottomQuickIcons.slotCount,
+      <String>[],
+    );
     groups[0] = ['a', 'b', 'c'];
     groups[3] = ['z'];
 
@@ -51,4 +54,3 @@ void main() {
     expect(loaded[3], []);
   });
 }
-

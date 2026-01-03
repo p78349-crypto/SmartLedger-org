@@ -56,4 +56,3 @@ void main(List<String> args) {
     'Exported ${rows.length} index rows to tools/index_export.csv and tools/index_export.json',
   );
 }
-

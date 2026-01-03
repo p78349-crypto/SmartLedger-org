@@ -92,7 +92,6 @@ void main() {
       ),
       findsOneWidget,
     );
-    
 
     // Empty slot '+' icons should not be present
     expect(
@@ -169,4 +168,3 @@ void main() {
     expect(find.byIcon(IconCatalog.add), findsWidgets);
   });
 }
-

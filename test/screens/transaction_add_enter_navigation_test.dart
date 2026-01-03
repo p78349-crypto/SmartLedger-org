@@ -4,7 +4,9 @@ import 'package:smart_ledger/models/transaction.dart';
 import 'package:smart_ledger/screens/transaction_add_screen.dart';
 
 void main() {
-  testWidgets('Income: Enter moves desc->amount->payment->memo', (tester) async {
+  testWidgets('Income: Enter moves desc->amount->payment->memo', (
+    tester,
+  ) async {
     final tx = Transaction(
       id: 't1',
       type: TransactionType.income,
@@ -13,7 +15,11 @@ void main() {
       date: DateTime.now(),
     );
 
-    await tester.pumpWidget(MaterialApp(home: TransactionAddScreen(accountName: 'a', initialTransaction: tx)));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: TransactionAddScreen(accountName: 'a', initialTransaction: tx),
+      ),
+    );
     await tester.pumpAndSettle();
 
     final descField = find.byKey(const Key('tx_desc'));
@@ -27,14 +33,20 @@ void main() {
     expect(memoField, findsOneWidget);
 
     // Focus desc and press Next
-    final descTextField = find.descendant(of: descField, matching: find.byType(TextFormField));
+    final descTextField = find.descendant(
+      of: descField,
+      matching: find.byType(TextFormField),
+    );
     await tester.tap(descTextField);
     await tester.pumpAndSettle();
     await tester.enterText(descTextField, '월급');
     await tester.testTextInput.receiveAction(TextInputAction.next);
     await tester.pumpAndSettle();
 
-    final amtEditable = find.descendant(of: amountField, matching: find.byType(EditableText));
+    final amtEditable = find.descendant(
+      of: amountField,
+      matching: find.byType(EditableText),
+    );
     final amtWidget = tester.widget<EditableText>(amtEditable);
     expect(amtWidget.focusNode.hasFocus, isTrue);
 
@@ -43,7 +55,10 @@ void main() {
     await tester.testTextInput.receiveAction(TextInputAction.next);
     await tester.pumpAndSettle();
 
-    final payEditable = find.descendant(of: paymentField, matching: find.byType(EditableText));
+    final payEditable = find.descendant(
+      of: paymentField,
+      matching: find.byType(EditableText),
+    );
     final payWidget = tester.widget<EditableText>(payEditable);
     expect(payWidget.focusNode.hasFocus, isTrue);
 
@@ -52,13 +67,18 @@ void main() {
     await tester.testTextInput.receiveAction(TextInputAction.next);
     await tester.pumpAndSettle();
 
-    final memoEditable = find.descendant(of: memoField, matching: find.byType(EditableText));
+    final memoEditable = find.descendant(
+      of: memoField,
+      matching: find.byType(EditableText),
+    );
     final memoWidget = tester.widget<EditableText>(memoEditable);
     expect(memoWidget.focusNode.hasFocus, isTrue);
   });
 
   testWidgets('Expense: Enter moves desc->unit->qty->payment', (tester) async {
-    await tester.pumpWidget(const MaterialApp(home: TransactionAddScreen(accountName: 'a')));
+    await tester.pumpWidget(
+      const MaterialApp(home: TransactionAddScreen(accountName: 'a')),
+    );
     await tester.pumpAndSettle();
 
     final descField = find.byKey(const Key('tx_desc'));
@@ -71,14 +91,20 @@ void main() {
     expect(qtyField, findsOneWidget);
     expect(paymentField, findsOneWidget);
 
-    final descTextField = find.descendant(of: descField, matching: find.byType(TextFormField));
+    final descTextField = find.descendant(
+      of: descField,
+      matching: find.byType(TextFormField),
+    );
     await tester.tap(descTextField);
     await tester.pumpAndSettle();
     await tester.enterText(descTextField, '닭고기');
     await tester.testTextInput.receiveAction(TextInputAction.next);
     await tester.pumpAndSettle();
 
-    final unitEditable = find.descendant(of: unitField, matching: find.byType(EditableText));
+    final unitEditable = find.descendant(
+      of: unitField,
+      matching: find.byType(EditableText),
+    );
     final unitWidget = tester.widget<EditableText>(unitEditable);
     expect(unitWidget.focusNode.hasFocus, isTrue);
 
@@ -87,7 +113,10 @@ void main() {
     await tester.testTextInput.receiveAction(TextInputAction.next);
     await tester.pumpAndSettle();
 
-    final qtyEditable = find.descendant(of: qtyField, matching: find.byType(EditableText));
+    final qtyEditable = find.descendant(
+      of: qtyField,
+      matching: find.byType(EditableText),
+    );
     final qtyWidget = tester.widget<EditableText>(qtyEditable);
     expect(qtyWidget.focusNode.hasFocus, isTrue);
 
@@ -96,9 +125,11 @@ void main() {
     await tester.testTextInput.receiveAction(TextInputAction.next);
     await tester.pumpAndSettle();
 
-    final payEditable = find.descendant(of: paymentField, matching: find.byType(EditableText));
+    final payEditable = find.descendant(
+      of: paymentField,
+      matching: find.byType(EditableText),
+    );
     final payWidget = tester.widget<EditableText>(payEditable);
     expect(payWidget.focusNode.hasFocus, isTrue);
   });
 }
-

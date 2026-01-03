@@ -349,9 +349,10 @@ class _MicroSavingsNudgeScreenState extends State<MicroSavingsNudgeScreen> {
     }
 
     final rounded = (base / unit).ceil() * unit;
-    final memo = '${BenefitAggregationUtils.roundUpMemoTag} '
-      '${CurrencyFormatter.format(base)}→'
-      '${CurrencyFormatter.format(rounded)}';
+    final memo =
+        '${BenefitAggregationUtils.roundUpMemoTag} '
+        '${CurrencyFormatter.format(base)}→'
+        '${CurrencyFormatter.format(rounded)}';
 
     final tx = Transaction(
       id: 'roundup_${DateTime.now().millisecondsSinceEpoch}',

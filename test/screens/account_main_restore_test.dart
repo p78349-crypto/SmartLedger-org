@@ -25,4 +25,3 @@ void main() {
     expect(find.byType(AccountMainScreen), findsOneWidget);
   });
 }
-

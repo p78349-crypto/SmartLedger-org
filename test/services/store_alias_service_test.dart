@@ -29,11 +29,7 @@ void main() {
 
     test('normalizes store key input', () {
       final map = <String, String>{'이마트': '이마트(대표)'};
-      expect(
-        StoreAliasService.resolve('이마트 / 기타', map),
-        equals('이마트(대표)'),
-      );
+      expect(StoreAliasService.resolve('이마트 / 기타', map), equals('이마트(대표)'));
     });
   });
 }
-

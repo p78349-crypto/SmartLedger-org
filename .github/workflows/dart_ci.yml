@@ -24,7 +24,7 @@ jobs:
       - name: dart_code_metrics (Linux)
         run: |
           dart pub global activate dart_code_metrics
-          dart pub global run dart_code_metrics:metrics --reporter=console || true
+          dart pub global run dart_code_metrics:metrics --reporter=console
       - name: Scan long lines (Linux)
         run: |
           # Fail if any line in lib/ is longer than 80 characters
@@ -51,9 +51,9 @@ jobs:
         shell: pwsh
         run: |
           dart pub global activate dart_code_metrics
-          dart pub global run dart_code_metrics:metrics --reporter=console || exit 0
+          dart pub global run dart_code_metrics:metrics --reporter=console
       - name: Scan long lines (PowerShell)
         shell: pwsh
         run: |
           Write-Host 'Running PowerShell line-length check'
-          .\scripts\scan_long_lines.ps1
+          pwsh -NoProfile -ExecutionPolicy Bypass -File .\scripts\scan_long_lines.ps1

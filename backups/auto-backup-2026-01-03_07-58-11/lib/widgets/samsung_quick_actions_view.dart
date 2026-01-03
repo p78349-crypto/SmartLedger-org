@@ -1,2 +1,0 @@
-// QuickActions feature removed.
-

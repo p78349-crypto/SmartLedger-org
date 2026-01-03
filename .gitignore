@@ -63,3 +63,6 @@ tools/index_export.json
 # Local artifact files accidentally tracked before
 _temp_head_account_stats_screen.dart
 long_line_counts.txt
+
+# Ignore repository backups created by scripts
+backups/

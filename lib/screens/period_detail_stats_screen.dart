@@ -73,6 +73,8 @@ class _PeriodDetailStatsScreenState extends State<PeriodDetailStatsScreen> {
 
   int get _monthsInPeriod {
     switch (widget.periodType) {
+      case period.PeriodType.week:
+        return 0; // 주간은 월 단위 이동이 아님
       case period.PeriodType.month:
         return 1;
       case period.PeriodType.quarter:
@@ -153,6 +155,10 @@ class _PeriodDetailStatsScreenState extends State<PeriodDetailStatsScreen> {
         _currentYear -= 10;
         return;
       }
+      if (widget.periodType == period.PeriodType.week) {
+        _currentMonth = _currentMonth.subtract(const Duration(days: 7));
+        return;
+      }
       final stepMonths = _monthsInPeriod;
       _currentMonth = DateTime(
         _currentMonth.year,
@@ -167,6 +173,10 @@ class _PeriodDetailStatsScreenState extends State<PeriodDetailStatsScreen> {
         _currentYear += 10;
         return;
       }
+      if (widget.periodType == period.PeriodType.week) {
+        _currentMonth = _currentMonth.add(const Duration(days: 7));
+        return;
+      }
       final stepMonths = _monthsInPeriod;
       _currentMonth = DateTime(
         _currentMonth.year,
@@ -177,6 +187,11 @@ class _PeriodDetailStatsScreenState extends State<PeriodDetailStatsScreen> {
 
   String _getCurrentPeriodLabel(BuildContext context) {
     switch (widget.periodType) {
+      case period.PeriodType.week:
+        final start = _currentMonth.subtract(const Duration(days: 6));
+        final startLabel = LocalizedDateFormatter.yMd(context, start);
+        final endLabel = LocalizedDateFormatter.yMd(context, _currentMonth);
+        return '$startLabel ~ $endLabel';
       case period.PeriodType.month:
         // 월간은 DAY 없이 연-월만.
         return LocalizedDateFormatter.yM(context, _currentMonth);

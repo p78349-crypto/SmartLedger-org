@@ -1,5 +1,5 @@
 /// 기간 타입 enum
-enum PeriodType { month, quarter, halfYear, year, decade }
+enum PeriodType { week, month, quarter, halfYear, year, decade }
 
 /// 기간 계산 관련 유틸리티 클래스
 class PeriodUtils {
@@ -10,6 +10,11 @@ class PeriodUtils {
     final now = baseDate ?? DateTime.now();
 
     switch (period) {
+      case PeriodType.week:
+        final end = now;
+        final start = end.subtract(const Duration(days: 6));
+        return DateTimeRange(start: start, end: end);
+
       case PeriodType.month:
         final start = DateTime(now.year, now.month, 1);
         final end = DateTime(now.year, now.month + 1, 0);
@@ -43,6 +48,8 @@ class PeriodUtils {
   /// 기간 레이블 반환
   static String getPeriodLabel(PeriodType period) {
     switch (period) {
+      case PeriodType.week:
+        return '주간 리포트';
       case PeriodType.month:
         return '월간 리포트';
       case PeriodType.quarter:

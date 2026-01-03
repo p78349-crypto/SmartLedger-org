@@ -70,6 +70,21 @@ class StatsCalculator {
     }).toList();
   }
 
+  /// 특정 기간의 거래만 필터링
+  static List<Transaction> filterByRange(
+    List<Transaction> transactions,
+    DateTime start,
+    DateTime end,
+  ) {
+    // 시간 정보를 제거하고 날짜만 비교하기 위해 정규화
+    final startDate = DateTime(start.year, start.month, start.day);
+    final endDate = DateTime(end.year, end.month, end.day, 23, 59, 59);
+    return transactions.where((tx) {
+      return tx.date.isAfter(startDate.subtract(const Duration(seconds: 1))) &&
+          tx.date.isBefore(endDate.add(const Duration(seconds: 1)));
+    }).toList();
+  }
+
   /// 특정 카테고리의 거래만 필터링
   static List<Transaction> filterByCategory(
     List<Transaction> transactions,

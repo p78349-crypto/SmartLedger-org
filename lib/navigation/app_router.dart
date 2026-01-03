@@ -38,6 +38,7 @@ import 'package:smart_ledger/screens/monthly_stats_screen.dart';
 import 'package:smart_ledger/screens/nutrition_report_screen.dart';
 import 'package:smart_ledger/screens/page1_bottom_icon_settings_screen.dart';
 import 'package:smart_ledger/screens/period_stats_screen.dart';
+import 'package:smart_ledger/utils/period_utils.dart' as period;
 import 'package:smart_ledger/screens/points_motivation_stats_screen.dart';
 import 'package:smart_ledger/screens/privacy_policy_screen.dart';
 import 'package:smart_ledger/screens/quick_simple_expense_input_screen.dart';
@@ -397,7 +398,7 @@ class AppRouter {
           settings: settings,
           builder: (_) => PeriodStatsScreen(
             accountName: a.accountName,
-            view: PeriodStatsView.week,
+            view: period.PeriodType.week,
           ),
         );
 
@@ -407,7 +408,7 @@ class AppRouter {
           settings: settings,
           builder: (_) => PeriodStatsScreen(
             accountName: a.accountName,
-            view: PeriodStatsView.month,
+            view: period.PeriodType.month,
           ),
         );
 
@@ -417,7 +418,7 @@ class AppRouter {
           settings: settings,
           builder: (_) => PeriodStatsScreen(
             accountName: a.accountName,
-            view: PeriodStatsView.quarter,
+            view: period.PeriodType.quarter,
           ),
         );
 
@@ -427,7 +428,7 @@ class AppRouter {
           settings: settings,
           builder: (_) => PeriodStatsScreen(
             accountName: a.accountName,
-            view: PeriodStatsView.halfYear,
+            view: period.PeriodType.halfYear,
           ),
         );
 
@@ -437,7 +438,7 @@ class AppRouter {
           settings: settings,
           builder: (_) => PeriodStatsScreen(
             accountName: a.accountName,
-            view: PeriodStatsView.year,
+            view: period.PeriodType.year,
           ),
         );
 
@@ -447,7 +448,7 @@ class AppRouter {
           settings: settings,
           builder: (_) => PeriodStatsScreen(
             accountName: a.accountName,
-            view: PeriodStatsView.decade,
+            view: period.PeriodType.decade,
           ),
         );
 

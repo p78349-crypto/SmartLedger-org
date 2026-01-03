@@ -6,6 +6,7 @@ import 'package:smart_ledger/utils/date_formats.dart';
 import 'package:smart_ledger/utils/stats_calculator.dart';
 import 'package:smart_ledger/utils/utils.dart';
 import 'package:smart_ledger/widgets/background_widget.dart';
+import 'package:smart_ledger/utils/period_utils.dart' as period;
 
 /// 카테고리별 분석 화면
 ///
@@ -13,13 +14,15 @@ import 'package:smart_ledger/widgets/background_widget.dart';
 class CategoryStatsScreen extends StatefulWidget {
   final String accountName;
   final bool isSubCategory;
-  final DateTime? initialMonth;
+  final DateTime? initialDate;
+  final period.PeriodType periodType;
 
   const CategoryStatsScreen({
     super.key,
     required this.accountName,
     this.isSubCategory = false,
-    this.initialMonth,
+    this.initialDate,
+    this.periodType = period.PeriodType.month,
   });
 
   @override
@@ -27,7 +30,7 @@ class CategoryStatsScreen extends StatefulWidget {
 }
 
 class _CategoryStatsScreenState extends State<CategoryStatsScreen> {
-  late DateTime _currentMonth;
+  late DateTime _anchorDate;
   TransactionType _selectedType = TransactionType.expense;
   List<Transaction> _allTransactions = [];
   bool _loading = true;
@@ -36,8 +39,7 @@ class _CategoryStatsScreenState extends State<CategoryStatsScreen> {
   @override
   void initState() {
     super.initState();
-    _currentMonth = widget.initialMonth ??
-        DateTime(DateTime.now().year, DateTime.now().month);
+    _anchorDate = widget.initialDate ?? DateTime.now();
     _isSubCategory = widget.isSubCategory;
     _loadData();
   }
@@ -55,12 +57,31 @@ class _CategoryStatsScreenState extends State<CategoryStatsScreen> {
     });
   }
 
-  void _changeMonth(int months) {
+  void _changePeriod(int delta) {
     setState(() {
-      _currentMonth = DateTime(
-        _currentMonth.year,
-        _currentMonth.month + months,
-      );
+      switch (widget.periodType) {
+        case period.PeriodType.week:
+          _anchorDate = _anchorDate.add(Duration(days: 7 * delta));
+          break;
+        case period.PeriodType.month:
+          _anchorDate = DateTime(_anchorDate.year, _anchorDate.month + delta);
+          break;
+        case period.PeriodType.quarter:
+          _anchorDate =
+              DateTime(_anchorDate.year, _anchorDate.month + (3 * delta));
+          break;
+        case period.PeriodType.halfYear:
+          _anchorDate =
+              DateTime(_anchorDate.year, _anchorDate.month + (6 * delta));
+          break;
+        case period.PeriodType.year:
+          _anchorDate = DateTime(_anchorDate.year + delta, _anchorDate.month);
+          break;
+        case period.PeriodType.decade:
+          _anchorDate =
+              DateTime(_anchorDate.year + (10 * delta), _anchorDate.month);
+          break;
+      }
     });
   }
 
@@ -83,17 +104,22 @@ class _CategoryStatsScreenState extends State<CategoryStatsScreen> {
           );
         }
 
-        final monthTransactions = StatsCalculator.filterByMonth(
+        final range = period.PeriodUtils.getPeriodRange(
+          widget.periodType,
+          baseDate: _anchorDate,
+        );
+        final filteredTransactions = StatsCalculator.filterByRange(
           _allTransactions,
-          _currentMonth,
+          range.start,
+          range.end,
         );
         final categoryStats = _isSubCategory
             ? StatsCalculator.calculateSubCategoryStats(
-                monthTransactions,
+                filteredTransactions,
                 _selectedType,
               )
             : StatsCalculator.calculateCategoryStats(
-                monthTransactions,
+                filteredTransactions,
                 _selectedType,
               );
 
@@ -120,8 +146,8 @@ class _CategoryStatsScreenState extends State<CategoryStatsScreen> {
           ),
           body: Column(
             children: [
-              // 월 선택기
-              _buildMonthSelector(theme),
+              // 기간 선택기
+              _buildPeriodSelector(theme, range),
               // 타입 선택기
               _buildTypeSelector(theme),
               const SizedBox(height: 16),
@@ -173,7 +199,35 @@ class _CategoryStatsScreenState extends State<CategoryStatsScreen> {
     );
   }
 
-  Widget _buildMonthSelector(ThemeData theme) {
+  Widget _buildPeriodSelector(ThemeData theme, period.DateTimeRange range) {
+    String label = '';
+    final df = DateFormats.monthDayLabel;
+    final mf = DateFormats.yMLabel;
+
+    switch (widget.periodType) {
+      case period.PeriodType.week:
+        label = '${df.format(range.start)} ~ ${df.format(range.end)}';
+        break;
+      case period.PeriodType.month:
+        label = mf.format(_anchorDate);
+        break;
+      case period.PeriodType.quarter:
+        final quarter = ((_anchorDate.month - 1) ~/ 3) + 1;
+        label = '${_anchorDate.year}년 $quarter분기';
+        break;
+      case period.PeriodType.halfYear:
+        final half = _anchorDate.month <= 6 ? '상반기' : '하반기';
+        label = '${_anchorDate.year}년 $half';
+        break;
+      case period.PeriodType.year:
+        label = '${_anchorDate.year}년';
+        break;
+      case period.PeriodType.decade:
+        final startYear = (_anchorDate.year ~/ 10) * 10;
+        label = '$startYear ~ ${startYear + 9}';
+        break;
+    }
+
     return Container(
       padding: const EdgeInsets.all(16),
       child: Row(
@@ -181,15 +235,15 @@ class _CategoryStatsScreenState extends State<CategoryStatsScreen> {
         children: [
           IconButton(
             icon: const Icon(Icons.chevron_left),
-            onPressed: () => _changeMonth(-1),
+            onPressed: () => _changePeriod(-1),
           ),
           Text(
-            DateFormats.yMLabel.format(_currentMonth),
+            label,
             style: theme.textTheme.titleLarge,
           ),
           IconButton(
             icon: const Icon(Icons.chevron_right),
-            onPressed: () => _changeMonth(1),
+            onPressed: () => _changePeriod(1),
           ),
         ],
       ),

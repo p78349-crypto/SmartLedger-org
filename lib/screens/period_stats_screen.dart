@@ -7,8 +7,7 @@ import 'package:smart_ledger/utils/date_formatter.dart';
 import 'package:smart_ledger/utils/localized_date_formatter.dart';
 import 'package:smart_ledger/utils/number_formats.dart';
 import 'package:smart_ledger/widgets/background_widget.dart';
-
-enum PeriodStatsView { week, month, quarter, halfYear, year, decade }
+import 'package:smart_ledger/utils/period_utils.dart' as period;
 
 class PeriodStatsScreen extends StatefulWidget {
   const PeriodStatsScreen({
@@ -18,7 +17,7 @@ class PeriodStatsScreen extends StatefulWidget {
   });
 
   final String accountName;
-  final PeriodStatsView view;
+  final period.PeriodType view;
 
   @override
   State<PeriodStatsScreen> createState() => _PeriodStatsScreenState();
@@ -42,20 +41,7 @@ class _PeriodStatsScreenState extends State<PeriodStatsScreen> {
   }
 
   String get _title {
-    switch (widget.view) {
-      case PeriodStatsView.week:
-        return '주간 리포트';
-      case PeriodStatsView.month:
-        return '월간 리포트';
-      case PeriodStatsView.quarter:
-        return '분기 리포트';
-      case PeriodStatsView.halfYear:
-        return '반기 리포트';
-      case PeriodStatsView.year:
-        return '연간 리포트';
-      case PeriodStatsView.decade:
-        return '10년';
-    }
+    return period.PeriodUtils.getPeriodLabel(widget.view);
   }
 
   DateTime _todayDay() {
@@ -64,58 +50,33 @@ class _PeriodStatsScreenState extends State<PeriodStatsScreen> {
   }
 
   _InclusiveRange _rangeForView() {
-    switch (widget.view) {
-      case PeriodStatsView.week:
-        final end = _anchorDay;
-        final start = end.subtract(const Duration(days: 6));
-        return _InclusiveRange(start: start, end: end);
-      case PeriodStatsView.month:
-        final start = DateTime(_anchorDay.year, _anchorDay.month, 1);
-        final end = DateTime(_anchorDay.year, _anchorDay.month + 1, 0);
-        return _InclusiveRange(start: start, end: end);
-      case PeriodStatsView.quarter:
-        final qStartMonth = ((_anchorDay.month - 1) ~/ 3) * 3 + 1;
-        final start = DateTime(_anchorDay.year, qStartMonth, 1);
-        final end = DateTime(_anchorDay.year, qStartMonth + 3, 0);
-        return _InclusiveRange(start: start, end: end);
-      case PeriodStatsView.halfYear:
-        final hStartMonth = _anchorDay.month <= 6 ? 1 : 7;
-        final start = DateTime(_anchorDay.year, hStartMonth, 1);
-        final end = DateTime(_anchorDay.year, hStartMonth + 6, 0);
-        return _InclusiveRange(start: start, end: end);
-      case PeriodStatsView.year:
-        final start = DateTime(_anchorDay.year, 1, 1);
-        final end = DateTime(_anchorDay.year + 1, 1, 0);
-        return _InclusiveRange(start: start, end: end);
-      case PeriodStatsView.decade:
-        final endYear = _anchorDay.year;
-        final startYear = endYear - 9;
-        final start = DateTime(startYear, 1, 1);
-        final end = DateTime(endYear + 1, 1, 0);
-        return _InclusiveRange(start: start, end: end);
-    }
+    final range = period.PeriodUtils.getPeriodRange(
+      widget.view,
+      baseDate: _anchorDay,
+    );
+    return _InclusiveRange(start: range.start, end: range.end);
   }
 
   void _goPrev() {
     setState(() {
       switch (widget.view) {
-        case PeriodStatsView.week:
+        case period.PeriodType.week:
           _anchorDay = _anchorDay.subtract(const Duration(days: 7));
           break;
-        case PeriodStatsView.month:
+        case period.PeriodType.month:
           _anchorDay = DateTime(_anchorDay.year, _anchorDay.month - 1, 1);
           break;
-        case PeriodStatsView.quarter:
+        case period.PeriodType.quarter:
           _anchorDay = DateTime(_anchorDay.year, _anchorDay.month - 3, 1);
           break;
-        case PeriodStatsView.halfYear:
+        case period.PeriodType.halfYear:
           _anchorDay = DateTime(_anchorDay.year, _anchorDay.month - 6, 1);
           break;
-        case PeriodStatsView.year:
-          _anchorDay = DateTime(_anchorDay.year - 1, 1, 1);
+        case period.PeriodType.year:
+          _anchorDay = DateTime(_anchorDay.year - 1, _anchorDay.month, 1);
           break;
-        case PeriodStatsView.decade:
-          _anchorDay = DateTime(_anchorDay.year - 10, 1, 1);
+        case period.PeriodType.decade:
+          _anchorDay = DateTime(_anchorDay.year - 10, _anchorDay.month, 1);
           break;
       }
     });
@@ -126,23 +87,23 @@ class _PeriodStatsScreenState extends State<PeriodStatsScreen> {
       final today = _todayDay();
       DateTime next;
       switch (widget.view) {
-        case PeriodStatsView.week:
+        case period.PeriodType.week:
           next = _anchorDay.add(const Duration(days: 7));
           break;
-        case PeriodStatsView.month:
+        case period.PeriodType.month:
           next = DateTime(_anchorDay.year, _anchorDay.month + 1, 1);
           break;
-        case PeriodStatsView.quarter:
+        case period.PeriodType.quarter:
           next = DateTime(_anchorDay.year, _anchorDay.month + 3, 1);
           break;
-        case PeriodStatsView.halfYear:
+        case period.PeriodType.halfYear:
           next = DateTime(_anchorDay.year, _anchorDay.month + 6, 1);
           break;
-        case PeriodStatsView.year:
-          next = DateTime(_anchorDay.year + 1, 1, 1);
+        case period.PeriodType.year:
+          next = DateTime(_anchorDay.year + 1, _anchorDay.month, 1);
           break;
-        case PeriodStatsView.decade:
-          next = DateTime(_anchorDay.year + 10, 1, 1);
+        case period.PeriodType.decade:
+          next = DateTime(_anchorDay.year + 10, _anchorDay.month, 1);
           break;
       }
 
@@ -152,18 +113,18 @@ class _PeriodStatsScreenState extends State<PeriodStatsScreen> {
 
   String _rangeLabel(BuildContext context, _InclusiveRange range) {
     switch (widget.view) {
-      case PeriodStatsView.month:
+      case period.PeriodType.month:
         return LocalizedDateFormatter.yM(context, range.start);
-      case PeriodStatsView.week:
+      case period.PeriodType.week:
         final startText = LocalizedDateFormatter.yMd(context, range.start);
         final endText = (range.start.year == range.end.year)
             ? LocalizedDateFormatter.md(context, range.end)
             : LocalizedDateFormatter.yMd(context, range.end);
         return '$startText ~ $endText';
-      case PeriodStatsView.quarter:
-      case PeriodStatsView.halfYear:
-      case PeriodStatsView.year:
-      case PeriodStatsView.decade:
+      case period.PeriodType.quarter:
+      case period.PeriodType.halfYear:
+      case period.PeriodType.year:
+      case period.PeriodType.decade:
         final startText = LocalizedDateFormatter.yMd(context, range.start);
         final endText = LocalizedDateFormatter.yMd(context, range.end);
         return '$startText ~ $endText';
@@ -393,7 +354,8 @@ class _PeriodStatsScreenState extends State<PeriodStatsScreen> {
                           builder: (context) => CategoryStatsScreen(
                             accountName: widget.accountName,
                             isSubCategory: false,
-                            initialMonth: _anchorDay,
+                            initialDate: _anchorDay,
+                            periodType: widget.view,
                           ),
                         ),
                       );
@@ -418,7 +380,8 @@ class _PeriodStatsScreenState extends State<PeriodStatsScreen> {
                           builder: (context) => CategoryStatsScreen(
                             accountName: widget.accountName,
                             isSubCategory: true,
-                            initialMonth: _anchorDay,
+                            initialDate: _anchorDay,
+                            periodType: widget.view,
                           ),
                         ),
                       );

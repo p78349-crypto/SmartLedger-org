@@ -75,3 +75,5 @@ linter:
     - unnecessary_string_escapes
     - unnecessary_string_interpolations
     - unnecessary_this
+    - avoid_unused_constructor_parameters
+    - avoid_redundant_argument_values

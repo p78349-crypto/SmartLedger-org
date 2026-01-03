@@ -1,0 +1,18 @@
+# dart_code_metrics configuration
+metrics:
+  cyclomatic-complexity:
+    threshold: 20
+  number-of-parameters:
+    threshold: 6
+  maximum-line-length:
+    threshold: 80
+  long-method:
+    threshold: 80
+
+anti-patterns:
+  - name: duplicate-code
+
+exclude:
+  - "**/*.g.dart"
+  - "**/*.freezed.dart"
+  - "backups/**"

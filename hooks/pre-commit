@@ -1,0 +1,18 @@
+#!/bin/sh
+# Repository hooks: developer can install these into .git/hooks via
+# `scripts/install-hooks.ps1` or manual copy.
+
+TOPLEVEL=$(git rev-parse --show-toplevel 2>/dev/null)
+if [ -z "$TOPLEVEL" ]; then
+  TOPLEVEL="."
+fi
+
+if command -v pwsh >/dev/null 2>&1; then
+  pwsh -NoProfile -ExecutionPolicy Bypass -File "$TOPLEVEL/scripts/backup_on_commit.ps1"
+elif command -v powershell >/dev/null 2>&1; then
+  powershell -NoProfile -ExecutionPolicy Bypass -File "$TOPLEVEL/scripts/backup_on_commit.ps1"
+else
+  echo "[pre-commit] No PowerShell available to run backup helper; skipping."
+fi
+
+exit 0

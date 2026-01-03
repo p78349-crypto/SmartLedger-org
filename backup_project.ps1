@@ -1,12 +1,31 @@
 # Flutter Project Backup Script
 # Created: 2025-12-06
-# Project: vccode1 - Multi-Account Household Ledger
+# Project: SmartLedger - Multi-Account Household Ledger
 
 param(
-    [string]$BackupDir = "C:\Users\plain\vccode1_backups",
+    [string]$ProjectPath = $null,
+    [string]$BackupDir = $null,
     [switch]$IncludeData,
     [switch]$Compress
 )
+
+if ([string]::IsNullOrWhiteSpace($ProjectPath)) {
+    if ($PSScriptRoot) {
+        $ProjectPath = $PSScriptRoot
+    } else {
+        $ProjectPath = Split-Path -Parent $MyInvocation.MyCommand.Path
+    }
+}
+
+if (-not (Test-Path $ProjectPath)) {
+    throw "Project path not found: $ProjectPath"
+}
+
+$projectPath = (Resolve-Path -Path $ProjectPath).Path
+
+if ([string]::IsNullOrWhiteSpace($BackupDir)) {
+    $BackupDir = Join-Path $env:USERPROFILE "SmartLedger_backups"
+}
 
 function Invoke-RoboCopyDir {
     param(
@@ -72,7 +91,7 @@ Write-Host ""
 
 # Generate timestamp
 $timestamp = Get-Date -Format "yyyy-MM-dd_HHmmss"
-$backupName = "vccode1_backup_$timestamp"
+$backupName = "SmartLedger_backup_$timestamp"
 $backupPath = Join-Path $BackupDir $backupName
 
 # Create backup directory
@@ -81,9 +100,6 @@ if (-not (Test-Path $BackupDir)) {
     New-Item -ItemType Directory -Force -Path $BackupDir | Out-Null
 }
 New-Item -ItemType Directory -Force -Path $backupPath | Out-Null
-
-# Project path
-$projectPath = "C:\Users\plain\vccode1"
 
 # Directories to exclude
 $excludeDirs = @(

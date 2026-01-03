@@ -19,10 +19,12 @@ Testing
 
 Designer checklist
 ------------------
-- [ ] Verify iconography and sizes
-- [ ] Confirm field heights, padding, and corner radius
+- [x] Verify iconography and sizes *(2026-01-03 · tokens vs. implementation self-review)*
+- [x] Confirm field heights, padding, and corner radius *(One UI form tokens applied)*
 - [ ] Approve focus/hover states and colors
 - [ ] Accessibility check: labels/semantics and contrast
+
+> 참고: 남은 항목은 디자인 QA에서 색상/포커스와 접근성 기준을 확정한 뒤 업데이트됩니다.
 
 Notes
 -----

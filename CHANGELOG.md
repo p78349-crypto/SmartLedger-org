@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
 - `pubspec.yaml` updated to include new SVG assets and manifest.
 - `docs/ICON_REPO_GUIDE.md` clarifications and CI instructions added.
 - One UI input field prototype: `lib/widgets/one_ui_input_field.dart` and transaction screen updates.
+- Documentation: refreshed One UI main-screen references (`tools/LEGACY_USER_MAIN_LOCATION.md`, `tools/INDEX_CODE_FEATURES.md`) and recorded design checklist status for `OneUiInputField` rollout.
 
 ### Notes
 - Image processing performance optimizations (Isolate/compute) are scheduled after design/icon work is finalized.

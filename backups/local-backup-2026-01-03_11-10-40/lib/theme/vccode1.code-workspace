@@ -1,0 +1,22 @@
+{
+	"folders": [
+		{
+			"path": "../.."
+		},
+		{
+			"path": "../../../tokenmonitor"
+		}
+	],
+	"settings": {
+		"chat.agent.thinking.collapsedTools": "all",
+		"github.copilot.chat.tools.memory.enabled": true,
+		"terminal.integrated.defaultProfile.windows": "PowerShell",
+		"terminal.integrated.profiles.windows": {
+			"PowerShell": {
+				"path": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+				"icon": "terminal-powershell"
+			}
+		},
+		"powershell.cwd": "vccode1"
+	}
+}

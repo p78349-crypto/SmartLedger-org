@@ -62,3 +62,34 @@ Flutter 기반 다중 계정 가계부 앱입니다. 각 계정별로 거래, �
 
 앱의 메인 페이지(1~7) 매핑 및 아이콘 노출 정책은 문서로 관리합니다: [DOCUMENTATION/MAIN_PAGES_POLICY.md](DOCUMENTATION/MAIN_PAGES_POLICY.md)
 
+## 개발자 로컬 설정 및 CI 안내
+
+간단한 개발자 온보딩과 로컬 검사 방법입니다. 새 환경에서는 아래를 먼저 실행하세요.
+
+- 의존성 설치:
+	```powershell
+	flutter pub get
+	```
+
+- Git 훅 설치 (로컬에 pre-commit 훅 복사)
+	```powershell
+	pwsh .\scripts\install-hooks.ps1
+	```
+	이 스크립트는 `hooks/` 디렉터리에 있는 훅을 `.git/hooks`로 복사합니다.
+
+- 로컬 검사(커밋 전 권장):
+	- 포맷 확인: `dart format --set-exit-if-changed .`
+	- 정적분석: `dart analyze`
+	- 라인 길이 검사: `pwsh .\scripts\scan_long_lines.ps1` (80자 초과 시 비정상 종료)
+
+- 백업(아티팩트):
+	- APK/AAB 생성 후 압축 및 백업: `pwsh .\scripts\backup_artifacts.ps1`
+	- 저장소 전체 백업: `pwsh .\scripts\run_local_backup.ps1`
+
+- CI 정책 (요약):
+	- GitHub Actions가 `dart format`, `dart analyze`, `dart_code_metrics`, 그리고 라인 길이 검사를 실행합니다.
+	- `dart_code_metrics`와 라인 길이(>80)는 CI에서 실패 시 빌드가 차단됩니다.
+	- 로컬에서 위 검사를 통과하면 PR이 통과할 가능성이 높습니다.
+
+문의: 팀이 이 설정을 따르도록 하려면 PR 템플릿 또는 README 상단에 설치 섹션 고정(권장) 가능합니다.
+

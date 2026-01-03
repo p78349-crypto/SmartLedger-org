@@ -1,13 +1,13 @@
 # dart_code_metrics configuration
 metrics:
   cyclomatic-complexity:
-    threshold: 20
+    threshold: 15
   number-of-parameters:
-    threshold: 6
+    threshold: 5
   maximum-line-length:
     threshold: 80
   long-method:
-    threshold: 80
+    threshold: 60
 
 anti-patterns:
   - name: duplicate-code

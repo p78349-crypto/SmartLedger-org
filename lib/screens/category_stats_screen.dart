@@ -1,11 +1,12 @@
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_ledger/models/transaction.dart';
 import 'package:smart_ledger/services/transaction_service.dart';
+import 'package:smart_ledger/utils/chart_colors.dart';
 import 'package:smart_ledger/utils/date_formats.dart';
 import 'package:smart_ledger/utils/stats_calculator.dart';
 import 'package:smart_ledger/utils/utils.dart';
 import 'package:smart_ledger/widgets/background_widget.dart';
+import 'package:smart_ledger/widgets/category_pie_chart.dart';
 import 'package:smart_ledger/utils/period_utils.dart' as period;
 
 /// 카테고리별 분석 화면
@@ -152,7 +153,8 @@ class _CategoryStatsScreenState extends State<CategoryStatsScreen> {
               _buildTypeSelector(theme),
               const SizedBox(height: 16),
               // 차트
-              if (categoryStats.isNotEmpty) _buildChart(categoryStats, theme),
+              if (categoryStats.isNotEmpty)
+                CategoryPieChart(categoryStats: categoryStats),
               const Divider(),
               // 카테고리 목록
               Expanded(
@@ -164,38 +166,6 @@ class _CategoryStatsScreenState extends State<CategoryStatsScreen> {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildChart(List<CategoryStats> categoryStats, ThemeData theme) {
-    return SizedBox(
-      height: 200,
-      child: PieChart(
-        PieChartData(
-          sectionsSpace: 2,
-          centerSpaceRadius: 40,
-          sections: categoryStats.asMap().entries.map((entry) {
-            final index = entry.key;
-            final stats = entry.value;
-            const fontSize = 12.0;
-            const radius = 50.0;
-
-            return PieChartSectionData(
-              color: _getColorForIndex(index, theme),
-              value: stats.total,
-              title: stats.percentage > 5
-                  ? '${stats.percentage.toStringAsFixed(0)}%'
-                  : '',
-              radius: radius,
-              titleStyle: const TextStyle(
-                fontSize: fontSize,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            );
-          }).toList(),
-        ),
-      ),
     );
   }
 
@@ -320,7 +290,7 @@ class _CategoryStatsScreenState extends State<CategoryStatsScreen> {
       itemCount: categoryStats.length,
       itemBuilder: (context, index) {
         final stats = categoryStats[index];
-        final color = _getColorForIndex(index, theme);
+        final color = ChartColors.getColorForIndex(index, theme);
 
         if (isLandscape) {
           return Card(
@@ -446,51 +416,6 @@ class _CategoryStatsScreenState extends State<CategoryStatsScreen> {
         );
       },
     );
-  }
-
-  Color _getColorForIndex(int index, ThemeData theme) {
-    final scheme = theme.colorScheme;
-
-    // 상위 10/20/21 색상 구분
-    if (index < 10) {
-      // 상위 1-10: 강조색 (Primary 계열)
-      final colors = [
-        scheme.primary,
-        Colors.blue,
-        Colors.indigo,
-        Colors.cyan,
-        Colors.teal,
-        Colors.green,
-        Colors.lightGreen,
-        Colors.lime,
-        Colors.yellow,
-        Colors.amber,
-      ];
-      return colors[index % colors.length];
-    } else if (index < 20) {
-      // 상위 11-20: 보조색 (Secondary 계열)
-      final colors = [
-        scheme.secondary,
-        Colors.orange,
-        Colors.deepOrange,
-        Colors.red,
-        Colors.pink,
-        Colors.purple,
-        Colors.deepPurple,
-        Colors.brown,
-        Colors.blueGrey,
-        Colors.grey,
-      ];
-      return colors[(index - 10) % colors.length];
-    } else {
-      // 21위 이상: 기타색 (Tertiary 계열)
-      final colors = [
-        scheme.tertiary,
-        scheme.outline,
-        scheme.onSurfaceVariant,
-      ];
-      return colors[(index - 20) % colors.length];
-    }
   }
 
   IconData _getIconForCategory(String category) {

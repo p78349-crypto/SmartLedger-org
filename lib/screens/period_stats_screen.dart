@@ -336,7 +336,7 @@ class _PeriodStatsScreenState extends State<PeriodStatsScreen> {
           ],
         ),
         floatingActionButton: Transform.translate(
-          offset: const Offset(0, 8),
+          offset: const Offset(0, 45),
           child: SizedBox(
             width: 160,
             height: 120,

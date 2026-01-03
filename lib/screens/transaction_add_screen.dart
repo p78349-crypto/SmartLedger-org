@@ -1631,6 +1631,7 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
       ),
       const SizedBox(height: 12),
       Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
             child: SmartInputField(
@@ -1693,12 +1694,13 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
       ),
       const SizedBox(height: 12),
       Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
             child: SmartInputField(
               controller: _amountController,
               focusNode: _calculatedAmountFocusNode,
-              enabled: false, // readOnly equivalent in SmartInputField
+              readOnly: true,
               label: '금액(자동계산)',
             ),
           ),

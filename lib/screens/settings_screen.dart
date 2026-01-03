@@ -577,9 +577,17 @@ class _SettingsScreenState extends State<SettingsScreen>
                   );
                 },
               ),
-              const ListTile(
-                title: Text('백업 암호화'),
-                subtitle: Text('해지는 설정에서만 가능합니다.'),
+              const Divider(height: 1),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                child: Text(
+                  '백업 암호화',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
+                ),
               ),
               ListTile(
                 leading: const Icon(Icons.lock_open_outlined),
@@ -595,9 +603,17 @@ class _SettingsScreenState extends State<SettingsScreen>
                     ? null
                     : _disableBackupEncryption,
               ),
-              const ListTile(
-                title: Text('사용자 계정 잠금'),
-                subtitle: Text('계정 진입 시 PIN을 요청합니다.'),
+              const Divider(height: 1),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                child: Text(
+                  '사용자 계정 잠금',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
+                ),
               ),
               const ListTile(
                 title: Text('사용자 계정 인증'),

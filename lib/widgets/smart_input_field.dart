@@ -8,6 +8,7 @@ class SmartInputField extends StatelessWidget {
   final TextEditingController? controller;
   final FormFieldValidator<String>? validator;
   final bool enabled;
+  final bool readOnly;
   final TextInputType? keyboardType;
   final TextInputAction? textInputAction;
   final FocusNode? focusNode;
@@ -22,6 +23,7 @@ class SmartInputField extends StatelessWidget {
   final bool autofocus;
   final bool compact;
   final FloatingLabelBehavior? floatingLabelBehavior;
+  final TextAlign textAlign;
 
   const SmartInputField({
     super.key,
@@ -30,6 +32,7 @@ class SmartInputField extends StatelessWidget {
     this.controller,
     this.validator,
     this.enabled = true,
+    this.readOnly = false,
     this.keyboardType,
     this.textInputAction,
     this.focusNode,
@@ -44,6 +47,7 @@ class SmartInputField extends StatelessWidget {
     this.autofocus = false,
     this.compact = false,
     this.floatingLabelBehavior,
+    this.textAlign = TextAlign.start,
   });
 
   @override
@@ -62,6 +66,8 @@ class SmartInputField extends StatelessWidget {
       autofocus: autofocus,
       validator: validator,
       enabled: enabled,
+      readOnly: readOnly,
+      textAlign: textAlign,
       keyboardType: keyboardType,
       inputFormatters: inputFormatters,
       textInputAction: textInputAction,
@@ -72,7 +78,6 @@ class SmartInputField extends StatelessWidget {
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
-        border: const OutlineInputBorder(),
         isDense: true,
         contentPadding: contentPadding,
         prefixIcon: prefixIcon,

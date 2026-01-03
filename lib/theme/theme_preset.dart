@@ -143,7 +143,26 @@ class ThemePresets {
     ),
   ];
 
-  static const List<ThemePreset> all = <ThemePreset>[...female, ...male];
+  static const List<ThemePreset> special = <ThemePreset>[
+    ThemePreset(
+      id: 'midnight_gold',
+      label: '스페셜 · 미드나잇 골드',
+      seedColor: Color(0xFFFFB300),
+      backgroundColor: Color(0xFF050505),
+    ),
+    ThemePreset(
+      id: 'starlight_navy',
+      label: '스페셜 · 스타라이트 네이비',
+      seedColor: Color(0xFF81D4FA),
+      backgroundColor: Color(0xFF020817),
+    ),
+  ];
+
+  static const List<ThemePreset> all = <ThemePreset>[
+    ...female,
+    ...male,
+    ...special,
+  ];
 
   static ThemePreset byId(String? id) {
     final key = (id ?? '').trim();

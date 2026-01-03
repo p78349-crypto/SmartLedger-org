@@ -24,10 +24,17 @@ class AppTheme {
     required UIStyle uiStyle,
     Color? backgroundColor,
   }) {
-    final scheme = ColorScheme.fromSeed(
+    var scheme = ColorScheme.fromSeed(
       seedColor: seedColor,
       brightness: brightness,
     );
+
+    // 다크 모드에서 가독성 개선을 위해 onSurfaceVariant 조정
+    if (brightness == Brightness.dark) {
+      scheme = scheme.copyWith(
+        onSurfaceVariant: scheme.onSurface.withValues(alpha: 0.8),
+      );
+    }
 
     // UI Style based adjustments
     double borderRadius;
@@ -73,12 +80,28 @@ class AppTheme {
       textTheme: ThemeData(brightness: brightness).textTheme.apply(
         bodyColor: scheme.onSurface,
         displayColor: scheme.onSurface,
+        decorationColor: scheme.onSurface,
+      ),
+      listTileTheme: ListTileThemeData(
+        iconColor: scheme.onSurface.withValues(alpha: 0.85),
+        titleTextStyle: TextStyle(
+          color: scheme.onSurface,
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+        ),
+        subtitleTextStyle: TextStyle(
+          color: scheme.onSurfaceVariant,
+          fontSize: 14,
+        ),
       ),
       appBarTheme: AppBarTheme(
         centerTitle: true,
         backgroundColor: scheme.surface,
         foregroundColor: scheme.onSurface,
         elevation: elevation,
+      ),
+      iconTheme: IconThemeData(
+        color: scheme.onSurface,
       ),
       cardTheme: CardThemeData(
         shape: RoundedRectangleBorder(
@@ -125,6 +148,15 @@ class AppTheme {
             color: scheme.error,
             width: borderWidth > 0 ? borderWidth : 2,
           ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(borderRadius / 1.5),
+          borderSide: showBorders
+              ? BorderSide(
+                color: scheme.outlineVariant.withValues(alpha: 0.38),
+                width: borderWidth,
+              )
+              : BorderSide.none,
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,

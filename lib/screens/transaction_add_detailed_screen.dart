@@ -248,7 +248,6 @@ class _TransactionAddDetailedFormState
     return InputDecoration(
       labelText: labelText,
       hintText: hintText,
-      border: const OutlineInputBorder(),
       isDense: true,
       contentPadding: contentPadding,
       prefixIcon: prefixIcon,
@@ -1750,6 +1749,7 @@ class _TransactionAddDetailedFormState
       ),
       const SizedBox(height: 12),
       Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
             child: TextFormField(
@@ -1796,6 +1796,7 @@ class _TransactionAddDetailedFormState
       ),
       const SizedBox(height: 12),
       Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
             child: TextFormField(
@@ -1826,6 +1827,7 @@ class _TransactionAddDetailedFormState
       ),
       const SizedBox(height: 12),
       Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
             child: InkWell(
@@ -1874,6 +1876,7 @@ class _TransactionAddDetailedFormState
       ),
       const SizedBox(height: 12),
       Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
             child: TextFormField(

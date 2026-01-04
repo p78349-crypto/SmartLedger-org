@@ -75,25 +75,62 @@ class ChartDisplaySelector extends StatelessWidget {
 
     return Wrap(
       alignment: WrapAlignment.center,
-      spacing: 8,
+      spacing: 12,
+      runSpacing: 8,
       children: displayTypes.map((type) {
+        final isSelected = selected == type;
+        final scheme = Theme.of(context).colorScheme;
+        
         return ChoiceChip(
-          label: showIcons
-              ? Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(type.icon, size: 16),
-                    const SizedBox(width: 4),
-                    Text(type.label),
-                  ],
-                )
-              : Text(type.label),
-          selected: selected == type,
+          label: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: showIcons
+                ? Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        type.icon,
+                        size: 18,
+                        color: isSelected
+                            ? scheme.onPrimaryContainer
+                            : scheme.primary,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        type.label,
+                        style: TextStyle(
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                        ),
+                      ),
+                    ],
+                  )
+                : Text(
+                    type.label,
+                    style: TextStyle(
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.normal,
+                    ),
+                  ),
+          ),
+          selected: isSelected,
           onSelected: (isSelected) {
             if (isSelected) {
               onChanged(type);
             }
           },
+          selectedColor: scheme.primaryContainer,
+          backgroundColor: scheme.surfaceContainerLow,
+          side: BorderSide(
+            color: isSelected
+                ? scheme.primary
+                : scheme.outlineVariant.withValues(alpha: 0.5),
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          showCheckmark: false,
         );
       }).toList(),
     );

@@ -435,7 +435,6 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          centerTitle: true,
           leading: canPop
               ? IconButton(
                   icon: const Icon(IconCatalog.arrowBack),

@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:io';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,6 +18,8 @@ import 'package:smart_ledger/utils/pref_keys.dart';
 import 'package:smart_ledger/utils/screen_saver_ids.dart';
 import 'package:smart_ledger/utils/screen_saver_launcher.dart';
 import 'package:smart_ledger/widgets/background_widget.dart';
+import 'package:smart_ledger/widgets/special_backgrounds.dart';
+import 'package:smart_ledger/theme/app_theme_seed_controller.dart';
 
 class AccountMainScreen extends StatefulWidget {
   final String accountName;
@@ -425,20 +429,87 @@ class _AccountMainScreenState extends State<AccountMainScreen>
   Widget build(BuildContext context) {
     // Phase 1: Smart style horizontal main pages (icons-only).
     // Top banner removed: only render the PageView.
-    return ValueListenableBuilder<Color>(
-      valueListenable: BackgroundHelper.colorNotifier,
-      builder: (context, bgColor, _) {
+    return ListenableBuilder(
+      listenable: Listenable.merge([
+        BackgroundHelper.colorNotifier,
+        BackgroundHelper.typeNotifier,
+        BackgroundHelper.imagePathNotifier,
+        BackgroundHelper.blurNotifier,
+      ]),
+      builder: (context, _) {
+        final bgColor = BackgroundHelper.colorNotifier.value;
+        final bgType = BackgroundHelper.typeNotifier.value;
+        final bgImagePath = BackgroundHelper.imagePathNotifier.value;
+        final bgBlur = BackgroundHelper.blurNotifier.value;
+
+        final presetId = AppThemeSeedController.instance.presetId.value;
+        final theme = Theme.of(context);
+        final isLandscape =
+            MediaQuery.of(context).orientation == Orientation.landscape;
+
+        // In dark mode, if the background color is still the default white,
+        // we should use the theme's scaffold background color instead.
+        Color effectiveBgColor = bgColor;
+        final isDefaultWhite = bgColor.toARGB32() == 0xFFFFFFFF ||
+            bgColor.toARGB32() == 0xffffffff;
+
+        if (theme.brightness == Brightness.dark && isDefaultWhite) {
+          effectiveBgColor = theme.scaffoldBackgroundColor;
+        }
+
         return Scaffold(
-          backgroundColor: bgColor,
+          backgroundColor: effectiveBgColor,
           body: Listener(
             onPointerDown: (_) => _onUserInteraction(),
             behavior: HitTestBehavior.translucent,
             child: Stack(
               children: [
-                ColoredBox(
-                  color: bgColor,
-                  child: PageView.builder(
-                    controller: _controller,
+                // 1. Base Background (Color or Image)
+                Positioned.fill(
+                  child: Builder(
+                    builder: (context) {
+                      if (bgType == 'image' && bgImagePath != null) {
+                        return Image.file(
+                          File(bgImagePath),
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              ColoredBox(color: effectiveBgColor),
+                        );
+                      }
+                      
+                      if (presetId == 'midnight_gold') {
+                        return MidnightGoldBackground(
+                          baseColor: effectiveBgColor,
+                        );
+                      } else if (presetId == 'starlight_navy') {
+                        return StarlightNavyBackground(
+                          baseColor: effectiveBgColor,
+                        );
+                      }
+                      return ColoredBox(color: effectiveBgColor);
+                    },
+                  ),
+                ),
+
+                // 2. Blur Effect (if image)
+                if (bgType == 'image' && bgImagePath != null && bgBlur > 0)
+                  Positioned.fill(
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: bgBlur, sigmaY: bgBlur),
+                      child: const ColoredBox(color: Colors.transparent),
+                    ),
+                  ),
+
+                // 3. Dark Overlay for images to ensure readability
+                if (bgType == 'image' && bgImagePath != null)
+                  Positioned.fill(
+                    child: ColoredBox(
+                      color: Colors.black.withValues(alpha: 0.2),
+                    ),
+                  ),
+
+                PageView.builder(
+                  controller: _controller,
                     physics: _disablePageSwipe
                         ? const NeverScrollableScrollPhysics()
                         : const PageScrollPhysics(),
@@ -484,14 +555,13 @@ class _AccountMainScreenState extends State<AccountMainScreen>
                       );
                     },
                   ),
-                ),
                 // Page quick-jump indicator (bottom center)
                 if (_pageCount > 0)
                   // Top page label for pages 1..7 (small, non-intrusive)
                   Positioned(
                     left: 0,
                     right: 0,
-                    top: 8,
+                    top: isLandscape ? 4 : 12,
                     child: SafeArea(
                       bottom: false,
                       child: Builder(
@@ -501,18 +571,39 @@ class _AccountMainScreenState extends State<AccountMainScreen>
                               _currentIndex < _pageNameLabels.length;
                           if (!showLabel) return const SizedBox.shrink();
                           final label = _pageNameLabels[_currentIndex];
+                          final scheme = Theme.of(context).colorScheme;
+                          
                           return Center(
-                            child: Padding(
+                            child: Container(
                               padding: const EdgeInsets.symmetric(
-                                vertical: 4.0,
-                                horizontal: 12.0,
+                                vertical: 6.0,
+                                horizontal: 16.0,
+                              ),
+                              decoration: BoxDecoration(
+                                color: scheme.surfaceContainerLow
+                                    .withValues(alpha: 0.7),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: scheme.primary.withValues(alpha: 0.2),
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.05),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
                               ),
                               child: Text(
                                 label,
-                                style: Theme.of(context).textTheme.titleSmall
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleSmall
                                     ?.copyWith(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w600,
+                                      fontSize: 12.5,
+                                      fontWeight: FontWeight.bold,
+                                      color: scheme.primary,
+                                      letterSpacing: -0.2,
                                     ),
                                 textAlign: TextAlign.center,
                                 maxLines: 1,
@@ -1224,15 +1315,25 @@ class _PageQuickMenuButton extends StatelessWidget {
 
           return entries;
         },
-        child: Material(
-          color: Colors.transparent,
-          child: SizedBox(
-            width: 48,
-            height: 48,
-            child: Icon(
-              IconCatalog.moreHoriz,
-              color: isEditMode ? scheme.primary : scheme.onSurfaceVariant,
-            ),
+        child: Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: isEditMode
+                ? scheme.primary
+                : scheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: isEditMode ? [
+              BoxShadow(
+                color: scheme.primary.withValues(alpha: 0.3),
+                blurRadius: 8,
+                spreadRadius: 1,
+              )
+            ] : null,
+          ),
+          child: Icon(
+            isEditMode ? IconCatalog.check : IconCatalog.moreHoriz,
+            color: isEditMode ? scheme.onPrimary : scheme.primary,
           ),
         ),
       ),
@@ -1307,12 +1408,14 @@ class _IconTile extends StatelessWidget {
     final scheme = theme.colorScheme;
     final live = liveDataWidget;
 
-    final bgColor = !isEditMode
-        ? scheme.surfaceContainerHighest
-        : scheme.primaryContainer;
-    final fgColor = !isEditMode
-        ? scheme.onSurfaceVariant
-        : scheme.onPrimaryContainer;
+    // Use more vibrant colors from the theme
+    final bgColor =
+        !isEditMode
+            ? scheme.primary.withValues(alpha: 0.12)
+            : scheme.primaryContainer;
+    final iconColor = !isEditMode ? scheme.primary : scheme.onPrimaryContainer;
+    final labelColor =
+        !isEditMode ? scheme.onSurface : scheme.onPrimaryContainer;
 
     return AnimatedRotation(
       turns: isEditMode ? -0.01 : 0,
@@ -1321,31 +1424,56 @@ class _IconTile extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Stack(
                 alignment: Alignment.center,
                 children: [
+                  // Subtle glow for the icon
+                  if (!isEditMode)
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: scheme.primary.withValues(alpha: 0.2),
+                            blurRadius: 12,
+                            spreadRadius: 2,
+                          ),
+                        ],
+                      ),
+                    ),
                   Container(
                     width: 56,
                     height: 56,
                     decoration: BoxDecoration(
                       color: bgColor,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(18),
+                      border:
+                          isEditMode
+                              ? Border.all(color: scheme.primary, width: 1.5)
+                              : null,
                     ),
-                    child: Icon(icon, color: fgColor),
+                    child: Icon(icon, color: iconColor, size: 28),
                   ),
                 ],
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: 8),
               Text(
                 label,
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.labelMedium?.copyWith(color: fgColor),
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: labelColor,
+                  fontWeight: isEditMode ? FontWeight.bold : FontWeight.w500,
+                  fontSize: 11,
+                  letterSpacing: -0.4,
+                ),
               ),
               if (!isEditMode && live != null) ...[
                 const SizedBox(height: 4),

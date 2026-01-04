@@ -1,0 +1,219 @@
+Analyzing SmartLedger...                                        
+
+  error - The value of the local variable 'preset' isn't used - lib\screens\account_main_screen.dart:447:15 - unused_local_variable
+  error - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\screens\account_main_screen.dart:454:21 - deprecated_member_use
+  error - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\screens\account_main_screen.dart:454:52 - deprecated_member_use
+  error - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\screens\account_select_screen.dart:54:21 - deprecated_member_use
+  error - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\screens\account_select_screen.dart:54:52 - deprecated_member_use
+   info - Unnecessary braces in a string interpolation - lib\screens\account_stats_screen.dart:1680:16 - unnecessary_brace_in_string_interps
+  error - Expected a class member - lib\screens\account_stats_screen.dart:2967:9 - expected_class_member
+  error - Expected a class member - lib\screens\account_stats_screen.dart:2967:10 - expected_class_member
+  error - Expected a class member - lib\screens\account_stats_screen.dart:2968:7 - expected_class_member
+  error - Expected a class member - lib\screens\account_stats_screen.dart:2968:8 - expected_class_member
+  error - Expected a class member - lib\screens\account_stats_screen.dart:2969:5 - expected_class_member
+  error - Expected a class member - lib\screens\account_stats_screen.dart:2969:6 - expected_class_member
+  error - The function 'setState' isn't defined - lib\screens\account_stats_screen.dart:2979:13 - undefined_function
+  error - Undefined name '_chartAnchorMonth' - lib\screens\account_stats_screen.dart:2980:15 - undefined_identifier
+  error - Undefined name '_chartAnchorMonth' - lib\screens\account_stats_screen.dart:2981:17 - undefined_identifier
+  error - Undefined name '_chartAnchorMonth' - lib\screens\account_stats_screen.dart:2982:17 - undefined_identifier
+  error - Undefined name '_rangeMonthFormat' - lib\screens\account_stats_screen.dart:2988:14 - undefined_identifier
+  error - Undefined name '_rangeMonthFormat' - lib\screens\account_stats_screen.dart:2989:14 - undefined_identifier
+  error - The function 'setState' isn't defined - lib\screens\account_stats_screen.dart:2995:13 - undefined_function
+  error - Undefined name '_chartAnchorMonth' - lib\screens\account_stats_screen.dart:2996:15 - undefined_identifier
+  error - Undefined name '_chartAnchorMonth' - lib\screens\account_stats_screen.dart:2997:17 - undefined_identifier
+  error - Undefined name '_chartAnchorMonth' - lib\screens\account_stats_screen.dart:2998:17 - undefined_identifier
+  error - Invalid context for 'super' invocation - lib\screens\account_stats_screen.dart:3009:5 - super_in_invalid_context
+  error - Expected a method, getter, setter or operator declaration - lib\screens\account_stats_screen.dart:3011:1 - expected_executable
+  error - The declaration '_SettingsSectionLabel' isn't referenced - lib\screens\application_settings_screen.dart:293:7 - unused_element
+  error - The method 'buildTimelineItem' isn't defined for the type 'AssetUIBuilder' - lib\screens\asset_dashboard_screen.dart:678:27 - undefined_method
+  error - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\screens\background_settings_screen.dart:173:21 - deprecated_member_use
+  error - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\screens\background_settings_screen.dart:173:52 - deprecated_member_use
+  error - Expected a method, getter, setter or operator declaration - lib\screens\background_settings_screen.dart:368:1 - expected_executable
+  error - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\screens\transaction_add_screen.dart:117:23 - deprecated_member_use
+  error - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\screens\transaction_add_screen.dart:117:54 - deprecated_member_use
+  error - The declaration '<unnamed>' isn't referenced - lib\utils\asset_dashboard_utils.dart:239:7 - unused_element
+  error - Instance members can't be accessed from a static method - lib\utils\asset_dashboard_utils.dart:246:12 - instance_member_access_from_static
+  error - The named parameter 'width' isn't defined - lib\utils\asset_dashboard_utils.dart:247:7 - undefined_named_parameter
+  error - The named parameter 'margin' isn't defined - lib\utils\asset_dashboard_utils.dart:248:7 - undefined_named_parameter
+  error - Instance members can't be accessed from a static method - lib\utils\asset_dashboard_utils.dart:271:11 - instance_member_access_from_static
+   info - The value of the argument is redundant because it matches the default value - lib\utils\asset_dashboard_utils.dart:272:32 - avoid_redundant_argument_values
+  error - Instance members can't be accessed from a static method - lib\utils\asset_dashboard_utils.dart:274:15 - instance_member_access_from_static
+  error - Instance members can't be accessed from a static method - lib\utils\asset_dashboard_utils.dart:276:19 - instance_member_access_from_static
+  error - The name 'SizedBox' isn't a class - lib\utils\asset_dashboard_utils.dart:288:25 - creation_with_non_type
+  error - The name 'SizedBox' isn't a class - lib\utils\asset_dashboard_utils.dart:305:17 - creation_with_non_type
+  error - The name 'SizedBox' isn't a class - lib\utils\asset_dashboard_utils.dart:313:17 - creation_with_non_type
+  error - The name 'SizedBox' isn't a class - lib\utils\asset_dashboard_utils.dart:322:17 - creation_with_non_type
+  error - Instance members can't be accessed from a static method - lib\utils\asset_dashboard_utils.dart:323:11 - instance_member_access_from_static
+  error - Instance members can't be accessed from a static method - lib\utils\asset_dashboard_utils.dart:329:20 - instance_member_access_from_static
+  error - The name 'SizedBox' isn't a class - lib\utils\asset_dashboard_utils.dart:341:29 - creation_with_non_type
+  error - Instance members can't be accessed from a static method - lib\utils\asset_dashboard_utils.dart:352:17 - instance_member_access_from_static
+  error - The named parameter 'width' isn't defined - lib\utils\asset_dashboard_utils.dart:353:19 - undefined_named_parameter
+  error - The named parameter 'height' isn't defined - lib\utils\asset_dashboard_utils.dart:354:19 - undefined_named_parameter
+  error - The named parameter 'color' isn't defined - lib\utils\asset_dashboard_utils.dart:355:19 - undefined_named_parameter
+  error - The name 'SizedBox' isn't a class - lib\utils\asset_dashboard_utils.dart:357:23 - creation_with_non_type
+  error - The name 'SizedBox' isn't a class - lib\utils\asset_dashboard_utils.dart:368:29 - creation_with_non_type
+   info - Unnecessary statement - lib\utils\asset_dashboard_utils.dart:385:21 - unnecessary_statements
+  error - Dead code - lib\utils\asset_dashboard_utils.dart:385:21 - dead_code
+  error - Expected to find ';' - lib\utils\asset_dashboard_utils.dart:385:29 - expected_token
+  error - Expected an identifier - lib\utils\asset_dashboard_utils.dart:385:52 - missing_identifier
+  error - Unexpected text ';' - lib\utils\asset_dashboard_utils.dart:385:52 - unexpected_token
+warning - The label 'style' isn't used - lib\utils\asset_dashboard_utils.dart:386:21 - unused_label
+  error - Expected to find ';' - lib\utils\asset_dashboard_utils.dart:389:21 - expected_token
+  error - Expected an identifier - lib\utils\asset_dashboard_utils.dart:389:22 - missing_identifier
+  error - Expected to find ';' - lib\utils\asset_dashboard_utils.dart:389:22 - expected_token
+  error - Unexpected text ';' - lib\utils\asset_dashboard_utils.dart:389:22 - unexpected_token
+  error - Expected an identifier - lib\utils\asset_dashboard_utils.dart:390:19 - missing_identifier
+  error - Expected to find ';' - lib\utils\asset_dashboard_utils.dart:390:19 - expected_token
+  error - Unexpected text ';' - lib\utils\asset_dashboard_utils.dart:390:19 - unexpected_token
+  error - Expected an identifier - lib\utils\asset_dashboard_utils.dart:390:20 - missing_identifier
+  error - Expected to find ';' - lib\utils\asset_dashboard_utils.dart:390:20 - expected_token
+  error - Unexpected text ';' - lib\utils\asset_dashboard_utils.dart:390:20 - unexpected_token
+  error - Expected an identifier - lib\utils\asset_dashboard_utils.dart:391:17 - missing_identifier
+  error - Expected to find ';' - lib\utils\asset_dashboard_utils.dart:391:17 - expected_token
+  error - Unexpected text ';' - lib\utils\asset_dashboard_utils.dart:391:17 - unexpected_token
+  error - Expected an identifier - lib\utils\asset_dashboard_utils.dart:391:18 - missing_identifier
+  error - Expected to find ';' - lib\utils\asset_dashboard_utils.dart:391:18 - expected_token
+  error - Unexpected text ';' - lib\utils\asset_dashboard_utils.dart:391:18 - unexpected_token
+  error - Expected an identifier - lib\utils\asset_dashboard_utils.dart:392:15 - missing_identifier
+  error - Expected to find ';' - lib\utils\asset_dashboard_utils.dart:392:15 - expected_token
+  error - Unexpected text ';' - lib\utils\asset_dashboard_utils.dart:392:15 - unexpected_token
+  error - Expected an identifier - lib\utils\asset_dashboard_utils.dart:392:16 - missing_identifier
+  error - Expected to find ';' - lib\utils\asset_dashboard_utils.dart:392:16 - expected_token
+  error - Unexpected text ';' - lib\utils\asset_dashboard_utils.dart:392:16 - unexpected_token
+  error - Expected an identifier - lib\utils\asset_dashboard_utils.dart:393:13 - missing_identifier
+  error - Expected to find ';' - lib\utils\asset_dashboard_utils.dart:393:13 - expected_token
+  error - Unexpected text ';' - lib\utils\asset_dashboard_utils.dart:393:13 - unexpected_token
+  error - Expected an identifier - lib\utils\asset_dashboard_utils.dart:393:14 - missing_identifier
+  error - Expected to find ';' - lib\utils\asset_dashboard_utils.dart:393:14 - expected_token
+  error - Unexpected text ';' - lib\utils\asset_dashboard_utils.dart:393:14 - unexpected_token
+  error - Expected an identifier - lib\utils\asset_dashboard_utils.dart:394:11 - missing_identifier
+  error - Expected to find ';' - lib\utils\asset_dashboard_utils.dart:394:11 - expected_token
+  error - Unexpected text ';' - lib\utils\asset_dashboard_utils.dart:394:11 - unexpected_token
+  error - Expected an identifier - lib\utils\asset_dashboard_utils.dart:394:12 - missing_identifier
+  error - Unexpected text ';' - lib\utils\asset_dashboard_utils.dart:394:12 - unexpected_token
+  error - The name 'SizedBox' isn't a class - lib\utils\asset_dashboard_utils.dart:395:17 - creation_with_non_type
+  error - Expected to find ';' - lib\utils\asset_dashboard_utils.dart:395:36 - expected_token
+  error - Expected an identifier - lib\utils\asset_dashboard_utils.dart:395:37 - missing_identifier
+  error - Unexpected text ';' - lib\utils\asset_dashboard_utils.dart:395:37 - unexpected_token
+  error - Instance members can't be accessed from a static method - lib\utils\asset_dashboard_utils.dart:396:11 - instance_member_access_from_static
+  error - Expected to find ';' - lib\utils\asset_dashboard_utils.dart:413:11 - expected_token
+  error - Expected an identifier - lib\utils\asset_dashboard_utils.dart:413:12 - missing_identifier
+  error - Expected to find ';' - lib\utils\asset_dashboard_utils.dart:413:12 - expected_token
+  error - Unexpected text ';' - lib\utils\asset_dashboard_utils.dart:413:12 - unexpected_token
+  error - Expected an identifier - lib\utils\asset_dashboard_utils.dart:414:9 - missing_identifier
+  error - Expected to find ';' - lib\utils\asset_dashboard_utils.dart:414:9 - expected_token
+  error - Unexpected text ';' - lib\utils\asset_dashboard_utils.dart:414:9 - unexpected_token
+  error - Expected an identifier - lib\utils\asset_dashboard_utils.dart:414:10 - missing_identifier
+  error - Expected to find ';' - lib\utils\asset_dashboard_utils.dart:414:10 - expected_token
+  error - Unexpected text ';' - lib\utils\asset_dashboard_utils.dart:414:10 - unexpected_token
+  error - Expected an identifier - lib\utils\asset_dashboard_utils.dart:415:7 - missing_identifier
+  error - Expected to find ';' - lib\utils\asset_dashboard_utils.dart:415:7 - expected_token
+  error - Unexpected text ';' - lib\utils\asset_dashboard_utils.dart:415:7 - unexpected_token
+  error - Expected an identifier - lib\utils\asset_dashboard_utils.dart:415:8 - missing_identifier
+  error - Expected to find ';' - lib\utils\asset_dashboard_utils.dart:415:8 - expected_token
+  error - Unexpected text ';' - lib\utils\asset_dashboard_utils.dart:415:8 - unexpected_token
+  error - Expected an identifier - lib\utils\asset_dashboard_utils.dart:416:5 - missing_identifier
+  error - Unexpected text ';' - lib\utils\asset_dashboard_utils.dart:416:5 - unexpected_token
+   info - Unnecessary empty statement - lib\utils\asset_dashboard_utils.dart:416:6 - empty_statements
+   info - The value of the argument is redundant because it matches the default value - lib\utils\asset_dashboard_utils.dart:434:18 - avoid_redundant_argument_values
+  error - Instance members can't be accessed from a static method - lib\utils\asset_dashboard_utils.dart:445:15 - instance_member_access_from_static
+  error - Instance members can't be accessed from a static method - lib\utils\asset_dashboard_utils.dart:447:19 - instance_member_access_from_static
+  error - The name 'SizedBox' isn't a class - lib\utils\asset_dashboard_utils.dart:459:25 - creation_with_non_type
+  error - The name 'SizedBox' isn't a class - lib\utils\asset_dashboard_utils.dart:471:31 - creation_with_non_type
+  error - Instance members can't be accessed from a static method - lib\utils\asset_dashboard_utils.dart:482:19 - instance_member_access_from_static
+  error - The name 'SizedBox' isn't a class - lib\utils\asset_dashboard_utils.dart:496:21 - creation_with_non_type
+  error - Instance members can't be accessed from a static method - lib\utils\asset_dashboard_utils.dart:497:15 - instance_member_access_from_static
+   info - The value of the argument is redundant because it matches the default value - lib\utils\asset_dashboard_utils.dart:498:36 - avoid_redundant_argument_values
+  error - The named parameter 'crossAxisAlignment' isn't defined - lib\utils\asset_dashboard_utils.dart:499:17 - undefined_named_parameter
+  error - The name 'SizedBox' isn't a class - lib\utils\asset_dashboard_utils.dart:511:29 - creation_with_non_type
+  error - Instance members can't be accessed from a static method - lib\utils\asset_dashboard_utils.dart:522:21 - instance_member_access_from_static
+  error - Instance members can't be accessed from a static method - lib\utils\asset_dashboard_utils.dart:531:30 - instance_member_access_from_static
+  error - The named parameter 'mainAxisSize' isn't defined - lib\utils\asset_dashboard_utils.dart:532:25 - undefined_named_parameter
+  error - The getter 'profitLoss' isn't defined for the type 'Asset' - lib\utils\asset_dashboard_utils.dart:535:44 - undefined_getter
+  error - The name 'SizedBox' isn't a class - lib\utils\asset_dashboard_utils.dart:541:33 - creation_with_non_type
+  error - Getters, setters and methods can't be declared to be 'const' - lib\utils\asset_dashboard_utils.dart:560:15 - const_method
+   info - Missing type annotation - lib\utils\asset_dashboard_utils.dart:560:21 - strict_top_level_inference
+   info - The method 'SizedBox' should have a return type but doesn't - lib\utils\asset_dashboard_utils.dart:560:21 - always_declare_return_types
+   info - The variable name 'SizedBox' isn't a lowerCamelCase identifier - lib\utils\asset_dashboard_utils.dart:560:21 - non_constant_identifier_names
+   info - Missing type annotation - lib\utils\asset_dashboard_utils.dart:560:30 - strict_top_level_inference
+  error - Named parameters must be enclosed in curly braces ('{' and '}') - lib\utils\asset_dashboard_utils.dart:560:36 - named_parameter_outside_group
+  error - Using a colon as the separator before a default value is no longer supported - lib\utils\asset_dashboard_utils.dart:560:36 - obsolete_colon_for_default_value
+  error - A function body must be provided - lib\utils\asset_dashboard_utils.dart:560:40 - missing_function_body
+  error - Expected a class member - lib\utils\asset_dashboard_utils.dart:560:40 - expected_class_member
+  error - Expected a class member - lib\utils\asset_dashboard_utils.dart:561:15 - expected_class_member
+  error - Expected an identifier - lib\utils\asset_dashboard_utils.dart:561:18 - missing_identifier
+  error - Undefined class 'hasCostBasis' - lib\utils\asset_dashboard_utils.dart:561:19 - undefined_class
+  error - Expected an identifier - lib\utils\asset_dashboard_utils.dart:561:40 - missing_identifier
+  error - A function body must be provided - lib\utils\asset_dashboard_utils.dart:561:42 - missing_function_body
+  error - Expected a class member - lib\utils\asset_dashboard_utils.dart:561:42 - expected_class_member
+  error - Expected a class member - lib\utils\asset_dashboard_utils.dart:561:45 - expected_class_member
+   info - Missing type annotation - lib\utils\asset_dashboard_utils.dart:562:17 - strict_top_level_inference
+   info - The method 'Row' should have a return type but doesn't - lib\utils\asset_dashboard_utils.dart:562:17 - always_declare_return_types
+   info - The variable name 'Row' isn't a lowerCamelCase identifier - lib\utils\asset_dashboard_utils.dart:562:17 - non_constant_identifier_names
+   info - Missing type annotation - lib\utils\asset_dashboard_utils.dart:563:19 - strict_top_level_inference
+  error - Named parameters must be enclosed in curly braces ('{' and '}') - lib\utils\asset_dashboard_utils.dart:563:36 - named_parameter_outside_group
+  error - Using a colon as the separator before a default value is no longer supported - lib\utils\asset_dashboard_utils.dart:563:36 - obsolete_colon_for_default_value
+   info - Missing type annotation - lib\utils\asset_dashboard_utils.dart:564:19 - strict_top_level_inference
+  error - Named parameters must be enclosed in curly braces ('{' and '}') - lib\utils\asset_dashboard_utils.dart:564:27 - named_parameter_outside_group
+  error - Using a colon as the separator before a default value is no longer supported - lib\utils\asset_dashboard_utils.dart:564:27 - obsolete_colon_for_default_value
+  error - The default value of an optional parameter must be constant - lib\utils\asset_dashboard_utils.dart:564:29 - non_constant_default_value
+  error - Undefined name 'theme' - lib\utils\asset_dashboard_utils.dart:567:30 - undefined_identifier
+  error - Undefined name 'theme' - lib\utils\asset_dashboard_utils.dart:568:32 - undefined_identifier
+  error - Undefined name 'cardInfo' - lib\utils\asset_dashboard_utils.dart:572:23 - undefined_identifier
+  error - Undefined name 'theme' - lib\utils\asset_dashboard_utils.dart:573:30 - undefined_identifier
+  error - Undefined name 'theme' - lib\utils\asset_dashboard_utils.dart:574:32 - undefined_identifier
+  error - A function body must be provided - lib\utils\asset_dashboard_utils.dart:578:18 - missing_function_body
+  error - Expected a class member - lib\utils\asset_dashboard_utils.dart:578:18 - expected_class_member
+  error - Getters, setters and methods can't be declared to be 'const' - lib\utils\asset_dashboard_utils.dart:579:17 - const_method
+   info - Missing type annotation - lib\utils\asset_dashboard_utils.dart:579:23 - strict_top_level_inference
+   info - The method 'SizedBox' should have a return type but doesn't - lib\utils\asset_dashboard_utils.dart:579:23 - always_declare_return_types
+   info - The variable name 'SizedBox' isn't a lowerCamelCase identifier - lib\utils\asset_dashboard_utils.dart:579:23 - non_constant_identifier_names
+  error - The name 'SizedBox' is already defined - lib\utils\asset_dashboard_utils.dart:579:23 - duplicate_definition
+   info - Missing type annotation - lib\utils\asset_dashboard_utils.dart:579:32 - strict_top_level_inference
+  error - Named parameters must be enclosed in curly braces ('{' and '}') - lib\utils\asset_dashboard_utils.dart:579:38 - named_parameter_outside_group
+  error - Using a colon as the separator before a default value is no longer supported - lib\utils\asset_dashboard_utils.dart:579:38 - obsolete_colon_for_default_value
+  error - A function body must be provided - lib\utils\asset_dashboard_utils.dart:579:43 - missing_function_body
+  error - Expected a class member - lib\utils\asset_dashboard_utils.dart:579:43 - expected_class_member
+  error - Expected a class member - lib\utils\asset_dashboard_utils.dart:580:15 - expected_class_member
+  error - Expected a class member - lib\utils\asset_dashboard_utils.dart:580:16 - expected_class_member
+   info - Missing type annotation - lib\utils\asset_dashboard_utils.dart:581:15 - strict_top_level_inference
+   info - The method 'Container' should have a return type but doesn't - lib\utils\asset_dashboard_utils.dart:581:15 - always_declare_return_types
+   info - The variable name 'Container' isn't a lowerCamelCase identifier - lib\utils\asset_dashboard_utils.dart:581:15 - non_constant_identifier_names
+   info - Missing type annotation - lib\utils\asset_dashboard_utils.dart:582:17 - strict_top_level_inference
+  error - Named parameters must be enclosed in curly braces ('{' and '}') - lib\utils\asset_dashboard_utils.dart:582:24 - named_parameter_outside_group
+  error - Using a colon as the separator before a default value is no longer supported - lib\utils\asset_dashboard_utils.dart:582:24 - obsolete_colon_for_default_value
+   info - Missing type annotation - lib\utils\asset_dashboard_utils.dart:583:17 - strict_top_level_inference
+  error - Named parameters must be enclosed in curly braces ('{' and '}') - lib\utils\asset_dashboard_utils.dart:583:27 - named_parameter_outside_group
+  error - Using a colon as the separator before a default value is no longer supported - lib\utils\asset_dashboard_utils.dart:583:27 - obsolete_colon_for_default_value
+  error - The default value of an optional parameter must be constant - lib\utils\asset_dashboard_utils.dart:583:29 - non_constant_default_value
+  error - Undefined name 'cardInfo' - lib\utils\asset_dashboard_utils.dart:584:26 - undefined_identifier
+   info - Missing type annotation - lib\utils\asset_dashboard_utils.dart:587:17 - strict_top_level_inference
+  error - Named parameters must be enclosed in curly braces ('{' and '}') - lib\utils\asset_dashboard_utils.dart:587:22 - named_parameter_outside_group
+  error - Using a colon as the separator before a default value is no longer supported - lib\utils\asset_dashboard_utils.dart:587:22 - obsolete_colon_for_default_value
+  error - Methods can't be invoked in constant expressions - lib\utils\asset_dashboard_utils.dart:587:24 - const_eval_method_invocation
+   info - The value of the argument is redundant because it matches the default value - lib\utils\asset_dashboard_utils.dart:588:38 - avoid_redundant_argument_values
+  error - Undefined name 'cardInfo' - lib\utils\asset_dashboard_utils.dart:593:27 - undefined_identifier
+  error - Undefined name 'cardInfo' - lib\utils\asset_dashboard_utils.dart:596:34 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\utils\asset_dashboard_utils.dart:599:31 - creation_with_non_type
+  error - Undefined name 'cardInfo' - lib\utils\asset_dashboard_utils.dart:601:27 - undefined_identifier
+  error - Undefined name 'theme' - lib\utils\asset_dashboard_utils.dart:602:34 - undefined_identifier
+  error - Undefined name 'cardInfo' - lib\utils\asset_dashboard_utils.dart:604:36 - undefined_identifier
+  error - Undefined name 'cardInfo' - lib\utils\asset_dashboard_utils.dart:610:23 - undefined_identifier
+  error - Undefined name 'theme' - lib\utils\asset_dashboard_utils.dart:611:30 - undefined_identifier
+  error - Undefined name 'cardInfo' - lib\utils\asset_dashboard_utils.dart:613:32 - undefined_identifier
+  error - A function body must be provided - lib\utils\asset_dashboard_utils.dart:618:16 - missing_function_body
+  error - Expected a class member - lib\utils\asset_dashboard_utils.dart:618:16 - expected_class_member
+  error - Expected a class member - lib\utils\asset_dashboard_utils.dart:619:13 - expected_class_member
+  error - Expected a class member - lib\utils\asset_dashboard_utils.dart:619:14 - expected_class_member
+  error - Expected a class member - lib\utils\asset_dashboard_utils.dart:620:11 - expected_class_member
+  error - Expected a class member - lib\utils\asset_dashboard_utils.dart:620:12 - expected_class_member
+  error - Expected a class member - lib\utils\asset_dashboard_utils.dart:621:9 - expected_class_member
+  error - Expected a class member - lib\utils\asset_dashboard_utils.dart:621:10 - expected_class_member
+  error - Expected a class member - lib\utils\asset_dashboard_utils.dart:622:7 - expected_class_member
+  error - Expected a class member - lib\utils\asset_dashboard_utils.dart:622:8 - expected_class_member
+  error - Expected a class member - lib\utils\asset_dashboard_utils.dart:623:5 - expected_class_member
+  error - Expected a class member - lib\utils\asset_dashboard_utils.dart:623:6 - expected_class_member
+  error - Can't have modifier 'static' here - lib\utils\asset_dashboard_utils.dart:627:3 - extraneous_modifier
+  error - Expected a method, getter, setter or operator declaration - lib\utils\asset_dashboard_utils.dart:669:1 - expected_executable
+   info - The value of the argument is redundant because it matches the default value - lib\widgets\smart_input_field.dart:117:62 - avoid_redundant_argument_values
+

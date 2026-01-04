@@ -598,7 +598,7 @@ class _IncomeSplitStatusScreenState extends State<IncomeSplitStatusScreen> {
     return Scaffold(
       appBar: AppBar(title: Text('${widget.accountName} - 수입 배분')),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         child: split == null
             ? const Center(
                 child: Padding(

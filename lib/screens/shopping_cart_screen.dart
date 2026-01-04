@@ -1323,7 +1323,8 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                                                   '수량',
                                                 ).copyWith(
                                                   contentPadding:
-                                                      const EdgeInsets.symmetric(
+                                                      const EdgeInsets
+                                                          .symmetric(
                                                         horizontal: 4,
                                                         vertical: 8,
                                                       ),
@@ -1595,7 +1596,8 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                             style: theme.textTheme.bodySmall,
                           ),
                           Text(
-                            '체크: ${CurrencyFormatter.format(checkedTotal)} ($checkedCount개)',
+                            '체크: ${CurrencyFormatter.format(checkedTotal)} '
+                            '($checkedCount개)',
                             style: theme.textTheme.bodyMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: theme.colorScheme.primary,

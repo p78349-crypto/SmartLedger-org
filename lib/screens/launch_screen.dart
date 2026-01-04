@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:smart_ledger/models/account.dart';
@@ -37,7 +40,8 @@ class _LaunchScreenState extends State<LaunchScreen> {
       final notificationStatus = await Permission.notification.status;
 
       debugPrint(
-        '[LaunchScreen] Permission Status - Photos: $photosStatus, Storage: $storageStatus, Notification: $notificationStatus',
+        '[LaunchScreen] Permission Status - Photos: $photosStatus, '
+        'Storage: $storageStatus, Notification: $notificationStatus',
       );
 
       final hasStorage =
@@ -58,7 +62,8 @@ class _LaunchScreenState extends State<LaunchScreen> {
         _goToAccountMain();
       } else {
         debugPrint(
-          '[LaunchScreen] Essential permissions missing. hasStorage: $hasStorage, hasNotification: $hasNotification',
+          '[LaunchScreen] Essential permissions missing. '
+          'hasStorage: $hasStorage, hasNotification: $hasNotification',
         );
         if (mounted) {
           setState(() {
@@ -122,12 +127,42 @@ class _LaunchScreenState extends State<LaunchScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isCheckingPermissions) {
-      return ValueListenableBuilder<Color>(
-        valueListenable: BackgroundHelper.colorNotifier,
-        builder: (context, bgColor, _) {
+      return ListenableBuilder(
+        listenable: Listenable.merge([
+          BackgroundHelper.colorNotifier,
+          BackgroundHelper.typeNotifier,
+          BackgroundHelper.imagePathNotifier,
+          BackgroundHelper.blurNotifier,
+        ]),
+        builder: (context, _) {
+          final bgColor = BackgroundHelper.colorNotifier.value;
+          final bgType = BackgroundHelper.typeNotifier.value;
+          final bgImagePath = BackgroundHelper.imagePathNotifier.value;
+          final bgBlur = BackgroundHelper.blurNotifier.value;
+
           return Scaffold(
             backgroundColor: bgColor,
-            body: const Center(child: CircularProgressIndicator()),
+            body: Stack(
+              children: [
+                if (bgType == 'image' && bgImagePath != null)
+                  Positioned.fill(
+                    child: Image.file(
+                      File(bgImagePath),
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                          ColoredBox(color: bgColor),
+                    ),
+                  ),
+                if (bgType == 'image' && bgImagePath != null && bgBlur > 0)
+                  Positioned.fill(
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: bgBlur, sigmaY: bgBlur),
+                      child: const ColoredBox(color: Colors.transparent),
+                    ),
+                  ),
+                const Center(child: CircularProgressIndicator()),
+              ],
+            ),
           );
         },
       );
@@ -145,12 +180,99 @@ class _LaunchScreenState extends State<LaunchScreen> {
     }
 
     // Requested: show nothing visible on app start.
-    return ValueListenableBuilder<Color>(
-      valueListenable: BackgroundHelper.colorNotifier,
-      builder: (context, bgColor, _) {
+    return ListenableBuilder(
+      listenable: Listenable.merge([
+        BackgroundHelper.colorNotifier,
+        BackgroundHelper.typeNotifier,
+        BackgroundHelper.imagePathNotifier,
+        BackgroundHelper.blurNotifier,
+      ]),
+      builder: (context, _) {
+        final bgColor = BackgroundHelper.colorNotifier.value;
+        final bgType = BackgroundHelper.typeNotifier.value;
+        final bgImagePath = BackgroundHelper.imagePathNotifier.value;
+        final bgBlur = BackgroundHelper.blurNotifier.value;
+
         return Scaffold(
           backgroundColor: bgColor,
-          body: ColoredBox(color: bgColor, child: const SizedBox.expand()),
+          body: Stack(
+            children: [
+              if (bgType == 'image' && bgImagePath != null)
+                Positioned.fill(
+                  child: Image.file(
+                    File(bgImagePath),
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) =>
+                        ColoredBox(color: bgColor),
+                  ),
+                ),
+              if (bgType == 'image' && bgImagePath != null && bgBlur > 0)
+                Positioned.fill(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: bgBlur, sigmaY: bgBlur),
+                    child: const ColoredBox(color: Colors.transparent),
+                  ),
+                ),
+              ColoredBox(
+                color: bgType == 'image'
+                    ? Colors.black.withValues(alpha: 0.3)
+                    : bgColor,
+                child: const SizedBox.expand(),
+              ),
+              Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .primary
+                            .withValues(alpha: 0.1),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .primary
+                                .withValues(alpha: 0.2),
+                            blurRadius: 30,
+                            spreadRadius: 5,
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        Icons.account_balance_wallet_rounded,
+                        size: 80,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      'Smart Ledger',
+                      style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '당신의 스마트한 자산 관리 파트너',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withValues(alpha: 0.6),
+                            letterSpacing: 0.5,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         );
       },
     );

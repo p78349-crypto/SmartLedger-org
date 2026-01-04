@@ -132,7 +132,7 @@ class _RootSearchScreenState extends State<RootSearchScreen> {
         body: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
                 child: Column(
                   children: [
                     Row(
@@ -157,7 +157,7 @@ class _RootSearchScreenState extends State<RootSearchScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 8),
                     Expanded(child: _buildResultList(currencyFormat)),
                   ],
                 ),

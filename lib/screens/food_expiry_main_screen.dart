@@ -1921,7 +1921,8 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
             SnackBar(
               content: Text(
                 '${selectedRecipe.name}: ${matchedInfo.length}개 항목 매칭됨\n'
-                '${matchedInfo.take(3).join(", ")}${matchedInfo.length > 3 ? " 등" : ""}',
+                '${matchedInfo.take(3).join(", ")}'
+                '${matchedInfo.length > 3 ? " 등" : ""}',
               ),
               duration: const Duration(seconds: 3),
             ),

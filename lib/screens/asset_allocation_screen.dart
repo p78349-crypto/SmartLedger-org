@@ -93,7 +93,7 @@ class _AssetAllocationScreenState extends State<AssetAllocationScreen> {
     final scheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('자산 배분 분석'), centerTitle: true),
+      appBar: AppBar(title: const Text('자산 배분 분석')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(

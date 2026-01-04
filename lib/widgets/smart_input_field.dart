@@ -52,13 +52,20 @@ class SmartInputField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
 
     final contentPadding = EdgeInsets.symmetric(
-      horizontal: 12,
-      vertical: compact ? (isLandscape ? 8 : 10) : (isLandscape ? 10 : 12),
+      horizontal: 16,
+      vertical: compact ? (isLandscape ? 10 : 12) : (isLandscape ? 14 : 16),
     );
+
+    final fillColor =
+        scheme.brightness == Brightness.light
+            ? scheme.surfaceContainerLow
+            : scheme.surfaceContainerHighest.withValues(alpha: 0.5);
 
     return TextFormField(
       controller: controller,
@@ -75,16 +82,53 @@ class SmartInputField extends StatelessWidget {
       onChanged: onChanged,
       maxLines: maxLines ?? 1,
       obscureText: obscureText,
+      style: theme.textTheme.bodyLarge,
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
         isDense: true,
+        filled: true,
+        fillColor: fillColor,
         contentPadding: contentPadding,
         prefixIcon: prefixIcon,
         suffixIcon: suffixIcon,
         suffixText: suffixText,
         floatingLabelBehavior:
             floatingLabelBehavior ?? FloatingLabelBehavior.always,
+        labelStyle: TextStyle(
+          color: scheme.primary,
+          fontWeight: FontWeight.bold,
+          fontSize: 14,
+        ),
+        hintStyle: TextStyle(
+          color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide:
+              scheme.brightness == Brightness.dark
+                  ? BorderSide(
+                    color: scheme.outlineVariant.withValues(alpha: 0.5),
+                  )
+                  : BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide:
+              scheme.brightness == Brightness.dark
+                  ? BorderSide(
+                    color: scheme.outlineVariant.withValues(alpha: 0.5),
+                  )
+                  : BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: scheme.primary, width: 1.5),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: scheme.error),
+        ),
       ),
     );
   }

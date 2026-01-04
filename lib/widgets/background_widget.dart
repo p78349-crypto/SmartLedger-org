@@ -115,26 +115,38 @@ class BackgroundHelper {
   static final ValueNotifier<Color> _colorNotifier = ValueNotifier(
     Colors.white,
   );
+  static final ValueNotifier<String> _typeNotifier = ValueNotifier('color');
+  static final ValueNotifier<String?> _imagePathNotifier = ValueNotifier(null);
+  static final ValueNotifier<double> _blurNotifier = ValueNotifier(0.0);
 
   static ValueNotifier<Color> get colorNotifier => _colorNotifier;
+  static ValueNotifier<String> get typeNotifier => _typeNotifier;
+  static ValueNotifier<String?> get imagePathNotifier => _imagePathNotifier;
+  static ValueNotifier<double> get blurNotifier => _blurNotifier;
 
   static Future<void> initialize() async {
-    final color = await getBackgroundColor();
-    _colorNotifier.value = color;
+    await refreshAll();
+  }
+
+  static Future<void> refreshAll() async {
+    final type = await BackgroundService.getBackgroundType();
+    final colorHex = await BackgroundService.getBackgroundColor();
+    final imagePath = await BackgroundService.getBackgroundImagePath();
+    final blur = await BackgroundService.getBackgroundBlur();
+
+    _typeNotifier.value = type;
+    _colorNotifier.value = _hexToColor(colorHex);
+    _imagePathNotifier.value = imagePath;
+    _blurNotifier.value = blur;
   }
 
   static Future<Color> getBackgroundColor() async {
-    final type = await BackgroundService.getBackgroundType();
-    if (type == 'color') {
-      final colorHex = await BackgroundService.getBackgroundColor();
-      return _hexToColor(colorHex);
-    }
-    return Colors.white;
+    final colorHex = await BackgroundService.getBackgroundColor();
+    return _hexToColor(colorHex);
   }
 
   static Future<void> refreshColor() async {
-    final color = await getBackgroundColor();
-    _colorNotifier.value = color;
+    await refreshAll();
   }
 
   static Color _hexToColor(String hexString) {

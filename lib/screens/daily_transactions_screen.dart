@@ -244,7 +244,6 @@ class _DailyTransactionsScreenState extends State<DailyTransactionsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('일일 거래'),
-        centerTitle: true,
         actions: const [
           // Quick Simple Expense Input connection removed
           // (feature disabled per request).
@@ -256,7 +255,7 @@ class _DailyTransactionsScreenState extends State<DailyTransactionsScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [

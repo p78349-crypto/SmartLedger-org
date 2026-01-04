@@ -537,7 +537,10 @@ class AppRouter {
         final a = args as AccountArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => AssetTabScreen(accountName: a.accountName),
+          builder: (_) => Scaffold(
+            appBar: AppBar(title: const Text('자산 관리')),
+            body: AssetTabScreen(accountName: a.accountName),
+          ),
         );
 
       case AppRoutes.assetDashboard:

@@ -65,7 +65,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
         return Scaffold(
           appBar: AppBar(
-            centerTitle: true,
             title: Text('${widget.accountName} 달력'),
           ),
           body: _buildCalendar(context, events),

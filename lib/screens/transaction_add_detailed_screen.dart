@@ -245,6 +245,8 @@ class _TransactionAddDetailedFormState
       vertical: isLandscape ? 10 : 12,
     );
 
+    final scheme = Theme.of(context).colorScheme;
+
     return InputDecoration(
       labelText: labelText,
       hintText: hintText,
@@ -254,6 +256,14 @@ class _TransactionAddDetailedFormState
       suffixIcon: suffixIcon,
       suffixText: suffixText,
       floatingLabelBehavior: FloatingLabelBehavior.always,
+      labelStyle: TextStyle(
+        color: scheme.primary,
+        fontWeight: FontWeight.bold,
+        fontSize: 15,
+      ),
+      hintStyle: TextStyle(
+        color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
+      ),
     );
   }
 
@@ -1499,20 +1509,26 @@ class _TransactionAddDetailedFormState
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        FloatingActionButton.small(
-          heroTag: 'save_continue',
-          onPressed: _saveAndContinue,
-          tooltip: '저장 후 계속',
-          child: const Icon(IconCatalog.arrowForward),
+        Transform.scale(
+          scale: 0.8,
+          child: FloatingActionButton.small(
+            heroTag: 'save_continue',
+            onPressed: _saveAndContinue,
+            tooltip: '저장 후 계속',
+            child: const Icon(IconCatalog.arrowForward),
+          ),
         ),
-        const SizedBox(width: 16),
-        FloatingActionButton(
-          heroTag: 'save',
-          onPressed: _saveTransaction,
-          tooltip: '저장',
-          child: const Text(
-            'ENT',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        const SizedBox(width: 8),
+        Transform.scale(
+          scale: 0.7,
+          child: FloatingActionButton(
+            heroTag: 'save',
+            onPressed: _saveTransaction,
+            tooltip: '저장',
+            child: const Text(
+              'ENT',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            ),
           ),
         ),
       ],
@@ -1972,7 +1988,14 @@ class _TransactionAddDetailedFormState
             children: mainCategories.map((cat) {
               final isSelected = _selectedMainCategory == cat;
               return ChoiceChip(
-                label: Text(cat),
+                label: Text(
+                  cat,
+                  style: TextStyle(
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                    fontSize: 12.5,
+                    letterSpacing: -0.2,
+                  ),
+                ),
                 selected: isSelected,
                 onSelected: (selected) {
                   if (!selected) return;
@@ -1993,7 +2016,14 @@ class _TransactionAddDetailedFormState
               children: subCategories.map((cat) {
                 final isSelected = _selectedSubCategory == cat;
                 return ChoiceChip(
-                  label: Text(cat),
+                  label: Text(
+                    cat,
+                    style: TextStyle(
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                      fontSize: 12.5,
+                      letterSpacing: -0.2,
+                    ),
+                  ),
                   selected: isSelected,
                   onSelected: (selected) {
                     if (!selected) return;
@@ -2025,7 +2055,7 @@ class _TransactionAddDetailedFormState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('대분류', style: theme.textTheme.labelLarge),
+        Text('대분류', style: theme.textTheme.labelMedium),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -2033,7 +2063,14 @@ class _TransactionAddDetailedFormState
           children: mainCategories.map((cat) {
             final isSelected = _selectedMainCategory == cat;
             return ChoiceChip(
-              label: Text(cat),
+              label: Text(
+                cat,
+                style: TextStyle(
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  fontSize: 12.5,
+                  letterSpacing: -0.2,
+                ),
+              ),
               selected: isSelected,
               onSelected: (selected) {
                 if (!selected) return;
@@ -2048,7 +2085,7 @@ class _TransactionAddDetailedFormState
         ),
         if (subCategories.isNotEmpty) ...[
           const SizedBox(height: 16),
-          Text('중분류', style: theme.textTheme.labelLarge),
+          Text('중분류', style: theme.textTheme.labelMedium),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
@@ -2056,7 +2093,14 @@ class _TransactionAddDetailedFormState
             children: subCategories.map((cat) {
               final isSelected = _selectedSubCategory == cat;
               return ChoiceChip(
-                label: Text(cat),
+                label: Text(
+                  cat,
+                  style: TextStyle(
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                    fontSize: 12.5,
+                    letterSpacing: -0.2,
+                  ),
+                ),
                 selected: isSelected,
                 onSelected: (selected) {
                   if (!selected) return;
@@ -2071,7 +2115,7 @@ class _TransactionAddDetailedFormState
         ],
         if (detailCategories.isNotEmpty) ...[
           const SizedBox(height: 16),
-          Text('소분류(상세)', style: theme.textTheme.labelLarge),
+          Text('소분류(상세)', style: theme.textTheme.labelMedium),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
@@ -2079,7 +2123,14 @@ class _TransactionAddDetailedFormState
             children: detailCategories.map((cat) {
               final isSelected = _selectedDetailCategory == cat;
               return ChoiceChip(
-                label: Text(cat),
+                label: Text(
+                  cat,
+                  style: TextStyle(
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                    fontSize: 12.5,
+                    letterSpacing: -0.2,
+                  ),
+                ),
                 selected: isSelected,
                 onSelected: (selected) {
                   if (!selected) return;

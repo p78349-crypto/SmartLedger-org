@@ -993,7 +993,7 @@ class _ShoppingCartQuickTransactionScreenState
                             ? ''
                             : (cardBenefit > 0
                                   ? '현재 기준 혜택(제시-실결제): '
-                                        '${CurrencyFormatter.format(cardBenefit)}'
+                                      '${CurrencyFormatter.format(cardBenefit)}'
                                   : '현재 기준 혜택: 0원'),
                         style: Theme.of(context).textTheme.bodySmall,
                       )
@@ -1479,9 +1479,9 @@ class _ShoppingCartQuickTransactionScreenState
                                     );
                                   }
 
+                                  final now = DateTime.now();
                                   final txId =
-                                      'tx_'
-                                      '${DateTime.now().microsecondsSinceEpoch}';
+                                      'tx_${now.microsecondsSinceEpoch}';
                                   await txService.addTransaction(
                                     widget.args.accountName,
                                     Transaction(

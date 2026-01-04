@@ -387,11 +387,10 @@ class _AccountHomeScreenState extends State<AccountHomeScreen> {
           backgroundColor: bgColor,
           appBar: AppBar(title: Text(widget.accountName)),
           body: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 8),
                 Text(
                   '총 지출',
                   style: TextStyle(fontSize: 13, color: Colors.grey[700]),

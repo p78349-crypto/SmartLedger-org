@@ -235,7 +235,7 @@ class _IncomeSplitScreenState extends State<IncomeSplitScreen> {
       enableDrag: false,
       builder: (context) {
         return FractionallySizedBox(
-          heightFactor: 0.75,
+          heightFactor: 0.95,
           child: StatefulBuilder(
             builder: (context, setSheetState) {
               final allocated = localBudgets.values.fold<double>(
@@ -686,34 +686,36 @@ class _IncomeSplitScreenState extends State<IncomeSplitScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Card(
-              color: scheme.surfaceContainerLow,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '💡 이번 달 수입을 어떻게 배분하시겠어요?',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: scheme.onSurface,
+            if (_totalIncome == 0 && _total == 0 && _incomeAllocations.isEmpty)
+              Card(
+                color: scheme.surfaceContainerLow,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '💡 이번 달 수입을 어떻게 배분하시겠어요?',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: scheme.onSurface,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '총 수입을 예금, 지출예산, 비상금으로 나누어 관리하세요.\n예산이 자동으로 설정됩니다.',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: scheme.onSurfaceVariant,
+                      const SizedBox(height: 8),
+                      Text(
+                        '총 수입을 예금, 지출예산, 비상금으로 나누어 관리하세요.\n예산이 자동으로 설정됩니다.',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: scheme.onSurfaceVariant,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 24),
+            if (_totalIncome == 0 && _total == 0 && _incomeAllocations.isEmpty)
+              const SizedBox(height: 24),
             // 계정 선택
             if (_availableAccounts.length > 1)
               Column(
@@ -1135,7 +1137,7 @@ class _IncomeSplitScreenState extends State<IncomeSplitScreen> {
       isScrollControlled: true,
       builder: (context) {
         return FractionallySizedBox(
-          heightFactor: 0.9,
+          heightFactor: 0.95,
           child: StatefulBuilder(
             builder: (context, setSheetState) {
               final allocated = localAllocations.values.fold<double>(

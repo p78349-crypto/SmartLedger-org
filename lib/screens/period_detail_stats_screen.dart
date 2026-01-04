@@ -262,8 +262,7 @@ class _PeriodDetailStatsScreenState extends State<PeriodDetailStatsScreen> {
         children: [
           // 기간 네비게이터
           Container(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-            color: theme.colorScheme.surfaceContainerHighest,
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [

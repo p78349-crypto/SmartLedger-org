@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smart_ledger/screens/application_settings_screen.dart';
@@ -555,138 +558,313 @@ class _SettingsScreenState extends State<SettingsScreen>
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<Color>(
-      valueListenable: BackgroundHelper.colorNotifier,
-      builder: (context, bgColor, _) {
+    return ListenableBuilder(
+      listenable: Listenable.merge([
+        BackgroundHelper.colorNotifier,
+        BackgroundHelper.typeNotifier,
+        BackgroundHelper.imagePathNotifier,
+        BackgroundHelper.blurNotifier,
+      ]),
+      builder: (context, _) {
+        final bgColor = BackgroundHelper.colorNotifier.value;
+        final bgType = BackgroundHelper.typeNotifier.value;
+        final bgImagePath = BackgroundHelper.imagePathNotifier.value;
+        final bgBlur = BackgroundHelper.blurNotifier.value;
+
         return Scaffold(
           backgroundColor: bgColor,
-          appBar: AppBar(title: const Text('설정')),
-          body: ListView(
+          appBar: AppBar(
+            title: const Text('설정'),
+            backgroundColor: bgType == 'image' ? Colors.transparent : null,
+            elevation: 0,
+          ),
+          extendBodyBehindAppBar: bgType == 'image',
+          body: Stack(
             children: [
-              // '테마' 및 '배경 설정'은 메인 페이지(9)에 아이콘으로 제공됩니다.
-              ListTile(
-                leading: const Icon(Icons.tune_outlined),
-                title: const Text('애플리케이션 설정'),
-                subtitle: const Text('테마와 배경을 앱 안에서 바로 조정합니다.'),
-                trailing: const Icon(IconCatalog.chevronRight),
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const ApplicationSettingsScreen(),
+              if (bgType == 'image' && bgImagePath != null) ...[
+                Positioned.fill(
+                  child: Image.file(
+                    File(bgImagePath),
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) =>
+                        ColoredBox(color: bgColor),
+                  ),
+                ),
+                if (bgBlur > 0)
+                  Positioned.fill(
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: bgBlur, sigmaY: bgBlur),
+                      child: const ColoredBox(color: Colors.transparent),
                     ),
-                  );
-                },
-              ),
-              const Divider(height: 1),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                child: Text(
-                  '백업 암호화',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
+                  ),
+                Positioned.fill(
+                  child: ColoredBox(
+                    color: Colors.black.withValues(alpha: 0.2),
                   ),
                 ),
-              ),
-              ListTile(
-                leading: const Icon(Icons.lock_open_outlined),
-                title: const Text('백업 암호화 해지'),
-                subtitle: Text(
-                  (_backupEncryptionEnabled || _backupTwoFactorEnabled)
-                      ? '상태: 사용'
-                      : '상태: 미사용',
-                ),
-                onTap:
-                    (_isLoading ||
-                        (!_backupEncryptionEnabled && !_backupTwoFactorEnabled))
-                    ? null
-                    : _disableBackupEncryption,
-              ),
-              const Divider(height: 1),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                child: Text(
-                  '사용자 계정 잠금',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
+              ],
+              ListView(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                children: [
+                  _buildSectionHeader(context, '애플리케이션'),
+                  _buildSettingsCard(
+                    context,
+                    icon: Icons.tune_outlined,
+                    title: '애플리케이션 설정',
+                    subtitle: '테마와 배경을 앱 안에서 바로 조정합니다.',
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const ApplicationSettingsScreen(),
+                        ),
+                      );
+                    },
                   ),
-                ),
-              ),
-              const ListTile(
-                title: Text('사용자 계정 인증'),
-                subtitle: Text('자산/ROOT/백업 보호에 동일 적용됩니다.'),
-              ),
-              SwitchListTile(
-                secondary: const Icon(Icons.password_outlined),
-                title: const Text('비밀번호 사용'),
-                subtitle: Text(
-                  _userPasswordConfigured
-                      ? (_userPasswordEnabled ? '상태: 사용' : '상태: 미사용')
-                      : '상태: 미설정',
-                ),
-                value: _userPasswordEnabled,
-                onChanged: _isLoading ? null : _setUserPasswordEnabled,
-              ),
-              ListTile(
-                leading: const Icon(Icons.password_outlined),
-                title: const Text('비밀번호 변경'),
-                subtitle: const Text('기존 비밀번호 확인 후 변경'),
-                onTap: (_isLoading || !_userPasswordEnabled)
-                    ? null
-                    : _changeUserPassword,
-              ),
-              SwitchListTile(
-                secondary: const Icon(Icons.lock_outline),
-                title: const Text('사용자 계정 PIN 사용'),
-                subtitle: Text(
-                  _userPinConfigured
-                      ? (_userPinEnabled ? '상태: 사용' : '상태: 미사용')
-                      : '상태: 미설정',
-                ),
-                value: _userPinEnabled,
-                onChanged: _isLoading ? null : _setUserPinEnabled,
-              ),
-              ListTile(
-                leading: const Icon(Icons.password_outlined),
-                title: const Text('PIN 변경'),
-                subtitle: const Text('기존 PIN 확인 후 변경'),
-                onTap: (_isLoading || !_userPinEnabled) ? null : _changeUserPin,
-              ),
-              SwitchListTile(
-                secondary: const Icon(Icons.fingerprint),
-                title: const Text('기기 인증 사용'),
-                subtitle: const Text('지문/잠금화면 등 기기 인증을 사용합니다.'),
-                value: _userBiometricEnabled,
-                onChanged: _isLoading ? null : _setUserBiometricEnabled,
-              ),
-              SwitchListTile(
-                secondary: const Icon(IconCatalog.keyboardAltOutlined),
-                title: const Text('숫자 입력 보조'),
-                subtitle: const Text('숫자 입력 시 0/00/000 버튼을 표시합니다.'),
-                value: _zeroQuickButtonsEnabled,
-                onChanged: _isLoading ? null : _setZeroQuickButtonsEnabled,
-              ),
-              // '화면 보호 설정'은 ROOT 전용 기능으로 메인 ROOT 페이지에서 제공합니다.
-              const Divider(),
-              ListTile(
-                leading: const Icon(Icons.description_outlined),
-                title: const Text('오픈소스 라이선스'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  showLicensePage(
-                    context: context,
-                    applicationName: 'vccode1',
-                    applicationLegalese: 'Copyright (c) 2025 com.example',
-                  );
-                },
+                  const SizedBox(height: 24),
+                  _buildSectionHeader(context, '보안 및 백업'),
+                  _buildSettingsCard(
+                    context,
+                    icon: Icons.lock_open_outlined,
+                    title: '백업 암호화 해지',
+                    subtitle:
+                        (_backupEncryptionEnabled || _backupTwoFactorEnabled)
+                            ? '상태: 사용 중'
+                            : '상태: 미사용',
+                    enabled: !_isLoading &&
+                        (_backupEncryptionEnabled || _backupTwoFactorEnabled),
+                    onTap: _disableBackupEncryption,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildSwitchCard(
+                    context,
+                    icon: Icons.password_outlined,
+                    title: '비밀번호 사용',
+                    subtitle: _userPasswordConfigured
+                        ? (_userPasswordEnabled ? '상태: 사용 중' : '상태: 미사용')
+                        : '상태: 미설정',
+                    value: _userPasswordEnabled,
+                    onChanged: _isLoading ? null : _setUserPasswordEnabled,
+                  ),
+                  if (_userPasswordEnabled) ...[
+                    const SizedBox(height: 12),
+                    _buildSettingsCard(
+                      context,
+                      icon: Icons.lock_reset_outlined,
+                      title: '비밀번호 변경',
+                      subtitle: '기존 비밀번호 확인 후 변경',
+                      onTap: _isLoading ? null : _changeUserPassword,
+                    ),
+                  ],
+                  const SizedBox(height: 12),
+                  _buildSwitchCard(
+                    context,
+                    icon: Icons.lock_outline,
+                    title: '사용자 계정 PIN 사용',
+                    subtitle: _userPinConfigured
+                        ? (_userPinEnabled ? '상태: 사용 중' : '상태: 미사용')
+                        : '상태: 미설정',
+                    value: _userPinEnabled,
+                    onChanged: _isLoading ? null : _setUserPinEnabled,
+                  ),
+                  if (_userPinEnabled) ...[
+                    const SizedBox(height: 12),
+                    _buildSettingsCard(
+                      context,
+                      icon: Icons.pin_outlined,
+                      title: 'PIN 변경',
+                      subtitle: '기존 PIN 확인 후 변경',
+                      onTap: _isLoading ? null : _changeUserPin,
+                    ),
+                  ],
+                  const SizedBox(height: 12),
+                  _buildSwitchCard(
+                    context,
+                    icon: Icons.fingerprint,
+                    title: '기기 인증 사용',
+                    subtitle: '지문/잠금화면 등 기기 인증을 사용합니다.',
+                    value: _userBiometricEnabled,
+                    onChanged: _isLoading ? null : _setUserBiometricEnabled,
+                  ),
+                  const SizedBox(height: 24),
+                  _buildSectionHeader(context, '입력 편의'),
+                  _buildSwitchCard(
+                    context,
+                    icon: IconCatalog.keyboardAltOutlined,
+                    title: '숫자 입력 보조',
+                    subtitle: '숫자 입력 시 0/00/000 버튼을 표시합니다.',
+                    value: _zeroQuickButtonsEnabled,
+                    onChanged: _isLoading ? null : _setZeroQuickButtonsEnabled,
+                  ),
+                  const SizedBox(height: 24),
+                  _buildSectionHeader(context, '정보'),
+                  _buildSettingsCard(
+                    context,
+                    icon: Icons.description_outlined,
+                    title: '오픈소스 라이선스',
+                    subtitle: 'vccode1 라이선스 정보 확인',
+                    onTap: () {
+                      showLicensePage(
+                        context: context,
+                        applicationName: 'vccode1',
+                        applicationLegalese: 'Copyright (c) 2025 com.example',
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 32),
+                ],
               ),
             ],
           ),
         );
       },
+    );
+  }
+
+  Widget _buildSectionHeader(BuildContext context, String title) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 8, bottom: 12),
+      child: Text(
+        title,
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.bold,
+          color: Theme.of(context).colorScheme.primary,
+          letterSpacing: 0.5,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSettingsCard(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    VoidCallback? onTap,
+    bool enabled = true,
+  }) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return Opacity(
+      opacity: enabled ? 1.0 : 0.5,
+      child: Card(
+        elevation: 0,
+        color: scheme.surfaceContainerLow.withValues(alpha: 0.8),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+          side: BorderSide(
+            color: scheme.outlineVariant.withValues(alpha: 0.5),
+          ),
+        ),
+        child: InkWell(
+          onTap: enabled ? onTap : null,
+          borderRadius: BorderRadius.circular(24),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: scheme.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Icon(icon, color: scheme.primary),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  IconCatalog.chevronRight,
+                  color: scheme.onSurfaceVariant.withValues(alpha: 0.5),
+                  size: 20,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSwitchCard(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required bool value,
+    required ValueChanged<bool>? onChanged,
+  }) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return Card(
+      elevation: 0,
+      color: scheme.surfaceContainerLow.withValues(alpha: 0.8),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
+        side: BorderSide(
+          color: scheme.outlineVariant.withValues(alpha: 0.5),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: scheme.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(icon, color: scheme.primary),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Switch(
+              value: value,
+              onChanged: onChanged,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

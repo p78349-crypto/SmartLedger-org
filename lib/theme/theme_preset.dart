@@ -148,13 +148,13 @@ class ThemePresets {
       id: 'midnight_gold',
       label: '스페셜 · 미드나잇 골드',
       seedColor: Color(0xFFFFB300),
-      backgroundColor: Color(0xFF050505),
+      backgroundColor: Color(0xFF1A1614),
     ),
     ThemePreset(
       id: 'starlight_navy',
       label: '스페셜 · 스타라이트 네이비',
       seedColor: Color(0xFF81D4FA),
-      backgroundColor: Color(0xFF020817),
+      backgroundColor: Color(0xFF0A0E1A),
     ),
   ];
 

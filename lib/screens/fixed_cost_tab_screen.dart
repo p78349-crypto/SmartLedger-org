@@ -6,6 +6,7 @@ import 'package:smart_ledger/services/recent_input_service.dart';
 import 'package:smart_ledger/services/transaction_service.dart';
 import 'package:smart_ledger/utils/date_formats.dart';
 import 'package:smart_ledger/utils/utils.dart';
+import 'package:smart_ledger/widgets/smart_input_field.dart';
 
 class FixedCostTabScreen extends StatefulWidget {
   final String accountName;
@@ -346,6 +347,31 @@ class _FixedCostTabScreenState extends State<FixedCostTabScreen> {
     );
   }
 
+  Widget _buildSectionHeader(String title) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 24, 4, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: theme.textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.primary,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Divider(
+            thickness: 1,
+            color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -374,35 +400,39 @@ class _FixedCostTabScreenState extends State<FixedCostTabScreen> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    TextFormField(
+                    _buildSectionHeader('기본 정보'),
+                    SmartInputField(
                       controller: _nameController,
-                      decoration: const InputDecoration(labelText: '정기지출 이름'),
+                      label: '정기지출 이름',
+                      prefixIcon: const Icon(Icons.label),
                       textInputAction: TextInputAction.next,
                       validator: (value) =>
                           Validators.required(value, fieldName: '정기지출 이름'),
                     ),
-                    const SizedBox(height: 16),
-                    TextFormField(
+                    const SizedBox(height: 12),
+                    SmartInputField(
                       controller: _amountController,
-                      decoration: const InputDecoration(labelText: '금액'),
+                      label: '금액',
+                      prefixIcon: const Icon(Icons.attach_money),
                       keyboardType: TextInputType.number,
                       textInputAction: TextInputAction.next,
                       validator: (value) =>
                           Validators.positiveNumber(value, fieldName: '금액'),
                     ),
-                    const SizedBox(height: 16),
-                    TextFormField(
+                    const SizedBox(height: 12),
+                    SmartInputField(
                       controller: _vendorController,
-                      decoration: const InputDecoration(labelText: '납부처 (선택)'),
+                      label: '납부처 (선택)',
+                      prefixIcon: const Icon(Icons.business),
                       textInputAction: TextInputAction.next,
                     ),
-                    const SizedBox(height: 16),
-                    TextFormField(
+
+                    _buildSectionHeader('결제 및 일정'),
+                    SmartInputField(
                       controller: _paymentController,
-                      decoration: const InputDecoration(
-                        labelText: '결제 수단',
-                        hintText: '결제 수단 입력',
-                      ),
+                      label: '결제 수단',
+                      prefixIcon: const Icon(Icons.payment),
+                      hint: '결제 수단 입력',
                       textInputAction: TextInputAction.next,
                       validator: (value) =>
                           Validators.required(value, fieldName: '결제 수단'),
@@ -415,7 +445,7 @@ class _FixedCostTabScreenState extends State<FixedCostTabScreen> {
                           children: _recentPaymentMethods
                               .take(5)
                               .map(
-                                (method) => FilterChip(
+                                (method) => ChoiceChip(
                                   label: Text(method),
                                   selected: _paymentController.text == method,
                                   onSelected: (_) => setState(
@@ -426,11 +456,12 @@ class _FixedCostTabScreenState extends State<FixedCostTabScreen> {
                               .toList(),
                         ),
                       ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                     DropdownButtonFormField<int?>(
                       initialValue: _dueDay,
                       decoration: const InputDecoration(
                         labelText: '납부일 (선택)',
+                        prefixIcon: Icon(Icons.calendar_today),
                         helperText: '입력 시 알림 등 일정 관리에 활용할 수 있어요.',
                       ),
                       items: [
@@ -447,39 +478,44 @@ class _FixedCostTabScreenState extends State<FixedCostTabScreen> {
                       onChanged: (value) => setState(() => _dueDay = value),
                     ),
 
-                    const SizedBox(height: 16),
-                    TextFormField(
+                    _buildSectionHeader('메모'),
+                    SmartInputField(
                       controller: _memoController,
-                      decoration: InputDecoration(
-                        labelText: '메모 (선택)',
-                        suffixIcon: _recentMemos.isEmpty
-                            ? null
-                            : PopupMenuButton<String>(
-                                icon: const Icon(Icons.history),
-                                tooltip: '최근 메모 선택',
-                                onSelected: (value) => setState(
-                                  () => _memoController.text = value,
-                                ),
-                                itemBuilder: (context) => _recentMemos
-                                    .map(
-                                      (memo) => PopupMenuItem(
-                                        value: memo,
-                                        child: Text(memo),
-                                      ),
-                                    )
-                                    .toList(),
+                      label: '메모 (선택)',
+                      prefixIcon: const Icon(Icons.note),
+                      suffixIcon: _recentMemos.isEmpty
+                          ? null
+                          : PopupMenuButton<String>(
+                              icon: const Icon(Icons.history),
+                              tooltip: '최근 메모 선택',
+                              onSelected: (value) => setState(
+                                () => _memoController.text = value,
                               ),
-                      ),
-                      maxLines: null,
+                              itemBuilder: (context) => _recentMemos
+                                  .map(
+                                    (memo) => PopupMenuItem(
+                                      value: memo,
+                                      child: Text(memo),
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
+                      maxLines: 3,
                       textInputAction: TextInputAction.done,
                       onFieldSubmitted: (_) => _submitCost(),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 32),
                     SizedBox(
                       width: double.infinity,
-                      child: ElevatedButton(
+                      child: FilledButton.icon(
                         onPressed: _submitCost,
-                        child: Text(_isEditing ? '수정 완료' : '저장'),
+                        icon: Icon(_isEditing ? Icons.save : Icons.add_task),
+                        label: Text(_isEditing ? '수정 완료' : '정기지출 저장'),
+                        style: FilledButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 16,
+                          ),
+                        ),
                       ),
                     ),
                     if (_isEditing)

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:smart_ledger/models/asset.dart';
 import 'package:smart_ledger/services/asset_service.dart';
 import 'package:smart_ledger/services/recent_input_service.dart';
+import 'package:smart_ledger/widgets/smart_input_field.dart';
 
 class AssetSimpleInputScreen extends StatefulWidget {
   final String accountName;
@@ -170,9 +171,13 @@ class _AssetSimpleInputScreenState extends State<AssetSimpleInputScreen> {
                     key: _formKey,
                     child: Column(
                       children: [
+                        _buildSectionHeader('자산 종류'),
                         DropdownButtonFormField<String>(
                           initialValue: _category,
-                          decoration: const InputDecoration(labelText: '자산 종류'),
+                          decoration: const InputDecoration(
+                            labelText: '자산 종류',
+                            prefixIcon: Icon(Icons.category),
+                          ),
                           items: const [
                             DropdownMenuItem(value: '현금', child: Text('현금')),
                             DropdownMenuItem(
@@ -190,20 +195,21 @@ class _AssetSimpleInputScreenState extends State<AssetSimpleInputScreen> {
                           ],
                           onChanged: (v) => setState(() => _category = v!),
                         ),
-                        const SizedBox(height: 16),
-                        TextFormField(
+
+                        _buildSectionHeader('기본 정보'),
+                        SmartInputField(
                           controller: _nameController,
-                          decoration: const InputDecoration(
-                            labelText: '자산명',
-                            hintText: '예: 시중은행 입출금통장',
-                          ),
+                          label: '자산명',
+                          hint: '예: 시중은행 입출금통장',
+                          prefixIcon: const Icon(Icons.label),
                           validator: (v) =>
                               v == null || v.isEmpty ? '자산명을 입력하세요' : null,
                         ),
-                        const SizedBox(height: 16),
-                        TextFormField(
+                        const SizedBox(height: 12),
+                        SmartInputField(
                           controller: _amountController,
-                          decoration: const InputDecoration(labelText: '금액'),
+                          label: '금액',
+                          prefixIcon: const Icon(Icons.attach_money),
                           keyboardType: TextInputType.number,
                           validator: (v) {
                             if (v == null || v.isEmpty) return '금액을 입력하세요';
@@ -212,49 +218,52 @@ class _AssetSimpleInputScreenState extends State<AssetSimpleInputScreen> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: 8),
-                        const SizedBox(height: 16),
-                        TextFormField(
+                        const SizedBox(height: 12),
+                        SmartInputField(
                           controller: _locationController,
-                          decoration: const InputDecoration(
-                            labelText: '위치(은행/앱/보관장소)',
-                          ),
+                          label: '위치(은행/앱/보관장소)',
+                          prefixIcon: const Icon(Icons.location_on),
                         ),
-                        const SizedBox(height: 16),
-                        TextFormField(
+
+                        _buildSectionHeader('메모'),
+                        SmartInputField(
                           controller: _memoController,
-                          decoration: InputDecoration(
-                            labelText: '메모(선택)',
-                            suffixIcon: _recentMemos.isEmpty
-                                ? null
-                                : PopupMenuButton<String>(
-                                    // icon: const Icon(Icons.history),
-                                    tooltip: '최근 메모 선택',
-                                    onSelected: (value) {
-                                      setState(
-                                        () => _memoController.text = value,
-                                      );
-                                    },
-                                    itemBuilder: (context) => _recentMemos
-                                        .map(
-                                          (memo) => PopupMenuItem(
-                                            value: memo,
-                                            child: Text(memo),
-                                          ),
-                                        )
-                                        .toList(),
-                                  ),
-                          ),
+                          label: '메모(선택)',
+                          prefixIcon: const Icon(Icons.note),
+                          suffixIcon: _recentMemos.isEmpty
+                              ? null
+                              : PopupMenuButton<String>(
+                                  tooltip: '최근 메모 선택',
+                                  onSelected: (value) {
+                                    setState(
+                                      () => _memoController.text = value,
+                                    );
+                                  },
+                                  itemBuilder: (context) => _recentMemos
+                                      .map(
+                                        (memo) => PopupMenuItem(
+                                          value: memo,
+                                          child: Text(memo),
+                                        ),
+                                      )
+                                      .toList(),
+                                ),
                           textInputAction: TextInputAction.done,
                           onFieldSubmitted: (_) => _submit(),
-                          maxLines: null,
+                          maxLines: 3,
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 32),
                         SizedBox(
                           width: double.infinity,
-                          child: ElevatedButton(
+                          child: FilledButton.icon(
                             onPressed: _submit,
-                            child: const Text('저장'),
+                            icon: const Icon(Icons.save),
+                            label: const Text('자산 저장'),
+                            style: FilledButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 16,
+                              ),
+                            ),
                           ),
                         ),
                       ],
@@ -293,6 +302,30 @@ class _AssetSimpleInputScreenState extends State<AssetSimpleInputScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+  Widget _buildSectionHeader(String title) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 24, 4, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: theme.textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.primary,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Divider(
+            thickness: 1,
+            color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+          ),
+        ],
       ),
     );
   }

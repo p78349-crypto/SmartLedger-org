@@ -53,7 +53,7 @@ class ThemeSettingsSection extends StatelessWidget {
             children: [
               Text('화면 모드', style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 8),
-              RadioGroup<ThemeMode>(
+              RadioGroup<AppThemeMode>(
                 groupValue: mode,
                 onChanged: (v) {
                   if (v == null) return;
@@ -61,17 +61,27 @@ class ThemeSettingsSection extends StatelessWidget {
                 },
                 child: const Column(
                   children: [
-                    RadioListTile<ThemeMode>(
+                    RadioListTile<AppThemeMode>(
                       title: Text('시스템 설정 따름'),
-                      value: ThemeMode.system,
+                      value: AppThemeMode.system,
                     ),
-                    RadioListTile<ThemeMode>(
+                    RadioListTile<AppThemeMode>(
                       title: Text('라이트'),
-                      value: ThemeMode.light,
+                      value: AppThemeMode.light,
                     ),
-                    RadioListTile<ThemeMode>(
+                    RadioListTile<AppThemeMode>(
                       title: Text('다크'),
-                      value: ThemeMode.dark,
+                      value: AppThemeMode.dark,
+                    ),
+                    RadioListTile<AppThemeMode>(
+                      title: Text('여성 스타일 (10)'),
+                      subtitle: Text('다크 모드 + 여성용 진한 색상'),
+                      value: AppThemeMode.femaleDark,
+                    ),
+                    RadioListTile<AppThemeMode>(
+                      title: Text('남성 스타일 (10)'),
+                      subtitle: Text('다크 모드 + 남성용 진한 색상'),
+                      value: AppThemeMode.maleDark,
                     ),
                   ],
                 ),
@@ -109,45 +119,80 @@ class ThemeSettingsSection extends StatelessWidget {
                 },
                 child: Column(
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 6,
-                      ),
-                      child: Text(
-                        '여성 스타일 (10)',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          fontWeight: FontWeight.w600,
+                    if (mode != AppThemeMode.maleDark) ...[
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 6,
+                        ),
+                        child: Text(
+                          '여성 스타일 (10)',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
-                    ),
-                    ...ThemePresets.female.map(
-                      (preset) => _presetTile(
-                        context,
-                        preset: preset,
-                        selectedPresetId: selectedPresetId,
-                      ),
-                    ),
-                    const Divider(height: 12),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 6,
-                      ),
-                      child: Text(
-                        '남성 스타일 (10)',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          fontWeight: FontWeight.w600,
+                      ...ThemePresets.female
+                          .where((p) =>
+                              mode != AppThemeMode.femaleDark ||
+                              p.id.contains('intense'))
+                          .map(
+                            (preset) => _presetTile(
+                              context,
+                              preset: preset,
+                              selectedPresetId: selectedPresetId,
+                            ),
+                          ),
+                      const Divider(height: 12),
+                    ],
+                    if (mode != AppThemeMode.femaleDark &&
+                        mode != AppThemeMode.maleDark) ...[
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 6,
+                        ),
+                        child: Text(
+                          '스페셜 스타일',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
-                    ),
-                    ...ThemePresets.male.map(
-                      (preset) => _presetTile(
-                        context,
-                        preset: preset,
-                        selectedPresetId: selectedPresetId,
+                      ...ThemePresets.special.map(
+                        (preset) => _presetTile(
+                          context,
+                          preset: preset,
+                          selectedPresetId: selectedPresetId,
+                        ),
                       ),
-                    ),
+                      const Divider(height: 12),
+                    ],
+                    if (mode != AppThemeMode.femaleDark) ...[
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 6,
+                        ),
+                        child: Text(
+                          '남성 스타일 (10)',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      ...ThemePresets.male
+                          .where((p) =>
+                              mode != AppThemeMode.maleDark ||
+                              p.id.contains('intense'))
+                          .map(
+                            (preset) => _presetTile(
+                              context,
+                              preset: preset,
+                              selectedPresetId: selectedPresetId,
+                            ),
+                          ),
+                    ],
                   ],
                 ),
               ),
@@ -207,8 +252,11 @@ class _AppIconSyncSectionState extends State<_AppIconSyncSection> {
       builder: (context) => AlertDialog(
         title: const Text('앱 아이콘 적용'),
         content: Text(
-          '현재 선택된 테마(${isFemale ? "여성향" : "남성향"})와 스타일(${_iconStyle == "intense" ? "진하게" : "기본"})에 맞춰 앱 아이콘을 변경합니다.\n\n'
-          '⚠️ 적용 시 안드로이드 시스템 정책에 의해 앱이 즉시 종료됩니다. 다시 실행해 주세요.',
+          '현재 선택된 테마(${isFemale ? "여성향" : "남성향"})와 '
+          '스타일(${_iconStyle == "intense" ? "진하게" : "기본"})에 맞춰 '
+          '앱 아이콘을 변경합니다.\n\n'
+          '⚠️ 적용 시 안드로이드 시스템 정책에 의해 앱이 즉시 종료됩니다. '
+          '다시 실행해 주세요.',
         ),
         actions: [
           TextButton(
@@ -229,8 +277,8 @@ class _AppIconSyncSectionState extends State<_AppIconSyncSection> {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('last_icon_theme_id', targetIconTheme);
 
-        // Import AppIconService if needed, but it's already used in the controller
-        // so we can call it here.
+        // Import AppIconService if needed, but it's already used in the
+        // controller so we can call it here.
         await AppIconService.setLauncherIconTheme(targetIconTheme);
       } catch (e) {
         if (mounted) {
@@ -297,7 +345,8 @@ class _AppIconSyncSectionState extends State<_AppIconSyncSection> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           child: Text(
-            '※ 아이콘 변경은 안드로이드 시스템에 의해 앱 재시작이 필요하므로, 모든 설정을 마친 후 수동으로 적용하는 것을 권장합니다.',
+            '※ 아이콘 변경은 안드로이드 시스템에 의해 앱 재시작이 필요하므로, '
+            '모든 설정을 마친 후 수동으로 적용하는 것을 권장합니다.',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),

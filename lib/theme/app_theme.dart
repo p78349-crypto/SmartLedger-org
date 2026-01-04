@@ -29,10 +29,11 @@ class AppTheme {
       brightness: brightness,
     );
 
-    // 다크 모드에서 가독성 개선을 위해 onSurfaceVariant 조정
     if (brightness == Brightness.dark) {
       scheme = scheme.copyWith(
-        onSurfaceVariant: scheme.onSurface.withValues(alpha: 0.8),
+        surface: const Color(0xFF1A1614),
+        onSurface: const Color(0xFFF9FAFB),
+        surfaceContainerHighest: const Color(0xFF2D2825),
       );
     }
 
@@ -82,32 +83,40 @@ class AppTheme {
         displayColor: scheme.onSurface,
         decorationColor: scheme.onSurface,
       ),
-      listTileTheme: ListTileThemeData(
-        iconColor: scheme.onSurface.withValues(alpha: 0.85),
-        titleTextStyle: TextStyle(
-          color: scheme.onSurface,
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
-        ),
-        subtitleTextStyle: TextStyle(
-          color: scheme.onSurfaceVariant,
-          fontSize: 14,
-        ),
-      ),
       appBarTheme: AppBarTheme(
-        centerTitle: true,
-        backgroundColor: scheme.surface,
+        centerTitle: false,
+        backgroundColor: Colors.transparent,
         foregroundColor: scheme.onSurface,
-        elevation: elevation,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        toolbarHeight: 48,
+        titleTextStyle: TextStyle(
+          fontSize: 17,
+          fontWeight: FontWeight.bold,
+          color: scheme.onSurface,
+          letterSpacing: -0.5,
+        ),
       ),
       iconTheme: IconThemeData(
         color: scheme.onSurface,
       ),
+      dividerTheme: DividerThemeData(
+        color: brightness == Brightness.dark
+            ? scheme.outlineVariant.withValues(alpha: 0.5)
+            : scheme.outlineVariant,
+        thickness: 1,
+        space: 1,
+      ),
       cardTheme: CardThemeData(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(borderRadius),
-          side: showBorders
-              ? BorderSide(color: scheme.outlineVariant, width: borderWidth)
+          side: (showBorders || brightness == Brightness.dark)
+              ? BorderSide(
+                  color: scheme.outlineVariant.withValues(
+                    alpha: brightness == Brightness.dark ? 0.5 : 1.0,
+                  ),
+                  width: borderWidth > 0 ? borderWidth : 1,
+                )
               : BorderSide.none,
         ),
         elevation: elevation,
@@ -115,18 +124,27 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: scheme.surfaceContainerHighest,
+        fillColor:
+            brightness == Brightness.light
+                ? scheme.surfaceContainerLow
+                : scheme.surfaceContainerHighest.withValues(alpha: 0.5),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(borderRadius / 1.5),
-          borderSide: showBorders
-              ? BorderSide(color: scheme.outlineVariant, width: borderWidth)
-              : BorderSide.none,
+          borderSide:
+              brightness == Brightness.dark
+                  ? BorderSide(
+                    color: scheme.outlineVariant.withValues(alpha: 0.4),
+                  )
+                  : BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(borderRadius / 1.5),
-          borderSide: showBorders
-              ? BorderSide(color: scheme.outlineVariant, width: borderWidth)
-              : BorderSide.none,
+          borderSide:
+              brightness == Brightness.dark
+                  ? BorderSide(
+                    color: scheme.outlineVariant.withValues(alpha: 0.4),
+                  )
+                  : BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(borderRadius / 1.5),
@@ -151,23 +169,21 @@ class AppTheme {
         ),
         disabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(borderRadius / 1.5),
-          borderSide: showBorders
-              ? BorderSide(
-                color: scheme.outlineVariant.withValues(alpha: 0.38),
-                width: borderWidth,
-              )
-              : BorderSide.none,
+          borderSide: BorderSide.none,
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 12,
         ),
-        labelStyle: TextStyle(color: scheme.onSurface.withValues(alpha: 0.90)),
+        labelStyle: TextStyle(
+          color: scheme.primary,
+          fontWeight: FontWeight.w600,
+        ),
         hintStyle: TextStyle(
-          color: scheme.onSurfaceVariant.withValues(alpha: 0.90),
+          color: scheme.onSurfaceVariant.withValues(alpha: 0.5),
         ),
         helperStyle: TextStyle(
-          color: scheme.onSurfaceVariant.withValues(alpha: 0.90),
+          color: scheme.onSurfaceVariant.withValues(alpha: 0.7),
         ),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
@@ -195,10 +211,17 @@ class AppTheme {
     // AppBar Theme
     appBarTheme: const AppBarTheme(
       elevation: 0,
-      centerTitle: true,
-      backgroundColor: AppColors.surface,
+      scrolledUnderElevation: 0,
+      centerTitle: false,
+      backgroundColor: Colors.transparent,
       foregroundColor: AppColors.textPrimary,
-      titleTextStyle: AppTextStyles.heading2,
+      toolbarHeight: 48,
+      titleTextStyle: TextStyle(
+        fontSize: 17,
+        fontWeight: FontWeight.bold,
+        color: AppColors.textPrimary,
+        letterSpacing: -0.5,
+      ),
       iconTheme: IconThemeData(color: AppColors.textPrimary),
     ),
 
@@ -299,7 +322,7 @@ class AppTheme {
 
     // Divider Theme
     dividerTheme: const DividerThemeData(
-      color: AppColors.divider,
+      color: Color(0xFF374151),
       thickness: 1,
       space: 1,
     ),
@@ -330,8 +353,8 @@ class AppTheme {
       primary: AppColors.primaryLight,
       primaryContainer: AppColors.primaryDark,
       secondary: AppColors.savings,
-      surface: Color(0xFF1F2937),
-      surfaceContainerHighest: Color(0xFF374151),
+      surface: Color(0xFF1A1614),
+      surfaceContainerHighest: Color(0xFF2D2825),
       error: AppColors.error,
       onPrimary: Colors.white,
       onSurface: Color(0xFFF9FAFB),
@@ -343,13 +366,16 @@ class AppTheme {
     // AppBar Theme
     appBarTheme: const AppBarTheme(
       elevation: 0,
-      centerTitle: true,
-      backgroundColor: Color(0xFF1F2937),
+      scrolledUnderElevation: 0,
+      centerTitle: false,
+      backgroundColor: Colors.transparent,
       foregroundColor: Color(0xFFF9FAFB),
+      toolbarHeight: 48,
       titleTextStyle: TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.w600,
+        fontSize: 17,
+        fontWeight: FontWeight.bold,
         color: Color(0xFFF9FAFB),
+        letterSpacing: -0.5,
       ),
       iconTheme: IconThemeData(color: Color(0xFFF9FAFB)),
     ),
@@ -358,16 +384,16 @@ class AppTheme {
     cardTheme: CardThemeData(
       elevation: 2,
       shadowColor: Colors.black.withValues(alpha: 0.3),
-      color: const Color(0xFF1F2937),
+      color: const Color(0xFF2D2825),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: Color(0xFF374151), width: 0.5),
+        side: const BorderSide(color: Color(0xFF3D3835), width: 0.5),
       ),
     ),
 
     // Bottom Navigation Bar Theme
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      backgroundColor: Color(0xFF1F2937),
+      backgroundColor: Color(0xFF1A1614),
       selectedItemColor: Color(0xFF818CF8),
       unselectedItemColor: Color(0xFF9CA3AF),
       type: BottomNavigationBarType.fixed,

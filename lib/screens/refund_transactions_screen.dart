@@ -340,7 +340,6 @@ class _RefundTransactionsScreenState extends State<RefundTransactionsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('반품'),
-        centerTitle: true,
         actions: [
           IconButton(
             tooltip: '반품 추가',
@@ -368,7 +367,7 @@ class _RefundTransactionsScreenState extends State<RefundTransactionsScreen> {
         children: [
           _buildSearchBar(theme),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
             child: queryActive
                 ? Row(
                     children: [

@@ -1049,7 +1049,6 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
       }
       return Scaffold(
         appBar: AppBar(
-          toolbarHeight: 40,
           elevation: 0,
           backgroundColor: Colors.transparent,
         ),
@@ -1064,7 +1063,7 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
 
     final content = SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [contentBody],
@@ -1082,7 +1081,6 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
         appBar: AppBar(
-          toolbarHeight: 40,
           elevation: 0,
           backgroundColor: Colors.transparent,
         ),
@@ -1493,24 +1491,59 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
       total += e.amount;
     }
 
-    return Card(
-      elevation: 2,
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerLow.withValues(alpha: 0.8),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+        ),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('이번달 총액', style: theme.textTheme.bodySmall),
-            const SizedBox(height: 6),
-            Text(
-              _formatWon(total),
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.bolt_outlined,
+                    color: theme.colorScheme.primary,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '이번 달 간편 지출 합계',
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      Text(
+                        _formatWon(total),
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 4),
             Text(
-              '(1달) · ${inMonth.length}건',
+              '${inMonth.length}건의 거래',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -1590,29 +1623,66 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
     final maxAmount = top.fold<double>(0, (m, e) => e.total > m ? e.total : m);
     final denom = maxAmount <= 0 ? 1.0 : maxAmount;
 
-    return Card(
-      elevation: 2,
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerLow.withValues(alpha: 0.8),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+        ),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('기본 마트/쇼핑몰: $store', style: theme.textTheme.bodySmall),
-            const SizedBox(height: 6),
-            Text(
-              '이번달 총액: ${_formatWon(thisMonthTotal)}',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.secondary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.shopping_bag_outlined,
+                    color: theme.colorScheme.secondary,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '기본 마트/쇼핑몰: $store',
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      Text(
+                        _formatWon(thisMonthTotal),
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.secondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 4),
             Text(
-              '(1달) · $thisMonthCount건',
+              '$thisMonthCount건의 거래',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
+            const Divider(height: 1),
+            const SizedBox(height: 16),
             if (top.isEmpty)
               Text(
                 '이번달 제품 데이터가 없습니다.',
@@ -1814,28 +1884,80 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
     List<Transaction> transactions,
     ThemeData theme,
   ) {
+    final scheme = theme.colorScheme;
     final total = _sumAmounts(transactions);
-    return Card(
-      child: ExpansionTile(
-        title: Text(_dayLabelFormat.format(day)),
-        subtitle: Text(
-          '합계 ${_formatAmountByType(total, _currentType)}',
-          style: TextStyle(color: _typeColor(theme)),
+    final typeColor = _typeColor(theme);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerLow.withValues(alpha: 0.8),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: scheme.outlineVariant.withValues(alpha: 0.5),
         ),
-        children: transactions
-            .map(
+      ),
+      child: Theme(
+        data: theme.copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          tilePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+          title: Text(
+            _dayLabelFormat.format(day),
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          subtitle: Text(
+            '합계 ${_formatAmountByType(total, _currentType)}',
+            style: TextStyle(
+              color: typeColor,
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
+            ),
+          ),
+          children: [
+            const Divider(height: 1, indent: 20, endIndent: 20),
+            ...transactions.map(
               (tx) => ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 24),
                 dense: true,
-                leading: Icon(
-                  _iconForType(tx.type),
-                  color: _colorForTransaction(tx.type, theme),
+                leading: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: _colorForTransaction(tx.type, theme)
+                        .withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    _iconForType(tx.type),
+                    size: 16,
+                    color: _colorForTransaction(tx.type, theme),
+                  ),
                 ),
-                title: Text(tx.description),
-                subtitle: Text(_dateFormat.format(tx.date)),
-                trailing: Text(_formatSignedAmount(tx)),
+                title: Text(
+                  tx.description,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                subtitle: Text(
+                  _dateFormat.format(tx.date),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+                trailing: Text(
+                  _formatSignedAmount(tx),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: _colorForTransaction(tx.type, theme),
+                  ),
+                ),
               ),
-            )
-            .toList(),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
       ),
     );
   }
@@ -2739,67 +2861,106 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
   }
 
   Widget _buildMonthNavigator(ThemeData theme) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        IconButton(
-          icon: const Icon(Icons.chevron_left),
-          onPressed: () {
-            setState(() {
-              _currentMonth = DateTime(
-                _currentMonth.year,
-                _currentMonth.month - 1,
-              );
-            });
-          },
+    final scheme = theme.colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerLow.withValues(alpha: 0.8),
+        borderRadius: BorderRadius.circular(32),
+        border: Border.all(
+          color: scheme.outlineVariant.withValues(alpha: 0.5),
         ),
-        Text(
-          _monthLabelFormat.format(_currentMonth),
-          style: theme.textTheme.titleMedium,
-        ),
-        IconButton(
-          icon: const Icon(Icons.chevron_right),
-          onPressed: () {
-            setState(() {
-              _currentMonth = DateTime(
-                _currentMonth.year,
-                _currentMonth.month + 1,
-              );
-            });
-          },
-        ),
-      ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.chevron_left),
+            onPressed: () {
+              setState(() {
+                _currentMonth = DateTime(
+                  _currentMonth.year,
+                  _currentMonth.month - 1,
+                );
+              });
+            },
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text(
+              _monthLabelFormat.format(_currentMonth),
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: scheme.primary,
+              ),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.chevron_right),
+            onPressed: () {
+              setState(() {
+                _currentMonth = DateTime(
+                  _currentMonth.year,
+                  _currentMonth.month + 1,
+                );
+              });
+            },
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildYearNavigator(ThemeData theme, {String? label}) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        IconButton(
-          icon: const Icon(Icons.chevron_left),
-          onPressed: () {
-            setState(() {
-              _currentYear -= 1;
-              if (_selectedView == _StatsView.decade) {
-                _currentMonth = DateTime(_currentYear, _currentMonth.month);
-              }
-            });
-          },
+    final scheme = theme.colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerLow.withValues(alpha: 0.8),
+        borderRadius: BorderRadius.circular(32),
+        border: Border.all(
+          color: scheme.outlineVariant.withValues(alpha: 0.5),
         ),
-        Text(label ?? '$_currentYear년', style: theme.textTheme.titleMedium),
-        IconButton(
-          icon: const Icon(Icons.chevron_right),
-          onPressed: () {
-            setState(() {
-              _currentYear += 1;
-              if (_selectedView == _StatsView.decade) {
-                _currentMonth = DateTime(_currentYear, _currentMonth.month);
-              }
-            });
-          },
-        ),
-      ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.chevron_left),
+            onPressed: () {
+              setState(() {
+                _currentYear -= 1;
+                if (_selectedView == _StatsView.decade) {
+                  _currentMonth = DateTime(_currentYear, _currentMonth.month);
+                }
+              });
+            },
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text(
+              label ?? '$_currentYear년',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: scheme.primary,
+              ),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.chevron_right),
+            onPressed: () {
+              setState(() {
+                _currentYear += 1;
+                if (_selectedView == _StatsView.decade) {
+                  _currentMonth = DateTime(_currentYear, _currentMonth.month);
+                }
+              });
+            },
+          ),
+        ],
+      ),
     );
   }
 
@@ -4029,16 +4190,14 @@ class _SummaryGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: children
-          .map(
-            (card) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: card,
-            ),
-          )
-          .toList(),
+    return GridView.count(
+      crossAxisCount: 2,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      mainAxisSpacing: 12,
+      crossAxisSpacing: 12,
+      childAspectRatio: 1.6,
+      children: children,
     );
   }
 }
@@ -4059,40 +4218,56 @@ class _SummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Card(
+    final scheme = theme.colorScheme;
+    final color = valueColor ?? scheme.primary;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerLow.withValues(alpha: 0.8),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: scheme.outlineVariant.withValues(alpha: 0.5),
+        ),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Icon(
-              icon,
-              size: 20,
-              color: valueColor ?? theme.colorScheme.primary,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    title,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    value,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: valueColor ?? theme.colorScheme.onSurface,
-                      fontWeight: FontWeight.w600,
+                  child: Icon(icon, size: 18, color: color),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                      fontWeight: FontWeight.bold,
                     ),
-                    maxLines: 2,
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                ],
+                ),
+              ],
+            ),
+            Text(
+              value,
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: color,
+                fontWeight: FontWeight.bold,
+                letterSpacing: -0.5,
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),

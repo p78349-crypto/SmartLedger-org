@@ -56,14 +56,16 @@ class _PermissionGateScreenState extends State<PermissionGateScreen>
       _microphoneStatus = await Permission.microphone.status;
 
       debugPrint(
-        '[PermissionGate] Photos: $_photosStatus, Storage: $_storageStatus, Notification: $_notificationStatus',
+        '[PermissionGate] Photos: $_photosStatus, Storage: $_storageStatus, '
+        'Notification: $_notificationStatus',
       );
 
       final hasStorage =
           _photosStatus.isGranted ||
           _storageStatus.isGranted ||
           _photosStatus.isLimited;
-      // On some older devices, notification permission might not be explicitly grantable but is allowed.
+      // On some older devices, notification permission might not be
+      // explicitly grantable but is allowed.
       // We check for isGranted or isProvisional.
       final hasNotification =
           _notificationStatus.isGranted || _notificationStatus.isProvisional;
@@ -75,7 +77,8 @@ class _PermissionGateScreenState extends State<PermissionGateScreen>
         widget.onGranted();
       } else {
         debugPrint(
-          '[PermissionGate] Essential permissions missing. hasStorage: $hasStorage, hasNotification: $hasNotification',
+          '[PermissionGate] Essential permissions missing. '
+          'hasStorage: $hasStorage, hasNotification: $hasNotification',
         );
         if (mounted) {
           setState(() => _isChecking = false);

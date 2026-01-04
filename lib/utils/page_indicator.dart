@@ -17,8 +17,8 @@ class PageIndicator extends StatelessWidget {
     this.onPageTap,
     this.activeColor,
     this.inactiveColor,
-    this.dotSize = 8.0,
-    this.spacing = 8.0,
+    this.dotSize = 5.0,
+    this.spacing = 6.0,
   });
 
   @override
@@ -38,12 +38,20 @@ class PageIndicator extends StatelessWidget {
           child: Container(
             margin: EdgeInsets.symmetric(horizontal: spacing / 2),
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              width: isActive ? dotSize * 1.5 : dotSize,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOutCubic,
+              width: isActive ? dotSize * 2.5 : dotSize,
               height: dotSize,
               decoration: BoxDecoration(
                 color: isActive ? effectiveActiveColor : effectiveInactiveColor,
                 borderRadius: BorderRadius.circular(dotSize / 2),
+                boxShadow: isActive ? [
+                  BoxShadow(
+                    color: effectiveActiveColor.withValues(alpha: 0.4),
+                    blurRadius: 4,
+                    spreadRadius: 1,
+                  )
+                ] : null,
               ),
             ),
           ),

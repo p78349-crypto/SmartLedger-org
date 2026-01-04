@@ -24,7 +24,8 @@ class AppThemeSeedController {
     final rawStyle = prefs.getString(PrefKeys.themeUiStyle);
     uiStyle.value = UIStyle.byId(rawStyle);
 
-    // Initialize last_icon_theme_id to prevent unnecessary restarts on first change
+    // Initialize last_icon_theme_id to prevent unnecessary restarts on
+    // first change
     if (prefs.getString('last_icon_theme_id') == null) {
       final isFemale = ThemePresets.female.any((p) => p.id == presetId.value);
       final iconThemeId = isFemale ? 'light' : 'dark';

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:smart_ledger/models/asset.dart';
-import 'package:smart_ledger/screens/asset_list_screen.dart';
 import 'package:smart_ledger/services/asset_service.dart';
 import 'package:smart_ledger/utils/date_formats.dart';
 import 'package:smart_ledger/utils/utils.dart';
+import 'package:smart_ledger/widgets/smart_input_field.dart';
 
 class AssetInputScreen extends StatefulWidget {
   final String accountName;
@@ -313,102 +313,51 @@ class _AssetInputScreenState extends State<AssetInputScreen> {
                     key: _formKey,
                     child: Column(
                       children: [
-                        // 자산 카테고리 선택
-                        Card(
-                          elevation: 2,
-                          child: Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '자산 카테고리',
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                        _buildSectionHeader('자산 카테고리'),
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: AssetCategory.values.map((category) {
+                              final isSelected = _selectedCategory == category;
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 4,
                                 ),
-                                const SizedBox(height: 8),
-                                SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  child: Center(
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: AssetCategory.values.map((
-                                        category,
-                                      ) {
-                                        final isSelected =
-                                            _selectedCategory == category;
-                                        final labelColor = isSelected
-                                            ? theme
-                                                  .colorScheme
-                                                  .onPrimaryContainer
-                                            : theme.colorScheme.onSurface;
-                                        final selectedChipColor = theme
-                                            .colorScheme
-                                            .primaryContainer
-                                            .withValues(alpha: 0.35);
-                                        return Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 3,
-                                          ),
-                                          child: ChoiceChip(
-                                            selected: isSelected,
-                                            label: Text(
-                                              '${category.emoji} '
-                                              '${category.label}',
-                                              style: theme.textTheme.bodyMedium
-                                                  ?.copyWith(
-                                                    fontWeight: isSelected
-                                                        ? FontWeight.bold
-                                                        : FontWeight.normal,
-                                                    color: labelColor,
-                                                  ),
-                                            ),
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 6,
-                                              vertical: 4,
-                                            ),
-                                            backgroundColor: theme
-                                                .colorScheme
-                                                .surfaceContainerHighest,
-                                            selectedColor: selectedChipColor,
-                                            materialTapTargetSize:
-                                                MaterialTapTargetSize
-                                                    .shrinkWrap,
-                                            onSelected: (selected) {
-                                              setState(() {
-                                                _selectedCategory = category;
-                                              });
-                                            },
-                                          ),
-                                        );
-                                      }).toList(),
+                                child: ChoiceChip(
+                                  selected: isSelected,
+                                  label: Text(
+                                    '${category.emoji} ${category.label}',
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      fontWeight: isSelected
+                                          ? FontWeight.bold
+                                          : FontWeight.normal,
                                     ),
                                   ),
+                                  onSelected: (selected) {
+                                    setState(() {
+                                      _selectedCategory = category;
+                                    });
+                                  },
                                 ),
-                              ],
-                            ),
+                              );
+                            }).toList(),
                           ),
                         ),
-                        const SizedBox(height: 16),
-                        TextFormField(
+
+                        _buildSectionHeader('기본 정보'),
+                        SmartInputField(
                           controller: _nameController,
-                          decoration: const InputDecoration(
-                            labelText: '자산명',
-                            prefixIcon: Icon(Icons.label),
-                            border: OutlineInputBorder(),
-                          ),
+                          label: '자산명',
+                          prefixIcon: const Icon(Icons.label),
                           validator: (v) =>
                               Validators.required(v, fieldName: '자산명'),
                         ),
-                        const SizedBox(height: 16),
-                        TextFormField(
+                        const SizedBox(height: 12),
+                        SmartInputField(
                           controller: _amountController,
-                          decoration: const InputDecoration(
-                            labelText: '금액',
-                            prefixIcon: Icon(Icons.attach_money),
-                            border: OutlineInputBorder(),
-                          ),
+                          label: '금액',
+                          prefixIcon: const Icon(Icons.attach_money),
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
                           ),
@@ -416,15 +365,13 @@ class _AssetInputScreenState extends State<AssetInputScreen> {
                           validator: (v) =>
                               Validators.positiveNumber(v, fieldName: '금액'),
                         ),
-                        const SizedBox(height: 16),
-                        TextFormField(
+
+                        _buildSectionHeader('수익 및 목표'),
+                        SmartInputField(
                           controller: _expectedAnnualRateController,
-                          decoration: const InputDecoration(
-                            labelText: '기대수익률(연 % · 선택)',
-                            prefixIcon: Icon(Icons.percent),
-                            helperText: '예: 예금 3, 주식 7, 코인 0~',
-                            border: OutlineInputBorder(),
-                          ),
+                          label: '기대수익률(연 % · 선택)',
+                          prefixIcon: const Icon(Icons.percent),
+                          hint: '예: 예금 3, 주식 7, 코인 0~',
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
                           ),
@@ -438,30 +385,23 @@ class _AssetInputScreenState extends State<AssetInputScreen> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: 16),
-                        // ✅ 원가 필드 (손익 추적용)
-                        TextFormField(
+                        const SizedBox(height: 12),
+                        SmartInputField(
                           controller: _costBasisController,
-                          decoration: const InputDecoration(
-                            labelText: '원가 (선택사항)',
-                            prefixIcon: Icon(Icons.history),
-                            helperText: '손익 추적을 위해 원래 투입한 금액을 입력하세요',
-                            border: OutlineInputBorder(),
-                          ),
+                          label: '원가 (선택사항)',
+                          prefixIcon: const Icon(Icons.history),
+                          hint: '손익 추적을 위해 원래 투입한 금액을 입력하세요',
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
                           ),
                           inputFormatters: [CurrencyInputFormatter()],
                         ),
-                        const SizedBox(height: 16),
-                        TextFormField(
+                        const SizedBox(height: 12),
+                        SmartInputField(
                           controller: _ratioController,
-                          decoration: const InputDecoration(
-                            labelText: '목표 배분 비율 (%)',
-                            prefixIcon: Icon(Icons.percent),
-                            helperText: '예: 30 (선택사항)',
-                            border: OutlineInputBorder(),
-                          ),
+                          label: '목표 배분 비율 (%)',
+                          prefixIcon: const Icon(Icons.percent),
+                          hint: '예: 30 (선택사항)',
                           keyboardType: TextInputType.number,
                           validator: (v) {
                             if (v == null || v.isEmpty) return null;
@@ -472,13 +412,19 @@ class _AssetInputScreenState extends State<AssetInputScreen> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: 16),
-                        // 투자 목표액 입력
+
                         if (_selectedCategory == AssetCategory.crypto) ...[
+                          const SizedBox(height: 12),
                           Card(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.surfaceContainerLow,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              side: BorderSide(
+                                color: theme.colorScheme.outlineVariant
+                                    .withValues(alpha: 0.5),
+                              ),
+                            ),
+                            color: theme.colorScheme.surfaceContainerLow,
                             child: Padding(
                               padding: const EdgeInsets.all(12.0),
                               child: Column(
@@ -486,21 +432,25 @@ class _AssetInputScreenState extends State<AssetInputScreen> {
                                 children: [
                                   Row(
                                     children: [
-                                      const Icon(Icons.flag),
+                                      Icon(
+                                        Icons.flag,
+                                        size: 20,
+                                        color: theme.colorScheme.primary,
+                                      ),
                                       const SizedBox(width: 8),
-                                      const Text(
+                                      Text(
                                         '투자 목표 설정',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 14,
-                                        ),
+                                        style: theme.textTheme.labelLarge
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                       ),
                                       const Spacer(),
-                                      Checkbox(
+                                      Switch(
                                         value: _isInvestment,
                                         onChanged: (value) {
                                           setState(() {
-                                            _isInvestment = value ?? false;
+                                            _isInvestment = value;
                                           });
                                         },
                                       ),
@@ -508,14 +458,11 @@ class _AssetInputScreenState extends State<AssetInputScreen> {
                                   ),
                                   if (_isInvestment) ...[
                                     const SizedBox(height: 8),
-                                    TextFormField(
+                                    SmartInputField(
                                       controller: _targetAmountController,
-                                      decoration: const InputDecoration(
-                                        labelText: '목표액 (도달 시 자동 전환)',
-                                        prefixIcon: Icon(Icons.flag),
-                                        helperText: '목표액에 도달하면 자동으로 자산으로 전환됩니다',
-                                        border: OutlineInputBorder(),
-                                      ),
+                                      label: '목표액 (도달 시 자동 전환)',
+                                      prefixIcon: const Icon(Icons.flag),
+                                      hint: '목표액에 도달하면 자동으로 자산으로 전환됩니다',
                                       keyboardType:
                                           const TextInputType.numberWithOptions(
                                             decimal: true,
@@ -539,21 +486,18 @@ class _AssetInputScreenState extends State<AssetInputScreen> {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 16),
                         ],
-                        TextFormField(
+
+                        _buildSectionHeader('메모 및 날짜'),
+                        SmartInputField(
                           controller: _memoController,
-                          decoration: const InputDecoration(
-                            labelText: '메모 (선택사항)',
-                            prefixIcon: Icon(Icons.note),
-                            border: OutlineInputBorder(),
-                          ),
+                          label: '메모 (선택사항)',
+                          prefixIcon: const Icon(Icons.note),
                           textInputAction: TextInputAction.done,
                           onFieldSubmitted: (_) => _submit(),
                           maxLines: 3,
-                          minLines: 2,
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 12),
                         InkWell(
                           onTap: () async {
                             final picked = await showDatePicker(
@@ -566,78 +510,49 @@ class _AssetInputScreenState extends State<AssetInputScreen> {
                               setState(() => _assetDate = picked);
                             }
                           },
+                          borderRadius: BorderRadius.circular(12),
                           child: InputDecorator(
                             decoration: const InputDecoration(
                               labelText: '날짜',
                               prefixIcon: Icon(Icons.calendar_today),
-                              border: OutlineInputBorder(),
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(DateFormats.yMd.format(_assetDate)),
-                                const Icon(Icons.edit_calendar),
+                                Text(
+                                  DateFormats.yMd.format(_assetDate),
+                                  style: theme.textTheme.bodyLarge,
+                                ),
+                                Icon(
+                                  Icons.edit_calendar,
+                                  size: 20,
+                                  color: theme.colorScheme.primary,
+                                ),
                               ],
                             ),
                           ),
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 32),
                         Row(
                           children: [
                             Expanded(
-                              child: ElevatedButton(
+                              child: FilledButton.icon(
                                 onPressed: _submit,
-                                style: ElevatedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 12,
-                                  ),
-                                  backgroundColor: Theme.of(
-                                    context,
-                                  ).colorScheme.primary,
+                                icon: Icon(
+                                  _isEdit ? Icons.save : Icons.add_task,
                                 ),
-                                child: Text(_isEdit ? '💾 수정' : '💾 저장'),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: OutlinedButton(
-                                onPressed: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (_) => AssetListScreen(
-                                        accountName: widget.accountName,
-                                      ),
-                                    ),
-                                  );
-                                },
-                                style: OutlinedButton.styleFrom(
+                                label: Text(_isEdit ? '수정 완료' : '자산 저장'),
+                                style: FilledButton.styleFrom(
                                   padding: const EdgeInsets.symmetric(
-                                    vertical: 12,
+                                    vertical: 16,
                                   ),
                                 ),
-                                child: const Text('📋 리스트'),
                               ),
                             ),
                           ],
                         ),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                  OutlinedButton.icon(
-                    icon: const Icon(Icons.list_alt),
-                    label: const Text('자산 목록 보기'),
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: const Size.fromHeight(52),
-                    ),
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              AssetListScreen(accountName: widget.accountName),
-                        ),
-                      );
-                    },
                   ),
                 ],
               ),
@@ -654,6 +569,31 @@ class _AssetInputScreenState extends State<AssetInputScreen> {
 
   String _targetAmountLabel(num amount) {
     return '목표액: ${CurrencyFormatter.format(amount)}';
+  }
+
+  Widget _buildSectionHeader(String title) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 24, 4, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: theme.textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.primary,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Divider(
+            thickness: 1,
+            color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+          ),
+        ],
+      ),
+    );
   }
 }
 

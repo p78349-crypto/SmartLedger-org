@@ -147,11 +147,47 @@ class MyApp extends StatelessWidget {
         AppLocaleController.instance.locale,
       ]),
       builder: (context, _) {
-        final themeMode = AppThemeModeController.instance.themeMode.value;
+        final appThemeMode = AppThemeModeController.instance.themeMode.value;
         final presetId = AppThemeSeedController.instance.presetId.value;
         final uiStyle = AppThemeSeedController.instance.uiStyle.value;
-        final preset = ThemePresets.byId(presetId);
         final localeOverride = AppLocaleController.instance.locale.value;
+
+        // Determine actual ThemeMode and Preset
+        ThemeMode themeMode;
+        ThemePreset preset;
+
+        switch (appThemeMode) {
+          case AppThemeMode.system:
+            themeMode = ThemeMode.system;
+            preset = ThemePresets.byId(presetId);
+            break;
+          case AppThemeMode.light:
+            themeMode = ThemeMode.light;
+            preset = ThemePresets.byId(presetId);
+            break;
+          case AppThemeMode.dark:
+            themeMode = ThemeMode.dark;
+            preset = ThemePresets.byId(presetId);
+            break;
+          case AppThemeMode.femaleDark:
+            themeMode = ThemeMode.dark;
+            // If current preset is not female intense, pick a default one
+            if (!ThemePresets.female.any((p) => p.id == presetId && p.id.contains('intense'))) {
+              preset = ThemePresets.female.firstWhere((p) => p.id.contains('intense'));
+            } else {
+              preset = ThemePresets.byId(presetId);
+            }
+            break;
+          case AppThemeMode.maleDark:
+            themeMode = ThemeMode.dark;
+            // If current preset is not male intense, pick a default one
+            if (!ThemePresets.male.any((p) => p.id == presetId && p.id.contains('intense'))) {
+              preset = ThemePresets.male.firstWhere((p) => p.id.contains('intense'));
+            } else {
+              preset = ThemePresets.byId(presetId);
+            }
+            break;
+        }
 
         // Keep Intl default locale in sync for any legacy Intl usages.
         final systemLocale = PlatformDispatcher.instance.locale;

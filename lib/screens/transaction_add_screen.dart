@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:io';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,6 +15,7 @@ import 'package:smart_ledger/services/category_usage_service.dart';
 import 'package:smart_ledger/services/recent_input_service.dart';
 import 'package:smart_ledger/services/transaction_service.dart';
 import 'package:smart_ledger/services/user_pref_service.dart';
+import 'package:smart_ledger/theme/app_theme_seed_controller.dart';
 import 'package:smart_ledger/utils/category_definitions.dart';
 import 'package:smart_ledger/utils/currency_formatter.dart';
 import 'package:smart_ledger/utils/date_formatter.dart';
@@ -20,7 +23,9 @@ import 'package:smart_ledger/utils/icon_catalog.dart';
 import 'package:smart_ledger/utils/income_category_definitions.dart';
 import 'package:smart_ledger/utils/snackbar_utils.dart';
 import 'package:smart_ledger/utils/store_memo_utils.dart';
+import 'package:smart_ledger/widgets/background_widget.dart';
 import 'package:smart_ledger/widgets/smart_input_field.dart';
+import 'package:smart_ledger/widgets/special_backgrounds.dart';
 
 // 최근 결제수단/메모 저장 키 및 최대 개수
 const String _recentDescriptionsKey = 'recent_descriptions';
@@ -89,36 +94,123 @@ class _TransactionAddScreenState extends State<TransactionAddScreen> {
           navigator.pop();
         }
       },
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text('$titlePrefix - ${widget.accountName}'),
-          actions: [
-            IconButton(
-              tooltip: '입력값 되돌리기',
-              icon: const Icon(IconCatalog.restartAlt),
-              onPressed: () =>
-                  _formStateKey.currentState?.promptRevertToInitial(),
+      child: ListenableBuilder(
+        listenable: Listenable.merge([
+          BackgroundHelper.colorNotifier,
+          BackgroundHelper.typeNotifier,
+          BackgroundHelper.imagePathNotifier,
+          BackgroundHelper.blurNotifier,
+          AppThemeSeedController.instance.presetId,
+        ]),
+        builder: (context, _) {
+          final bgColor = BackgroundHelper.colorNotifier.value;
+          final bgType = BackgroundHelper.typeNotifier.value;
+          final bgImagePath = BackgroundHelper.imagePathNotifier.value;
+          final bgBlur = BackgroundHelper.blurNotifier.value;
+          final presetId = AppThemeSeedController.instance.presetId.value;
+          final theme = Theme.of(context);
+
+          // In dark mode, if the background color is still the default white,
+          // we should use the theme's scaffold background color instead.
+          Color effectiveBgColor = bgColor;
+          final isDefaultWhite = bgColor.toARGB32() == 0xFFFFFFFF ||
+              bgColor.toARGB32() == 0xffffffff;
+
+          if (theme.brightness == Brightness.dark && isDefaultWhite) {
+            effectiveBgColor = theme.scaffoldBackgroundColor;
+          }
+
+          return Scaffold(
+            backgroundColor: effectiveBgColor,
+            extendBodyBehindAppBar: bgType == 'image' && bgImagePath != null,
+            appBar: AppBar(
+              title: Text('$titlePrefix - ${widget.accountName}'),
+              backgroundColor:
+                  bgType == 'image' && bgImagePath != null
+                      ? Colors.transparent
+                      : null,
+              elevation: 0,
+              actions: [
+                IconButton(
+                  tooltip: '입력값 되돌리기',
+                  icon: const Icon(IconCatalog.restartAlt),
+                  onPressed: () =>
+                      _formStateKey.currentState?.promptRevertToInitial(),
+                ),
+              ],
             ),
-          ],
-        ),
-        body: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: 16.0,
-            vertical:
-                MediaQuery.of(context).orientation == Orientation.landscape
-                ? 8.0
-                : 16.0,
-          ),
-          child: TransactionAddForm(
-            key: _formStateKey,
-            accountName: widget.accountName,
-            initialTransaction: widget.initialTransaction,
-            learnCategoryHintFromDescription:
-                widget.learnCategoryHintFromDescription,
-            confirmBeforeSave: widget.confirmBeforeSave,
-            treatAsNew: widget.treatAsNew,
-          ),
-        ),
+            body: Stack(
+              children: [
+                // 1. Base Background (Color or Image)
+                Positioned.fill(
+                  child: Builder(
+                    builder: (context) {
+                      if (bgType == 'image' && bgImagePath != null) {
+                        return Image.file(
+                          File(bgImagePath),
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              ColoredBox(color: effectiveBgColor),
+                        );
+                      }
+
+                      if (presetId == 'midnight_gold') {
+                        return MidnightGoldBackground(
+                          baseColor: effectiveBgColor,
+                        );
+                      } else if (presetId == 'starlight_navy') {
+                        return StarlightNavyBackground(
+                          baseColor: effectiveBgColor,
+                        );
+                      }
+                      return ColoredBox(color: effectiveBgColor);
+                    },
+                  ),
+                ),
+
+                // 2. Blur Effect (if image)
+                if (bgType == 'image' && bgImagePath != null && bgBlur > 0)
+                  Positioned.fill(
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: bgBlur, sigmaY: bgBlur),
+                      child: const ColoredBox(color: Colors.transparent),
+                    ),
+                  ),
+
+                // 3. Dark Overlay for images to ensure readability
+                if (bgType == 'image' && bgImagePath != null)
+                  Positioned.fill(
+                    child: ColoredBox(
+                      color: Colors.black.withValues(alpha: 0.2),
+                    ),
+                  ),
+
+                // 4. Content
+                SafeArea(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 16.0,
+                      vertical:
+                          MediaQuery.of(context).orientation ==
+                                  Orientation.landscape
+                              ? 8.0
+                              : 16.0,
+                    ),
+                    child: TransactionAddForm(
+                      key: _formStateKey,
+                      accountName: widget.accountName,
+                      initialTransaction: widget.initialTransaction,
+                      learnCategoryHintFromDescription:
+                          widget.learnCategoryHintFromDescription,
+                      confirmBeforeSave: widget.confirmBeforeSave,
+                      treatAsNew: widget.treatAsNew,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
@@ -1382,23 +1474,37 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
 
   /// 저장 + 저장후계속 버튼
   Widget _buildSaveButtons() {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        FloatingActionButton.small(
-          heroTag: 'save_continue',
-          onPressed: _saveAndContinue,
-          tooltip: '저장 후 계속',
-          child: const Icon(IconCatalog.arrowForward),
+        Transform.scale(
+          scale: 0.8,
+          child: FloatingActionButton.small(
+            heroTag: 'save_continue',
+            onPressed: _saveAndContinue,
+            tooltip: '저장 후 계속',
+            backgroundColor: scheme.secondaryContainer,
+            foregroundColor: scheme.onSecondaryContainer,
+            child: const Icon(IconCatalog.arrowForward),
+          ),
         ),
-        const SizedBox(width: 16),
-        FloatingActionButton(
-          heroTag: 'save',
-          onPressed: _saveTransaction,
-          tooltip: '저장',
-          child: const Text(
-            'ENT',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        const SizedBox(width: 8),
+        Transform.scale(
+          scale: 0.7,
+          child: FloatingActionButton.extended(
+            heroTag: 'save',
+            onPressed: _saveTransaction,
+            tooltip: '저장',
+            backgroundColor: scheme.primary,
+            foregroundColor: scheme.onPrimary,
+            icon: const Icon(IconCatalog.check, size: 18),
+            label: const Text(
+              '저장 (ENT)',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            ),
           ),
         ),
       ],
@@ -1526,16 +1632,15 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
     final theme = Theme.of(context);
     return InkWell(
       onTap: _pickTransactionDate,
-      borderRadius: BorderRadius.circular(4),
+      borderRadius: BorderRadius.circular(16),
       child: InputDecorator(
         decoration: const InputDecoration(
           labelText: '예금일',
-          border: OutlineInputBorder(),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(formatted),
+            Text(formatted, style: theme.textTheme.bodyLarge),
             Icon(
               IconCatalog.calendarTodayOutlined,
               color: theme.colorScheme.primary,
@@ -1766,7 +1871,7 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('카테고리', style: theme.textTheme.labelLarge),
+            Text('카테고리', style: theme.textTheme.labelMedium),
             if (isIncome)
               TextButton.icon(
                 onPressed: () {
@@ -1796,7 +1901,17 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
                 return SizedBox(
                   width: width3,
                   child: ChoiceChip(
-                    label: Text(cat),
+                    label: Center(
+                      child: Text(
+                        cat,
+                        style: TextStyle(
+                          fontWeight:
+                              isSelected ? FontWeight.bold : FontWeight.w500,
+                          fontSize: 12.5,
+                          letterSpacing: -0.2,
+                        ),
+                      ),
+                    ),
                     selected: isSelected,
                     onSelected: (selected) {
                       if (!selected) return;
@@ -1810,11 +1925,23 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
                     },
                     showCheckmark: false,
                     visualDensity: VisualDensity.compact,
+                    selectedColor: theme.colorScheme.primary,
                     labelStyle: TextStyle(
-                      fontSize: 13,
-                      fontWeight: isSelected
-                          ? FontWeight.bold
-                          : FontWeight.normal,
+                      fontSize: 12.5,
+                      letterSpacing: -0.2,
+                      color: isSelected
+                          ? theme.colorScheme.onPrimary
+                          : theme.colorScheme.onSurface,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(
+                        color: isSelected
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.outlineVariant,
+                        width: isSelected ? 1.5 : 1.0,
+                      ),
                     ),
                   ),
                 );
@@ -1846,9 +1973,22 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
                 },
                 showCheckmark: false,
                 visualDensity: VisualDensity.compact,
+                selectedColor: theme.colorScheme.secondary,
                 labelStyle: TextStyle(
                   fontSize: 12,
+                  color: isSelected
+                      ? theme.colorScheme.onSecondary
+                      : theme.colorScheme.onSurface,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(
+                    color: isSelected
+                        ? theme.colorScheme.secondary
+                        : theme.colorScheme.outlineVariant,
+                    width: isSelected ? 1.5 : 1.0,
+                  ),
                 ),
               );
             }).toList(),

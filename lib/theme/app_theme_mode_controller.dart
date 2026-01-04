@@ -2,13 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smart_ledger/utils/pref_keys.dart';
 
+enum AppThemeMode {
+  system,
+  light,
+  dark,
+  femaleDark,
+  maleDark,
+}
+
 class AppThemeModeController {
   AppThemeModeController._();
 
   static final AppThemeModeController instance = AppThemeModeController._();
 
-  final ValueNotifier<ThemeMode> themeMode = ValueNotifier<ThemeMode>(
-    ThemeMode.system,
+  final ValueNotifier<AppThemeMode> themeMode = ValueNotifier<AppThemeMode>(
+    AppThemeMode.system,
   );
 
   Future<void> loadFromPrefs(SharedPreferences prefs) async {
@@ -16,7 +24,7 @@ class AppThemeModeController {
     themeMode.value = _parseThemeMode(raw);
   }
 
-  Future<void> setThemeMode(ThemeMode mode) async {
+  Future<void> setThemeMode(AppThemeMode mode) async {
     if (themeMode.value == mode) return;
     themeMode.value = mode;
 
@@ -24,25 +32,33 @@ class AppThemeModeController {
     await prefs.setString(PrefKeys.theme, _encodeThemeMode(mode));
   }
 
-  static ThemeMode _parseThemeMode(String? raw) {
+  static AppThemeMode _parseThemeMode(String? raw) {
     switch (raw) {
       case 'light':
-        return ThemeMode.light;
+        return AppThemeMode.light;
       case 'dark':
-        return ThemeMode.dark;
+        return AppThemeMode.dark;
+      case 'female_dark':
+        return AppThemeMode.femaleDark;
+      case 'male_dark':
+        return AppThemeMode.maleDark;
       case 'system':
     }
 
-    return ThemeMode.system;
+    return AppThemeMode.system;
   }
 
-  static String _encodeThemeMode(ThemeMode mode) {
+  static String _encodeThemeMode(AppThemeMode mode) {
     switch (mode) {
-      case ThemeMode.light:
+      case AppThemeMode.light:
         return 'light';
-      case ThemeMode.dark:
+      case AppThemeMode.dark:
         return 'dark';
-      case ThemeMode.system:
+      case AppThemeMode.femaleDark:
+        return 'female_dark';
+      case AppThemeMode.maleDark:
+        return 'male_dark';
+      case AppThemeMode.system:
         return 'system';
     }
   }

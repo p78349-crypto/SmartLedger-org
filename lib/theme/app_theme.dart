@@ -26,7 +26,8 @@ class AppTheme {
     Color? backgroundColor,
   }) {
     final cacheKey =
-        '${seedColor.toARGB32()}_${brightness.name}_${uiStyle.name}_${backgroundColor?.toARGB32()}';
+        '${seedColor.toARGB32()}_${brightness.name}_'
+        '${uiStyle.name}_${backgroundColor?.toARGB32()}';
     if (_themeCache.containsKey(cacheKey)) {
       return _themeCache[cacheKey]!;
     }
@@ -104,9 +105,7 @@ class AppTheme {
           letterSpacing: -0.5,
         ),
       ),
-      iconTheme: IconThemeData(
-        color: scheme.onSurface,
-      ),
+      iconTheme: IconThemeData(color: scheme.onSurface),
       dividerTheme: DividerThemeData(
         color: brightness == Brightness.dark
             ? scheme.outlineVariant.withValues(alpha: 0.5)
@@ -131,27 +130,20 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor:
-            brightness == Brightness.light
-                ? scheme.surfaceContainerLow
-                : scheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        fillColor: brightness == Brightness.light
+            ? scheme.surfaceContainerLow
+            : scheme.surfaceContainerHighest.withValues(alpha: 0.5),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(borderRadius / 1.5),
-          borderSide:
-              brightness == Brightness.dark
-                  ? BorderSide(
-                    color: scheme.outlineVariant.withValues(alpha: 0.4),
-                  )
-                  : BorderSide.none,
+          borderSide: brightness == Brightness.dark
+              ? BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.4))
+              : BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(borderRadius / 1.5),
-          borderSide:
-              brightness == Brightness.dark
-                  ? BorderSide(
-                    color: scheme.outlineVariant.withValues(alpha: 0.4),
-                  )
-                  : BorderSide.none,
+          borderSide: brightness == Brightness.dark
+              ? BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.4))
+              : BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(borderRadius / 1.5),

@@ -17,8 +17,8 @@ class PageIndicator extends StatelessWidget {
     this.onPageTap,
     this.activeColor,
     this.inactiveColor,
-    this.dotSize = 5.0,
-    this.spacing = 6.0,
+    this.dotSize = 8.0,
+    this.spacing = 8.0,
   });
 
   @override
@@ -27,7 +27,7 @@ class PageIndicator extends StatelessWidget {
     final scheme = theme.colorScheme;
     final effectiveActiveColor = activeColor ?? scheme.primary;
     final effectiveInactiveColor =
-        inactiveColor ?? scheme.onSurfaceVariant.withValues(alpha: 0.3);
+        inactiveColor ?? scheme.onSurfaceVariant.withValues(alpha: 0.4);
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -40,18 +40,11 @@ class PageIndicator extends StatelessWidget {
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeOutCubic,
-              width: isActive ? dotSize * 2.5 : dotSize,
+              width: dotSize,
               height: dotSize,
               decoration: BoxDecoration(
                 color: isActive ? effectiveActiveColor : effectiveInactiveColor,
                 borderRadius: BorderRadius.circular(dotSize / 2),
-                boxShadow: isActive ? [
-                  BoxShadow(
-                    color: effectiveActiveColor.withValues(alpha: 0.4),
-                    blurRadius: 4,
-                    spreadRadius: 1,
-                  )
-                ] : null,
               ),
             ),
           ),

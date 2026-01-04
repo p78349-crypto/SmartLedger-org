@@ -992,9 +992,9 @@ class _ShoppingCartQuickTransactionScreenState
                         cardBenefit == null
                             ? ''
                             : (cardBenefit > 0
-                                  ? '현재 기준 혜택(제시-실결제): '
-                                      '${CurrencyFormatter.format(cardBenefit)}'
-                                  : '현재 기준 혜택: 0원'),
+                                ? '현재 기준 혜택(제시-실결제): '
+                                    '${CurrencyFormatter.format(cardBenefit)}'
+                                : '현재 기준 혜택: 0원'),
                         style: Theme.of(context).textTheme.bodySmall,
                       )
                     else

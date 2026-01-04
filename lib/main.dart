@@ -83,18 +83,14 @@ Future<void> main() async {
       // Best-effort; non-destructive.
       try {
         // One-off migration: move asset-related icons into the asset page.
-        await MainPageMigration.moveAssetIconsToPageForAllAccounts(
-          
-        );
+        await MainPageMigration.moveAssetIconsToPageForAllAccounts();
       } catch (_) {
         // ignore
       }
       // Maintenance: if compiled with `-DMAINTENANCE_RECREATE_PAGES=true`
       // then list page-related SharedPreferences keys and recreate pages
       // with a fresh 15 empty pages (clearing existing prefs first).
-      const doMaintenance = bool.fromEnvironment(
-        'MAINTENANCE_RECREATE_PAGES',
-      );
+      const doMaintenance = bool.fromEnvironment('MAINTENANCE_RECREATE_PAGES');
       if (doMaintenance) {
         try {
           final keys = await MainFeatureIconCatalog.listPagePrefKeys();

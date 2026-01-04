@@ -770,15 +770,9 @@ class _TrendChartCard extends StatelessWidget {
             gridData: const FlGridData(show: false),
             borderData: FlBorderData(show: false),
             titlesData: FlTitlesData(
-              topTitles: const AxisTitles(
-                
-              ),
-              rightTitles: const AxisTitles(
-                
-              ),
-              leftTitles: const AxisTitles(
-                
-              ),
+              topTitles: const AxisTitles(),
+              rightTitles: const AxisTitles(),
+              leftTitles: const AxisTitles(),
               bottomTitles: AxisTitles(
                 sideTitles: SideTitles(
                   showTitles: true,

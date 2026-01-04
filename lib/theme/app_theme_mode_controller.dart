@@ -49,26 +49,30 @@ class AppThemeModeController {
         break;
       case AppThemeMode.femaleDark:
       case AppThemeMode.femaleLight:
-        targetMode =
-            mode == AppThemeMode.femaleDark ? ThemeMode.dark : ThemeMode.light;
+        targetMode = mode == AppThemeMode.femaleDark
+            ? ThemeMode.dark
+            : ThemeMode.light;
         if (!ThemePresets.female.any(
           (p) => p.id == currentPresetId && p.id.contains('intense'),
         )) {
-          targetPreset =
-              ThemePresets.female.firstWhere((p) => p.id.contains('intense'));
+          targetPreset = ThemePresets.female.firstWhere(
+            (p) => p.id.contains('intense'),
+          );
         } else {
           targetPreset = ThemePresets.byId(currentPresetId);
         }
         break;
       case AppThemeMode.maleDark:
       case AppThemeMode.maleLight:
-        targetMode =
-            mode == AppThemeMode.maleDark ? ThemeMode.dark : ThemeMode.light;
+        targetMode = mode == AppThemeMode.maleDark
+            ? ThemeMode.dark
+            : ThemeMode.light;
         if (!ThemePresets.male.any(
           (p) => p.id == currentPresetId && p.id.contains('intense'),
         )) {
-          targetPreset =
-              ThemePresets.male.firstWhere((p) => p.id.contains('intense'));
+          targetPreset = ThemePresets.male.firstWhere(
+            (p) => p.id.contains('intense'),
+          );
         } else {
           targetPreset = ThemePresets.byId(currentPresetId);
         }

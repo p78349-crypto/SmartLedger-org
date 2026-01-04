@@ -64,9 +64,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         final events = _groupTransactionsByDay(transactions);
 
         return Scaffold(
-          appBar: AppBar(
-            title: Text('${widget.accountName} 달력'),
-          ),
+          appBar: AppBar(title: Text('${widget.accountName} 달력')),
           body: _buildCalendar(context, events),
         );
       },

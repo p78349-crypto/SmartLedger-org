@@ -50,7 +50,8 @@ class AccountSelectScreen extends StatelessWidget {
         // In dark mode, if the background color is still the default white,
         // we should use the theme's scaffold background color instead.
         Color effectiveBgColor = bgColor;
-        final isDefaultWhite = bgColor.toARGB32() == 0xFFFFFFFF ||
+        final isDefaultWhite =
+            bgColor.toARGB32() == 0xFFFFFFFF ||
             bgColor.toARGB32() == 0xffffffff;
 
         if (theme.brightness == Brightness.dark && isDefaultWhite) {
@@ -62,10 +63,9 @@ class AccountSelectScreen extends StatelessWidget {
           extendBodyBehindAppBar: bgType == 'image' && bgImagePath != null,
           appBar: AppBar(
             title: const Text('기존 계정 선택'),
-            backgroundColor:
-                bgType == 'image' && bgImagePath != null
-                    ? Colors.transparent
-                    : null,
+            backgroundColor: bgType == 'image' && bgImagePath != null
+                ? Colors.transparent
+                : null,
             elevation: 0,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back),
@@ -113,9 +113,7 @@ class AccountSelectScreen extends StatelessWidget {
               // 3. Dark Overlay for images to ensure readability
               if (bgType == 'image' && bgImagePath != null)
                 Positioned.fill(
-                  child: ColoredBox(
-                    color: Colors.black.withValues(alpha: 0.2),
-                  ),
+                  child: ColoredBox(color: Colors.black.withValues(alpha: 0.2)),
                 ),
 
               // 4. Content
@@ -130,13 +128,9 @@ class AccountSelectScreen extends StatelessWidget {
 
                     return ListTile(
                       title: Text(accountName),
-                      trailing:
-                          label == null
-                              ? null
-                              : Text(
-                                label,
-                                style: theme.textTheme.labelMedium,
-                              ),
+                      trailing: label == null
+                          ? null
+                          : Text(label, style: theme.textTheme.labelMedium),
                       onTap: () {
                         final account = accountService.getAccountByName(
                           accountName,

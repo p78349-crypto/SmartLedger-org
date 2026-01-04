@@ -598,14 +598,14 @@ class _SettingsScreenState extends State<SettingsScreen>
                     ),
                   ),
                 Positioned.fill(
-                  child: ColoredBox(
-                    color: Colors.black.withValues(alpha: 0.2),
-                  ),
+                  child: ColoredBox(color: Colors.black.withValues(alpha: 0.2)),
                 ),
               ],
               ListView(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
+                ),
                 children: [
                   _buildSectionHeader(context, '애플리케이션'),
                   _buildSettingsCard(
@@ -629,9 +629,10 @@ class _SettingsScreenState extends State<SettingsScreen>
                     title: '백업 암호화 해지',
                     subtitle:
                         (_backupEncryptionEnabled || _backupTwoFactorEnabled)
-                            ? '상태: 사용 중'
-                            : '상태: 미사용',
-                    enabled: !_isLoading &&
+                        ? '상태: 사용 중'
+                        : '상태: 미사용',
+                    enabled:
+                        !_isLoading &&
                         (_backupEncryptionEnabled || _backupTwoFactorEnabled),
                     onTap: _disableBackupEncryption,
                   ),
@@ -753,9 +754,7 @@ class _SettingsScreenState extends State<SettingsScreen>
         color: scheme.surfaceContainerLow.withValues(alpha: 0.8),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
-          side: BorderSide(
-            color: scheme.outlineVariant.withValues(alpha: 0.5),
-          ),
+          side: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.5)),
         ),
         child: InkWell(
           onTap: enabled ? onTap : null,
@@ -821,9 +820,7 @@ class _SettingsScreenState extends State<SettingsScreen>
       color: scheme.surfaceContainerLow.withValues(alpha: 0.8),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(24),
-        side: BorderSide(
-          color: scheme.outlineVariant.withValues(alpha: 0.5),
-        ),
+        side: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.5)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -858,10 +855,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                 ],
               ),
             ),
-            Switch(
-              value: value,
-              onChanged: onChanged,
-            ),
+            Switch(value: value, onChanged: onChanged),
           ],
         ),
       ),

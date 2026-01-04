@@ -465,9 +465,7 @@ class _FixedCostTabScreenState extends State<FixedCostTabScreen> {
                         helperText: '입력 시 알림 등 일정 관리에 활용할 수 있어요.',
                       ),
                       items: [
-                        const DropdownMenuItem<int?>(
-                          child: Text('선택 안 함'),
-                        ),
+                        const DropdownMenuItem<int?>(child: Text('선택 안 함')),
                         ..._dayOptions.map(
                           (day) => DropdownMenuItem<int?>(
                             value: day,
@@ -488,9 +486,8 @@ class _FixedCostTabScreenState extends State<FixedCostTabScreen> {
                           : PopupMenuButton<String>(
                               icon: const Icon(Icons.history),
                               tooltip: '최근 메모 선택',
-                              onSelected: (value) => setState(
-                                () => _memoController.text = value,
-                              ),
+                              onSelected: (value) =>
+                                  setState(() => _memoController.text = value),
                               itemBuilder: (context) => _recentMemos
                                   .map(
                                     (memo) => PopupMenuItem(
@@ -512,9 +509,7 @@ class _FixedCostTabScreenState extends State<FixedCostTabScreen> {
                         icon: Icon(_isEditing ? Icons.save : Icons.add_task),
                         label: Text(_isEditing ? '수정 완료' : '정기지출 저장'),
                         style: FilledButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 16,
-                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
                       ),
                     ),

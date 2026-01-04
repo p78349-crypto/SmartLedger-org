@@ -131,10 +131,7 @@ class _SavingsPlanFormScreenState extends State<SavingsPlanFormScreen> {
     if (termMonths == null || termMonths <= 0) {
       return '-';
     }
-    final base = DateTime(
-      _startDate.year,
-      _startDate.month + termMonths - 1,
-    );
+    final base = DateTime(_startDate.year, _startDate.month + termMonths - 1);
     final day = _startDate.day;
     final lastDayOfMonth = DateTime(base.year, base.month + 1, 0).day;
     final safeDay = day < 1

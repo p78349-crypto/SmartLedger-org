@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:smart_ledger/navigation/app_routes.dart';
 import 'package:smart_ledger/services/user_pref_service.dart';
-import 'package:smart_ledger/utils/icon_catalog.dart';
 import 'package:smart_ledger/utils/number_formats.dart';
 import 'package:smart_ledger/utils/nutrition_food_knowledge.dart';
 import 'package:smart_ledger/utils/nutrition_report_utils.dart';
@@ -203,32 +202,42 @@ class _NutritionReportScreenState extends State<NutritionReportScreen> {
                 _InfoCard(
                   title: '구매 식재료',
                   child: report.items.isEmpty
-                      ? Text(
-                          '메모에 예시처럼 적으면 자동 분석이 됩니다.\n'
-                          '예) 달고기(1마리 6500-7500원) 당근 3000원 '
-                          '양배추 1000원 팽이 1개 350원',
-                          style: theme.textTheme.bodyMedium,
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '💡 지출 입력 화면의 "메모" 필드에 식재료 정보를 작성하면 자동으로 분석됩니다.',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: theme.colorScheme.primary,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              '예시:\n'
+                              '닭고기(1마리 6500-7500원) 당근 3000원 '
+                              '양배추 1000원 팽이 1개 350원',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
                         )
                       : Column(
                           children: [
                             for (final item in report.items)
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 10),
-                                child: _IngredientRow(
-                                  item: item,
-                                  onTap: () {
-                                    setState(() {
-                                      _foodQuery = item.name;
-                                      _foodSearchController.text = item.name;
-                                      _foodSearchController.selection =
-                                          TextSelection.fromPosition(
-                                            TextPosition(
-                                              offset: item.name.length,
-                                            ),
-                                          );
-                                    });
-                                  },
-                                ),
+                              _IngredientRow(
+                                item: item,
+                                onTap: () {
+                                  setState(() {
+                                    _foodQuery = item.name;
+                                    _foodSearchController.text = item.name;
+                                    _foodSearchController
+                                        .selection = TextSelection.fromPosition(
+                                      TextPosition(offset: item.name.length),
+                                    );
+                                  });
+                                },
                               ),
                           ],
                         ),
@@ -261,9 +270,15 @@ class _NutritionReportScreenState extends State<NutritionReportScreen> {
                 ),
                 const SizedBox(height: 12),
 
-                _InfoCard(
-                  title: '영양학적 최종 판단 요약',
-                  child: _FinalJudgementSummary(items: report.items),
+                const _InfoCard(
+                  title: '요리 준비 가이드(실제 검증됨)',
+                  child: _CookingPreparationGuide(),
+                ),
+                const SizedBox(height: 12),
+
+                const _InfoCard(
+                  title: '식사 후 간단한 후식 조합',
+                  child: _DessertSuggestions(),
                 ),
                 const SizedBox(height: 12),
 
@@ -281,10 +296,17 @@ class _NutritionReportScreenState extends State<NutritionReportScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          Navigator.of(context).pushNamed(AppRoutes.foodExpiry);
+          final ingredients = _report.items.map((e) => e.name).toList();
+          Navigator.of(context).pushNamed(
+            AppRoutes.foodExpiry,
+            arguments: {
+              'initialIngredients': ingredients,
+              'autoUsageMode': true,
+            },
+          );
         },
-        icon: const Icon(IconCatalog.inventory2),
-        label: const Text('식재료 재고 확인'),
+        icon: const Icon(Icons.soup_kitchen),
+        label: const Text('재고 확인 및 요리 시작'),
       ),
     );
   }
@@ -382,39 +404,33 @@ class _FoodSearchResult extends StatelessWidget {
         ),
         const SizedBox(height: 6),
         for (final p in entry.pairings)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 6),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    '• ${p.ingredient} — ${p.why}',
-                    style: theme.textTheme.bodySmall,
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+            margin: const EdgeInsets.only(bottom: 2),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: theme.colorScheme.outlineVariant.withValues(
+                    alpha: 0.3,
                   ),
+                  width: 0.5,
                 ),
-                const SizedBox(width: 8),
-                ElevatedButton(
-                  onPressed: () {
-                    if (onAdd != null) {
-                      onAdd!(p.ingredient);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('"${p.ingredient}"을(를) 쇼핑 목록에 추가했습니다.'),
-                        ),
-                      );
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('쇼핑 화면에서 열면 바로 추가할 수 있어요.'),
-                        ),
-                      );
-                    }
-                  },
-                  child: const Text('추가'),
-                ),
-              ],
+              ),
+            ),
+            child: RichText(
+              text: TextSpan(
+                style: theme.textTheme.bodySmall,
+                children: [
+                  TextSpan(
+                    text: '${p.ingredient}: ',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  TextSpan(text: p.why),
+                ],
+              ),
             ),
           ),
+        const SizedBox(height: 8),
 
         if (entry.quantitySuggestions.isNotEmpty) ...[
           const SizedBox(height: 12),
@@ -426,10 +442,27 @@ class _FoodSearchResult extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           for (final line in entry.quantitySuggestions)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 6),
-              child: Text('• $line', style: theme.textTheme.bodySmall),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              margin: const EdgeInsets.only(bottom: 2),
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: theme.colorScheme.outlineVariant.withValues(
+                      alpha: 0.3,
+                    ),
+                    width: 0.5,
+                  ),
+                ),
+              ),
+              child: Text(
+                line,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
+          const SizedBox(height: 8),
           Text(
             '참고: 인원/레시피/취향에 따라 달라질 수 있어요.',
             style: theme.textTheme.bodySmall?.copyWith(
@@ -461,23 +494,34 @@ class _IngredientRow extends StatelessWidget {
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+      borderRadius: BorderRadius.circular(4),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        margin: const EdgeInsets.only(bottom: 2),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(
+              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+              width: 0.5,
+            ),
+          ),
+        ),
         child: Row(
           children: [
             Expanded(
               child: Text(
                 item.name,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
                 ),
               ),
             ),
             Text(
               priceLabel,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w700,
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.primary,
               ),
             ),
           ],
@@ -543,77 +587,247 @@ class _NutritionHighlights extends StatelessWidget {
   }
 }
 
-class _FinalJudgementSummary extends StatelessWidget {
-  const _FinalJudgementSummary({required this.items});
-
-  final List<NutritionItem> items;
-
-  bool _hasAny(List<String> keys) {
-    for (final k in keys) {
-      if (items.any((e) => e.name.contains(k))) return true;
-    }
-    return false;
-  }
+class _CookingPreparationGuide extends StatelessWidget {
+  const _CookingPreparationGuide();
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final hasProtein = _hasAny(<String>[
-      '닭',
-      '달고기',
-      '생선',
-      '연어',
-      '소고기',
-      '돼지고기',
-      '두부',
-      '계란',
-    ]);
-    final hasVeg = _hasAny(<String>[
-      '양배추',
-      '당근',
-      '양파',
-      '호박',
-      '가지',
-      '브로콜리',
-      '시금치',
-      '토마토',
-    ]);
-    final hasMushroom = _hasAny(<String>['표고', '느타리', '팽이', '버섯']);
+    final sections = [
+      {
+        'title': '한 끼 필요 재료 (5L 냄비 1회 기준)',
+        'items': [
+          '5L 냄비 1회에 들어가는 양이 6-7끼 분량이므로,',
+          '기본: 닭고기/돼지고기 약 114g (800g ÷ 7끼)',
+          '양파 약 1/2개, 당근 약 1/3-1/2개',
+          '가지 약 1/3-1/2개, 호박 약 1/4개',
+          '감자 약 1/2개, 양배추 약 30g',
+          '버섯류 (표고 약 1/3개, 느타리 + 팽이 약간)',
+          '+ 국물(육수 + 된장) 약 350-400ml',
+        ],
+      },
+      {
+        'title': '구매 시 권장량 (여러 끼 고려)',
+        'items': [
+          '닭고기/돼지고기: 800g (약 4끼 분량)',
+          '양배추: 1/4통 (약 3-4끼)',
+          '양파: 3개 (약 3끼)',
+          '당근 1봉지(4개): 약 4끼 (2개/끼)',
+          '가지 1팩(3개): 약 3끼 (1개/끼)',
+          '호박 1팩(2개): 약 2끼 (1개/끼)',
+          '감자 1팩(5개): 약 5끼 (1개/끼)',
+          '표고버섯 1팩(3개): 약 3끼 (1개/끼)',
+          '팽이버섯 1봉지: 약 1-2끼',
+          '느타리버섯 1봉지: 약 2-3끼',
+          '소계: 약 20,000원으로 6-7끼 가능 (양념류 별도)',
+        ],
+      },
+      {
+        'title': '준비물 (필수)',
+        'items': [
+          '★ 5L 냄비 1개 (용량 표시: 5.0L) - 이것이 기준입니다',
+          '★ 뚜껑 있는 냄비 추천',
+          '★ 가스레인지 또는 핫플레이트',
+        ],
+      },
+      {
+        'title': '준비 순서 (5L 냄비 1회 기준 - 냄비 가득)',
+        'items': [
+          '1) 돼지고기 또는 닭고기 800g을 물 2.5-3L에 넣고 육수 우려내기 (5-10분)',
+          '2) 된장(큰 스푼 2-3) + 고추장(큰 스푼 1-2) + 마늘/생강 넣기',
+          '3) 양파 3개 모두 → 당근 2-3개 → 가지 2-3개 → 호박 1-2개 순으로 투입',
+          '4) 감자 2-3개 추가',
+          '5) 버섯류(표고 2-3개 + 느타리 1줌 + 팽이 1줌) 모두 추가',
+          '6) 양배추 대량(약 150-200g) 마지막에 투입',
+          '7) 깻잎/상추 등 잎채소(선택) 마지막 1분 전 추가',
+          '8) 모든 재료가 부드러워질 때까지 끓임 (30-40분)',
+          '※ 5.0L 냄비가 거의 가득 찼을 정도로 채우면 영양 만점!',
+        ],
+      },
+      {
+        'title': '소요 시간 (실제 경험)',
+        'items': [
+          '전체 조리 시간: 약 1시간 10분-1시간 30분',
+          '  └ 재료 준비(손질): 약 20-30분',
+          '  └ 끓이기: 약 40-50분',
+          '한 번 요리로 2일 식사 가능!',
+          '  └ 1일차: 3끼 (또는 3-4끼)',
+          '  └ 2일차: 3-4끼 (또는 3끼)',
+        ],
+      },
+      {
+        'title': '2일 활용법 (바쁜 직장인 추천)',
+        'items': [
+          '1단계) 토요일 오전에 1시간 정도 투자해서 5L 냄비 가득 요리',
+          '2단계) 모두 식힌 후 일회분씩 밀폐 용기에 담기 (6-7개 분할)',
+          '3단계) 냉장실에 보관 (최대 2-3일, 3일 이상 보관 금지!)',
+          '⚠️ 2일 분량을 초과하면 변질 위험 있음',
+          '결과) 토요일-일요일: 요리 없이 준비된 음식만 먹으면 됨!',
+          '장점: 바쁜 주중에 시간 절약 + 건강한 식단 유지',
+        ],
+      },
+      {
+        'title': '3일 이상 보관 방법',
+        'items': [
+          '필요한 경우에만 냉동 추천',
+          '1회분씩 소분해서 냉동용기에 담기 (약간씩 자주 먹을 때 편함)',
+          '냉동 보관: 최대 1개월 가능',
+          '해동: 자연 해동 또는 전자레인지 사용',
+          '재가열: 냄비에 넣고 약불에서 천천히 데우기',
+        ],
+      },
+      {
+        'title': '정확한 비용 계산 (실제 영수증 기반)',
+        'items': [
+          '🥩 고기류: 약 4,255원',
+          '  └ 한돈사태 또는 돼지고기 살코기 (1묶음)',
+          '🥕 채소류: 약 7,720원',
+          '  └ 당근(495원) + 애호박(2,180원) + 양배추(376원)',
+          '  └ 가지(2,333원) + 감자(354원) + 양파(426원) + 깻잎(660원) + 브로콜리(1,200원)',
+          '🍄 버섯류: 약 1,320원',
+          '  └ 표고(993원) + 팽이(327원)',
+          '━━━━━━━━━━━━━━━━━━━━',
+          '💰 1회 요리 총액: 13,668원 (실제 영수증)',
+          '6-7끼 ÷ 13,668원 = 1끼당 약 1,950-2,280원',
+        ],
+      },
+      {
+        'title': '월간 절약 시뮬레이션 (실제 데이터)',
+        'items': [
+          '주말 2회 요리(토, 일): 13,668 × 2 = 27,336원',
+          '월간 총액: 27,336 × 4주 = 약 109,344원 (약 11만원)',
+          '외식 비교(1끼 10,000-15,000원):',
+          '  └ 1주일 7끼 × 12,500원(평균) = 87,500원',
+          '  └ 월간 약 350,000-400,000원 ⚠️',
+          '월간 절약액: 약 241,000-291,000원! 🎯',
+          '연간 절약액: 약 2,890,000-3,490,000원!!',
+          '※ 1끼당 약 2,000원으로 외식 대비 80% 절약!',
+        ],
+      },
+      {
+        'title': '팁 및 안전 주의사항',
+        'items': [
+          '간은 죽염/소금으로 마지막에 조정',
+          '남은 재료는 다음 번 요리에 재활용',
+          '가격은 지역/시즌/마트에 따라 ±10-20% 변동',
+          '⚠️ 냉장 보관: 최대 2-3일 (3일 이상 보관 금지!)',
+          '⚠️ 변질 위험 시 냉동하고 1-2일 분씩 소분 보관 추천',
+          '⚠️ 냄새나 맛이 이상하면 버리기 (식중독 위험)',
+          '💧 물 섭취: 채소 많음 → 식이섬유 증가 → 변비 예방 필수',
+          '  └ 하루 최소 1리터 ~ 최대 2리터 물 섭취 권장',
+          '  └ 특히 아침에 일어나서 따뜻한 물 한잔 마시기',
+        ],
+      },
+      {
+        'title': '건강 효과 (의학적 가치)',
+        'items': [
+          '🩺 당뇨병 관리: 3:1 채소-고기 비율 → 혈당 안정 (저GI 식단)',
+          '💊 혈압 관리: 칼륨 풍부(양파, 당근, 감자) → 혈압 감소 효과',
+          '🫀 고지혈증 개선: 포화지방 적음 + 식이섬유 풍부 → 콜레스테롤 개선',
+          '🧠 두뇌건강: 카카오(폴리페놀) + 우유(칼슘) → 인지기능 향상',
+          '🦴 뼈건강: 표고버섯(비타민D) + 우유(칼슘) → 골밀도 증가',
+          '🔥 소화건강: 식이섬유 24g/끼 → 변비 예방 + 장 건강',
+          '⚖️ 체중관리: 1끼 800-900kcal (저칼로리) → 안전한 감량',
+          '━━━━━━━━━━━━━━━━━━━━',
+          '결론: 외식이 악화시키는 질환들을 개선하는 거의 완전한 식단',
+        ],
+      },
+    ];
 
-    final verdict = (hasProtein && hasVeg)
-        ? '균형 잡힌 식단(단백질 + 채소)'
-        : (hasProtein ? '단백질은 좋고, 채소 보강 추천' : '채소/단백질 균형 보강 추천');
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (final section in sections)
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                section['title'] as String,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+              const SizedBox(height: 4),
+              for (final item in section['items'] as List<String>)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  margin: const EdgeInsets.only(bottom: 1),
+                  decoration: BoxDecoration(
+                    border: Border(
+                      left: BorderSide(
+                        color: theme.colorScheme.primary.withValues(alpha: 0.3),
+                        width: 2,
+                      ),
+                    ),
+                  ),
+                  child: Text(item, style: theme.textTheme.bodySmall),
+                ),
+              const SizedBox(height: 8),
+            ],
+          ),
+      ],
+    );
+  }
+}
 
-    final bullets = <String>[];
-    if (hasProtein) {
-      bullets.add('고단백 식재료가 포함되어 한 끼 구성에 도움이 됩니다.');
-    } else {
-      bullets.add('단백질원이 보이면 더 균형 잡히기 쉬워요(예: 두부/계란/살코기).');
-    }
-    if (hasVeg) {
-      bullets.add('채소가 포함되어 식이섬유/미네랄 보강에 도움이 됩니다.');
-    } else {
-      bullets.add('채소를 1~2가지 추가하면 포만감/균형에 도움이 됩니다.');
-    }
-    if (hasMushroom) {
-      bullets.add('버섯류가 있으면 감칠맛/식이섬유 측면에서 보완이 됩니다.');
-    }
+class _DessertSuggestions extends StatelessWidget {
+  const _DessertSuggestions();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final desserts = [
+      {
+        'name': '⭐ 카카오(100% 분말) + 아몬드(100% 분말)',
+        'desc': '최고 추천! 포만감 최강 + 영양 완벽(단백질3g, 지방6g, 식이섬유2.1g)',
+      },
+      {'name': '카카오(100% 분말) + 우유', 'desc': '단백질/칼슘 보충 + 초콜릿의 폴리페놀, 비용 효율적'},
+      {'name': '카카오(100% 분말) + 요구르트', 'desc': '유산균 + 항산화 성분 조합, 저비용 고영양'},
+      {'name': '아몬드(100% 분말) + 요구르트', 'desc': '건강한 지방/식이섬유 + 유산균, 추천 조합'},
+      {'name': '냉동 바나나', 'desc': '칼륨 풍부, 장기 보관 가능 (선택적)'},
+    ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '판단 결과: $verdict',
-          style: theme.textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w700,
+          '식사 후 조금 부족한 영양을 보충하는 간단한 조합',
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
         const SizedBox(height: 8),
-        for (final b in bullets)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 6),
-            child: Text('• $b', style: theme.textTheme.bodySmall),
+        for (final item in desserts)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+            margin: const EdgeInsets.only(bottom: 2),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: theme.colorScheme.outlineVariant.withValues(
+                    alpha: 0.3,
+                  ),
+                  width: 0.5,
+                ),
+              ),
+            ),
+            child: RichText(
+              text: TextSpan(
+                style: theme.textTheme.bodyMedium,
+                children: [
+                  TextSpan(
+                    text: '${item['name']}: ',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  TextSpan(text: item['desc']),
+                ],
+              ),
+            ),
           ),
       ],
     );
@@ -817,21 +1031,43 @@ class _ExtraRecommendations extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    const bullets = [
-      '계란: 저렴한 완전단백질 + 요리에 넣기 쉬움.',
-      '두부: 가성비 단백질/칼슘(제품별 차이) + 생선/버섯과도 잘 어울림.',
-      '김/미역: 미네랄 보강 + 국/반찬으로 간편.',
-      '마늘/생강: 향·풍미를 올려 염분을 줄이는 데 도움.',
-      '현미/잡곡(또는 귀리): 식이섬유를 늘려 포만감 유지에 도움.',
+    final recommendations = [
+      {'name': '계란', 'desc': '저렴한 완전단백질 + 요리에 넣기 쉬움'},
+      {'name': '두부', 'desc': '가성비 단백질/칼슘(제품별 차이) + 생선/버섯과도 잘 어울림'},
+      {'name': '김/미역', 'desc': '미네랄 보강 + 국/반찬으로 간편'},
+      {'name': '마늘/생강', 'desc': '향·풍미를 올려 염분을 줄이는 데 도움'},
+      {'name': '현미/잡곡(또는 귀리)', 'desc': '식이섬유를 늘려 포만감 유지에 도움'},
     ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (final b in bullets)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Text('• $b', style: theme.textTheme.bodyMedium),
+        for (final item in recommendations)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+            margin: const EdgeInsets.only(bottom: 2),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: theme.colorScheme.outlineVariant.withValues(
+                    alpha: 0.3,
+                  ),
+                  width: 0.5,
+                ),
+              ),
+            ),
+            child: RichText(
+              text: TextSpan(
+                style: theme.textTheme.bodyMedium,
+                children: [
+                  TextSpan(
+                    text: '${item['name']}: ',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  TextSpan(text: item['desc']),
+                ],
+              ),
+            ),
           ),
         if (onAdd != null) ...[
           const SizedBox(height: 8),

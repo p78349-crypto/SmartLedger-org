@@ -260,9 +260,7 @@ class _AssetSimpleInputScreenState extends State<AssetSimpleInputScreen> {
                             icon: const Icon(Icons.save),
                             label: const Text('자산 저장'),
                             style: FilledButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 16,
-                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
                             ),
                           ),
                         ),
@@ -305,6 +303,7 @@ class _AssetSimpleInputScreenState extends State<AssetSimpleInputScreen> {
       ),
     );
   }
+
   Widget _buildSectionHeader(String title) {
     final theme = Theme.of(context);
     return Padding(

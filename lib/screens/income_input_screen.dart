@@ -391,10 +391,9 @@ class _IncomeInputScreenState extends State<IncomeInputScreen> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                   side: BorderSide(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .outlineVariant
-                        .withValues(alpha: 0.5),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.outlineVariant.withValues(alpha: 0.5),
                   ),
                 ),
                 child: ExpansionTile(
@@ -403,8 +402,8 @@ class _IncomeInputScreenState extends State<IncomeInputScreen> {
                   title: Text(
                     '고급 설정',
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   children: [
                     DropdownButtonFormField<String>(
@@ -496,14 +495,12 @@ class _IncomeInputScreenState extends State<IncomeInputScreen> {
                                   _alarmTime != null
                                       ? _alarmTime!.format(context)
                                       : '시간 선택',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyLarge
+                                  style: Theme.of(context).textTheme.bodyLarge
                                       ?.copyWith(
                                         fontWeight: FontWeight.bold,
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .primary,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.primary,
                                       ),
                                 ),
                               ],
@@ -552,6 +549,7 @@ class _IncomeInputScreenState extends State<IncomeInputScreen> {
       ),
     );
   }
+
   Widget _buildSectionHeader(String title) {
     final theme = Theme.of(context);
     return Padding(

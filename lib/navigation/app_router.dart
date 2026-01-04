@@ -349,8 +349,7 @@ class AppRouter {
         final a = args as AccountArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) =>
-              AccountStatsScreen(accountName: a.accountName),
+          builder: (_) => AccountStatsScreen(accountName: a.accountName),
         );
 
       case AppRoutes.accountStatsDecade:

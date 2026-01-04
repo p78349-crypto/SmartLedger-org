@@ -1,0 +1,4 @@
+Analyzing SmartLedger...                                        
+
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_main_screen.dart:637:39 - avoid_redundant_argument_values
+

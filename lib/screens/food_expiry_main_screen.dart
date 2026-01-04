@@ -16,7 +16,14 @@ import 'package:smart_ledger/navigation/app_routes.dart';
 
 /// 식품 유통기한 관리 전용 메인 네비게이션 화면
 class FoodExpiryMainScreen extends StatefulWidget {
-  const FoodExpiryMainScreen({super.key});
+  final List<String>? initialIngredients;
+  final bool autoUsageMode;
+
+  const FoodExpiryMainScreen({
+    super.key,
+    this.initialIngredients,
+    this.autoUsageMode = false,
+  });
 
   @override
   State<FoodExpiryMainScreen> createState() => _FoodExpiryMainScreenState();
@@ -735,7 +742,11 @@ class _FoodExpiryMainScreenState extends State<FoodExpiryMainScreen> {
   }
 
   late final List<Widget> _screens = <Widget>[
-    _FoodExpiryItemsScreen(onUpsert: _openUpsertDialog),
+    _FoodExpiryItemsScreen(
+      onUpsert: _openUpsertDialog,
+      initialIngredients: widget.initialIngredients,
+      autoUsageMode: widget.autoUsageMode,
+    ),
     const _FoodExpiryNotificationsScreen(),
     const _FoodExpiryPlaceholderScreen(title: '소비 기록'),
     const _FoodExpiryPlaceholderScreen(title: '통계'),
@@ -1497,8 +1508,14 @@ class _FoodExpiryPlaceholderScreen extends StatelessWidget {
 class _FoodExpiryItemsScreen extends StatefulWidget {
   final Future<void> Function(BuildContext, {FoodExpiryItem? existing})?
   onUpsert;
+  final List<String>? initialIngredients;
+  final bool autoUsageMode;
 
-  const _FoodExpiryItemsScreen({this.onUpsert});
+  const _FoodExpiryItemsScreen({
+    this.onUpsert,
+    this.initialIngredients,
+    this.autoUsageMode = false,
+  });
 
   @override
   State<_FoodExpiryItemsScreen> createState() => _FoodExpiryItemsScreenState();
@@ -1508,6 +1525,14 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
   bool _isUsageMode = false;
   final Map<String, double> _usageMap = {};
   final Set<String> _activeUsageItems = {};
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.autoUsageMode) {
+      _isUsageMode = true;
+    }
+  }
 
   Future<void> _addToCart(BuildContext context, FoodExpiryItem item) async {
     final accountName = await UserPrefService.getLastAccountName();
@@ -1682,6 +1707,52 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
     );
   }
 
+  Future<void> _addMissingToCart(List<String> names) async {
+    final accountName = await UserPrefService.getLastAccountName();
+    if (accountName == null) return;
+
+    final currentItems = await UserPrefService.getShoppingCartItems(
+      accountName: accountName,
+    );
+
+    final now = DateTime.now();
+    final List<ShoppingCartItem> newItems = [];
+
+    for (var name in names) {
+      newItems.add(
+        ShoppingCartItem(
+          id: 'shop_${now.microsecondsSinceEpoch}_${newItems.length}',
+          name: name,
+          createdAt: now,
+          updatedAt: now,
+        ),
+      );
+    }
+
+    await UserPrefService.setShoppingCartItems(
+      accountName: accountName,
+      items: [...newItems, ...currentItems],
+    );
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${newItems.length}개의 재료를 장바구니에 담았습니다.'),
+          action: SnackBarAction(
+            label: '장바구니 이동',
+            onPressed: () {
+              Navigator.pushNamed(
+                context,
+                AppRoutes.shoppingCart,
+                arguments: ShoppingCartArgs(accountName: accountName),
+              );
+            },
+          ),
+        ),
+      );
+    }
+  }
+
   void _showItemDetail(BuildContext context, FoodExpiryItem item) {
     final theme = Theme.of(context);
     final left = item.daysLeft(DateTime.now());
@@ -1842,6 +1913,7 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
 
     int updatedCount = 0;
     final items = FoodExpiryService.instance.items.value;
+    final List<String> itemsToRemove = [];
 
     for (var entry in _usageMap.entries) {
       if (entry.value <= 0) continue;
@@ -1854,20 +1926,30 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
 
       final newQty = (item.quantity - entry.value).clamp(0.0, double.infinity);
 
-      await FoodExpiryService.instance.updateItem(
-        id: item.id,
-        name: item.name,
-        purchaseDate: item.purchaseDate,
-        expiryDate: item.expiryDate,
-        memo: item.memo,
-        quantity: newQty,
-        unit: item.unit,
-        category: item.category,
-        location: item.location,
-        price: item.price,
-        supplier: item.supplier,
-      );
+      if (newQty <= 0) {
+        itemsToRemove.add(item.id);
+      } else {
+        await FoodExpiryService.instance.updateItem(
+          id: item.id,
+          name: item.name,
+          purchaseDate: item.purchaseDate,
+          expiryDate: item.expiryDate,
+          memo: item.memo,
+          quantity: newQty,
+          unit: item.unit,
+          category: item.category,
+          location: item.location,
+          price: item.price,
+          supplier: item.supplier,
+        );
+      }
       updatedCount++;
+    }
+
+    if (itemsToRemove.isNotEmpty) {
+      for (final id in itemsToRemove) {
+        await FoodExpiryService.instance.deleteById(id);
+      }
     }
 
     setState(() {
@@ -1877,11 +1959,12 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
     });
 
     if (mounted) {
+      String msg = '$updatedCount개의 항목 사용량이 기록되었습니다.';
+      if (itemsToRemove.isNotEmpty) {
+        msg += '\n(${itemsToRemove.length}개 항목 소진되어 삭제됨)';
+      }
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('$updatedCount개의 항목 사용량이 기록되었습니다.'),
-          behavior: SnackBarBehavior.floating,
-        ),
+        SnackBar(content: Text(msg), behavior: SnackBarBehavior.floating),
       );
     }
   }
@@ -2054,6 +2137,21 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
             icon: Icon(_isUsageMode ? Icons.close : Icons.soup_kitchen),
             tooltip: _isUsageMode ? '사용량 입력 종료' : '요리/사용 모드 (일괄 입력)',
           ),
+          IconButton(
+            onPressed: () async {
+              final accountName = await UserPrefService.getLastAccountName();
+              if (!context.mounted) return;
+              if (accountName != null) {
+                Navigator.pushNamed(
+                  context,
+                  AppRoutes.shoppingCart,
+                  arguments: ShoppingCartArgs(accountName: accountName),
+                );
+              }
+            },
+            icon: const Icon(IconCatalog.shoppingCart),
+            tooltip: '장바구니 이동',
+          ),
           if (!_isUsageMode)
             IconButton(
               onPressed: FoodExpiryService.instance.load,
@@ -2073,7 +2171,22 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
       body: ValueListenableBuilder<List<FoodExpiryItem>>(
         valueListenable: FoodExpiryService.instance.items,
         builder: (context, items, child) {
-          if (items.isEmpty) {
+          final missingIngredients = <String>[];
+          if (widget.initialIngredients != null) {
+            for (final ing in widget.initialIngredients!) {
+              final hasMatch = items.any(
+                (it) =>
+                    it.name.contains(ing) ||
+                    ing.contains(it.name) ||
+                    it.category.contains(ing),
+              );
+              if (!hasMatch) {
+                missingIngredients.add(ing);
+              }
+            }
+          }
+
+          if (items.isEmpty && missingIngredients.isEmpty) {
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(24),
@@ -2086,185 +2199,297 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
             );
           }
 
-          return ListView.separated(
-            padding: const EdgeInsets.only(bottom: 88),
-            itemCount: items.length,
-            separatorBuilder: (context, index) => const Divider(height: 1),
-            itemBuilder: (context, i) {
-              final it = items[i];
-              final left = it.daysLeft(DateTime.now());
-              final leftText = left < 0
-                  ? '지남 ${-left}일'
-                  : '남음 $left'
-                        '일';
-              final color = left < 0
-                  ? theme.colorScheme.error
-                  : (left <= 2
-                        ? theme.colorScheme.tertiary
-                        : theme.colorScheme.primary);
-
-              final isItemUsageActive =
-                  _isUsageMode || _activeUsageItems.contains(it.id);
-
-              return ListTile(
-                onTap: () => _showItemDetail(context, it),
-                title: Row(
-                  children: [
-                    if (it.category.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.secondaryContainer,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            it.category,
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: theme.colorScheme.onSecondaryContainer,
-                              fontSize: 10,
-                            ),
-                          ),
-                        ),
-                      ),
-                    Expanded(
-                      child: Row(
-                        children: [
-                          Flexible(
-                            child: Text(
-                              it.name,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          Icon(
-                            Icons.info_outline,
-                            size: 14,
-                            color: theme.colorScheme.primary.withValues(
-                              alpha: 0.5,
-                            ),
-                          ),
-                        ],
-                      ),
+          return Column(
+            children: [
+              if (missingIngredients.isNotEmpty)
+                Container(
+                  width: double.maxFinite,
+                  margin: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.errorContainer.withValues(
+                      alpha: 0.3,
                     ),
-                    if (!isItemUsageActive) ...[
-                      IconButton(
-                        icon: const Icon(Icons.remove_circle_outline, size: 20),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                        onPressed: () => _adjustQuantity(context, it, -1),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: InkWell(
-                          onTap: () => _editQuantity(context, it),
-                          borderRadius: BorderRadius.circular(4),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            child: Text(
-                              _formatQuantity(it),
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: theme.colorScheme.primary,
-                                decoration: TextDecoration.underline,
-                                decorationStyle: TextDecorationStyle.dotted,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.add_circle_outline, size: 20),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                        onPressed: () => _adjustQuantity(context, it, 1),
-                      ),
-                    ] else ...[
-                      // Usage Mode: Improved UI
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        mainAxisSize: MainAxisSize.min,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: theme.colorScheme.error.withValues(alpha: 0.2),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
                         children: [
+                          Icon(
+                            Icons.warning_amber_rounded,
+                            color: theme.colorScheme.error,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
                           Text(
-                            '잔량: ${_formatQuantity(it)}',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: Colors.grey,
-                              fontSize: 11,
+                            '부족한 식재료 (${missingIngredients.length})',
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              color: theme.colorScheme.error,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const SizedBox(height: 4),
-                          _UsageInput(
-                            initialValue: _usageMap[it.id],
-                            max: it.quantity,
-                            unit: it.unit,
-                            onChanged: (val) {
-                              setState(() {
-                                if (val == null || val <= 0) {
-                                  _usageMap.remove(it.id);
-                                } else {
-                                  _usageMap[it.id] = val;
-                                }
-                              });
-                            },
+                          const Spacer(),
+                          TextButton.icon(
+                            onPressed: () =>
+                                _addMissingToCart(missingIngredients),
+                            icon: const Icon(
+                              Icons.shopping_cart_outlined,
+                              size: 16,
+                            ),
+                            label: const Text('장바구니 담기'),
+                            style: TextButton.styleFrom(
+                              visualDensity: VisualDensity.compact,
+                              foregroundColor: theme.colorScheme.error,
+                            ),
                           ),
                         ],
+                      ),
+                      const SizedBox(height: 4),
+                      Wrap(
+                        spacing: 8,
+                        children: missingIngredients
+                            .map(
+                              (ing) => Chip(
+                                label: Text(ing),
+                                visualDensity: VisualDensity.compact,
+                                labelStyle: const TextStyle(fontSize: 12),
+                              ),
+                            )
+                            .toList(),
                       ),
                     ],
-                  ],
+                  ),
                 ),
-                subtitle: Text(
-                  _itemSubtitleText(it),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                trailing: _isUsageMode
-                    ? null
-                    : Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (!isItemUsageActive)
-                            Text(leftText, style: TextStyle(color: color)),
-                          IconButton(
-                            icon: Icon(
-                              isItemUsageActive
-                                  ? Icons.close
-                                  : Icons.soup_kitchen,
-                              size: 20,
-                              color: isItemUsageActive
-                                  ? theme.colorScheme.error
-                                  : theme.colorScheme.primary,
+              Expanded(
+                child: ListView.separated(
+                  padding: const EdgeInsets.only(bottom: 88),
+                  itemCount: items.length,
+                  separatorBuilder: (context, index) =>
+                      const Divider(height: 1),
+                  itemBuilder: (context, i) {
+                    final it = items[i];
+                    final left = it.daysLeft(DateTime.now());
+                    final leftText = left < 0
+                        ? '지남 ${-left}일'
+                        : '남음 $left'
+                              '일';
+                    final color = left < 0
+                        ? theme.colorScheme.error
+                        : (left <= 2
+                              ? theme.colorScheme.tertiary
+                              : theme.colorScheme.primary);
+
+                    final isMatched =
+                        widget.initialIngredients?.any(
+                          (ing) =>
+                              it.name.contains(ing) ||
+                              ing.contains(it.name) ||
+                              it.category.contains(ing),
+                        ) ??
+                        false;
+
+                    final isItemUsageActive =
+                        _isUsageMode || _activeUsageItems.contains(it.id);
+
+                    return Container(
+                      color: isMatched
+                          ? theme.colorScheme.primaryContainer.withValues(
+                              alpha: 0.2,
+                            )
+                          : null,
+                      child: ListTile(
+                        onTap: () => _showItemDetail(context, it),
+                        title: Row(
+                          children: [
+                            if (it.category.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(right: 8),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: theme.colorScheme.secondaryContainer,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    it.category,
+                                    style: theme.textTheme.labelSmall?.copyWith(
+                                      color: theme
+                                          .colorScheme
+                                          .onSecondaryContainer,
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      it.name,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Icon(
+                                    Icons.info_outline,
+                                    size: 14,
+                                    color: theme.colorScheme.primary.withValues(
+                                      alpha: 0.5,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                            tooltip: isItemUsageActive ? '입력 취소' : '사용량 입력',
-                            onPressed: () => _toggleItemUsage(it.id),
-                          ),
-                          if (!isItemUsageActive) ...[
-                            IconButton(
-                              icon: const Icon(IconCatalog.shoppingCart),
-                              tooltip: '장바구니 담기',
-                              onPressed: () => _addToCart(context, it),
-                            ),
-                            IconButton(
-                              icon: const Icon(IconCatalog.deleteOutline),
-                              tooltip: '삭제',
-                              onPressed: () =>
-                                  FoodExpiryService.instance.deleteById(it.id),
-                            ),
+                            if (!isItemUsageActive) ...[
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.remove_circle_outline,
+                                  size: 20,
+                                ),
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                                onPressed: () =>
+                                    _adjustQuantity(context, it, -1),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                ),
+                                child: InkWell(
+                                  onTap: () => _editQuantity(context, it),
+                                  borderRadius: BorderRadius.circular(4),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
+                                    child: Text(
+                                      _formatQuantity(it),
+                                      style: theme.textTheme.bodyMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color: theme.colorScheme.primary,
+                                            decoration:
+                                                TextDecoration.underline,
+                                            decorationStyle:
+                                                TextDecorationStyle.dotted,
+                                          ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.add_circle_outline,
+                                  size: 20,
+                                ),
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                                onPressed: () =>
+                                    _adjustQuantity(context, it, 1),
+                              ),
+                            ] else ...[
+                              // Usage Mode: Improved UI
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    '잔량: ${_formatQuantity(it)}',
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: Colors.grey,
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  _UsageInput(
+                                    initialValue: _usageMap[it.id],
+                                    max: it.quantity,
+                                    unit: it.unit,
+                                    onChanged: (val) {
+                                      setState(() {
+                                        if (val == null || val <= 0) {
+                                          _usageMap.remove(it.id);
+                                        } else {
+                                          _usageMap[it.id] = val;
+                                        }
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ],
                           ],
-                        ],
+                        ),
+                        subtitle: Text(
+                          _itemSubtitleText(it),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        trailing: _isUsageMode
+                            ? null
+                            : Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (!isItemUsageActive)
+                                    Text(
+                                      leftText,
+                                      style: TextStyle(color: color),
+                                    ),
+                                  IconButton(
+                                    icon: Icon(
+                                      isItemUsageActive
+                                          ? Icons.close
+                                          : Icons.soup_kitchen,
+                                      size: 20,
+                                      color: isItemUsageActive
+                                          ? theme.colorScheme.error
+                                          : theme.colorScheme.primary,
+                                    ),
+                                    tooltip: isItemUsageActive
+                                        ? '입력 취소'
+                                        : '사용량 입력',
+                                    onPressed: () => _toggleItemUsage(it.id),
+                                  ),
+                                  if (!isItemUsageActive) ...[
+                                    IconButton(
+                                      icon: const Icon(
+                                        IconCatalog.shoppingCart,
+                                      ),
+                                      tooltip: '장바구니 담기',
+                                      onPressed: () => _addToCart(context, it),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(
+                                        IconCatalog.deleteOutline,
+                                      ),
+                                      tooltip: '삭제',
+                                      onPressed: () => FoodExpiryService
+                                          .instance
+                                          .deleteById(it.id),
+                                    ),
+                                  ],
+                                ],
+                              ),
                       ),
-              );
-            },
+                    );
+                  },
+                ),
+              ),
+            ],
           );
         },
       ),
@@ -2379,9 +2604,7 @@ class _UsageInputState extends State<_UsageInput> {
               contentPadding: EdgeInsets.zero,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(
-                  color: theme.colorScheme.outline,
-                ),
+                borderSide: BorderSide(color: theme.colorScheme.outline),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),

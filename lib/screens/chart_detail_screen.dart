@@ -432,12 +432,8 @@ class _ChartDetailScreenState extends State<ChartDetailScreen> {
               },
             ),
           ),
-          rightTitles: const AxisTitles(
-            
-          ),
-          topTitles: const AxisTitles(
-            
-          ),
+          rightTitles: const AxisTitles(),
+          topTitles: const AxisTitles(),
         ),
         gridData: FlGridData(
           drawVerticalLine: false,
@@ -521,12 +517,8 @@ class _ChartDetailScreenState extends State<ChartDetailScreen> {
               },
             ),
           ),
-          rightTitles: const AxisTitles(
-            
-          ),
-          topTitles: const AxisTitles(
-            
-          ),
+          rightTitles: const AxisTitles(),
+          topTitles: const AxisTitles(),
         ),
         gridData: FlGridData(
           drawVerticalLine: false,

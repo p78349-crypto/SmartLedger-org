@@ -80,7 +80,7 @@ class ChartDisplaySelector extends StatelessWidget {
       children: displayTypes.map((type) {
         final isSelected = selected == type;
         final scheme = Theme.of(context).colorScheme;
-        
+
         return ChoiceChip(
           label: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -109,8 +109,9 @@ class ChartDisplaySelector extends StatelessWidget {
                 : Text(
                     type.label,
                     style: TextStyle(
-                      fontWeight:
-                          isSelected ? FontWeight.bold : FontWeight.normal,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                     ),
                   ),
           ),

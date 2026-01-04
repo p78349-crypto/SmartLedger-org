@@ -93,41 +93,43 @@ class _TransactionAddDetailedScreenState
           navigator.pop();
         }
       },
-      child: Builder(builder: (context) {
-        final isLandscape =
-            MediaQuery.of(context).orientation == Orientation.landscape;
-        return Scaffold(
-          appBar: isLandscape
-              ? null
-              : AppBar(
-                  title: Text('$titlePrefix - ${widget.accountName}'),
-                  actions: [
-                    IconButton(
-                      tooltip: '입력값 되돌리기',
-                      icon: const Icon(IconCatalog.restartAlt),
-                      onPressed: () =>
-                          _formStateKey.currentState?.promptRevertToInitial(),
-                    ),
-                  ],
+      child: Builder(
+        builder: (context) {
+          final isLandscape =
+              MediaQuery.of(context).orientation == Orientation.landscape;
+          return Scaffold(
+            appBar: isLandscape
+                ? null
+                : AppBar(
+                    title: Text('$titlePrefix - ${widget.accountName}'),
+                    actions: [
+                      IconButton(
+                        tooltip: '입력값 되돌리기',
+                        icon: const Icon(IconCatalog.restartAlt),
+                        onPressed: () =>
+                            _formStateKey.currentState?.promptRevertToInitial(),
+                      ),
+                    ],
+                  ),
+            body: SafeArea(
+              top: !isLandscape,
+              child: Padding(
+                padding: EdgeInsets.all(isLandscape ? 0.0 : 16.0),
+                child: TransactionAddDetailedForm(
+                  key: _formStateKey,
+                  accountName: widget.accountName,
+                  initialTransaction: widget.initialTransaction,
+                  learnCategoryHintFromDescription:
+                      widget.learnCategoryHintFromDescription,
+                  confirmBeforeSave: widget.confirmBeforeSave,
+                  treatAsNew: widget.treatAsNew,
+                  titlePrefix: isLandscape ? titlePrefix : null,
                 ),
-          body: SafeArea(
-            top: !isLandscape,
-            child: Padding(
-              padding: EdgeInsets.all(isLandscape ? 0.0 : 16.0),
-              child: TransactionAddDetailedForm(
-                key: _formStateKey,
-                accountName: widget.accountName,
-                initialTransaction: widget.initialTransaction,
-                learnCategoryHintFromDescription:
-                    widget.learnCategoryHintFromDescription,
-                confirmBeforeSave: widget.confirmBeforeSave,
-                treatAsNew: widget.treatAsNew,
-                titlePrefix: isLandscape ? titlePrefix : null,
               ),
             ),
-          ),
-        );
-      }),
+          );
+        },
+      ),
     );
   }
 }
@@ -1469,10 +1471,7 @@ class _TransactionAddDetailedFormState
         // 하단 고정 버튼 바 (가로모드에서는 헤더로 통합하여 숨김)
         if (!isLandscape)
           Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 12,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               color: theme.colorScheme.surface,
               boxShadow: [
@@ -1488,7 +1487,10 @@ class _TransactionAddDetailedFormState
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  _buildSaveButtons(),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 20),
+                    child: _buildSaveButtons(),
+                  ),
                 ],
               ),
             ),
@@ -1803,7 +1805,8 @@ class _TransactionAddDetailedFormState
                 keyboardType: TextInputType.number,
                 textInputAction: TextInputAction.next,
                 onFieldSubmitted: (_) => _paymentFocusNode.requestFocus(),
-                validator: (value) => _validatePositiveAmount(value, '금액을 입력하세요.'),
+                validator: (value) =>
+                    _validatePositiveAmount(value, '금액을 입력하세요.'),
                 decoration: _standardInputDecoration(labelText: '금액 (수동 입력)'),
               ),
             ),
@@ -1857,7 +1860,8 @@ class _TransactionAddDetailedFormState
                 keyboardType: TextInputType.number,
                 textInputAction: TextInputAction.next,
                 onFieldSubmitted: (_) => _paymentFocusNode.requestFocus(),
-                validator: (value) => _validatePositiveAmount(value, '금액을 입력하세요.'),
+                validator: (value) =>
+                    _validatePositiveAmount(value, '금액을 입력하세요.'),
                 decoration: _standardInputDecoration(labelText: '반품 금액'),
               ),
             ),
@@ -2156,7 +2160,9 @@ class _TransactionAddDetailedFormState
                   label: Text(
                     cat,
                     style: TextStyle(
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.w500,
                       fontSize: 12.5,
                       letterSpacing: -0.2,
                     ),

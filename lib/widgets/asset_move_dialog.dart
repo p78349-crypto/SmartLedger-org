@@ -315,9 +315,7 @@ class _AssetMoveDialogState extends State<AssetMoveDialog> {
                                   border: OutlineInputBorder(),
                                 ),
                                 items: [
-                                  const DropdownMenuItem(
-                                    child: Text('선택안함'),
-                                  ),
+                                  const DropdownMenuItem(child: Text('선택안함')),
                                   ...otherAssets.map((asset) {
                                     final assetLabel =
                                         '${asset.name} ('
@@ -358,9 +356,7 @@ class _AssetMoveDialogState extends State<AssetMoveDialog> {
                             border: OutlineInputBorder(),
                           ),
                           items: [
-                            const DropdownMenuItem(
-                              child: Text('선택안함'),
-                            ),
+                            const DropdownMenuItem(child: Text('선택안함')),
                             ...AssetCategory.values.map(
                               (cat) => DropdownMenuItem(
                                 value: cat,

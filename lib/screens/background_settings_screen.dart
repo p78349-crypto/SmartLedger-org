@@ -169,7 +169,8 @@ class _BackgroundSettingsScreenState extends State<BackgroundSettingsScreen> {
         // In dark mode, if the background color is still the default white,
         // we should use the theme's scaffold background color instead.
         Color effectiveBgColor = bgColor;
-        final isDefaultWhite = bgColor.toARGB32() == 0xFFFFFFFF ||
+        final isDefaultWhite =
+            bgColor.toARGB32() == 0xFFFFFFFF ||
             bgColor.toARGB32() == 0xffffffff;
 
         if (theme.brightness == Brightness.dark && isDefaultWhite) {
@@ -181,10 +182,9 @@ class _BackgroundSettingsScreenState extends State<BackgroundSettingsScreen> {
           extendBodyBehindAppBar: bgType == 'image' && bgImagePath != null,
           appBar: AppBar(
             title: const Text('배경 설정'),
-            backgroundColor:
-                bgType == 'image' && bgImagePath != null
-                    ? Colors.transparent
-                    : null,
+            backgroundColor: bgType == 'image' && bgImagePath != null
+                ? Colors.transparent
+                : null,
             elevation: 0,
           ),
           body: Stack(
@@ -228,9 +228,7 @@ class _BackgroundSettingsScreenState extends State<BackgroundSettingsScreen> {
               // 3. Dark Overlay for images to ensure readability
               if (bgType == 'image' && bgImagePath != null)
                 Positioned.fill(
-                  child: ColoredBox(
-                    color: Colors.black.withValues(alpha: 0.2),
-                  ),
+                  child: ColoredBox(color: Colors.black.withValues(alpha: 0.2)),
                 ),
 
               // 4. Content

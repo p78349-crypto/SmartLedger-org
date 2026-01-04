@@ -582,10 +582,7 @@ class _IncomeSplitScreenState extends State<IncomeSplitScreen> {
                     if (total > 0) ...[
                       const SizedBox(width: 8),
                       Text(
-                        CurrencyFormatter.formatRatio(
-                          entry.value,
-                          total,
-                        ),
+                        CurrencyFormatter.formatRatio(entry.value, total),
                         style: TextStyle(
                           fontSize: 12,
                           color: scheme.onSurfaceVariant,

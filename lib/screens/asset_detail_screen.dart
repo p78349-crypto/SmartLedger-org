@@ -68,9 +68,7 @@ class _AssetDetailScreenState extends State<AssetDetailScreen> {
     );
     final moves = rawMoves.toList()
       ..sort((a, b) => b.date.compareTo(a.date)); // 최신순
-    final currentAmountLabel = CurrencyFormatter.format(
-      _currentAsset.amount,
-    );
+    final currentAmountLabel = CurrencyFormatter.format(_currentAsset.amount);
     final categoryLabel =
         '${_currentAsset.category.emoji} ${_currentAsset.category.label}';
     final registrationDateLabel = DateFormatter.defaultDate.format(

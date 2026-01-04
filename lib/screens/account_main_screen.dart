@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -447,10 +448,30 @@ class _AccountMainScreenState extends State<AccountMainScreen>
         final isLandscape =
             MediaQuery.of(context).orientation == Orientation.landscape;
 
+        // DEBUG: 화면 크기 출력 (프로토타입/개발 모드 전용, 출시 전 자동 제거됨)
+        if (kDebugMode) {
+          final size = MediaQuery.of(context).size;
+          final padding = MediaQuery.of(context).padding;
+          debugPrint(
+            '📱 화면 크기: ${size.width.toStringAsFixed(1)} '
+            'x ${size.height.toStringAsFixed(1)}',
+          );
+          debugPrint(
+            '📱 SafeArea 여백: top=${padding.top.toStringAsFixed(1)}, '
+            'bottom=${padding.bottom.toStringAsFixed(1)}, '
+            'left=${padding.left.toStringAsFixed(1)}, '
+            'right=${padding.right.toStringAsFixed(1)}',
+          );
+          debugPrint(
+            '📱 방향: ${isLandscape ? "가로(Landscape)" : "세로(Portrait)"}',
+          );
+        }
+
         // In dark mode, if the background color is still the default white,
         // we should use the theme's scaffold background color instead.
         Color effectiveBgColor = bgColor;
-        final isDefaultWhite = bgColor.toARGB32() == 0xFFFFFFFF ||
+        final isDefaultWhite =
+            bgColor.toARGB32() == 0xFFFFFFFF ||
             bgColor.toARGB32() == 0xffffffff;
 
         if (theme.brightness == Brightness.dark && isDefaultWhite) {
@@ -476,7 +497,7 @@ class _AccountMainScreenState extends State<AccountMainScreen>
                               ColoredBox(color: effectiveBgColor),
                         );
                       }
-                      
+
                       if (presetId == 'midnight_gold') {
                         return MidnightGoldBackground(
                           baseColor: effectiveBgColor,
@@ -510,51 +531,51 @@ class _AccountMainScreenState extends State<AccountMainScreen>
 
                 PageView.builder(
                   controller: _controller,
-                    physics: _disablePageSwipe
-                        ? const NeverScrollableScrollPhysics()
-                        : const PageScrollPhysics(),
-                    itemCount: _pageCount,
-                    onPageChanged: (index) {
-                      setState(() {
-                        _currentIndex = index;
-                        _disablePageSwipe =
-                            _pageKeys[index].currentState?.isEditMode ?? false;
-                      });
-                      if (_isRestoringIndex) return;
-                      // Fire-and-forget: a best-effort persistence.
-                      UserPrefService.setMainPageIndex(
-                        accountName: widget.accountName,
-                        index: index,
-                      );
-                    },
-                    itemBuilder: (context, index) {
-                      return _IconGridPage(
-                        key: _pageKeys[index],
-                        accountName: widget.accountName,
-                        pageIndex: index,
-                        pageCount: _pageCount,
-                        currentPage: _currentIndex,
-                        pageController: _controller,
-                        onRequestResetMainPages: _confirmAndResetMainPages,
-                        onRequestQuickJump: _showQuickJumpSheet,
-                        onRequestJumpToPage: (targetIndex) {
-                          if (targetIndex < 0 || targetIndex >= _pageCount) {
-                            return;
-                          }
-                          _controller.animateToPage(
-                            targetIndex,
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeOut,
-                          );
-                        },
-                        onEditModeChanged: (isEditMode) {
-                          if (index != _currentIndex) return;
-                          if (_disablePageSwipe == isEditMode) return;
-                          setState(() => _disablePageSwipe = isEditMode);
-                        },
-                      );
-                    },
-                  ),
+                  physics: _disablePageSwipe
+                      ? const NeverScrollableScrollPhysics()
+                      : const PageScrollPhysics(),
+                  itemCount: _pageCount,
+                  onPageChanged: (index) {
+                    setState(() {
+                      _currentIndex = index;
+                      _disablePageSwipe =
+                          _pageKeys[index].currentState?.isEditMode ?? false;
+                    });
+                    if (_isRestoringIndex) return;
+                    // Fire-and-forget: a best-effort persistence.
+                    UserPrefService.setMainPageIndex(
+                      accountName: widget.accountName,
+                      index: index,
+                    );
+                  },
+                  itemBuilder: (context, index) {
+                    return _IconGridPage(
+                      key: _pageKeys[index],
+                      accountName: widget.accountName,
+                      pageIndex: index,
+                      pageCount: _pageCount,
+                      currentPage: _currentIndex,
+                      pageController: _controller,
+                      onRequestResetMainPages: _confirmAndResetMainPages,
+                      onRequestQuickJump: _showQuickJumpSheet,
+                      onRequestJumpToPage: (targetIndex) {
+                        if (targetIndex < 0 || targetIndex >= _pageCount) {
+                          return;
+                        }
+                        _controller.animateToPage(
+                          targetIndex,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeOut,
+                        );
+                      },
+                      onEditModeChanged: (isEditMode) {
+                        if (index != _currentIndex) return;
+                        if (_disablePageSwipe == isEditMode) return;
+                        setState(() => _disablePageSwipe = isEditMode);
+                      },
+                    );
+                  },
+                ),
                 // Page quick-jump indicator (bottom center)
                 if (_pageCount > 0)
                   // Top page label for pages 1..7 (small, non-intrusive)
@@ -572,7 +593,7 @@ class _AccountMainScreenState extends State<AccountMainScreen>
                           if (!showLabel) return const SizedBox.shrink();
                           final label = _pageNameLabels[_currentIndex];
                           final scheme = Theme.of(context).colorScheme;
-                          
+
                           return Center(
                             child: Container(
                               padding: const EdgeInsets.symmetric(
@@ -580,8 +601,9 @@ class _AccountMainScreenState extends State<AccountMainScreen>
                                 horizontal: 16.0,
                               ),
                               decoration: BoxDecoration(
-                                color: scheme.surfaceContainerLow
-                                    .withValues(alpha: 0.7),
+                                color: scheme.surfaceContainerLow.withValues(
+                                  alpha: 0.7,
+                                ),
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
                                   color: scheme.primary.withValues(alpha: 0.2),
@@ -596,9 +618,7 @@ class _AccountMainScreenState extends State<AccountMainScreen>
                               ),
                               child: Text(
                                 label,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleSmall
+                                style: Theme.of(context).textTheme.titleSmall
                                     ?.copyWith(
                                       fontSize: 12.5,
                                       fontWeight: FontWeight.bold,
@@ -612,6 +632,17 @@ class _AccountMainScreenState extends State<AccountMainScreen>
                             ),
                           );
                         },
+                      ),
+                    ),
+                  ),
+
+                // DEBUG: 그리드 오버레이 (프로토타입/개발 모드 전용, 출시 전 자동 제거됨)
+                if (kDebugMode)
+                  Positioned.fill(
+                    child: IgnorePointer(
+                      child: GridPaper(
+                        color: Colors.blue.withValues(alpha: 0.15),
+                        interval: 50,
                       ),
                     ),
                   ),
@@ -1323,13 +1354,15 @@ class _PageQuickMenuButton extends StatelessWidget {
                 ? scheme.primary
                 : scheme.surfaceContainerHighest.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(16),
-            boxShadow: isEditMode ? [
-              BoxShadow(
-                color: scheme.primary.withValues(alpha: 0.3),
-                blurRadius: 8,
-                spreadRadius: 1,
-              )
-            ] : null,
+            boxShadow: isEditMode
+                ? [
+                    BoxShadow(
+                      color: scheme.primary.withValues(alpha: 0.3),
+                      blurRadius: 8,
+                      spreadRadius: 1,
+                    ),
+                  ]
+                : null,
           ),
           child: Icon(
             isEditMode ? IconCatalog.check : IconCatalog.moreHoriz,
@@ -1409,13 +1442,13 @@ class _IconTile extends StatelessWidget {
     final live = liveDataWidget;
 
     // Use more vibrant colors from the theme
-    final bgColor =
-        !isEditMode
-            ? scheme.primary.withValues(alpha: 0.12)
-            : scheme.primaryContainer;
+    final bgColor = !isEditMode
+        ? scheme.primary.withValues(alpha: 0.12)
+        : scheme.primaryContainer;
     final iconColor = !isEditMode ? scheme.primary : scheme.onPrimaryContainer;
-    final labelColor =
-        !isEditMode ? scheme.onSurface : scheme.onPrimaryContainer;
+    final labelColor = !isEditMode
+        ? scheme.onSurface
+        : scheme.onPrimaryContainer;
 
     return AnimatedRotation(
       turns: isEditMode ? -0.01 : 0,
@@ -1453,10 +1486,9 @@ class _IconTile extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: bgColor,
                       borderRadius: BorderRadius.circular(18),
-                      border:
-                          isEditMode
-                              ? Border.all(color: scheme.primary, width: 1.5)
-                              : null,
+                      border: isEditMode
+                          ? Border.all(color: scheme.primary, width: 1.5)
+                          : null,
                     ),
                     child: Icon(icon, color: iconColor, size: 28),
                   ),

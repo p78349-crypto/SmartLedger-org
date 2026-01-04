@@ -190,9 +190,7 @@ class CompactSearchBar extends StatelessWidget {
         contentPadding: const EdgeInsets.symmetric(horizontal: 16),
       ),
       onChanged: (query) {
-        onSearchChanged(
-          SearchFilter(query: query),
-        );
+        onSearchChanged(SearchFilter(query: query));
       },
     );
   }

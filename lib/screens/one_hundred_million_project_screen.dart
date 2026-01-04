@@ -56,7 +56,7 @@ class _OneHundredMillionProjectScreenState
         prefs.getBool(PrefKeys.project100mIncludeBenefitsV1) ?? true;
     _projectCashToInvestThresholdAmount =
         prefs.getDouble(PrefKeys.project100mCashToInvestThresholdAmountV1) ??
-            100000;
+        100000;
 
     if (mounted) {
       setState(() => _isLoading = false);
@@ -386,7 +386,9 @@ class _OneHundredMillionProjectScreenState
 
     final achieved = gapAt10y <= 0;
     final gapText = achieved ? '목표 초과: $gapLabel' : '부족: $gapLabel';
-    final gapColor = achieved ? theme.colorScheme.primary : theme.colorScheme.error;
+    final gapColor = achieved
+        ? theme.colorScheme.primary
+        : theme.colorScheme.error;
 
     return Scaffold(
       appBar: AppBar(
@@ -412,8 +414,11 @@ class _OneHundredMillionProjectScreenState
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.emoji_events,
-                            color: theme.colorScheme.primary, size: 32),
+                        Icon(
+                          Icons.emoji_events,
+                          color: theme.colorScheme.primary,
+                          size: 32,
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(
@@ -510,7 +515,9 @@ class _OneHundredMillionProjectScreenState
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                color: theme.colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.3,
+                ),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(

@@ -80,9 +80,7 @@ class AssetManagementUtils {
       totalProfitLossRate: totalProfitLossRate,
       profitLossColor: ProfitLossCalculator.getProfitLossColor(totalProfitLoss),
       profitLossLabel: ProfitLossCalculator.getProfitLossLabel(totalProfitLoss),
-      formattedTotalAssets: CurrencyFormatter.format(
-        totalAssets,
-      ),
+      formattedTotalAssets: CurrencyFormatter.format(totalAssets),
       formattedProfitLoss: ProfitLossCalculator.formatProfitLoss(
         totalProfitLoss,
       ),
@@ -352,8 +350,9 @@ class AssetUIBuilder {
                       Text(
                         '총 손익',
                         style: theme.textTheme.labelMedium?.copyWith(
-                          color: theme.colorScheme.onPrimary
-                              .withValues(alpha: 0.8),
+                          color: theme.colorScheme.onPrimary.withValues(
+                            alpha: 0.8,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -380,8 +379,9 @@ class AssetUIBuilder {
                       Text(
                         '손익률',
                         style: theme.textTheme.labelMedium?.copyWith(
-                          color: theme.colorScheme.onPrimary
-                              .withValues(alpha: 0.8),
+                          color: theme.colorScheme.onPrimary.withValues(
+                            alpha: 0.8,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -415,9 +415,7 @@ class AssetUIBuilder {
       color: scheme.surfaceContainerLow,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: BorderSide(
-          color: scheme.outlineVariant.withValues(alpha: 0.5),
-        ),
+        side: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.5)),
       ),
       child: InkWell(
         onTap: onTap,
@@ -457,8 +455,9 @@ class AssetUIBuilder {
                         Text(
                           cardInfo.asset.category.label,
                           style: theme.textTheme.labelSmall?.copyWith(
-                            color: scheme.onSurfaceVariant
-                                .withValues(alpha: 0.7),
+                            color: scheme.onSurfaceVariant.withValues(
+                              alpha: 0.7,
+                            ),
                             fontWeight: FontWeight.w500,
                           ),
                         ),

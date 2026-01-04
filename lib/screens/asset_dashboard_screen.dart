@@ -151,9 +151,7 @@ class _AssetDashboardScreenState extends State<AssetDashboardScreen> {
   /// ⏱️ 최근 타임라인
   Widget _buildRecentTimeline(ThemeData theme) {
     final allMoves = AssetMoveService().getMoves(widget.accountName);
-    final recentMoves = AssetManagementUtils.getRecentMoves(
-      allMoves,
-    );
+    final recentMoves = AssetManagementUtils.getRecentMoves(allMoves);
 
     if (recentMoves.isEmpty) {
       return const SizedBox.shrink();

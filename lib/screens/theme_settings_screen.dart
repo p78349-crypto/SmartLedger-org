@@ -132,22 +132,25 @@ class ThemeSettingsSection extends StatelessWidget {
                     if (mode != AppThemeMode.maleDark &&
                         mode != AppThemeMode.maleLight) ...[
                       Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 6,
-                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 6),
                         child: Text(
                           '여성 스타일 (10)',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                                fontWeight: FontWeight.w600,
+                              ),
                         ),
                       ),
                       ...ThemePresets.female
-                          .where((p) =>
-                              (mode != AppThemeMode.femaleDark &&
-                                  mode != AppThemeMode.femaleLight) ||
-                              p.id.contains('intense'))
+                          .where(
+                            (p) =>
+                                (mode != AppThemeMode.femaleDark &&
+                                    mode != AppThemeMode.femaleLight) ||
+                                p.id.contains('intense'),
+                          )
                           .map(
                             (preset) => _presetTile(
                               context,
@@ -162,15 +165,16 @@ class ThemeSettingsSection extends StatelessWidget {
                         mode != AppThemeMode.femaleLight &&
                         mode != AppThemeMode.maleLight) ...[
                       Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 6,
-                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 6),
                         child: Text(
                           '스페셜 스타일',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                                fontWeight: FontWeight.w600,
+                              ),
                         ),
                       ),
                       ...ThemePresets.special.map(
@@ -185,22 +189,25 @@ class ThemeSettingsSection extends StatelessWidget {
                     if (mode != AppThemeMode.femaleDark &&
                         mode != AppThemeMode.femaleLight) ...[
                       Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 6,
-                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 6),
                         child: Text(
                           '남성 스타일 (10)',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                                fontWeight: FontWeight.w600,
+                              ),
                         ),
                       ),
                       ...ThemePresets.male
-                          .where((p) =>
-                              (mode != AppThemeMode.maleDark &&
-                                  mode != AppThemeMode.maleLight) ||
-                              p.id.contains('intense'))
+                          .where(
+                            (p) =>
+                                (mode != AppThemeMode.maleDark &&
+                                    mode != AppThemeMode.maleLight) ||
+                                p.id.contains('intense'),
+                          )
                           .map(
                             (preset) => _presetTile(
                               context,

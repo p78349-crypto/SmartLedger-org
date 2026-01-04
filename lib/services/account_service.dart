@@ -146,10 +146,7 @@ class AccountService {
     final index = _accounts.indexWhere((a) => a.name == accountName);
     if (index == -1) return;
     final old = _accounts[index];
-    _accounts[index] = Account(
-      name: old.name,
-      createdAt: old.createdAt,
-    );
+    _accounts[index] = Account(name: old.name, createdAt: old.createdAt);
   }
 
   Future<void> _doLoad() async {

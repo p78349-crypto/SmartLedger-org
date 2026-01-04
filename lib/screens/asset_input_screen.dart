@@ -271,9 +271,7 @@ class _AssetInputScreenState extends State<AssetInputScreen> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              CurrencyFormatter.format(
-                                initialAsset.amount,
-                              ),
+                              CurrencyFormatter.format(initialAsset.amount),
                               style: theme.textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),

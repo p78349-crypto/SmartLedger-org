@@ -62,10 +62,9 @@ class SmartInputField extends StatelessWidget {
       vertical: compact ? (isLandscape ? 10 : 12) : (isLandscape ? 14 : 16),
     );
 
-    final fillColor =
-        scheme.brightness == Brightness.light
-            ? scheme.surfaceContainerLow
-            : scheme.surfaceContainerHighest.withValues(alpha: 0.5);
+    final fillColor = scheme.brightness == Brightness.light
+        ? scheme.surfaceContainerLow
+        : scheme.surfaceContainerHighest.withValues(alpha: 0.5);
 
     return TextFormField(
       controller: controller,
@@ -105,21 +104,15 @@ class SmartInputField extends StatelessWidget {
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide:
-              scheme.brightness == Brightness.dark
-                  ? BorderSide(
-                    color: scheme.outlineVariant.withValues(alpha: 0.5),
-                  )
-                  : BorderSide.none,
+          borderSide: scheme.brightness == Brightness.dark
+              ? BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.5))
+              : BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide:
-              scheme.brightness == Brightness.dark
-                  ? BorderSide(
-                    color: scheme.outlineVariant.withValues(alpha: 0.5),
-                  )
-                  : BorderSide.none,
+          borderSide: scheme.brightness == Brightness.dark
+              ? BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.5))
+              : BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),

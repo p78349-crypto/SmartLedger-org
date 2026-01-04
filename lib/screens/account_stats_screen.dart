@@ -200,12 +200,8 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
         borderData: FlBorderData(show: false),
         gridData: const FlGridData(show: false),
         titlesData: FlTitlesData(
-          topTitles: const AxisTitles(
-            
-          ),
-          rightTitles: const AxisTitles(
-            
-          ),
+          topTitles: const AxisTitles(),
+          rightTitles: const AxisTitles(),
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
@@ -262,12 +258,8 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
         borderData: FlBorderData(show: false),
         gridData: const FlGridData(show: false),
         titlesData: FlTitlesData(
-          topTitles: const AxisTitles(
-            
-          ),
-          rightTitles: const AxisTitles(
-            
-          ),
+          topTitles: const AxisTitles(),
+          rightTitles: const AxisTitles(),
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
@@ -1048,10 +1040,7 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
         return loader;
       }
       return Scaffold(
-        appBar: AppBar(
-          elevation: 0,
-          backgroundColor: Colors.transparent,
-        ),
+        appBar: AppBar(elevation: 0, backgroundColor: Colors.transparent),
         body: loader,
       );
     }
@@ -1080,10 +1069,7 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        appBar: AppBar(
-          elevation: 0,
-          backgroundColor: Colors.transparent,
-        ),
+        appBar: AppBar(elevation: 0, backgroundColor: Colors.transparent),
         body: content,
       ),
     );
@@ -1893,9 +1879,7 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
       decoration: BoxDecoration(
         color: scheme.surfaceContainerLow.withValues(alpha: 0.8),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: scheme.outlineVariant.withValues(alpha: 0.5),
-        ),
+        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.5)),
       ),
       child: Theme(
         data: theme.copyWith(dividerColor: Colors.transparent),
@@ -1924,8 +1908,10 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
                 leading: Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: _colorForTransaction(tx.type, theme)
-                        .withValues(alpha: 0.1),
+                    color: _colorForTransaction(
+                      tx.type,
+                      theme,
+                    ).withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -2455,10 +2441,7 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
                 final picked = await showDatePicker(
                   context: context,
                   initialDate: _selectedDate ?? _currentMonth,
-                  firstDate: DateTime(
-                    _currentMonth.year,
-                    _currentMonth.month,
-                  ),
+                  firstDate: DateTime(_currentMonth.year, _currentMonth.month),
                   lastDate: DateTime(
                     _currentMonth.year,
                     _currentMonth.month + 1,
@@ -2867,9 +2850,7 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
       decoration: BoxDecoration(
         color: scheme.surfaceContainerLow.withValues(alpha: 0.8),
         borderRadius: BorderRadius.circular(32),
-        border: Border.all(
-          color: scheme.outlineVariant.withValues(alpha: 0.5),
-        ),
+        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.5)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -2919,9 +2900,7 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
       decoration: BoxDecoration(
         color: scheme.surfaceContainerLow.withValues(alpha: 0.8),
         borderRadius: BorderRadius.circular(32),
-        border: Border.all(
-          color: scheme.outlineVariant.withValues(alpha: 0.5),
-        ),
+        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.5)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -4225,9 +4204,7 @@ class _SummaryCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: scheme.surfaceContainerLow.withValues(alpha: 0.8),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: scheme.outlineVariant.withValues(alpha: 0.5),
-        ),
+        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.5)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),

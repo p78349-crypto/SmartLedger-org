@@ -188,12 +188,8 @@ class _AccountHomeScreenState extends State<AccountHomeScreen> {
                                 ),
                                 borderData: FlBorderData(show: false),
                                 titlesData: FlTitlesData(
-                                  topTitles: const AxisTitles(
-                                    
-                                  ),
-                                  rightTitles: const AxisTitles(
-                                    
-                                  ),
+                                  topTitles: const AxisTitles(),
+                                  rightTitles: const AxisTitles(),
                                   leftTitles: AxisTitles(
                                     sideTitles: SideTitles(
                                       showTitles: true,

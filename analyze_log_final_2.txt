@@ -1,0 +1,9 @@
+Analyzing SmartLedger...                                        
+
+   info - The value of the argument is redundant because it matches the default value - lib\screens\account_main_screen.dart:637:39 - avoid_redundant_argument_values
+warning - A value for optional parameter 'initialIngredients' isn't ever given - lib\screens\food_expiry_main_screen.dart:1505:10 - unused_element_parameter
+warning - A value for optional parameter 'autoUsageMode' isn't ever given - lib\screens\food_expiry_main_screen.dart:1506:10 - unused_element_parameter
+  error - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\screens\food_expiry_main_screen.dart:2138:19 - use_build_context_synchronously
+  error - Expected to find ']' - lib\screens\food_expiry_main_screen.dart:2446:25 - expected_token
+  error - The argument for the named parameter 'separatorBuilder' was already specified - lib\screens\food_expiry_main_screen.dart:2450:19 - duplicate_named_argument
+

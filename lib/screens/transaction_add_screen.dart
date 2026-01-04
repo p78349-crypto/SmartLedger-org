@@ -113,7 +113,8 @@ class _TransactionAddScreenState extends State<TransactionAddScreen> {
           // In dark mode, if the background color is still the default white,
           // we should use the theme's scaffold background color instead.
           Color effectiveBgColor = bgColor;
-          final isDefaultWhite = bgColor.toARGB32() == 0xFFFFFFFF ||
+          final isDefaultWhite =
+              bgColor.toARGB32() == 0xFFFFFFFF ||
               bgColor.toARGB32() == 0xffffffff;
 
           if (theme.brightness == Brightness.dark && isDefaultWhite) {
@@ -1120,15 +1121,11 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
 
         if (effectiveMainCategory != _defaultCategory) {
           unawaited(
-            CategoryUsageService.increment(
-              main: effectiveMainCategory,
-            ),
+            CategoryUsageService.increment(main: effectiveMainCategory),
           );
           unawaited(
             RecentInputService.saveCategory(
-              CategoryUsageService.labelFor(
-                main: effectiveMainCategory,
-              ),
+              CategoryUsageService.labelFor(main: effectiveMainCategory),
             ),
           );
         }
@@ -1173,15 +1170,11 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
 
         if (effectiveMainCategory != _defaultCategory) {
           unawaited(
-            CategoryUsageService.increment(
-              main: effectiveMainCategory,
-            ),
+            CategoryUsageService.increment(main: effectiveMainCategory),
           );
           unawaited(
             RecentInputService.saveCategory(
-              CategoryUsageService.labelFor(
-                main: effectiveMainCategory,
-              ),
+              CategoryUsageService.labelFor(main: effectiveMainCategory),
             ),
           );
         }
@@ -1198,9 +1191,7 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
           UserPrefService.setShoppingCategoryHint(
             accountName: widget.accountName,
             keyword: desc,
-            hint: CategoryHint(
-              mainCategory: effectiveMainCategory,
-            ),
+            hint: CategoryHint(mainCategory: effectiveMainCategory),
           ),
         );
       }
@@ -1431,10 +1422,7 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
         // 하단 고정 버튼 바 (가로모드에서는 헤더로 통합하여 숨김)
         if (!isLandscape)
           Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 12,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               color: theme.colorScheme.surface.withValues(alpha: 0.9),
               boxShadow: [
@@ -1450,7 +1438,10 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  _buildSaveButtons(),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 20),
+                    child: _buildSaveButtons(),
+                  ),
                 ],
               ),
             ),
@@ -1545,14 +1536,12 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
               keyboardType: TextInputType.number,
               textInputAction: TextInputAction.next,
               label: '예금 금액 (원)',
-              validator: (value) => _validatePositiveAmount(value, '예금 금액을 입력하세요.'),
+              validator: (value) =>
+                  _validatePositiveAmount(value, '예금 금액을 입력하세요.'),
             ),
           ),
           const SizedBox(width: 12),
-          Expanded(
-            flex: 3,
-            child: _buildSavingsDateField(),
-          ),
+          Expanded(flex: 3, child: _buildSavingsDateField()),
         ],
       ),
       SizedBox(height: spacing),
@@ -1737,9 +1726,7 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
       onTap: _pickTransactionDate,
       borderRadius: BorderRadius.circular(16),
       child: InputDecorator(
-        decoration: const InputDecoration(
-          labelText: '예금일',
-        ),
+        decoration: const InputDecoration(labelText: '예금일'),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -1780,7 +1767,8 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
                 keyboardType: TextInputType.number,
                 textInputAction: TextInputAction.next,
                 onFieldSubmitted: (_) => _paymentFocusNode.requestFocus(),
-                validator: (value) => _validatePositiveAmount(value, '금액을 입력하세요.'),
+                validator: (value) =>
+                    _validatePositiveAmount(value, '금액을 입력하세요.'),
                 label: '금액 (수동 입력)',
               ),
             ),
@@ -1834,7 +1822,8 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
                 keyboardType: TextInputType.number,
                 textInputAction: TextInputAction.next,
                 onFieldSubmitted: (_) => _paymentFocusNode.requestFocus(),
-                validator: (value) => _validatePositiveAmount(value, '금액을 입력하세요.'),
+                validator: (value) =>
+                    _validatePositiveAmount(value, '금액을 입력하세요.'),
                 label: '반품 금액',
               ),
             ),
@@ -2043,8 +2032,9 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
                       child: Text(
                         cat,
                         style: TextStyle(
-                          fontWeight:
-                              isSelected ? FontWeight.bold : FontWeight.w500,
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.w500,
                           fontSize: 12.5,
                           letterSpacing: -0.2,
                         ),
@@ -2070,7 +2060,9 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
                       color: isSelected
                           ? theme.colorScheme.onPrimary
                           : theme.colorScheme.onSurface,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),

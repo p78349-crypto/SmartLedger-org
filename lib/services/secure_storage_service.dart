@@ -7,9 +7,7 @@ class SecureStorageService {
       SecureStorageService._internal();
   factory SecureStorageService() => _instance;
 
-  final FlutterSecureStorage _storage = const FlutterSecureStorage(
-    
-  );
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   Future<String?> readString(String key) {
     return _storage.read(key: key);

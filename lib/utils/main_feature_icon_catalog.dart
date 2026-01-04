@@ -180,6 +180,13 @@ class MainFeatureIconCatalog {
           icon: IconCatalog.refund,
           routeName: AppRoutes.refundTransactions,
         ),
+        MainFeatureIcon(
+          id: 'asset_project_100m',
+          label: '1억 프로젝트',
+          labelEn: '100M Project',
+          icon: Icons.emoji_events_outlined,
+          routeName: AppRoutes.assetProject100m,
+        ),
       ],
     ),
 
@@ -499,11 +506,11 @@ class MainFeatureIconCatalog {
       case 'stats':
         return at(3);
       case 'asset':
-        return at(5);
+        return at(4);
       case 'root':
-        return at(6);
+        return at(5);
       case 'settings':
-        return at(8);
+        return at(6);
       case 'reserved':
         return const [];
       default:

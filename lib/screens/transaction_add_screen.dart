@@ -120,25 +120,29 @@ class _TransactionAddScreenState extends State<TransactionAddScreen> {
             effectiveBgColor = theme.scaffoldBackgroundColor;
           }
 
+          final isLandscape =
+              MediaQuery.of(context).orientation == Orientation.landscape;
+
           return Scaffold(
             backgroundColor: effectiveBgColor,
             extendBodyBehindAppBar: bgType == 'image' && bgImagePath != null,
-            appBar: AppBar(
-              title: Text('$titlePrefix - ${widget.accountName}'),
-              backgroundColor:
-                  bgType == 'image' && bgImagePath != null
-                      ? Colors.transparent
-                      : null,
-              elevation: 0,
-              actions: [
-                IconButton(
-                  tooltip: '입력값 되돌리기',
-                  icon: const Icon(IconCatalog.restartAlt),
-                  onPressed: () =>
-                      _formStateKey.currentState?.promptRevertToInitial(),
-                ),
-              ],
-            ),
+            appBar: isLandscape
+                ? null
+                : AppBar(
+                    title: Text('$titlePrefix - ${widget.accountName}'),
+                    backgroundColor: bgType == 'image' && bgImagePath != null
+                        ? Colors.transparent
+                        : null,
+                    elevation: 0,
+                    actions: [
+                      IconButton(
+                        tooltip: '입력값 되돌리기',
+                        icon: const Icon(IconCatalog.restartAlt),
+                        onPressed: () =>
+                            _formStateKey.currentState?.promptRevertToInitial(),
+                      ),
+                    ],
+                  ),
             body: Stack(
               children: [
                 // 1. Base Background (Color or Image)
@@ -187,14 +191,11 @@ class _TransactionAddScreenState extends State<TransactionAddScreen> {
 
                 // 4. Content
                 SafeArea(
+                  top: !isLandscape,
                   child: Padding(
                     padding: EdgeInsets.symmetric(
                       horizontal: 16.0,
-                      vertical:
-                          MediaQuery.of(context).orientation ==
-                                  Orientation.landscape
-                              ? 8.0
-                              : 16.0,
+                      vertical: isLandscape ? 0.0 : 16.0,
                     ),
                     child: TransactionAddForm(
                       key: _formStateKey,
@@ -204,6 +205,7 @@ class _TransactionAddScreenState extends State<TransactionAddScreen> {
                           widget.learnCategoryHintFromDescription,
                       confirmBeforeSave: widget.confirmBeforeSave,
                       treatAsNew: widget.treatAsNew,
+                      titlePrefix: isLandscape ? titlePrefix : null,
                     ),
                   ),
                 ),
@@ -256,6 +258,7 @@ class TransactionAddForm extends StatefulWidget {
   final bool learnCategoryHintFromDescription;
   final bool confirmBeforeSave;
   final bool treatAsNew;
+  final String? titlePrefix;
   const TransactionAddForm({
     super.key,
     required this.accountName,
@@ -263,6 +266,7 @@ class TransactionAddForm extends StatefulWidget {
     this.learnCategoryHintFromDescription = false,
     this.confirmBeforeSave = false,
     this.treatAsNew = false,
+    this.titlePrefix,
   });
 
   @override
@@ -1404,20 +1408,104 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: EdgeInsets.only(
-            top: 12, // Add top padding to prevent label clipping
-            bottom:
-                MediaQuery.of(context).padding.bottom +
-                80, // Add padding for FAB
+    final theme = Theme.of(context);
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+
+    return Column(
+      children: [
+        if (isLandscape && widget.titlePrefix != null) _buildInlineHeader(),
+        Expanded(
+          child: Form(
+            key: _formKey,
+            child: ListView(
+              padding: EdgeInsets.only(
+                left: isLandscape ? 16 : 0,
+                right: isLandscape ? 16 : 0,
+                bottom: MediaQuery.of(context).padding.bottom + 20,
+              ),
+              children: [..._buildFieldsForSelectedType()],
+            ),
           ),
-          children: [..._buildFieldsForSelectedType()],
+        ),
+        // 하단 고정 버튼 바 (가로모드에서는 헤더로 통합하여 숨김)
+        if (!isLandscape)
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface.withValues(alpha: 0.9),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, -5),
+                ),
+              ],
+            ),
+            child: SafeArea(
+              top: false,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  _buildSaveButtons(),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildInlineHeader() {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        border: Border(
+          bottom: BorderSide(
+            color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+          ),
         ),
       ),
-      floatingActionButton: _buildSaveButtons(),
+      child: SafeArea(
+        top: false,
+        bottom: false,
+        child: Row(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => Navigator.of(context).pop(),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                '${widget.titlePrefix} - ${widget.accountName}',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(width: 8),
+            IconButton(
+              tooltip: '입력값 되돌리기',
+              icon: const Icon(IconCatalog.restartAlt, size: 20),
+              onPressed: promptRevertToInitial,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+            ),
+            const SizedBox(width: 16),
+            // 가로모드 전용: 헤더에 저장 버튼 배치
+            _buildSaveButtons(compact: true),
+          ],
+        ),
+      ),
     );
   }
 
@@ -1436,23 +1524,38 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
 
   List<Widget> _buildSavingsFields() {
     final theme = Theme.of(context);
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+    final spacing = isLandscape ? 8.0 : 12.0;
+
     return [
       _buildDescriptionInput(
         labelText: '상품명',
         emptyMessage: '상품명을 입력하세요.',
         enableHistory: true,
       ),
-      const SizedBox(height: 12),
-      SmartInputField(
-        controller: _amountController,
-        keyboardType: TextInputType.number,
-        textInputAction: TextInputAction.next,
-        label: '예금 금액 (원)',
-        validator: (value) => _validatePositiveAmount(value, '예금 금액을 입력하세요.'),
+      SizedBox(height: spacing),
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 2,
+            child: SmartInputField(
+              controller: _amountController,
+              keyboardType: TextInputType.number,
+              textInputAction: TextInputAction.next,
+              label: '예금 금액 (원)',
+              validator: (value) => _validatePositiveAmount(value, '예금 금액을 입력하세요.'),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            flex: 3,
+            child: _buildSavingsDateField(),
+          ),
+        ],
       ),
-      const SizedBox(height: 12),
-      _buildSavingsDateField(),
-      const SizedBox(height: 12),
+      SizedBox(height: spacing),
       _buildSavingsAllocationSelector(theme),
       const SizedBox(height: 4),
       AnimatedSwitcher(
@@ -1465,15 +1568,15 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
           ),
         ),
       ),
-      const SizedBox(height: 12),
+      SizedBox(height: spacing),
       _buildMemoField(onSubmitted: _saveTransaction),
-      const SizedBox(height: 24),
+      SizedBox(height: isLandscape ? 12 : 24),
       _buildCategorySection(),
     ];
   }
 
   /// 저장 + 저장후계속 버튼
-  Widget _buildSaveButtons() {
+  Widget _buildSaveButtons({bool compact = false}) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
 
@@ -1481,7 +1584,7 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Transform.scale(
-          scale: 0.8,
+          scale: compact ? 0.7 : 0.8,
           child: FloatingActionButton.small(
             heroTag: 'save_continue',
             onPressed: _saveAndContinue,
@@ -1491,9 +1594,9 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
             child: const Icon(IconCatalog.arrowForward),
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: 4), // 간격 축소
         Transform.scale(
-          scale: 0.7,
+          scale: compact ? 0.6 : 0.7,
           child: FloatingActionButton.extended(
             heroTag: 'save',
             onPressed: _saveTransaction,
@@ -1501,9 +1604,9 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
             backgroundColor: scheme.primary,
             foregroundColor: scheme.onPrimary,
             icon: const Icon(IconCatalog.check, size: 18),
-            label: const Text(
-              '저장 (ENT)',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            label: Text(
+              compact ? '저장' : '저장 (ENT)',
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             ),
           ),
         ),
@@ -1652,6 +1755,10 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
   }
 
   List<Widget> _buildIncomeFields() {
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+    final spacing = isLandscape ? 8.0 : 12.0;
+
     return [
       _buildDescriptionInput(
         labelText: '내용',
@@ -1659,35 +1766,51 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
         enableHistory: true,
         onFieldSubmitted: (_) => _amountFocusNode.requestFocus(),
       ),
-      const SizedBox(height: 12),
-      KeyedSubtree(
-        key: const Key('tx_amount'),
-        child: SmartInputField(
-          focusNode: _amountFocusNode,
-          controller: _amountController,
-          keyboardType: TextInputType.number,
-          textInputAction: TextInputAction.next,
-          onFieldSubmitted: (_) => _paymentFocusNode.requestFocus(),
-          validator: (value) => _validatePositiveAmount(value, '금액을 입력하세요.'),
-          label: '금액 (수동 입력)',
-        ),
+      SizedBox(height: spacing),
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 2,
+            child: KeyedSubtree(
+              key: const Key('tx_amount'),
+              child: SmartInputField(
+                focusNode: _amountFocusNode,
+                controller: _amountController,
+                keyboardType: TextInputType.number,
+                textInputAction: TextInputAction.next,
+                onFieldSubmitted: (_) => _paymentFocusNode.requestFocus(),
+                validator: (value) => _validatePositiveAmount(value, '금액을 입력하세요.'),
+                label: '금액 (수동 입력)',
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            flex: 3,
+            child: _buildPaymentField(
+              fieldKey: const Key('tx_payment'),
+              focusNode: _paymentFocusNode,
+              controller: _paymentController,
+              onSubmitted: () =>
+                  FocusScope.of(context).requestFocus(_memoFocusNode),
+              labelText: '결제수단',
+            ),
+          ),
+        ],
       ),
-      const SizedBox(height: 12),
-      _buildPaymentField(
-        fieldKey: const Key('tx_payment'),
-        focusNode: _paymentFocusNode,
-        controller: _paymentController,
-        onSubmitted: () => FocusScope.of(context).requestFocus(_memoFocusNode),
-        labelText: '결제수단',
-      ),
-      const SizedBox(height: 12),
+      SizedBox(height: spacing),
       _buildMemoField(onSubmitted: _saveTransaction),
-      const SizedBox(height: 24),
+      SizedBox(height: isLandscape ? 12 : 24),
       _buildCategorySection(),
     ];
   }
 
   List<Widget> _buildRefundFields() {
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+    final spacing = isLandscape ? 8.0 : 12.0;
+
     return [
       _buildDescriptionInput(
         labelText: '반품 내역',
@@ -1695,33 +1818,45 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
         enableHistory: true,
         onFieldSubmitted: (_) => _storeFocusNode.requestFocus(),
       ),
-      const SizedBox(height: 12),
+      SizedBox(height: spacing),
       _buildStoreOrBuyerField(),
-      const SizedBox(height: 12),
-      KeyedSubtree(
-        key: const Key('tx_amount'),
-        child: SmartInputField(
-          focusNode: _amountFocusNode,
-          controller: _amountController,
-          keyboardType: TextInputType.number,
-          textInputAction: TextInputAction.next,
-          onFieldSubmitted: (_) => _paymentFocusNode.requestFocus(),
-          validator: (value) => _validatePositiveAmount(value, '금액을 입력하세요.'),
-          label: '반품 금액',
-        ),
+      SizedBox(height: spacing),
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 2,
+            child: KeyedSubtree(
+              key: const Key('tx_amount'),
+              child: SmartInputField(
+                focusNode: _amountFocusNode,
+                controller: _amountController,
+                keyboardType: TextInputType.number,
+                textInputAction: TextInputAction.next,
+                onFieldSubmitted: (_) => _paymentFocusNode.requestFocus(),
+                validator: (value) => _validatePositiveAmount(value, '금액을 입력하세요.'),
+                label: '반품 금액',
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            flex: 3,
+            child: _buildPaymentField(
+              fieldKey: const Key('tx_payment'),
+              focusNode: _paymentFocusNode,
+              controller: _paymentController,
+              onSubmitted: () =>
+                  FocusScope.of(context).requestFocus(_memoFocusNode),
+              labelText: '환불 계좌/수단',
+              emptyErrorText: '환불 수단 입력',
+            ),
+          ),
+        ],
       ),
-      const SizedBox(height: 12),
-      _buildPaymentField(
-        fieldKey: const Key('tx_payment'),
-        focusNode: _paymentFocusNode,
-        controller: _paymentController,
-        onSubmitted: () => FocusScope.of(context).requestFocus(_memoFocusNode),
-        labelText: '환불 계좌/수단',
-        emptyErrorText: '환불 수단 입력',
-      ),
-      const SizedBox(height: 12),
+      SizedBox(height: spacing),
       _buildMemoField(onSubmitted: _saveTransaction),
-      const SizedBox(height: 24),
+      SizedBox(height: isLandscape ? 12 : 24),
       _buildCategorySection(),
     ];
   }
@@ -1739,6 +1874,7 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
+            flex: 2,
             child: SmartInputField(
               key: const Key('tx_unit'),
               controller: _unitPriceController,
@@ -1802,6 +1938,7 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
+            flex: 2,
             child: SmartInputField(
               controller: _amountController,
               focusNode: _calculatedAmountFocusNode,
@@ -1811,6 +1948,7 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
           ),
           const SizedBox(width: 12),
           Expanded(
+            flex: 3,
             child: _buildPaymentField(
               fieldKey: const Key('tx_payment'),
               focusNode: _paymentFocusNode,

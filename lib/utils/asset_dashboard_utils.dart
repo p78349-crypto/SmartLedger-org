@@ -242,6 +242,7 @@ class AssetUIBuilder {
     required ThemeData theme,
     required DashboardSummary summary,
     VoidCallback? onRefresh,
+    VoidCallback? onProjectClick,
   }) {
     return Container(
       width: double.infinity,
@@ -295,11 +296,27 @@ class AssetUIBuilder {
                   ),
                 ],
               ),
-              if (onRefresh != null)
-                IconButton(
-                  onPressed: onRefresh,
-                  icon: Icon(Icons.refresh, color: theme.colorScheme.onPrimary),
-                ),
+              Row(
+                children: [
+                  if (onProjectClick != null)
+                    IconButton(
+                      tooltip: '1억 프로젝트',
+                      onPressed: onProjectClick,
+                      icon: Icon(
+                        Icons.emoji_events_outlined,
+                        color: theme.colorScheme.onPrimary,
+                      ),
+                    ),
+                  if (onRefresh != null)
+                    IconButton(
+                      onPressed: onRefresh,
+                      icon: Icon(
+                        Icons.refresh,
+                        color: theme.colorScheme.onPrimary,
+                      ),
+                    ),
+                ],
+              ),
             ],
           ),
           const SizedBox(height: 32),

@@ -36,6 +36,7 @@ import 'package:smart_ledger/screens/micro_savings_nudge_screen.dart';
 import 'package:smart_ledger/screens/month_end_carryover_screen.dart';
 import 'package:smart_ledger/screens/monthly_stats_screen.dart';
 import 'package:smart_ledger/screens/nutrition_report_screen.dart';
+import 'package:smart_ledger/screens/one_hundred_million_project_screen.dart';
 import 'package:smart_ledger/screens/page1_bottom_icon_settings_screen.dart';
 import 'package:smart_ledger/screens/period_stats_screen.dart';
 import 'package:smart_ledger/utils/period_utils.dart' as period;
@@ -588,6 +589,15 @@ class AppRouter {
           settings: settings,
           builder: (_) => AssetRouteAuthGate(
             child: AssetInputScreen(accountName: a.accountName),
+          ),
+        );
+
+      case AppRoutes.assetProject100m:
+        final a = args as AccountArgs;
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => AssetRouteAuthGate(
+            child: OneHundredMillionProjectScreen(accountName: a.accountName),
           ),
         );
 

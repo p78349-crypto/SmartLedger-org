@@ -86,6 +86,7 @@ class AppRoutes {
   static const assetManagement = '/asset/management';
   static const assetSimpleInput = '/asset/input/simple';
   static const assetDetailInput = '/asset/input/detail';
+  static const assetProject100m = '/asset/project-100m';
 
   static const fixedCostTab = '/fixed-cost/tab';
   static const fixedCostStats = '/fixed-cost/stats';

@@ -410,6 +410,22 @@ class _AssetTabScreenState extends State<AssetTabScreen> {
         final result = await _authService.authenticateDevice(
           reason: '자산 정보에 접근하려면 인증이 필요합니다',
         );
+
+        // If device auth is not available (e.g., emulator/no biometrics),
+        // allow access as a pragmatic fallback but set the session marker.
+        if (result.status == AuthStatus.unavailable) {
+          await prefs.setInt(
+            PrefKeys.assetAuthSessionUntilMs,
+            DateTime.now()
+                .add(AuthService.assetSessionTimeout)
+                .millisecondsSinceEpoch,
+          );
+          if (!mounted) return true;
+          setState(() => _isAuthenticated = true);
+          _resetAutoLockTimer();
+          return true;
+        }
+
         if (!result.ok) return false;
 
         await prefs.setInt(

@@ -9,7 +9,7 @@ class MainPageMigration {
   /// This is best-effort and non-destructive: it only updates per-account
   /// persisted page slots to prefer asset icons on the asset page.
   static Future<void> moveAssetIconsToPageForAllAccounts({
-    int targetPageIndex = 5,
+    int targetPageIndex = 4,
   }) async {
     await AccountService().loadAccounts();
 

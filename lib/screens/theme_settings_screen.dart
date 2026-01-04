@@ -74,14 +74,24 @@ class ThemeSettingsSection extends StatelessWidget {
                       value: AppThemeMode.dark,
                     ),
                     RadioListTile<AppThemeMode>(
-                      title: Text('여성 스타일 (10)'),
+                      title: Text('여성 스타일 (다크)'),
                       subtitle: Text('다크 모드 + 여성용 진한 색상'),
                       value: AppThemeMode.femaleDark,
                     ),
                     RadioListTile<AppThemeMode>(
-                      title: Text('남성 스타일 (10)'),
+                      title: Text('남성 스타일 (다크)'),
                       subtitle: Text('다크 모드 + 남성용 진한 색상'),
                       value: AppThemeMode.maleDark,
+                    ),
+                    RadioListTile<AppThemeMode>(
+                      title: Text('여성 스타일 (진한 색상)'),
+                      subtitle: Text('라이트 모드 + 여성용 진한 색상'),
+                      value: AppThemeMode.femaleLight,
+                    ),
+                    RadioListTile<AppThemeMode>(
+                      title: Text('남성 스타일 (진한 색상)'),
+                      subtitle: Text('라이트 모드 + 남성용 진한 색상'),
+                      value: AppThemeMode.maleLight,
                     ),
                   ],
                 ),
@@ -119,7 +129,8 @@ class ThemeSettingsSection extends StatelessWidget {
                 },
                 child: Column(
                   children: [
-                    if (mode != AppThemeMode.maleDark) ...[
+                    if (mode != AppThemeMode.maleDark &&
+                        mode != AppThemeMode.maleLight) ...[
                       Padding(
                         padding: const EdgeInsets.symmetric(
                           vertical: 6,
@@ -134,7 +145,8 @@ class ThemeSettingsSection extends StatelessWidget {
                       ),
                       ...ThemePresets.female
                           .where((p) =>
-                              mode != AppThemeMode.femaleDark ||
+                              (mode != AppThemeMode.femaleDark &&
+                                  mode != AppThemeMode.femaleLight) ||
                               p.id.contains('intense'))
                           .map(
                             (preset) => _presetTile(
@@ -146,7 +158,9 @@ class ThemeSettingsSection extends StatelessWidget {
                       const Divider(height: 12),
                     ],
                     if (mode != AppThemeMode.femaleDark &&
-                        mode != AppThemeMode.maleDark) ...[
+                        mode != AppThemeMode.maleDark &&
+                        mode != AppThemeMode.femaleLight &&
+                        mode != AppThemeMode.maleLight) ...[
                       Padding(
                         padding: const EdgeInsets.symmetric(
                           vertical: 6,
@@ -168,7 +182,8 @@ class ThemeSettingsSection extends StatelessWidget {
                       ),
                       const Divider(height: 12),
                     ],
-                    if (mode != AppThemeMode.femaleDark) ...[
+                    if (mode != AppThemeMode.femaleDark &&
+                        mode != AppThemeMode.femaleLight) ...[
                       Padding(
                         padding: const EdgeInsets.symmetric(
                           vertical: 6,
@@ -183,7 +198,8 @@ class ThemeSettingsSection extends StatelessWidget {
                       ),
                       ...ThemePresets.male
                           .where((p) =>
-                              mode != AppThemeMode.maleDark ||
+                              (mode != AppThemeMode.maleDark &&
+                                  mode != AppThemeMode.maleLight) ||
                               p.id.contains('intense'))
                           .map(
                             (preset) => _presetTile(

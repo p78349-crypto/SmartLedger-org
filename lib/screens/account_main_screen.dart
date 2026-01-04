@@ -786,12 +786,12 @@ class _IconGridPageState extends State<_IconGridPage> {
       Page1BottomQuickIcons.slotCount; // 4x6 (24 slots)
 
   // Reserved page policy (0-based indices):
-  // 3: stats (page 4), 5: asset (page 6),
-  // 6: root (page 7), 8: settings (page 9)
+  // 3: stats (page 4), 4: asset (page 5),
+  // 5: root (page 6), 6: settings (page 7)
   static const Set<int> _statsReservedPages = <int>{3};
-  static const Set<int> _assetReservedPages = <int>{5};
-  static const Set<int> _rootReservedPages = <int>{6};
-  static const Set<int> _settingsOnlyPages = <int>{8};
+  static const Set<int> _assetReservedPages = <int>{4};
+  static const Set<int> _rootReservedPages = <int>{5};
+  static const Set<int> _settingsOnlyPages = <int>{6};
 
   late final Set<String> _allKnownIconIds = MainFeatureIconCatalog.pages
       .expand((p) => p.items)

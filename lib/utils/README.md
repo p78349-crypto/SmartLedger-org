@@ -9,7 +9,7 @@
 날짜와 시간을 다양한 형식으로 변환합니다.
 
 ```dart
-import 'package:vccode1/utils/utils.dart';
+import 'package:smart_ledger/utils/utils.dart';
 
 // 기본 날짜 포맷
 DateFormatter.formatDate(DateTime.now()); // "2025-12-05"
@@ -239,20 +239,20 @@ SuccessMessages.backupCompleted
 
 ### 전체 import (권장)
 ```dart
-import 'package:vccode1/utils/utils.dart';
+import 'package:smart_ledger/utils/utils.dart';
 ```
 
 ### 개별 import
 ```dart
-import 'package:vccode1/utils/date_formatter.dart';
-import 'package:vccode1/utils/currency_formatter.dart';
+import 'package:smart_ledger/utils/date_formatter.dart';
+import 'package:smart_ledger/utils/currency_formatter.dart';
 ```
 
 ## 📝 실전 예시
 
 ### 거래 내역 화면에서 활용
 ```dart
-import 'package:vccode1/utils/utils.dart';
+import 'package:smart_ledger/utils/utils.dart';
 
 class TransactionListItem extends StatelessWidget {
   final Transaction transaction;

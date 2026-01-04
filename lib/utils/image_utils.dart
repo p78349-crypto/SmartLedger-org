@@ -43,7 +43,7 @@ Future<File> processAndCacheImage(
       '$quality.jpg';
 
   final cacheDir = await getTemporaryDirectory();
-  final outPath = p.join(cacheDir.path, 'vccode1_wallpapers', key);
+  final outPath = p.join(cacheDir.path, 'smart_ledger_wallpapers', key);
   final outDir = Directory(p.dirname(outPath));
   if (!outDir.existsSync()) outDir.createSync(recursive: true);
 
@@ -60,7 +60,7 @@ Future<void> pruneCache({
   int maxTotalBytes = 100 * 1024 * 1024,
 }) async {
   final cacheDir = await getTemporaryDirectory();
-  final root = Directory(p.join(cacheDir.path, 'vccode1_wallpapers'));
+  final root = Directory(p.join(cacheDir.path, 'smart_ledger_wallpapers'));
   if (!root.existsSync()) return;
 
   final now = DateTime.now();

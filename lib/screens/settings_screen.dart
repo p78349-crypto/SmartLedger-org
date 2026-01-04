@@ -702,12 +702,12 @@ class _SettingsScreenState extends State<SettingsScreen>
                     context,
                     icon: Icons.description_outlined,
                     title: '오픈소스 라이선스',
-                    subtitle: 'vccode1 라이선스 정보 확인',
+                    subtitle: 'SmartLedger 라이선스 정보 확인',
                     onTap: () {
                       showLicensePage(
                         context: context,
-                        applicationName: 'vccode1',
-                        applicationLegalese: 'Copyright (c) 2025 com.example',
+                        applicationName: 'SmartLedger',
+                        applicationLegalese: 'Copyright (c) 2025 SmartLedger',
                       );
                     },
                   ),

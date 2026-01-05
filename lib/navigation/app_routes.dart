@@ -47,6 +47,7 @@ class AppRoutes {
   static const privacyPolicy = '/privacy-policy';
   static const fileViewer = '/file-viewer';
   static const nutritionReport = '/nutrition-report';
+  static const ingredientSearch = '/ingredient-search';
 
   static const accountStats = '/stats/monthly';
   static const accountStatsDecade = '/stats/decade';
@@ -66,6 +67,8 @@ class AppRoutes {
   static const microSavings = '/nudges/micro-savings';
   static const incomeSplit = '/income/split';
   static const foodExpiry = '/food/expiry';
+  static const foodInventoryCheck = '/food/inventory-check';
+  static const foodCookingStart = '/food/cooking-start';
   static const calendar = '/calendar';
 
   static const shoppingCart = '/shopping/cart';

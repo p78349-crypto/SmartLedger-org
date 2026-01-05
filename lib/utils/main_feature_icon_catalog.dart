@@ -97,11 +97,18 @@ class MainFeatureIconCatalog {
           routeName: AppRoutes.quickSimpleExpenseInput,
         ),
         MainFeatureIcon(
-          id: 'food_expiry',
-          label: '식재료 재고/유통기한',
-          labelEn: 'Food Inventory',
+          id: 'food_inventory_check',
+          label: '재고 확인',
+          labelEn: 'Inventory Check',
           icon: IconCatalog.inventory2,
-          routeName: AppRoutes.foodExpiry,
+          routeName: AppRoutes.foodInventoryCheck,
+        ),
+        MainFeatureIcon(
+          id: 'food_cooking_start',
+          label: '요리 시작',
+          labelEn: 'Start Cooking',
+          icon: Icons.fastfood,
+          routeName: AppRoutes.foodCookingStart,
         ),
         MainFeatureIcon(
           id: 'nutrition_report',
@@ -151,6 +158,13 @@ class MainFeatureIconCatalog {
           labelEn: 'Add Detailed',
           icon: IconCatalog.postAdd,
           routeName: AppRoutes.transactionAddDetailed,
+        ),
+        MainFeatureIcon(
+          id: 'ingredient_search',
+          label: '요리 필요 재료 검색',
+          labelEn: 'Recipe Ingredients',
+          icon: Icons.menu_book,
+          routeName: AppRoutes.ingredientSearch,
         ),
         MainFeatureIcon(
           id: 'income_add',

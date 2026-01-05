@@ -417,17 +417,32 @@ class _FoodSearchResult extends StatelessWidget {
                 ),
               ),
             ),
-            child: RichText(
-              text: TextSpan(
-                style: theme.textTheme.bodySmall,
-                children: [
-                  TextSpan(
-                    text: '${p.ingredient}: ',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text.rich(
+                    TextSpan(
+                      style: theme.textTheme.bodySmall,
+                      children: [
+                        TextSpan(
+                          text: '${p.ingredient}: ',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        TextSpan(text: p.why),
+                      ],
+                    ),
                   ),
-                  TextSpan(text: p.why),
-                ],
-              ),
+                ),
+                if (onAdd != null)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8),
+                    child: ElevatedButton(
+                      onPressed: () => onAdd?.call(p.ingredient),
+                      child: const Text('추가'),
+                    ),
+                  ),
+              ],
             ),
           ),
         const SizedBox(height: 8),

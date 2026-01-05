@@ -2124,7 +2124,49 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('유통기한 관리'),
+        centerTitle: false,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            IconButton(
+              tooltip: '이전',
+              icon: Icon(
+                Icons.arrow_back,
+                color: theme.colorScheme.onSurfaceVariant.withValues(
+                  alpha: 0.4,
+                ),
+              ),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            Expanded(
+              child: Text(
+                '유통기한 관리',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            IconButton(
+              tooltip: '다음',
+              icon: Icon(
+                Icons.arrow_forward,
+                color: theme.colorScheme.primary,
+              ),
+              onPressed: () async {
+                final accountName = await UserPrefService.getLastAccountName();
+                if (!context.mounted) return;
+                if (accountName != null) {
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.shoppingCart,
+                    arguments: ShoppingCartArgs(accountName: accountName),
+                  );
+                }
+              },
+            ),
+          ],
+        ),
         actions: [
           if (_isUsageMode)
             IconButton(
@@ -2136,21 +2178,6 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
             onPressed: _toggleUsageMode,
             icon: Icon(_isUsageMode ? Icons.close : Icons.soup_kitchen),
             tooltip: _isUsageMode ? '사용량 입력 종료' : '요리/사용 모드 (일괄 입력)',
-          ),
-          IconButton(
-            onPressed: () async {
-              final accountName = await UserPrefService.getLastAccountName();
-              if (!context.mounted) return;
-              if (accountName != null) {
-                Navigator.pushNamed(
-                  context,
-                  AppRoutes.shoppingCart,
-                  arguments: ShoppingCartArgs(accountName: accountName),
-                );
-              }
-            },
-            icon: const Icon(IconCatalog.shoppingCart),
-            tooltip: '장바구니 이동',
           ),
           if (!_isUsageMode)
             IconButton(

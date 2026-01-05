@@ -965,19 +965,61 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
       appBar: AppBar(
         centerTitle: false,
         title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildModeSwitchBar(theme: theme),
-            if (!isPrep) ...[
-              const SizedBox(width: 8),
-              IconButton(
-                tooltip: '선택 항목 삭제',
-                onPressed: _isLoading ? null : _deleteCheckedItems,
-                icon: Icon(
-                  IconCatalog.deleteOutline,
-                  color: theme.colorScheme.error,
-                ),
+            IconButton(
+              tooltip: '이전',
+              icon: Icon(
+                Icons.arrow_back,
+                color: widget.openPrepOnStart
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
               ),
-            ],
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            Expanded(
+              child: Align(
+                child: _buildModeSwitchBar(theme: theme),
+              ),
+            ),
+            Row(
+              children: [
+                if (!isPrep) ...[
+                  IconButton(
+                    tooltip: '선택 항목 삭제',
+                    onPressed: _isLoading ? null : _deleteCheckedItems,
+                    icon: Icon(
+                      IconCatalog.deleteOutline,
+                      color: theme.colorScheme.error,
+                    ),
+                  ),
+                ],
+                IconButton(
+                  tooltip: '다음',
+                  icon: Icon(
+                    Icons.arrow_forward,
+                    color: widget.openPrepOnStart
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.onSurfaceVariant.withValues(
+                          alpha: 0.4,
+                        ),
+                  ),
+                  onPressed: widget.openPrepOnStart
+                      ? () {
+                          Navigator.of(context).pushNamed(
+                            AppRoutes.shoppingCartQuickTransaction,
+                            arguments: ShoppingCartQuickTransactionArgs(
+                              accountName: widget.accountName,
+                              title: '지출 입력',
+                              description: '장바구니 항목',
+                              total: 0,
+                            ),
+                          );
+                        }
+                      : null,
+                ),
+              ],
+            ),
           ],
         ),
         actions: widget.openPrepOnStart
@@ -1561,23 +1603,97 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                     const SizedBox(height: 10),
                     Row(
                       children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed:
-                                (!widget.openPrepOnStart && checkedCount > 0)
-                                ? _addCheckedItemsToLedgerMartShopping
-                                : null,
-                            child: const Text('마트 쇼핑 입력'),
+                        Transform.translate(
+                          offset: const Offset(0, -6),
+                          child: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.surfaceContainerHighest,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.06),
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: IconButton(
+                              padding: const EdgeInsets.all(6),
+                              constraints: const BoxConstraints(),
+                              icon: Icon(
+                                Icons.arrow_back,
+                                size: 20,
+                                color: theme.colorScheme.primary,
+                              ),
+                              onPressed: () => Navigator.of(context).pop(),
+                            ),
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        Expanded(
+                        const SizedBox(width: 6),
+                        SizedBox(
+                          width: 120,
+                          height: 36,
+                          child: OutlinedButton(
+                            onPressed: (!widget.openPrepOnStart && checkedCount > 0)
+                                ? _addCheckedItemsToLedgerMartShopping
+                                : null,
+                            child: const Text('마트 쇼핑'),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        SizedBox(
+                          width: 120,
+                          height: 36,
                           child: FilledButton(
-                            onPressed:
-                                (!widget.openPrepOnStart && checkedCount > 0)
+                            onPressed: (!widget.openPrepOnStart && checkedCount > 0)
                                 ? _addCheckedItemsToLedgerBulk
                                 : null,
                             child: Text('일괄 입력 ($checkedCount)'),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Transform.translate(
+                          offset: const Offset(0, -6),
+                          child: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.surfaceContainerHighest,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.06),
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: IconButton(
+                              padding: const EdgeInsets.all(6),
+                              constraints: const BoxConstraints(),
+                              icon: Icon(
+                                Icons.arrow_forward,
+                                size: 20,
+                                color: widget.openPrepOnStart
+                                    ? theme.colorScheme.primary
+                                    : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                              ),
+                              onPressed: widget.openPrepOnStart
+                                  ? () {
+                                      Navigator.of(context).pushNamed(
+                                        AppRoutes.shoppingCartQuickTransaction,
+                                        arguments: ShoppingCartQuickTransactionArgs(
+                                          accountName: widget.accountName,
+                                          title: '지출 입력',
+                                          description: '장바구니 항목',
+                                          total: 0,
+                                        ),
+                                      );
+                                    }
+                                  : null,
+                            ),
                           ),
                         ),
                       ],

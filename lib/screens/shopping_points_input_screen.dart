@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 
 import 'package:smart_ledger/models/shopping_points_draft_entry.dart';
 import 'package:smart_ledger/models/transaction.dart';
+import 'package:smart_ledger/navigation/app_routes.dart';
 import 'package:smart_ledger/services/transaction_service.dart';
 import 'package:smart_ledger/services/user_pref_service.dart';
 import 'package:smart_ledger/utils/benefit_aggregation_utils.dart';
@@ -405,7 +406,38 @@ class _ShoppingPointsInputScreenState extends State<ShoppingPointsInputScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('포인트 입력'),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            IconButton(
+              tooltip: '이전',
+              icon: Icon(
+                Icons.arrow_back,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            const Expanded(
+              child: Text(
+                '포인트 입력',
+                textAlign: TextAlign.center,
+              ),
+            ),
+            IconButton(
+              tooltip: '다음',
+              icon: Icon(
+                Icons.arrow_forward,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              onPressed: () {
+                Navigator.of(context).pushNamed(
+                  AppRoutes.dailyTransactions,
+                  arguments: AccountArgs(accountName: widget.accountName),
+                );
+              },
+            ),
+          ],
+        ),
         actions: [
           IconButton(
             tooltip: '새로고침',

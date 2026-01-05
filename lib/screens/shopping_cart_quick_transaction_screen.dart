@@ -1701,10 +1701,47 @@ class _ShoppingCartQuickTransactionScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          '$title$bulkIndexText',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            IconButton(
+              tooltip: '이전',
+              icon: Icon(
+                Icons.arrow_back,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            Expanded(
+              child: Text(
+                '$title$bulkIndexText',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+              ),
+            ),
+            IconButton(
+              tooltip: '다음',
+              icon: Icon(
+                Icons.arrow_forward,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              onPressed: () {
+                _save();
+                if (!mounted) return;
+                final navigator = Navigator.of(context);
+                Future.delayed(const Duration(milliseconds: 200), () {
+                  if (!mounted) return;
+                  navigator.pushNamed(
+                    AppRoutes.shoppingPointsInput,
+                    arguments: AccountArgs(
+                      accountName: widget.args.accountName,
+                    ),
+                  );
+                });
+              },
+            ),
+          ],
         ),
         actions: [
           IconButton(
@@ -1887,38 +1924,107 @@ class _ShoppingCartQuickTransactionScreenState
           ],
           Row(
             children: [
-              Expanded(
-                child: SizedBox(
-                  height: 52,
-                  child: OutlinedButton(
-                    onPressed: _saveWithBenefits,
-                    style: OutlinedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+              Transform.translate(
+                offset: const Offset(0, -6),
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.06),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
                       ),
+                    ],
+                  ),
+                  child: IconButton(
+                    padding: const EdgeInsets.all(6),
+                    constraints: const BoxConstraints(),
+                    icon: Icon(
+                      Icons.arrow_back,
+                      size: 20,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
-                    child: const Text('혜택 입력'),
+                    onPressed: () => Navigator.of(context).pop(),
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: SizedBox(
-                  height: 52,
-                  child: FilledButton(
-                    onPressed: _save,
-                    style: FilledButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+              const SizedBox(width: 6),
+              SizedBox(
+                width: 120,
+                height: 36,
+                child: OutlinedButton(
+                  onPressed: _saveWithBenefits,
+                  style: OutlinedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Text(
-                      '저장',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+                  ),
+                  child: const Text('혜택 입력'),
+                ),
+              ),
+              const SizedBox(width: 6),
+              SizedBox(
+                width: 120,
+                height: 36,
+                child: FilledButton(
+                  onPressed: _save,
+                  style: FilledButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
+                  ),
+                  child: const Text(
+                    '저장',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 6),
+              Transform.translate(
+                offset: const Offset(0, -6),
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.06),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: IconButton(
+                    padding: const EdgeInsets.all(6),
+                    constraints: const BoxConstraints(),
+                    icon: Icon(
+                      Icons.arrow_forward,
+                      size: 20,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    onPressed: () {
+                      _save();
+                      if (!mounted) return;
+                      final navigator = Navigator.of(context);
+                      Future.delayed(const Duration(milliseconds: 200), () {
+                        if (!mounted) return;
+                        navigator.pushNamed(
+                          AppRoutes.shoppingPointsInput,
+                          arguments: AccountArgs(
+                            accountName: widget.args.accountName,
+                          ),
+                        );
+                      });
+                    },
                   ),
                 ),
               ),

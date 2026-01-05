@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:smart_ledger/models/category_hint.dart';
 import 'package:smart_ledger/models/shopping_cart_history_entry.dart';
 import 'package:smart_ledger/models/shopping_cart_item.dart';
+import 'package:smart_ledger/models/transaction.dart';
 import 'package:smart_ledger/navigation/app_routes.dart';
 import 'package:smart_ledger/services/user_pref_service.dart';
-import 'package:smart_ledger/utils/currency_formatter.dart';
 import 'package:smart_ledger/utils/shopping_category_utils.dart';
 
 class ShoppingCartBulkLedgerUtils {
@@ -43,10 +43,6 @@ class ShoppingCartBulkLedgerUtils {
       final item = selected.first;
       final qty = qtyOf(item);
       final unit = item.unitPrice;
-      if (unit <= 0) {
-        messenger.showSnackBar(const SnackBar(content: Text('단가를 입력하세요.')));
-        return;
-      }
       final total = unit * qty;
       final suggested = ShoppingCategoryUtils.suggest(
         item,
@@ -56,16 +52,21 @@ class ShoppingCartBulkLedgerUtils {
       final baseNow = DateTime.now();
 
       final saved = await navigator.pushNamed(
-        AppRoutes.shoppingCartQuickTransaction,
-        arguments: ShoppingCartQuickTransactionArgs(
+        AppRoutes.transactionAdd,
+        arguments: TransactionAddArgs(
           accountName: accountName,
-          title: '장바구니',
-          description: item.name,
-          quantity: qty,
-          unitPrice: unit,
-          total: total,
-          initialMainCategory: suggested.mainCategory,
-          initialSubCategory: suggested.subCategory,
+          initialTransaction: Transaction(
+            id: 'tmp_${baseNow.microsecondsSinceEpoch}',
+            type: TransactionType.expense,
+            description: item.name,
+            amount: total,
+            date: baseNow,
+            quantity: qty,
+            unitPrice: unit,
+            mainCategory: suggested.mainCategory,
+            subCategory: suggested.subCategory,
+            detailCategory: suggested.detailCategory,
+          ),
         ),
       );
 
@@ -104,45 +105,8 @@ class ShoppingCartBulkLedgerUtils {
       return;
     }
 
-    final itemsMissingUnitPrice = selected
-        .where((i) => i.unitPrice <= 0)
-        .toList();
-    if (itemsMissingUnitPrice.isNotEmpty) {
-      final firstName = itemsMissingUnitPrice.first.name;
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(
-            '단가 미입력 항목이 있어요: “$firstName” 등 ${itemsMissingUnitPrice.length}개',
-          ),
-        ),
-      );
-      return;
-    }
-    final total = selected.fold<double>(
-      0.0,
-      (sum, i) => sum + (qtyOf(i) * i.unitPrice),
-    );
-    if (total <= 0) {
-      messenger.showSnackBar(
-        const SnackBar(content: Text('합계 금액이 0원입니다. 단가를 확인하세요.')),
-      );
-      return;
-    }
-
-    final bulkPreviewLines = selected
-        .map((i) {
-          final qty = qtyOf(i);
-          final unit = i.unitPrice;
-          final lineTotal = qty * unit;
-          final left = '${i.name} ($qty개)';
-          final right = CurrencyFormatter.format(lineTotal);
-          return '$left = $right';
-        })
-        .toList(growable: false);
-
     // Sequential quick saves: after the first save, payment/memo will be
-    // auto-prefilled on the next screen. From the 2nd item, the screen can
-    // also save the remaining items at once ("나머지 모두 저장").
+    // auto-prefilled on the next screen.
     var currentItems = items;
     for (var index = 0; index < selected.length; index++) {
       if (!context.mounted) return;
@@ -155,84 +119,26 @@ class ShoppingCartBulkLedgerUtils {
         learnedHints: categoryHints,
       );
 
-      final remaining = selected.sublist(index);
       final result = await navigator.pushNamed(
-        AppRoutes.shoppingCartQuickTransaction,
-        arguments: ShoppingCartQuickTransactionArgs(
+        AppRoutes.transactionAdd,
+        arguments: TransactionAddArgs(
           accountName: accountName,
-          title: '장바구니(일괄) ${index + 1}/${selected.length}',
-          description: item.name,
-          quantity: qty,
-          unitPrice: unit,
-          total: itemTotal,
-          initialMainCategory: suggested.mainCategory,
-          initialSubCategory: suggested.subCategory,
-          bulkRemainingItems: remaining,
-          bulkIndex: index,
-          bulkTotalCount: selected.length,
-          bulkCategoryHints: categoryHints,
-          bulkGrandTotal: total,
-          bulkPreviewLines: bulkPreviewLines,
+          initialTransaction: Transaction(
+            id: 'tmp_${DateTime.now().microsecondsSinceEpoch}',
+            type: TransactionType.expense,
+            description: item.name,
+            amount: itemTotal,
+            date: DateTime.now(),
+            quantity: qty,
+            unitPrice: unit,
+            mainCategory: suggested.mainCategory,
+            subCategory: suggested.subCategory,
+            detailCategory: suggested.detailCategory,
+          ),
         ),
       );
 
       if (!context.mounted) return;
-
-      if (result is ShoppingCartQuickTransactionSaveRestResult) {
-        for (final savedId in result.savedItemIds) {
-          final savedItem = selected.firstWhere(
-            (i) => i.id == savedId,
-            orElse: () => ShoppingCartItem(
-              id: savedId,
-              name: '',
-              isPlanned: false,
-              createdAt: DateTime.now(),
-              updatedAt: DateTime.now(),
-            ),
-          );
-          final at = DateTime.now();
-          await UserPrefService.addShoppingCartHistoryEntry(
-            accountName: accountName,
-            entry: ShoppingCartHistoryEntry(
-              id: 'hist_${at.microsecondsSinceEpoch}',
-              action: ShoppingCartHistoryAction.addToLedger,
-              itemId: savedId,
-              name: savedItem.name,
-              quantity: savedItem.quantity,
-              unitPrice: savedItem.unitPrice,
-              isPlanned: savedItem.isPlanned,
-              at: at,
-            ),
-          );
-        }
-
-        final ids = result.savedItemIds.toSet();
-        currentItems = currentItems.where((i) => !ids.contains(i.id)).toList();
-
-        if (!context.mounted) return;
-
-        final shouldClear = await _confirmClearRemainingAfterShopping(
-          context: context,
-          remainingCount: currentItems.length,
-        );
-        if (!context.mounted) return;
-
-        await saveItems(shouldClear ? const [] : currentItems);
-        await reload();
-
-        if (!context.mounted) return;
-
-        await navigator.pushNamed(
-          AppRoutes.dailyTransactions,
-          arguments: DailyTransactionsArgs(
-            accountName: accountName,
-            initialDay: DateTime.now(),
-            savedCount: result.savedItemIds.length,
-            showShoppingPointsInputCta: true,
-          ),
-        );
-        return;
-      }
 
       final savedBool = result is bool ? result : null;
       if (savedBool != true) {
@@ -312,18 +218,6 @@ class ShoppingCartBulkLedgerUtils {
     if (commonInfo == null || !context.mounted) return;
 
     // 2. Proceed with bulk entry using common info
-    final total = selected.fold<double>(
-      0.0,
-      (sum, i) => sum + ((i.quantity <= 0 ? 1 : i.quantity) * i.unitPrice),
-    );
-
-    final bulkPreviewLines = selected.map((i) {
-      final qty = i.quantity <= 0 ? 1 : i.quantity;
-      final unit = i.unitPrice;
-      final lineTotal = qty * unit;
-      return '${i.name} ($qty개) = ${CurrencyFormatter.format(lineTotal)}';
-    }).toList();
-
     var currentItems = items;
     for (var index = 0; index < selected.length; index++) {
       if (!context.mounted) return;
@@ -336,71 +230,28 @@ class ShoppingCartBulkLedgerUtils {
         learnedHints: categoryHints,
       );
 
-      final remaining = selected.sublist(index);
       final result = await navigator.pushNamed(
-        AppRoutes.shoppingCartQuickTransaction,
-        arguments: ShoppingCartQuickTransactionArgs(
+        AppRoutes.transactionAdd,
+        arguments: TransactionAddArgs(
           accountName: accountName,
-          title: '마트 쇼핑 입력 ${index + 1}/${selected.length}',
-          description: item.name,
-          quantity: qty,
-          unitPrice: unit,
-          total: itemTotal,
-          initialMainCategory: suggested.mainCategory,
-          initialSubCategory: suggested.subCategory,
-          bulkRemainingItems: remaining,
-          bulkIndex: index,
-          bulkTotalCount: selected.length,
-          bulkCategoryHints: categoryHints,
-          bulkGrandTotal: total,
-          bulkPreviewLines: bulkPreviewLines,
-          martStore: commonInfo.store,
-          martPayment: commonInfo.payment,
-          martDate: commonInfo.date,
+          initialTransaction: Transaction(
+            id: 'tmp_${DateTime.now().microsecondsSinceEpoch}',
+            type: TransactionType.expense,
+            description: item.name,
+            amount: itemTotal,
+            date: commonInfo.date,
+            quantity: qty,
+            unitPrice: unit,
+            paymentMethod: commonInfo.payment,
+            store: commonInfo.store,
+            mainCategory: suggested.mainCategory,
+            subCategory: suggested.subCategory,
+            detailCategory: suggested.detailCategory,
+          ),
         ),
       );
 
       if (!context.mounted) return;
-
-      if (result is ShoppingCartQuickTransactionSaveRestResult) {
-        // Handle bulk save rest (similar to existing logic but with mart info)
-        // Actually, the screen itself should handle the mart info
-        // during bulk save.
-        // We just need to make sure the screen uses it.
-        for (final savedId in result.savedItemIds) {
-          final at = DateTime.now();
-          await UserPrefService.addShoppingCartHistoryEntry(
-            accountName: accountName,
-            entry: ShoppingCartHistoryEntry(
-              id: 'hist_${at.microsecondsSinceEpoch}',
-              action: ShoppingCartHistoryAction.addToLedger,
-              itemId: savedId,
-              name: selected.firstWhere((i) => i.id == savedId).name,
-              quantity: selected.firstWhere((i) => i.id == savedId).quantity,
-              unitPrice: selected.firstWhere((i) => i.id == savedId).unitPrice,
-              isPlanned: selected.firstWhere((i) => i.id == savedId).isPlanned,
-              at: at,
-            ),
-          );
-        }
-
-        final ids = result.savedItemIds.toSet();
-        currentItems = currentItems.where((i) => !ids.contains(i.id)).toList();
-        await saveItems(currentItems);
-        await reload();
-
-        if (!context.mounted) return;
-        await navigator.pushNamed(
-          AppRoutes.dailyTransactions,
-          arguments: DailyTransactionsArgs(
-            accountName: accountName,
-            initialDay: commonInfo.date,
-            savedCount: result.savedItemIds.length,
-            showShoppingPointsInputCta: true,
-          ),
-        );
-        return;
-      }
 
       if (result != true) break;
 

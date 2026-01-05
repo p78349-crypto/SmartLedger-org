@@ -406,6 +406,7 @@ class _ShoppingPointsInputScreenState extends State<ShoppingPointsInputScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('포인트 입력'),
+        centerTitle: true,
         actions: [
           IconButton(
             tooltip: '새로고침',

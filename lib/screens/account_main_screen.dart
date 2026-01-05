@@ -54,11 +54,6 @@ class _AccountMainScreenState extends State<AccountMainScreen>
   bool _isRestoringIndex = false;
   bool _disablePageSwipe = false;
 
-  Timer? _screenSaverTimer;
-  bool _screenSaverShowing = false;
-  bool _screenSaverEnabled = false;
-  int _screenSaverIdleSeconds = 60;
-
   late final List<GlobalKey<_IconGridPageState>> _pageKeys;
 
   Future<void> _confirmAndResetMainPages() async {
@@ -134,97 +129,12 @@ class _AccountMainScreenState extends State<AccountMainScreen>
       _pageCount,
       (_) => GlobalKey<_IconGridPageState>(),
     );
-    // Best-effort policy normalization: if a reserved-module icon (Stats/Asset/
-    // ROOT/Settings) is placed on a non-policy page, move it to the nearest
-    // allowed page with an empty slot.
-    //
-    // NOTE: automatic relocation was causing unexpected page moves. Disabled
-    // the automatic normalization so icon placement remains under user
-    // control. The full helper `_normalizeReservedPageIconSlotsBestEffort`
-    // remains in the file for manual invocation or future opt-in use.
-    // _normalizeReservedPageIconSlotsBestEffort();
     _restoreSavedIndexIfNeeded();
-    _loadScreenSaverPrefsAndArm();
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    _screenSaverTimer?.cancel();
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      _loadScreenSaverPrefsAndArm();
-      return;
-    }
-    if (state == AppLifecycleState.inactive ||
-        state == AppLifecycleState.paused) {
-      _screenSaverTimer?.cancel();
-    }
-  }
-
-  Future<void> _loadScreenSaverPrefsAndArm() async {
-    final prefs = await SharedPreferences.getInstance();
-    final enabled = prefs.getBool(PrefKeys.screenSaverEnabled) ?? false;
-    final seconds = prefs.getInt(PrefKeys.screenSaverIdleSeconds) ?? 60;
-    if (!mounted) return;
-    setState(() {
-      _screenSaverEnabled = enabled;
-      _screenSaverIdleSeconds = seconds.clamp(10, 3600);
-    });
-    _armScreenSaverTimer();
-  }
-
-  void _armScreenSaverTimer() {
-    _screenSaverTimer?.cancel();
-    if (!_screenSaverEnabled) return;
-    _screenSaverTimer = Timer(
-      Duration(seconds: _screenSaverIdleSeconds),
-      _maybeShowScreenSaver,
-    );
-  }
-
-  void _onUserInteraction() {
-    if (!_screenSaverEnabled) return;
-    if (_screenSaverShowing) return;
-    _armScreenSaverTimer();
-  }
-
-  Future<void> _maybeShowScreenSaver() async {
-    if (!mounted) return;
-    if (!_screenSaverEnabled) return;
-    if (_screenSaverShowing) return;
-
-    // Avoid interrupting drag/edit mode.
-    final editing = _pageKeys[_currentIndex].currentState?.isEditMode ?? false;
-    if (editing) {
-      _armScreenSaverTimer();
-      return;
-    }
-
-    setState(() => _screenSaverShowing = true);
-
-    await ScreenSaverLauncher.show(
-      context: context,
-      accountName: widget.accountName,
-      title: '${widget.accountName} 보호기',
-    );
-
-    if (!mounted) return;
-    setState(() => _screenSaverShowing = false);
-    _armScreenSaverTimer();
   }
 
   void _showQuickJumpSheet() {
-    if (!mounted) return;
-    final total = _pageCount < _pageNameLabels.length
-        ? _pageCount
-        : _pageNameLabels.length;
-    if (total == 0) return;
+    final total = _pageCount;
+    if (total <= 1) return;
 
     showModalBottomSheet<void>(
       context: context,
@@ -444,7 +354,6 @@ class _AccountMainScreenState extends State<AccountMainScreen>
         final bgBlur = BackgroundHelper.blurNotifier.value;
 
         final presetId = AppThemeSeedController.instance.presetId.value;
-        final theme = Theme.of(context);
         final isLandscape =
             MediaQuery.of(context).orientation == Orientation.landscape;
 
@@ -463,30 +372,15 @@ class _AccountMainScreenState extends State<AccountMainScreen>
             'right=${padding.right.toStringAsFixed(1)}',
           );
           debugPrint(
-            '📱 방향: ${isLandscape ? "가로(Landscape)" : "세로(Portrait)"}',
+            '📱 방향: ${isLandscape ? '가로(Landscape)' : '세로(Portrait)'}',
           );
         }
 
-        // In dark mode, if the background color is still the default white,
-        // we should use the theme's scaffold background color instead.
-        Color effectiveBgColor = bgColor;
-        final isDefaultWhite =
-            bgColor.toARGB32() == 0xFFFFFFFF ||
-            bgColor.toARGB32() == 0xffffffff;
+        final effectiveBgColor = bgColor;
 
-        if (theme.brightness == Brightness.dark && isDefaultWhite) {
-          effectiveBgColor = theme.scaffoldBackgroundColor;
-        }
-
-        return Scaffold(
-          backgroundColor: effectiveBgColor,
-          body: Listener(
-            onPointerDown: (_) => _onUserInteraction(),
-            behavior: HitTestBehavior.translucent,
-            child: Stack(
-              children: [
-                // 1. Base Background (Color or Image)
-                Positioned.fill(
+        return Stack(
+          children: [
+            Positioned.fill(
                   child: Builder(
                     builder: (context) {
                       if (bgType == 'image' && bgImagePath != null) {
@@ -647,8 +541,6 @@ class _AccountMainScreenState extends State<AccountMainScreen>
                     ),
                   ),
               ],
-            ),
-          ),
         );
       },
     );
@@ -1143,20 +1035,16 @@ class _IconGridPageState extends State<_IconGridPage> {
                     child: SizedBox(
                       height: gridHeight,
                       width: double.infinity,
-                      child: GridView.builder(
+                      child: GridView.count(
                         padding: const EdgeInsets.all(16),
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 4,
-                              mainAxisSpacing: 12,
-                              crossAxisSpacing: 12,
-                              childAspectRatio: 0.75,
-                            ),
-                        itemCount: _defaultSlotCount,
-                        itemBuilder: (context, index) {
-                          final slotKey = ValueKey(
+                        crossAxisCount: 4,
+                        mainAxisSpacing: 12,
+                        crossAxisSpacing: 12,
+                        childAspectRatio: childAspectRatio,
+                        children: List.generate(_defaultSlotCount, (index) {
+                          final slotKey = ValueKey<String>(
                             'main_icon_slot_${widget.pageIndex}_$index',
                           );
                           final id = _slots[index];
@@ -1164,10 +1052,7 @@ class _IconGridPageState extends State<_IconGridPage> {
                           final icon = isEmpty ? null : _iconById(id);
 
                           if (!_isEditMode && _hideEmptySlots && isEmpty) {
-                            return KeyedSubtree(
-                              key: slotKey,
-                              child: const SizedBox.expand(),
-                            );
+                            return SizedBox.expand(key: slotKey);
                           }
 
                           final tile = icon != null
@@ -1184,10 +1069,10 @@ class _IconGridPageState extends State<_IconGridPage> {
                               : _EmptySlotTile(isEditMode: _isEditMode);
 
                           if (!_isEditMode) {
-                            return KeyedSubtree(key: slotKey, child: tile);
+                            return SizedBox(key: slotKey, child: tile);
                           }
 
-                          return KeyedSubtree(
+                          return SizedBox(
                             key: slotKey,
                             child: LongPressDraggable<String>(
                               data: id,
@@ -1208,24 +1093,23 @@ class _IconGridPageState extends State<_IconGridPage> {
                                 },
                                 builder:
                                     (context, candidateData, rejectedData) {
-                                      final highlight =
-                                          candidateData.isNotEmpty;
-                                      return AnimatedContainer(
-                                        duration: const Duration(
-                                          milliseconds: 120,
-                                        ),
-                                        transform: Matrix4.diagonal3Values(
-                                          highlight ? 1.03 : 1.0,
-                                          highlight ? 1.03 : 1.0,
-                                          1.0,
-                                        ),
-                                        child: tile,
-                                      );
-                                    },
+                                  final highlight = candidateData.isNotEmpty;
+                                  return AnimatedContainer(
+                                    duration: const Duration(
+                                      milliseconds: 120,
+                                    ),
+                                    transform: Matrix4.diagonal3Values(
+                                      highlight ? 1.03 : 1.0,
+                                      highlight ? 1.03 : 1.0,
+                                      1.0,
+                                    ),
+                                    child: tile,
+                                  );
+                                },
                               ),
                             ),
                           );
-                        },
+                        }),
                       ),
                     ),
                   );
@@ -1289,89 +1173,51 @@ class _PageQuickMenuButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-
-    final tooltip = isEditMode ? '메뉴 (이동모드 켜짐)' : '메뉴';
-
-    return Tooltip(
-      message: tooltip,
-      child: PopupMenuButton<void>(
-        tooltip: '',
-        itemBuilder: (context) {
-          final entries = <PopupMenuEntry<void>>[];
-
-          // Move mode toggle
-          entries.add(
-            PopupMenuItem<void>(
-              onTap: onToggleEditMode,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    isEditMode
-                        ? IconCatalog.checkCircleOutline
-                        : IconCatalog.openWithOutlined,
-                    size: 18,
-                    color: scheme.onSurface,
-                  ),
-                  const SizedBox(width: 10),
-                  Text(isEditMode ? '이동모드 끄기' : '이동모드 켜기'),
-                ],
-              ),
-            ),
-          );
-
-          // Page quick-jump menu items (1-7)
-          final pageLabels = <String>[
-            '1.대시보드',
-            '2.요리/쇼핑/지출',
-            '3.수입',
-            '4.통계',
-            '5.자산',
-            '6.ROOT',
-            '7.설정',
-          ];
-          for (int i = 0; i < pageLabels.length; i++) {
-            final pageIndex = i;
-            entries.add(
-              PopupMenuItem<void>(
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 16.0),
-                  child: Text(pageLabels[i]),
-                ),
-                onTap: () => onPageSelected?.call(pageIndex),
-              ),
-            );
-          }
-
-          return entries;
-        },
-        child: Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(
-            color: isEditMode
-                ? scheme.primary
-                : scheme.surfaceContainerHighest.withValues(alpha: 0.5),
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: isEditMode
-                ? [
-                    BoxShadow(
-                      color: scheme.primary.withValues(alpha: 0.3),
-                      blurRadius: 8,
-                      spreadRadius: 1,
-                    ),
-                  ]
-                : null,
-          ),
-          child: Icon(
-            isEditMode ? IconCatalog.check : IconCatalog.moreHoriz,
-            color: isEditMode ? scheme.onPrimary : scheme.primary,
-          ),
-        ),
+    return PopupMenuButton<_QuickMenuAction>(
+      tooltip: '메뉴',
+      icon: Icon(
+        isEditMode ? Icons.check : Icons.more_vert,
+        color: theme.colorScheme.onSurface,
       ),
+      onSelected: (action) {
+        switch (action) {
+          case _QuickMenuAction.toggleEdit:
+            onToggleEditMode();
+            break;
+          case _QuickMenuAction.reset:
+            onResetMainPages?.call();
+            break;
+          case _QuickMenuAction.jumpFirst:
+            onPageSelected?.call(0);
+            break;
+        }
+      },
+      itemBuilder: (context) {
+        return <PopupMenuEntry<_QuickMenuAction>>[
+          PopupMenuItem<_QuickMenuAction>(
+            value: _QuickMenuAction.toggleEdit,
+            child: Text(isEditMode ? '편집 종료' : '편집 모드'),
+          ),
+          if (onPageSelected != null)
+            const PopupMenuItem<_QuickMenuAction>(
+              value: _QuickMenuAction.jumpFirst,
+              child: Text('1페이지로 이동'),
+            ),
+          if (onResetMainPages != null)
+            const PopupMenuItem<_QuickMenuAction>(
+              value: _QuickMenuAction.reset,
+              child: Text('메인 페이지 초기화'),
+            ),
+        ];
+      },
     );
   }
+}
+
+enum _QuickMenuAction {
+  toggleEdit,
+  jumpFirst,
+  reset,
 }
 
 class _EmptySlotTile extends StatelessWidget {

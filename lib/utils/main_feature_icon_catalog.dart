@@ -97,11 +97,18 @@ class MainFeatureIconCatalog {
           routeName: AppRoutes.quickSimpleExpenseInput,
         ),
         MainFeatureIcon(
-          id: 'food_expiry',
-          label: '식재료 재고/유통기한',
-          labelEn: 'Food Inventory',
+          id: 'food_inventory_check',
+          label: '재고 확인',
+          labelEn: 'Inventory Check',
           icon: IconCatalog.inventory2,
-          routeName: AppRoutes.foodExpiry,
+          routeName: AppRoutes.foodInventoryCheck,
+        ),
+        MainFeatureIcon(
+          id: 'food_cooking_start',
+          label: '유통기한',
+          labelEn: 'Start Cooking',
+          icon: Icons.fastfood,
+          routeName: AppRoutes.foodCookingStart,
         ),
         MainFeatureIcon(
           id: 'nutrition_report',
@@ -138,13 +145,27 @@ class MainFeatureIconCatalog {
           icon: IconCatalog.calendarToday,
           routeName: AppRoutes.dailyTransactions,
         ),
-      ],
-    ),
-
-    // Page 2: 수입 (Income)
-    const MainFeaturePage(
-      index: 2,
-      items: [
+        MainFeatureIcon(
+          id: 'household_consumables',
+          label: '소모품 입력',
+          labelEn: 'Consumables',
+          icon: Icons.cleaning_services,
+          routeName: AppRoutes.householdConsumables,
+        ),
+        MainFeatureIcon(
+          id: 'consumable_inventory',
+          label: '소모품 재고',
+          labelEn: 'Consumables Stock',
+          icon: Icons.inventory,
+          routeName: AppRoutes.consumableInventory,
+        ),
+        MainFeatureIcon(
+          id: 'quick_stock_use',
+          label: '빠른 재고 차감',
+          labelEn: 'Quick Stock Use',
+          icon: Icons.bolt,
+          routeName: AppRoutes.quickStockUse,
+        ),
         MainFeatureIcon(
           id: 'transaction_add_detailed',
           label: '지출입력(상세)',
@@ -152,6 +173,20 @@ class MainFeatureIconCatalog {
           icon: IconCatalog.postAdd,
           routeName: AppRoutes.transactionAddDetailed,
         ),
+        MainFeatureIcon(
+          id: 'ingredient_search',
+          label: '요리 필요 재료 검색',
+          labelEn: 'Recipe Ingredients',
+          icon: Icons.menu_book,
+          routeName: AppRoutes.ingredientSearch,
+        ),
+      ],
+    ),
+
+    // Page 2: 수입 (Income)
+    const MainFeaturePage(
+      index: 2,
+      items: [
         MainFeatureIcon(
           id: 'income_add',
           label: '수입 입력',
@@ -186,6 +221,13 @@ class MainFeatureIconCatalog {
           labelEn: '100M Project',
           icon: Icons.emoji_events_outlined,
           routeName: AppRoutes.assetProject100m,
+        ),
+        MainFeatureIcon(
+          id: 'weather_manual_input',
+          label: '날씨 입력',
+          labelEn: 'Weather Input',
+          icon: Icons.wb_sunny_outlined,
+          routeName: AppRoutes.weatherManualInput,
         ),
       ],
     ),
@@ -277,6 +319,20 @@ class MainFeatureIconCatalog {
           labelEn: 'Points',
           icon: IconCatalog.localOffer,
           routeName: AppRoutes.pointsMotivationStats,
+        ),
+        MainFeatureIcon(
+          id: 'spending_analysis',
+          label: '지출 분석 & 절약 팁',
+          labelEn: 'Spending Analysis',
+          icon: Icons.analytics,
+          routeName: AppRoutes.spendingAnalysis,
+        ),
+        MainFeatureIcon(
+          id: 'weather_price_prediction',
+          label: '날씨 기반 가격 예측',
+          labelEn: 'Weather Price Prediction',
+          icon: Icons.wb_cloudy,
+          routeName: AppRoutes.weatherPricePrediction,
         ),
       ],
     ),

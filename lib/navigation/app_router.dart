@@ -25,6 +25,11 @@ import 'package:smart_ledger/screens/file_viewer_screen.dart';
 import 'package:smart_ledger/screens/fixed_cost_stats_screen.dart';
 import 'package:smart_ledger/screens/fixed_cost_tab_screen.dart';
 import 'package:smart_ledger/screens/food_expiry_main_screen.dart';
+import 'package:smart_ledger/screens/household_consumables_screen.dart';
+import 'package:smart_ledger/screens/consumable_inventory_screen.dart';
+import 'package:smart_ledger/screens/quick_stock_use_screen.dart';
+import 'package:smart_ledger/screens/food_inventory_check_screen.dart';
+import 'package:smart_ledger/screens/food_cooking_start_screen.dart';
 import 'package:smart_ledger/screens/icon_management2_screen.dart';
 import 'package:smart_ledger/screens/icon_management_asset_screen.dart';
 import 'package:smart_ledger/screens/icon_management_root_screen.dart';
@@ -40,6 +45,7 @@ import 'package:smart_ledger/screens/one_hundred_million_project_screen.dart';
 import 'package:smart_ledger/screens/page1_bottom_icon_settings_screen.dart';
 import 'package:smart_ledger/screens/period_stats_screen.dart';
 import 'package:smart_ledger/utils/period_utils.dart' as period;
+import 'package:smart_ledger/screens/ingredient_search_list_screen.dart';
 import 'package:smart_ledger/screens/points_motivation_stats_screen.dart';
 import 'package:smart_ledger/screens/privacy_policy_screen.dart';
 import 'package:smart_ledger/screens/quick_simple_expense_input_screen.dart';
@@ -53,14 +59,15 @@ import 'package:smart_ledger/screens/root_search_screen.dart';
 import 'package:smart_ledger/screens/root_transaction_manager_screen.dart';
 import 'package:smart_ledger/screens/savings_plan_list_screen.dart';
 import 'package:smart_ledger/screens/settings_screen.dart';
-import 'package:smart_ledger/screens/'
-    'shopping_cart_quick_transaction_screen.dart';
 import 'package:smart_ledger/screens/shopping_cart_screen.dart';
 import 'package:smart_ledger/screens/shopping_cheapest_month_screen.dart';
 import 'package:smart_ledger/screens/shopping_points_input_screen.dart';
+import 'package:smart_ledger/screens/spending_analysis_screen.dart';
 import 'package:smart_ledger/screens/store_merge_screen.dart';
 import 'package:smart_ledger/screens/theme_settings_screen.dart';
 import 'package:smart_ledger/screens/top_level_main_screen.dart';
+import 'package:smart_ledger/screens/weather_price_prediction_screen.dart';
+import 'package:smart_ledger/screens/weather_manual_input_screen.dart';
 import 'package:smart_ledger/screens/transaction_add_screen.dart';
 import 'package:smart_ledger/screens/transaction_add_detailed_screen.dart';
 import 'package:smart_ledger/screens/transaction_detail_screen.dart';
@@ -392,6 +399,28 @@ class AppRouter {
               PointsMotivationStatsScreen(accountName: a.accountName),
         );
 
+      case AppRoutes.spendingAnalysis:
+        final a = args as AccountArgs;
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) =>
+              SpendingAnalysisScreen(accountName: a.accountName),
+        );
+
+      case AppRoutes.weatherPricePrediction:
+        final a = args as AccountArgs;
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) =>
+              WeatherPricePredictionScreen(accountName: a.accountName),
+        );
+
+      case AppRoutes.weatherManualInput:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const WeatherManualInputScreen(),
+        );
+
       case AppRoutes.microSavings:
         final a = args as AccountArgs;
         return MaterialPageRoute(
@@ -482,6 +511,18 @@ class AppRouter {
           builder: (_) => const FoodExpiryMainScreen(),
         );
 
+      case AppRoutes.foodInventoryCheck:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const FoodInventoryCheckScreen(),
+        );
+
+      case AppRoutes.foodCookingStart:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const FoodCookingStartScreen(),
+        );
+
       case AppRoutes.calendar:
         final a = args as AccountArgs;
         return MaterialPageRoute(
@@ -511,11 +552,27 @@ class AppRouter {
           ),
         );
 
-      case AppRoutes.shoppingCartQuickTransaction:
-        final a = args as ShoppingCartQuickTransactionArgs;
+      case AppRoutes.householdConsumables:
+        final a = args as AccountArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => ShoppingCartQuickTransactionScreen(args: a),
+          builder: (_) => HouseholdConsumablesScreen(
+            accountName: a.accountName,
+          ),
+        );
+
+      case AppRoutes.consumableInventory:
+        final a = args as AccountArgs;
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => ConsumableInventoryScreen(accountName: a.accountName),
+        );
+
+      case AppRoutes.quickStockUse:
+        final a = args as AccountArgs;
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => QuickStockUseScreen(accountName: a.accountName),
         );
 
       case AppRoutes.shoppingPointsInput:
@@ -627,6 +684,12 @@ class AppRouter {
           builder: (_) => const NutritionReportScreen(rawText: ''),
         );
 
+      case AppRoutes.ingredientSearch:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const _IngredientSearchInputScreen(),
+        );
+
       case AppRoutes.rootTransactions:
         return MaterialPageRoute(
           settings: settings,
@@ -666,5 +729,103 @@ class AppRouter {
     }
 
     return null;
+  }
+}
+
+/// 식재료 검색 입력 화면 (요리 필요 재료 검색)
+class _IngredientSearchInputScreen extends StatefulWidget {
+  const _IngredientSearchInputScreen();
+
+  @override
+  State<_IngredientSearchInputScreen> createState() =>
+      _IngredientSearchInputScreenState();
+}
+
+class _IngredientSearchInputScreenState
+    extends State<_IngredientSearchInputScreen> {
+  final TextEditingController _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _search(String query) {
+    if (query.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('검색어를 입력하세요.')),
+      );
+      return;
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => IngredientSearchListScreen(
+          searchQuery: query,
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('요리 필요 재료 검색'),
+        elevation: 0,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.restaurant_menu,
+              size: 80,
+              color: theme.colorScheme.primary.withValues(alpha: 0.5),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              '요리 이름을 입력하세요',
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '예: 닭고기, 돼지고기, 생선 등',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 32),
+            TextField(
+              controller: _controller,
+              decoration: const InputDecoration(
+                hintText: '요리 이름 입력',
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+              ),
+              onSubmitted: _search,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: () => _search(_controller.text),
+              icon: const Icon(Icons.search),
+              label: const Text('검색'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

@@ -752,16 +752,46 @@ class _FoodExpiryMainScreenState extends State<FoodExpiryMainScreen> {
     const _FoodExpiryPlaceholderScreen(title: '통계'),
   ];
 
-  final List<BottomNavigationBarItem> _navItems = const [
-    BottomNavigationBarItem(
-      icon: Icon(IconCatalog.shoppingCart),
-      label: '상품 관리',
-    ),
-    BottomNavigationBarItem(icon: Icon(IconCatalog.warningAmber), label: '알림'),
-    BottomNavigationBarItem(icon: Icon(IconCatalog.history), label: '소비 기록'),
-    BottomNavigationBarItem(icon: Icon(IconCatalog.barChart), label: '통계'),
-    BottomNavigationBarItem(icon: Icon(IconCatalog.addCircle), label: '추가'),
-  ];
+  /// 모드에 따라 다른 네비게이션 아이템 반환
+  List<BottomNavigationBarItem> get _navItems {
+    if (widget.autoUsageMode) {
+      // 유통기한 관리 / 요리 모드
+      return const [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.soup_kitchen),
+          label: '요리 모드',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(IconCatalog.warningAmber),
+          label: '알림',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(IconCatalog.history),
+          label: '소비 기록',
+        ),
+        BottomNavigationBarItem(icon: Icon(IconCatalog.barChart), label: '통계'),
+        BottomNavigationBarItem(icon: Icon(IconCatalog.addCircle), label: '추가'),
+      ];
+    } else {
+      // 재고 확인 모드
+      return const [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.inventory_2),
+          label: '재고 목록',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(IconCatalog.warningAmber),
+          label: '알림',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(IconCatalog.history),
+          label: '소비 기록',
+        ),
+        BottomNavigationBarItem(icon: Icon(IconCatalog.barChart), label: '통계'),
+        BottomNavigationBarItem(icon: Icon(IconCatalog.addCircle), label: '추가'),
+      ];
+    }
+  }
 
   Future<void> _openUpsertDialog(
     BuildContext context, {
@@ -1526,6 +1556,16 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
   final Map<String, double> _usageMap = {};
   final Set<String> _activeUsageItems = {};
 
+  // 로케이션 필터
+  String? _locationFilter;
+  static const List<String> _locationOptions = [
+    '전체',
+    '냉장',
+    '냉동',
+    '실온',
+    '김치냉장고',
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -1986,15 +2026,21 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
         _usageMap.clear();
 
         for (var ingredient in selectedRecipe.ingredients) {
-          try {
-            final item = items.firstWhere(
-              (i) =>
-                  i.name.contains(ingredient.name) ||
-                  ingredient.name.contains(i.name),
-            );
+          // FIFO: 유통기한 빠른 순서로 정렬된 항목 중 매칭되는 것 선택
+          final matchedItems = items
+              .where(
+                (i) =>
+                    i.name.contains(ingredient.name) ||
+                    ingredient.name.contains(i.name),
+              )
+              .toList()
+            ..sort((a, b) => a.expiryDate.compareTo(b.expiryDate));
+
+          if (matchedItems.isNotEmpty) {
+            final item = matchedItems.first; // FIFO: 유통기한 가장 빠른 것
             _usageMap[item.id] = ingredient.quantity;
             matchedInfo.add('${item.name} (재고: ${_formatQuantity(item)})');
-          } catch (e) {
+          } else {
             missingIngredients.add(ingredient.name);
           }
         }
@@ -2122,9 +2168,19 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    // 모드에 따라 다른 타이틀 및 아이콘
+    final appBarTitle = widget.autoUsageMode ? '유통기한 관리' : '식재료 재고';
+    final appBarIcon = widget.autoUsageMode
+        ? const Icon(Icons.soup_kitchen)
+        : const Icon(Icons.inventory_2);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('유통기한 관리'),
+        centerTitle: true,
+        leading: IconButton(
+          icon: appBarIcon,
+          onPressed: null, // 장식용 아이콘
+        ),
+        title: Text(appBarTitle),
         actions: [
           if (_isUsageMode)
             IconButton(
@@ -2136,21 +2192,6 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
             onPressed: _toggleUsageMode,
             icon: Icon(_isUsageMode ? Icons.close : Icons.soup_kitchen),
             tooltip: _isUsageMode ? '사용량 입력 종료' : '요리/사용 모드 (일괄 입력)',
-          ),
-          IconButton(
-            onPressed: () async {
-              final accountName = await UserPrefService.getLastAccountName();
-              if (!context.mounted) return;
-              if (accountName != null) {
-                Navigator.pushNamed(
-                  context,
-                  AppRoutes.shoppingCart,
-                  arguments: ShoppingCartArgs(accountName: accountName),
-                );
-              }
-            },
-            icon: const Icon(IconCatalog.shoppingCart),
-            tooltip: '장바구니 이동',
           ),
           if (!_isUsageMode)
             IconButton(
@@ -2170,7 +2211,14 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
           : null,
       body: ValueListenableBuilder<List<FoodExpiryItem>>(
         valueListenable: FoodExpiryService.instance.items,
-        builder: (context, items, child) {
+        builder: (context, allItems, child) {
+          // 로케이션 필터 적용
+          final items = _locationFilter == null || _locationFilter == '전체'
+              ? allItems
+              : allItems
+                    .where((it) => it.location == _locationFilter)
+                    .toList();
+
           final missingIngredients = <String>[];
           if (widget.initialIngredients != null) {
             for (final ing in widget.initialIngredients!) {
@@ -2187,11 +2235,14 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
           }
 
           if (items.isEmpty && missingIngredients.isEmpty) {
+            final emptyMsg = widget.autoUsageMode
+                ? '등록된 유통기한 항목이 없습니다.\n하단 버튼으로 추가하세요.'
+                : '등록된 식재료가 없습니다.\n하단 버튼으로 재고를 추가하세요.';
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(24),
                 child: Text(
-                  '등록된 유통기한 항목이 없습니다.\n하단 버튼으로 추가하세요.',
+                  emptyMsg,
                   style: theme.textTheme.bodyLarge,
                   textAlign: TextAlign.center,
                 ),
@@ -2201,6 +2252,30 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
 
           return Column(
             children: [
+              // 로케이션 필터 칩
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                child: Row(
+                  children: _locationOptions.map((loc) {
+                    final isSelected =
+                        (_locationFilter ?? '전체') == loc;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: FilterChip(
+                        label: Text(loc),
+                        selected: isSelected,
+                        onSelected: (_) {
+                          setState(() {
+                            _locationFilter = loc == '전체' ? null : loc;
+                          });
+                        },
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
               if (missingIngredients.isNotEmpty)
                 Container(
                   width: double.maxFinite,

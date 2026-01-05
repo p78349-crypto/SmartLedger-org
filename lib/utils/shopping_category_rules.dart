@@ -1,4 +1,5 @@
-typedef ShoppingCategoryPair = ({String mainCategory, String? subCategory});
+typedef ShoppingCategoryPair =
+    ({String mainCategory, String? subCategory, String? detailCategory});
 
 /// SSOT keyword rules for shopping item → category suggestion.
 ///
@@ -9,46 +10,55 @@ class ShoppingCategoryRules {
   static const ShoppingCategoryPair foodGrocery = (
     mainCategory: '식품·음료비',
     subCategory: '장보기',
+    detailCategory: null,
   );
 
   static const ShoppingCategoryPair foodSnack = (
     mainCategory: '식품·음료비',
     subCategory: '간식',
+    detailCategory: null,
   );
 
   static const ShoppingCategoryPair foodProcessed = (
     mainCategory: '식품·음료비',
     subCategory: '가공식품',
+    detailCategory: null,
   );
 
   static const ShoppingCategoryPair foodMeat = (
     mainCategory: '식품·음료비',
     subCategory: '육류',
+    detailCategory: null,
   );
 
   static const ShoppingCategoryPair foodDrink = (
     mainCategory: '식품·음료비',
     subCategory: '음료',
+    detailCategory: null,
   );
 
   static const ShoppingCategoryPair suppliesHygiene = (
     mainCategory: '생활용품비',
     subCategory: '위생용품',
+    detailCategory: null,
   );
 
   static const ShoppingCategoryPair suppliesPaper = (
     mainCategory: '생활용품비',
     subCategory: '종이용품',
+    detailCategory: null,
   );
 
   static const ShoppingCategoryPair suppliesConsumable = (
     mainCategory: '생활용품비',
     subCategory: '생활소모품',
+    detailCategory: null,
   );
 
   static const ShoppingCategoryPair suppliesBaby = (
     mainCategory: '생활용품비',
     subCategory: '유아용품',
+    detailCategory: null,
   );
 
   // --- Templates (expand by filling keywords) ---
@@ -58,37 +68,44 @@ class ShoppingCategoryRules {
   static const ShoppingCategoryPair medicalPharmacy = (
     mainCategory: '의료비',
     subCategory: '약국 의약품',
+    detailCategory: null,
   );
 
   static const ShoppingCategoryPair medicalHospital = (
     mainCategory: '의료비',
     subCategory: '병원 진료비',
+    detailCategory: null,
   );
 
   static const ShoppingCategoryPair transportPublic = (
     mainCategory: '교통비',
     subCategory: '대중교통',
+    detailCategory: null,
   );
 
   static const ShoppingCategoryPair transportParking = (
     mainCategory: '교통비',
     subCategory: '주차',
+    detailCategory: null,
   );
 
   static const ShoppingCategoryPair housingUtilities = (
     mainCategory: '주거비',
     subCategory: '관리비',
+    detailCategory: null,
   );
 
   static const ShoppingCategoryPair clothing = (
     mainCategory: '의류/잡화',
     subCategory: '의류',
+    detailCategory: null,
   );
 
   // 주류: recommended to live under "식품·음료비" as an optional subcategory.
   static const ShoppingCategoryPair alcohol = (
     mainCategory: '식품·음료비',
     subCategory: '주류',
+    detailCategory: null,
   );
 
   /// 식자재 구매 (과일/유제품/계란/주식류)
@@ -332,16 +349,19 @@ class ShoppingCategoryRules {
   static const ShoppingCategoryPair suppliesKitchen = (
     mainCategory: '생활용품비',
     subCategory: '주방용품',
+    detailCategory: null,
   );
 
   static const ShoppingCategoryPair suppliesStationery = (
     mainCategory: '생활용품비',
     subCategory: '문구/사무용품',
+    detailCategory: null,
   );
 
   static const ShoppingCategoryPair suppliesPet = (
     mainCategory: '생활용품비',
     subCategory: '반려동물용품',
+    detailCategory: null,
   );
 
   /// 유아용품
@@ -442,10 +462,10 @@ class ShoppingCategoryRules {
   /// 주거(공과금/관리비 등)
   static const Map<String, ShoppingCategoryPair> housingKeywords = {
     '관리비': housingUtilities,
-    '전기요금': (mainCategory: '주거비', subCategory: '전기요금'),
-    '가스요금': (mainCategory: '주거비', subCategory: '가스요금'),
-    '수도요금': (mainCategory: '주거비', subCategory: '수도요금'),
-    '월세': (mainCategory: '주거비', subCategory: '월세'),
+    '전기요금': (mainCategory: '주거비', subCategory: '전기요금', detailCategory: null),
+    '가스요금': (mainCategory: '주거비', subCategory: '가스요금', detailCategory: null),
+    '수도요금': (mainCategory: '주거비', subCategory: '수도요금', detailCategory: null),
+    '월세': (mainCategory: '주거비', subCategory: '월세', detailCategory: null),
   };
 
   /// 의류/잡화
@@ -458,12 +478,12 @@ class ShoppingCategoryRules {
     '원피스': clothing,
     '코트': clothing,
     '패딩': clothing,
-    '양말': (mainCategory: '의류/잡화', subCategory: '속옷'),
-    '속옷': (mainCategory: '의류/잡화', subCategory: '속옷'),
-    '신발': (mainCategory: '의류/잡화', subCategory: '신발'),
-    '운동화': (mainCategory: '의류/잡화', subCategory: '신발'),
-    '가방': (mainCategory: '의류/잡화', subCategory: '가방'),
-    '모자': (mainCategory: '의류/잡화', subCategory: '기타잡화'),
+    '양말': (mainCategory: '의류/잡화', subCategory: '속옷', detailCategory: null),
+    '속옷': (mainCategory: '의류/잡화', subCategory: '속옷', detailCategory: null),
+    '신발': (mainCategory: '의류/잡화', subCategory: '신발', detailCategory: null),
+    '운동화': (mainCategory: '의류/잡화', subCategory: '신발', detailCategory: null),
+    '가방': (mainCategory: '의류/잡화', subCategory: '가방', detailCategory: null),
+    '모자': (mainCategory: '의류/잡화', subCategory: '기타잡화', detailCategory: null),
   };
 
   /// 주류

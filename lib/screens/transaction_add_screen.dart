@@ -12,6 +12,8 @@ import 'package:smart_ledger/screens/income_split_screen.dart';
 // Preserved but disabled per request.
 import 'package:smart_ledger/services/asset_service.dart';
 import 'package:smart_ledger/services/category_usage_service.dart';
+import 'package:smart_ledger/services/consumable_inventory_service.dart';
+import 'package:smart_ledger/services/food_expiry_service.dart';
 import 'package:smart_ledger/services/recent_input_service.dart';
 import 'package:smart_ledger/services/transaction_service.dart';
 import 'package:smart_ledger/services/user_pref_service.dart';
@@ -1196,6 +1198,17 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
         );
       }
 
+      // 카테고리 기반 자동 분류: 식품 → 유통기한, 생활용품 → 재고
+      if (isExpense && existing == null) {
+        await _autoClassifyByCategory(
+          category: effectiveMainCategory,
+          itemName: desc,
+          quantity: qty,
+          unitPrice: unit,
+          purchaseDate: _transactionDate,
+        );
+      }
+
       if (existing != null) {
         Future.delayed(const Duration(milliseconds: 500), () {
           if (mounted) navigator.pop(true);
@@ -1238,6 +1251,38 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
     } catch (e) {
       if (!mounted) return;
       SnackbarUtils.showError(context, '거래 저장 중 오류: ${e.toString()}');
+    }
+  }
+
+  /// 카테고리 기반 자동 분류: 식품 → 유통기한, 생활용품 → 재고
+  Future<void> _autoClassifyByCategory({
+    required String category,
+    required String itemName,
+    required int quantity,
+    required double unitPrice,
+    required DateTime purchaseDate,
+  }) async {
+    // 식품 관련 카테고리 → 유통기한 목록에 추가
+    const foodCategories = ['식비', '식품·음료비'];
+    if (foodCategories.contains(category)) {
+      // 기본 유통기한: 구매일 + 7일 (사용자가 나중에 수정 가능)
+      final defaultExpiryDate = purchaseDate.add(const Duration(days: 7));
+      await FoodExpiryService.instance.addItem(
+        name: itemName,
+        purchaseDate: purchaseDate,
+        expiryDate: defaultExpiryDate,
+        quantity: quantity.toDouble(),
+        price: unitPrice,
+      );
+      return;
+    }
+
+    // 생활용품 카테고리 → 소모품 재고 목록에 추가
+    if (category == '생활용품비') {
+      await ConsumableInventoryService.instance.addItem(
+        name: itemName,
+        currentStock: quantity.toDouble(),
+      );
     }
   }
 
@@ -1399,7 +1444,6 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
 
@@ -1419,33 +1463,6 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
             ),
           ),
         ),
-        // 하단 고정 버튼 바 (가로모드에서는 헤더로 통합하여 숨김)
-        if (!isLandscape)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surface.withValues(alpha: 0.9),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, -5),
-                ),
-              ],
-            ),
-            child: SafeArea(
-              top: false,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(right: 20),
-                    child: _buildSaveButtons(),
-                  ),
-                ],
-              ),
-            ),
-          ),
       ],
     );
   }
@@ -1573,18 +1590,6 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Transform.scale(
-          scale: compact ? 0.7 : 0.8,
-          child: FloatingActionButton.small(
-            heroTag: 'save_continue',
-            onPressed: _saveAndContinue,
-            tooltip: '저장 후 계속',
-            backgroundColor: scheme.secondaryContainer,
-            foregroundColor: scheme.onSecondaryContainer,
-            child: const Icon(IconCatalog.arrowForward),
-          ),
-        ),
-        const SizedBox(width: 4), // 간격 축소
-        Transform.scale(
           scale: compact ? 0.6 : 0.7,
           child: FloatingActionButton.extended(
             heroTag: 'save',
@@ -1597,6 +1602,18 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
               compact ? '저장' : '저장 (ENT)',
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             ),
+          ),
+        ),
+        const SizedBox(width: 4), // 간격 축소
+        Transform.scale(
+          scale: compact ? 0.7 : 0.8,
+          child: FloatingActionButton.small(
+            heroTag: 'save_continue',
+            onPressed: _saveAndContinue,
+            tooltip: '저장 후 계속',
+            backgroundColor: scheme.secondaryContainer,
+            foregroundColor: scheme.onSecondaryContainer,
+            child: const Icon(IconCatalog.arrowForward),
           ),
         ),
       ],
@@ -1992,30 +2009,68 @@ class _TransactionAddFormState extends State<TransactionAddForm> {
         _selectedMainCategory != _defaultCategory && subCategories.isNotEmpty;
     final theme = Theme.of(context);
 
+    // 선택된 카테고리 표시 문자열
+    final selectedCategoryText = _selectedSubCategory != null
+        ? '$_selectedMainCategory > $_selectedSubCategory'
+        : _selectedMainCategory != _defaultCategory
+            ? _selectedMainCategory
+            : null;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('카테고리', style: theme.textTheme.labelMedium),
-            if (isIncome)
-              TextButton.icon(
-                onPressed: () {
-                  setState(() {
-                    _showIncomeCategoryOptions = false;
-                    _selectedMainCategory = _defaultCategory;
-                    _selectedSubCategory = null;
-                  });
-                },
-                icon: const Icon(IconCatalog.visibilityOffOutlined, size: 16),
-                label: const Text('숨기기'),
-                style: TextButton.styleFrom(
-                  visualDensity: VisualDensity.compact,
-                ),
+            Expanded(
+              child: Row(
+                children: [
+                  Text('카테고리', style: theme.textTheme.labelMedium),
+                  if (selectedCategoryText != null) ...[
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Container(
+                        padding:
+                            const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primaryContainer,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          selectedCategoryText,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: theme.colorScheme.onPrimaryContainer,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
+            ),
+            _buildSaveButtons(compact: true),
           ],
         ),
+        if (isIncome)
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton.icon(
+              onPressed: () {
+                setState(() {
+                  _showIncomeCategoryOptions = false;
+                  _selectedMainCategory = _defaultCategory;
+                  _selectedSubCategory = null;
+                });
+              },
+              icon: const Icon(IconCatalog.visibilityOffOutlined, size: 16),
+              label: const Text('숨기기'),
+              style: TextButton.styleFrom(
+                visualDensity: VisualDensity.compact,
+              ),
+            ),
+          ),
         const SizedBox(height: 8),
         LayoutBuilder(
           builder: (context, constraints) {

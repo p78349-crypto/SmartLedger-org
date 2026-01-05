@@ -1,6 +1,6 @@
 # Third-Party Licenses Summary
 
-- Generated: 2025-12-27T17:07:51.560431
+- Generated: 2026-01-05T20:47:08.487483
 - Sources: `.dart_tool/package_config.json` + `pubspec.lock` + local Pub cache (package root folders)
 - Note: This file intentionally does NOT include full license texts. It only records which license file was found and a best-effort detected license type.
 
@@ -40,6 +40,8 @@
 | cupertino_icons | 1.0.8 | "direct main" | LICENSE | MIT (detected) |
 | dart_style | 3.1.3 | transitive | LICENSE | BSD (detected) |
 | dbus | 0.7.11 | transitive | LICENSE | MPL-2.0 (detected) |
+| device_info_plus | 12.3.0 | "direct main" | LICENSE | BSD (detected) |
+| device_info_plus_platform_interface | 7.0.3 | transitive | LICENSE | BSD (detected) |
 | drift | 2.30.0 | "direct main" | LICENSE | MIT (detected) |
 | drift_dev | 2.30.0 | "direct dev" | LICENSE | MIT (detected) |
 | drift_flutter | 0.2.8 | "direct main" | LICENSE | MIT (detected) |
@@ -58,6 +60,11 @@
 | flutter | 0.0.0 | "direct main" | LICENSE | BSD (detected) |
 | flutter_email_sender | 8.0.0 | "direct main" | LICENSE | Apache-2.0 (detected) |
 | flutter_lints | 6.0.0 | "direct dev" | LICENSE | BSD (detected) |
+| flutter_local_notifications | 19.5.0 | "direct main" | LICENSE | BSD (detected) |
+| flutter_local_notifications_linux | 6.0.0 | transitive | LICENSE | BSD (detected) |
+| flutter_local_notifications_platform_interface | 9.1.0 | transitive | LICENSE | BSD (detected) |
+| flutter_local_notifications_windows | 1.0.3 | transitive | LICENSE | BSD (detected) |
+| flutter_localizations | 0.0.0 | "direct main" | LICENSE (parent) | BSD (detected) |
 | flutter_plugin_android_lifecycle | 2.0.33 | transitive | LICENSE | BSD (detected) |
 | flutter_secure_storage | 10.0.0 | "direct main" | LICENSE | BSD (detected) |
 | flutter_secure_storage_darwin | 0.2.0 | transitive | LICENSE | BSD (detected) |
@@ -65,6 +72,7 @@
 | flutter_secure_storage_platform_interface | 2.0.1 | transitive | LICENSE | BSD (detected) |
 | flutter_secure_storage_web | 2.1.0 | transitive | LICENSE | BSD (detected) |
 | flutter_secure_storage_windows | 4.1.0 | transitive | LICENSE | BSD (detected) |
+| flutter_svg | 2.2.3 | "direct main" | LICENSE | Unknown (review) |
 | flutter_test | 0.0.0 | "direct dev" | LICENSE (parent) | BSD (detected) |
 | flutter_web_plugins | 0.0.0 | transitive | LICENSE (parent) | BSD (detected) |
 | geoclue | 0.1.1 | transitive | LICENSE | MPL-2.0 (detected) |
@@ -76,26 +84,12 @@
 | geolocator_web | 4.1.3 | transitive | LICENSE | MIT (detected) |
 | geolocator_windows | 0.2.5 | transitive | LICENSE | MIT (detected) |
 | glob | 2.1.3 | transitive | LICENSE | BSD (detected) |
-| google_ml_kit | 0.20.0 | "direct main" | LICENSE | MIT (detected) |
-| google_mlkit_barcode_scanning | 0.14.1 | "direct main" | LICENSE | MIT (detected) |
-| google_mlkit_commons | 0.11.0 | transitive | LICENSE | MIT (detected) |
-| google_mlkit_digital_ink_recognition | 0.14.1 | transitive | LICENSE | MIT (detected) |
-| google_mlkit_entity_extraction | 0.15.1 | transitive | LICENSE | MIT (detected) |
-| google_mlkit_face_detection | 0.13.1 | transitive | LICENSE | MIT (detected) |
-| google_mlkit_face_mesh_detection | 0.4.1 | transitive | LICENSE | MIT (detected) |
-| google_mlkit_image_labeling | 0.14.1 | transitive | LICENSE | MIT (detected) |
-| google_mlkit_language_id | 0.13.0 | transitive | LICENSE | MIT (detected) |
-| google_mlkit_object_detection | 0.15.0 | transitive | LICENSE | MIT (detected) |
-| google_mlkit_pose_detection | 0.14.0 | transitive | LICENSE | MIT (detected) |
-| google_mlkit_selfie_segmentation | 0.10.0 | transitive | LICENSE | MIT (detected) |
-| google_mlkit_smart_reply | 0.13.0 | transitive | LICENSE | MIT (detected) |
-| google_mlkit_text_recognition | 0.15.0 | transitive | LICENSE | MIT (detected) |
-| google_mlkit_translation | 0.13.0 | transitive | LICENSE | MIT (detected) |
 | graphs | 2.3.2 | transitive | LICENSE | BSD (detected) |
 | gsettings | 0.2.8 | transitive | LICENSE | MPL-2.0 (detected) |
 | http | 1.6.0 | "direct main" | LICENSE | BSD (detected) |
 | http_multi_server | 3.2.2 | transitive | LICENSE | BSD (detected) |
 | http_parser | 4.1.2 | transitive | LICENSE | BSD (detected) |
+| image | 4.3.0 | "direct main" | LICENSE | MIT (detected) |
 | image_picker | 1.2.1 | "direct main" | LICENSE | Apache-2.0 (detected) |
 | image_picker_android | 0.8.13+10 | transitive | LICENSE | Apache-2.0 (detected) |
 | image_picker_for_web | 3.1.1 | transitive | LICENSE | BSD (detected) |
@@ -126,6 +120,7 @@
 | package_info_plus | 8.3.1 | transitive | LICENSE | BSD (detected) |
 | package_info_plus_platform_interface | 3.2.1 | transitive | LICENSE | BSD (detected) |
 | path | 1.9.1 | "direct main" | LICENSE | BSD (detected) |
+| path_parsing | 1.1.0 | transitive | LICENSE | Unknown (review) |
 | path_provider | 2.1.5 | "direct main" | LICENSE | BSD (detected) |
 | path_provider_android | 2.2.22 | transitive | LICENSE | BSD (detected) |
 | path_provider_foundation | 2.5.1 | transitive | LICENSE | BSD (detected) |
@@ -147,8 +142,8 @@
 | pub_semver | 2.2.0 | transitive | LICENSE | BSD (detected) |
 | pubspec_parse | 1.5.0 | transitive | LICENSE | BSD (detected) |
 | recase | 4.1.0 | transitive | LICENSE | BSD (detected) |
-| share_plus | 10.1.4 | "direct main" | LICENSE | BSD (detected) |
-| share_plus_platform_interface | 5.0.2 | transitive | LICENSE | BSD (detected) |
+| share_plus | 12.0.1 | "direct main" | LICENSE | BSD (detected) |
+| share_plus_platform_interface | 6.1.0 | transitive | LICENSE | BSD (detected) |
 | shared_preferences | 2.5.4 | "direct main" | LICENSE | BSD (detected) |
 | shared_preferences_android | 2.4.18 | transitive | LICENSE | BSD (detected) |
 | shared_preferences_foundation | 2.5.6 | transitive | LICENSE | BSD (detected) |
@@ -175,12 +170,16 @@
 | table_calendar | 3.2.0 | "direct main" | LICENSE | Apache-2.0 (detected) |
 | term_glyph | 1.2.2 | transitive | LICENSE | BSD (detected) |
 | test_api | 0.7.7 | transitive | LICENSE | BSD (detected) |
+| timezone | 0.10.1 | "direct main" | LICENSE | BSD (detected) |
 | typed_data | 1.4.0 | transitive | LICENSE | BSD (detected) |
 | url_launcher_linux | 3.2.2 | transitive | LICENSE | BSD (detected) |
 | url_launcher_platform_interface | 2.3.2 | transitive | LICENSE | BSD (detected) |
 | url_launcher_web | 2.4.1 | transitive | LICENSE | Apache-2.0 (detected) |
 | url_launcher_windows | 3.1.5 | transitive | LICENSE | BSD (detected) |
 | uuid | 4.5.2 | "direct main" | LICENSE | Unknown (review) |
+| vector_graphics | 1.1.19 | transitive | LICENSE | BSD (detected) |
+| vector_graphics_codec | 1.1.13 | transitive | LICENSE | BSD (detected) |
+| vector_graphics_compiler | 1.1.19 | transitive | LICENSE | BSD (detected) |
 | vector_math | 2.2.0 | transitive | LICENSE | BSD (detected) |
 | vm_service | 15.0.2 | transitive | LICENSE | BSD (detected) |
 | watcher | 1.2.0 | transitive | LICENSE | BSD (detected) |
@@ -188,6 +187,7 @@
 | web_socket | 1.0.1 | transitive | LICENSE | BSD (detected) |
 | web_socket_channel | 3.0.3 | transitive | LICENSE | BSD (detected) |
 | win32 | 5.15.0 | transitive | LICENSE | BSD (detected) |
+| win32_registry | 2.1.0 | transitive | LICENSE | BSD (detected) |
 | xdg_directories | 1.1.0 | transitive | LICENSE | BSD (detected) |
 | xml | 6.6.1 | transitive | LICENSE | MIT (detected) |
 | yaml | 3.1.3 | transitive | LICENSE | Unknown (review) |

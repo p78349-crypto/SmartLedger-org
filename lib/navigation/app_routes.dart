@@ -2,7 +2,6 @@
 //
 // Keeping route names in one place prevents UI entrypoints from breaking
 // when individual screens get moved/renamed.
-import 'package:smart_ledger/models/category_hint.dart';
 import 'package:smart_ledger/models/shopping_cart_item.dart';
 import 'package:smart_ledger/utils/top_level_stats_utils.dart';
 
@@ -47,6 +46,7 @@ class AppRoutes {
   static const privacyPolicy = '/privacy-policy';
   static const fileViewer = '/file-viewer';
   static const nutritionReport = '/nutrition-report';
+  static const ingredientSearch = '/ingredient-search';
 
   static const accountStats = '/stats/monthly';
   static const accountStatsDecade = '/stats/decade';
@@ -63,16 +63,22 @@ class AppRoutes {
   static const categoryStats = '/stats/category';
   static const cardDiscountStats = '/stats/card-discount';
   static const pointsMotivationStats = '/stats/points-motivation';
+  static const spendingAnalysis = '/stats/spending-analysis';
+  static const weatherPricePrediction = '/stats/weather-price-prediction';
+  static const weatherManualInput = '/weather/manual-input';
   static const microSavings = '/nudges/micro-savings';
   static const incomeSplit = '/income/split';
   static const foodExpiry = '/food/expiry';
+  static const foodInventoryCheck = '/food/inventory-check';
+  static const foodCookingStart = '/food/cooking-start';
   static const calendar = '/calendar';
 
   static const shoppingCart = '/shopping/cart';
   static const shoppingPrep = '/shopping/prep';
 
-  static const shoppingCartQuickTransaction =
-      '/shopping/cart/quick-transaction';
+  static const householdConsumables = '/household/consumables';
+  static const consumableInventory = '/household/inventory';
+  static const quickStockUse = '/household/quick-stock-use';
 
   static const shoppingPointsInput = '/shopping/points-input';
 
@@ -185,86 +191,6 @@ class ShoppingCartArgs {
   final String accountName;
   final bool openPrepOnStart;
   final List<ShoppingCartItem>? initialItems;
-}
-
-class ShoppingCartQuickTransactionArgs {
-  const ShoppingCartQuickTransactionArgs({
-    required this.accountName,
-    required this.title,
-    required this.description,
-    required this.total,
-    this.quantity = 1,
-    this.unitPrice,
-    this.itemCount,
-    this.previewLines,
-    this.initialMainCategory,
-    this.initialSubCategory,
-    this.bulkRemainingItems,
-    this.bulkIndex,
-    this.bulkTotalCount,
-    this.bulkCategoryHints,
-    this.bulkGrandTotal,
-    this.bulkPreviewLines,
-    this.martStore,
-    this.martPayment,
-    this.martDate,
-  });
-
-  final String accountName;
-  final String title;
-  final String description;
-  final double total;
-  final int quantity;
-
-  /// Optional. Used when showing single-item detail.
-  final double? unitPrice;
-
-  /// Optional. Used when showing bulk summary.
-  final int? itemCount;
-
-  /// Optional. Preformatted list of item lines shown in confirm dialog.
-  final List<String>? previewLines;
-
-  /// Optional. When not provided, the screen will auto-suggest.
-  final String? initialMainCategory;
-  final String? initialSubCategory;
-
-  /// Optional. When provided, enables bulk UX ("나머지 모두 저장").
-  /// This list should contain the *current* item first.
-  final List<ShoppingCartItem>? bulkRemainingItems;
-
-  /// Optional. 0-based index of the current item in the original selection.
-  final int? bulkIndex;
-
-  /// Optional. Total count of originally selected items.
-  final int? bulkTotalCount;
-
-  /// Optional. Category hints used for auto-suggestion in bulk mode.
-  final Map<String, CategoryHint>? bulkCategoryHints;
-
-  /// Optional. Total sum of ALL selected items in bulk mode.
-  /// Used for receipt-total review and adjustment transaction.
-  final double? bulkGrandTotal;
-
-  /// Optional. Preformatted list of item lines for bulk review.
-  final List<String>? bulkPreviewLines;
-
-  /// Optional. Pre-filled store for mart shopping mode.
-  final String? martStore;
-
-  /// Optional. Pre-filled payment for mart shopping mode.
-  final String? martPayment;
-
-  /// Optional. Pre-filled date for mart shopping mode.
-  final DateTime? martDate;
-}
-
-class ShoppingCartQuickTransactionSaveRestResult {
-  const ShoppingCartQuickTransactionSaveRestResult({
-    required this.savedItemIds,
-  });
-
-  final List<String> savedItemIds;
 }
 
 class TopLevelStatsDetailArgs {

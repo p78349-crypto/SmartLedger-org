@@ -21,7 +21,16 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const ValueKey('main_icon_slot_0_0')), findsOneWidget);
-    expect(find.byKey(const ValueKey('main_icon_slot_0_11')), findsOneWidget);
+    final slot0Finder = find.byKey(
+      const ValueKey('main_icon_slot_0_0'),
+      skipOffstage: false,
+    );
+    final slot11Finder = find.byKey(
+      const ValueKey('main_icon_slot_0_11'),
+      skipOffstage: false,
+    );
+
+    expect(slot0Finder, findsOneWidget);
+    expect(slot11Finder, findsOneWidget);
   });
 }

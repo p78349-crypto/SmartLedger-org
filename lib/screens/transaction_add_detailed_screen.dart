@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:smart_ledger/utils/pref_keys.dart';
 import 'package:smart_ledger/models/asset.dart';
 import 'package:smart_ledger/models/category_hint.dart';
 import 'package:smart_ledger/models/shopping_cart_item.dart';
@@ -16,6 +18,7 @@ import 'package:smart_ledger/services/food_expiry_service.dart';
 import 'package:smart_ledger/services/recent_input_service.dart';
 import 'package:smart_ledger/services/transaction_service.dart';
 import 'package:smart_ledger/services/user_pref_service.dart';
+import 'package:smart_ledger/utils/shopping_cart_bulk_ledger_utils.dart';
 import 'package:smart_ledger/utils/category_definitions.dart';
 import 'package:smart_ledger/utils/detailed_category_definitions.dart';
 import 'package:smart_ledger/utils/currency_formatter.dart';
@@ -79,7 +82,7 @@ class _TransactionAddDetailedScreenState
         widget.initialTransaction?.type == TransactionType.income;
     final titlePrefix = isIncomeTemplate
         ? (isEditing ? '수입 수정(상세)' : '수입(상세)')
-        : (isEditing ? '거래 수정(상세)' : '지출 입력(상세)');
+        : (isEditing ? '거래 수정(상세)' : '2-지출입력(상세)');
 
     return PopScope(
       canPop: false,
@@ -103,6 +106,11 @@ class _TransactionAddDetailedScreenState
                 : AppBar(
                     title: Text('$titlePrefix - ${widget.accountName}'),
                     actions: [
+                      IconButton(
+                        tooltip: '장바구니 불러오기',
+                        icon: const Icon(IconCatalog.shoppingCart),
+                        onPressed: () => _formStateKey.currentState?.openShoppingCartPicker(),
+                      ),
                       IconButton(
                         tooltip: '입력값 되돌리기',
                         icon: const Icon(IconCatalog.restartAlt),
@@ -440,6 +448,7 @@ class _TransactionAddDetailedFormState
     }
 
     unawaited(_loadRecentInputs());
+    unawaited(_loadDraftIfRecent());
     unawaited(_loadSortedCategories()); // Load sorted categories
     _qtyController.addListener(_updateAmount);
     _unitPriceController.addListener(_updateAmount);
@@ -576,6 +585,213 @@ class _TransactionAddDetailedFormState
     }
   }
 
+  Future<void> openShoppingCartPicker() async {
+    FocusScope.of(context).unfocus();
+    await _saveDraft();
+
+    var items = await UserPrefService.getShoppingCartItems(
+      accountName: widget.accountName,
+    );
+
+    if (!mounted || items.isEmpty) {
+      if (mounted) SnackbarUtils.showInfo(context, '장바구니에 저장된 항목이 없습니다.');
+      return;
+    }
+
+    // Make a local mutable copy so we can toggle isChecked in the picker.
+    final local = items.map((e) => e.copyWith()).toList();
+
+    final confirmed = await showModalBottomSheet<bool>(
+      context: context,
+      useSafeArea: true,
+      isScrollControlled: true,
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Material(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+            clipBehavior: Clip.antiAlias,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 640),
+              child: Column(
+                children: [
+                  ListTile(
+                    title: const Text('장바구니 항목 선택 (지출입력으로 넘기기)'),
+                    trailing: IconButton(
+                      icon: const Icon(IconCatalog.close),
+                      onPressed: () => Navigator.of(sheetContext).pop(false),
+                    ),
+                  ),
+                  const Divider(height: 1),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: local.length,
+                      itemBuilder: (context, index) {
+                        final it = local[index];
+                        return CheckboxListTile(
+                          value: it.isChecked,
+                          title: Text(it.name),
+                          subtitle: Text('수량: ${it.quantity <= 0 ? 1 : it.quantity}    단가: ${it.unitPrice <= 0 ? '-' : CurrencyFormatter.formatWithDecimals(it.unitPrice, showUnit: false)}'),
+                          onChanged: (v) {
+                            local[index] = it.copyWith(isChecked: v ?? false);
+                            // rebuild sheet
+                            (sheetContext as Element).markNeedsBuild();
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.of(sheetContext).pop(false),
+                            child: const Text('취소'),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: FilledButton(
+                            onPressed: () => Navigator.of(sheetContext).pop(true),
+                            child: const Text('선택 항목 지출입력으로 이동'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+
+    if (!mounted || confirmed != true) return;
+
+    // Replace original items with local (which includes isChecked flags)
+    items = local;
+
+    // load category hints for suggestions
+    final hints = await UserPrefService.getShoppingCategoryHints(
+      accountName: widget.accountName,
+    );
+
+    // Call bulk utility to handle sequential transactionAdd flows.
+    await ShoppingCartBulkLedgerUtils.addCheckedItemsToLedgerBulk(
+      context: context,
+      accountName: widget.accountName,
+      items: items,
+      categoryHints: hints,
+      saveItems: (next) async {
+        await UserPrefService.setShoppingCartItems(accountName: widget.accountName, items: next);
+      },
+      reload: () async {},
+    );
+  }
+
+  // Draft persistence (short-lived draft to survive short navigations)
+  static const int _draftTtlMs = 30 * 60 * 1000; // 30 minutes
+
+  String _draftKey() => PrefKeys.accountKey(widget.accountName, 'tx_draft_v1');
+
+  Future<void> _saveDraft() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final draft = <String, dynamic>{
+        'ts': DateTime.now().millisecondsSinceEpoch,
+        'desc': _descController.text,
+        'qty': _qtyController.text,
+        'unitPrice': _unitPriceController.text,
+        'amount': _amountController.text,
+        'card': _cardChargedAmountController.text,
+        'memo': _memoController.text,
+        'store': _storeController.text,
+        'payment': _paymentController.text,
+        'type': _selectedType.name,
+        'savingsAllocation': _savingsAllocation.name,
+        'date': _transactionDate.toIso8601String(),
+        'mainCategory': _selectedMainCategory,
+        'subCategory': _selectedSubCategory,
+        'detailCategory': _selectedDetailCategory,
+        'location': _locationController.text,
+        'supplier': _supplierController.text,
+        'unit': _unitController.text,
+        'expiry': _expiryDate?.toIso8601String(),
+        'addToShoppingList': _addToShoppingList,
+      };
+      await prefs.setString(_draftKey(), jsonEncode(draft));
+    } catch (_) {}
+  }
+
+  Future<void> _clearDraft() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_draftKey());
+    } catch (_) {}
+  }
+
+  Future<void> _loadDraftIfRecent() async {
+    try {
+      if (!mounted) return;
+      // Do not overwrite when editing an existing transaction
+      if (widget.initialTransaction != null && !widget.treatAsNew) return;
+
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_draftKey());
+      if (raw == null || raw.trim().isEmpty) return;
+      final Map<String, dynamic> decoded = jsonDecode(raw);
+      final ts = decoded['ts'] as int?;
+      if (ts == null) {
+        // malformed draft — remove
+        await prefs.remove(_draftKey());
+        return;
+      }
+      final age = DateTime.now().millisecondsSinceEpoch - ts;
+      if (age > _draftTtlMs) {
+        // expired — delete draft
+        await prefs.remove(_draftKey());
+        return;
+      }
+
+      // Restore fields
+      if (!mounted) return;
+      setState(() {
+        _descController.text = decoded['desc'] ?? '';
+        _qtyController.text = decoded['qty'] ?? _qtyController.text;
+        _unitPriceController.text = decoded['unitPrice'] ?? _unitPriceController.text;
+        _amountController.text = decoded['amount'] ?? _amountController.text;
+        _cardChargedAmountController.text = decoded['card'] ?? '';
+        _memoController.text = decoded['memo'] ?? '';
+        _storeController.text = decoded['store'] ?? '';
+        _paymentController.text = decoded['payment'] ?? '';
+        try {
+          _selectedType = TransactionType.values.firstWhere((e) => e.name == (decoded['type'] ?? ''), orElse: () => _selectedType);
+        } catch (_) {}
+        try {
+          _savingsAllocation = SavingsAllocation.values.firstWhere((e) => e.name == (decoded['savingsAllocation'] ?? ''), orElse: () => _savingsAllocation);
+        } catch (_) {}
+        try {
+          _transactionDate = DateTime.parse(decoded['date'] ?? _transactionDate.toIso8601String());
+        } catch (_) {}
+        _selectedMainCategory = decoded['mainCategory'] ?? _selectedMainCategory;
+        _selectedSubCategory = decoded['subCategory'];
+        _selectedDetailCategory = decoded['detailCategory'];
+        _locationController.text = decoded['location'] ?? '';
+        _supplierController.text = decoded['supplier'] ?? '';
+        _unitController.text = decoded['unit'] ?? '';
+        if (decoded['expiry'] != null) {
+          try {
+            _expiryDate = DateTime.parse(decoded['expiry']);
+          } catch (_) {}
+        }
+        _addToShoppingList = decoded['addToShoppingList'] ?? _addToShoppingList;
+      });
+      _updateAmount();
+    } catch (_) {}
+  }
+
   void _captureInitialSnapshotIfNeeded() {
     if (!mounted) return;
     if (_initialSnapshot != null) return;
@@ -667,6 +883,7 @@ class _TransactionAddDetailedFormState
 
   @override
   void dispose() {
+    unawaited(_saveDraft());
     _descController.dispose();
     _qtyController.dispose();
     _unitPriceController.dispose();
@@ -1229,6 +1446,7 @@ class _TransactionAddDetailedFormState
       final detail = isSavings ? ' (${_savingsAllocation.snackBarDetail})' : '';
       if (!mounted) return;
       SnackbarUtils.showSuccess(context, '$baseMessage$detail');
+      await _clearDraft();
 
       if (widget.learnCategoryHintFromDescription &&
           effectiveMainCategory != _defaultCategory) {
@@ -1531,6 +1749,13 @@ class _TransactionAddDetailedFormState
                 overflow: TextOverflow.ellipsis,
               ),
             ),
+            IconButton(
+              tooltip: '장바구니 불러오기',
+              icon: const Icon(IconCatalog.shoppingCart),
+              onPressed: () => _formStateKey.currentState?.openShoppingCartPicker(),
+              visualDensity: VisualDensity.compact,
+            ),
+            const SizedBox(width: 8),
             IconButton(
               tooltip: '입력값 되돌리기',
               icon: const Icon(IconCatalog.restartAlt),

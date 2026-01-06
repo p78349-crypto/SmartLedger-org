@@ -10,6 +10,7 @@ import 'package:smart_ledger/utils/shopping_cart_next_prep_utils.dart';
 import 'package:smart_ledger/utils/shopping_category_utils.dart';
 import 'package:smart_ledger/widgets/smart_input_field.dart';
 import 'package:smart_ledger/widgets/zero_quick_buttons.dart';
+import 'package:smart_ledger/screens/account_main_screen.dart'; // Ensure this import exists
 // import 'package:smart_ledger/screens/nutrition_report_screen.dart';
 // Feature connections removed per request.
 
@@ -57,6 +58,25 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
     return unitPrice == unitPrice.roundToDouble()
         ? CurrencyFormatter.format(unitPrice, showUnit: false)
         : CurrencyFormatter.formatWithDecimals(unitPrice, showUnit: false);
+  }
+
+  Future<void> _openPage2AndLaunchTransactionAdd() async {
+    // Navigate to main screen page 2 (index 1), then open transaction add.
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => AccountMainScreen(
+          accountName: widget.accountName,
+          initialIndex: 1,
+        ),
+      ),
+    );
+
+    if (!mounted) return;
+
+    await Navigator.of(context).pushNamed(
+      AppRoutes.transactionAdd,
+      arguments: TransactionAddArgs(accountName: widget.accountName),
+    );
   }
 
   InputDecoration _inlineFieldDecoration(String hint) {
@@ -284,6 +304,42 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
     );
   }
 
+  void _saveAllInlineEdits() {
+    // 모든 항목의 편집 내용을 적용
+    final updatedItems = _items.map((item) {
+      final qtyRaw = _qtyControllers[item.id]?.text.trim() ?? '';
+      final unitRaw = _unitPriceControllers[item.id]?.text.trim() ?? '';
+      final memoRaw = _memoControllers[item.id]?.text.trim() ?? item.memo;
+
+      final parsedQty = int.tryParse(qtyRaw);
+      final parsedUnit = CurrencyFormatter.parse(unitRaw);
+
+      final nextQty = (parsedQty == null)
+          ? item.quantity
+          : (parsedQty <= 0 ? 1 : parsedQty);
+      final nextUnit = (parsedUnit == null) ? item.unitPrice : parsedUnit;
+      final nextMemo = memoRaw;
+
+      if (nextQty != item.quantity ||
+          nextUnit != item.unitPrice ||
+          nextMemo != item.memo) {
+        return item.copyWith(
+          quantity: nextQty,
+          unitPrice: nextUnit,
+          memo: nextMemo,
+          updatedAt: DateTime.now(),
+        );
+      }
+      return item;
+    }).toList();
+
+    // 변경사항이 있으면 저장
+    UserPrefService.setShoppingCartItems(
+      accountName: widget.accountName,
+      items: updatedItems,
+    );
+  }
+
   Future<void> _applyInlineEdits(ShoppingCartItem item) async {
     final qtyRaw = _qtyControllers[item.id]?.text.trim() ?? '';
     final unitRaw = _unitPriceControllers[item.id]?.text.trim() ?? '';
@@ -391,48 +447,42 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
     final checkedItems = _items.where((i) => i.isChecked).toList();
     if (checkedItems.isEmpty) return;
 
-    // 체크된 항목들의 총액 계산
-    double totalAmount = 0;
-    final descriptions = <String>[];
-
+    // 체크된 항목들을 하나씩 순차적으로 처리 (개별 처리)
     for (final item in checkedItems) {
       final qty = item.quantity <= 0 ? 1 : item.quantity;
-      totalAmount += item.unitPrice * qty;
-      descriptions.add(item.name);
-    }
+      final amount = item.unitPrice * qty;
 
-    // 첫 번째 항목의 카테고리 사용
-    final firstItem = checkedItems.first;
-    final suggested = ShoppingCategoryUtils.suggest(
-      firstItem,
-      learnedHints: _categoryHints,
-    );
+      final suggested = ShoppingCategoryUtils.suggest(
+        item,
+        learnedHints: _categoryHints,
+      );
 
-    final result = await Navigator.of(context).pushNamed(
-      AppRoutes.transactionAdd,
-      arguments: TransactionAddArgs(
-        accountName: widget.accountName,
-        initialTransaction: Transaction(
-          id: 'tmp_${DateTime.now().microsecondsSinceEpoch}',
-          type: TransactionType.expense,
-          description: descriptions.length == 1
-              ? descriptions.first
-              : '${descriptions.first} 외 ${descriptions.length - 1}건',
-          amount: totalAmount,
-          date: DateTime.now(),
-          unitPrice: totalAmount,
-          mainCategory: suggested.mainCategory,
-          subCategory: suggested.subCategory,
-          detailCategory: suggested.detailCategory,
-          memo: descriptions.join(', '),
+      final result = await Navigator.of(context).pushNamed(
+        AppRoutes.transactionAdd,
+        arguments: TransactionAddArgs(
+          accountName: widget.accountName,
+          initialTransaction: Transaction(
+            id: 'tmp_${DateTime.now().microsecondsSinceEpoch}',
+            type: TransactionType.expense,
+            description: item.name,
+            amount: amount,
+            date: DateTime.now(),
+            quantity: qty,
+            unitPrice: item.unitPrice,
+            mainCategory: suggested.mainCategory,
+            subCategory: suggested.subCategory,
+            detailCategory: suggested.detailCategory,
+          ),
+          treatAsNew: true, // 항상 "지출 입력" 모드 (거래수정 아님)
         ),
-      ),
-    );
+      );
 
-    if (result == true) {
-      // 체크된 항목들 삭제
-      for (final item in checkedItems) {
+      // 지출입력 완료 시 해당 항목 삭제
+      if (result == true) {
         _deleteItem(item);
+      } else {
+        // 사용자가 취소하면 나머지 항목 처리 중단
+        break;
       }
     }
   }
@@ -467,6 +517,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
           subCategory: suggested.subCategory,
           detailCategory: suggested.detailCategory,
         ),
+        treatAsNew: true,
       ),
     );
 
@@ -476,6 +527,8 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
   }
 
   void _switchToCart() {
+    // 편집 중인 내용 저장 후 이동
+    _saveAllInlineEdits();
     Navigator.of(context).pushReplacementNamed(
       AppRoutes.shoppingCart,
       arguments: ShoppingCartArgs(accountName: widget.accountName),
@@ -483,55 +536,15 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
   }
 
   void _switchToPrep() {
+    // 편집 중인 내용 저장 후 이동
+    _saveAllInlineEdits();
     Navigator.of(context).pushReplacementNamed(
       AppRoutes.shoppingPrep,
       arguments: ShoppingCartArgs(accountName: widget.accountName),
     );
   }
 
-  Widget _buildWideItemTile({
-    required BuildContext context,
-    required ShoppingCartItem item,
-    required bool isSelected,
-    required TextEditingController qtyController,
-    required TextEditingController unitController,
-    required TextEditingController memoController,
-    required FocusNode qtyFocusNode,
-    required FocusNode unitFocusNode,
-    required FocusNode memoFocusNode,
-    required ThemeData theme,
-    required Widget memoButton,
-  }) {
-    final isPrep = widget.openPrepOnStart;
-    const unitKeyboardType = TextInputType.numberWithOptions(decimal: true);
-
-    return InkWell(
-      onTap: !isPrep ? () => _toggleCheckedFast(item) : null,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        color: isSelected ? theme.colorScheme.primaryContainer : null,
-        child: Row(
-          children: [
-            if (!isPrep)
-              SizedBox(
-                width: 32,
-                child: Checkbox(
-                  value: item.isChecked,
-                  onChanged: (_) => _toggleCheckedFast(item),
-                  visualDensity: VisualDensity.compact,
-                ),
-              ),
-            const SizedBox(width: 8),
-            Expanded(
-              flex: 4,
-              child: Text(
-                item.name,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                ),
-              ),
+        // _navigateToExpenseInput removed: cart button now routes to page2's transactionAdd
             ),
             const SizedBox(width: 12),
             SizedBox(
@@ -1186,8 +1199,18 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                                           },
                                           onEditingComplete: () =>
                                               _applyInlineEdits(item),
-                                          onSubmitted: (_) =>
-                                              _applyInlineEdits(item),
+                                          onSubmitted: (_) {
+                                            _applyInlineEdits(item);
+                                            // 다음 항목의 가격 필드로 이동
+                                            final currentIndex = ordered.indexOf(item);
+                                            if (currentIndex >= 0 && currentIndex < ordered.length - 1) {
+                                              final nextItem = ordered[currentIndex + 1];
+                                              final nextUnitFocus = _unitPriceFocusNodes[nextItem.id];
+                                              if (nextUnitFocus != null) {
+                                                nextUnitFocus.requestFocus();
+                                              }
+                                            }
+                                          },
                                         ),
                                       ),
                                     ],
@@ -1278,8 +1301,8 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
               ),
               FilledButton.tonal(
                 onPressed: checkedCount > 0
-                    ? _navigateToExpenseInput
-                    : null,
+                  ? _openPage2AndLaunchTransactionAdd
+                  : null,
                 style: FilledButton.styleFrom(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

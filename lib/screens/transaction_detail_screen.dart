@@ -3,7 +3,7 @@ import 'package:smart_ledger/models/asset.dart';
 import 'package:smart_ledger/models/asset_move.dart';
 import 'package:smart_ledger/models/emergency_transaction.dart';
 import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/screens/transaction_add_screen.dart';
+import 'package:smart_ledger/screens/transaction_add_detailed_screen.dart';
 import 'package:smart_ledger/services/asset_move_service.dart';
 import 'package:smart_ledger/services/asset_service.dart';
 import 'package:smart_ledger/services/budget_service.dart';
@@ -161,7 +161,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
         await Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => TransactionAddScreen(
+            builder: (_) => TransactionAddDetailedScreen(
               accountName: widget.accountName,
               initialTransaction: tx,
             ),

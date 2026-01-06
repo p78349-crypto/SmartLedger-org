@@ -67,6 +67,7 @@ class ShoppingCartBulkLedgerUtils {
             subCategory: suggested.subCategory,
             detailCategory: suggested.detailCategory,
           ),
+          treatAsNew: true,
         ),
       );
 
@@ -135,6 +136,7 @@ class ShoppingCartBulkLedgerUtils {
             subCategory: suggested.subCategory,
             detailCategory: suggested.detailCategory,
           ),
+          treatAsNew: true,
         ),
       );
 
@@ -248,6 +250,7 @@ class ShoppingCartBulkLedgerUtils {
             subCategory: suggested.subCategory,
             detailCategory: suggested.detailCategory,
           ),
+          treatAsNew: true,
         ),
       );
 

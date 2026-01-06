@@ -70,8 +70,8 @@ class TransactionAddScreen extends StatefulWidget {
 }
 
 class _TransactionAddScreenState extends State<TransactionAddScreen> {
-  final GlobalKey<_TransactionAddFormState> _formStateKey =
-      GlobalKey<_TransactionAddFormState>();
+  final GlobalKey<_NO1FormState> _formStateKey =
+      GlobalKey<_NO1FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +82,7 @@ class _TransactionAddScreenState extends State<TransactionAddScreen> {
         widget.initialTransaction?.type == TransactionType.income;
     final titlePrefix = isIncomeTemplate
         ? (isEditing ? '수입 수정' : '수입')
-        : (isEditing ? '거래 수정' : '지출 입력');
+        : (isEditing ? '거래 수정' : '1-지출입력');
 
     return PopScope(
       canPop: false,
@@ -200,7 +200,7 @@ class _TransactionAddScreenState extends State<TransactionAddScreen> {
                       horizontal: 16.0,
                       vertical: isLandscape ? 0.0 : 16.0,
                     ),
-                    child: TransactionAddForm(
+                    child: NO1Form(
                       key: _formStateKey,
                       accountName: widget.accountName,
                       initialTransaction: widget.initialTransaction,
@@ -255,14 +255,15 @@ class _InitialTransactionFormSnapshot {
   final bool showIncomeCategoryOptions;
 }
 
-class TransactionAddForm extends StatefulWidget {
+/// 1-메인-지출입력
+class NO1Form extends StatefulWidget {
   final String accountName;
   final Transaction? initialTransaction;
   final bool learnCategoryHintFromDescription;
   final bool confirmBeforeSave;
   final bool treatAsNew;
   final String? titlePrefix;
-  const TransactionAddForm({
+  const NO1Form({
     super.key,
     required this.accountName,
     this.initialTransaction,
@@ -273,10 +274,10 @@ class TransactionAddForm extends StatefulWidget {
   });
 
   @override
-  State<TransactionAddForm> createState() => _TransactionAddFormState();
+  State<NO1Form> createState() => _NO1FormState();
 }
 
-class _TransactionAddFormState extends State<TransactionAddForm> {
+class _NO1FormState extends State<NO1Form> {
   List<String> _recentDescriptions = [];
   List<String> _recentPayments = [];
   List<String> _recentMemos = [];

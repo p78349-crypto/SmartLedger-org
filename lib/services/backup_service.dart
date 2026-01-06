@@ -369,6 +369,16 @@ class BackupService {
     final incomeSplit = IncomeSplitService().getSplit(accountName);
     final savingsPlans = SavingsPlanService().getPlans(accountName);
     final trashEntries = TrashService().getEntries(accountName: accountName);
+    // Ensure drafts are not included in backups: temporarily remove
+    // per-account draft key before exporting any UserPref snapshots,
+    // then restore it after assembling the export payload.
+    final prefs = await SharedPreferences.getInstance();
+    final draftKey = PrefKeys.accountKey(accountName, 'tx_draft_v1');
+    final _maybeDraftRaw = prefs.getString(draftKey);
+    if (_maybeDraftRaw != null) {
+      await prefs.remove(draftKey);
+    }
+
     final shoppingCartItems = await UserPrefService.getShoppingCartItems(
       accountName: accountName,
     );
@@ -395,7 +405,7 @@ class BackupService {
     final lastAccountName = await UserPrefService.getLastAccountName();
     final lastBackupDate = await getLastBackupDate(accountName);
 
-    final prefs = await SharedPreferences.getInstance();
+    // prefs already obtained above; reuse it.
     final favorites = _exportFavoritesSnapshot(prefs, accountName);
     final globalSettings = <String, dynamic>{};
     for (final key in PrefKeys.settingKeys) {
@@ -477,6 +487,11 @@ class BackupService {
       },
       'globalSettings': globalSettings,
     };
+    // Restore draft key if it existed before export.
+    if (_maybeDraftRaw != null) {
+      await prefs.setString(draftKey, _maybeDraftRaw);
+    }
+
     return jsonEncode(data);
   }
 

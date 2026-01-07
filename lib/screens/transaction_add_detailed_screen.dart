@@ -678,6 +678,9 @@ class _TransactionAddDetailedFormState
       accountName: widget.accountName,
     );
 
+    // Ensure widget still mounted before using context across async gaps
+    if (!mounted) return;
+
     // Call bulk utility to handle sequential transactionAdd flows.
     await ShoppingCartBulkLedgerUtils.addCheckedItemsToLedgerBulk(
       context: context,
@@ -1752,7 +1755,7 @@ class _TransactionAddDetailedFormState
             IconButton(
               tooltip: '장바구니 불러오기',
               icon: const Icon(IconCatalog.shoppingCart),
-              onPressed: () => _formStateKey.currentState?.openShoppingCartPicker(),
+              onPressed: openShoppingCartPicker,
               visualDensity: VisualDensity.compact,
             ),
             const SizedBox(width: 8),

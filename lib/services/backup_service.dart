@@ -374,8 +374,8 @@ class BackupService {
     // then restore it after assembling the export payload.
     final prefs = await SharedPreferences.getInstance();
     final draftKey = PrefKeys.accountKey(accountName, 'tx_draft_v1');
-    final _maybeDraftRaw = prefs.getString(draftKey);
-    if (_maybeDraftRaw != null) {
+    final maybeDraftRaw = prefs.getString(draftKey);
+    if (maybeDraftRaw != null) {
       await prefs.remove(draftKey);
     }
 
@@ -488,8 +488,8 @@ class BackupService {
       'globalSettings': globalSettings,
     };
     // Restore draft key if it existed before export.
-    if (_maybeDraftRaw != null) {
-      await prefs.setString(draftKey, _maybeDraftRaw);
+    if (maybeDraftRaw != null) {
+      await prefs.setString(draftKey, maybeDraftRaw);
     }
 
     return jsonEncode(data);

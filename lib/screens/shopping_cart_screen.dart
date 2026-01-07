@@ -31,6 +31,8 @@ class ShoppingCartScreen extends StatefulWidget {
 }
 
 class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
+  static const double _inlineFieldHeight = 36.0;
+
   bool _isLoading = true;
   List<ShoppingCartItem> _items = const [];
   Map<String, CategoryHint> _categoryHints = const <String, CategoryHint>{};
@@ -47,10 +49,12 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
 
   final Map<String, TextEditingController> _qtyControllers = {};
   final Map<String, TextEditingController> _unitPriceControllers = {};
+  final Map<String, TextEditingController> _unitLabelControllers = {};
   final Map<String, TextEditingController> _memoControllers = {};
 
   final Map<String, FocusNode> _qtyFocusNodes = {};
   final Map<String, FocusNode> _unitPriceFocusNodes = {};
+  final Map<String, FocusNode> _unitLabelFocusNodes = {};
   final Map<String, FocusNode> _memoFocusNodes = {};
 
   String _unitPriceTextForInlineEditor(double unitPrice) {
@@ -80,11 +84,17 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
   }
 
   InputDecoration _inlineFieldDecoration(String hint) {
+    final theme = Theme.of(context);
     return InputDecoration(
       isDense: true,
       hintText: hint,
-      border: const OutlineInputBorder(),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      filled: true,
+      fillColor: theme.colorScheme.surfaceContainerHighest,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
     );
   }
 
@@ -123,6 +133,9 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
     for (final c in _unitPriceControllers.values) {
       c.dispose();
     }
+    for (final c in _unitLabelControllers.values) {
+      c.dispose();
+    }
     for (final c in _memoControllers.values) {
       c.dispose();
     }
@@ -130,6 +143,9 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
       n.dispose();
     }
     for (final n in _unitPriceFocusNodes.values) {
+      n.dispose();
+    }
+    for (final n in _unitLabelFocusNodes.values) {
       n.dispose();
     }
     for (final n in _memoFocusNodes.values) {
@@ -158,6 +174,12 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
       _unitPriceControllers.remove(k)?.dispose();
     }
 
+    final unitLabelRemoved =
+        _unitLabelControllers.keys.where((k) => !ids.contains(k));
+    for (final k in unitLabelRemoved.toList(growable: false)) {
+      _unitLabelControllers.remove(k)?.dispose();
+    }
+
     final memoRemoved = _memoControllers.keys.where((k) => !ids.contains(k));
     for (final k in memoRemoved.toList(growable: false)) {
       _memoControllers.remove(k)?.dispose();
@@ -168,6 +190,12 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
     );
     for (final k in unitFocusRemoved.toList(growable: false)) {
       _unitPriceFocusNodes.remove(k)?.dispose();
+    }
+
+    final unitLabelFocusRemoved =
+        _unitLabelFocusNodes.keys.where((k) => !ids.contains(k));
+    for (final k in unitLabelFocusRemoved.toList(growable: false)) {
+      _unitLabelFocusNodes.remove(k)?.dispose();
     }
 
     final memoFocusRemoved = _memoFocusNodes.keys.where(
@@ -223,6 +251,35 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
         node.addListener(() {
           if (node.hasFocus) {
             final c = _unitPriceControllers[item.id];
+            if (c != null) {
+              c.selection = TextSelection(
+                baseOffset: 0,
+                extentOffset: c.text.length,
+              );
+            }
+          }
+          if (mounted) setState(() {});
+        });
+        return node;
+      });
+
+      final unitLabelText = item.unitLabel;
+      final unitLabelController = _unitLabelControllers[item.id];
+      if (unitLabelController == null) {
+        _unitLabelControllers[item.id] =
+            TextEditingController(text: unitLabelText);
+      } else {
+        final hasFocus = _unitLabelFocusNodes[item.id]?.hasFocus ?? false;
+        if (!hasFocus && unitLabelController.text != unitLabelText) {
+          unitLabelController.text = unitLabelText;
+        }
+      }
+
+      _unitLabelFocusNodes.putIfAbsent(item.id, () {
+        final node = FocusNode();
+        node.addListener(() {
+          if (node.hasFocus) {
+            final c = _unitLabelControllers[item.id];
             if (c != null) {
               c.selection = TextSelection(
                 baseOffset: 0,
@@ -309,6 +366,8 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
     final updatedItems = _items.map((item) {
       final qtyRaw = _qtyControllers[item.id]?.text.trim() ?? '';
       final unitRaw = _unitPriceControllers[item.id]?.text.trim() ?? '';
+        final unitLabelRaw =
+          _unitLabelControllers[item.id]?.text.trim() ?? item.unitLabel;
       final memoRaw = _memoControllers[item.id]?.text.trim() ?? item.memo;
 
       final parsedQty = int.tryParse(qtyRaw);
@@ -317,15 +376,18 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
       final nextQty = (parsedQty == null)
           ? item.quantity
           : (parsedQty <= 0 ? 1 : parsedQty);
-      final nextUnit = (parsedUnit == null) ? item.unitPrice : parsedUnit;
+        final nextUnit = (parsedUnit == null) ? item.unitPrice : parsedUnit;
+          final nextUnitLabel = unitLabelRaw;
       final nextMemo = memoRaw;
 
       if (nextQty != item.quantity ||
           nextUnit != item.unitPrice ||
+          nextUnitLabel != item.unitLabel ||
           nextMemo != item.memo) {
         return item.copyWith(
           quantity: nextQty,
           unitPrice: nextUnit,
+          unitLabel: nextUnitLabel,
           memo: nextMemo,
           updatedAt: DateTime.now(),
         );
@@ -343,6 +405,8 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
   Future<void> _applyInlineEdits(ShoppingCartItem item) async {
     final qtyRaw = _qtyControllers[item.id]?.text.trim() ?? '';
     final unitRaw = _unitPriceControllers[item.id]?.text.trim() ?? '';
+    final unitLabelRaw =
+        _unitLabelControllers[item.id]?.text.trim() ?? item.unitLabel;
     final memoRaw = _memoControllers[item.id]?.text.trim() ?? item.memo;
 
     final parsedQty = int.tryParse(qtyRaw);
@@ -352,10 +416,12 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
         ? item.quantity
         : (parsedQty <= 0 ? 1 : parsedQty);
     final nextUnit = (parsedUnit == null) ? item.unitPrice : parsedUnit;
+    final nextUnitLabel = unitLabelRaw;
     final nextMemo = memoRaw;
 
     if (nextQty == item.quantity &&
         nextUnit == item.unitPrice &&
+        nextUnitLabel == item.unitLabel &&
         nextMemo == item.memo) {
       return;
     }
@@ -364,6 +430,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
     final updated = item.copyWith(
       quantity: nextQty,
       unitPrice: nextUnit,
+      unitLabel: nextUnitLabel,
       memo: nextMemo,
       updatedAt: now,
     );
@@ -414,6 +481,8 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
   void _previewInlineEdits(ShoppingCartItem item) {
     final qtyRaw = _qtyControllers[item.id]?.text.trim() ?? '';
     final unitRaw = _unitPriceControllers[item.id]?.text.trim() ?? '';
+    final unitLabelRaw =
+      _unitLabelControllers[item.id]?.text.trim() ?? item.unitLabel;
     final memoRaw = _memoControllers[item.id]?.text.trim() ?? item.memo;
 
     final parsedQty = int.tryParse(qtyRaw);
@@ -423,10 +492,12 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
         ? item.quantity
         : (parsedQty <= 0 ? 1 : parsedQty);
     final nextUnit = (parsedUnit == null) ? item.unitPrice : parsedUnit;
+    final nextUnitLabel = unitLabelRaw;
     final nextMemo = memoRaw;
 
     if (nextQty == item.quantity &&
         nextUnit == item.unitPrice &&
+        nextUnitLabel == item.unitLabel &&
         nextMemo == item.memo) {
       return;
     }
@@ -434,6 +505,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
     final updated = item.copyWith(
       quantity: nextQty,
       unitPrice: nextUnit,
+      unitLabel: nextUnitLabel,
       memo: nextMemo,
       updatedAt: DateTime.now(),
     );
@@ -501,22 +573,47 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
     );
   }
 
+  Widget _buildUnitField({
+    required ThemeData theme,
+    required ShoppingCartItem item,
+    required TextEditingController controller,
+    required FocusNode focusNode,
+  }) {
+    return SizedBox(
+      width: 72,
+      height: _inlineFieldHeight,
+      child: TextField(
+        controller: controller,
+        focusNode: focusNode,
+        textAlign: TextAlign.center,
+        textInputAction: TextInputAction.next,
+        keyboardType: TextInputType.text,
+        style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
+        decoration: _inlineFieldDecoration('단위'),
+        onChanged: (_) => _previewInlineEdits(item),
+        onEditingComplete: () => _applyInlineEdits(item),
+      ),
+    );
+  }
+
 Widget _buildWideItemTile({
     required BuildContext context,
     required ShoppingCartItem item,
     required bool isSelected,
     required TextEditingController qtyController,
     required TextEditingController unitController,
+  required TextEditingController unitLabelController,
     required TextEditingController memoController,
     required FocusNode qtyFocusNode,
     required FocusNode unitFocusNode,
+  required FocusNode unitLabelFocusNode,
     required FocusNode memoFocusNode,
     required ThemeData theme,
     required Widget memoButton,
   }) {
     final isPrep = widget.openPrepOnStart;
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
       decoration: isSelected
           ? BoxDecoration(color: theme.colorScheme.primaryContainer)
           : null,
@@ -551,6 +648,7 @@ Widget _buildWideItemTile({
           const SizedBox(width: 12),
           SizedBox(
             width: 100,
+            height: _inlineFieldHeight,
             child: TextField(
               controller: unitController,
               focusNode: unitFocusNode,
@@ -565,6 +663,7 @@ Widget _buildWideItemTile({
           const SizedBox(width: 8),
           SizedBox(
             width: 45,
+            height: _inlineFieldHeight,
             child: TextField(
               controller: qtyController,
               focusNode: qtyFocusNode,
@@ -577,6 +676,13 @@ Widget _buildWideItemTile({
               onChanged: (_) => _previewInlineEdits(item),
               onEditingComplete: () => _applyInlineEdits(item),
             ),
+          ),
+          const SizedBox(width: 8),
+          _buildUnitField(
+            theme: theme,
+            item: item,
+            controller: unitLabelController,
+            focusNode: unitLabelFocusNode,
           ),
           const SizedBox(width: 8),
           Expanded(
@@ -906,15 +1012,36 @@ Widget _buildWideItemTile({
           : theme.colorScheme.surfaceContainerHighest,
       appBar: AppBar(
         // Title is rendered via flexibleSpace to ensure true screen-center alignment
-        centerTitle: false,
         title: const SizedBox.shrink(),
+        // Increase toolbar height so mode switch has space and won't overlap input below
+        toolbarHeight: isPortrait ? 90.0 : 74.0,
         flexibleSpace: SafeArea(
-          child: Align(
-            alignment: Alignment.topCenter,
-            child: Padding(
-              padding: EdgeInsets.only(top: isPortrait ? 8.0 : 6.0),
-              child: _buildModeSwitchBar(theme: theme),
-            ),
+          child: Column(
+            children: [
+              SizedBox(height: isPortrait ? 8.0 : 6.0),
+              Center(
+                child: Container(
+                  // expand horizontally closer to the icon areas (blue rectangles)
+                  margin: EdgeInsets.symmetric(horizontal: isPortrait ? 12 : 16),
+                  padding: EdgeInsets.symmetric(horizontal: isPortrait ? 12 : 20, vertical: 6),
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surface,
+                    // no border (removed per request)
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.04),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Center(child: _buildModeSwitchBar(theme: theme)),
+                ),
+              ),
+              SizedBox(height: isPortrait ? 8.0 : 6.0),
+            ],
           ),
         ),
         actions: widget.openPrepOnStart ? [
@@ -930,11 +1057,11 @@ Widget _buildWideItemTile({
           ),
         ] : null,
         bottom: PreferredSize(
-          preferredSize: Size.fromHeight(isPortrait ? 68 : 56),
+          preferredSize: Size.fromHeight(isPortrait ? 72 : 56),
           child: Padding(
             padding: isPortrait
-                ? const EdgeInsets.fromLTRB(16, 0, 10, 10)
-                : const EdgeInsets.fromLTRB(16, 0, 10, 6),
+                ? const EdgeInsets.fromLTRB(16, 6, 10, 10)
+                : const EdgeInsets.fromLTRB(16, 6, 10, 6),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1023,7 +1150,7 @@ Widget _buildWideItemTile({
                         ),
                         itemCount: ordered.length,
                         separatorBuilder: (context, index) =>
-                            const Divider(height: 1),
+                            Divider(height: 1, thickness: 1, color: theme.colorScheme.outlineVariant),
                         itemBuilder: (context, index) {
                           final item = ordered[index];
 
@@ -1049,12 +1176,24 @@ Widget _buildWideItemTile({
                               ),
                             ),
                           );
+                          _unitLabelControllers.putIfAbsent(
+                            item.id,
+                            () => TextEditingController(
+                              text: item.unitLabel.isEmpty
+                                  ? '개수'
+                                  : item.unitLabel,
+                            ),
+                          );
                           _memoControllers.putIfAbsent(
                             item.id,
                             () => TextEditingController(text: item.memo),
                           );
                           _qtyFocusNodes.putIfAbsent(item.id, FocusNode.new);
                           _unitPriceFocusNodes.putIfAbsent(
+                            item.id,
+                            FocusNode.new,
+                          );
+                          _unitLabelFocusNodes.putIfAbsent(
                             item.id,
                             FocusNode.new,
                           );
@@ -1066,9 +1205,13 @@ Widget _buildWideItemTile({
                           final qtyController = _qtyControllers[item.id]!;
                           final unitController =
                               _unitPriceControllers[item.id]!;
+                            final unitLabelController =
+                              _unitLabelControllers[item.id]!;
                           final memoController = _memoControllers[item.id]!;
                           final qtyFocusNode = _qtyFocusNodes[item.id]!;
                           final unitFocusNode = _unitPriceFocusNodes[item.id]!;
+                            final unitLabelFocusNode =
+                              _unitLabelFocusNodes[item.id]!;
                           final memoFocusNode = _memoFocusNodes[item.id]!;
                           const unitKeyboardType =
                               TextInputType.numberWithOptions(decimal: true);
@@ -1103,139 +1246,128 @@ Widget _buildWideItemTile({
                           }
 
                           final tile = isPortrait
-                              ? ListTile(
-                                  contentPadding:
-                                      const EdgeInsetsDirectional.fromSTEB(
-                                        12,
-                                        4,
-                                        8,
-                                        4,
-                                      ),
-                                  selected: isSelected,
-                                  selectedTileColor:
-                                      theme.colorScheme.primaryContainer,
-                                  leading: widget.openPrepOnStart
-                                      ? null
-                                      : SizedBox(
-                                          width: 40,
-                                          height: 40,
-                                          child: Center(
-                                            child: Transform.scale(
-                                              scale: 0.85,
-                                              child: Checkbox(
-                                                value: item.isChecked,
-                                                onChanged: (_) =>
-                                                    _toggleCheckedFast(item),
-                                                visualDensity:
-                                                    VisualDensity.compact,
-                                                materialTapTargetSize:
-                                                    MaterialTapTargetSize
-                                                        .shrinkWrap,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                  horizontalTitleGap: 6,
-                                  minLeadingWidth: 40,
-                                  title: Text(
-                                    item.name,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      fontWeight: isSelected
-                                          ? FontWeight.w700
-                                          : FontWeight.w600,
-                                      color: isSelected
-                                          ? theme.colorScheme.onPrimaryContainer
-                                          : theme.colorScheme.onSurface,
-                                    ),
-                                  ),
-                                  subtitle: Row(
-                                    children: [
-                                      SizedBox(
-                                        width: 100,
-                                        child: TextField(
-                                          controller: unitController,
-                                          focusNode: unitFocusNode,
-                                          keyboardType: unitKeyboardType,
-                                          textInputAction: TextInputAction.next,
-                                          style: theme.textTheme.bodySmall,
-                                          decoration: _inlineFieldDecoration(
-                                            '가격',
-                                          ),
-                                          onChanged: (_) =>
-                                              _previewInlineEdits(item),
-                                          onTapOutside: (_) {
-                                            FocusScope.of(context).unfocus();
-                                            _applyInlineEdits(item);
-                                          },
-                                          onEditingComplete: () =>
-                                              _applyInlineEdits(item),
-                                          onSubmitted: (_) {
-                                            _applyInlineEdits(item);
-                                            qtyFocusNode.requestFocus();
-                                          },
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      SizedBox(
-                                        width: 45,
-                                        child: TextField(
-                                          controller: qtyController,
-                                          focusNode: qtyFocusNode,
-                                          textAlign: TextAlign.center,
-                                          keyboardType: TextInputType.number,
-                                          textInputAction: TextInputAction.done,
-                                          style: theme.textTheme.bodySmall
-                                              ?.copyWith(
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                          decoration: _inlineFieldDecoration(
-                                            '수량',
-                                          ).copyWith(
-                                            contentPadding:
-                                                const EdgeInsets.symmetric(
-                                                  horizontal: 4,
-                                                  vertical: 8,
+                              ? Material(
+                                  color: isSelected ? theme.colorScheme.primaryContainer : Colors.transparent,
+                                  child: InkWell(
+                                    onTap: (!widget.openPrepOnStart) ? () => _toggleCheckedFast(item) : null,
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              if (!widget.openPrepOnStart) ...[
+                                                SizedBox(
+                                                  width: 40,
+                                                  height: 40,
+                                                  child: Center(
+                                                    child: Transform.scale(
+                                                      scale: 0.85,
+                                                      child: Checkbox(
+                                                        value: item.isChecked,
+                                                        onChanged: (_) => _toggleCheckedFast(item),
+                                                        visualDensity: VisualDensity.compact,
+                                                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                                      ),
+                                                    ),
+                                                  ),
                                                 ),
+                                                const SizedBox(width: 8),
+                                              ],
+                                              Expanded(
+                                                child: Text(
+                                                  item.name,
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
+                                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                                                    color: isSelected ? theme.colorScheme.onPrimaryContainer : theme.colorScheme.onSurface,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
                                           ),
-                                          onChanged: (_) =>
-                                              _previewInlineEdits(item),
-                                          onTapOutside: (_) {
-                                            FocusScope.of(context).unfocus();
-                                            _applyInlineEdits(item);
-                                          },
-                                          onEditingComplete: () =>
-                                              _applyInlineEdits(item),
-                                          onSubmitted: (_) {
-                                            _applyInlineEdits(item);
-                                            // 다음 항목의 가격 필드로 이동
-                                            final currentIndex = ordered.indexOf(item);
-                                            if (currentIndex >= 0 && currentIndex < ordered.length - 1) {
-                                              final nextItem = ordered[currentIndex + 1];
-                                              final nextUnitFocus = _unitPriceFocusNodes[nextItem.id];
-                                              if (nextUnitFocus != null) {
-                                                nextUnitFocus.requestFocus();
-                                              }
-                                            }
-                                          },
-                                        ),
+                                          const SizedBox(height: 8),
+                                          Row(
+                                            children: [
+                                              SizedBox(
+                                                width: 100,
+                                                height: _inlineFieldHeight,
+                                                child: TextField(
+                                                  controller: unitController,
+                                                  focusNode: unitFocusNode,
+                                                  keyboardType: unitKeyboardType,
+                                                  textInputAction: TextInputAction.next,
+                                                  style: theme.textTheme.bodySmall,
+                                                  decoration: InputDecoration(
+                                                    isDense: true,
+                                                    filled: true,
+                                                    fillColor: theme.colorScheme.surfaceContainerHighest,
+                                                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                                    hintText: '가격',
+                                                    border: OutlineInputBorder(
+                                                      borderRadius: BorderRadius.circular(12),
+                                                      borderSide: BorderSide.none,
+                                                    ),
+                                                  ),
+                                                  onChanged: (_) => _previewInlineEdits(item),
+                                                  onTapOutside: (_) {
+                                                    FocusScope.of(context).unfocus();
+                                                    _applyInlineEdits(item);
+                                                  },
+                                                  onEditingComplete: () => _applyInlineEdits(item),
+                                                  onSubmitted: (_) {
+                                                    _applyInlineEdits(item);
+                                                    qtyFocusNode.requestFocus();
+                                                  },
+                                                ),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              SizedBox(
+                                                width: 56,
+                                                height: _inlineFieldHeight,
+                                                child: TextField(
+                                                  controller: qtyController,
+                                                  focusNode: qtyFocusNode,
+                                                  textAlign: TextAlign.center,
+                                                  keyboardType: TextInputType.number,
+                                                  style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
+                                                  decoration: InputDecoration(
+                                                    isDense: true,
+                                                    filled: true,
+                                                    fillColor: theme.colorScheme.surfaceContainerHighest,
+                                                    contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                                                    border: OutlineInputBorder(
+                                                      borderRadius: BorderRadius.circular(12),
+                                                      borderSide: BorderSide.none,
+                                                    ),
+                                                  ),
+                                                  onChanged: (_) => _previewInlineEdits(item),
+                                                  onEditingComplete: () => _applyInlineEdits(item),
+                                                ),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              _buildUnitField(
+                                                theme: theme,
+                                                item: item,
+                                                controller: unitLabelController,
+                                                focusNode: unitLabelFocusNode,
+                                              ),
+                                              const Spacer(),
+                                              IconButton(
+                                                tooltip: '삭제',
+                                                padding: EdgeInsets.zero,
+                                                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                                                onPressed: () => _deleteItemWithUndo(item),
+                                                icon: const Icon(IconCatalog.deleteOutline),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
-                                  trailing: IconButton(
-                                    tooltip: '삭제',
-                                    padding: EdgeInsets.zero,
-                                    constraints: const BoxConstraints(
-                                      minWidth: 44,
-                                      minHeight: 44,
                                     ),
-                                    onPressed: () => _deleteItemWithUndo(item),
-                                    icon: const Icon(IconCatalog.deleteOutline),
                                   ),
-                                  onTap: (!widget.openPrepOnStart)
-                                      ? () => _toggleCheckedFast(item)
-                                      : null,
                                 )
                               : _buildWideItemTile(
                                   context: context,
@@ -1243,9 +1375,11 @@ Widget _buildWideItemTile({
                                   isSelected: isSelected,
                                   qtyController: qtyController,
                                   unitController: unitController,
+                                  unitLabelController: unitLabelController,
                                   memoController: memoController,
                                   qtyFocusNode: qtyFocusNode,
                                   unitFocusNode: unitFocusNode,
+                                  unitLabelFocusNode: unitLabelFocusNode,
                                   memoFocusNode: memoFocusNode,
                                   theme: theme,
                                   memoButton: buildMemoButton(),

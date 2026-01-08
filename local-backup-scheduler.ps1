@@ -2,9 +2,9 @@
 # Creates local backups every 3 hours without pushing to GitHub
 # Created: 2025-01-03
 
-$ProjectRoot = "C:\Users\plain\SmartLedger"
-$BackupDir = "$ProjectRoot\backups"
-$LogFile = "$ProjectRoot\local-backup.log"
+$ProjectRoot = $PSScriptRoot
+$BackupDir = Join-Path $ProjectRoot "backups"
+$LogFile = Join-Path $ProjectRoot "local-backup.log"
 
 # Create backup directory if it doesn't exist
 if (-not (Test-Path $BackupDir)) {
@@ -30,20 +30,20 @@ function Create-LocalBackup {
         New-Item -ItemType Directory -Path $BackupPath | Out-Null
         
         # Backup source directories
-        Write-Log "  Copying lib/ directory..."
-        Copy-Item -Path "$ProjectRoot\lib" -Destination "$BackupPath\lib" -Recurse -Force
-        
-        Write-Log "  Copying test/ directory..."
-        Copy-Item -Path "$ProjectRoot\test" -Destination "$BackupPath\test" -Recurse -Force
-        
-        Write-Log "  Copying tools/ directory..."
-        Copy-Item -Path "$ProjectRoot\tools" -Destination "$BackupPath\tools" -Recurse -Force
+        $dirs = @("lib", "test", "tools", "android", "ios", "windows", "web", "linux", "macos")
+        foreach ($dir in $dirs) {
+            $src = Join-Path $ProjectRoot $dir
+            if (Test-Path $src) {
+                Write-Log "  Copying $dir/ directory..."
+                Copy-Item -Path $src -Destination (Join-Path $BackupPath $dir) -Recurse -Force
+            }
+        }
         
         # Backup important files
         Write-Log "  Copying configuration files..."
-        Copy-Item -Path "$ProjectRoot\pubspec.yaml" -Destination "$BackupPath\pubspec.yaml" -Force
-        Copy-Item -Path "$ProjectRoot\pubspec.lock" -Destination "$BackupPath\pubspec.lock" -Force
-        Copy-Item -Path "$ProjectRoot\analysis_options.yaml" -Destination "$BackupPath\analysis_options.yaml" -Force
+        Copy-Item -Path (Join-Path $ProjectRoot "pubspec.yaml") -Destination (Join-Path $BackupPath "pubspec.yaml") -Force
+        Copy-Item -Path (Join-Path $ProjectRoot "pubspec.lock") -Destination (Join-Path $BackupPath "pubspec.lock") -Force
+        Copy-Item -Path (Join-Path $ProjectRoot "analysis_options.yaml") -Destination (Join-Path $BackupPath "analysis_options.yaml") -Force
         
         # Count files
         $FileCount = (Get-ChildItem -Path $BackupPath -Recurse -File).Count

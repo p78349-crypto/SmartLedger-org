@@ -98,15 +98,15 @@ class MainFeatureIconCatalog {
         ),
         MainFeatureIcon(
           id: 'food_inventory_check',
-          label: '재고 확인',
-          labelEn: 'Inventory Check',
+          label: '우리집 식재료',
+          labelEn: 'My Pantry',
           icon: IconCatalog.inventory2,
-          routeName: AppRoutes.foodInventoryCheck,
+          routeName: AppRoutes.foodExpiry,
         ),
         MainFeatureIcon(
           id: 'food_cooking_start',
-          label: '유통기한',
-          labelEn: 'Start Cooking',
+          label: '유통기한 관리',
+          labelEn: 'Expiry Management',
           icon: Icons.fastfood,
           routeName: AppRoutes.foodCookingStart,
         ),
@@ -154,15 +154,15 @@ class MainFeatureIconCatalog {
         ),
         MainFeatureIcon(
           id: 'consumable_inventory',
-          label: '소모품 재고',
-          labelEn: 'Consumables Stock',
+          label: '재고 관리',
+          labelEn: 'Inventory',
           icon: Icons.inventory,
           routeName: AppRoutes.consumableInventory,
         ),
         MainFeatureIcon(
           id: 'quick_stock_use',
-          label: '빠른 재고 차감',
-          labelEn: 'Quick Stock Use',
+          label: '식료품/생활용품 사용기록',
+          labelEn: 'Usage Log',
           icon: Icons.bolt,
           routeName: AppRoutes.quickStockUse,
         ),
@@ -172,13 +172,6 @@ class MainFeatureIconCatalog {
           labelEn: 'Add Detailed',
           icon: IconCatalog.postAdd,
           routeName: AppRoutes.transactionAddDetailed,
-        ),
-        MainFeatureIcon(
-          id: 'ingredient_search',
-          label: '요리 필요 재료 검색',
-          labelEn: 'Recipe Ingredients',
-          icon: Icons.menu_book,
-          routeName: AppRoutes.ingredientSearch,
         ),
       ],
     ),
@@ -432,6 +425,13 @@ class MainFeatureIconCatalog {
     const MainFeaturePage(
       index: 6,
       items: [
+        MainFeatureIcon(
+          id: 'application_settings',
+          label: '애플리케이션 설정',
+          labelEn: 'App Settings',
+          icon: IconCatalog.tune,
+          routeName: AppRoutes.applicationSettings,
+        ),
         MainFeatureIcon(
           id: 'settings',
           label: '설정',

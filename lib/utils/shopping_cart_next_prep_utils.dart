@@ -8,6 +8,7 @@ import 'package:smart_ledger/models/transaction.dart';
 import 'package:smart_ledger/services/store_alias_service.dart';
 import 'package:smart_ledger/services/transaction_service.dart';
 import 'package:smart_ledger/services/user_pref_service.dart';
+import 'package:smart_ledger/services/activity_household_estimator_service.dart';
 import 'package:smart_ledger/utils/icon_catalog.dart';
 import 'package:smart_ledger/utils/shopping_cart_next_prep_dialog_utils.dart';
 import 'package:smart_ledger/utils/shopping_prep_utils.dart';
@@ -17,6 +18,30 @@ import 'package:smart_ledger/screens/nutrition_report_screen.dart';
 
 class ShoppingCartNextPrepUtils {
   ShoppingCartNextPrepUtils._();
+
+  static double? _resolveQuantityFactorFromTrend(ActivityHouseholdTrendComparison? trend) {
+    if (trend == null) return null;
+    final r = trend.ratio;
+    if (!r.isFinite || r <= 0) return null;
+    if (r >= 0.9 && r <= 1.1) return null;
+    return r.clamp(0.7, 1.5);
+  }
+
+  static int _applyFactorToIntQuantity(int baseQty, double? factor) {
+    final b = baseQty <= 0 ? 1 : baseQty;
+    if (factor == null) return b;
+    final next = (b * factor).ceil();
+    return next < 1 ? 1 : next;
+  }
+
+  static String _appendFactorMemo(String? existing, double? factor) {
+    if (factor == null) return (existing ?? '').trim();
+    final line = '활동량 보정 x${factor.toStringAsFixed(2)}';
+    final base = (existing ?? '').trim();
+    if (base.isEmpty) return line;
+    if (base.contains(line)) return base;
+    return '$base\n$line';
+  }
 
   static Future<void> run({
     required BuildContext context,
@@ -558,6 +583,11 @@ class ShoppingCartNextPrepUtils {
       return;
     }
 
+    final trend = await ActivityHouseholdEstimatorService.compareTrend();
+    final qtyFactor = _resolveQuantityFactorFromTrend(trend);
+
+    if (!context.mounted) return;
+
     await showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
@@ -576,8 +606,12 @@ class ShoppingCartNextPrepUtils {
                 ShoppingCartItem(
                   id: 'store_${createdAt.microsecondsSinceEpoch}_$key',
                   name: item.name,
-                  quantity: item.quantity <= 0 ? 1 : item.quantity,
+                  quantity: _applyFactorToIntQuantity(
+                    item.quantity <= 0 ? 1 : item.quantity,
+                    qtyFactor,
+                  ),
                   unitPrice: item.unitPrice,
+                  memo: _appendFactorMemo(null, qtyFactor),
                   createdAt: createdAt,
                   updatedAt: createdAt,
                 ),
@@ -667,6 +701,11 @@ class ShoppingCartNextPrepUtils {
     );
     if (!context.mounted) return;
 
+    final trend = await ActivityHouseholdEstimatorService.compareTrend();
+    final qtyFactor = _resolveQuantityFactorFromTrend(trend);
+
+    if (!context.mounted) return;
+
     final candidates = <ShoppingTemplateItem>[];
     final seen = <String>{};
     for (final h in history) {
@@ -736,8 +775,12 @@ class ShoppingCartNextPrepUtils {
           return ShoppingCartItem(
             id: 'recent_${now.microsecondsSinceEpoch}_$key',
             name: c.name,
-            quantity: c.quantity <= 0 ? 1 : c.quantity,
+            quantity: _applyFactorToIntQuantity(
+              c.quantity <= 0 ? 1 : c.quantity,
+              qtyFactor,
+            ),
             unitPrice: c.unitPrice,
+            memo: _appendFactorMemo(null, qtyFactor),
             createdAt: now,
             updatedAt: now,
           );
@@ -768,6 +811,11 @@ class ShoppingCartNextPrepUtils {
       accountName: accountName,
       limit: 2000,
     );
+    if (!context.mounted) return;
+
+    final trend = await ActivityHouseholdEstimatorService.compareTrend();
+    final qtyFactor = _resolveQuantityFactorFromTrend(trend);
+
     if (!context.mounted) return;
 
     const maxStaleDays = 180;
@@ -1030,8 +1078,12 @@ class ShoppingCartNextPrepUtils {
           return ShoppingCartItem(
             id: 'freq_${now.microsecondsSinceEpoch}_$key',
             name: c.name,
-            quantity: c.quantity <= 0 ? 1 : c.quantity,
+            quantity: _applyFactorToIntQuantity(
+              c.quantity <= 0 ? 1 : c.quantity,
+              qtyFactor,
+            ),
             unitPrice: c.unitPrice,
+            memo: _appendFactorMemo(null, qtyFactor),
             createdAt: now,
             updatedAt: now,
           );

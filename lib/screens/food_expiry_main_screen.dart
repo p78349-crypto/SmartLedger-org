@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smart_ledger/models/food_expiry_item.dart';
 import 'package:smart_ledger/models/recipe.dart';
 import 'package:smart_ledger/models/shopping_cart_history_entry.dart';
@@ -9,20 +12,28 @@ import 'package:smart_ledger/services/food_expiry_prediction_engine.dart';
 import 'package:smart_ledger/services/food_expiry_service.dart';
 import 'package:smart_ledger/services/recipe_service.dart';
 import 'package:smart_ledger/services/user_pref_service.dart';
+import 'package:smart_ledger/services/health_guardrail_service.dart';
+import 'package:smart_ledger/services/replacement_cycle_notification_service.dart';
 import 'package:smart_ledger/utils/currency_formatter.dart';
 import 'package:smart_ledger/utils/icon_catalog.dart';
 import 'package:smart_ledger/utils/interaction_blockers.dart';
+import 'package:smart_ledger/utils/shopping_prep_utils.dart';
+import 'package:smart_ledger/screens/savings_statistics_screen.dart';
 import 'package:smart_ledger/navigation/app_routes.dart';
 
 /// 식품 유통기한 관리 전용 메인 네비게이션 화면
 class FoodExpiryMainScreen extends StatefulWidget {
   final List<String>? initialIngredients;
   final bool autoUsageMode;
+  final bool openUpsertOnStart;
+  final bool openCookableRecipePickerOnStart;
 
   const FoodExpiryMainScreen({
     super.key,
     this.initialIngredients,
     this.autoUsageMode = false,
+    this.openUpsertOnStart = false,
+    this.openCookableRecipePickerOnStart = false,
   });
 
   @override
@@ -30,7 +41,9 @@ class FoodExpiryMainScreen extends StatefulWidget {
 }
 
 class _RecipePickerDialog extends StatefulWidget {
-  const _RecipePickerDialog();
+  final bool onlyCookable;
+
+  const _RecipePickerDialog({this.onlyCookable = false});
 
   @override
   State<_RecipePickerDialog> createState() => _RecipePickerDialogState();
@@ -72,6 +85,15 @@ class _RecipePickerDialogState extends State<_RecipePickerDialog> {
     return matched.where((it) => seen.add(it.id)).toList();
   }
 
+  bool _isCookable(Recipe recipe, List<FoodExpiryItem> inventory) {
+    if (recipe.ingredients.isEmpty) return false;
+    return recipe.ingredients.every(
+      (ing) => inventory.any(
+        (it) => it.name.contains(ing.name) || ing.name.contains(it.name),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -82,6 +104,8 @@ class _RecipePickerDialogState extends State<_RecipePickerDialog> {
       final matchesCuisine =
           _selectedCuisine == 'All' || r.cuisine == _selectedCuisine;
       if (!matchesCuisine) return false;
+
+      if (widget.onlyCookable && !_isCookable(r, inventory)) return false;
 
       if (_searchQuery.isEmpty) return true;
       final query = _searchQuery.toLowerCase();
@@ -96,7 +120,7 @@ class _RecipePickerDialogState extends State<_RecipePickerDialog> {
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text('레시피 선택'),
+          Text(widget.onlyCookable ? '가능 레시피' : '레시피 선택'),
           IconButton(
             icon: const Icon(Icons.add),
             tooltip: '새 레시피 추가',
@@ -118,7 +142,7 @@ class _RecipePickerDialogState extends State<_RecipePickerDialog> {
             TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: '레시피 또는 식재료 검색',
+                hintText: '레시피 또는 우리집 식재료 검색',
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: _searchQuery.isNotEmpty
                     ? IconButton(
@@ -157,7 +181,13 @@ class _RecipePickerDialogState extends State<_RecipePickerDialog> {
             const SizedBox(height: 16),
             Expanded(
               child: filteredRecipes.isEmpty
-                  ? const Center(child: Text('검색 결과가 없습니다.'))
+                  ? Center(
+                      child: Text(
+                        widget.onlyCookable
+                            ? '보관 중인 재료로 가능한 레시피가 없습니다.'
+                            : '검색 결과가 없습니다.',
+                      ),
+                    )
                   : ListView.builder(
                       shrinkWrap: true,
                       itemCount: filteredRecipes.length,
@@ -434,7 +464,7 @@ class _RecipeUpsertDialogState extends State<_RecipeUpsertDialog> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('식재료 목록'),
+                const Text('우리집 식재료 목록'),
                 Row(
                   children: [
                     IconButton(
@@ -445,7 +475,7 @@ class _RecipeUpsertDialogState extends State<_RecipeUpsertDialog> {
                     IconButton(
                       onPressed: _addIngredient,
                       icon: const Icon(Icons.add),
-                      tooltip: '식재료 직접 추가',
+                      tooltip: '우리집 식재료 직접 추가',
                     ),
                   ],
                 ),
@@ -589,14 +619,14 @@ class _IngredientUpsertDialogState extends State<_IngredientUpsertDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('식재료 추가'),
+      title: const Text('우리집 식재료/생활용품 추가'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
             controller: _nameController,
             decoration: const InputDecoration(
-              labelText: '이름',
+              labelText: '품목명',
               hintText: '예: 아몬드 분말',
             ),
             autofocus: true,
@@ -739,6 +769,13 @@ class _FoodExpiryMainScreenState extends State<FoodExpiryMainScreen> {
     super.initState();
     FoodExpiryService.instance.load();
     RecipeService.instance.load();
+
+    if (widget.openUpsertOnStart) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _openUpsertDialog(context);
+      });
+    }
   }
 
   late final List<Widget> _screens = <Widget>[
@@ -746,10 +783,11 @@ class _FoodExpiryMainScreenState extends State<FoodExpiryMainScreen> {
       onUpsert: _openUpsertDialog,
       initialIngredients: widget.initialIngredients,
       autoUsageMode: widget.autoUsageMode,
+      openCookableRecipePickerOnStart: widget.openCookableRecipePickerOnStart,
     ),
     const _FoodExpiryNotificationsScreen(),
     const _FoodExpiryPlaceholderScreen(title: '소비 기록'),
-    const _FoodExpiryPlaceholderScreen(title: '통계'),
+    const SavingsStatisticsScreen(),
   ];
 
   /// 모드에 따라 다른 네비게이션 아이템 반환
@@ -793,6 +831,19 @@ class _FoodExpiryMainScreenState extends State<FoodExpiryMainScreen> {
     }
   }
 
+  /// 절약 통계 화면으로 빠르게 이동할 수 있는 FAB
+  Widget _buildSavingsStatsButton(BuildContext context) {
+    final theme = Theme.of(context);
+    return FloatingActionButton(
+      heroTag: 'savings_stats',
+      onPressed: () => setState(() => _currentIndex = 3),
+      backgroundColor: theme.colorScheme.tertiaryContainer,
+      foregroundColor: theme.colorScheme.onTertiaryContainer,
+      tooltip: '절약 통계 보기',
+      child: const Icon(IconCatalog.savings),
+    );
+  }
+
   Future<void> _openUpsertDialog(
     BuildContext context, {
     FoodExpiryItem? existing,
@@ -807,6 +858,7 @@ class _FoodExpiryMainScreenState extends State<FoodExpiryMainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(index: _currentIndex, children: _screens),
+      floatingActionButton: _buildSavingsStatsButton(context),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _currentIndex,
@@ -838,6 +890,10 @@ class _FoodExpiryUpsertDialog extends StatefulWidget {
 }
 
 class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
+  static const String _kLastCategory = 'food_expiry_last_category_v1';
+  static const String _kLastLocation = 'food_expiry_last_location_v1';
+  static const String _kLastUnit = 'food_expiry_last_unit_v1';
+
   late TextEditingController _nameController;
   late TextEditingController _memoController;
   late TextEditingController _quantityController;
@@ -850,6 +906,7 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
   String _category = '기타';
   String _location = '냉장';
   bool _addToShoppingList = false;
+  List<String> _healthTags = const <String>[];
 
   final List<String> _categories = [
     '채소',
@@ -896,11 +953,76 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
     _pickedExpiryDate = widget.existing?.expiryDate;
     _category = widget.existing?.category ?? '기타';
     _location = widget.existing?.location ?? '냉장';
+    _healthTags = widget.existing?.healthTags ?? const <String>[];
+
+    if (widget.existing == null) {
+      _loadLastCategory();
+      _loadLastLocation();
+      _loadLastUnit();
+    }
 
     if (widget.existing != null) {
       _addQtyController.addListener(_updateTotal);
       _subQtyController.addListener(_updateTotal);
     }
+  }
+
+  Future<void> _loadLastCategory() async {
+    final prefs = await SharedPreferences.getInstance();
+    final last = prefs.getString(_kLastCategory)?.trim();
+    if (!mounted) return;
+    if (last == null || last.isEmpty) return;
+    if (!_categories.contains(last)) return;
+    setState(() {
+      _category = last;
+    });
+  }
+
+  Future<void> _saveLastCategory(String category) async {
+    final next = category.trim();
+    if (next.isEmpty) return;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_kLastCategory, next);
+  }
+
+  Future<void> _loadLastLocation() async {
+    final prefs = await SharedPreferences.getInstance();
+    final last = prefs.getString(_kLastLocation)?.trim();
+    if (!mounted) return;
+    if (last == null || last.isEmpty) return;
+    if (!_locations.contains(last)) return;
+    setState(() {
+      _location = last;
+    });
+  }
+
+  Future<void> _saveLastLocation(String location) async {
+    final next = location.trim();
+    if (next.isEmpty) return;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_kLastLocation, next);
+  }
+
+  Future<void> _loadLastUnit() async {
+    final prefs = await SharedPreferences.getInstance();
+    final last = prefs.getString(_kLastUnit)?.trim();
+    if (!mounted) return;
+    if (last == null || last.isEmpty) return;
+
+    // Only override when the field is still at default / empty.
+    final current = _unitController.text.trim();
+    if (current.isNotEmpty && current != '개') return;
+
+    setState(() {
+      _unitController.text = last;
+    });
+  }
+
+  Future<void> _saveLastUnit(String unit) async {
+    final next = unit.trim();
+    if (next.isEmpty) return;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_kLastUnit, next);
   }
 
   @override
@@ -1121,8 +1243,26 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
         location: _location,
         price: price,
         supplier: supplier,
+        healthTags: _healthTags,
       );
     } else {
+      final used = widget.existing!.quantity - quantity;
+      if (used > 0) {
+        final warning = await HealthGuardrailService.recordUsageAndCheck(
+          itemName: name,
+          amount: used,
+          tags: _healthTags,
+        );
+        if (mounted && warning != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(warning.message),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
+
       await FoodExpiryService.instance.updateItem(
         id: widget.existing!.id,
         name: name,
@@ -1135,8 +1275,13 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
         location: _location,
         price: price,
         supplier: supplier,
+        healthTags: _healthTags,
       );
     }
+
+    await _saveLastCategory(_category);
+    await _saveLastLocation(_location);
+    await _saveLastUnit(unit);
 
     // Handle "Add to shopping list" if checked
     if (_addToShoppingList) {
@@ -1232,7 +1377,9 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
                 child: Column(
                   children: [
                     Text(
-                      widget.existing == null ? '식재료 등록' : '식재료 정보 수정',
+                      widget.existing == null
+                          ? '우리집 식재료/생활용품 등록'
+                          : '우리집 식재료/생활용품 정보 수정',
                       style: theme.textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.w900,
                         letterSpacing: 0.5,
@@ -1305,6 +1452,31 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
                 },
               ),
 
+              // Health Tags
+              _buildFieldLabel('건강 태그 (선택)', theme),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: HealthGuardrailService.defaultTags.map((tag) {
+                  final isSelected = _healthTags.contains(tag);
+                  return FilterChip(
+                    label: Text(tag),
+                    selected: isSelected,
+                    onSelected: (v) {
+                      setState(() {
+                        final next = <String>{..._healthTags};
+                        if (v) {
+                          next.add(tag);
+                        } else {
+                          next.remove(tag);
+                        }
+                        _healthTags = next.toList();
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+
               // Quantity & Unit
               Row(
                 children: [
@@ -1313,7 +1485,7 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildFieldLabel('수량', theme),
+                        _buildFieldLabel('개수/수량', theme),
                         TextField(
                           controller: _quantityController,
                           keyboardType: const TextInputType.numberWithOptions(
@@ -1540,11 +1712,13 @@ class _FoodExpiryItemsScreen extends StatefulWidget {
   onUpsert;
   final List<String>? initialIngredients;
   final bool autoUsageMode;
+  final bool openCookableRecipePickerOnStart;
 
   const _FoodExpiryItemsScreen({
     this.onUpsert,
     this.initialIngredients,
     this.autoUsageMode = false,
+    this.openCookableRecipePickerOnStart = false,
   });
 
   @override
@@ -1555,6 +1729,89 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
   bool _isUsageMode = false;
   final Map<String, double> _usageMap = {};
   final Set<String> _activeUsageItems = {};
+
+  Set<String> _countLikeUnits =
+      UserPrefService.defaultCountLikeUnitsV1.toSet();
+
+  Future<void> _loadCountLikeUnits() async {
+    try {
+      final units = await UserPrefService.getCountLikeUnitsV1();
+      if (!mounted) return;
+      setState(() {
+        _countLikeUnits =
+            units.map((e) => e.trim()).where((e) => e.isNotEmpty).toSet();
+      });
+    } catch (_) {
+      // Best-effort
+    }
+  }
+
+  Future<void> _showCountLikeUnitsDialog() async {
+    final initial = _countLikeUnits.toList()..sort();
+    final controller = TextEditingController(text: initial.join(', '));
+
+    final result = await showDialog<List<String>>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('개수형 단위 설정'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('입력된 단위는 목록에서 -1 버튼이 크게 표시됩니다.'),
+            const SizedBox(height: 12),
+            TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                labelText: '단위 목록 (쉼표/줄바꿈 구분)',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              controller.text =
+                  UserPrefService.defaultCountLikeUnitsV1.join(', ');
+            },
+            child: const Text('기본값'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('취소'),
+          ),
+          FilledButton(
+            onPressed: () {
+              final parts = controller.text
+                  .split(RegExp(r'[\n,]'))
+                  .map((s) => s.trim())
+                  .where((s) => s.isNotEmpty)
+                  .toList();
+              Navigator.pop(ctx, parts);
+            },
+            child: const Text('저장'),
+          ),
+        ],
+      ),
+    );
+
+    if (result == null) return;
+    await UserPrefService.setCountLikeUnitsV1(result);
+    await _loadCountLikeUnits();
+  }
+
+  bool _isCountLikeUnit(String unit) {
+    final u = unit.trim();
+    if (u.isEmpty) return false;
+    return _countLikeUnits.contains(u);
+  }
+
+  Color _qtyColor(ThemeData theme, FoodExpiryItem item) {
+    if (item.quantity <= 0) return theme.colorScheme.error;
+    if (item.quantity <= 2) return theme.colorScheme.tertiary;
+    return theme.colorScheme.primary;
+  }
 
   // 로케이션 필터
   String? _locationFilter;
@@ -1572,6 +1829,110 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
     if (widget.autoUsageMode) {
       _isUsageMode = true;
     }
+
+    _loadCountLikeUnits();
+
+    if (widget.openCookableRecipePickerOnStart) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _showRecipePicker(onlyCookable: true);
+      });
+    }
+  }
+
+  List<String> _normalizeIngredientNames(List<String>? raw) {
+    if (raw == null || raw.isEmpty) return const <String>[];
+    final seen = <String>{};
+    final out = <String>[];
+    for (final v in raw) {
+      final name = v.trim();
+      if (name.isEmpty) continue;
+      final key = name.toLowerCase();
+      if (seen.add(key)) out.add(name);
+    }
+    return out;
+  }
+
+  bool _ingredientMatchesItem(String ingredient, FoodExpiryItem item) {
+    final ing = ingredient.trim().toLowerCase();
+    if (ing.isEmpty) return false;
+    final n = item.name.trim().toLowerCase();
+    final c = item.category.trim().toLowerCase();
+    return n.contains(ing) || ing.contains(n) || c.contains(ing);
+  }
+
+  List<FoodExpiryItem> _matchAllItemsForIngredient(
+    String ingredient,
+    List<FoodExpiryItem> items,
+  ) {
+    final matched =
+        items.where((it) => _ingredientMatchesItem(ingredient, it)).toList()
+          ..sort((a, b) => a.expiryDate.compareTo(b.expiryDate));
+    return matched;
+  }
+
+  List<FoodExpiryItem> _matchAvailableItemsForIngredient(
+    String ingredient,
+    List<FoodExpiryItem> items,
+  ) {
+    return _matchAllItemsForIngredient(ingredient, items)
+        .where((it) => it.quantity > 0)
+        .toList();
+  }
+
+  String _formatQuantityValue(double quantity, String unit) {
+    final isInt = quantity == quantity.toInt();
+    final value = isInt ? quantity.toInt().toString() : '$quantity';
+    return '$value$unit';
+  }
+
+  String _formatMatchedTotal(List<FoodExpiryItem> matched) {
+    if (matched.isEmpty) return '0';
+    final unit = matched.first.unit;
+    final sameUnit = matched.every((it) => it.unit == unit);
+    if (!sameUnit) return '${matched.length}개 항목';
+    final sum = matched.fold<double>(0.0, (acc, it) => acc + it.quantity);
+    return _formatQuantityValue(sum, unit);
+  }
+
+  void _showIngredientMatchesDetail(
+    BuildContext context, {
+    required String ingredientName,
+    required List<FoodExpiryItem> matched,
+  }) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('$ingredientName 재고 (${matched.length})'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: matched.length,
+            itemBuilder: (ctx, i) {
+              final it = matched[i];
+              final left = it.daysLeft(DateTime.now());
+              final expiry = DateFormat('yyyy-MM-dd').format(it.expiryDate);
+              final leftText = left < 0 ? '지남 ${-left}일' : '$left일 남음';
+
+              return ListTile(
+                title: Text(it.name.trim().isEmpty ? '(이름 없음)' : it.name),
+                subtitle: Text(
+                  '${it.category} | ${it.location} | ${_formatQuantity(it)}\n'
+                  '기한: $expiry ($leftText)',
+                ),
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('닫기'),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _addToCart(BuildContext context, FoodExpiryItem item) async {
@@ -1660,6 +2021,30 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
     );
 
     if (result != null && result != item.quantity) {
+      final used = item.quantity - result;
+      if (used > 0) {
+        final warning = await HealthGuardrailService.recordUsageAndCheck(
+          itemName: item.name,
+          amount: used,
+          tags: item.healthTags,
+        );
+        try {
+          await ReplacementCycleNotificationService.instance.rescheduleFromPrefs();
+        } catch (_) {
+          // ignore
+        }
+        if (context.mounted && warning != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(warning.message),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
+
+      if (!context.mounted) return;
+
       if (result == 0) {
         if (!context.mounted) return;
         final confirm = await showDialog<bool>(
@@ -1694,6 +2079,7 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
         memo: item.memo,
         quantity: result,
         unit: item.unit,
+        healthTags: item.healthTags,
       );
     }
   }
@@ -1705,6 +2091,30 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
   ) async {
     final newQty = item.quantity + delta;
     if (newQty < 0) return; // Prevent negative
+
+    final used = delta < 0 ? -delta : 0.0;
+    if (used > 0) {
+      final warning = await HealthGuardrailService.recordUsageAndCheck(
+        itemName: item.name,
+        amount: used,
+        tags: item.healthTags,
+      );
+      try {
+        await ReplacementCycleNotificationService.instance.rescheduleFromPrefs();
+      } catch (_) {
+        // ignore
+      }
+      if (context.mounted && warning != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(warning.message),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+
+    if (!context.mounted) return;
 
     if (newQty == 0) {
       // Ask to delete if 0
@@ -1744,10 +2154,15 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
       location: item.location,
       price: item.price,
       supplier: item.supplier,
+      healthTags: item.healthTags,
     );
   }
 
   Future<void> _addMissingToCart(List<String> names) async {
+    await _addIngredientNamesToCart(names);
+  }
+
+  Future<void> _addIngredientNamesToCart(List<String> names) async {
     final accountName = await UserPrefService.getLastAccountName();
     if (accountName == null) return;
 
@@ -1756,12 +2171,13 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
     );
 
     final now = DateTime.now();
-    final List<ShoppingCartItem> newItems = [];
-
-    for (var name in names) {
-      newItems.add(
+    final incoming = <ShoppingCartItem>[];
+    for (var i = 0; i < names.length; i++) {
+      final name = names[i].trim();
+      if (name.isEmpty) continue;
+      incoming.add(
         ShoppingCartItem(
-          id: 'shop_${now.microsecondsSinceEpoch}_${newItems.length}',
+          id: 'shop_${now.microsecondsSinceEpoch}_$i',
           name: name,
           createdAt: now,
           updatedAt: now,
@@ -1769,15 +2185,29 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
       );
     }
 
+    final merged = ShoppingPrepUtils.mergeByName(
+      existing: currentItems,
+      incoming: incoming,
+    );
+
+    if (merged.added <= 0) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('추가할 새 항목이 없습니다.')),
+        );
+      }
+      return;
+    }
+
     await UserPrefService.setShoppingCartItems(
       accountName: accountName,
-      items: [...newItems, ...currentItems],
+      items: merged.merged,
     );
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${newItems.length}개의 재료를 장바구니에 담았습니다.'),
+          content: Text('${merged.added}개의 재료를 장바구니에 담았습니다.'),
           action: SnackBarAction(
             label: '장바구니 이동',
             onPressed: () {
@@ -1948,6 +2378,34 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
     });
   }
 
+  Future<void> _confirmAndDeleteItem(FoodExpiryItem item) async {
+    final name = item.name.trim().isEmpty ? '(이름 없음)' : item.name.trim();
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('삭제 확인'),
+        content: Text("'$name' 항목을 삭제하시겠습니까?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('취소'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(
+              '삭제',
+              style: TextStyle(color: Theme.of(ctx).colorScheme.error),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await FoodExpiryService.instance.deleteById(item.id);
+    }
+  }
+
   Future<void> _applyBulkUsage() async {
     if (_usageMap.isEmpty) return;
 
@@ -2009,12 +2467,12 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
     }
   }
 
-  Future<void> _showRecipePicker() async {
+  Future<void> _showRecipePicker({bool onlyCookable = false}) async {
     final items = FoodExpiryService.instance.items.value;
 
     final selectedRecipe = await showDialog<Recipe>(
       context: context,
-      builder: (ctx) => const _RecipePickerDialog(),
+      builder: (ctx) => _RecipePickerDialog(onlyCookable: onlyCookable),
     );
 
     if (selectedRecipe != null) {
@@ -2073,7 +2531,7 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('부족한 식재료 안내'),
+        title: const Text('부족한 우리집 식재료 안내'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -2169,7 +2627,7 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     // 모드에 따라 다른 타이틀 및 아이콘
-    final appBarTitle = widget.autoUsageMode ? '유통기한 관리' : '식재료 재고';
+    final appBarTitle = widget.autoUsageMode ? '유통기한 관리' : '우리집 식재료';
     final appBarIcon = widget.autoUsageMode
         ? const Icon(Icons.soup_kitchen)
         : const Icon(Icons.inventory_2);
@@ -2188,6 +2646,11 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
               icon: const Icon(Icons.menu_book),
               tooltip: '요리 불러오기',
             ),
+          IconButton(
+            onPressed: _showCountLikeUnitsDialog,
+            icon: const Icon(Icons.tune),
+            tooltip: '개수형 단위 설정',
+          ),
           IconButton(
             onPressed: _toggleUsageMode,
             icon: Icon(_isUsageMode ? Icons.close : Icons.soup_kitchen),
@@ -2219,25 +2682,25 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
                     .where((it) => it.location == _locationFilter)
                     .toList();
 
+          final ingredientNames = _normalizeIngredientNames(
+            widget.initialIngredients,
+          );
+
           final missingIngredients = <String>[];
-          if (widget.initialIngredients != null) {
-            for (final ing in widget.initialIngredients!) {
-              final hasMatch = items.any(
-                (it) =>
-                    it.name.contains(ing) ||
-                    ing.contains(it.name) ||
-                    it.category.contains(ing),
+          if (ingredientNames.isNotEmpty) {
+            for (final ing in ingredientNames) {
+              // Treat "quantity <= 0" as effectively missing (still showable in detail)
+              final hasAvailable = items.any(
+                (it) => _ingredientMatchesItem(ing, it) && it.quantity > 0,
               );
-              if (!hasMatch) {
-                missingIngredients.add(ing);
-              }
+              if (!hasAvailable) missingIngredients.add(ing);
             }
           }
 
           if (items.isEmpty && missingIngredients.isEmpty) {
             final emptyMsg = widget.autoUsageMode
                 ? '등록된 유통기한 항목이 없습니다.\n하단 버튼으로 추가하세요.'
-                : '등록된 식재료가 없습니다.\n하단 버튼으로 재고를 추가하세요.';
+                : '등록된 우리집 식재료가 없습니다.\n하단 버튼으로 품목을 추가하세요.';
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(24),
@@ -2276,6 +2739,206 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
                   }).toList(),
                 ),
               ),
+              if (!_isUsageMode)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        FilledButton.icon(
+                          onPressed: () =>
+                              _showRecipePicker(onlyCookable: true),
+                          icon: const Icon(Icons.soup_kitchen),
+                          style: FilledButton.styleFrom(
+                            visualDensity: VisualDensity.compact,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                            minimumSize: const Size(0, 36),
+                          ),
+                          label: const Text('보관 중인 식재료 요리'),
+                        ),
+                        const SizedBox(width: 8),
+                        OutlinedButton.icon(
+                          onPressed: () {
+                            Navigator.pushNamed(
+                              context,
+                              AppRoutes.ingredientSearch,
+                            );
+                          },
+                          icon: const Icon(Icons.search),
+                          style: OutlinedButton.styleFrom(
+                            visualDensity: VisualDensity.compact,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                            minimumSize: const Size(0, 36),
+                          ),
+                          label: const Text('추천 재료 비교'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+              if (ingredientNames.isNotEmpty)
+                Container(
+                  width: double.maxFinite,
+                  margin: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.25),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: theme.colorScheme.outline.withValues(alpha: 0.2),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.fact_check_outlined,
+                            size: 18,
+                            color: theme.colorScheme.primary,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '재료 비교 (${ingredientNames.length})',
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const Spacer(),
+                          TextButton.icon(
+                            onPressed: () => _addIngredientNamesToCart(
+                              ingredientNames,
+                            ),
+                            icon: const Icon(
+                              Icons.playlist_add,
+                              size: 16,
+                            ),
+                            label: const Text('모두 담기'),
+                            style: TextButton.styleFrom(
+                              visualDensity: VisualDensity.compact,
+                            ),
+                          ),
+                          if (missingIngredients.isNotEmpty)
+                            TextButton.icon(
+                              onPressed: () => _addMissingToCart(
+                                missingIngredients,
+                              ),
+                              icon: const Icon(
+                                Icons.shopping_cart_outlined,
+                                size: 16,
+                              ),
+                              label: const Text('재고 0 모두 담기'),
+                              style: TextButton.styleFrom(
+                                visualDensity: VisualDensity.compact,
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      ...ingredientNames.expand((ing) {
+                        final matchedAll = _matchAllItemsForIngredient(
+                          ing,
+                          items,
+                        );
+                        final matched = _matchAvailableItemsForIngredient(
+                          ing,
+                          items,
+                        );
+                        final isMissing = matched.isEmpty;
+                        final nearest = isMissing ? null : matched.first;
+                        final left = nearest?.daysLeft(DateTime.now());
+                        final leftText = left == null
+                          ? ''
+                          : (left < 0 ? '지남 ${-left}일' : '$left일 남음');
+                        final nearestExpiry = left == null
+                            ? null
+                            : DateFormat('yyyy-MM-dd').format(nearest!.expiryDate);
+
+                        final subtitle = isMissing
+                            ? (matchedAll.isEmpty
+                                  ? '재고: 0 (없음)'
+                                  : '재고: 0 (수량 0)')
+                            : '총 ${_formatMatchedTotal(matched)} / 가장 빠른 기한: $nearestExpiry ($leftText)';
+
+                        final warnColor =
+                            (left != null && left <= 2) ? theme.colorScheme.error : null;
+
+                        return [
+                          InkWell(
+                            onTap: matchedAll.isEmpty
+                                ? null
+                                : () => _showIngredientMatchesDetail(
+                                      context,
+                                      ingredientName: ing,
+                                      matched: matchedAll,
+                                    ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 6),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          ing,
+                                          style: theme.textTheme.bodyMedium
+                                              ?.copyWith(
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          subtitle,
+                                          style: theme.textTheme.bodySmall
+                                              ?.copyWith(color: warnColor),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  if (isMissing)
+                                    IconButton(
+                                      tooltip: '장바구니 담기',
+                                      onPressed: () => _addMissingToCart([ing]),
+                                      icon: const Icon(
+                                        Icons.shopping_cart_outlined,
+                                        size: 18,
+                                      ),
+                                    )
+                                  else
+                                    Icon(
+                                      Icons.chevron_right,
+                                      size: 18,
+                                      color: theme.colorScheme.outline,
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const Divider(height: 1),
+                        ];
+                      }).toList()
+                        ..removeLast(),
+                    ],
+                  ),
+                ),
+
               if (missingIngredients.isNotEmpty)
                 Container(
                   width: double.maxFinite,
@@ -2302,7 +2965,7 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            '부족한 식재료 (${missingIngredients.length})',
+                            '부족한 우리집 식재료 (${missingIngredients.length})',
                             style: theme.textTheme.titleSmall?.copyWith(
                               color: theme.colorScheme.error,
                               fontWeight: FontWeight.bold,
@@ -2325,6 +2988,7 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
                         ],
                       ),
                       const SizedBox(height: 4),
+                      const Text('우리집 식재료 목록'),
                       Wrap(
                         spacing: 8,
                         children: missingIngredients
@@ -2348,6 +3012,9 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
                       const Divider(height: 1),
                   itemBuilder: (context, i) {
                     final it = items[i];
+                    final displayName = it.name.trim().isEmpty
+                        ? '(이름 없음)'
+                        : it.name.trim();
                     final left = it.daysLeft(DateTime.now());
                     final leftText = left < 0
                         ? '지남 ${-left}일'
@@ -2379,134 +3046,196 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
                           : null,
                       child: ListTile(
                         onTap: () => _showItemDetail(context, it),
-                        title: Row(
+                        title: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            if (it.category.isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(right: 8),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 6,
-                                    vertical: 2,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: theme.colorScheme.secondaryContainer,
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Text(
-                                    it.category,
-                                    style: theme.textTheme.labelSmall?.copyWith(
-                                      color: theme
-                                          .colorScheme
-                                          .onSecondaryContainer,
-                                      fontSize: 10,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            Expanded(
-                              child: Row(
-                                children: [
-                                  Flexible(
-                                    child: Text(
-                                      it.name,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
+                            Row(
+                              children: [
+                                if (it.category.isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 8),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: theme
+                                            .colorScheme
+                                            .secondaryContainer,
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Text(
+                                        it.category,
+                                        style: theme.textTheme.labelSmall
+                                            ?.copyWith(
+                                          color: theme
+                                              .colorScheme
+                                              .onSecondaryContainer,
+                                          fontSize: 10,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(width: 4),
-                                  Icon(
-                                    Icons.info_outline,
-                                    size: 14,
-                                    color: theme.colorScheme.primary.withValues(
-                                      alpha: 0.5,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            if (!isItemUsageActive) ...[
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.remove_circle_outline,
-                                  size: 20,
-                                ),
-                                padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(),
-                                onPressed: () =>
-                                    _adjustQuantity(context, it, -1),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 4,
-                                ),
-                                child: InkWell(
-                                  onTap: () => _editQuantity(context, it),
-                                  borderRadius: BorderRadius.circular(4),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 4,
-                                    ),
-                                    child: Text(
-                                      _formatQuantity(it),
-                                      style: theme.textTheme.bodyMedium
-                                          ?.copyWith(
+                                Expanded(
+                                  child: Row(
+                                    children: [
+                                      Flexible(
+                                        child: Text(
+                                          displayName,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
                                             fontWeight: FontWeight.bold,
-                                            color: theme.colorScheme.primary,
-                                            decoration:
-                                                TextDecoration.underline,
-                                            decorationStyle:
-                                                TextDecorationStyle.dotted,
                                           ),
-                                    ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Icon(
+                                        Icons.info_outline,
+                                        size: 14,
+                                        color: theme
+                                            .colorScheme
+                                            .primary
+                                            .withValues(
+                                              alpha: 0.5,
+                                            ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                              ),
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.add_circle_outline,
-                                  size: 20,
-                                ),
-                                padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(),
-                                onPressed: () =>
-                                    _adjustQuantity(context, it, 1),
-                              ),
-                            ] else ...[
-                              // Usage Mode: Improved UI
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    '잔량: ${_formatQuantity(it)}',
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: Colors.grey,
-                                      fontSize: 11,
+                              ],
+                            ),
+                            const SizedBox(height: 6),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: !isItemUsageActive
+                                  ? Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        if (_isCountLikeUnit(it.unit))
+                                          FilledButton.tonal(
+                                            onPressed: () => _adjustQuantity(
+                                              context,
+                                              it,
+                                              -1.0,
+                                            ),
+                                            style: FilledButton.styleFrom(
+                                              visualDensity: VisualDensity.compact,
+                                              tapTargetSize:
+                                                  MaterialTapTargetSize.shrinkWrap,
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                horizontal: 10,
+                                                vertical: 8,
+                                              ),
+                                            ),
+                                            child: const Text(
+                                              '-1',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          )
+                                        else
+                                          IconButton(
+                                            icon: const Icon(
+                                              Icons.remove_circle_outline,
+                                              size: 20,
+                                            ),
+                                            padding: EdgeInsets.zero,
+                                            constraints:
+                                                const BoxConstraints(),
+                                            onPressed: () =>
+                                                _adjustQuantity(
+                                              context,
+                                              it,
+                                              -1.0,
+                                            ),
+                                          ),
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 4,
+                                          ),
+                                          child: InkWell(
+                                            onTap: () =>
+                                                _editQuantity(context, it),
+                                            borderRadius:
+                                                BorderRadius.circular(4),
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                horizontal: 8,
+                                                vertical: 4,
+                                              ),
+                                              child: Text(
+                                                _formatQuantity(it),
+                                                style: theme
+                                                    .textTheme
+                                                    .bodyMedium
+                                                    ?.copyWith(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color:
+                                                          _qtyColor(theme, it),
+                                                      decoration: TextDecoration
+                                                          .underline,
+                                                      decorationStyle:
+                                                          TextDecorationStyle
+                                                              .dotted,
+                                                    ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(
+                                            Icons.add_circle_outline,
+                                            size: 20,
+                                          ),
+                                          padding: EdgeInsets.zero,
+                                          constraints: const BoxConstraints(),
+                                          onPressed: () => _adjustQuantity(
+                                            context,
+                                            it,
+                                            1.0,
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  : Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          '잔량: ${_formatQuantity(it)}',
+                                          style: theme.textTheme.bodySmall
+                                              ?.copyWith(
+                                            color: theme.colorScheme
+                                                .onSurfaceVariant,
+                                            fontSize: 11,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        _UsageInput(
+                                          initialValue: _usageMap[it.id],
+                                          max: it.quantity,
+                                          unit: it.unit,
+                                          onChanged: (val) {
+                                            setState(() {
+                                              if (val == null || val <= 0) {
+                                                _usageMap.remove(it.id);
+                                              } else {
+                                                _usageMap[it.id] = val;
+                                              }
+                                            });
+                                          },
+                                        ),
+                                      ],
                                     ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  _UsageInput(
-                                    initialValue: _usageMap[it.id],
-                                    max: it.quantity,
-                                    unit: it.unit,
-                                    onChanged: (val) {
-                                      setState(() {
-                                        if (val == null || val <= 0) {
-                                          _usageMap.remove(it.id);
-                                        } else {
-                                          _usageMap[it.id] = val;
-                                        }
-                                      });
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ],
+                            ),
                           ],
                         ),
                         subtitle: Text(
@@ -2516,48 +3245,52 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
                         ),
                         trailing: _isUsageMode
                             ? null
-                            : Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  if (!isItemUsageActive)
-                                    Text(
-                                      leftText,
-                                      style: TextStyle(color: color),
-                                    ),
-                                  IconButton(
-                                    icon: Icon(
-                                      isItemUsageActive
-                                          ? Icons.close
-                                          : Icons.soup_kitchen,
-                                      size: 20,
-                                      color: isItemUsageActive
-                                          ? theme.colorScheme.error
-                                          : theme.colorScheme.primary,
-                                    ),
-                                    tooltip: isItemUsageActive
-                                        ? '입력 취소'
-                                        : '사용량 입력',
-                                    onPressed: () => _toggleItemUsage(it.id),
-                                  ),
-                                  if (!isItemUsageActive) ...[
-                                    IconButton(
-                                      icon: const Icon(
-                                        IconCatalog.shoppingCart,
+                            : SizedBox(
+                                width: 210,
+                                child: Row(
+                                  children: [
+                                    if (!isItemUsageActive)
+                                      Text(
+                                        leftText,
+                                        style: TextStyle(color: color),
                                       ),
-                                      tooltip: '장바구니 담기',
-                                      onPressed: () => _addToCart(context, it),
-                                    ),
                                     IconButton(
-                                      icon: const Icon(
-                                        IconCatalog.deleteOutline,
+                                      icon: Icon(
+                                        isItemUsageActive
+                                            ? Icons.close
+                                            : Icons.soup_kitchen,
+                                        size: 20,
+                                        color: isItemUsageActive
+                                            ? theme.colorScheme.error
+                                            : theme.colorScheme.primary,
                                       ),
-                                      tooltip: '삭제',
-                                      onPressed: () => FoodExpiryService
-                                          .instance
-                                          .deleteById(it.id),
+                                      tooltip: isItemUsageActive
+                                          ? '입력 취소'
+                                          : '사용량 입력',
+                                      onPressed: () => _toggleItemUsage(it.id),
                                     ),
+                                    if (!isItemUsageActive) ...[
+                                      IconButton(
+                                        icon: const Icon(
+                                          IconCatalog.shoppingCart,
+                                        ),
+                                        tooltip: '장바구니 담기',
+                                        onPressed: () =>
+                                            _addToCart(context, it),
+                                      ),
+                                      const Spacer(),
+                                      IconButton(
+                                        icon: Icon(
+                                          IconCatalog.deleteOutline,
+                                          color: theme.colorScheme.error,
+                                        ),
+                                        tooltip: '삭제',
+                                        onPressed: () =>
+                                            _confirmAndDeleteItem(it),
+                                      ),
+                                    ],
                                   ],
-                                ],
+                                ),
                               ),
                       ),
                     );
@@ -2572,9 +3305,16 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
   }
 
   String _formatQuantity(FoodExpiryItem item) {
-    final isInt = item.quantity == item.quantity.toInt();
-    final value = isInt ? item.quantity.toInt().toString() : '${item.quantity}';
-    return '$value${item.unit}';
+    String formatQty(double value) {
+      if (!value.isFinite) return '0';
+      final rounded = value.roundToDouble();
+      if ((value - rounded).abs() < 0.000001) {
+        return rounded.toStringAsFixed(0);
+      }
+      return value.toStringAsFixed(1);
+    }
+
+    return '${formatQty(item.quantity)}${item.unit}';
   }
 
   String _itemSubtitleText(FoodExpiryItem item) {
@@ -2614,6 +3354,12 @@ class _UsageInput extends StatefulWidget {
 
 class _UsageInputState extends State<_UsageInput> {
   late TextEditingController _controller;
+
+  double get _step {
+    final u = widget.unit.trim();
+    if (u == '개') return 1.0;
+    return 0.1;
+  }
 
   @override
   void initState() {
@@ -2657,8 +3403,10 @@ class _UsageInputState extends State<_UsageInput> {
           onPressed: () {
             final current = double.tryParse(_controller.text) ?? 0.0;
             if (current > 0) {
-              final next = (current - 0.1).clamp(0.0, widget.max);
-              final rounded = double.parse(next.toStringAsFixed(1));
+              final next = (current - _step).clamp(0.0, widget.max);
+              final rounded = _step == 1.0
+                  ? next.roundToDouble()
+                  : double.parse(next.toStringAsFixed(1));
               _update(rounded == 0 ? null : rounded);
             }
           },
@@ -2675,7 +3423,7 @@ class _UsageInputState extends State<_UsageInput> {
               fontWeight: FontWeight.bold,
             ),
             decoration: InputDecoration(
-              hintText: '0.0',
+              hintText: _step == 1.0 ? '0' : '0.0',
               contentPadding: EdgeInsets.zero,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -2702,8 +3450,10 @@ class _UsageInputState extends State<_UsageInput> {
           constraints: const BoxConstraints(),
           onPressed: () {
             final current = double.tryParse(_controller.text) ?? 0.0;
-            final next = (current + 0.1).clamp(0.0, widget.max);
-            final rounded = double.parse(next.toStringAsFixed(1));
+            final next = (current + _step).clamp(0.0, widget.max);
+            final rounded = _step == 1.0
+                ? next.roundToDouble()
+                : double.parse(next.toStringAsFixed(1));
             _update(rounded);
           },
         ),
@@ -2812,6 +3562,18 @@ class _FoodExpiryNotificationsScreenState
             value: s.enabled,
             onChanged: _saving ? null : (v) => _update(s.copyWith(enabled: v)),
           ),
+          if (defaultTargetPlatform == TargetPlatform.android)
+            ListTile(
+              title: const Text('정확 알림 권한(선택)'),
+              subtitle: const Text(
+                '일부 기기(Android 12+)에서는 정확한 시간 알림을 위해\n'
+                '시스템의 “알람 및 리마인더” 권한이 필요할 수 있습니다.',
+              ),
+              trailing: TextButton(
+                onPressed: _saving ? null : openAppSettings,
+                child: const Text('설정 열기'),
+              ),
+            ),
           ListTile(
             enabled: s.enabled && !_saving,
             title: const Text('며칠 전 알림'),

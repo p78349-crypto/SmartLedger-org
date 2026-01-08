@@ -54,6 +54,7 @@ class TransactionAddDetailedScreen extends StatefulWidget {
   final bool learnCategoryHintFromDescription;
   final bool confirmBeforeSave;
   final bool treatAsNew;
+  final bool closeAfterSave;
   const TransactionAddDetailedScreen({
     super.key,
     required this.accountName,
@@ -61,6 +62,7 @@ class TransactionAddDetailedScreen extends StatefulWidget {
     this.learnCategoryHintFromDescription = false,
     this.confirmBeforeSave = false,
     this.treatAsNew = false,
+    this.closeAfterSave = false,
   });
 
   @override
@@ -131,6 +133,7 @@ class _TransactionAddDetailedScreenState
                       widget.learnCategoryHintFromDescription,
                   confirmBeforeSave: widget.confirmBeforeSave,
                   treatAsNew: widget.treatAsNew,
+                  closeAfterSave: widget.closeAfterSave,
                   titlePrefix: isLandscape ? titlePrefix : null,
                 ),
               ),
@@ -194,6 +197,7 @@ class TransactionAddDetailedForm extends StatefulWidget {
   final bool learnCategoryHintFromDescription;
   final bool confirmBeforeSave;
   final bool treatAsNew;
+  final bool closeAfterSave;
   final String? titlePrefix;
   const TransactionAddDetailedForm({
     super.key,
@@ -202,6 +206,7 @@ class TransactionAddDetailedForm extends StatefulWidget {
     this.learnCategoryHintFromDescription = false,
     this.confirmBeforeSave = false,
     this.treatAsNew = false,
+    this.closeAfterSave = false,
     this.titlePrefix,
   });
 
@@ -1471,6 +1476,12 @@ class _TransactionAddDetailedFormState
           if (mounted) navigator.pop(true);
         });
       } else {
+        if (widget.closeAfterSave) {
+          Future.delayed(const Duration(milliseconds: 200), () {
+            if (mounted) navigator.pop(true);
+          });
+          return;
+        }
         if (!mounted) return;
         _didSaveAtLeastOnce = true;
         void resetForNextEntry() {

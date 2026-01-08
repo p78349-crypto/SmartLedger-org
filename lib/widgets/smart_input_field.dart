@@ -104,15 +104,12 @@ class SmartInputField extends StatelessWidget {
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: scheme.brightness == Brightness.dark
-              ? BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.5))
-              : BorderSide.none,
+          borderSide: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.12)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: scheme.brightness == Brightness.dark
-              ? BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.5))
-              : BorderSide.none,
+          // Use theme outlineVariant for subtle border in both light and dark modes
+          borderSide: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.12)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),

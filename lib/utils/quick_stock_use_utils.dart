@@ -1,14 +1,61 @@
 import 'package:flutter/material.dart';
 import 'package:smart_ledger/models/consumable_inventory_item.dart';
 import 'package:smart_ledger/models/shopping_cart_item.dart';
+import 'package:smart_ledger/repositories/app_repositories.dart';
 import 'package:smart_ledger/services/consumable_inventory_service.dart';
+import 'package:smart_ledger/services/activity_household_estimator_service.dart';
 import 'package:smart_ledger/services/user_pref_service.dart';
 
-/// 빠른 재고 차감 유틸리티
+/// 식료품/생활용품 사용기록 유틸리티
 ///
 /// 상품명 입력 후 사용량 입력하면 자동 차감되는 기능 제공
 class QuickStockUseUtils {
   const QuickStockUseUtils._();
+
+  static DateTime _startOfDay(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
+
+  static String _formatQty(double value) {
+    if (!value.isFinite) return '0';
+    final rounded = value.roundToDouble();
+    if ((value - rounded).abs() < 0.000001) return rounded.toStringAsFixed(0);
+    return value.toStringAsFixed(1);
+  }
+
+  static double? _resolveQuantityFactorFromTrend(ActivityHouseholdTrendComparison? trend) {
+    if (trend == null) return null;
+    final r = trend.ratio;
+    if (!r.isFinite || r <= 0) return null;
+    if (r >= 0.9 && r <= 1.1) return null;
+    return r.clamp(0.7, 1.5);
+  }
+
+  static int _applyFactorToIntQuantity(int baseQty, double? factor) {
+    final b = baseQty <= 0 ? 1 : baseQty;
+    if (factor == null) return b;
+    final next = (b * factor).round();
+    return next < 1 ? 1 : next;
+  }
+
+  /// Returns expected depletion days from today based on usage history.
+  /// Requires enough usage history.
+  static int? _calculateExpectedDepletionDays(ConsumableInventoryItem item) {
+    if (item.currentStock <= 0) return null;
+    if (item.usageHistory.length < 2) return null;
+
+    final sorted = [...item.usageHistory]
+      ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
+
+    final first = sorted.first.timestamp;
+    final last = sorted.last.timestamp;
+    final spanDays =
+        _startOfDay(last).difference(_startOfDay(first)).inDays.abs();
+    final denomDays = spanDays < 1 ? 1 : spanDays;
+    final totalUsed = sorted.fold<double>(0.0, (sum, r) => sum + r.amount);
+    final avgPerDay = totalUsed / denomDays;
+    if (avgPerDay <= 0) return null;
+
+    return (item.currentStock / avgPerDay).ceil();
+  }
 
   // ============================================================
   // 한글 초성 테이블
@@ -133,6 +180,29 @@ class QuickStockUseUtils {
         await ConsumableInventoryService.instance.useItem(itemId, actualUsed);
       }
 
+      // Refresh item after use (usageHistory + currentStock updated)
+      final updated = ConsumableInventoryService.instance.items.value
+          .firstWhere((e) => e.id == itemId, orElse: () => item);
+
+      // Activity-based shopping adjustment factor (short vs baseline).
+      final trend = await ActivityHouseholdEstimatorService.compareTrend();
+      final qtyFactor = _resolveQuantityFactorFromTrend(trend);
+
+      // Auto add to shopping prep when expected depletion is imminent
+      final autoAddDaysThreshold = updated.expiryDate != null
+          ? await UserPrefService.getStockUseAutoAddDepletionDaysFoodV1()
+          : await UserPrefService.getStockUseAutoAddDepletionDaysHouseholdV1();
+      final expectedDaysLeft = _calculateExpectedDepletionDays(updated);
+      var addedToCartByPrediction = false;
+      if (expectedDaysLeft != null && expectedDaysLeft <= autoAddDaysThreshold) {
+        addedToCartByPrediction = await _addToShoppingCartWithMemo(
+          accountName: accountName,
+          itemName: updated.name,
+          memo: '예상 소진 임박 ($expectedDaysLeft일 내 소진 예상)',
+          quantity: _applyFactorToIntQuantity(1, qtyFactor),
+        );
+      }
+
       // 차감 후 남은 재고
       final remaining = (currentStock - actualUsed).clamp(0.0, double.infinity);
 
@@ -142,6 +212,8 @@ class QuickStockUseUtils {
         shortage: shortage,
         remaining: remaining,
         addedToCart: shortage > 0,
+        addedToCartByPrediction: addedToCartByPrediction,
+        expectedDepletionDays: expectedDaysLeft,
       );
     } catch (e) {
       return StockUseResult(
@@ -150,6 +222,8 @@ class QuickStockUseUtils {
         shortage: 0,
         remaining: 0,
         addedToCart: false,
+        addedToCartByPrediction: false,
+        expectedDepletionDays: null,
         error: e.toString(),
       );
     }
@@ -161,8 +235,9 @@ class QuickStockUseUtils {
     required String itemName,
     required double shortage,
     required String unit,
+    int quantity = 1,
   }) async {
-    final current = await UserPrefService.getShoppingCartItems(
+    final current = await AppRepositories.shoppingCart.getItems(
       accountName: accountName,
     );
 
@@ -176,16 +251,48 @@ class QuickStockUseUtils {
     final newItem = ShoppingCartItem(
       id: 'cart_${now.microsecondsSinceEpoch}',
       name: itemName,
-      memo: '재고 부족 (${shortage.toStringAsFixed(0)}$unit 필요)',
+      quantity: quantity <= 0 ? 1 : quantity,
+      memo: '재고 부족 (${_formatQty(shortage)}$unit 필요)',
       createdAt: now,
       updatedAt: now,
     );
 
     final next = List<ShoppingCartItem>.from(current)..add(newItem);
-    await UserPrefService.setShoppingCartItems(
+    await AppRepositories.shoppingCart.setItems(
       accountName: accountName,
       items: next,
     );
+  }
+
+  static Future<bool> _addToShoppingCartWithMemo({
+    required String accountName,
+    required String itemName,
+    required String memo,
+    int quantity = 1,
+  }) async {
+    final current = await AppRepositories.shoppingCart.getItems(
+      accountName: accountName,
+    );
+
+    final existingIndex = current.indexWhere((i) => i.name == itemName);
+    if (existingIndex >= 0) return false;
+
+    final now = DateTime.now();
+    final newItem = ShoppingCartItem(
+      id: 'cart_${now.microsecondsSinceEpoch}',
+      name: itemName,
+      quantity: quantity <= 0 ? 1 : quantity,
+      memo: memo,
+      createdAt: now,
+      updatedAt: now,
+    );
+
+    final next = List<ShoppingCartItem>.from(current)..add(newItem);
+    await AppRepositories.shoppingCart.setItems(
+      accountName: accountName,
+      items: next,
+    );
+    return true;
   }
 
   /// 재고 차감 (기본 - 호환성 유지)
@@ -218,6 +325,8 @@ class StockUseResult {
   final double shortage;
   final double remaining;
   final bool addedToCart;
+  final bool addedToCartByPrediction;
+  final int? expectedDepletionDays;
   final String? error;
 
   const StockUseResult({
@@ -226,6 +335,8 @@ class StockUseResult {
     required this.shortage,
     required this.remaining,
     required this.addedToCart,
+    required this.addedToCartByPrediction,
+    required this.expectedDepletionDays,
     this.error,
   });
 }
@@ -352,7 +463,7 @@ class _QuickStockUseSheetState extends State<_QuickStockUseSheet> {
               const Icon(Icons.bolt, color: Colors.orange),
               const SizedBox(width: 8),
               Text(
-                '빠른 재고 차감',
+                '식료품/생활용품 사용기록',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const Spacer(),

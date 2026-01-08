@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -6,6 +9,12 @@ import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
 import 'package:smart_ledger/models/food_expiry_item.dart';
+import 'package:smart_ledger/models/shopping_cart_item.dart';
+import 'package:smart_ledger/navigation/app_routes.dart';
+import 'package:smart_ledger/navigation/global_navigator_key.dart';
+import 'package:smart_ledger/services/account_service.dart';
+import 'package:smart_ledger/services/user_pref_service.dart';
+import 'package:smart_ledger/utils/pref_keys.dart';
 
 @immutable
 class FoodExpiryNotificationSettings {
@@ -46,6 +55,9 @@ class FoodExpiryNotificationService {
   static const String _androidChannelName = '유통기한 알림';
   static const String _androidChannelDescription = '유통기한 임박/경과 알림을 제공합니다.';
 
+  static const String _actionRecipe = 'food_expiry_action_recipe';
+  static const String _actionRepurchase = 'food_expiry_action_repurchase';
+
   final FlutterLocalNotificationsPlugin _plugin =
       FlutterLocalNotificationsPlugin();
 
@@ -65,7 +77,10 @@ class FoodExpiryNotificationService {
     const android = AndroidInitializationSettings('@mipmap/ic_launcher');
     const ios = DarwinInitializationSettings();
     const settings = InitializationSettings(android: android, iOS: ios);
-    await _plugin.initialize(settings);
+    await _plugin.initialize(
+      settings,
+      onDidReceiveNotificationResponse: _onNotificationResponse,
+    );
 
     // Android 채널 등록 (일부 기기/OS에선 필요)
     final androidImpl = _plugin
@@ -84,9 +99,115 @@ class FoodExpiryNotificationService {
     _initialized = true;
   }
 
+  Future<void> _onNotificationResponse(NotificationResponse response) async {
+    final payload = response.payload;
+
+    String? itemName;
+    try {
+      if (payload != null && payload.trim().isNotEmpty) {
+        final decoded = jsonDecode(payload);
+        if (decoded is Map<String, dynamic>) {
+          itemName = (decoded['itemName'] as String?)?.trim();
+        }
+      }
+    } catch (_) {
+      // ignore
+    }
+
+    if (response.actionId == _actionRecipe) {
+      await _openFoodExpiry(openCookableRecipePickerOnStart: true);
+      return;
+    }
+
+    if (response.actionId == _actionRepurchase) {
+      await _addToShoppingCartAndOpen(itemName);
+      return;
+    }
+
+    // Default tap
+    await _openFoodExpiry(openCookableRecipePickerOnStart: false);
+  }
+
+  Future<void> _openFoodExpiry({
+    required bool openCookableRecipePickerOnStart,
+  }) async {
+    for (int i = 0; i < 10; i++) {
+      final nav = appNavigatorKey.currentState;
+      if (nav != null) {
+        nav.pushNamed(
+          AppRoutes.foodExpiry,
+          arguments: FoodExpiryArgs(
+            openCookableRecipePickerOnStart: openCookableRecipePickerOnStart,
+          ),
+        );
+        return;
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+    }
+  }
+
+  Future<String?> _resolveAccountName() async {
+    final prefs = await SharedPreferences.getInstance();
+    final selected = prefs.getString(PrefKeys.selectedAccount)?.trim();
+    if (selected != null && selected.isNotEmpty) return selected;
+
+    try {
+      final service = AccountService();
+      await service.loadAccounts();
+      if (service.accounts.isNotEmpty) return service.accounts.first.name;
+    } catch (_) {
+      // ignore
+    }
+    return null;
+  }
+
+  Future<void> _addToShoppingCartAndOpen(String? itemName) async {
+    final name = (itemName ?? '').trim();
+    final accountName = await _resolveAccountName();
+
+    if (accountName == null || accountName.isEmpty || name.isEmpty) {
+      await _openFoodExpiry(openCookableRecipePickerOnStart: false);
+      return;
+    }
+
+    final current = await UserPrefService.getShoppingCartItems(
+      accountName: accountName,
+    );
+    final exists = current.any((i) => i.name.trim() == name);
+    if (!exists) {
+      final now = DateTime.now();
+      final next = List<ShoppingCartItem>.from(current)
+        ..add(
+          ShoppingCartItem(
+            id: 'sc_${now.microsecondsSinceEpoch}',
+            name: name,
+            createdAt: now,
+            updatedAt: now,
+          ),
+        );
+      await UserPrefService.setShoppingCartItems(
+        accountName: accountName,
+        items: next,
+      );
+    }
+
+    for (int i = 0; i < 10; i++) {
+      final nav = appNavigatorKey.currentState;
+      if (nav != null) {
+        nav.pushNamed(
+          AppRoutes.shoppingCart,
+          arguments: ShoppingCartArgs(accountName: accountName),
+        );
+        return;
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+    }
+  }
+
   Future<FoodExpiryNotificationSettings> loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
-    final enabled = prefs.getBool(_kEnabled) ?? false;
+    // Default ON for new installs; respect any previously saved user choice.
+    final enabled = prefs.getBool(_kEnabled) ?? true;
     final daysBefore = prefs.getInt(_kDaysBefore) ?? 2;
     final hour = prefs.getInt(_kHour) ?? 9;
     final minute = prefs.getInt(_kMinute) ?? 0;
@@ -131,9 +252,34 @@ class FoodExpiryNotificationService {
       channelDescription: _androidChannelDescription,
       importance: Importance.max,
       priority: Priority.high,
+      actions: <AndroidNotificationAction>[
+        AndroidNotificationAction(
+          _actionRecipe,
+          '레시피 보기',
+          showsUserInterface: true,
+        ),
+        AndroidNotificationAction(
+          _actionRepurchase,
+          '재구매 담기',
+          showsUserInterface: true,
+        ),
+      ],
     );
     const ios = DarwinNotificationDetails();
     return const NotificationDetails(android: android, iOS: ios);
+  }
+
+  String _formatQty(double value) {
+    if (!value.isFinite) return '0';
+    final rounded = value.roundToDouble();
+    if ((value - rounded).abs() < 0.000001) return rounded.toStringAsFixed(0);
+    return value.toStringAsFixed(1);
+  }
+
+  String _formatQtyWithUnit(double value, String unit) {
+    final u = unit.trim();
+    final q = _formatQty(value);
+    return u.isEmpty ? q : '$q$u';
   }
 
   Future<void> cancelAllFoodExpiryNotifications() async {
@@ -186,20 +332,42 @@ class FoodExpiryNotificationService {
         continue;
       }
 
-      const title = '유통기한 알림';
-      final body = daysBefore == 0
-          ? '${it.name} 유통기한 당일입니다.'
-          : '${it.name} 유통기한 $daysBefore일 전입니다.';
+        const title = '유통기한 알림';
+        final remaining = _formatQtyWithUnit(it.quantity, it.unit);
+        final body = daysBefore == 0
+          ? '${it.name} 유통기한 당일입니다.\n잔량: $remaining'
+          : '${it.name} 유통기한까지 $daysBefore일입니다.\n잔량: $remaining';
+
+      final payload = jsonEncode({'itemId': it.id, 'itemName': it.name});
 
       final id = _stableNotificationId(it.id);
-      await _plugin.zonedSchedule(
-        id,
-        title,
-        body,
-        tz.TZDateTime.from(notifyAt, tz.local),
-        _details(),
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      );
+      try {
+        await _plugin.zonedSchedule(
+          id,
+          title,
+          body,
+          tz.TZDateTime.from(notifyAt, tz.local),
+          _details(),
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+          payload: payload,
+        );
+      } on PlatformException catch (e) {
+        // Android 12+ can block exact alarms unless the user grants
+        // special access (SCHEDULE_EXACT_ALARM). Fall back to inexact.
+        if (e.code == 'exact_alarms_not_permitted') {
+          await _plugin.zonedSchedule(
+            id,
+            title,
+            body,
+            tz.TZDateTime.from(notifyAt, tz.local),
+            _details(),
+            androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+            payload: payload,
+          );
+        } else {
+          rethrow;
+        }
+      }
       scheduled++;
     }
 

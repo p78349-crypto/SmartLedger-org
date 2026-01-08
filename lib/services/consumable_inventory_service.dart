@@ -1,43 +1,25 @@
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smart_ledger/models/consumable_inventory_item.dart';
+import 'package:smart_ledger/repositories/app_repositories.dart';
+import 'package:smart_ledger/services/health_guardrail_service.dart';
+import 'package:smart_ledger/services/replacement_cycle_notification_service.dart';
+import 'package:smart_ledger/services/stock_depletion_notification_service.dart';
 
 class ConsumableInventoryService {
   ConsumableInventoryService._internal();
   static final ConsumableInventoryService instance =
       ConsumableInventoryService._internal();
 
-  static const String _prefsKey = 'consumable_inventory_items_v1';
-
   final ValueNotifier<List<ConsumableInventoryItem>> items =
       ValueNotifier<List<ConsumableInventoryItem>>(<ConsumableInventoryItem>[]);
 
   Future<void> load() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_prefsKey);
-    if (raw == null || raw.trim().isEmpty) {
-      items.value = [];
-      return;
-    }
-    try {
-      final list = jsonDecode(raw) as List<dynamic>;
-      final parsed = list
-          .whereType<Map<String, dynamic>>()
-          .map(ConsumableInventoryItem.fromJson)
-          .toList();
-      // FIFO: 생성일 기준 정렬 (오래된 것이 먼저)
-      parsed.sort((a, b) => a.createdAt.compareTo(b.createdAt));
-      items.value = parsed;
-    } catch (_) {
-      items.value = [];
-    }
+    final parsed = await AppRepositories.consumableInventory.loadItems();
+    items.value = parsed;
   }
 
   Future<void> _save() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = jsonEncode(items.value.map((e) => e.toJson()).toList());
-    await prefs.setString(_prefsKey, raw);
+    await AppRepositories.consumableInventory.saveItems(items.value);
   }
 
   Future<void> addItem({
@@ -49,6 +31,8 @@ class ConsumableInventoryService {
     String category = '생활용품',
     String? detailCategory,
     String location = '기타',
+    DateTime? expiryDate,
+    List<String> healthTags = const <String>[],
   }) async {
     final now = DateTime.now();
     final id = 'ci_${now.microsecondsSinceEpoch}';
@@ -64,6 +48,8 @@ class ConsumableInventoryService {
       location: location,
       createdAt: now,
       lastUpdated: now,
+      expiryDate: expiryDate,
+      healthTags: healthTags,
     );
     final next = List<ConsumableInventoryItem>.from(items.value)..add(newItem);
     // FIFO: 생성일 기준 정렬 (오래된 것이 먼저)
@@ -79,6 +65,15 @@ class ConsumableInventoryService {
       next[index] = item.copyWith(lastUpdated: DateTime.now());
       items.value = next;
       await _save();
+
+      // Keep predicted-depletion notifications up to date.
+      // Best-effort: do not fail the update flow if scheduling throws.
+      try {
+        await StockDepletionNotificationService.instance
+            .rescheduleForItem(next[index]);
+      } catch (_) {
+        // ignore
+      }
     }
   }
 
@@ -87,13 +82,55 @@ class ConsumableInventoryService {
     await _save();
   }
 
-  Future<void> useItem(String id, double amount) async {
+  Future<HealthGuardrailWarning?> useItem(String id, double amount) async {
     final index = items.value.indexWhere((e) => e.id == id);
     if (index != -1) {
       final item = items.value[index];
+      final actualUsed = amount <= 0
+          ? 0.0
+          : amount > item.currentStock
+              ? item.currentStock
+              : amount;
       final nextStock =
           (item.currentStock - amount).clamp(0.0, double.infinity);
-      await updateItem(item.copyWith(currentStock: nextStock));
+
+      final now = DateTime.now();
+      final nextHistory = <ConsumableUsageRecord>[...
+        item.usageHistory,
+        if (actualUsed > 0)
+          ConsumableUsageRecord(timestamp: now, amount: actualUsed),
+      ];
+
+      // keep only the last 60 records to bound storage
+      final bounded = nextHistory.length <= 60
+          ? nextHistory
+          : nextHistory.sublist(nextHistory.length - 60);
+
+      await updateItem(
+        item.copyWith(
+          currentStock: nextStock,
+          usageHistory: bounded,
+        ),
+      );
+
+      if (actualUsed > 0) {
+        final warning = await HealthGuardrailService.recordUsageAndCheck(
+          itemName: item.name,
+          amount: actualUsed,
+          tags: item.healthTags,
+        );
+
+        // Best-effort: keep replacement-cycle notifications up to date.
+        try {
+          await ReplacementCycleNotificationService.instance.rescheduleFromPrefs();
+        } catch (_) {
+          // ignore
+        }
+
+        return warning;
+      }
     }
+
+    return null;
   }
 }

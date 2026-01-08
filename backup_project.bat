@@ -1,22 +1,26 @@
 @echo off
 REM Flutter Project Backup Script
 REM Created: 2025-12-06
-REM Project: vccode1 - Multi-Account Household Ledger
+REM Project: SmartLedger - Multi-Account Household Ledger
 
 echo =========================================
 echo   Flutter Project Backup Started
 echo =========================================
 echo.
 
-REM Set backup directory
-set BACKUP_DIR=C:\Users\plain\vccode1_backups
-set PROJECT_DIR=C:\Users\plain\vccode1
+REM Set backup directory (default: %USERPROFILE%\SmartLedger_backups)
+set BACKUP_DIR=%USERPROFILE%\SmartLedger_backups
+
+REM Resolve project directory to this script's folder
+set PROJECT_DIR=%~dp0
+REM Remove trailing backslash if present
+if "%PROJECT_DIR:~-1%"=="\" set PROJECT_DIR=%PROJECT_DIR:~0,-1%
 
 REM Create timestamp
 for /f "tokens=2-4 delims=/ " %%a in ('date /t') do (set mydate=%%c-%%a-%%b)
 for /f "tokens=1-2 delims=/:" %%a in ('time /t') do (set mytime=%%a%%b)
 set TIMESTAMP=%mydate%_%mytime%
-set BACKUP_NAME=vccode1_backup_%TIMESTAMP%
+set BACKUP_NAME=SmartLedger_backup_%TIMESTAMP%
 set BACKUP_PATH=%BACKUP_DIR%\%BACKUP_NAME%
 
 echo Creating backup directory...
@@ -143,7 +147,7 @@ echo.
 
 REM List recent backups
 echo Recent Backups:
-dir /B /O-D "%BACKUP_DIR%" | findstr /R "vccode1_backup"
+dir /B /O-D "%BACKUP_DIR%" | findstr /R "SmartLedger_backup"
 
 echo.
 echo Backup completed successfully!

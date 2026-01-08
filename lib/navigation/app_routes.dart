@@ -32,6 +32,7 @@ class AppRoutes {
   static const trash = '/trash';
   static const backup = '/backup';
   static const settings = '/settings';
+  static const applicationSettings = '/settings/application';
   static const iconManagement = '/settings/icon-management';
   static const iconManagement2 = '/settings/icon-management-2';
   static const iconManagementAsset = '/settings/icon-management-asset';
@@ -69,7 +70,6 @@ class AppRoutes {
   static const microSavings = '/nudges/micro-savings';
   static const incomeSplit = '/income/split';
   static const foodExpiry = '/food/expiry';
-  static const foodInventoryCheck = '/food/inventory-check';
   static const foodCookingStart = '/food/cooking-start';
   static const calendar = '/calendar';
 
@@ -115,6 +115,19 @@ class AccountArgs {
   final double? initialIncomeAmount;
 }
 
+class FoodExpiryArgs {
+  const FoodExpiryArgs({
+    this.initialIngredients,
+    this.autoUsageMode = false,
+    this.openUpsertOnStart = false,
+    this.openCookableRecipePickerOnStart = false,
+  });
+  final List<String>? initialIngredients;
+  final bool autoUsageMode;
+  final bool openUpsertOnStart;
+  final bool openCookableRecipePickerOnStart;
+}
+
 class AccountMainArgs {
   const AccountMainArgs({required this.accountName, this.initialIndex = 0});
   final String accountName;
@@ -138,12 +151,14 @@ class TransactionAddArgs {
     this.learnCategoryHintFromDescription = false,
     this.confirmBeforeSave = false,
     this.treatAsNew = false,
+    this.closeAfterSave = false,
   });
   final String accountName;
   final Object? initialTransaction;
   final bool learnCategoryHintFromDescription;
   final bool confirmBeforeSave;
   final bool treatAsNew;
+  final bool closeAfterSave;
 }
 
 class TransactionDetailArgs {

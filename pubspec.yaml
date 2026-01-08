@@ -98,6 +98,9 @@ flutter:
 
   # Assets: custom original icons for theme preview
   assets:
+    - assets/data/
+    - assets/icons/
+    - assets/images/
     - assets/icons/custom/sample_icon_circle.svg
     - assets/icons/custom/sample_icon_star.svg
     - assets/icons/custom/sample_icon_spark.svg

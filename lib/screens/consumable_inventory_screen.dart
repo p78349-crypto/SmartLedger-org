@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:smart_ledger/models/consumable_inventory_item.dart';
 import 'package:smart_ledger/models/shopping_cart_item.dart';
+import 'package:smart_ledger/repositories/app_repositories.dart';
 import 'package:smart_ledger/services/consumable_inventory_service.dart';
+import 'package:smart_ledger/services/health_guardrail_service.dart';
 import 'package:smart_ledger/services/user_pref_service.dart';
 
 class ConsumableInventoryScreen extends StatefulWidget {
@@ -20,10 +22,113 @@ class ConsumableInventoryScreen extends StatefulWidget {
 class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
   String _locationFilter = '전체'; // 로케이션 필터 상태
 
+  Set<String> _countLikeUnits =
+      UserPrefService.defaultCountLikeUnitsV1.toSet();
+
+  String _formatQty(double value) {
+    if (!value.isFinite) return '0';
+    final rounded = value.roundToDouble();
+    if ((value - rounded).abs() < 0.000001) {
+      return rounded.toStringAsFixed(0);
+    }
+    return value.toStringAsFixed(1);
+  }
+
+  bool _isCountLikeUnit(String unit) {
+    final u = unit.trim();
+    if (u.isEmpty) return false;
+    return _countLikeUnits.contains(u);
+  }
+
+  Future<void> _loadCountLikeUnits() async {
+    try {
+      final units = await UserPrefService.getCountLikeUnitsV1();
+      if (!mounted) return;
+      setState(() {
+        _countLikeUnits =
+            units.map((e) => e.trim()).where((e) => e.isNotEmpty).toSet();
+      });
+    } catch (_) {
+      // Best-effort
+    }
+  }
+
+  Future<void> _showCountLikeUnitsDialog() async {
+    final initial = _countLikeUnits.toList()..sort();
+    final controller = TextEditingController(text: initial.join(', '));
+
+    final result = await showDialog<List<String>>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('개수형 단위 설정'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('입력된 단위는 목록에서 -1 버튼이 크게 표시됩니다.'),
+            const SizedBox(height: 12),
+            TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                labelText: '단위 목록 (쉼표/줄바꿈 구분)',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              controller.text =
+                  UserPrefService.defaultCountLikeUnitsV1.join(', ');
+            },
+            child: const Text('기본값'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('취소'),
+          ),
+          FilledButton(
+            onPressed: () {
+              final parts = controller.text
+                  .split(RegExp(r'[\n,]'))
+                  .map((s) => s.trim())
+                  .where((s) => s.isNotEmpty)
+                  .toList();
+              Navigator.pop(ctx, parts);
+            },
+            child: const Text('저장'),
+          ),
+        ],
+      ),
+    );
+
+    if (result == null) return;
+    await UserPrefService.setCountLikeUnitsV1(result);
+    await _loadCountLikeUnits();
+  }
+
+  Future<void> _quickDecrementOne(ConsumableInventoryItem item) async {
+    final warning = await ConsumableInventoryService.instance.useItem(
+      item.id,
+      1.0,
+    );
+    if (!mounted) return;
+    if (warning != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(warning.message),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     ConsumableInventoryService.instance.load();
+    _loadCountLikeUnits();
   }
 
   // 로케이션 필터 옵션 (전체 + 기본 옵션들)
@@ -34,8 +139,13 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('생활용품 재고 관리'),
+        title: const Text('식료품/생활용품 재고 관리'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.tune),
+            tooltip: '개수형 단위 설정',
+            onPressed: _showCountLikeUnitsDialog,
+          ),
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: _showAddItemDialog,
@@ -91,18 +201,42 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
                         itemBuilder: (context, index) {
                           final item = filteredItems[index];
                           final isLow = item.currentStock <= item.threshold;
+                          final expiry = item.expiryDate;
+                          final isEmpty = item.currentStock <= 0;
+
+                          final theme = Theme.of(context);
+                          final accentColor = isEmpty
+                              ? theme.colorScheme.error
+                              : (isLow
+                                  ? theme.colorScheme.tertiary
+                                  : theme.colorScheme.primary);
+
+                          DateTime startOfDay(DateTime dt) =>
+                              DateTime(dt.year, dt.month, dt.day);
+
+                          String formatDate(DateTime dt) {
+                            final y = dt.year.toString().padLeft(4, '0');
+                            final m = dt.month.toString().padLeft(2, '0');
+                            final d = dt.day.toString().padLeft(2, '0');
+                            return '$y-$m-$d';
+                          }
+
+                          int? daysLeft;
+                          if (expiry != null) {
+                            daysLeft = startOfDay(expiry)
+                                .difference(startOfDay(DateTime.now()))
+                                .inDays;
+                          }
 
                           return Card(
                             elevation: 0,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                               side: BorderSide(
-                                color: isLow
-                                    ? Colors.orange.withValues(alpha: 0.5)
-                                    : Theme.of(context)
-                                        .colorScheme
-                                        .outlineVariant,
-                                width: isLow ? 2 : 1,
+                                color: isEmpty || isLow
+                                    ? accentColor.withValues(alpha: 0.5)
+                                    : theme.colorScheme.outlineVariant,
+                                width: (isEmpty || isLow) ? 2 : 1,
                               ),
                             ),
                             child: Padding(
@@ -134,6 +268,28 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
                                                     .onSurfaceVariant,
                                               ),
                                             ),
+                                            if (expiry != null) ...[
+                                              const SizedBox(height: 2),
+                                              Text(
+                                                '⏳ 유통기한: ${formatDate(expiry)}'
+                                                '${daysLeft == null ? '' : daysLeft < 0 ? ' (경과 ${-daysLeft}일)' : ' (D-$daysLeft)'}',
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  color: daysLeft == null
+                                                      ? Theme.of(context)
+                                                          .colorScheme
+                                                          .onSurfaceVariant
+                                                      : (daysLeft < 0
+                                                          ? Colors.red
+                                                          : (daysLeft <= 2
+                                                              ? Colors.orange
+                                                              : Theme.of(
+                                                                      context)
+                                                                  .colorScheme
+                                                                  .onSurfaceVariant)),
+                                                ),
+                                              ),
+                                            ],
                                           ],
                                         ),
                                       ),
@@ -144,14 +300,26 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
                                             vertical: 4,
                                           ),
                                           decoration: BoxDecoration(
-                                            color: Colors.orange.shade100,
+                                            color: isEmpty
+                                                ? theme
+                                                    .colorScheme
+                                                    .errorContainer
+                                                : theme
+                                                    .colorScheme
+                                                    .tertiaryContainer,
                                             borderRadius:
                                                 BorderRadius.circular(8),
                                           ),
-                                          child: const Text(
-                                            '재고 부족',
+                                          child: Text(
+                                            isEmpty ? '재고 없음' : '재고 부족',
                                             style: TextStyle(
-                                              color: Colors.orange,
+                                              color: isEmpty
+                                                  ? theme
+                                                      .colorScheme
+                                                      .onErrorContainer
+                                                  : theme
+                                                      .colorScheme
+                                                      .onTertiaryContainer,
                                               fontSize: 12,
                                               fontWeight: FontWeight.bold,
                                             ),
@@ -163,18 +331,19 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
                                   Row(
                                     children: [
                                       Text(
-                                        '현재고: ${item.currentStock} ${item.unit}',
+                                        '현재고: ${_formatQty(item.currentStock)}${item.unit}',
                                         style: TextStyle(
                                           fontSize: 16,
-                                          color: isLow ? Colors.orange : null,
+                                          color:
+                                              (isEmpty || isLow) ? accentColor : null,
                                         ),
                                       ),
                                       const Spacer(),
                                       Text(
-                                        '알림 기준: ${item.threshold} ${item.unit} 이하',
+                                        '알림 기준: ${_formatQty(item.threshold)}${item.unit} 이하',
                                         style: TextStyle(
                                           fontSize: 12,
-                                          color: Theme.of(context)
+                                          color: theme
                                               .colorScheme
                                               .onSurfaceVariant,
                                         ),
@@ -184,6 +353,28 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
                                   const SizedBox(height: 16),
                                   Row(
                                     children: [
+                                      if (_isCountLikeUnit(item.unit)) ...[
+                                        FilledButton.tonal(
+                                          onPressed: () =>
+                                              _quickDecrementOne(item),
+                                          style: FilledButton.styleFrom(
+                                            visualDensity:
+                                                VisualDensity.standard,
+                                            padding:
+                                                const EdgeInsets.symmetric(
+                                              horizontal: 14,
+                                              vertical: 10,
+                                            ),
+                                          ),
+                                          child: const Text(
+                                            '-1',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                      ],
                                       _ActionButton(
                                         icon: Icons.remove,
                                         label: '사용',
@@ -253,6 +444,17 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
         TextEditingController(text: item?.bundleSize.toString() ?? '1');
     final unitController = TextEditingController(text: item?.unit ?? '개');
     String selectedLocation = item?.location ?? '기타';
+    DateTime? selectedExpiry = item?.expiryDate;
+    bool expiryCleared = false;
+
+    final selectedTags = <String>{...?(item?.healthTags)};
+
+    String formatDate(DateTime dt) {
+      final y = dt.year.toString().padLeft(4, '0');
+      final m = dt.month.toString().padLeft(2, '0');
+      final d = dt.day.toString().padLeft(2, '0');
+      return '$y-$m-$d';
+    }
 
     showDialog(
       context: context,
@@ -316,6 +518,61 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
                       },
                     ),
                     const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            '유통기한: ${selectedExpiry == null ? '-' : formatDate(selectedExpiry!)}',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                ),
+                          ),
+                        ),
+                        if (selectedExpiry != null)
+                          TextButton(
+                            onPressed: () {
+                              setDialogState(() {
+                                selectedExpiry = null;
+                                expiryCleared = true;
+                              });
+                            },
+                            style: TextButton.styleFrom(
+                              visualDensity: VisualDensity.compact,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            child: const Text('해제'),
+                          ),
+                        TextButton(
+                          onPressed: () async {
+                            final now = DateTime.now();
+                            final initial = selectedExpiry ?? now;
+                            final picked = await showDatePicker(
+                              context: context,
+                              initialDate: initial,
+                              firstDate: DateTime(2000),
+                              lastDate: DateTime(2100),
+                            );
+                            if (picked != null) {
+                              setDialogState(() {
+                                selectedExpiry = picked;
+                                expiryCleared = false;
+                              });
+                            }
+                          },
+                          style: TextButton.styleFrom(
+                            visualDensity: VisualDensity.compact,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          child: const Text('선택'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
                     TextField(
                       controller: thresholdController,
                       decoration: const InputDecoration(
@@ -334,6 +591,35 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
+                    ),
+                    const SizedBox(height: 12),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        '건강 태그 (선택)',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: HealthGuardrailService.defaultTags.map((tag) {
+                        final isSelected = selectedTags.contains(tag);
+                        return FilterChip(
+                          label: Text(tag),
+                          selected: isSelected,
+                          onSelected: (v) {
+                            setDialogState(() {
+                              if (v) {
+                                selectedTags.add(tag);
+                              } else {
+                                selectedTags.remove(tag);
+                              }
+                            });
+                          },
+                        );
+                      }).toList(),
                     ),
                   ],
                 ),
@@ -364,6 +650,7 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
                     final bundleSize =
                         double.tryParse(bundleSizeController.text) ?? 1.0;
                     final unit = unitController.text.trim();
+                    final tags = selectedTags.toList();
 
                     if (item == null) {
                       ConsumableInventoryService.instance.addItem(
@@ -373,6 +660,8 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
                         bundleSize: bundleSize,
                         unit: unit,
                         location: selectedLocation,
+                        expiryDate: selectedExpiry,
+                        healthTags: tags,
                       );
                     } else {
                       ConsumableInventoryService.instance.updateItem(
@@ -383,6 +672,9 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
                           bundleSize: bundleSize,
                           unit: unit,
                           location: selectedLocation,
+                          expiryDate: selectedExpiry,
+                          clearExpiryDate: expiryCleared,
+                          healthTags: tags,
                         ),
                       );
                     }
@@ -402,8 +694,20 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
     _showAmountDialog(
       title: '사용량 입력',
       item: item,
-      onConfirm: (amount) {
-        ConsumableInventoryService.instance.useItem(item.id, amount);
+      onConfirm: (amount) async {
+        final warning = await ConsumableInventoryService.instance.useItem(
+          item.id,
+          amount,
+        );
+        if (!mounted) return;
+        if (warning != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(warning.message),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
       },
     );
   }
@@ -412,8 +716,8 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
     _showAmountDialog(
       title: '추가량 입력',
       item: item,
-      onConfirm: (amount) {
-        ConsumableInventoryService.instance.updateItem(
+      onConfirm: (amount) async {
+        await ConsumableInventoryService.instance.updateItem(
           item.copyWith(currentStock: item.currentStock + amount),
         );
       },
@@ -423,12 +727,12 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
   void _showAmountDialog({
     required String title,
     required ConsumableInventoryItem item,
-    required Function(double) onConfirm,
+    required Future<void> Function(double) onConfirm,
   }) {
     final controller = TextEditingController(text: '1');
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: Text(title),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -477,15 +781,16 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.of(dialogContext).pop(),
             child: const Text('취소'),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               final val = double.tryParse(controller.text);
               if (val != null) {
-                onConfirm(val);
-                Navigator.pop(context);
+                await onConfirm(val);
+                if (!dialogContext.mounted) return;
+                Navigator.of(dialogContext).pop();
               }
             },
             child: const Text('확인'),
@@ -496,7 +801,7 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
   }
 
   Future<void> _sendToCart(ConsumableInventoryItem item) async {
-    final current = await UserPrefService.getShoppingCartItems(
+    final current = await AppRepositories.shoppingCart.getItems(
       accountName: widget.accountName,
     );
 
@@ -520,7 +825,7 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
     );
 
     final next = List<ShoppingCartItem>.from(current)..add(newItem);
-    await UserPrefService.setShoppingCartItems(
+    await AppRepositories.shoppingCart.setItems(
       accountName: widget.accountName,
       items: next,
     );

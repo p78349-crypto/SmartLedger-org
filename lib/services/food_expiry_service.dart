@@ -59,6 +59,7 @@ class FoodExpiryService {
     String location = '냉장',
     double price = 0.0,
     String supplier = '',
+    List<String> healthTags = const <String>[],
   }) async {
     final now = DateTime.now();
     final id = 'fx_${now.microsecondsSinceEpoch}';
@@ -77,6 +78,7 @@ class FoodExpiryService {
           location: location,
           price: price,
           supplier: supplier,
+          healthTags: healthTags,
         ),
       );
     next.sort((a, b) => a.expiryDate.compareTo(b.expiryDate));
@@ -99,6 +101,7 @@ class FoodExpiryService {
     String location = '냉장',
     double price = 0.0,
     String supplier = '',
+    List<String>? healthTags,
   }) async {
     final prev = items.value;
     final idx = prev.indexWhere((e) => e.id == id);
@@ -119,6 +122,7 @@ class FoodExpiryService {
       location: location,
       price: price,
       supplier: supplier,
+      healthTags: healthTags ?? old.healthTags,
     );
     next.sort((a, b) => a.expiryDate.compareTo(b.expiryDate));
     items.value = next;

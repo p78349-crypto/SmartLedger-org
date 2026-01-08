@@ -9,8 +9,8 @@ param(
 )
 
 $TaskName = "SmartLedger-Local-Backup"
-$ScriptPath = "C:\Users\plain\SmartLedger\local-backup-scheduler.ps1"
-$ProjectRoot = "C:\Users\plain\SmartLedger"
+$ProjectRoot = $PSScriptRoot
+$ScriptPath = Join-Path $ProjectRoot "local-backup-scheduler.ps1"
 
 Write-Host ""
 Write-Host "======================================" -ForegroundColor Cyan

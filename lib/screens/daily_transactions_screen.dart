@@ -183,6 +183,72 @@ class _DailyTransactionsScreenState extends State<DailyTransactionsScreen> {
     }
   }
 
+  Widget _buildBottomActionBar(ThemeData theme) {
+    final showCountInputCta = widget.showShoppingPointsInputCta;
+    return SafeArea(
+      top: false,
+      child: Material(
+        color: theme.colorScheme.surface,
+        elevation: 4,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+          child: Row(
+            children: [
+              if (showCountInputCta) ...[
+                FilledButton.tonal(
+                  onPressed: () {
+                    Navigator.of(context).pushNamed(
+                      AppRoutes.shoppingCart,
+                      arguments: ShoppingCartArgs(accountName: widget.accountName),
+                    );
+                  },
+                  style: FilledButton.styleFrom(
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                  ),
+                  child: const Text('개수 입력'),
+                ),
+                const SizedBox(width: 10),
+              ],
+              FilledButton.tonal(
+                onPressed: () {
+                  Navigator.of(context).pushNamed(
+                    AppRoutes.shoppingPointsInput,
+                    arguments: AccountArgs(accountName: widget.accountName),
+                  );
+                },
+                style: FilledButton.styleFrom(
+                  visualDensity: VisualDensity.compact,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                ),
+                child: const Text('포인트 입력'),
+              ),
+              const Spacer(),
+              FilledButton.tonal(
+                onPressed: () {
+                  Navigator.of(context).pushNamed(
+                    AppRoutes.foodExpiry,
+                    arguments: const FoodExpiryArgs(openUpsertOnStart: true),
+                  );
+                },
+                style: FilledButton.styleFrom(
+                  visualDensity: VisualDensity.compact,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                ),
+                child: const Text('우리집 식재료/생활용품 등록'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -251,6 +317,7 @@ class _DailyTransactionsScreenState extends State<DailyTransactionsScreen> {
           // (feature disabled per request).
         ],
       ),
+      bottomNavigationBar: _buildBottomActionBar(theme),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

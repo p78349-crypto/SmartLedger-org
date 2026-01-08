@@ -14,12 +14,14 @@ import 'package:smart_ledger/screens/launch_screen.dart';
 import 'package:smart_ledger/services/account_service.dart';
 import 'package:smart_ledger/services/asset_service.dart';
 import 'package:smart_ledger/services/budget_service.dart';
+import 'package:smart_ledger/services/fixed_cost_auto_record_service.dart';
 import 'package:smart_ledger/services/fixed_cost_service.dart';
 import 'package:smart_ledger/services/notification_service.dart';
 import 'package:smart_ledger/services/transaction_service.dart';
 import 'package:smart_ledger/services/user_pref_service.dart';
 import 'package:smart_ledger/services/food_expiry_service.dart';
 import 'package:smart_ledger/services/recipe_service.dart';
+import 'package:smart_ledger/services/recipe_knowledge_service.dart';
 import 'package:smart_ledger/theme/app_theme.dart';
 import 'package:smart_ledger/theme/app_theme_mode_controller.dart';
 import 'package:smart_ledger/theme/app_theme_seed_controller.dart';
@@ -52,6 +54,9 @@ Future<void> main() async {
 
       final prefs = await SharedPreferences.getInstance();
 
+      // Optional: enable family sharing backend when compiled with
+      // `--dart-define=ENABLE_FAMILY_SHARING=true` and an active family id is set.
+
       // Locale policy (정석): default follow system; optional override via prefs.
       await AppLocaleController.instance.loadFromPrefs(prefs);
 
@@ -76,7 +81,17 @@ Future<void> main() async {
         NotificationService().initialize(),
         FoodExpiryService.instance.load(),
         RecipeService.instance.load(),
+        RecipeKnowledgeService.instance.loadData(),
       ]);
+
+      // Monthly routine: auto-record fixed costs (local-only).
+      // Note: runs when the app starts (or restarts). If the app isn't opened
+      // on the due day, it will be recorded on the next launch after the date.
+      try {
+        await FixedCostAutoRecordService().runForAllAccounts(backfillMonths: 6);
+      } catch (_) {
+        // Best-effort; never block startup.
+      }
       // One-off migration: move asset-related icons to the asset page.
       // This operation updates per-account persisted page slots so assets
       // appear consistently (default page index: 5).

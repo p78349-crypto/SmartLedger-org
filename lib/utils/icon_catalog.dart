@@ -49,6 +49,8 @@ class IconCatalog {
   static const IconData tune = Icons.tune;
   static const IconData zoomIn = Icons.zoom_in;
   static const IconData refresh = Icons.refresh;
+  static const IconData restaurant = Icons.restaurant;
+  static const IconData favorite = Icons.favorite;
   static const IconData chevronRight = Icons.chevron_right;
   static const IconData wbSunny = Icons.wb_sunny;
   static const IconData wbCloudy = Icons.wb_cloudy;

@@ -17,6 +17,105 @@ import 'package:smart_ledger/utils/pref_keys.dart';
 class UserPrefService {
   static const String lastAccountKey = 'lastAccountName';
 
+  /// Units treated as "count-like" for one-tap decrement (-1) buttons.
+  ///
+  /// Keep this list short and practical; users can edit it.
+  static const List<String> defaultCountLikeUnitsV1 = [
+    '개',
+    '알',
+    '롤',
+    '팩',
+    '봉',
+    '봉지',
+    '캔',
+    '병',
+    '장',
+    '매',
+    '줄',
+    '통',
+    '박스',
+    '포',
+    '조각',
+    '세트',
+    '줄기',
+  ];
+
+  static List<String> _normalizeUnitList(Iterable<String> raw) {
+    final seen = <String>{};
+    final out = <String>[];
+    for (final v in raw) {
+      final u = v.trim();
+      if (u.isEmpty) continue;
+      final key = u.toLowerCase();
+      if (!seen.add(key)) continue;
+      out.add(u);
+    }
+    return out;
+  }
+
+  static Future<List<String>> getCountLikeUnitsV1() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(PrefKeys.countLikeUnitsV1);
+    if (raw == null || raw.trim().isEmpty) {
+      return _normalizeUnitList(defaultCountLikeUnitsV1);
+    }
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is! List) {
+        return _normalizeUnitList(defaultCountLikeUnitsV1);
+      }
+      return _normalizeUnitList(decoded.whereType<String>());
+    } catch (_) {
+      return _normalizeUnitList(defaultCountLikeUnitsV1);
+    }
+  }
+
+  static Future<void> setCountLikeUnitsV1(List<String> units) async {
+    final prefs = await SharedPreferences.getInstance();
+    final normalized = _normalizeUnitList(units);
+    await prefs.setString(PrefKeys.countLikeUnitsV1, jsonEncode(normalized));
+  }
+
+  // --- Stock use: predicted depletion auto-add threshold ---
+  // Defaults: food 3 days, household 5 days.
+  // For backward compatibility, if the older single key is set, we use it
+  // as a fallback when the split keys are absent.
+  static Future<int> getStockUseAutoAddDepletionDaysFoodV1() async {
+    final prefs = await SharedPreferences.getInstance();
+    final v = prefs.getInt(PrefKeys.stockUseAutoAddDepletionDaysFoodV1);
+    if (v != null) return v.clamp(1, 30);
+
+    final legacy = prefs.getInt(PrefKeys.stockUseAutoAddDepletionDaysV1);
+    return (legacy ?? 3).clamp(1, 30);
+  }
+
+  static Future<int> getStockUseAutoAddDepletionDaysHouseholdV1() async {
+    final prefs = await SharedPreferences.getInstance();
+    final v = prefs.getInt(PrefKeys.stockUseAutoAddDepletionDaysHouseholdV1);
+    if (v != null) return v.clamp(1, 30);
+
+    final legacy = prefs.getInt(PrefKeys.stockUseAutoAddDepletionDaysV1);
+    return (legacy ?? 5).clamp(1, 30);
+  }
+
+  static Future<void> setStockUseAutoAddDepletionDaysFoodV1(int days) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(
+      PrefKeys.stockUseAutoAddDepletionDaysFoodV1,
+      days.clamp(1, 30),
+    );
+  }
+
+  static Future<void> setStockUseAutoAddDepletionDaysHouseholdV1(
+    int days,
+  ) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(
+      PrefKeys.stockUseAutoAddDepletionDaysHouseholdV1,
+      days.clamp(1, 30),
+    );
+  }
+
   // --- Shopping: post-shopping points drafts (for later input) ---
   static String _shoppingPointsDraftsKey(String accountName) {
     return PrefKeys.accountKey(accountName, 'shopping_points_drafts_v1');

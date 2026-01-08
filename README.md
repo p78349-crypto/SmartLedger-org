@@ -39,6 +39,9 @@ Flutter 기반 다중 계정 가계부 앱입니다. 각 계정별로 거래, �
 - Run validation: `python tools/validate_icons.py` (or `pwsh .\tools\validate_icons.ps1` on Windows).
 - PRs that add icons will be validated automatically by `.github/workflows/validate-icons.yml`.
 
+## Asset sources (licenses)
+- Track asset origins/licenses in [ASSETS_SOURCES.md](ASSETS_SOURCES.md).
+
 ## 사용법
 1. 앱 실행 후 계정 선택/생성 화면에서 원하는 방식 선택
 	- 임시로 사용하기: 임시 계정으로 바로 진입

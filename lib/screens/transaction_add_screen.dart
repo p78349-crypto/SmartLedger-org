@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smart_ledger/models/asset.dart';
 import 'package:smart_ledger/models/category_hint.dart';
@@ -25,6 +26,7 @@ import 'package:smart_ledger/utils/icon_catalog.dart';
 import 'package:smart_ledger/utils/income_category_definitions.dart';
 import 'package:smart_ledger/utils/snackbar_utils.dart';
 import 'package:smart_ledger/utils/store_memo_utils.dart';
+import 'package:smart_ledger/utils/pref_keys.dart';
 import 'package:smart_ledger/widgets/background_widget.dart';
 import 'package:smart_ledger/widgets/smart_input_field.dart';
 import 'package:smart_ledger/widgets/special_backgrounds.dart';
@@ -33,9 +35,7 @@ import 'package:smart_ledger/widgets/special_backgrounds.dart';
 const String _recentDescriptionsKey = 'recent_descriptions';
 const String _recentPaymentsKey = 'recent_payments';
 const String _recentMemosKey = 'recent_memos';
-const int _maxRecentDescriptions = 30;
-const int _maxRecentPayments = 10;
-const int _maxRecentMemos = 10;
+const int _defaultMaxRecentInputs = 30;
 const String _lastCategoryMainKeyPrefix = 'last_category_main';
 const String _lastCategorySubKeyPrefix = 'last_category_sub';
 const String _defaultCategory = CategoryDefinitions.defaultCategory;
@@ -56,6 +56,7 @@ class TransactionAddScreen extends StatefulWidget {
   final bool learnCategoryHintFromDescription;
   final bool confirmBeforeSave;
   final bool treatAsNew;
+  final bool closeAfterSave;
   const TransactionAddScreen({
     super.key,
     required this.accountName,
@@ -63,6 +64,7 @@ class TransactionAddScreen extends StatefulWidget {
     this.learnCategoryHintFromDescription = false,
     this.confirmBeforeSave = false,
     this.treatAsNew = false,
+    this.closeAfterSave = false,
   });
 
   @override
@@ -208,6 +210,7 @@ class _TransactionAddScreenState extends State<TransactionAddScreen> {
                           widget.learnCategoryHintFromDescription,
                       confirmBeforeSave: widget.confirmBeforeSave,
                       treatAsNew: widget.treatAsNew,
+                      closeAfterSave: widget.closeAfterSave,
                       titlePrefix: isLandscape ? titlePrefix : null,
                     ),
                   ),
@@ -262,6 +265,7 @@ class NO1Form extends StatefulWidget {
   final bool learnCategoryHintFromDescription;
   final bool confirmBeforeSave;
   final bool treatAsNew;
+  final bool closeAfterSave;
   final String? titlePrefix;
   const NO1Form({
     super.key,
@@ -270,6 +274,7 @@ class NO1Form extends StatefulWidget {
     this.learnCategoryHintFromDescription = false,
     this.confirmBeforeSave = false,
     this.treatAsNew = false,
+    this.closeAfterSave = false,
     this.titlePrefix,
   });
 
@@ -281,6 +286,10 @@ class _NO1FormState extends State<NO1Form> {
   List<String> _recentDescriptions = [];
   List<String> _recentPayments = [];
   List<String> _recentMemos = [];
+
+  bool _recentInputsEnabled = true;
+  bool _recentInputsAutofillEnabled = true;
+  int _recentInputsMaxCount = _defaultMaxRecentInputs;
   static const int _priceRiseLookbackCount = 20;
   static const int _priceRiseMinSamples = 3;
   static const double _priceRisePctThreshold = 0.10; // 10%
@@ -324,6 +333,8 @@ class _NO1FormState extends State<NO1Form> {
   _InitialTransactionFormSnapshot? _initialSnapshot;
 
   bool _didSaveAtLeastOnce = false;
+
+  bool _installedHardwareKeyboardHandler = false;
 
   bool get didSave => _didSaveAtLeastOnce;
 
@@ -411,6 +422,12 @@ class _NO1FormState extends State<NO1Form> {
   @override
   void initState() {
     super.initState();
+
+    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+      HardwareKeyboard.instance.addHandler(_handleHardwareKeyEvent);
+      _installedHardwareKeyboardHandler = true;
+    }
+
     final initial = widget.initialTransaction;
     _transactionDate = initial?.date ?? DateTime.now();
     if (initial != null) {
@@ -524,6 +541,32 @@ class _NO1FormState extends State<NO1Form> {
 
   Future<void> _loadRecentInputs() async {
     final prefs = await SharedPreferences.getInstance();
+
+    final enabled = prefs.getBool(PrefKeys.txRecentInputsEnabledV1);
+    final autofill = prefs.getBool(PrefKeys.txRecentInputsAutofillEnabledV1);
+    final maxCount = prefs.getInt(PrefKeys.txRecentInputsMaxCountV1);
+
+    final nextEnabled = enabled ?? true;
+    final nextAutofill = autofill ?? true;
+    final nextMaxCount = (maxCount ?? _defaultMaxRecentInputs).clamp(1, 100);
+
+    if (!mounted) return;
+    setState(() {
+      _recentInputsEnabled = nextEnabled;
+      _recentInputsAutofillEnabled = nextAutofill;
+      _recentInputsMaxCount = nextMaxCount;
+    });
+
+    if (!nextEnabled) {
+      if (!mounted) return;
+      setState(() {
+        _recentDescriptions = const <String>[];
+        _recentPayments = const <String>[];
+        _recentMemos = const <String>[];
+      });
+      return;
+    }
+
     final descriptions =
         prefs.getStringList(_recentDescriptionsKey) ?? const <String>[];
     final payments = prefs.getStringList(_recentPaymentsKey) ?? [];
@@ -532,19 +575,21 @@ class _NO1FormState extends State<NO1Form> {
     if (!mounted) return;
     setState(() {
       _recentDescriptions = descriptions
-          .take(_maxRecentDescriptions)
+          .take(_recentInputsMaxCount)
           .toList(growable: false);
-      _recentPayments = payments
-          .take(_maxRecentPayments)
-          .toList(growable: false);
-      _recentMemos = memos.take(_maxRecentMemos).toList(growable: false);
+      _recentPayments = payments.take(_recentInputsMaxCount).toList(
+            growable: false,
+          );
+      _recentMemos = memos.take(_recentInputsMaxCount).toList(growable: false);
     });
 
-    if (_paymentController.text.isEmpty && payments.isNotEmpty) {
-      _paymentController.text = payments.first;
-    }
-    if (_memoController.text.isEmpty && memos.isNotEmpty) {
-      _memoController.text = memos.first;
+    if (_recentInputsAutofillEnabled) {
+      if (_paymentController.text.isEmpty && payments.isNotEmpty) {
+        _paymentController.text = payments.first;
+      }
+      if (_memoController.text.isEmpty && memos.isNotEmpty) {
+        _memoController.text = memos.first;
+      }
     }
   }
 
@@ -685,6 +730,10 @@ class _NO1FormState extends State<NO1Form> {
 
   @override
   void dispose() {
+    if (_installedHardwareKeyboardHandler) {
+      HardwareKeyboard.instance.removeHandler(_handleHardwareKeyEvent);
+    }
+
     _descController.dispose();
     _qtyController.dispose();
     _unitPriceController.dispose();
@@ -702,6 +751,34 @@ class _NO1FormState extends State<NO1Form> {
     _memoFocusNode.dispose();
     _calculatedAmountFocusNode.dispose();
     super.dispose();
+  }
+
+  bool _handleHardwareKeyEvent(KeyEvent event) {
+    // Use KeyUp to avoid OS key-repeat firing multiple saves.
+    if (event is! KeyUpEvent) return false;
+
+    final key = event.logicalKey;
+    final isEnter =
+        key == LogicalKeyboardKey.enter || key == LogicalKeyboardKey.numpadEnter;
+    if (!isEnter) return false;
+
+    // Avoid accidental saves while navigating earlier fields.
+    final isSaveEligibleField =
+        _paymentFocusNode.hasFocus || _memoFocusNode.hasFocus;
+    if (!isSaveEligibleField) return false;
+
+    final pressed = HardwareKeyboard.instance.logicalKeysPressed;
+    final isShiftPressed =
+        pressed.contains(LogicalKeyboardKey.shiftLeft) ||
+        pressed.contains(LogicalKeyboardKey.shiftRight);
+
+    if (isShiftPressed) {
+      unawaited(_saveAndContinue());
+    } else {
+      unawaited(_saveTransaction());
+    }
+
+    return true;
   }
 
   Widget _buildStoreOrBuyerField() {
@@ -965,28 +1042,29 @@ class _NO1FormState extends State<NO1Form> {
     }
 
     // 최근 상품명/결제수단/메모 저장 (빈값/중복 제외)
-    final prefs = await SharedPreferences.getInstance();
-    if (desc.isNotEmpty) {
-      final updated = [desc, ..._recentDescriptions.where((e) => e != desc)];
-      final clipped = updated.take(_maxRecentDescriptions).toList();
-      await prefs.setStringList(_recentDescriptionsKey, clipped);
-      _recentDescriptions = clipped;
-    }
-    if (payment.isNotEmpty) {
-      final updated = [payment, ..._recentPayments.where((e) => e != payment)];
-      await prefs.setStringList(
-        _recentPaymentsKey,
-        updated.take(_maxRecentPayments).toList(),
-      );
-      _recentPayments = updated.take(_maxRecentPayments).toList();
-    }
-    if (memo.isNotEmpty) {
-      final updated = [memo, ..._recentMemos.where((e) => e != memo)];
-      await prefs.setStringList(
-        _recentMemosKey,
-        updated.take(_maxRecentMemos).toList(),
-      );
-      _recentMemos = updated.take(_maxRecentMemos).toList();
+    if (_recentInputsEnabled) {
+      final prefs = await SharedPreferences.getInstance();
+      if (desc.isNotEmpty) {
+        final updated = [desc, ..._recentDescriptions.where((e) => e != desc)];
+        final clipped = updated.take(_recentInputsMaxCount).toList();
+        await prefs.setStringList(_recentDescriptionsKey, clipped);
+        _recentDescriptions = clipped;
+      }
+      if (payment.isNotEmpty) {
+        final updated = [
+          payment,
+          ..._recentPayments.where((e) => e != payment),
+        ];
+        final clipped = updated.take(_recentInputsMaxCount).toList();
+        await prefs.setStringList(_recentPaymentsKey, clipped);
+        _recentPayments = clipped;
+      }
+      if (memo.isNotEmpty) {
+        final updated = [memo, ..._recentMemos.where((e) => e != memo)];
+        final clipped = updated.take(_recentInputsMaxCount).toList();
+        await prefs.setStringList(_recentMemosKey, clipped);
+        _recentMemos = clipped;
+      }
     }
 
     if (isExpense) {
@@ -1215,6 +1293,12 @@ class _NO1FormState extends State<NO1Form> {
           if (mounted) navigator.pop(true);
         });
       } else {
+        if (widget.closeAfterSave) {
+          Future.delayed(const Duration(milliseconds: 200), () {
+            if (mounted) navigator.pop(true);
+          });
+          return;
+        }
         if (!mounted) return;
         _didSaveAtLeastOnce = true;
         void resetForNextEntry() {

@@ -1,0 +1,51 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isMember(familyId) {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/families/$(familyId)/members/$(request.auth.uid));
+    }
+
+    function memberRole(familyId) {
+      return get(/databases/$(database)/documents/families/$(familyId)/members/$(request.auth.uid)).data.role;
+    }
+
+    match /users/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+
+    match /families/{familyId} {
+      allow read: if isMember(familyId);
+      allow create: if isSignedIn();
+      allow update, delete: if isMember(familyId) && memberRole(familyId) == 'owner';
+
+      match /members/{uid} {
+        allow read: if isMember(familyId);
+
+        // Only owner can manage membership in MVP
+        allow create, update, delete: if isMember(familyId) && memberRole(familyId) == 'owner';
+      }
+
+      match /consumables/{itemId} {
+        allow read, write: if isMember(familyId);
+      }
+
+      match /accounts/{accountName} {
+        allow read, write: if isMember(familyId);
+
+        match /shoppingCartItems/{cartItemId} {
+          allow read, write: if isMember(familyId);
+        }
+
+        match /shoppingCartHistory/{entryId} {
+          allow read, write: if isMember(familyId);
+        }
+      }
+    }
+  }
+}

@@ -14,6 +14,7 @@ class FoodExpiryItem {
   final String location;
   final double price;
   final String supplier;
+  final List<String> healthTags; // 건강 주의 태그 (예: 탄수화물/당류/주류)
 
   const FoodExpiryItem({
     required this.id,
@@ -28,6 +29,7 @@ class FoodExpiryItem {
     this.location = '냉장',
     this.price = 0.0,
     this.supplier = '',
+    this.healthTags = const <String>[],
   });
 
   int daysLeft(DateTime now) {
@@ -49,10 +51,23 @@ class FoodExpiryItem {
     'location': location,
     'price': price,
     'supplier': supplier,
+    'healthTags': healthTags,
   };
 
   static FoodExpiryItem fromJson(Map<String, dynamic> json) {
     final createdAt = DateTime.parse(json['createdAt'] as String);
+
+    final tagsRaw = json['healthTags'];
+    final tags = <String>[];
+    if (tagsRaw is List) {
+      for (final t in tagsRaw) {
+        if (t is String) {
+          final s = t.trim();
+          if (s.isNotEmpty) tags.add(s);
+        }
+      }
+    }
+
     return FoodExpiryItem(
       id: (json['id'] as String?) ?? '',
       name: (json['name'] as String?) ?? '',
@@ -68,6 +83,7 @@ class FoodExpiryItem {
       location: (json['location'] as String?) ?? '냉장',
       price: (json['price'] as num?)?.toDouble() ?? 0.0,
       supplier: (json['supplier'] as String?) ?? '',
+      healthTags: tags,
     );
   }
 
@@ -82,6 +98,7 @@ class FoodExpiryItem {
     String? location,
     double? price,
     String? supplier,
+    List<String>? healthTags,
   }) {
     return FoodExpiryItem(
       id: id,
@@ -96,6 +113,7 @@ class FoodExpiryItem {
       location: location ?? this.location,
       price: price ?? this.price,
       supplier: supplier ?? this.supplier,
+      healthTags: healthTags ?? this.healthTags,
     );
   }
 }

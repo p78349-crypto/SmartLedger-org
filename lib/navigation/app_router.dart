@@ -5,6 +5,7 @@ import 'package:smart_ledger/screens/account_create_screen.dart';
 import 'package:smart_ledger/screens/account_main_screen.dart';
 import 'package:smart_ledger/screens/account_select_screen.dart';
 import 'package:smart_ledger/screens/account_stats_screen.dart';
+import 'package:smart_ledger/screens/application_settings_screen.dart';
 import 'package:smart_ledger/screens/asset_allocation_screen.dart';
 import 'package:smart_ledger/screens/asset_dashboard_screen.dart';
 import 'package:smart_ledger/screens/asset_input_screen.dart';
@@ -28,7 +29,6 @@ import 'package:smart_ledger/screens/food_expiry_main_screen.dart';
 import 'package:smart_ledger/screens/household_consumables_screen.dart';
 import 'package:smart_ledger/screens/consumable_inventory_screen.dart';
 import 'package:smart_ledger/screens/quick_stock_use_screen.dart';
-import 'package:smart_ledger/screens/food_inventory_check_screen.dart';
 import 'package:smart_ledger/screens/food_cooking_start_screen.dart';
 import 'package:smart_ledger/screens/icon_management2_screen.dart';
 import 'package:smart_ledger/screens/icon_management_asset_screen.dart';
@@ -133,6 +133,7 @@ class AppRouter {
                 a.learnCategoryHintFromDescription,
             confirmBeforeSave: a.confirmBeforeSave,
             treatAsNew: a.treatAsNew,
+            closeAfterSave: a.closeAfterSave,
           ),
         );
 
@@ -147,6 +148,7 @@ class AppRouter {
                 a.learnCategoryHintFromDescription,
             confirmBeforeSave: a.confirmBeforeSave,
             treatAsNew: a.treatAsNew,
+            closeAfterSave: a.closeAfterSave,
           ),
         );
 
@@ -161,6 +163,7 @@ class AppRouter {
                 a.learnCategoryHintFromDescription,
             confirmBeforeSave: a.confirmBeforeSave,
             treatAsNew: a.treatAsNew,
+            closeAfterSave: a.closeAfterSave,
           ),
         );
 
@@ -256,6 +259,12 @@ class AppRouter {
         return MaterialPageRoute(
           settings: settings,
           builder: (_) => const SettingsScreen(),
+        );
+
+      case AppRoutes.applicationSettings:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const ApplicationSettingsScreen(),
         );
 
       case AppRoutes.iconManagement:
@@ -506,15 +515,15 @@ class AppRouter {
         );
 
       case AppRoutes.foodExpiry:
+        final a = args is FoodExpiryArgs ? args : const FoodExpiryArgs();
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => const FoodExpiryMainScreen(),
-        );
-
-      case AppRoutes.foodInventoryCheck:
-        return MaterialPageRoute(
-          settings: settings,
-          builder: (_) => const FoodInventoryCheckScreen(),
+          builder: (_) => FoodExpiryMainScreen(
+            initialIngredients: a.initialIngredients,
+            autoUsageMode: a.autoUsageMode,
+            openUpsertOnStart: a.openUpsertOnStart,
+            openCookableRecipePickerOnStart: a.openCookableRecipePickerOnStart,
+          ),
         );
 
       case AppRoutes.foodCookingStart:

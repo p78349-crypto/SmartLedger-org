@@ -48,6 +48,38 @@ class PrefKeys {
   static const String recentPaymentMethods = 'recent_payment_methods';
   static const String recentCategories = 'recent_categories';
 
+  // Transaction add screen: recent inputs behavior
+  static const String txRecentInputsEnabledV1 = 'tx_recent_inputs_enabled_v1';
+  static const String txRecentInputsAutofillEnabledV1 =
+      'tx_recent_inputs_autofill_enabled_v1';
+  static const String txRecentInputsMaxCountV1 = 'tx_recent_inputs_max_count_v1';
+
+  /// Stock use: auto-add to shopping cart when predicted depletion is near.
+  ///
+  /// Stored as int days (e.g., 1/2/3/5/7).
+  static const String stockUseAutoAddDepletionDaysV1 =
+      'stock_use_auto_add_depletion_days_v1';
+
+  /// Stock use: food items (typically has expiryDate) auto-add threshold.
+  /// Default: 3 days.
+  static const String stockUseAutoAddDepletionDaysFoodV1 =
+      'stock_use_auto_add_depletion_days_food_v1';
+
+  /// Stock use: household items (typically no expiryDate) auto-add threshold.
+  /// Default: 5 days.
+  static const String stockUseAutoAddDepletionDaysHouseholdV1 =
+      'stock_use_auto_add_depletion_days_household_v1';
+
+  /// Stock use: whether to schedule local notifications for predicted depletion.
+  /// Default: ON.
+  static const String stockUsePredictedDepletionNotifyEnabledV1 =
+      'stock_use_predicted_depletion_notify_enabled_v1';
+
+    /// Units treated as count-like (e.g., 개/롤/팩) for one-tap '-1' decrement UI.
+    ///
+    /// Stored as JSON list string.
+    static const String countLikeUnitsV1 = 'count_like_units_v1';
+
   /// Category usage counts (label -> count).
   ///
   /// Stored as JSON map string. Used for sorting category pickers by

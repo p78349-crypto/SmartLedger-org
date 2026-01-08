@@ -18,3 +18,9 @@ All notable changes to this project will be documented in this file.
 
 ### Notes
 - Image processing performance optimizations (Isolate/compute) are scheduled after design/icon work is finalized.
+
+## [Unreleased] - 2026-01-08
+
+### Changed
+- Shopping recommendations: apply household activity trend ratio (short vs baseline) to suggested quantities, with clamped scaling and memo note.
+- Quick stock use: apply the same activity ratio to auto-added “imminent depletion” shopping items.

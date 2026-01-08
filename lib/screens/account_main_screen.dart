@@ -1184,11 +1184,26 @@ class _PageQuickMenuButton extends StatelessWidget {
           case _QuickMenuAction.toggleEdit:
             onToggleEditMode();
             break;
-          case _QuickMenuAction.reset:
-            onResetMainPages?.call();
-            break;
-          case _QuickMenuAction.jumpFirst:
+          case _QuickMenuAction.jumpPage1:
             onPageSelected?.call(0);
+            break;
+          case _QuickMenuAction.jumpPage2:
+            onPageSelected?.call(1);
+            break;
+          case _QuickMenuAction.jumpPage3:
+            onPageSelected?.call(2);
+            break;
+          case _QuickMenuAction.jumpPage4:
+            onPageSelected?.call(3);
+            break;
+          case _QuickMenuAction.jumpPage5:
+            onPageSelected?.call(4);
+            break;
+          case _QuickMenuAction.jumpPage6:
+            onPageSelected?.call(5);
+            break;
+          case _QuickMenuAction.jumpPage7:
+            onPageSelected?.call(6);
             break;
         }
       },
@@ -1198,16 +1213,37 @@ class _PageQuickMenuButton extends StatelessWidget {
             value: _QuickMenuAction.toggleEdit,
             child: Text(isEditMode ? '편집 종료' : '편집 모드'),
           ),
-          if (onPageSelected != null)
+          if (onPageSelected != null) ...<PopupMenuEntry<_QuickMenuAction>>[
+            const PopupMenuDivider(),
             const PopupMenuItem<_QuickMenuAction>(
-              value: _QuickMenuAction.jumpFirst,
-              child: Text('1페이지로 이동'),
+              value: _QuickMenuAction.jumpPage1,
+              child: Text('1. 대시보드'),
             ),
-          if (onResetMainPages != null)
             const PopupMenuItem<_QuickMenuAction>(
-              value: _QuickMenuAction.reset,
-              child: Text('메인 페이지 초기화'),
+              value: _QuickMenuAction.jumpPage2,
+              child: Text('2. 거래'),
             ),
+            const PopupMenuItem<_QuickMenuAction>(
+              value: _QuickMenuAction.jumpPage3,
+              child: Text('3. 수입'),
+            ),
+            const PopupMenuItem<_QuickMenuAction>(
+              value: _QuickMenuAction.jumpPage4,
+              child: Text('4. 통계'),
+            ),
+            const PopupMenuItem<_QuickMenuAction>(
+              value: _QuickMenuAction.jumpPage5,
+              child: Text('5. 자산'),
+            ),
+            const PopupMenuItem<_QuickMenuAction>(
+              value: _QuickMenuAction.jumpPage6,
+              child: Text('6. ROOT'),
+            ),
+            const PopupMenuItem<_QuickMenuAction>(
+              value: _QuickMenuAction.jumpPage7,
+              child: Text('7. 설정'),
+            ),
+          ],
         ];
       },
     );
@@ -1216,8 +1252,13 @@ class _PageQuickMenuButton extends StatelessWidget {
 
 enum _QuickMenuAction {
   toggleEdit,
-  jumpFirst,
-  reset,
+  jumpPage1,
+  jumpPage2,
+  jumpPage3,
+  jumpPage4,
+  jumpPage5,
+  jumpPage6,
+  jumpPage7,
 }
 
 class _EmptySlotTile extends StatelessWidget {

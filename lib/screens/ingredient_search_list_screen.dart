@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:smart_ledger/models/food_expiry_item.dart';
+import 'package:smart_ledger/models/shopping_cart_item.dart';
 import 'package:smart_ledger/services/food_expiry_service.dart';
+import 'package:smart_ledger/services/user_pref_service.dart';
+import 'package:smart_ledger/utils/ingredient_parsing_utils.dart';
 import 'package:smart_ledger/utils/nutrition_food_knowledge.dart';
+import 'package:smart_ledger/utils/shopping_prep_utils.dart';
 
 /// 식재료 검색 결과 화면
 /// 검색어에 정확하게 매칭되는 식재료를 찾고,
@@ -9,11 +13,15 @@ import 'package:smart_ledger/utils/nutrition_food_knowledge.dart';
 class IngredientSearchListScreen extends StatefulWidget {
   const IngredientSearchListScreen({
     super.key,
-    required this.searchQuery,
+    this.searchQuery = '',
+    this.customIngredients,
+    this.dessertIngredients,
     this.onSelect,
   });
 
   final String searchQuery;
+  final List<String>? customIngredients;
+  final List<String>? dessertIngredients;
   final ValueChanged<String>? onSelect;
 
   @override
@@ -23,65 +31,295 @@ class IngredientSearchListScreen extends StatefulWidget {
 
 class _IngredientSearchListScreenState
     extends State<IngredientSearchListScreen> {
-  late FoodKnowledgeEntry? _mainIngredient;
-  late List<PairingIngredient> _pairingList;
+  FoodKnowledgeEntry? _mainIngredient;
+  List<PairingIngredient> _cookingList = [];
+  List<PairingIngredient> _dessertList = [];
   bool _isSelectionMode = false; // 선택 모드 활성화 여부
-  final Set<int> _selectedIndices = {}; // 선택된 인덱스들
+  final Set<String> _selectedNames = {}; // 선택된 식재료 이름
 
   @override
   void initState() {
     super.initState();
-    // 검색어와 정확하게 매칭되는 주 식재료 찾기
-    _mainIngredient = NutritionFoodKnowledge.lookup(widget.searchQuery);
-    
-    // 주 식재료의 페어링 정보 추출
-    _pairingList = _getPairingIngredients(_mainIngredient);
+    _initializeData();
+  }
+
+  void _initializeData() {
+    if (widget.customIngredients != null && widget.customIngredients!.isNotEmpty) {
+      // 1. 커스텀 리스트 모드
+      _mainIngredient = null;
+      _cookingList = _buildFromCustomList(widget.customIngredients!);
+    } else if (widget.searchQuery.isNotEmpty) {
+      // 2. 검색어 기반 모드
+      _mainIngredient = NutritionFoodKnowledge.lookup(widget.searchQuery);
+      _cookingList = _getPairingIngredients(_mainIngredient);
+    } else {
+      // 3. Fallback
+      _mainIngredient = null;
+      _cookingList = [];
+    }
+
+    if (widget.dessertIngredients != null && widget.dessertIngredients!.isNotEmpty) {
+      _dessertList = _buildFromCustomList(widget.dessertIngredients!);
+    } else {
+      _dessertList = [];
+    }
   }
 
   void _toggleSelectionMode() {
     setState(() {
       _isSelectionMode = !_isSelectionMode;
       if (!_isSelectionMode) {
-        _selectedIndices.clear();
+        _selectedNames.clear();
       }
     });
   }
 
-  void _toggleItemSelection(int index) {
+  void _selectAll() {
     setState(() {
-      if (_selectedIndices.contains(index)) {
-        _selectedIndices.remove(index);
+      final totalItems = _cookingList.length + _dessertList.length;
+      if (_selectedNames.length == totalItems) {
+        // 이미 모두 선택된 경우 해제
+        _selectedNames.clear();
       } else {
-        _selectedIndices.add(index);
+        // 모두 선택
+        _selectedNames.clear();
+        for (final item in _cookingList) {
+          _selectedNames.add(item.name);
+        }
+        for (final item in _dessertList) {
+          _selectedNames.add(item.name);
+        }
       }
     });
+  }
+
+  void _toggleItemSelection(String name) {
+    setState(() {
+      if (_selectedNames.contains(name)) {
+        _selectedNames.remove(name);
+      } else {
+        _selectedNames.add(name);
+      }
+    });
+  }
+
+  Future<void> _addSingleToCart(String itemName) async {
+    final accountName = await UserPrefService.getLastAccountName();
+    if (accountName == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('계정이 선택되지 않았습니다.')),
+        );
+      }
+      return;
+    }
+
+    final currentItems = await UserPrefService.getShoppingCartItems(
+      accountName: accountName,
+    );
+
+    final now = DateTime.now();
+    final newItem = ShoppingCartItem(
+      id: 'shop_${now.microsecondsSinceEpoch}',
+      name: itemName,
+      createdAt: now,
+      updatedAt: now,
+    );
+
+    final merged = ShoppingPrepUtils.mergeByName(
+      existing: currentItems,
+      incoming: [newItem],
+    );
+
+    await UserPrefService.setShoppingCartItems(
+      accountName: accountName,
+      items: merged.merged,
+    );
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('$itemName을(를) 쇼핑준비에 추가했습니다.'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   Future<void> _sendToShoppingPrep() async {
-    if (_selectedIndices.isEmpty) {
+    if (_selectedNames.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('선택된 식재료가 없습니다.')),
       );
       return;
     }
 
-    final selectedItems = _selectedIndices
-        .map((i) => _pairingList[i].name)
+    final selectedItems = _selectedNames.toList();
+
+    if (widget.onSelect != null) {
+      // 쇼핑준비로 보내기 (각 항목을 callbacks으로 전송)
+      for (final item in selectedItems) {
+        widget.onSelect?.call(item);
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '${selectedItems.length}개 식재료를 쇼핑준비에 추가했습니다.',
+            ),
+          ),
+        );
+        Navigator.pop(context);
+      }
+      return;
+    } else {
+      // Default behavior: add directly to shopping prep/cart.
+      final accountName = await UserPrefService.getLastAccountName();
+      if (accountName == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('계정이 선택되지 않았습니다.')),
+          );
+        }
+        return;
+      }
+
+      final currentItems = await UserPrefService.getShoppingCartItems(
+        accountName: accountName,
+      );
+
+      final now = DateTime.now();
+      final incoming = <ShoppingCartItem>[];
+      for (var i = 0; i < selectedItems.length; i++) {
+        final name = selectedItems[i].trim();
+        if (name.isEmpty) continue;
+        incoming.add(
+          ShoppingCartItem(
+            id: 'shop_${now.microsecondsSinceEpoch}_$i',
+            name: name,
+            createdAt: now,
+            updatedAt: now,
+          ),
+        );
+      }
+
+      final merged = ShoppingPrepUtils.mergeByName(
+        existing: currentItems,
+        incoming: incoming,
+      );
+
+      await UserPrefService.setShoppingCartItems(
+        accountName: accountName,
+        items: merged.merged,
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${merged.added}개 식재료를 쇼핑준비에 추가했습니다.'),
+          ),
+        );
+        Navigator.pop(context);
+      }
+
+      return;
+    }
+  }
+
+  List<PairingIngredient> _buildFromCustomList(List<String> names) {
+    if (names.isEmpty) return [];
+
+    // 1. 입력된 이름 정제 (중복 제거)
+    final uniqueNames = names
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toSet()
         .toList();
 
-    // 쇼핑준비로 보내기 (각 항목을 callbacks으로 전송)
-    for (final item in selectedItems) {
-      widget.onSelect?.call(item);
+    // 2. 현재 재고 목록 가져오기
+    final inventoryItems = FoodExpiryService.instance.items.value;
+
+    // 3. 매칭 로직 및 그룹화
+    // (InventoryID -> List<String>) : 재고와 매칭된 이름들
+    final Map<String, List<String>> matchedGroups = {};
+    // (String) : 매칭되지 않은 이름들
+    final List<String> unmatchedNames = [];
+
+    // 매칭 헬퍼 함수
+    FoodExpiryItem? findMatch(String rawName) {
+      try {
+        return inventoryItems.firstWhere(
+          (item) => item.name.contains(rawName) || rawName.contains(item.name),
+        );
+      } catch (_) {
+        return null; // 매칭 실패
+      }
     }
 
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${selectedItems.length}개 식재료를 쇼핑준비에 추가했습니다.'),
-        ),
-      );
-      Navigator.pop(context);
+    for (final name in uniqueNames) {
+      final match = findMatch(name);
+      if (match != null) {
+        matchedGroups.putIfAbsent(match.id, () => []).add(name);
+      } else {
+        unmatchedNames.add(name);
+      }
     }
+
+    final results = <PairingIngredient>[];
+
+    // 4. 매칭된 그룹 처리 (합치기)
+    for (final entry in matchedGroups.entries) {
+      final itemId = entry.key;
+      final rawNames = entry.value; // 예: ["양파", "양파 1개"]
+      
+      // 재고 아이템 찾기 (ID로 확실하게)
+      final inventoryItem = inventoryItems.firstWhere((it) => it.id == itemId);
+      
+      String bestRequiredAmount = '-';
+      String displayName = inventoryItem.name; // 기본값: 재고명
+
+      // 가장 정보량이 많은(긴) 수량 정보 찾기
+      for (final raw in rawNames) {
+        // 이미 파싱된 이름과 수량을 확인
+        // 예: "닭고기(적은 것) 1마리" -> name="닭고기(적은 것)", amount="1마리"
+        // 예: "가지 1개" -> name="가지", amount="1개"
+        final (pName, pAmount) = IngredientParsingUtils.parseNameAndAmount(raw);
+        
+        // 유의미한 수량 정보가 있다면 업데이트 (더 긴 정보를 선호)
+        if (pAmount != '(정보 없음)' && pAmount.length > bestRequiredAmount.length) {
+            bestRequiredAmount = pAmount;
+
+            // 수량 정보가 있는 소스의 이름을 디스플레이 네임으로 사용할지 결정
+            // 재고명("닭고기")보다 상세한 이름("닭고기(적은 것)")이라면 사용 고려
+            if (pName.contains(inventoryItem.name) && pName.length > displayName.length) {
+               displayName = pName;
+            }
+        }
+      }
+
+      results.add(PairingIngredient(
+        name: displayName, 
+        reason: '검색/리포트 결과',
+        inventory: inventoryItem,
+        requiredAmount: bestRequiredAmount == '-' ? '(정보 없음)' : bestRequiredAmount,
+      ));
+    }
+
+    // 5. 매칭되지 않은 항목 처리
+    for (final name in unmatchedNames) {
+      final (pName, pAmount) = IngredientParsingUtils.parseNameAndAmount(name);
+      results.add(PairingIngredient(
+        name: pName,
+        reason: '검색/리포트 결과',
+        requiredAmount: pAmount,
+      ));
+    }
+
+    // 이름순 정렬
+    results.sort((a, b) => a.name.compareTo(b.name));
+
+    return results;
   }
 
   List<PairingIngredient> _getPairingIngredients(FoodKnowledgeEntry? entry) {
@@ -109,16 +347,15 @@ class _IngredientSearchListScreenState
           }
 
           // 레시피에서 해당 식재료의 필요량 찾기
-          String requiredAmount = '';
+          String bestRequiredAmount = '(정보 없음)';
           for (final suggestion in entry.quantitySuggestions) {
             if (suggestion.contains(ing)) {
-              requiredAmount = suggestion;
-              break;
+               final (_, pAmount) = IngredientParsingUtils.parseNameAndAmount(suggestion);
+               if (pAmount != '(정보 없음)') {
+                 bestRequiredAmount = pAmount;
+                 break;
+               }
             }
-          }
-          // 필요량을 찾지 못한 경우 기본값
-          if (requiredAmount.isEmpty) {
-            requiredAmount = '(정보 없음)';
           }
 
           return PairingIngredient(
@@ -127,32 +364,124 @@ class _IngredientSearchListScreenState
                 .firstWhere((p) => p.ingredient == ing)
                 .why,
             inventory: matchingItem,
-            requiredAmount: requiredAmount,
+            requiredAmount: bestRequiredAmount,
           );
         })
         .toList();
   }
 
-  /// 후식/디저트 메뉴 데이터 반환
-  List<DessertItem> _getDessertMenus() {
-    return [
-      DessertItem(
-        name: '카카오 분말(100% 무가당)',
-        description: '건강한 초콜렛 음료 후식',
+
+
+  SliverList _buildSliverList(ThemeData theme, List<PairingIngredient> list) {
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (context, index) {
+          final pairing = list[index];
+          final statusColor = _getStatusColor(theme, pairing.status);
+          final statusIcon = _getStatusIcon(pairing.status);
+          final isSelected = _selectedNames.contains(pairing.name);
+
+          return GestureDetector(
+            onTap: _isSelectionMode
+                ? () => _toggleItemSelection(pairing.name)
+                : null,
+            child: Card(
+              margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              color: isSelected
+                  ? statusColor.withValues(alpha: 0.15)
+                  : statusColor.withValues(alpha: 0.08),
+              child: ListTile(
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                leading: _isSelectionMode
+                    ? Checkbox(
+                        value: isSelected,
+                        onChanged: (_) => _toggleItemSelection(pairing.name),
+                      )
+                    : null,
+                title: Text(
+                  pairing.name,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: Text(
+                        pairing.reason,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '${pairing.requiredText} | ${pairing.inventoryText}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(statusIcon, size: 14, color: statusColor),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            pairing.expiryText,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: statusColor,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                trailing: !_isSelectionMode
+                    ? IconButton(
+                        icon: Icon(
+                          Icons.add_circle_outline,
+                          color: theme.colorScheme.primary,
+                        ),
+                        onPressed: () {
+                          if (widget.onSelect != null) {
+                            widget.onSelect?.call(pairing.name);
+                            Navigator.pop(context, pairing.name);
+                          } else {
+                            _addSingleToCart(pairing.name);
+                          }
+                        },
+                      )
+                    : null,
+                onTap: !_isSelectionMode
+                    ? () {
+                        if (widget.onSelect != null) {
+                          widget.onSelect?.call(pairing.name);
+                          Navigator.pop(context, pairing.name);
+                        } else {
+                          _addSingleToCart(pairing.name);
+                        }
+                      }
+                    : null,
+              ),
+            ),
+          );
+        },
+        childCount: list.length,
       ),
-      DessertItem(
-        name: '아몬드 분말(100% 무가당)',
-        description: '건강한 견과류 요구르트 후식',
-      ),
-      DessertItem(
-        name: '플레인 요구르트',
-        description: '가볍고 부드러운 유산균 후식',
-      ),
-      DessertItem(
-        name: '베리류(블루베리/딸기)',
-        description: '상큼한 베리 후식',
-      ),
-    ];
+    );
   }
 
   /// 재고 상태에 따른 색상 반환
@@ -182,9 +511,10 @@ class _IngredientSearchListScreenState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isCustomMode = widget.customIngredients != null;
 
-    // 주 식재료를 찾지 못한 경우
-    if (_mainIngredient == null) {
+    // 주 식재료를 찾지 못한 경우 (검색 모드일 때만 체크)
+    if (!isCustomMode && _mainIngredient == null) {
       return Scaffold(
         appBar: AppBar(
           title: Text(
@@ -218,12 +548,13 @@ class _IngredientSearchListScreenState
       );
     }
 
-    // 페어링 재료가 없는 경우
-    if (_pairingList.isEmpty) {
+    // 목록이 비어있는 경우
+    if (_cookingList.isEmpty && _dessertList.isEmpty) {
+      final title = isCustomMode ? '식재료 목록' : _mainIngredient!.primaryName;
       return Scaffold(
         appBar: AppBar(
           title: Text(
-            _mainIngredient!.primaryName,
+            title,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
             ),
@@ -243,7 +574,7 @@ class _IngredientSearchListScreenState
               ),
               const SizedBox(height: 16),
               Text(
-                '${_mainIngredient!.primaryName} 요리에 필요한\n재료 정보가 아직 없습니다.',
+                isCustomMode ? '표시할 식재료가 없습니다.' : '$title 요리에 필요한\n재료 정보가 아직 없습니다.',
                 style: theme.textTheme.bodyLarge,
                 textAlign: TextAlign.center,
               ),
@@ -253,6 +584,10 @@ class _IngredientSearchListScreenState
       );
     }
 
+    final mainTitle = isCustomMode ? '재고 확인 및 선택' : '${_mainIngredient!.primaryName} 요리';
+    final totalCount = _cookingList.length + _dessertList.length;
+    final subTitle = isCustomMode ? '식재료 $totalCount개' : '필요한 재료 ($totalCount개)';
+
     // 페어링 재료 리스트 표시
     return Scaffold(
       appBar: AppBar(
@@ -261,13 +596,13 @@ class _IngredientSearchListScreenState
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              '${_mainIngredient!.primaryName} 요리',
+              mainTitle,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
             Text(
-              '필요한 재료 (${_pairingList.length}개)',
+              subTitle,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -275,180 +610,83 @@ class _IngredientSearchListScreenState
           ],
         ),
         elevation: 0,
-      ),
-      body: ListView.builder(
-        padding: const EdgeInsets.fromLTRB(8, 8, 8, 80),
-        itemCount: _pairingList.length + 1 + _getDessertMenus().length + 1,
-        itemBuilder: (context, index) {
-          // 페어링 재료 섹션
-          if (index < _pairingList.length) {
-            final pairing = _pairingList[index];
-            final statusColor = _getStatusColor(theme, pairing.status);
-            final statusIcon = _getStatusIcon(pairing.status);
-            final isSelected = _selectedIndices.contains(index);
-
-            return GestureDetector(
-              onTap:
-                  _isSelectionMode
-                      ? () => _toggleItemSelection(index)
-                      : null,
-              child: Card(
-                margin: const EdgeInsets.symmetric(vertical: 4),
-                color: isSelected
-                    ? statusColor.withValues(alpha: 0.15)
-                    : statusColor.withValues(alpha: 0.08),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                  leading: _isSelectionMode
-                      ? Checkbox(
-                          value: isSelected,
-                          onChanged: (_) => _toggleItemSelection(index),
-                        )
-                      : null,
-                  title: Text(
-                    pairing.name,
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(top: 6),
-                        child: Text(
-                          pairing.reason,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      // 필요량 / 현재고 / 구입량
-                      Text(
-                        '${pairing.requiredText} | ${pairing.inventoryText}',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                          fontSize: 12,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Icon(statusIcon, size: 14, color: statusColor),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              pairing.expiryText,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: statusColor,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  trailing: !_isSelectionMode
-                      ? Icon(
-                          Icons.add_circle_outline,
-                          color: theme.colorScheme.primary,
-                        )
-                      : null,
-                  onTap: !_isSelectionMode
-                      ? () {
-                          widget.onSelect?.call(pairing.name);
-                          Navigator.pop(context, pairing.name);
-                        }
-                      : null,
+        actions: [
+            // 전체 선택/해제 버튼 (선택 모드일 때만 표시하거나 항상 표시)
+             if (_isSelectionMode)
+              TextButton(
+                onPressed: _selectAll,
+                 child: Text(
+                  _selectedNames.length == totalCount ? '해제' : '전체',
                 ),
               ),
-            );
-          }
-
-          // 섹션 구분선
-          if (index == _pairingList.length) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        ],
+      ),
+      body: CustomScrollView(
+        slivers: [
+          // 0. 파싱 로직 안내 (간단한 헤더)
+           SliverToBoxAdapter(
+            child: Padding(
+               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+               child: Row(
                 children: [
-                  Divider(
-                    color: theme.colorScheme.outlineVariant.withValues(
-                      alpha: 0.3,
-                    ),
+                   Icon(Icons.info_outline, size: 14, color: theme.colorScheme.onSurfaceVariant),
+                   const SizedBox(width: 6),
+                   Expanded(
+                     child: Text(
+                       '상품명과 수량이 자동으로 분리되어 표시됩니다.',
+                       style: theme.textTheme.labelSmall?.copyWith(
+                         color: theme.colorScheme.onSurfaceVariant,
+                       ),
+                     ),
+                   ),
+                ],
+               ),
+            ),
+           ),
+
+          // 1. 요리 재료 섹션
+          if (_cookingList.isNotEmpty) ...[
+             SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                child: Text(
+                  '🍳 요리 식재료',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.primary,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                    child: Text(
+                ),
+              ),
+            ),
+            _buildSliverList(theme, _cookingList),
+          ],
+
+          // 2. 후식 섹션
+          if (_dessertList.isNotEmpty) ...[
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Divider(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3)),
+                    const SizedBox(height: 8),
+                    Text(
                       '🍰 후식 메뉴 추천',
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: theme.colorScheme.primary,
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            );
-          }
-
-          // 후식 메뉴 섹션
-          final desserts = _getDessertMenus();
-          final dessertIndex = index - _pairingList.length - 1;
-          if (dessertIndex < desserts.length) {
-            final dessert = desserts[dessertIndex];
-            return Card(
-              margin: const EdgeInsets.symmetric(vertical: 4),
-              color: theme.colorScheme.surfaceContainerLow,
-              child: ListTile(
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-                leading: Icon(
-                  Icons.cake_outlined,
-                  color: theme.colorScheme.secondary,
-                ),
-                title: Text(
-                  dessert.name,
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                subtitle: Padding(
-                  padding: const EdgeInsets.only(top: 6),
-                  child: Text(
-                    dessert.description,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                trailing: Icon(
-                  Icons.add_circle_outline,
-                  color: theme.colorScheme.secondary,
-                ),
-                onTap: () {
-                  widget.onSelect?.call(dessert.name);
-                  Navigator.pop(context, dessert.name);
-                },
-              ),
-            );
-          }
-
-          return const SizedBox.shrink();
-        },
+            ),
+            _buildSliverList(theme, _dessertList),
+          ],
+          
+          const SliverPadding(padding: EdgeInsets.only(bottom: 80)),
+        ],
       ),
       bottomNavigationBar: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -484,9 +722,9 @@ class _IngredientSearchListScreenState
                 onPressed: _sendToShoppingPrep,
                 icon: const Icon(Icons.shopping_cart_outlined),
                 label: Text(
-                  _selectedIndices.isEmpty
+                  _selectedNames.isEmpty
                       ? '쇼핑준비 보내기'
-                      : '${_selectedIndices.length}개 보내기',
+                      : '${_selectedNames.length}개 보내기',
                 ),
               ),
             ),
@@ -496,6 +734,7 @@ class _IngredientSearchListScreenState
     );
   }
 }
+
 
 /// 페어링 식재료 정보
 class PairingIngredient {
@@ -564,13 +803,4 @@ enum InventoryStatus {
   noStock, // 🔴 없음
 }
 
-/// 후식/디저트 메뉴
-class DessertItem {
-  final String name;
-  final String description;
 
-  DessertItem({
-    required this.name,
-    required this.description,
-  });
-}

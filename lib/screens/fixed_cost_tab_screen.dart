@@ -122,7 +122,11 @@ class _FixedCostTabScreenState extends State<FixedCostTabScreen> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
+    final existingId = (_isEditing && _editingIndex != null)
+        ? _costs[_editingIndex!].id
+        : DateTime.now().millisecondsSinceEpoch.toString();
     final cost = FixedCost(
+      id: existingId,
       name: _nameController.text.trim(),
       amount: double.parse(_amountController.text.trim()),
       vendor: _vendorController.text.trim().isEmpty

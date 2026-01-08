@@ -3,7 +3,6 @@
 // Keeping route names in one place prevents UI entrypoints from breaking
 // when individual screens get moved/renamed.
 import 'package:smart_ledger/models/shopping_cart_item.dart';
-import 'package:smart_ledger/utils/top_level_stats_utils.dart';
 
 class AppRoutes {
   const AppRoutes._();
@@ -208,7 +207,17 @@ class ShoppingCartArgs {
   final List<ShoppingCartItem>? initialItems;
 }
 
+class QuickStockUseArgs {
+  const QuickStockUseArgs({
+    required this.accountName,
+    this.initialProductName,
+  });
+  final String accountName;
+  final String? initialProductName;
+}
+
 class TopLevelStatsDetailArgs {
   const TopLevelStatsDetailArgs({required this.dashboard});
-  final RootDashboardContext dashboard;
+  final dynamic dashboard;
 }
+

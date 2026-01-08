@@ -25,31 +25,27 @@ class PageIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final effectiveActiveColor = activeColor ?? scheme.primary;
-    final effectiveInactiveColor =
-        inactiveColor ?? scheme.onSurfaceVariant.withValues(alpha: 0.4);
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: List.generate(pageCount, (index) {
-        final isActive = index == currentPage;
-        return GestureDetector(
-          onTap: onPageTap != null ? () => onPageTap!(index) : null,
-          child: Container(
-            margin: EdgeInsets.symmetric(horizontal: spacing / 2),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeOutCubic,
-              width: dotSize,
-              height: dotSize,
-              decoration: BoxDecoration(
-                color: isActive ? effectiveActiveColor : effectiveInactiveColor,
-                borderRadius: BorderRadius.circular(dotSize / 2),
-              ),
-            ),
+    // Display as page number (e.g., "1", "2", "3", ... "pageCount")
+    return GestureDetector(
+      onTap: onPageTap != null ? () => onPageTap!(currentPage) : null,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: scheme.primaryContainer.withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: scheme.primary.withValues(alpha: 0.5),
           ),
-        );
-      }),
+        ),
+        child: Text(
+          '${currentPage + 1}',
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: scheme.primary,
+          ),
+        ),
+      ),
     );
   }
 }

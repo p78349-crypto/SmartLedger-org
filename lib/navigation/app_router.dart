@@ -578,10 +578,13 @@ class AppRouter {
         );
 
       case AppRoutes.quickStockUse:
-        final a = args as AccountArgs;
+        final a = args as QuickStockUseArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => QuickStockUseScreen(accountName: a.accountName),
+          builder: (_) => QuickStockUseScreen(
+            accountName: a.accountName,
+            initialProductName: a.initialProductName,
+          ),
         );
 
       case AppRoutes.shoppingPointsInput:

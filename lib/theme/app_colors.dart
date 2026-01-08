@@ -54,6 +54,30 @@ class AppColors {
   static const Color chartPurple = Color(0xFF8B5CF6);
   static const Color chartTeal = Color(0xFF14B8A6);
 
+  // Icon Background Color (Consumables)
+  static const Color iconBackgroundLight = Color(0xFFF3E5E8); // 연분홍
+
+  // Consumable Icon Colors (고급스러운 팔레트)
+  static const List<Color> consumableIconColors = [
+    // 첫 행
+    Color(0xFFE85D5D),  // 딥 로즈
+    Color(0xFFC94B7F),  // 매그넷 핑크
+    Color(0xFF9B6B9E),  // 플럼
+    Color(0xFF6B7E8E),  // 슬레이트
+    // 둘째 행
+    Color(0xFF8B6F47),  // 워싱턴 브라운
+    Color(0xFF7E8B5E),  // 올리브 그린
+    Color(0xFF5B8B7D),  // 틸
+    Color(0xFF6B6B9E),  // 인디고
+    // 셋째 행
+    Color(0xFFB86B6B),  // 오래된 로즈
+    Color(0xFF8B7B5E),  // 베이지
+    Color(0xFF7B7B8B),  // 그레이 블루
+    Color(0xFFB8A86B),  // 골드
+    // 넷째 행
+    Color(0xFFCE7D7D),  // 코럴 핑크
+  ];
+
   // Shadow
   static List<BoxShadow> cardShadow = [
     BoxShadow(

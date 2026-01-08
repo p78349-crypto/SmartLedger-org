@@ -1151,56 +1151,7 @@ class _IconGridPageState extends State<_IconGridPage> {
                       ),
                     ],
                   ),
-                  // 홈 화면 하단 아이콘 (페이지 1에만 표시)
-                  if (widget.pageIndex == 0)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 12),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          _buildBottomActionButton(
-                            context,
-                            icon: Icons.restaurant,
-                            label: '식사준비',
-                            onTap: () => widget.pageController.animateToPage(
-                              1,
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeOut,
-                            ),
-                          ),
-                          _buildBottomActionButton(
-                            context,
-                            icon: Icons.trending_down,
-                            label: '비용분석',
-                            onTap: () => widget.pageController.animateToPage(
-                              1,
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeOut,
-                            ),
-                          ),
-                          _buildBottomActionButton(
-                            context,
-                            icon: Icons.calendar_month,
-                            label: '식단표',
-                            onTap: () => widget.pageController.animateToPage(
-                              1,
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeOut,
-                            ),
-                          ),
-                          _buildBottomActionButton(
-                            context,
-                            icon: Icons.settings,
-                            label: '설정',
-                            onTap: () => widget.pageController.animateToPage(
-                              1,
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeOut,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+
                 ],
               ),
             ),
@@ -1210,41 +1161,7 @@ class _IconGridPageState extends State<_IconGridPage> {
     );
   }
 
-  Widget _buildBottomActionButton(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    final theme = Theme.of(context);
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primaryContainer
-                  .withValues(alpha: 0.7),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              icon,
-              size: 24,
-              color: theme.colorScheme.onPrimaryContainer,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: theme.textTheme.labelSmall
-                ?.copyWith(fontWeight: FontWeight.bold),
-          ),
-        ],
-      ),
-    );
-  }
+
 }
 
 class _PageQuickMenuButton extends StatelessWidget {

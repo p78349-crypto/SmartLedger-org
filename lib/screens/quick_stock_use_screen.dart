@@ -9,10 +9,12 @@ import 'package:smart_ledger/utils/quick_stock_use_utils.dart';
 /// 상품명 입력 → 사용량 입력 → 자동 차감
 class QuickStockUseScreen extends StatefulWidget {
   final String accountName;
+  final String? initialProductName;
 
   const QuickStockUseScreen({
     super.key,
     required this.accountName,
+    this.initialProductName,
   });
 
   @override
@@ -32,15 +34,22 @@ class _QuickStockUseScreenState extends State<QuickStockUseScreen> {
       appBar: AppBar(
         title: const Text('식료품/생활용품 사용기록'),
       ),
-      body: _QuickStockUseBody(accountName: widget.accountName),
+      body: _QuickStockUseBody(
+        accountName: widget.accountName,
+        initialProductName: widget.initialProductName,
+      ),
     );
   }
 }
 
 class _QuickStockUseBody extends StatefulWidget {
   final String accountName;
+  final String? initialProductName;
 
-  const _QuickStockUseBody({required this.accountName});
+  const _QuickStockUseBody({
+    required this.accountName,
+    this.initialProductName,
+  });
 
   @override
   State<_QuickStockUseBody> createState() => _QuickStockUseBodyState();
@@ -62,6 +71,12 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
     _nameController.addListener(_onNameChanged);
     _amountController.addListener(_onAmountChanged);
     _loadShoppingHistoryNames();
+    
+    // 초기 상품명 설정 (생활용품 화면에서 전달된 경우)
+    if (widget.initialProductName != null && widget.initialProductName!.isNotEmpty) {
+      _nameController.text = widget.initialProductName!;
+      _onNameChanged();
+    }
   }
 
   @override
@@ -197,6 +212,53 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
     });
   }
 
+  // 현재 재고량 기반 동적 빠른 선택 버튼 생성
+  List<Widget> _buildQuickButtons() {
+    if (_selectedItem == null) {
+      const defaults = [1, 2, 3, 5, 10];
+      return [
+        for (final value in defaults)
+          _QuickButton(
+            label: value.toString(),
+            onTap: () => _amountController.text = value.toString(),
+          )
+      ];
+    }
+
+    final currentStock = _selectedItem!.currentStock;
+    final List<double> buttonValues = [];
+
+    // 재고의 25%, 50%, 75%, 100% 계산
+    if (currentStock > 0) {
+      final step25 = (currentStock / 4).floorToDouble();
+      final step50 = (currentStock / 2).floorToDouble();
+      final step75 = ((currentStock * 3) / 4).floorToDouble();
+
+      if (step25 > 0) buttonValues.add(step25);
+      if (step50 > 0 && step50 != step25) buttonValues.add(step50);
+      if (step75 > 0 && step75 != step50) buttonValues.add(step75);
+      buttonValues.add(currentStock); // 100%
+    }
+
+    // 중복 제거 및 정렬
+    final uniqueValues = buttonValues.toSet().toList()..sort();
+
+    return [
+      for (final value in uniqueValues)
+        _QuickButton(
+          label: _formatQty(value),
+          onTap: () => _amountController.text = _formatQty(value),
+          isHighRisk: value >= (currentStock * 0.6), // 60% 이상 사용
+        ),
+      if (_selectedItem != null && _selectedItem!.bundleSize > 1)
+        _QuickButton(
+          label: '묶음',
+          onTap: () => _amountController.text =
+              _selectedItem!.bundleSize.toStringAsFixed(0),
+        ),
+    ];
+  }
+
   Future<void> _submit() async {
     if (_selectedItem == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -209,6 +271,20 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
     if (amount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('사용량을 입력해주세요')),
+      );
+      return;
+    }
+
+    // 재고 초과 체크
+    if (amount > _selectedItem!.currentStock) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '재고 부족! 현재: ${_formatQty(_selectedItem!.currentStock)}${_selectedItem!.unit}',
+          ),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 2),
+        ),
       );
       return;
     }
@@ -424,178 +500,104 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
 
           const SizedBox(height: 16),
 
-          // 선택된 아이템 정보
-          if (_selectedItem != null) ...[
-            Card(
-              color: _selectedItem!.currentStock == 0
-                  ? Colors.red.shade50
-                  : _selectedItem!.currentStock <= _selectedItem!.threshold
-                      ? Colors.orange.shade50
-                      : Theme.of(context).colorScheme.primaryContainer,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+          // 사용량 입력
+          Builder(
+            builder: (context) {
+              final quickButtons = _buildQuickButtons();
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: TextField(
+                      controller: _amountController,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      style: const TextStyle(fontSize: 24),
+                      decoration: InputDecoration(
+                        labelText: '사용량',
+                        border: const OutlineInputBorder(),
+                        suffixText: _selectedItem?.unit ?? '개',
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Icon(
-                          _selectedItem!.currentStock == 0
-                              ? Icons.warning
-                              : Icons.inventory_2,
-                          size: 28,
-                          color: _selectedItem!.currentStock == 0
-                              ? Colors.red
-                              : null,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
+                        Align(
+                          alignment: Alignment.centerRight,
                           child: Text(
-                            _selectedItem!.name,
-                            style: const TextStyle(
-                              fontSize: 18,
+                            '빠른 선택',
+                            style: TextStyle(
+                              fontSize: 12,
                               fontWeight: FontWeight.bold,
+                              color: Colors.red.shade700,
                             ),
                           ),
                         ),
-                        if (_selectedItem!.currentStock == 0)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.red,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: const Text(
-                              '재고 없음',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          )
-                        else if (_selectedItem!.currentStock <=
-                            _selectedItem!.threshold)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.orange,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: const Text(
-                              '재고 부족',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                        const SizedBox(height: 4),
+                        Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.red.shade300, width: 1.5),
+                            borderRadius: BorderRadius.circular(12),
                           ),
+                          child: Wrap(
+                            alignment: WrapAlignment.center,
+                            spacing: 6,
+                            runSpacing: 6,
+                            children: quickButtons,
+                          ),
+                        ),
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '현재 재고: ${_formatQty(_selectedItem!.currentStock)}${_selectedItem!.unit}',
+                  ),
+                ],
+              );
+            },
+          ),
+
+          // 현재 재고량 표시 (사용량 입력 아래)
+          if (_selectedItem != null) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text.rich(
+                    TextSpan(
                       style: TextStyle(
                         fontSize: 16,
-                        color: _selectedItem!.currentStock == 0
-                            ? Colors.red
-                            : _selectedItem!.currentStock <=
-                                    _selectedItem!.threshold
-                                ? Colors.orange
-                                : null,
-                        fontWeight: _selectedItem!.currentStock == 0
-                            ? FontWeight.bold
-                            : null,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red,
                       ),
-                    ),
-                    Text(
-                      '보관 위치: 📍${_selectedItem!.location}',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    if (_selectedItem!.currentStock == 0)
-                      const Padding(
-                        padding: EdgeInsets.only(top: 8),
-                        child: Text(
-                          '💡 사용량을 입력하면 부족분이 장바구니에 자동 추가됩니다.',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-          ],
-
-          // 사용량 입력
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                flex: 2,
-                child: TextField(
-                  controller: _amountController,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  style: const TextStyle(fontSize: 24),
-                  decoration: InputDecoration(
-                    labelText: '사용량',
-                    border: const OutlineInputBorder(),
-                    suffixText: _selectedItem?.unit ?? '개',
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  children: [
-                    const Text('빠른 선택', style: TextStyle(fontSize: 12)),
-                    const SizedBox(height: 4),
-                    Wrap(
-                      spacing: 4,
-                      runSpacing: 4,
                       children: [
-                        _QuickButton(
-                          label: '1',
-                          onTap: () => _amountController.text = '1',
-                        ),
-                        _QuickButton(
-                          label: '2',
-                          onTap: () => _amountController.text = '2',
-                        ),
-                        _QuickButton(
-                          label: '5',
-                          onTap: () => _amountController.text = '5',
-                        ),
-                        _QuickButton(
-                          label: '10',
-                          onTap: () => _amountController.text = '10',
-                        ),
-                        if (_selectedItem != null &&
-                            _selectedItem!.bundleSize > 1)
-                          _QuickButton(
-                            label: '묶음',
-                            onTap: () => _amountController.text =
-                                _selectedItem!.bundleSize.toStringAsFixed(0),
-                          ),
+                        TextSpan(text: '현재 '),
+                        TextSpan(text: '재고량'),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                  Text(
+                    '${_formatQty(_selectedItem!.currentStock)}${_selectedItem!.unit}',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.red,
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
 
           if (_selectedItem != null) ...[
             const SizedBox(height: 12),
@@ -901,21 +903,43 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
 class _QuickButton extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
+  final bool isHighRisk;
 
-  const _QuickButton({required this.label, required this.onTap});
+  const _QuickButton({
+    required this.label,
+    required this.onTap,
+    this.isHighRisk = false,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final baseBorderColor = Colors.red.shade400;
+    final borderRadius = BorderRadius.circular(10);
+    final textColor = isHighRisk ? Colors.red.shade700 : Colors.red.shade600;
+
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: borderRadius,
       child: Container(
+        constraints: const BoxConstraints(minWidth: 44),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          border: Border.all(color: Theme.of(context).colorScheme.outline),
-          borderRadius: BorderRadius.circular(8),
+          color: isHighRisk ? Colors.red.shade50 : Colors.white,
+          border: Border.all(
+            color: isHighRisk ? Colors.red.shade600 : baseBorderColor,
+            width: isHighRisk ? 2 : 1.5,
+          ),
+          borderRadius: borderRadius,
         ),
-        child: Text(label),
+        child: Center(
+          child: Text(
+            label,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: textColor,
+            ),
+          ),
+        ),
       ),
     );
   }

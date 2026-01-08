@@ -32,7 +32,7 @@ class _QuickStockUseScreenState extends State<QuickStockUseScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('식료품/생활용품 사용기록'),
+        title: const Text('빠른 재고 차감'),
       ),
       body: _QuickStockUseBody(
         accountName: widget.accountName,
@@ -215,7 +215,7 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
   // 현재 재고량 기반 동적 빠른 선택 버튼 생성
   List<Widget> _buildQuickButtons() {
     if (_selectedItem == null) {
-      const defaults = [1, 2, 3, 5, 10];
+      const defaults = [1, 2, 5, 10];
       return [
         for (final value in defaults)
           _QuickButton(
@@ -257,6 +257,128 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
               _selectedItem!.bundleSize.toStringAsFixed(0),
         ),
     ];
+  }
+
+  Widget _buildPrimaryActionRow() {
+    final hasItem = _selectedItem != null;
+    final stockText = hasItem
+        ? '${_formatQty(_selectedItem!.currentStock)}${_selectedItem!.unit}'
+        : '상품 선택';
+    final pillRadius = BorderRadius.circular(8);
+    const pillPadding = EdgeInsets.symmetric(vertical: 12, horizontal: 16);
+
+    Widget buildPill({
+      required Widget child,
+      VoidCallback? onTap,
+      EdgeInsetsGeometry? padding,
+      bool isPrimary = false,
+    }) {
+      final enabled = onTap != null;
+      final colorScheme = Theme.of(context).colorScheme;
+      return InkWell(
+        onTap: onTap,
+        borderRadius: pillRadius,
+        child: Container(
+          padding: padding ?? pillPadding,
+          decoration: BoxDecoration(
+            color: isPrimary && enabled
+                ? colorScheme.primary
+                : (enabled ? colorScheme.surface : colorScheme.surfaceContainerHighest),
+            border: Border.all(width: 1.3, color: isPrimary && enabled ? colorScheme.primary : colorScheme.outline),
+            borderRadius: pillRadius,
+            boxShadow: [
+              BoxShadow(
+                color: colorScheme.shadow.withValues(alpha: 0.05),
+                blurRadius: 6,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: child,
+        ),
+      );
+    }
+
+    return Row(
+      children: [
+        Expanded(
+          flex: 3,
+            child: buildPill(
+              onTap: hasItem ? () => _showStockInfo(stockText) : null,
+              padding: pillPadding,
+              child: Builder(
+                builder: (context) {
+                  final colorScheme = Theme.of(context).colorScheme;
+                  return Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: '현재고량 ',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: colorScheme.onSurface,
+                          ),
+                        ),
+                        TextSpan(
+                          text: stockText,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: hasItem ? colorScheme.onSurface : colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        TextSpan(
+                          text: '  ⊖ ENT',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                    softWrap: false,
+                    overflow: TextOverflow.ellipsis,
+                  );
+                },
+              ),
+            ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          flex: 3,
+            child: buildPill(
+              onTap: hasItem ? _submit : null,
+              padding: pillPadding,
+              isPrimary: true,
+              child: Builder(
+                builder: (context) {
+                  final colorScheme = Theme.of(context).colorScheme;
+                  return Center(
+                    child: Text(
+                      'ENT',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: hasItem ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+        ),
+      ],
+    );
+  }
+
+  void _showStockInfo(String stockText) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('현재 재고: $stockText'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   Future<void> _submit() async {
@@ -385,7 +507,7 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
                   SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      '상품명 입력 → 사용량 입력 → 차감하기',
+                      '상품명 입력 → 사용량 입력 → ENT',
                       style: TextStyle(fontWeight: FontWeight.w500),
                     ),
                   ),
@@ -404,6 +526,8 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
               hintText: '휴지, 세제, 샴푸 등',
               prefixIcon: const Icon(Icons.search),
               border: const OutlineInputBorder(),
+              contentPadding:
+                  const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
               suffixIcon: _selectedItem != null
                   ? const Icon(Icons.check_circle, color: Colors.green)
                   : null,
@@ -500,7 +624,7 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
 
           const SizedBox(height: 16),
 
-          // 사용량 입력
+          // 사용량 입력 + 빠른 선택
           Builder(
             builder: (context) {
               final quickButtons = _buildQuickButtons();
@@ -508,47 +632,48 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    flex: 2,
                     child: TextField(
                       controller: _amountController,
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
-                      style: const TextStyle(fontSize: 24),
+                      style: const TextStyle(fontSize: 18),
                       decoration: InputDecoration(
                         labelText: '사용량',
                         border: const OutlineInputBorder(),
                         suffixText: _selectedItem?.unit ?? '개',
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 14,
+                          horizontal: 12,
+                        ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
+                  const SizedBox(width: 12),
+                  SizedBox(
+                    width: 108,
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: Text(
-                            '빠른 선택',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.red.shade700,
-                            ),
+                        const Text(
+                          '빠른 선택',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Container(
-                          padding: const EdgeInsets.all(6),
+                          padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
                           decoration: BoxDecoration(
-                            border: Border.all(color: Colors.red.shade300, width: 1.5),
-                            borderRadius: BorderRadius.circular(12),
+                            color: Colors.white,
+                            border: Border.all(color: Colors.grey.shade400),
+                            borderRadius: BorderRadius.circular(8),
                           ),
                           child: Wrap(
                             alignment: WrapAlignment.center,
-                            spacing: 6,
-                            runSpacing: 6,
+                            spacing: 4,
+                            runSpacing: 4,
                             children: quickButtons,
                           ),
                         ),
@@ -560,47 +685,12 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
             },
           ),
 
-          // 현재 재고량 표시 (사용량 입력 아래)
-          if (_selectedItem != null) ...[
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border.all(),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text.rich(
-                    TextSpan(
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.red,
-                      ),
-                      children: [
-                        TextSpan(text: '현재 '),
-                        TextSpan(text: '재고량'),
-                      ],
-                    ),
-                  ),
-                  Text(
-                    '${_formatQty(_selectedItem!.currentStock)}${_selectedItem!.unit}',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.red,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+          const SizedBox(height: 16),
+
+          _buildPrimaryActionRow(),
 
           if (_selectedItem != null) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             Builder(
               builder: (context) {
                 final item = _selectedItem!;
@@ -801,18 +891,6 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
             ),
           ],
 
-          const SizedBox(height: 16),
-
-          // 차감 버튼
-          FilledButton.icon(
-            onPressed: _selectedItem != null ? _submit : null,
-            icon: const Icon(Icons.remove_circle_outline),
-            label: const Text('차감하기', style: TextStyle(fontSize: 18)),
-            style: FilledButton.styleFrom(
-              minimumSize: const Size.fromHeight(56),
-            ),
-          ),
-
           // 최근 사용 기록
           if (_recentUses.isNotEmpty) ...[
             const SizedBox(height: 32),
@@ -913,28 +991,29 @@ class _QuickButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final baseBorderColor = Colors.red.shade400;
-    final borderRadius = BorderRadius.circular(10);
-    final textColor = isHighRisk ? Colors.red.shade700 : Colors.red.shade600;
+    final baseBorderColor = Colors.grey.shade600;
+    final borderRadius = BorderRadius.circular(12);
+    final textColor = isHighRisk ? Colors.red.shade700 : Colors.black87;
 
     return InkWell(
       onTap: onTap,
       borderRadius: borderRadius,
-      child: Container(
-        constraints: const BoxConstraints(minWidth: 44),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Container(
+        constraints: const BoxConstraints(minWidth: 38, minHeight: 38, maxWidth: 38, maxHeight: 38),
+        padding: EdgeInsets.zero,
         decoration: BoxDecoration(
           color: isHighRisk ? Colors.red.shade50 : Colors.white,
           border: Border.all(
             color: isHighRisk ? Colors.red.shade600 : baseBorderColor,
-            width: isHighRisk ? 2 : 1.5,
           ),
-          borderRadius: borderRadius,
+          borderRadius: BorderRadius.circular(7),
         ),
         child: Center(
           child: Text(
             label,
+            textAlign: TextAlign.center,
             style: TextStyle(
+              fontSize: 15,
               fontWeight: FontWeight.bold,
               color: textColor,
             ),

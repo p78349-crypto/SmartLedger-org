@@ -1675,17 +1675,17 @@ class _NO1FormState extends State<NO1Form> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Transform.scale(
-          scale: compact ? 0.6 : 0.7,
+          scale: compact ? 0.75 : 0.85,
           child: FloatingActionButton.extended(
             heroTag: 'save',
             onPressed: _saveTransaction,
             tooltip: '저장',
             backgroundColor: scheme.primary,
             foregroundColor: scheme.onPrimary,
-            icon: const Icon(IconCatalog.check, size: 18),
-            label: Text(
-              compact ? '저장' : '저장 (ENT)',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            icon: const Icon(IconCatalog.check, size: 20),
+            label: const Text(
+              'ENT',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
           ),
         ),

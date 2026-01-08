@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:smart_ledger/models/food_expiry_item.dart';
 import 'package:smart_ledger/models/shopping_cart_item.dart';
+import 'package:smart_ledger/navigation/app_routes.dart';
 import 'package:smart_ledger/services/food_expiry_service.dart';
 import 'package:smart_ledger/services/user_pref_service.dart';
 import 'package:smart_ledger/utils/ingredient_parsing_utils.dart';
@@ -140,6 +141,16 @@ class _IngredientSearchListScreenState
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('$itemName을(를) 쇼핑준비에 추가했습니다.'),
+          action: SnackBarAction(
+            label: '쇼핑준비 이동',
+            onPressed: () {
+              Navigator.pushNamed(
+                context,
+                AppRoutes.shoppingPrep,
+                arguments: ShoppingCartArgs(accountName: accountName),
+              );
+            },
+          ),
           duration: const Duration(seconds: 2),
         ),
       );
@@ -218,6 +229,16 @@ class _IngredientSearchListScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${merged.added}개 식재료를 쇼핑준비에 추가했습니다.'),
+            action: SnackBarAction(
+              label: '쇼핑준비 이동',
+              onPressed: () {
+                Navigator.pushNamed(
+                  context,
+                  AppRoutes.shoppingPrep,
+                  arguments: ShoppingCartArgs(accountName: accountName),
+                );
+              },
+            ),
           ),
         );
         Navigator.pop(context);

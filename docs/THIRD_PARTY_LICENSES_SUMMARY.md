@@ -1,6 +1,6 @@
 # Third-Party Licenses Summary
 
-- Generated: 2026-01-05T20:47:08.487483
+- Generated: 2026-01-08T13:26:38.682044
 - Sources: `.dart_tool/package_config.json` + `pubspec.lock` + local Pub cache (package root folders)
 - Note: This file intentionally does NOT include full license texts. It only records which license file was found and a best-effort detected license type.
 

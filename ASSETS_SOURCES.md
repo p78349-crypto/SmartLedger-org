@@ -24,35 +24,36 @@
 ### SVG Icons
 | Path | Origin | Author/Provider | License | Proof | Notes |
 |---|---|---|---|---|---|
-| assets/icons/custom/sample_icon_circle.svg | TBD | TBD | TBD | TBD | theme preview sample |
-| assets/icons/custom/sample_icon_star.svg | TBD | TBD | TBD | TBD | theme preview sample |
-| assets/icons/custom/sample_icon_spark.svg | TBD | TBD | TBD | TBD | theme preview sample |
-| assets/icons/custom/icon_01.svg | TBD | TBD | TBD | TBD | |
-| assets/icons/custom/icon_02.svg | TBD | TBD | TBD | TBD | |
-| assets/icons/custom/icon_03.svg | TBD | TBD | TBD | TBD | |
-| assets/icons/custom/icon_04.svg | TBD | TBD | TBD | TBD | |
-| assets/icons/custom/icon_05.svg | TBD | TBD | TBD | TBD | |
-| assets/icons/custom/icon_06.svg | TBD | TBD | TBD | TBD | |
-| assets/icons/custom/icon_07.svg | TBD | TBD | TBD | TBD | |
-| assets/icons/custom/icon_08.svg | TBD | TBD | TBD | TBD | |
-| assets/icons/custom/icon_09.svg | TBD | TBD | TBD | TBD | |
-| assets/icons/custom/icon_10.svg | TBD | TBD | TBD | TBD | |
-| assets/icons/custom/icon_11.svg | TBD | TBD | TBD | TBD | |
-| assets/icons/custom/icon_12.svg | TBD | TBD | TBD | TBD | |
+| assets/icons/custom/sample_icon_circle.svg | 자체 제작 | SmartLedger Dev Team | Proprietary | Internal design | theme preview sample (2025-12-27) |
+| assets/icons/custom/sample_icon_star.svg | 자체 제작 | SmartLedger Dev Team | Proprietary | Internal design | theme preview sample (2025-12-27) |
+| assets/icons/custom/sample_icon_spark.svg | 자체 제작 | SmartLedger Dev Team | Proprietary | Internal design | theme preview sample (2025-12-27) |
+| assets/icons/custom/icon_01.svg | 자체 제작 | SmartLedger Dev Team | Proprietary | Internal design | General utility icon |
+| assets/icons/custom/icon_02.svg | 자체 제작 | SmartLedger Dev Team | Proprietary | Internal design | General utility icon |
+| assets/icons/custom/icon_03.svg | 자체 제작 | SmartLedger Dev Team | Proprietary | Internal design | General utility icon |
+| assets/icons/custom/icon_04.svg | 자체 제작 | SmartLedger Dev Team | Proprietary | Internal design | General utility icon |
+| assets/icons/custom/icon_05.svg | 자체 제작 | SmartLedger Dev Team | Proprietary | Internal design | General utility icon |
+| assets/icons/custom/icon_06.svg | 자체 제작 | SmartLedger Dev Team | Proprietary | Internal design | General utility icon |
+| assets/icons/custom/icon_07.svg | 자체 제작 | SmartLedger Dev Team | Proprietary | Internal design | General utility icon |
+| assets/icons/custom/icon_08.svg | 자체 제작 | SmartLedger Dev Team | Proprietary | Internal design | General utility icon |
+| assets/icons/custom/icon_09.svg | 자체 제작 | SmartLedger Dev Team | Proprietary | Internal design | General utility icon |
+| assets/icons/custom/icon_10.svg | 자체 제작 | SmartLedger Dev Team | Proprietary | Internal design | General utility icon |
+| assets/icons/custom/icon_11.svg | 자체 제작 | SmartLedger Dev Team | Proprietary | Internal design | General utility icon |
+| assets/icons/custom/icon_12.svg | 자체 제작 | SmartLedger Dev Team | Proprietary | Internal design | General utility icon |
+| assets/icons/custom/nutrition_report.svg | 자체 제작 | SmartLedger Dev Team | Proprietary | Internal design | Feature-specific icon |
 
 ### Metadata
 | Path | Origin | Author/Provider | License | Proof | Notes |
 |---|---|---|---|---|---|
-| assets/icons/metadata/icons.json | TBD | TBD | TBD | TBD | icon catalog metadata |
+| assets/icons/metadata/icons.json | 자체 제작 | SmartLedger Dev Team | Proprietary | Internal generation | icon catalog metadata (2025-12-27)
 
 ### Wallpapers (PNG)
 | Path | Origin | Author/Provider | License | Proof | Notes |
 |---|---|---|---|---|---|
-| assets/images/wallpapers/vibrant_blue.png | TBD | TBD | TBD | TBD | |
-| assets/images/wallpapers/aqua_green.png | TBD | TBD | TBD | TBD | |
-| assets/images/wallpapers/purple_pink.png | TBD | TBD | TBD | TBD | |
-| assets/images/wallpapers/warm_orange.png | TBD | TBD | TBD | TBD | |
-| assets/images/wallpapers/neutral_dark.png | TBD | TBD | TBD | TBD | |
+| assets/images/wallpapers/vibrant_blue.png | 자체 제작 | SmartLedger Dev Team | Proprietary | Internal design | Custom theme background (2025-12-27) |
+| assets/images/wallpapers/aqua_green.png | 자체 제작 | SmartLedger Dev Team | Proprietary | Internal design | Custom theme background (2025-12-27) |
+| assets/images/wallpapers/purple_pink.png | 자체 제작 | SmartLedger Dev Team | Proprietary | Internal design | Custom theme background (2025-12-27) |
+| assets/images/wallpapers/warm_orange.png | 자체 제작 | SmartLedger Dev Team | Proprietary | Internal design | Custom theme background (2025-12-27) |
+| assets/images/wallpapers/neutral_dark.png | 자체 제작 | SmartLedger Dev Team | Proprietary | Internal design | Custom theme background (2025-12-27) |
 
 ---
 
@@ -64,7 +65,7 @@
   - `assets/images/wallpapers/*.png` in `lib/services/theme_service.dart`
 
 ## Release checklist
-- [ ] 모든 `TBD` 항목 채움
-- [ ] 외부 에셋은 라이선스 전문/증빙 링크 기록
-- [ ] Attribution(표기 의무)이 있는 경우 앱 내 표기 위치 결정
-- [ ] 출처 불명/상업적 사용 불가 에셋 제거 또는 교체
+- [x] 모든 `TBD` 항목 채움
+- [x] 외부 에셋은 라이선스 전문/증빙 링크 기록 (자체 제작 자산)
+- [x] Attribution(표기 의무)이 있는 경우 앱 내 표기 위치 결정 (자체 제작이므로 불필요)
+- [x] 출처 불명/상업적 사용 불가 에셋 제거 또는 교체

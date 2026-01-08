@@ -20,6 +20,11 @@ import 'package:smart_ledger/utils/interaction_blockers.dart';
 import 'package:smart_ledger/utils/shopping_prep_utils.dart';
 import 'package:smart_ledger/screens/savings_statistics_screen.dart';
 import 'package:smart_ledger/navigation/app_routes.dart';
+import 'package:smart_ledger/widgets/daily_recipe_recommendation_widget.dart';
+import 'package:smart_ledger/widgets/ingredients_recommendation_widget.dart';
+import 'package:smart_ledger/widgets/meal_plan_widget.dart';
+import 'package:smart_ledger/widgets/cost_analysis_widget.dart';
+import 'package:smart_ledger/widgets/user_preferences_widget.dart';
 
 /// 식품 유통기한 관리 전용 메인 네비게이션 화면
 class FoodExpiryMainScreen extends StatefulWidget {
@@ -2739,6 +2744,16 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
                   }).toList(),
                 ),
               ),
+              // 오늘의 요리 추천 위젯
+              const DailyRecipeRecommendationWidget(),
+              // 식재료 추천 강화 위젯
+              const IngredientsRecommendationWidget(),
+              // 식단 계획 위젯
+              const MealPlanWidget(),
+              // 비용 분석 위젯
+              const CostAnalysisWidget(),
+              // 사용자 설정 위젯
+              const UserPreferencesWidget(),
               if (!_isUsageMode)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),

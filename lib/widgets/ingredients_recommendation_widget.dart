@@ -1,0 +1,253 @@
+// ignore_for_file: dead_code, dead_null_aware_expression, invalid_null_aware_operator, unchecked_use_of_nullable_value
+import 'package:flutter/material.dart';
+import 'package:smart_ledger/models/food_expiry_item.dart';
+import 'package:smart_ledger/services/food_expiry_service.dart';
+import 'package:smart_ledger/utils/icon_catalog.dart';
+import 'package:smart_ledger/utils/ingredients_recommendation_utils.dart';
+
+/// 식재료 추천 강화 위젯
+class IngredientsRecommendationWidget extends StatefulWidget {
+  const IngredientsRecommendationWidget({super.key});
+
+  @override
+  State<IngredientsRecommendationWidget> createState() =>
+      _IngredientsRecommendationWidgetState();
+}
+
+class _IngredientsRecommendationWidgetState
+    extends State<IngredientsRecommendationWidget> {
+  List<FoodExpiryItem>? _recommendations;
+  String? _nutritionAdvice;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRecommendations();
+  }
+
+  Future<void> _loadRecommendations() async {
+    try {
+      final items = FoodExpiryService.instance.items.value;
+
+      // 금주 활용할 식재료
+      final thisWeek =
+          IngredientsRecommendationUtils.getThisWeekItems(items);
+
+      // 가격 효율성 기반 추천
+      final optimized =
+          IngredientsRecommendationUtils.getOptimizedRecommendations(
+        thisWeek,
+        limit: 5,
+      );
+
+      final advice =
+          IngredientsRecommendationUtils.getNutritionAdvice(items);
+
+      if (mounted) {
+        setState(() {
+          _recommendations = optimized;
+          _nutritionAdvice = advice;
+          _isLoading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    if (_isLoading) {
+      return const Padding(
+        padding: EdgeInsets.all(16),
+        child: CircularProgressIndicator.adaptive(),
+      );
+    }
+
+    if (_recommendations == null || _recommendations!.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      elevation: 2,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 헤더
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                Icon(
+                  IconCatalog.ingredients,
+                  color: theme.colorScheme.primary,
+                  size: 24,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  '🍽️ 이번주 추천 식재료',
+                  style: theme.textTheme.titleMedium
+                      ?.copyWith(fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
+
+          // 추천 식재료 리스트
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: _recommendations!.length,
+            separatorBuilder: (context, index) => const Divider(height: 1),
+            itemBuilder: (context, index) {
+              final item = _recommendations![index];
+              final nutrition = IngredientsRecommendationUtils
+                  .getNutritionInfo(item.name);
+              final message =
+                  IngredientsRecommendationUtils.getRecommendationMessage(
+                item,
+              );
+              final priceScore =
+                  IngredientsRecommendationUtils.getPriceValueScore(item);
+
+              return Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 식재료 이름 및 가격
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                item.name,
+                                style: theme.textTheme.bodyLarge
+                                    ?.copyWith(fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Text(
+                                    nutrition,
+                                    style: theme.textTheme.labelSmall,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: _getScoreColor(priceScore),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      '점수: $priceScore',
+                                      style:
+                                          theme.textTheme.labelSmall?.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        Text(
+                          '${item.price?.toStringAsFixed(0) ?? '가격 미정'}원',
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    // 추천 메시지
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primaryContainer
+                            .withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        message,
+                        style: theme.textTheme.labelMedium,
+                      ),
+                    ),
+
+                    // 수량 정보
+                    const SizedBox(height: 8),
+                    Text(
+                      '보유량: ${item.quantity} ${item.unit ?? '개'}',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+
+          const Divider(height: 1),
+
+          // 영양 정보 팁
+          if (_nutritionAdvice != null)
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.secondaryContainer
+                      .withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      size: 20,
+                      color: theme.colorScheme.secondary,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _nutritionAdvice!,
+                        style: theme.textTheme.labelMedium,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Color _getScoreColor(int score) {
+    if (score >= 80) return Colors.green;
+    if (score >= 60) return Colors.orange;
+    return Colors.red;
+  }
+}

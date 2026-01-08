@@ -151,4 +151,8 @@ class IconCatalog {
   static const IconData lightModeOutlined = Icons.light_mode_outlined;
   static const IconData darkModeOutlined = Icons.dark_mode_outlined;
   static const IconData postAdd = Icons.post_add;
+  
+  // New icons for utils (2026-01-08)
+  static const IconData spending = Icons.trending_down;
+  static const IconData ingredients = Icons.local_dining;
 }

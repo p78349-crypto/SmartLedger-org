@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/models/asset.dart';
-import 'package:smart_ledger/utils/icon_catalog.dart';
+import '../models/asset.dart';
+import 'icon_catalog.dart';
 
 /// 자산 카테고리별 아이콘 및 메타데이터 관리
 class AssetIconUtils {

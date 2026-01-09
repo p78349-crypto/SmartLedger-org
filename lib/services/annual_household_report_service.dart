@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:smart_ledger/services/health_guardrail_service.dart';
+import 'health_guardrail_service.dart';
 
 @immutable
 class AnnualHouseholdReport {
@@ -27,7 +27,8 @@ class AnnualHouseholdReport {
 class AnnualHouseholdReportService {
   AnnualHouseholdReportService._();
 
-  static DateTime _startOfDay(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
+  static DateTime _startOfDay(DateTime dt) =>
+      DateTime(dt.year, dt.month, dt.day);
 
   static Future<List<HealthConsumptionRecord>> _loadLog() async {
     final prefs = await SharedPreferences.getInstance();
@@ -47,12 +48,16 @@ class AnnualHouseholdReportService {
     }
   }
 
-  static Future<AnnualHouseholdReport?> buildReport({int windowDays = 365}) async {
+  static Future<AnnualHouseholdReport?> buildReport({
+    int windowDays = 365,
+  }) async {
     final w = windowDays.clamp(30, 365);
     final now = DateTime.now();
     final since = _startOfDay(now).subtract(Duration(days: w));
 
-    final records = (await _loadLog()).where((r) => r.timestamp.isAfter(since)).toList();
+    final records = (await _loadLog())
+        .where((r) => r.timestamp.isAfter(since))
+        .toList();
     if (records.isEmpty) return null;
 
     final totals = <String, double>{};
@@ -63,7 +68,9 @@ class AnnualHouseholdReportService {
     final sorted = totals.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
 
-    final top = sorted.isNotEmpty ? sorted.first : const MapEntry<String, double>('', 0.0);
+    final top = sorted.isNotEmpty
+        ? sorted.first
+        : const MapEntry<String, double>('', 0.0);
     final topItems = sorted.take(5).toList();
 
     return AnnualHouseholdReport(

@@ -1,10 +1,10 @@
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_ledger/models/asset.dart';
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/models/trash_entry.dart';
-import 'package:smart_ledger/utils/pref_keys.dart';
+import '../models/asset.dart';
+import '../models/transaction.dart';
+import '../models/trash_entry.dart';
+import '../utils/pref_keys.dart';
 
 class TrashService {
   static final TrashService _instance = TrashService._internal();

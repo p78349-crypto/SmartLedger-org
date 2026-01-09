@@ -1,7 +1,7 @@
 import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_ledger/services/root_pin_service.dart';
-import 'package:smart_ledger/utils/pref_keys.dart';
+import 'root_pin_service.dart';
+import '../utils/pref_keys.dart';
 
 enum AuthScope { asset, root, backupRestore, screenSaverExit }
 

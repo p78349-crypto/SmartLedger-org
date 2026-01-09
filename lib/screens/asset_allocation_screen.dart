@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/models/asset.dart';
-import 'package:smart_ledger/services/asset_service.dart';
-import 'package:smart_ledger/utils/number_formats.dart';
+import '../models/asset.dart';
+import '../services/asset_service.dart';
+import '../utils/number_formats.dart';
 
 class AssetCategoryStats {
   final AssetCategory category;

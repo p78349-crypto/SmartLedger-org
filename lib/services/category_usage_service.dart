@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_ledger/utils/pref_keys.dart';
+import '../utils/pref_keys.dart';
 
 class CategoryUsageService {
   static const String separator = ' · ';

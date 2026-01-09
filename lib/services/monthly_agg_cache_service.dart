@@ -4,9 +4,8 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/services/'
-    'quick_simple_expense_input_history_service.dart';
+import '../models/transaction.dart';
+import 'quick_simple_expense_input_history_service.dart';
 
 @immutable
 class MonthlyAggBucket {

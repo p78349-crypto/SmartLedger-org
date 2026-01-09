@@ -1,5 +1,5 @@
 import 'package:flutter/services.dart';
-import 'package:smart_ledger/utils/currency_input_formatter.dart';
+import 'currency_input_formatter.dart';
 
 /// 숫자만 허용하며 천 단위 콤마를 추가하는 입력 포매터.
 ///

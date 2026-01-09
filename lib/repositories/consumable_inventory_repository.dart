@@ -1,4 +1,4 @@
-import 'package:smart_ledger/models/consumable_inventory_item.dart';
+import '../models/consumable_inventory_item.dart';
 
 abstract class ConsumableInventoryRepository {
   Future<List<ConsumableInventoryItem>> loadItems();

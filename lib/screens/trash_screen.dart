@@ -1,17 +1,17 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/models/account.dart';
-import 'package:smart_ledger/models/asset.dart';
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/models/trash_entry.dart';
-import 'package:smart_ledger/services/account_service.dart';
-import 'package:smart_ledger/services/asset_service.dart';
-import 'package:smart_ledger/services/backup_service.dart';
-import 'package:smart_ledger/services/transaction_service.dart';
-import 'package:smart_ledger/services/trash_service.dart';
-import 'package:smart_ledger/utils/account_name_language_tag.dart';
-import 'package:smart_ledger/utils/utils.dart';
+import '../models/account.dart';
+import '../models/asset.dart';
+import '../models/transaction.dart';
+import '../models/trash_entry.dart';
+import '../services/account_service.dart';
+import '../services/asset_service.dart';
+import '../services/backup_service.dart';
+import '../services/transaction_service.dart';
+import '../services/trash_service.dart';
+import '../utils/account_name_language_tag.dart';
+import '../utils/utils.dart';
 
 class TrashScreen extends StatefulWidget {
   const TrashScreen({super.key});

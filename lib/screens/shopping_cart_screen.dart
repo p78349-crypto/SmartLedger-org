@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/models/category_hint.dart';
-import 'package:smart_ledger/models/shopping_cart_item.dart';
-import 'package:smart_ledger/services/user_pref_service.dart';
-import 'package:smart_ledger/utils/currency_formatter.dart';
-import 'package:smart_ledger/utils/icon_catalog.dart';
-import 'package:smart_ledger/utils/shopping_cart_bulk_ledger_utils.dart';
-import 'package:smart_ledger/widgets/smart_input_field.dart';
+import '../models/category_hint.dart';
+import '../models/shopping_cart_item.dart';
+import '../services/user_pref_service.dart';
+import '../utils/currency_formatter.dart';
+import '../utils/icon_catalog.dart';
+import '../utils/shopping_cart_bulk_ledger_utils.dart';
+import '../widgets/smart_input_field.dart';
 
 class ShoppingCartScreen extends StatefulWidget {
   const ShoppingCartScreen({
@@ -25,8 +25,9 @@ class ShoppingCartScreen extends StatefulWidget {
 
 class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
   static const double _inlineFieldHeight = 36.0;
-  static const BorderRadius _inlineFieldRadius =
-      BorderRadius.all(Radius.circular(12));
+  static const BorderRadius _inlineFieldRadius = BorderRadius.all(
+    Radius.circular(12),
+  );
   static const Color _inlineFieldBorderColor = Color(0xFFD8C5CA);
   static const Color _inlineFieldFocusedBorderColor = Color(0xFF884A5E);
   static const Color _inlineFieldFillColor = Color(0xFFF8EFF2);
@@ -40,10 +41,12 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
 
   final Map<String, TextEditingController> _qtyControllers = {};
   final Map<String, TextEditingController> _unitPriceControllers = {};
+  final Map<String, TextEditingController> _bundleSizeControllers = {};
   final Map<String, TextEditingController> _memoControllers = {};
 
   final Map<String, FocusNode> _qtyFocusNodes = {};
   final Map<String, FocusNode> _unitPriceFocusNodes = {};
+  final Map<String, FocusNode> _bundleSizeFocusNodes = {};
   final Map<String, FocusNode> _memoFocusNodes = {};
 
   String _unitPriceTextForInlineEditor(double unitPrice) {
@@ -53,32 +56,40 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
         : CurrencyFormatter.formatWithDecimals(unitPrice, showUnit: false);
   }
 
-  InputDecoration _inlineFieldDecoration(String hint) {
+  InputDecoration _inlineFieldDecoration(ThemeData theme, String hint) {
+    final scheme = theme.colorScheme;
+    final isDark = scheme.brightness == Brightness.dark;
+
+    final borderColor = isDark
+        ? scheme.outlineVariant.withValues(alpha: 0.6)
+        : _inlineFieldBorderColor;
+    final focusedBorderColor = isDark
+        ? scheme.primary
+        : _inlineFieldFocusedBorderColor;
+    final fillColor = isDark
+        ? scheme.surfaceContainerHighest.withValues(alpha: 0.6)
+        : _inlineFieldFillColor;
+    final hintColor = isDark
+        ? scheme.onSurfaceVariant.withValues(alpha: 0.8)
+        : scheme.onSurfaceVariant.withValues(alpha: 0.6);
+
     return InputDecoration(
       isDense: true,
       hintText: hint,
       filled: true,
-      fillColor: _inlineFieldFillColor,
-      border: const OutlineInputBorder(
+      fillColor: fillColor,
+      hintStyle: TextStyle(color: hintColor),
+      border: OutlineInputBorder(
         borderRadius: _inlineFieldRadius,
-        borderSide: BorderSide(
-          color: _inlineFieldBorderColor,
-          width: 1.2,
-        ),
+        borderSide: BorderSide(color: borderColor, width: 1.2),
       ),
-      enabledBorder: const OutlineInputBorder(
+      enabledBorder: OutlineInputBorder(
         borderRadius: _inlineFieldRadius,
-        borderSide: BorderSide(
-          color: _inlineFieldBorderColor,
-          width: 1.2,
-        ),
+        borderSide: BorderSide(color: borderColor, width: 1.2),
       ),
-      focusedBorder: const OutlineInputBorder(
+      focusedBorder: OutlineInputBorder(
         borderRadius: _inlineFieldRadius,
-        borderSide: BorderSide(
-          color: _inlineFieldFocusedBorderColor,
-          width: 1.6,
-        ),
+        borderSide: BorderSide(color: focusedBorderColor, width: 1.6),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
     );
@@ -110,6 +121,9 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
     for (final c in _unitPriceControllers.values) {
       c.dispose();
     }
+    for (final c in _bundleSizeControllers.values) {
+      c.dispose();
+    }
     for (final c in _memoControllers.values) {
       c.dispose();
     }
@@ -117,6 +131,9 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
       n.dispose();
     }
     for (final n in _unitPriceFocusNodes.values) {
+      n.dispose();
+    }
+    for (final n in _bundleSizeFocusNodes.values) {
       n.dispose();
     }
     for (final n in _memoFocusNodes.values) {
@@ -145,6 +162,13 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
       _unitPriceControllers.remove(k)?.dispose();
     }
 
+    final bundleSizeRemoved = _bundleSizeControllers.keys.where(
+      (k) => !ids.contains(k),
+    );
+    for (final k in bundleSizeRemoved.toList(growable: false)) {
+      _bundleSizeControllers.remove(k)?.dispose();
+    }
+
     final memoRemoved = _memoControllers.keys.where((k) => !ids.contains(k));
     for (final k in memoRemoved.toList(growable: false)) {
       _memoControllers.remove(k)?.dispose();
@@ -157,6 +181,13 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
       _unitPriceFocusNodes.remove(k)?.dispose();
     }
 
+    final bundleSizeFocusRemoved = _bundleSizeFocusNodes.keys.where(
+      (k) => !ids.contains(k),
+    );
+    for (final k in bundleSizeFocusRemoved.toList(growable: false)) {
+      _bundleSizeFocusNodes.remove(k)?.dispose();
+    }
+
     final memoFocusRemoved = _memoFocusNodes.keys.where(
       (k) => !ids.contains(k),
     );
@@ -165,7 +196,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
     }
 
     for (final item in next) {
-      final qtyText = (item.quantity < 0 ? 0 : item.quantity).toString();
+      final qtyText = (item.bundleCount < 0 ? 0 : item.bundleCount).toString();
       final qtyC = _qtyControllers[item.id];
       if (qtyC == null) {
         _qtyControllers[item.id] = TextEditingController(text: qtyText);
@@ -181,6 +212,37 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
         node.addListener(() {
           if (node.hasFocus) {
             final c = _qtyControllers[item.id];
+            if (c != null) {
+              c.selection = TextSelection(
+                baseOffset: 0,
+                extentOffset: c.text.length,
+              );
+            }
+          }
+          if (mounted) setState(() {});
+        });
+        return node;
+      });
+
+      final perBundleText = (item.unitsPerBundle < 0 ? 0 : item.unitsPerBundle)
+          .toString();
+      final perBundleController = _bundleSizeControllers[item.id];
+      if (perBundleController == null) {
+        _bundleSizeControllers[item.id] = TextEditingController(
+          text: perBundleText,
+        );
+      } else {
+        final hasFocus = _bundleSizeFocusNodes[item.id]?.hasFocus ?? false;
+        if (!hasFocus && perBundleController.text != perBundleText) {
+          perBundleController.text = perBundleText;
+        }
+      }
+
+      _bundleSizeFocusNodes.putIfAbsent(item.id, () {
+        final node = FocusNode();
+        node.addListener(() {
+          if (node.hasFocus) {
+            final c = _bundleSizeControllers[item.id];
             if (c != null) {
               c.selection = TextSelection(
                 baseOffset: 0,
@@ -274,20 +336,27 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
   }
 
   Future<void> _applyInlineEdits(ShoppingCartItem item) async {
-    final qtyRaw = _qtyControllers[item.id]?.text.trim() ?? '';
+    final bundleRaw = _qtyControllers[item.id]?.text.trim() ?? '';
+    final perBundleRaw = _bundleSizeControllers[item.id]?.text.trim() ?? '';
     final unitRaw = _unitPriceControllers[item.id]?.text.trim() ?? '';
     final memoRaw = _memoControllers[item.id]?.text.trim() ?? item.memo;
 
-    final parsedQty = int.tryParse(qtyRaw);
+    final parsedBundle = int.tryParse(bundleRaw);
+    final parsedPerBundle = int.tryParse(perBundleRaw);
     final parsedUnit = CurrencyFormatter.parse(unitRaw);
 
-    final nextQty = (parsedQty == null)
-      ? item.quantity
-      : (parsedQty < 0 ? 0 : parsedQty);
+    final nextBundle = (parsedBundle == null)
+        ? item.bundleCount
+        : (parsedBundle < 0 ? 0 : parsedBundle);
+    final nextPerBundle = (parsedPerBundle == null)
+        ? item.unitsPerBundle
+        : (parsedPerBundle < 0 ? 0 : parsedPerBundle);
+    final nextQty = nextBundle * nextPerBundle;
     final nextUnit = (parsedUnit == null) ? item.unitPrice : parsedUnit;
     final nextMemo = memoRaw;
 
-    if (nextQty == item.quantity &&
+    if (nextBundle == item.bundleCount &&
+        nextPerBundle == item.unitsPerBundle &&
         nextUnit == item.unitPrice &&
         nextMemo == item.memo) {
       return;
@@ -295,6 +364,8 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
 
     final now = DateTime.now();
     final updated = item.copyWith(
+      bundleCount: nextBundle,
+      unitsPerBundle: nextPerBundle,
       quantity: nextQty,
       unitPrice: nextUnit,
       memo: nextMemo,
@@ -305,26 +376,35 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
   }
 
   void _previewInlineEdits(ShoppingCartItem item) {
-    final qtyRaw = _qtyControllers[item.id]?.text.trim() ?? '';
+    final bundleRaw = _qtyControllers[item.id]?.text.trim() ?? '';
+    final perBundleRaw = _bundleSizeControllers[item.id]?.text.trim() ?? '';
     final unitRaw = _unitPriceControllers[item.id]?.text.trim() ?? '';
     final memoRaw = _memoControllers[item.id]?.text.trim() ?? item.memo;
 
-    final parsedQty = int.tryParse(qtyRaw);
+    final parsedBundle = int.tryParse(bundleRaw);
+    final parsedPerBundle = int.tryParse(perBundleRaw);
     final parsedUnit = CurrencyFormatter.parse(unitRaw);
 
-    final nextQty = (parsedQty == null)
-      ? item.quantity
-      : (parsedQty < 0 ? 0 : parsedQty);
+    final nextBundle = (parsedBundle == null)
+        ? item.bundleCount
+        : (parsedBundle < 0 ? 0 : parsedBundle);
+    final nextPerBundle = (parsedPerBundle == null)
+        ? item.unitsPerBundle
+        : (parsedPerBundle < 0 ? 0 : parsedPerBundle);
+    final nextQty = nextBundle * nextPerBundle;
     final nextUnit = (parsedUnit == null) ? item.unitPrice : parsedUnit;
     final nextMemo = memoRaw;
 
-    if (nextQty == item.quantity &&
+    if (nextBundle == item.bundleCount &&
+        nextPerBundle == item.unitsPerBundle &&
         nextUnit == item.unitPrice &&
         nextMemo == item.memo) {
       return;
     }
 
     final updated = item.copyWith(
+      bundleCount: nextBundle,
+      unitsPerBundle: nextPerBundle,
       quantity: nextQty,
       unitPrice: nextUnit,
       memo: nextMemo,
@@ -335,89 +415,6 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
       _items = _items.map((i) => i.id == item.id ? updated : i).toList();
     });
   }
-
-  Future<void> _openBundleToCountDialog(ShoppingCartItem item) async {
-    FocusScope.of(context).unfocus();
-
-    final bundlesController = TextEditingController(text: '1');
-    final perBundleController = TextEditingController();
-
-    int? result;
-    try {
-      result = await showDialog<int>(
-        context: context,
-        builder: (dialogContext) {
-          return AlertDialog(
-            title: const Text('묶음 → 개수'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  item.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: bundlesController,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: '묶음/망 수',
-                    hintText: '예: 1',
-                  ),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: perBundleController,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: '묶음당 개수',
-                    hintText: '예: 7',
-                  ),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(dialogContext).pop(),
-                child: const Text('취소'),
-              ),
-              FilledButton(
-                onPressed: () {
-                  final bundles = int.tryParse(
-                        bundlesController.text.trim(),
-                      ) ??
-                      0;
-                  final perBundle = int.tryParse(
-                        perBundleController.text.trim(),
-                      ) ??
-                      0;
-
-                  final total = bundles * perBundle;
-                  Navigator.of(dialogContext).pop(total < 0 ? 0 : total);
-                },
-                child: const Text('적용'),
-              ),
-            ],
-          );
-        },
-      );
-    } finally {
-      bundlesController.dispose();
-      perBundleController.dispose();
-    }
-
-    if (!mounted) return;
-    if (result == null) return;
-
-    final qtyController = _qtyControllers[item.id];
-    if (qtyController == null) return;
-
-    qtyController.text = result.toString();
-    _previewInlineEdits(item);
-    await _applyInlineEdits(item);
-  }
-
 
   Future<void> _confirmResetAll() async {
     FocusScope.of(context).unfocus();
@@ -449,9 +446,11 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
     required BuildContext context,
     required ShoppingCartItem item,
     required TextEditingController qtyController,
+    required TextEditingController bundleSizeController,
     required TextEditingController unitController,
     required TextEditingController memoController,
     required FocusNode qtyFocusNode,
+    required FocusNode bundleSizeFocusNode,
     required FocusNode unitFocusNode,
     required FocusNode memoFocusNode,
     required ThemeData theme,
@@ -500,10 +499,12 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
               key: ValueKey('sc_price_${item.id}'),
               controller: unitController,
               focusNode: unitFocusNode,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               textInputAction: TextInputAction.next,
               style: theme.textTheme.bodySmall,
-              decoration: _inlineFieldDecoration('가격'),
+              decoration: _inlineFieldDecoration(theme, '가격'),
               onChanged: (_) => _previewInlineEdits(item),
               onSubmitted: (_) => _applyInlineEdits(item),
               onEditingComplete: () => _applyInlineEdits(item),
@@ -519,23 +520,35 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
               focusNode: qtyFocusNode,
               textAlign: TextAlign.center,
               keyboardType: TextInputType.number,
-              textInputAction: TextInputAction.done,
+              textInputAction: TextInputAction.next,
               style: theme.textTheme.bodySmall?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
-              decoration: _inlineFieldDecoration('개수'),
+              decoration: _inlineFieldDecoration(theme, '수량'),
               onChanged: (_) => _previewInlineEdits(item),
               onSubmitted: (_) => _applyInlineEdits(item),
               onEditingComplete: () => _applyInlineEdits(item),
             ),
           ),
-          IconButton(
-            tooltip: '묶음→개수',
-            onPressed: () => _openBundleToCountDialog(item),
-            visualDensity: VisualDensity.compact,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-            icon: const Icon(Icons.calculate, size: 18),
+          const SizedBox(width: 8),
+          SizedBox(
+            width: 56,
+            height: _inlineFieldHeight,
+            child: TextField(
+              key: ValueKey('sc_units_${item.id}'),
+              controller: bundleSizeController,
+              focusNode: bundleSizeFocusNode,
+              textAlign: TextAlign.center,
+              keyboardType: TextInputType.number,
+              textInputAction: TextInputAction.next,
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+              decoration: _inlineFieldDecoration(theme, '개수'),
+              onChanged: (_) => _previewInlineEdits(item),
+              onSubmitted: (_) => _applyInlineEdits(item),
+              onEditingComplete: () => _applyInlineEdits(item),
+            ),
           ),
           const SizedBox(width: 8),
           Expanded(
@@ -544,7 +557,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
               controller: memoController,
               focusNode: memoFocusNode,
               style: theme.textTheme.bodySmall,
-              decoration: _inlineFieldDecoration('메모'),
+              decoration: _inlineFieldDecoration(theme, '메모'),
               onChanged: (_) => _previewInlineEdits(item),
               onEditingComplete: () => _applyInlineEdits(item),
             ),
@@ -554,8 +567,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
             width: 90,
             child: Text(
               CurrencyFormatter.format(
-                (CurrencyFormatter.parse(unitController.text) ?? 0) *
-                  (int.tryParse(qtyController.text) ?? 0),
+                item.unitPrice * (item.quantity < 0 ? 0 : item.quantity),
               ),
               textAlign: TextAlign.end,
               style: theme.textTheme.titleMedium?.copyWith(
@@ -610,13 +622,13 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
   }) {
     if (_items.isEmpty) return const SizedBox.shrink();
 
-    final checkedTotal = _items.where((i) => i.isChecked).fold<double>(
-      0,
-      (sum, item) {
-        final qty = item.quantity < 0 ? 0 : item.quantity;
-        return sum + (item.unitPrice * qty);
-      },
-    );
+    final checkedTotal = _items.where((i) => i.isChecked).fold<double>(0, (
+      sum,
+      item,
+    ) {
+      final qty = item.quantity < 0 ? 0 : item.quantity;
+      return sum + (item.unitPrice * qty);
+    });
 
     return SafeArea(
       top: false,
@@ -645,11 +657,12 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                 ),
               ),
               FilledButton.tonal(
-                onPressed:
-                    checkedCount > 0 ? _openTransactionAdd : null,
+                onPressed: checkedCount > 0 ? _openTransactionAdd : null,
                 style: FilledButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   visualDensity: VisualDensity.compact,
                 ),
                 child: Text('지출입력 ($checkedCount)'),
@@ -769,10 +782,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
         ),
       ),
       bottomNavigationBar: (!_isLoading && !isPrep)
-          ? _buildCheckedSummaryBar(
-              theme: theme,
-              checkedCount: checkedCount,
-            )
+          ? _buildCheckedSummaryBar(theme: theme, checkedCount: checkedCount)
           : null,
       body: Padding(
         padding: const EdgeInsets.all(12),
@@ -796,12 +806,13 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                   children: [
                     Expanded(
                       child: ListView.separated(
-                        padding: EdgeInsets.only(
-                          bottom: bottomInset + 24,
-                        ),
+                        padding: EdgeInsets.only(bottom: bottomInset + 24),
                         itemCount: ordered.length,
-                        separatorBuilder: (context, index) =>
-                            Divider(height: 1, thickness: 1, color: theme.colorScheme.outlineVariant),
+                        separatorBuilder: (context, index) => Divider(
+                          height: 1,
+                          thickness: 1,
+                          color: theme.colorScheme.outlineVariant,
+                        ),
                         itemBuilder: (context, index) {
                           final item = ordered[index];
 
@@ -810,8 +821,9 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                           _qtyControllers.putIfAbsent(
                             item.id,
                             () => TextEditingController(
-                              text: (item.quantity < 0 ? 0 : item.quantity)
-                                  .toString(),
+                              text:
+                                  (item.bundleCount < 0 ? 0 : item.bundleCount)
+                                      .toString(),
                             ),
                           );
                           _unitPriceControllers.putIfAbsent(
@@ -822,11 +834,25 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                               ),
                             ),
                           );
+                          _bundleSizeControllers.putIfAbsent(
+                            item.id,
+                            () => TextEditingController(
+                              text:
+                                  (item.unitsPerBundle < 0
+                                          ? 0
+                                          : item.unitsPerBundle)
+                                      .toString(),
+                            ),
+                          );
                           _memoControllers.putIfAbsent(
                             item.id,
                             () => TextEditingController(text: item.memo),
                           );
                           _qtyFocusNodes.putIfAbsent(item.id, FocusNode.new);
+                          _bundleSizeFocusNodes.putIfAbsent(
+                            item.id,
+                            FocusNode.new,
+                          );
                           _unitPriceFocusNodes.putIfAbsent(
                             item.id,
                             FocusNode.new,
@@ -834,14 +860,20 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                           _memoFocusNodes.putIfAbsent(item.id, FocusNode.new);
 
                           final qtyController = _qtyControllers[item.id]!;
+                          final bundleSizeController =
+                              _bundleSizeControllers[item.id]!;
                           final unitController =
                               _unitPriceControllers[item.id]!;
                           final memoController = _memoControllers[item.id]!;
                           final qtyFocusNode = _qtyFocusNodes[item.id]!;
+                          final bundleSizeFocusNode =
+                              _bundleSizeFocusNodes[item.id]!;
                           final unitFocusNode = _unitPriceFocusNodes[item.id]!;
                           final memoFocusNode = _memoFocusNodes[item.id]!;
                           const unitKeyboardType =
                               TextInputType.numberWithOptions(decimal: true);
+                          const tapTargetSize =
+                              MaterialTapTargetSize.shrinkWrap;
 
                           final isPortrait =
                               MediaQuery.of(context).orientation ==
@@ -876,12 +908,14 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                                                         child: Checkbox(
                                                           value: item.isChecked,
                                                           onChanged: (_) =>
-                                                              _toggleChecked(item),
+                                                              _toggleChecked(
+                                                                item,
+                                                              ),
                                                           visualDensity:
-                                                              VisualDensity.compact,
+                                                              VisualDensity
+                                                                  .compact,
                                                           materialTapTargetSize:
-                                                              MaterialTapTargetSize
-                                                                  .shrinkWrap,
+                                                              tapTargetSize,
                                                         ),
                                                       ),
                                                     ),
@@ -894,11 +928,13 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                                                     maxLines: 1,
                                                     overflow:
                                                         TextOverflow.ellipsis,
-                                                    style: theme.textTheme
+                                                    style: theme
+                                                        .textTheme
                                                         .bodyMedium
                                                         ?.copyWith(
-                                                      fontWeight: FontWeight.w600,
-                                                    ),
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                        ),
                                                   ),
                                                 ),
                                                 IconButton(
@@ -906,9 +942,9 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                                                   padding: EdgeInsets.zero,
                                                   constraints:
                                                       const BoxConstraints(
-                                                    minWidth: 36,
-                                                    minHeight: 36,
-                                                  ),
+                                                        minWidth: 36,
+                                                        minHeight: 36,
+                                                      ),
                                                   onPressed: () =>
                                                       _deleteItemWithUndo(item),
                                                   icon: const Icon(
@@ -933,18 +969,22 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                                                         unitKeyboardType,
                                                     textInputAction:
                                                         TextInputAction.next,
-                                                    style: theme.textTheme
+                                                    style: theme
+                                                        .textTheme
                                                         .bodySmall,
                                                     decoration:
                                                         _inlineFieldDecoration(
-                                                      '가격',
-                                                    ),
+                                                          theme,
+                                                          '가격',
+                                                        ),
                                                     onChanged: (_) =>
                                                         _previewInlineEdits(
-                                                            item),
+                                                          item,
+                                                        ),
                                                     onTapOutside: (_) {
-                                                      FocusScope.of(context)
-                                                          .unfocus();
+                                                      FocusScope.of(
+                                                        context,
+                                                      ).unfocus();
                                                       _applyInlineEdits(item);
                                                     },
                                                     onSubmitted: (_) =>
@@ -968,40 +1008,65 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                                                         TextInputType.number,
                                                     textInputAction:
                                                         TextInputAction.next,
-                                                    style: theme.textTheme
+                                                    style: theme
+                                                        .textTheme
                                                         .bodySmall
                                                         ?.copyWith(
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .bold),
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                        ),
                                                     decoration:
                                                         _inlineFieldDecoration(
-                                                      '개수',
-                                                    ),
+                                                          theme,
+                                                          '수량',
+                                                        ),
                                                     onChanged: (_) =>
                                                         _previewInlineEdits(
-                                                            item),
+                                                          item,
+                                                        ),
                                                     onSubmitted: (_) =>
                                                         _applyInlineEdits(item),
                                                     onEditingComplete: () =>
                                                         _applyInlineEdits(item),
                                                   ),
                                                 ),
-                                                IconButton(
-                                                  tooltip: '묶음→개수',
-                                                  onPressed: () =>
-                                                      _openBundleToCountDialog(item),
-                                                  visualDensity:
-                                                      VisualDensity.compact,
-                                                  padding: EdgeInsets.zero,
-                                                  constraints:
-                                                      const BoxConstraints(
-                                                    minWidth: 32,
-                                                    minHeight: 32,
-                                                  ),
-                                                  icon: const Icon(
-                                                    Icons.calculate,
-                                                    size: 18,
+                                                const SizedBox(width: 8),
+                                                SizedBox(
+                                                  width: 56,
+                                                  height: _inlineFieldHeight,
+                                                  child: TextField(
+                                                    key: ValueKey(
+                                                      'sc_units_${item.id}',
+                                                    ),
+                                                    controller:
+                                                        bundleSizeController,
+                                                    focusNode:
+                                                        bundleSizeFocusNode,
+                                                    textAlign: TextAlign.center,
+                                                    keyboardType:
+                                                        TextInputType.number,
+                                                    textInputAction:
+                                                        TextInputAction.done,
+                                                    style: theme
+                                                        .textTheme
+                                                        .bodySmall
+                                                        ?.copyWith(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                        ),
+                                                    decoration:
+                                                        _inlineFieldDecoration(
+                                                          theme,
+                                                          '개수',
+                                                        ),
+                                                    onChanged: (_) =>
+                                                        _previewInlineEdits(
+                                                          item,
+                                                        ),
+                                                    onSubmitted: (_) =>
+                                                        _applyInlineEdits(item),
+                                                    onEditingComplete: () =>
+                                                        _applyInlineEdits(item),
                                                   ),
                                                 ),
                                               ],
@@ -1016,9 +1081,11 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                                   context: context,
                                   item: item,
                                   qtyController: qtyController,
+                                  bundleSizeController: bundleSizeController,
                                   unitController: unitController,
                                   memoController: memoController,
                                   qtyFocusNode: qtyFocusNode,
+                                  bundleSizeFocusNode: bundleSizeFocusNode,
                                   unitFocusNode: unitFocusNode,
                                   memoFocusNode: memoFocusNode,
                                   theme: theme,

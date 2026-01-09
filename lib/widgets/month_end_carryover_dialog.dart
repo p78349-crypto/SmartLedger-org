@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/models/account.dart';
-import 'package:smart_ledger/models/emergency_transaction.dart';
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/services/account_service.dart';
-import 'package:smart_ledger/services/emergency_fund_service.dart';
-import 'package:smart_ledger/services/transaction_service.dart';
+import '../models/account.dart';
+import '../models/emergency_transaction.dart';
+import '../models/transaction.dart';
+import '../services/account_service.dart';
+import '../services/emergency_fund_service.dart';
+import '../services/transaction_service.dart';
 
 class MonthEndCarryoverDialog extends StatefulWidget {
   final Account account;

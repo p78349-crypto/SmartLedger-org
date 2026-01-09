@@ -4,14 +4,14 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import 'package:smart_ledger/models/fixed_cost.dart';
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/services/fixed_cost_service.dart';
-import 'package:smart_ledger/services/transaction_service.dart';
-import 'package:smart_ledger/utils/date_formatter.dart';
-import 'package:smart_ledger/utils/number_formats.dart';
-import 'package:smart_ledger/utils/refund_utils.dart';
-import 'package:smart_ledger/utils/stats_labels.dart';
+import '../models/fixed_cost.dart';
+import '../models/transaction.dart';
+import '../services/fixed_cost_service.dart';
+import '../services/transaction_service.dart';
+import '../utils/date_formatter.dart';
+import '../utils/number_formats.dart';
+import '../utils/refund_utils.dart';
+import '../utils/stats_labels.dart';
 
 enum ChartType { bar, line, pie }
 

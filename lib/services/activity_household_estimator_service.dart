@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_ledger/services/health_guardrail_service.dart';
+import 'health_guardrail_service.dart';
 
 @immutable
 class ActivityIndicatorItem {
@@ -20,10 +20,10 @@ class ActivityIndicatorItem {
   });
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'name': name,
-        'unit': unit,
-        'perPersonPerDay': perPersonPerDay,
-      };
+    'name': name,
+    'unit': unit,
+    'perPersonPerDay': perPersonPerDay,
+  };
 
   factory ActivityIndicatorItem.fromJson(Map<String, dynamic> json) {
     return ActivityIndicatorItem(
@@ -109,11 +109,7 @@ class ActivityHouseholdEstimatorService {
       windowDays: 10,
       maxWindowDays: 365,
       indicators: <ActivityIndicatorItem>[
-        ActivityIndicatorItem(
-          name: '달걀',
-          unit: '개',
-          perPersonPerDay: 0.5,
-        ),
+        ActivityIndicatorItem(name: '달걀', unit: '개', perPersonPerDay: 0.5),
       ],
     );
   }
@@ -149,7 +145,9 @@ class ActivityHouseholdEstimatorService {
         enabled: enabled,
         windowDays: normalizedWindow,
         maxWindowDays: normalizedMaxWindow,
-        indicators: indicators.isEmpty ? defaultSettings().indicators : indicators,
+        indicators: indicators.isEmpty
+            ? defaultSettings().indicators
+            : indicators,
       );
     } catch (_) {
       return defaultSettings();
@@ -163,12 +161,16 @@ class ActivityHouseholdEstimatorService {
       'enabled': s.enabled,
       'windowDays': s.windowDays.clamp(3, normalizedMaxWindow),
       'maxWindowDays': normalizedMaxWindow,
-      'indicators': s.indicators.where((e) => e.isValid).map((e) => e.toJson()).toList(),
+      'indicators': s.indicators
+          .where((e) => e.isValid)
+          .map((e) => e.toJson())
+          .toList(),
     });
     await prefs.setString(_kSettings, raw);
   }
 
-  static DateTime _startOfDay(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
+  static DateTime _startOfDay(DateTime dt) =>
+      DateTime(dt.year, dt.month, dt.day);
 
   static double _median(List<double> values) {
     if (values.isEmpty) return 0.0;
@@ -239,7 +241,9 @@ class ActivityHouseholdEstimatorService {
   }) {
     final w = windowDays.clamp(3, settings.maxWindowDays);
     final since = _startOfDay(now).subtract(Duration(days: w));
-    final windowRecords = records.where((r) => r.timestamp.isAfter(since)).toList();
+    final windowRecords = records
+        .where((r) => r.timestamp.isAfter(since))
+        .toList();
     if (windowRecords.isEmpty) return null;
 
     final estimates = <double>[];
@@ -290,7 +294,10 @@ class ActivityHouseholdEstimatorService {
     if (records == null || records.isEmpty) return null;
 
     final now = DateTime.now();
-    final shortW = (shortWindowDays ?? settings.windowDays).clamp(3, settings.maxWindowDays);
+    final shortW = (shortWindowDays ?? settings.windowDays).clamp(
+      3,
+      settings.maxWindowDays,
+    );
     final baseW = baselineWindowDays.clamp(10, settings.maxWindowDays);
 
     final shortEstimate = _estimateForWindow(
@@ -309,7 +316,8 @@ class ActivityHouseholdEstimatorService {
     if (shortEstimate == null || baselineEstimate == null) return null;
     if (baselineEstimate.estimatedPeople <= 0) return null;
 
-    final ratio = shortEstimate.estimatedPeople / baselineEstimate.estimatedPeople;
+    final ratio =
+        shortEstimate.estimatedPeople / baselineEstimate.estimatedPeople;
     if (!ratio.isFinite || ratio <= 0) return null;
 
     return ActivityHouseholdTrendComparison(
@@ -340,7 +348,9 @@ class ActivityHouseholdEstimatorService {
       maxWindowDays: settings.maxWindowDays,
     )) {
       final since = _startOfDay(now).subtract(Duration(days: windowDays));
-      final windowRecords = records.where((r) => r.timestamp.isAfter(since)).toList();
+      final windowRecords = records
+          .where((r) => r.timestamp.isAfter(since))
+          .toList();
       if (windowRecords.isEmpty) continue;
 
       final estimates = <double>[];

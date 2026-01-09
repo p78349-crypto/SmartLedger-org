@@ -2,9 +2,9 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:smart_ledger/models/asset.dart';
-import 'package:smart_ledger/services/asset_move_service.dart';
-import 'package:smart_ledger/services/trash_service.dart';
+import '../models/asset.dart';
+import 'asset_move_service.dart';
+import 'trash_service.dart';
 
 class AssetService {
   static final AssetService _instance = AssetService._internal();

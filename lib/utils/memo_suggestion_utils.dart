@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/services/store_alias_service.dart';
-import 'package:smart_ledger/utils/store_memo_utils.dart';
+import '../models/transaction.dart';
+import '../services/store_alias_service.dart';
+import 'store_memo_utils.dart';
 
 @immutable
 class MemoSuggestionUtils {

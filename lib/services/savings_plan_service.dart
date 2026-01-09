@@ -2,10 +2,10 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:smart_ledger/models/savings_plan.dart';
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/services/transaction_service.dart';
-import 'package:smart_ledger/utils/pref_keys.dart';
+import '../models/savings_plan.dart';
+import '../models/transaction.dart';
+import 'transaction_service.dart';
+import '../utils/pref_keys.dart';
 
 class SavingsPlanService {
   static final SavingsPlanService _instance = SavingsPlanService._internal();

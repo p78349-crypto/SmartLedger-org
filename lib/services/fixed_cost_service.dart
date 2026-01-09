@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:smart_ledger/models/fixed_cost.dart';
-import 'package:smart_ledger/utils/pref_keys.dart';
+import '../models/fixed_cost.dart';
+import '../utils/pref_keys.dart';
 
 class FixedCostService {
   static final FixedCostService _instance = FixedCostService._internal();

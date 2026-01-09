@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:smart_ledger/utils/pref_keys.dart';
-import 'package:smart_ledger/utils/store_memo_utils.dart';
+import '../utils/pref_keys.dart';
+import '../utils/store_memo_utils.dart';
 
 class StoreAliasService {
   StoreAliasService._();

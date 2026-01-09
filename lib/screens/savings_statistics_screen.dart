@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/services/savings_statistics_service.dart';
-import 'package:smart_ledger/utils/currency_formatter.dart';
-import 'package:smart_ledger/utils/icon_catalog.dart';
+import '../services/savings_statistics_service.dart';
+import '../utils/currency_formatter.dart';
+import '../utils/icon_catalog.dart';
 
 /// 절약 통계 화면
 /// 1. 냉파 성공 지수 (챌린지 기간 끼니 수)
@@ -11,7 +11,8 @@ class SavingsStatisticsScreen extends StatefulWidget {
   const SavingsStatisticsScreen({super.key});
 
   @override
-  State<SavingsStatisticsScreen> createState() => _SavingsStatisticsScreenState();
+  State<SavingsStatisticsScreen> createState() =>
+      _SavingsStatisticsScreenState();
 }
 
 class _SavingsStatisticsScreenState extends State<SavingsStatisticsScreen> {
@@ -64,7 +65,12 @@ class _SavingsStatisticsScreenState extends State<SavingsStatisticsScreen> {
                 children: [
                   _buildTabButton(context, 0, '냉파 성공', IconCatalog.restaurant),
                   _buildTabButton(context, 1, '구조된 재료', IconCatalog.favorite),
-                  _buildTabButton(context, 2, '지출 변화', IconCatalog.trendingDown),
+                  _buildTabButton(
+                    context,
+                    2,
+                    '지출 변화',
+                    IconCatalog.trendingDown,
+                  ),
                 ],
               ),
             ),
@@ -87,7 +93,11 @@ class _SavingsStatisticsScreenState extends State<SavingsStatisticsScreen> {
   }
 
   Widget _buildTabButton(
-      BuildContext context, int index, String label, IconData icon) {
+    BuildContext context,
+    int index,
+    String label,
+    IconData icon,
+  ) {
     final theme = Theme.of(context);
     final isSelected = _selectedTabIndex == index;
 
@@ -105,7 +115,7 @@ class _SavingsStatisticsScreenState extends State<SavingsStatisticsScreen> {
                       color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 2,
                       offset: const Offset(0, 1),
-                    )
+                    ),
                   ]
                 : null,
           ),
@@ -114,11 +124,13 @@ class _SavingsStatisticsScreenState extends State<SavingsStatisticsScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon,
-                  size: 22,
-                  color: isSelected
-                      ? theme.colorScheme.primary
-                      : theme.colorScheme.onSurfaceVariant),
+              Icon(
+                icon,
+                size: 22,
+                color: isSelected
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.onSurfaceVariant,
+              ),
               const SizedBox(height: 4),
               Text(
                 label,
@@ -138,7 +150,8 @@ class _SavingsStatisticsScreenState extends State<SavingsStatisticsScreen> {
   }
 
   Widget _buildCookingSuccessTab(BuildContext context, ThemeData theme) {
-    final successIndex = SavingsStatisticsService.instance.calculateCookingSuccessIndex();
+    final successIndex = SavingsStatisticsService.instance
+        .calculateCookingSuccessIndex();
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -195,8 +208,11 @@ class _SavingsStatisticsScreenState extends State<SavingsStatisticsScreen> {
               children: [
                 Row(
                   children: [
-                    Icon(Icons.info_outline,
-                        size: 20, color: theme.colorScheme.primary),
+                    Icon(
+                      Icons.info_outline,
+                      size: 20,
+                      color: theme.colorScheme.primary,
+                    ),
                     const SizedBox(width: 12),
                     Text(
                       '성공 지수란?',
@@ -208,7 +224,9 @@ class _SavingsStatisticsScreenState extends State<SavingsStatisticsScreen> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  '매달 20일부터 말일까지의 "냉장고 파먹기 챌린지" 기간 동안 추가 식재료 구매 없이 현재 재고로만 준비한 끼니의 총 수입니다.\n\n이 숫자가 높을수록 냉장고를 효과적으로 비우고, 식비 낭비를 줄였다는 뜻입니다.',
+                  '매달 20일부터 말일까지의 "냉장고 파먹기 챌린지" 기간 동안 '
+                  '추가 식재료 구매 없이 현재 재고로만 준비한 끼니의 총 수입니다.\n\n'
+                  '이 숫자가 높을수록 냉장고를 효과적으로 비우고, 식비 낭비를 줄였다는 뜻입니다.',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                     height: 1.6,
@@ -247,8 +265,8 @@ class _SavingsStatisticsScreenState extends State<SavingsStatisticsScreen> {
   }
 
   Widget _buildSavedIngredientsTab(BuildContext context, ThemeData theme) {
-    final savedValue =
-        SavingsStatisticsService.instance.calculateSavedIngredientsValue();
+    final savedValue = SavingsStatisticsService.instance
+        .calculateSavedIngredientsValue();
     final formattedValue = CurrencyFormatter.format(savedValue.toInt());
 
     return ListView(
@@ -257,10 +275,7 @@ class _SavingsStatisticsScreenState extends State<SavingsStatisticsScreen> {
         Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [
-                Colors.pink.shade300,
-                Colors.pink.shade200,
-              ],
+              colors: [Colors.pink.shade300, Colors.pink.shade200],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -304,8 +319,11 @@ class _SavingsStatisticsScreenState extends State<SavingsStatisticsScreen> {
               children: [
                 Row(
                   children: [
-                    Icon(Icons.shopping_cart_outlined,
-                        size: 20, color: theme.colorScheme.primary),
+                    Icon(
+                      Icons.shopping_cart_outlined,
+                      size: 20,
+                      color: theme.colorScheme.primary,
+                    ),
                     const SizedBox(width: 12),
                     Text(
                       '구조된 식재료란?',
@@ -317,7 +335,9 @@ class _SavingsStatisticsScreenState extends State<SavingsStatisticsScreen> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  '앱에서 "유통기한 임박" 알림을 받았으나, 버리지 않고 실제 요리에 활용한 식재료의 총 가치입니다.\n\n이 금액이 높을수록 당신은 식재료를 낭비 없이 효율적으로 활용하고 있다는 의미입니다.',
+                  '앱에서 "유통기한 임박" 알림을 받았으나, 버리지 않고 실제 요리에 '
+                  '활용한 식재료의 총 가치입니다.\n\n'
+                  '이 금액이 높을수록 당신은 식재료를 낭비 없이 효율적으로 활용하고 있다는 의미입니다.',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                     height: 1.6,
@@ -368,8 +388,11 @@ class _SavingsStatisticsScreenState extends State<SavingsStatisticsScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.bar_chart_outlined,
-                    size: 48, color: theme.colorScheme.onSurfaceVariant),
+                Icon(
+                  Icons.bar_chart_outlined,
+                  size: 48,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
                 const SizedBox(height: 16),
                 Text(
                   '식비 기록이 아직 없습니다.',
@@ -392,8 +415,9 @@ class _SavingsStatisticsScreenState extends State<SavingsStatisticsScreen> {
 
         final monthlyData = snapshot.data!;
         final months = monthlyData.keys.toList()..sort();
-        final maxExpense =
-            months.map((m) => monthlyData[m]!).reduce((a, b) => a > b ? a : b);
+        final maxExpense = months
+            .map((m) => monthlyData[m]!)
+            .reduce((a, b) => a > b ? a : b);
 
         return ListView(
           padding: const EdgeInsets.all(16),
@@ -452,8 +476,12 @@ class _SavingsStatisticsScreenState extends State<SavingsStatisticsScreen> {
                     for (int i = 0; i < months.length; i++)
                       Column(
                         children: [
-                          _buildMonthlyDetail(theme, months[i],
-                              monthlyData[months[i]]!, i == months.length - 1),
+                          _buildMonthlyDetail(
+                            theme,
+                            months[i],
+                            monthlyData[months[i]]!,
+                            i == months.length - 1,
+                          ),
                           if (i < months.length - 1) const Divider(),
                         ],
                       ),
@@ -463,14 +491,15 @@ class _SavingsStatisticsScreenState extends State<SavingsStatisticsScreen> {
             ),
             const SizedBox(height: 16),
             FutureBuilder<
-                ({
-                  double beforePrice,
-                  double afterPrice,
-                  double savingsAmount,
-                  double savingsPercent
-                })>(
-              future:
-                  SavingsStatisticsService.instance.calculateSavingsCompare(),
+              ({
+                double beforePrice,
+                double afterPrice,
+                double savingsAmount,
+                double savingsPercent,
+              })
+            >(
+              future: SavingsStatisticsService.instance
+                  .calculateSavingsCompare(),
               builder: (context, compareSnapshot) {
                 if (!compareSnapshot.hasData) return const SizedBox.shrink();
 
@@ -485,8 +514,10 @@ class _SavingsStatisticsScreenState extends State<SavingsStatisticsScreen> {
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.trending_down,
-                                color: Colors.green.shade600),
+                            Icon(
+                              Icons.trending_down,
+                              color: Colors.green.shade600,
+                            ),
                             const SizedBox(width: 8),
                             Text(
                               '절약 효과',
@@ -498,75 +529,107 @@ class _SavingsStatisticsScreenState extends State<SavingsStatisticsScreen> {
                           ],
                         ),
                         const SizedBox(height: 12),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                        Builder(
+                          builder: (context) {
+                            final beforePriceText = CurrencyFormatter.format(
+                              compare.beforePrice.toInt(),
+                            );
+                            final afterPriceText = CurrencyFormatter.format(
+                              compare.afterPrice.toInt(),
+                            );
+                            final savingsAmountText = CurrencyFormatter.format(
+                              compare.savingsAmount.toInt(),
+                            );
+                            final savingsPercentText = compare.savingsPercent
+                                .toStringAsFixed(1);
+
+                            return Column(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text(
-                                  '지난달',
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: Colors.grey,
-                                  ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          '지난달',
+                                          style: theme.textTheme.bodySmall
+                                              ?.copyWith(color: Colors.grey),
+                                        ),
+                                        Text(
+                                          '₩$beforePriceText',
+                                          style: theme.textTheme.titleSmall
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                        ),
+                                      ],
+                                    ),
+                                    Icon(
+                                      Icons.arrow_forward,
+                                      color: Colors.green.shade600,
+                                    ),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      children: [
+                                        Text(
+                                          '이번달',
+                                          style: theme.textTheme.bodySmall
+                                              ?.copyWith(color: Colors.grey),
+                                        ),
+                                        Text(
+                                          '₩$afterPriceText',
+                                          style: theme.textTheme.titleSmall
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.green.shade600,
+                                              ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
-                                Text(
-                                  '₩${CurrencyFormatter.format(compare.beforePrice.toInt())}',
-                                  style: theme.textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
+                                const SizedBox(height: 12),
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.green.shade100.withValues(
+                                      alpha: 0.5,
+                                    ),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        '절약액',
+                                        style: theme.textTheme.labelSmall
+                                            ?.copyWith(
+                                              color: Colors.green.shade700,
+                                            ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        '₩$savingsAmountText '
+                                        '(-$savingsPercentText%)',
+                                        style: theme.textTheme.titleMedium
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.green.shade700,
+                                            ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
-                            ),
-                            Icon(Icons.arrow_forward,
-                                color: Colors.green.shade600),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text(
-                                  '이번달',
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                                Text(
-                                  '₩${CurrencyFormatter.format(compare.afterPrice.toInt())}',
-                                  style: theme.textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.green.shade600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.green.shade100.withValues(alpha: 0.5),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '절약액',
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: Colors.green.shade700,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '₩${CurrencyFormatter.format(compare.savingsAmount.toInt())} (-${compare.savingsPercent.toStringAsFixed(1)}%)',
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.green.shade700,
-                                ),
-                              ),
-                            ],
-                          ),
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -604,7 +667,9 @@ class _SavingsStatisticsScreenState extends State<SavingsStatisticsScreen> {
             height: height.clamp(10, 150),
             decoration: BoxDecoration(
               color: theme.colorScheme.primary,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(8),
+              ),
             ),
           ),
           const SizedBox(height: 8),
@@ -619,8 +684,12 @@ class _SavingsStatisticsScreenState extends State<SavingsStatisticsScreen> {
     );
   }
 
-  Widget _buildMonthlyDetail(ThemeData theme, String month, double value,
-      [bool isLast = false]) {
+  Widget _buildMonthlyDetail(
+    ThemeData theme,
+    String month,
+    double value, [
+    bool isLast = false,
+  ]) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(

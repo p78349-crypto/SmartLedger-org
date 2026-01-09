@@ -1,5 +1,5 @@
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/utils/benefit_memo_utils.dart';
+import '../models/transaction.dart';
+import 'benefit_memo_utils.dart';
 
 /// Utility to aggregate "benefit" (discount/saving) amounts from transactions.
 ///

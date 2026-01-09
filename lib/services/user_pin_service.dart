@@ -4,7 +4,7 @@ import 'dart:typed_data';
 
 import 'package:cryptography/cryptography.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_ledger/utils/pref_keys.dart';
+import '../utils/pref_keys.dart';
 
 enum UserPinPolicyStatus { success, failed, locked }
 

@@ -1,5 +1,5 @@
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/utils/shopping_prep_utils.dart';
+import '../models/transaction.dart';
+import 'shopping_prep_utils.dart';
 
 class ShoppingRepurchaseLearningUtils {
   ShoppingRepurchaseLearningUtils._();

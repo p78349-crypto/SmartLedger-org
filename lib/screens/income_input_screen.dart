@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/services/recent_input_service.dart';
-import 'package:smart_ledger/services/transaction_service.dart';
-import 'package:smart_ledger/utils/date_formatter.dart';
-import 'package:smart_ledger/utils/snackbar_utils.dart';
-import 'package:smart_ledger/widgets/smart_input_field.dart';
+import '../models/transaction.dart';
+import '../services/recent_input_service.dart';
+import '../services/transaction_service.dart';
+import '../utils/date_formatter.dart';
+import '../utils/snackbar_utils.dart';
+import '../widgets/smart_input_field.dart';
 
 class IncomeInputScreen extends StatefulWidget {
   final String accountName;

@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/utils/benefit_aggregation_utils.dart';
-import 'package:smart_ledger/utils/benefit_memo_utils.dart';
+import '../models/transaction.dart';
+import 'benefit_aggregation_utils.dart';
+import 'benefit_memo_utils.dart';
 
 /// Utilities for "points/discount saved" motivation stats.
 ///

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:smart_ledger/widgets/background_widget.dart';
-import 'package:smart_ledger/utils/pref_keys.dart';
+import '../widgets/background_widget.dart';
+import '../utils/pref_keys.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PermissionGateScreen extends StatefulWidget {

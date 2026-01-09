@@ -8,13 +8,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
-import 'package:smart_ledger/models/food_expiry_item.dart';
-import 'package:smart_ledger/models/shopping_cart_item.dart';
-import 'package:smart_ledger/navigation/app_routes.dart';
-import 'package:smart_ledger/navigation/global_navigator_key.dart';
-import 'package:smart_ledger/services/account_service.dart';
-import 'package:smart_ledger/services/user_pref_service.dart';
-import 'package:smart_ledger/utils/pref_keys.dart';
+import '../models/food_expiry_item.dart';
+import '../models/shopping_cart_item.dart';
+import '../navigation/app_routes.dart';
+import '../navigation/global_navigator_key.dart';
+import 'account_service.dart';
+import 'user_pref_service.dart';
+import '../utils/pref_keys.dart';
 
 @immutable
 class FoodExpiryNotificationSettings {

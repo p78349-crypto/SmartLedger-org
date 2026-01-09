@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/services/'
-    'transaction_benefit_monthly_agg_service.dart';
-import 'package:smart_ledger/services/transaction_fts_index_service.dart';
-import 'package:smart_ledger/services/transaction_service.dart';
-import 'package:smart_ledger/utils/icon_catalog.dart';
-import 'package:smart_ledger/utils/number_formats.dart';
-import 'package:smart_ledger/widgets/root_auth_gate.dart';
-import 'package:smart_ledger/widgets/root_transaction_list.dart';
+import '../models/transaction.dart';
+import '../services/transaction_benefit_monthly_agg_service.dart';
+import '../services/transaction_fts_index_service.dart';
+import '../services/transaction_service.dart';
+import '../utils/icon_catalog.dart';
+import '../utils/number_formats.dart';
+import '../widgets/root_auth_gate.dart';
+import '../widgets/root_transaction_list.dart';
 
 /// ROOT 전용 - 전체 계정 거래 통합 검색
 class RootSearchScreen extends StatefulWidget {

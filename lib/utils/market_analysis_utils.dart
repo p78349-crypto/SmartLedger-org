@@ -1,4 +1,4 @@
-import 'package:smart_ledger/models/transaction.dart';
+import '../models/transaction.dart';
 
 /// 시장 분석 및 통계 유틸리티
 /// - 품목별 가격 추이

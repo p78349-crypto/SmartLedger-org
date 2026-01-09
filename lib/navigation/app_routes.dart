@@ -2,7 +2,7 @@
 //
 // Keeping route names in one place prevents UI entrypoints from breaking
 // when individual screens get moved/renamed.
-import 'package:smart_ledger/models/shopping_cart_item.dart';
+import '../models/shopping_cart_item.dart';
 
 class AppRoutes {
   const AppRoutes._();

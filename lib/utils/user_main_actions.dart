@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/navigation/app_routes.dart';
-import 'package:smart_ledger/services/backup_service.dart';
-import 'package:smart_ledger/services/user_pref_service.dart';
-import 'package:smart_ledger/utils/backup_password_bootstrapper.dart';
+import '../models/transaction.dart';
+import '../navigation/app_routes.dart';
+import '../services/backup_service.dart';
+import '../services/user_pref_service.dart';
+import 'backup_password_bootstrapper.dart';
 
 /// Navigation + persistence helpers for the user main UI
 /// (AccountMainScreen -> HomeTabScreen).

@@ -68,8 +68,26 @@ void main() {
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pumpAndSettle();
 
+    // Focus per-bundle count of first item and input.
+    const units1Key = ValueKey<String>('sc_units_i1');
+    await tester.tap(find.byKey(units1Key));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(units1Key), '6');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+
     // Sanity: both fields are still in the tree.
-    expect(await editableForKey(const ValueKey<String>('sc_qty_i1')), isNotNull);
-    expect(await editableForKey(const ValueKey<String>('sc_price_i1')), isNotNull);
+    expect(
+      await editableForKey(const ValueKey<String>('sc_qty_i1')),
+      isNotNull,
+    );
+    expect(
+      await editableForKey(const ValueKey<String>('sc_price_i1')),
+      isNotNull,
+    );
+    expect(
+      await editableForKey(const ValueKey<String>('sc_units_i1')),
+      isNotNull,
+    );
   });
 }

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:smart_ledger/screens/_verify_current_user_password_dialog.dart';
-import 'package:smart_ledger/screens/_verify_current_user_pin_dialog.dart';
-import 'package:smart_ledger/services/auth_service.dart';
-import 'package:smart_ledger/services/user_password_service.dart';
-import 'package:smart_ledger/services/user_pin_service.dart';
-import 'package:smart_ledger/utils/dev_overrides.dart';
-import 'package:smart_ledger/utils/pref_keys.dart';
+import '../screens/_verify_current_user_password_dialog.dart';
+import '../screens/_verify_current_user_pin_dialog.dart';
+import '../services/auth_service.dart';
+import '../services/user_password_service.dart';
+import '../services/user_pin_service.dart';
+import '../utils/dev_overrides.dart';
+import '../utils/pref_keys.dart';
 
 /// A lightweight gate for asset-related standalone routes.
 ///

@@ -1,4 +1,4 @@
-import 'package:smart_ledger/database/app_database.dart';
+import 'app_database.dart';
 
 class DatabaseProvider {
   DatabaseProvider._();

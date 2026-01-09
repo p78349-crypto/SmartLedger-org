@@ -24,3 +24,6 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Shopping recommendations: apply household activity trend ratio (short vs baseline) to suggested quantities, with clamped scaling and memo note.
 - Quick stock use: apply the same activity ratio to auto-added “imminent depletion” shopping items.
+
+### Notes
+- 2026-01-09 checkpoint: `lib/**/*.dart` has 0 lines over 80 chars; `flutter analyze` reports no issues; import-style work continues (next: mixed import style cleanup).

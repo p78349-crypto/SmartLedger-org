@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:smart_ledger/utils/dev_overrides.dart';
-import 'package:smart_ledger/utils/pref_keys.dart';
-import 'package:smart_ledger/widgets/user_account_auth_gate.dart';
+import '../utils/dev_overrides.dart';
+import '../utils/pref_keys.dart';
+import 'user_account_auth_gate.dart';
 
 class RootAuthGate extends StatefulWidget {
   const RootAuthGate({super.key, required this.child});

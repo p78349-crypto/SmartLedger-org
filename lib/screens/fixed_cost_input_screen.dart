@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:smart_ledger/screens/fixed_cost_tab_screen.dart';
+import 'fixed_cost_tab_screen.dart';
 
 class FixedCostInputScreen extends StatelessWidget {
   final String accountName;

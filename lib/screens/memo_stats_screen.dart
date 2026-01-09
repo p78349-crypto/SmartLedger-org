@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:smart_ledger/services/transaction_service.dart';
-import 'package:smart_ledger/utils/memo_stats_utils.dart';
-import 'package:smart_ledger/utils/number_formats.dart';
+import '../services/transaction_service.dart';
+import '../utils/memo_stats_utils.dart';
+import '../utils/number_formats.dart';
 
 class MemoStatsScreen extends StatefulWidget {
   const MemoStatsScreen({super.key, required this.accountName});

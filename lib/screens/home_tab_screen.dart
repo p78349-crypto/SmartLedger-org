@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/navigation/app_routes.dart';
-import 'package:smart_ledger/screens/account_home_screen.dart';
-import 'package:smart_ledger/screens/account_stats_screen.dart';
-import 'package:smart_ledger/screens/asset_tab_screen.dart';
-import 'package:smart_ledger/screens/fixed_cost_tab_screen.dart';
-import 'package:smart_ledger/screens/root_account_manager_page.dart';
-import 'package:smart_ledger/services/account_service.dart';
-import 'package:smart_ledger/utils/icon_catalog.dart';
-import 'package:smart_ledger/utils/period_utils.dart' as period;
-import 'package:smart_ledger/utils/stats_labels.dart';
-import 'package:smart_ledger/utils/user_main_actions.dart';
-import 'package:smart_ledger/widgets/month_end_carryover_dialog.dart';
+import '../models/transaction.dart';
+import '../navigation/app_routes.dart';
+import 'account_home_screen.dart';
+import 'account_stats_screen.dart';
+import 'asset_tab_screen.dart';
+import 'fixed_cost_tab_screen.dart';
+import 'root_account_manager_page.dart';
+import '../services/account_service.dart';
+import '../utils/icon_catalog.dart';
+import '../utils/period_utils.dart' as period;
+import '../utils/stats_labels.dart';
+import '../utils/user_main_actions.dart';
+import '../widgets/month_end_carryover_dialog.dart';
 
 class HomeTabScreen extends StatefulWidget {
   const HomeTabScreen({

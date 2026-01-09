@@ -8,22 +8,22 @@ import 'package:flutter/material.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_ledger/models/asset.dart';
-import 'package:smart_ledger/screens/_verify_current_user_password_dialog.dart';
-import 'package:smart_ledger/screens/_verify_current_user_pin_dialog.dart';
-import 'package:smart_ledger/screens/asset_allocation_screen.dart';
-import 'package:smart_ledger/screens/asset_dashboard_screen.dart';
-import 'package:smart_ledger/screens/asset_input_screen.dart';
-import 'package:smart_ledger/screens/asset_simple_input_screen.dart';
-import 'package:smart_ledger/services/asset_service.dart';
-import 'package:smart_ledger/services/auth_service.dart';
-import 'package:smart_ledger/services/root_pin_service.dart';
-import 'package:smart_ledger/services/user_password_service.dart';
-import 'package:smart_ledger/services/user_pin_service.dart';
-import 'package:smart_ledger/utils/icon_catalog.dart';
-import 'package:smart_ledger/utils/pref_keys.dart';
-import 'package:smart_ledger/utils/utils.dart';
-import 'package:smart_ledger/widgets/smart_input_field.dart';
+import '../models/asset.dart';
+import '_verify_current_user_password_dialog.dart';
+import '_verify_current_user_pin_dialog.dart';
+import 'asset_allocation_screen.dart';
+import 'asset_dashboard_screen.dart';
+import 'asset_input_screen.dart';
+import 'asset_simple_input_screen.dart';
+import '../services/asset_service.dart';
+import '../services/auth_service.dart';
+import '../services/root_pin_service.dart';
+import '../services/user_password_service.dart';
+import '../services/user_pin_service.dart';
+import '../utils/icon_catalog.dart';
+import '../utils/pref_keys.dart';
+import '../utils/utils.dart';
+import '../widgets/smart_input_field.dart';
 
 enum _AssetSubview { none, expenses, savings }
 
@@ -936,9 +936,9 @@ class _AssetTabScreenState extends State<AssetTabScreen> {
                                 children: [
                                   RadioGroup<String>(
                                     groupValue: _rootAuthMode,
-                                    onChanged: (v) {
-                                      if (v == null) return;
-                                      _setRootAuthMode(v);
+                                    onChanged: (value) {
+                                      if (value == null) return;
+                                      _setRootAuthMode(value);
                                     },
                                     child: const Column(
                                       children: [
@@ -953,7 +953,8 @@ class _AssetTabScreenState extends State<AssetTabScreen> {
                                         RadioListTile<String>(
                                           dense: true,
                                           contentPadding: EdgeInsets.zero,
-                                          title: Text('별도 사용 (ROOT 추가 인증)'),
+                                          title:
+                                              Text('별도 사용 (ROOT 추가 인증)'),
                                           value: 'separate',
                                         ),
                                       ],

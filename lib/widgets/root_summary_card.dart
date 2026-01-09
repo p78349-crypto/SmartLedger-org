@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:smart_ledger/models/fixed_cost.dart';
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/theme/app_colors.dart';
-import 'package:smart_ledger/utils/icon_catalog.dart';
-import 'package:smart_ledger/utils/number_formats.dart';
-import 'package:smart_ledger/utils/utils.dart';
+import '../models/fixed_cost.dart';
+import '../models/transaction.dart';
+import '../theme/app_colors.dart';
+import '../utils/icon_catalog.dart';
+import '../utils/number_formats.dart';
+import '../utils/utils.dart';
 
 class RootSummaryData {
   const RootSummaryData({

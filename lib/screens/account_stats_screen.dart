@@ -3,27 +3,23 @@ import 'dart:math' as math;
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:smart_ledger/models/fixed_cost.dart';
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/screens/transaction_add_screen.dart';
-import 'package:smart_ledger/services/fixed_cost_service.dart';
-import 'package:smart_ledger/services/'
-    'monthly_agg_cache_service.dart';
-import 'package:smart_ledger/services/'
-    'quick_simple_expense_input_history_service.dart';
-import 'package:smart_ledger/services/store_alias_service.dart';
-import 'package:smart_ledger/services/'
-    'transaction_benefit_monthly_agg_service.dart';
-import 'package:smart_ledger/services/'
-    'transaction_fts_index_service.dart';
-import 'package:smart_ledger/services/transaction_service.dart';
-import 'package:smart_ledger/utils/benefit_memo_utils.dart';
-import 'package:smart_ledger/utils/chart_utils.dart';
-import 'package:smart_ledger/utils/date_formatter.dart';
-import 'package:smart_ledger/utils/localization.dart';
-import 'package:smart_ledger/utils/number_formats.dart';
-import 'package:smart_ledger/utils/product_name_utils.dart';
-import 'package:smart_ledger/utils/store_memo_utils.dart';
+import '../models/fixed_cost.dart';
+import '../models/transaction.dart';
+import 'transaction_add_screen.dart';
+import '../services/fixed_cost_service.dart';
+import '../services/monthly_agg_cache_service.dart';
+import '../services/quick_simple_expense_input_history_service.dart';
+import '../services/store_alias_service.dart';
+import '../services/transaction_benefit_monthly_agg_service.dart';
+import '../services/transaction_fts_index_service.dart';
+import '../services/transaction_service.dart';
+import '../utils/benefit_memo_utils.dart';
+import '../utils/chart_utils.dart';
+import '../utils/date_formatter.dart';
+import '../utils/localization.dart';
+import '../utils/number_formats.dart';
+import '../utils/product_name_utils.dart';
+import '../utils/store_memo_utils.dart';
 
 enum _StatsView {
   month,

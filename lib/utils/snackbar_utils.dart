@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/utils/icon_catalog.dart';
+import 'icon_catalog.dart';
 
 /// 스낵바 관련 유틸리티 클래스
 class SnackbarUtils {

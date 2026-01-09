@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_ledger/utils/pref_keys.dart';
+import '../utils/pref_keys.dart';
 
 class CurrencySettingsScreen extends StatefulWidget {
   const CurrencySettingsScreen({super.key});

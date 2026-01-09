@@ -1,5 +1,5 @@
 import 'package:intl/intl.dart';
-import 'package:smart_ledger/utils/date_formatter.dart';
+import 'date_formatter.dart';
 
 /// 공용 날짜 포매터: 기존 `DateFormats` API를 유지하되 내부적으로
 /// `DateFormatter`의 정의를 재사용합니다.

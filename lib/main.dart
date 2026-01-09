@@ -8,29 +8,29 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_ledger/navigation/app_router.dart';
-import 'package:smart_ledger/navigation/global_navigator_key.dart';
-import 'package:smart_ledger/screens/launch_screen.dart';
-import 'package:smart_ledger/services/account_service.dart';
-import 'package:smart_ledger/services/asset_service.dart';
-import 'package:smart_ledger/services/budget_service.dart';
-import 'package:smart_ledger/services/fixed_cost_auto_record_service.dart';
-import 'package:smart_ledger/services/fixed_cost_service.dart';
-import 'package:smart_ledger/services/notification_service.dart';
-import 'package:smart_ledger/services/transaction_service.dart';
-import 'package:smart_ledger/services/user_pref_service.dart';
-import 'package:smart_ledger/services/food_expiry_service.dart';
-import 'package:smart_ledger/services/recipe_service.dart';
-import 'package:smart_ledger/services/recipe_knowledge_service.dart';
-import 'package:smart_ledger/theme/app_theme.dart';
-import 'package:smart_ledger/theme/app_theme_mode_controller.dart';
-import 'package:smart_ledger/theme/app_theme_seed_controller.dart';
-import 'package:smart_ledger/utils/app_locale_controller.dart';
-import 'package:smart_ledger/utils/currency_formatter.dart';
-import 'package:smart_ledger/utils/icon_catalog.dart';
-import 'package:smart_ledger/utils/main_feature_icon_catalog.dart';
-import 'package:smart_ledger/utils/main_page_migration.dart';
-import 'package:smart_ledger/widgets/background_widget.dart';
+import 'navigation/app_router.dart';
+import 'navigation/global_navigator_key.dart';
+import 'screens/launch_screen.dart';
+import 'services/account_service.dart';
+import 'services/asset_service.dart';
+import 'services/budget_service.dart';
+import 'services/fixed_cost_auto_record_service.dart';
+import 'services/fixed_cost_service.dart';
+import 'services/notification_service.dart';
+import 'services/transaction_service.dart';
+import 'services/user_pref_service.dart';
+import 'services/food_expiry_service.dart';
+import 'services/recipe_service.dart';
+import 'services/recipe_knowledge_service.dart';
+import 'theme/app_theme.dart';
+import 'theme/app_theme_mode_controller.dart';
+import 'theme/app_theme_seed_controller.dart';
+import 'utils/app_locale_controller.dart';
+import 'utils/currency_formatter.dart';
+import 'utils/icon_catalog.dart';
+import 'utils/main_feature_icon_catalog.dart';
+import 'utils/main_page_migration.dart';
+import 'widgets/background_widget.dart';
 
 Future<void> main() async {
   FlutterError.onError = (FlutterErrorDetails details) {
@@ -55,7 +55,8 @@ Future<void> main() async {
       final prefs = await SharedPreferences.getInstance();
 
       // Optional: enable family sharing backend when compiled with
-      // `--dart-define=ENABLE_FAMILY_SHARING=true` and an active family id is set.
+      // `--dart-define=ENABLE_FAMILY_SHARING=true` and an active family
+      // id is set.
 
       // Locale policy (정석): default follow system; optional override via prefs.
       await AppLocaleController.instance.loadFromPrefs(prefs);

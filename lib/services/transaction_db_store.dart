@@ -2,10 +2,10 @@ import 'dart:convert';
 
 import 'package:drift/drift.dart';
 
-import 'package:smart_ledger/database/app_database.dart';
-import 'package:smart_ledger/database/database_provider.dart';
-import 'package:smart_ledger/models/transaction.dart' as model;
-import 'package:smart_ledger/models/weather_snapshot.dart';
+import '../database/app_database.dart';
+import '../database/database_provider.dart';
+import '../models/transaction.dart' as model;
+import '../models/weather_snapshot.dart';
 
 class TransactionDbStore {
   TransactionDbStore();

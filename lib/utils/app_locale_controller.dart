@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_ledger/utils/pref_keys.dart';
+import 'pref_keys.dart';
 
 class AppLocaleController {
   AppLocaleController._();

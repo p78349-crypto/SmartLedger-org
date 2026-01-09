@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:smart_ledger/models/asset.dart';
-import 'package:smart_ledger/screens/asset_detail_screen.dart';
-import 'package:smart_ledger/screens/asset_input_screen.dart';
-import 'package:smart_ledger/services/asset_service.dart';
-import 'package:smart_ledger/utils/date_formatter.dart';
-import 'package:smart_ledger/utils/dialog_utils.dart';
-import 'package:smart_ledger/utils/icon_catalog.dart';
-import 'package:smart_ledger/utils/number_formats.dart';
-import 'package:smart_ledger/utils/profit_loss_calculator.dart';
-import 'package:smart_ledger/utils/snackbar_utils.dart';
-import 'package:smart_ledger/widgets/asset_move_dialog.dart';
-import 'package:smart_ledger/widgets/smart_input_field.dart';
-import 'package:smart_ledger/widgets/state_placeholders.dart';
+import '../models/asset.dart';
+import 'asset_detail_screen.dart';
+import 'asset_input_screen.dart';
+import '../services/asset_service.dart';
+import '../utils/date_formatter.dart';
+import '../utils/dialog_utils.dart';
+import '../utils/icon_catalog.dart';
+import '../utils/number_formats.dart';
+import '../utils/profit_loss_calculator.dart';
+import '../utils/snackbar_utils.dart';
+import '../widgets/asset_move_dialog.dart';
+import '../widgets/smart_input_field.dart';
+import '../widgets/state_placeholders.dart';
 
 class AssetListScreen extends StatefulWidget {
   final String accountName;

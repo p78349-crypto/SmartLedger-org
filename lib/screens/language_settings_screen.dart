@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_ledger/utils/app_locale_controller.dart';
-import 'package:smart_ledger/utils/pref_keys.dart';
+import '../utils/app_locale_controller.dart';
+import '../utils/pref_keys.dart';
 
 class LanguageSettingsScreen extends StatefulWidget {
   const LanguageSettingsScreen({super.key});

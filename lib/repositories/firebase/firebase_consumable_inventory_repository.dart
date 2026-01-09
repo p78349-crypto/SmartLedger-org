@@ -1,5 +1,5 @@
-import 'package:smart_ledger/models/consumable_inventory_item.dart';
-import 'package:smart_ledger/repositories/consumable_inventory_repository.dart';
+import '../../models/consumable_inventory_item.dart';
+import '../consumable_inventory_repository.dart';
 
 class FirebaseConsumableInventoryRepository
     implements ConsumableInventoryRepository {

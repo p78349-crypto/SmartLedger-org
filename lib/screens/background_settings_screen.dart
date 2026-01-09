@@ -3,10 +3,10 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:smart_ledger/services/background_service.dart';
-import 'package:smart_ledger/theme/app_theme_seed_controller.dart';
-import 'package:smart_ledger/widgets/background_widget.dart';
-import 'package:smart_ledger/widgets/special_backgrounds.dart';
+import '../services/background_service.dart';
+import '../theme/app_theme_seed_controller.dart';
+import '../widgets/background_widget.dart';
+import '../widgets/special_backgrounds.dart';
 
 class BackgroundSettingsScreen extends StatefulWidget {
   const BackgroundSettingsScreen({super.key});

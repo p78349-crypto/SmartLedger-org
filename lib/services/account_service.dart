@@ -3,10 +3,10 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:smart_ledger/database/app_database.dart';
-import 'package:smart_ledger/database/database_provider.dart';
-import 'package:smart_ledger/models/account.dart';
-import 'package:smart_ledger/utils/pref_keys.dart';
+import '../database/app_database.dart';
+import '../database/database_provider.dart';
+import '../models/account.dart';
+import '../utils/pref_keys.dart';
 
 class AccountService {
   static final AccountService _instance = AccountService._internal();

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/utils/icon_catalog.dart';
+import '../utils/icon_catalog.dart';
 
 /// 공통 상태 플레이스홀더 위젯 모음.
 class EmptyState extends StatelessWidget {

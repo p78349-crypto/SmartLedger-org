@@ -7,8 +7,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
-import 'package:smart_ledger/services/health_guardrail_service.dart';
-import 'package:smart_ledger/services/activity_household_estimator_service.dart';
+import 'health_guardrail_service.dart';
+import 'activity_household_estimator_service.dart';
 
 class ReplacementCycleNotificationSettings {
   final bool enabled;
@@ -38,13 +38,15 @@ class ReplacementCycleNotificationSettings {
   }
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'enabled': enabled,
-        'maxWindowDays': maxWindowDays,
-        'leadDays': leadDays,
-        'minCycleDays': minCycleDays,
-      };
+    'enabled': enabled,
+    'maxWindowDays': maxWindowDays,
+    'leadDays': leadDays,
+    'minCycleDays': minCycleDays,
+  };
 
-  factory ReplacementCycleNotificationSettings.fromJson(Map<String, dynamic> json) {
+  factory ReplacementCycleNotificationSettings.fromJson(
+    Map<String, dynamic> json,
+  ) {
     return ReplacementCycleNotificationSettings(
       enabled: (json['enabled'] as bool?) ?? false,
       maxWindowDays: (json['maxWindowDays'] as int?) ?? 365,
@@ -60,13 +62,16 @@ class ReplacementCycleNotificationService {
       ReplacementCycleNotificationService._internal();
 
   static const String _kSettings = 'replacement_cycle_notify_settings_v1';
-  static const String _kScheduledIds = 'replacement_cycle_notify_scheduled_ids_v1';
+  static const String _kScheduledIds =
+      'replacement_cycle_notify_scheduled_ids_v1';
 
   static const String _androidChannelId = 'replacement_cycle';
   static const String _androidChannelName = '교체 주기 알림';
-  static const String _androidChannelDescription = '소모품/교체형 품목의 예상 교체 시점을 알려줍니다.';
+  static const String _androidChannelDescription =
+      '소모품/교체형 품목의 예상 교체 시점을 알려줍니다.';
 
-  final FlutterLocalNotificationsPlugin _plugin = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _plugin =
+      FlutterLocalNotificationsPlugin();
   bool _initialized = false;
 
   Future<void> _ensureInit() async {
@@ -86,7 +91,9 @@ class ReplacementCycleNotificationService {
     await _plugin.initialize(settings);
 
     final androidImpl = _plugin
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
     await androidImpl?.createNotificationChannel(
       const AndroidNotificationChannel(
         _androidChannelId,
@@ -241,7 +248,9 @@ class ReplacementCycleNotificationService {
     await _cancelPreviouslyScheduled();
 
     final now = DateTime.now();
-    final since = _startOfDay(now).subtract(Duration(days: settings.maxWindowDays));
+    final since = _startOfDay(
+      now,
+    ).subtract(Duration(days: settings.maxWindowDays));
 
     final records = (await _loadLog())
         .where((r) => r.timestamp.isAfter(since))
@@ -284,12 +293,7 @@ class ReplacementCycleNotificationService {
       // If overdue or too soon, notify next 9am.
       final tzNotify = notifyAt.isAfter(now)
           ? tz.TZDateTime.from(
-              DateTime(
-                notifyAt.year,
-                notifyAt.month,
-                notifyAt.day,
-                9,
-              ),
+              DateTime(notifyAt.year, notifyAt.month, notifyAt.day, 9),
               loc,
             )
           : _next9am(loc, now);
@@ -307,7 +311,8 @@ class ReplacementCycleNotificationService {
       final id = _stableIdForName(itemName);
       final daysSince = max(0, _startOfDay(now).difference(last).inDays);
       final title = '교체 시점이 다가와요: $itemName';
-        final body = '예상 교체 주기: 약 $medianCycle일\n'
+      final body =
+          '예상 교체 주기: 약 $medianCycle일\n'
           '마지막 교체/사용 후: $daysSince일'
           '${trendLine == null ? '' : '\n$trendLine'}';
 

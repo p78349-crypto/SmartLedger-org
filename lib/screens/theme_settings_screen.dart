@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_ledger/services/app_icon_service.dart';
-import 'package:smart_ledger/theme/app_theme_mode_controller.dart';
-import 'package:smart_ledger/theme/app_theme_seed_controller.dart';
-import 'package:smart_ledger/theme/theme_preset.dart';
-import 'package:smart_ledger/theme/ui_style.dart';
+import '../services/app_icon_service.dart';
+import '../theme/app_theme_mode_controller.dart';
+import '../theme/app_theme_seed_controller.dart';
+import '../theme/theme_preset.dart';
+import '../theme/ui_style.dart';
 
 class ThemeSettingsScreen extends StatelessWidget {
   const ThemeSettingsScreen({super.key});
@@ -55,9 +55,9 @@ class ThemeSettingsSection extends StatelessWidget {
               const SizedBox(height: 8),
               RadioGroup<AppThemeMode>(
                 groupValue: mode,
-                onChanged: (v) {
-                  if (v == null) return;
-                  AppThemeModeController.instance.setThemeMode(v);
+                onChanged: (value) {
+                  if (value == null) return;
+                  AppThemeModeController.instance.setThemeMode(value);
                 },
                 child: const Column(
                   children: [
@@ -104,9 +104,9 @@ class ThemeSettingsSection extends StatelessWidget {
               const SizedBox(height: 8),
               RadioGroup<UIStyle>(
                 groupValue: selectedUiStyle,
-                onChanged: (v) {
-                  if (v == null) return;
-                  AppThemeSeedController.instance.setUiStyle(v);
+                onChanged: (style) {
+                  if (style == null) return;
+                  AppThemeSeedController.instance.setUiStyle(style);
                 },
                 child: Column(
                   children: UIStyle.values.map((style) {
@@ -123,9 +123,9 @@ class ThemeSettingsSection extends StatelessWidget {
               const SizedBox(height: 8),
               RadioGroup<String>(
                 groupValue: selectedPresetId,
-                onChanged: (v) {
-                  if (v == null) return;
-                  AppThemeSeedController.instance.setPresetId(v);
+                onChanged: (presetId) {
+                  if (presetId == null) return;
+                  AppThemeSeedController.instance.setPresetId(presetId);
                 },
                 child: Column(
                   children: [
@@ -137,9 +137,9 @@ class ThemeSettingsSection extends StatelessWidget {
                           '여성 스타일 (10)',
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
                                 fontWeight: FontWeight.w600,
                               ),
                         ),
@@ -155,7 +155,6 @@ class ThemeSettingsSection extends StatelessWidget {
                             (preset) => _presetTile(
                               context,
                               preset: preset,
-                              selectedPresetId: selectedPresetId,
                             ),
                           ),
                       const Divider(height: 12),
@@ -170,9 +169,9 @@ class ThemeSettingsSection extends StatelessWidget {
                           '스페셜 스타일',
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
                                 fontWeight: FontWeight.w600,
                               ),
                         ),
@@ -181,7 +180,6 @@ class ThemeSettingsSection extends StatelessWidget {
                         (preset) => _presetTile(
                           context,
                           preset: preset,
-                          selectedPresetId: selectedPresetId,
                         ),
                       ),
                       const Divider(height: 12),
@@ -194,9 +192,9 @@ class ThemeSettingsSection extends StatelessWidget {
                           '남성 스타일 (10)',
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
                                 fontWeight: FontWeight.w600,
                               ),
                         ),
@@ -212,7 +210,6 @@ class ThemeSettingsSection extends StatelessWidget {
                             (preset) => _presetTile(
                               context,
                               preset: preset,
-                              selectedPresetId: selectedPresetId,
                             ),
                           ),
                     ],
@@ -231,7 +228,6 @@ class ThemeSettingsSection extends StatelessWidget {
   static Widget _presetTile(
     BuildContext context, {
     required ThemePreset preset,
-    required String selectedPresetId,
   }) {
     return RadioListTile<String>(
       value: preset.id,
@@ -379,3 +375,4 @@ class _AppIconSyncSectionState extends State<_AppIconSyncSection> {
     );
   }
 }
+

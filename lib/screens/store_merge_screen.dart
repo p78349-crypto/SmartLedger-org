@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/services/store_alias_service.dart';
-import 'package:smart_ledger/services/transaction_service.dart';
-import 'package:smart_ledger/utils/icon_catalog.dart';
-import 'package:smart_ledger/utils/store_memo_utils.dart';
+import '../models/transaction.dart';
+import '../services/store_alias_service.dart';
+import '../services/transaction_service.dart';
+import '../utils/icon_catalog.dart';
+import '../utils/store_memo_utils.dart';
 
 class StoreMergeScreen extends StatefulWidget {
   const StoreMergeScreen({super.key, required this.accountName});

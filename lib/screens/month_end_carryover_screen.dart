@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/services/account_service.dart';
-import 'package:smart_ledger/widgets/month_end_carryover_dialog.dart';
+import '../services/account_service.dart';
+import '../widgets/month_end_carryover_dialog.dart';
 
 class MonthEndCarryoverScreen extends StatefulWidget {
   const MonthEndCarryoverScreen({super.key, required this.accountName});

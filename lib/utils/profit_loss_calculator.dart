@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/utils/currency_formatter.dart';
+import 'currency_formatter.dart';
 
 /// 손익 계산 유틸리티
 class ProfitLossCalculator {

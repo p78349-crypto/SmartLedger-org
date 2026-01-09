@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/models/consumable_inventory_item.dart';
-import 'package:smart_ledger/models/shopping_cart_item.dart';
-import 'package:smart_ledger/repositories/app_repositories.dart';
-import 'package:smart_ledger/services/consumable_inventory_service.dart';
-import 'package:smart_ledger/services/activity_household_estimator_service.dart';
-import 'package:smart_ledger/services/user_pref_service.dart';
+import '../models/consumable_inventory_item.dart';
+import '../models/shopping_cart_item.dart';
+import '../repositories/app_repositories.dart';
+import '../services/consumable_inventory_service.dart';
+import '../services/activity_household_estimator_service.dart';
+import '../services/user_pref_service.dart';
 
 /// 식료품/생활용품 사용기록 유틸리티
 ///
@@ -12,7 +12,8 @@ import 'package:smart_ledger/services/user_pref_service.dart';
 class QuickStockUseUtils {
   const QuickStockUseUtils._();
 
-  static DateTime _startOfDay(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
+  static DateTime _startOfDay(DateTime dt) =>
+      DateTime(dt.year, dt.month, dt.day);
 
   static String _formatQty(double value) {
     if (!value.isFinite) return '0';
@@ -21,7 +22,9 @@ class QuickStockUseUtils {
     return value.toStringAsFixed(1);
   }
 
-  static double? _resolveQuantityFactorFromTrend(ActivityHouseholdTrendComparison? trend) {
+  static double? _resolveQuantityFactorFromTrend(
+    ActivityHouseholdTrendComparison? trend,
+  ) {
     if (trend == null) return null;
     final r = trend.ratio;
     if (!r.isFinite || r <= 0) return null;
@@ -47,8 +50,9 @@ class QuickStockUseUtils {
 
     final first = sorted.first.timestamp;
     final last = sorted.last.timestamp;
-    final spanDays =
-        _startOfDay(last).difference(_startOfDay(first)).inDays.abs();
+    final spanDays = _startOfDay(
+      last,
+    ).difference(_startOfDay(first)).inDays.abs();
     final denomDays = spanDays < 1 ? 1 : spanDays;
     final totalUsed = sorted.fold<double>(0.0, (sum, r) => sum + r.amount);
     final avgPerDay = totalUsed / denomDays;
@@ -61,8 +65,25 @@ class QuickStockUseUtils {
   // 한글 초성 테이블
   // ============================================================
   static const List<String> _chosung = [
-    'ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ',
-    'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ',
+    'ㄱ',
+    'ㄲ',
+    'ㄴ',
+    'ㄷ',
+    'ㄸ',
+    'ㄹ',
+    'ㅁ',
+    'ㅂ',
+    'ㅃ',
+    'ㅅ',
+    'ㅆ',
+    'ㅇ',
+    'ㅈ',
+    'ㅉ',
+    'ㅊ',
+    'ㅋ',
+    'ㅌ',
+    'ㅍ',
+    'ㅎ',
   ];
 
   /// 한글 문자의 초성 추출
@@ -139,9 +160,7 @@ class QuickStockUseUtils {
     final lowerName = name.toLowerCase().trim();
 
     try {
-      return items.firstWhere(
-        (item) => item.name.toLowerCase() == lowerName,
-      );
+      return items.firstWhere((item) => item.name.toLowerCase() == lowerName);
     } catch (_) {
       return null;
     }
@@ -194,7 +213,8 @@ class QuickStockUseUtils {
           : await UserPrefService.getStockUseAutoAddDepletionDaysHouseholdV1();
       final expectedDaysLeft = _calculateExpectedDepletionDays(updated);
       var addedToCartByPrediction = false;
-      if (expectedDaysLeft != null && expectedDaysLeft <= autoAddDaysThreshold) {
+      if (expectedDaysLeft != null &&
+          expectedDaysLeft <= autoAddDaysThreshold) {
         addedToCartByPrediction = await _addToShoppingCartWithMemo(
           accountName: accountName,
           itemName: updated.name,
@@ -398,17 +418,17 @@ class _QuickStockUseSheetState extends State<_QuickStockUseSheet> {
 
   Future<void> _submit() async {
     if (_selectedItem == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('상품을 선택해주세요')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('상품을 선택해주세요')));
       return;
     }
 
     final amount = double.tryParse(_amountController.text) ?? 0;
     if (amount <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('사용량을 입력해주세요')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('사용량을 입력해주세요')));
       return;
     }
 
@@ -419,13 +439,18 @@ class _QuickStockUseSheetState extends State<_QuickStockUseSheet> {
 
     if (mounted) {
       if (success) {
-        final remaining = (_selectedItem!.currentStock - amount)
-            .clamp(0.0, double.infinity);
+        final remaining = (_selectedItem!.currentStock - amount).clamp(
+          0.0,
+          double.infinity,
+        );
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              '${_selectedItem!.name} ${amount.toStringAsFixed(0)}${_selectedItem!.unit} 사용 완료\n'
-              '남은 재고: ${remaining.toStringAsFixed(0)}${_selectedItem!.unit}',
+              '${_selectedItem!.name} '
+              '${amount.toStringAsFixed(0)}${_selectedItem!.unit} '
+              '사용 완료\n'
+              '남은 재고: '
+              '${remaining.toStringAsFixed(0)}${_selectedItem!.unit}',
             ),
             backgroundColor: Colors.green,
           ),
@@ -433,10 +458,7 @@ class _QuickStockUseSheetState extends State<_QuickStockUseSheet> {
         Navigator.pop(context);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('차감 실패'),
-            backgroundColor: Colors.red,
-          ),
+          const SnackBar(content: Text('차감 실패'), backgroundColor: Colors.red),
         );
       }
     }
@@ -512,9 +534,7 @@ class _QuickStockUseSheetState extends State<_QuickStockUseSheet> {
                     title: Text(item.name),
                     subtitle: Text(
                       '재고: ${item.currentStock.toStringAsFixed(0)}${item.unit}',
-                      style: TextStyle(
-                        color: isLow ? Colors.orange : null,
-                      ),
+                      style: TextStyle(color: isLow ? Colors.orange : null),
                     ),
                     trailing: Text('📍${item.location}'),
                     onTap: () => _selectItem(item),
@@ -544,7 +564,10 @@ class _QuickStockUseSheetState extends State<_QuickStockUseSheet> {
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           Text(
-                            '현재 재고: ${_selectedItem!.currentStock.toStringAsFixed(0)}${_selectedItem!.unit} | 📍${_selectedItem!.location}',
+                            '현재 재고: '
+                            '${_selectedItem!.currentStock.toStringAsFixed(0)}'
+                            '${_selectedItem!.unit} '
+                            '| 📍${_selectedItem!.location}',
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                         ],
@@ -580,8 +603,8 @@ class _QuickStockUseSheetState extends State<_QuickStockUseSheet> {
                       ActionChip(
                         label: const Text('1묶음'),
                         onPressed: () {
-                          _amountController.text =
-                              _selectedItem!.bundleSize.toStringAsFixed(0);
+                          _amountController.text = _selectedItem!.bundleSize
+                              .toStringAsFixed(0);
                         },
                       ),
                       const SizedBox(width: 4),

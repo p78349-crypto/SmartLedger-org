@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_ledger/navigation/app_routes.dart';
-import 'package:smart_ledger/utils/pref_keys.dart';
-import 'package:smart_ledger/utils/screen_saver_background_photo.dart';
-import 'package:smart_ledger/widgets/root_auth_gate.dart';
+import '../navigation/app_routes.dart';
+import '../utils/pref_keys.dart';
+import '../utils/screen_saver_background_photo.dart';
+import '../widgets/root_auth_gate.dart';
 
 class RootScreenSaverSettingsScreen extends StatefulWidget {
   const RootScreenSaverSettingsScreen({super.key});

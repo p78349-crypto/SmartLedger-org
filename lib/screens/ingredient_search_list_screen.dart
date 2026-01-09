@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/models/food_expiry_item.dart';
-import 'package:smart_ledger/models/shopping_cart_item.dart';
-import 'package:smart_ledger/navigation/app_routes.dart';
-import 'package:smart_ledger/services/food_expiry_service.dart';
-import 'package:smart_ledger/services/user_pref_service.dart';
-import 'package:smart_ledger/utils/ingredient_parsing_utils.dart';
-import 'package:smart_ledger/utils/nutrition_food_knowledge.dart';
-import 'package:smart_ledger/utils/shopping_prep_utils.dart';
+import '../models/food_expiry_item.dart';
+import '../models/shopping_cart_item.dart';
+import '../navigation/app_routes.dart';
+import '../services/food_expiry_service.dart';
+import '../services/user_pref_service.dart';
+import '../utils/ingredient_parsing_utils.dart';
+import '../utils/nutrition_food_knowledge.dart';
+import '../utils/shopping_prep_utils.dart';
 
 /// 식재료 검색 결과 화면
 /// 검색어에 정확하게 매칭되는 식재료를 찾고,
@@ -45,7 +45,8 @@ class _IngredientSearchListScreenState
   }
 
   void _initializeData() {
-    if (widget.customIngredients != null && widget.customIngredients!.isNotEmpty) {
+    if (widget.customIngredients != null &&
+        widget.customIngredients!.isNotEmpty) {
       // 1. 커스텀 리스트 모드
       _mainIngredient = null;
       _cookingList = _buildFromCustomList(widget.customIngredients!);
@@ -59,7 +60,8 @@ class _IngredientSearchListScreenState
       _cookingList = [];
     }
 
-    if (widget.dessertIngredients != null && widget.dessertIngredients!.isNotEmpty) {
+    if (widget.dessertIngredients != null &&
+        widget.dessertIngredients!.isNotEmpty) {
       _dessertList = _buildFromCustomList(widget.dessertIngredients!);
     } else {
       _dessertList = [];
@@ -108,9 +110,9 @@ class _IngredientSearchListScreenState
     final accountName = await UserPrefService.getLastAccountName();
     if (accountName == null) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('계정이 선택되지 않았습니다.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('계정이 선택되지 않았습니다.')));
       }
       return;
     }
@@ -159,9 +161,9 @@ class _IngredientSearchListScreenState
 
   Future<void> _sendToShoppingPrep() async {
     if (_selectedNames.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('선택된 식재료가 없습니다.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('선택된 식재료가 없습니다.')));
       return;
     }
 
@@ -176,9 +178,7 @@ class _IngredientSearchListScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              '${selectedItems.length}개 식재료를 쇼핑준비에 추가했습니다.',
-            ),
+            content: Text('${selectedItems.length}개 식재료를 쇼핑준비에 추가했습니다.'),
           ),
         );
         Navigator.pop(context);
@@ -189,9 +189,9 @@ class _IngredientSearchListScreenState
       final accountName = await UserPrefService.getLastAccountName();
       if (accountName == null) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('계정이 선택되지 않았습니다.')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('계정이 선택되지 않았습니다.')));
         }
         return;
       }
@@ -293,10 +293,10 @@ class _IngredientSearchListScreenState
     for (final entry in matchedGroups.entries) {
       final itemId = entry.key;
       final rawNames = entry.value; // 예: ["양파", "양파 1개"]
-      
+
       // 재고 아이템 찾기 (ID로 확실하게)
       final inventoryItem = inventoryItems.firstWhere((it) => it.id == itemId);
-      
+
       String bestRequiredAmount = '-';
       String displayName = inventoryItem.name; // 기본값: 재고명
 
@@ -306,35 +306,43 @@ class _IngredientSearchListScreenState
         // 예: "닭고기(적은 것) 1마리" -> name="닭고기(적은 것)", amount="1마리"
         // 예: "가지 1개" -> name="가지", amount="1개"
         final (pName, pAmount) = IngredientParsingUtils.parseNameAndAmount(raw);
-        
-        // 유의미한 수량 정보가 있다면 업데이트 (더 긴 정보를 선호)
-        if (pAmount != '(정보 없음)' && pAmount.length > bestRequiredAmount.length) {
-            bestRequiredAmount = pAmount;
 
-            // 수량 정보가 있는 소스의 이름을 디스플레이 네임으로 사용할지 결정
-            // 재고명("닭고기")보다 상세한 이름("닭고기(적은 것)")이라면 사용 고려
-            if (pName.contains(inventoryItem.name) && pName.length > displayName.length) {
-               displayName = pName;
-            }
+        // 유의미한 수량 정보가 있다면 업데이트 (더 긴 정보를 선호)
+        if (pAmount != '(정보 없음)' &&
+            pAmount.length > bestRequiredAmount.length) {
+          bestRequiredAmount = pAmount;
+
+          // 수량 정보가 있는 소스의 이름을 디스플레이 네임으로 사용할지 결정
+          // 재고명("닭고기")보다 상세한 이름("닭고기(적은 것)")이라면 사용 고려
+          if (pName.contains(inventoryItem.name) &&
+              pName.length > displayName.length) {
+            displayName = pName;
+          }
         }
       }
 
-      results.add(PairingIngredient(
-        name: displayName, 
-        reason: '검색/리포트 결과',
-        inventory: inventoryItem,
-        requiredAmount: bestRequiredAmount == '-' ? '(정보 없음)' : bestRequiredAmount,
-      ));
+      results.add(
+        PairingIngredient(
+          name: displayName,
+          reason: '검색/리포트 결과',
+          inventory: inventoryItem,
+          requiredAmount: bestRequiredAmount == '-'
+              ? '(정보 없음)'
+              : bestRequiredAmount,
+        ),
+      );
     }
 
     // 5. 매칭되지 않은 항목 처리
     for (final name in unmatchedNames) {
       final (pName, pAmount) = IngredientParsingUtils.parseNameAndAmount(name);
-      results.add(PairingIngredient(
-        name: pName,
-        reason: '검색/리포트 결과',
-        requiredAmount: pAmount,
-      ));
+      results.add(
+        PairingIngredient(
+          name: pName,
+          reason: '검색/리포트 결과',
+          requiredAmount: pAmount,
+        ),
+      );
     }
 
     // 이름순 정렬
@@ -345,163 +353,156 @@ class _IngredientSearchListScreenState
 
   List<PairingIngredient> _getPairingIngredients(FoodKnowledgeEntry? entry) {
     if (entry == null) return [];
-    
+
     // 현재 재고 목록 가져오기
     final inventoryItems = FoodExpiryService.instance.items.value;
-    
+
     // pairings에서 ingredient만 추출하고 중복 제거
     final ingredients = <String>{};
     for (final pairing in entry.pairings) {
       ingredients.add(pairing.ingredient);
     }
-    
-    return ingredients
-        .map((ing) {
-          // 현재 재고에서 같은 식재료 찾기
-          FoodExpiryItem? matchingItem;
-          try {
-            matchingItem = inventoryItems.firstWhere(
-              (item) => item.name.contains(ing) || ing.contains(item.name),
-            );
-          } catch (e) {
-            matchingItem = null;
-          }
 
-          // 레시피에서 해당 식재료의 필요량 찾기
-          String bestRequiredAmount = '(정보 없음)';
-          for (final suggestion in entry.quantitySuggestions) {
-            if (suggestion.contains(ing)) {
-               final (_, pAmount) = IngredientParsingUtils.parseNameAndAmount(suggestion);
-               if (pAmount != '(정보 없음)') {
-                 bestRequiredAmount = pAmount;
-                 break;
-               }
-            }
-          }
+    return ingredients.map((ing) {
+      // 현재 재고에서 같은 식재료 찾기
+      FoodExpiryItem? matchingItem;
+      try {
+        matchingItem = inventoryItems.firstWhere(
+          (item) => item.name.contains(ing) || ing.contains(item.name),
+        );
+      } catch (e) {
+        matchingItem = null;
+      }
 
-          return PairingIngredient(
-            name: ing,
-            reason: entry.pairings
-                .firstWhere((p) => p.ingredient == ing)
-                .why,
-            inventory: matchingItem,
-            requiredAmount: bestRequiredAmount,
+      // 레시피에서 해당 식재료의 필요량 찾기
+      String bestRequiredAmount = '(정보 없음)';
+      for (final suggestion in entry.quantitySuggestions) {
+        if (suggestion.contains(ing)) {
+          final (_, pAmount) = IngredientParsingUtils.parseNameAndAmount(
+            suggestion,
           );
-        })
-        .toList();
+          if (pAmount != '(정보 없음)') {
+            bestRequiredAmount = pAmount;
+            break;
+          }
+        }
+      }
+
+      return PairingIngredient(
+        name: ing,
+        reason: entry.pairings.firstWhere((p) => p.ingredient == ing).why,
+        inventory: matchingItem,
+        requiredAmount: bestRequiredAmount,
+      );
+    }).toList();
   }
-
-
 
   SliverList _buildSliverList(ThemeData theme, List<PairingIngredient> list) {
     return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          final pairing = list[index];
-          final statusColor = _getStatusColor(theme, pairing.status);
-          final statusIcon = _getStatusIcon(pairing.status);
-          final isSelected = _selectedNames.contains(pairing.name);
+      delegate: SliverChildBuilderDelegate((context, index) {
+        final pairing = list[index];
+        final statusColor = _getStatusColor(theme, pairing.status);
+        final statusIcon = _getStatusIcon(pairing.status);
+        final isSelected = _selectedNames.contains(pairing.name);
 
-          return GestureDetector(
-            onTap: _isSelectionMode
-                ? () => _toggleItemSelection(pairing.name)
-                : null,
-            child: Card(
-              margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              color: isSelected
-                  ? statusColor.withValues(alpha: 0.15)
-                  : statusColor.withValues(alpha: 0.08),
-              child: ListTile(
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
+        return GestureDetector(
+          onTap: _isSelectionMode
+              ? () => _toggleItemSelection(pairing.name)
+              : null,
+          child: Card(
+            margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            color: isSelected
+                ? statusColor.withValues(alpha: 0.15)
+                : statusColor.withValues(alpha: 0.08),
+            child: ListTile(
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
+              leading: _isSelectionMode
+                  ? Checkbox(
+                      value: isSelected,
+                      onChanged: (_) => _toggleItemSelection(pairing.name),
+                    )
+                  : null,
+              title: Text(
+                pairing.name,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
                 ),
-                leading: _isSelectionMode
-                    ? Checkbox(
-                        value: isSelected,
-                        onChanged: (_) => _toggleItemSelection(pairing.name),
-                      )
-                    : null,
-                title: Text(
-                  pairing.name,
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(top: 6),
-                      child: Text(
-                        pairing.reason,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '${pairing.requiredText} | ${pairing.inventoryText}',
+              ),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Text(
+                      pairing.reason,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
-                        fontSize: 12,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Icon(statusIcon, size: 14, color: statusColor),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            pairing.expiryText,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: statusColor,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '${pairing.requiredText} | ${pairing.inventoryText}',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      fontSize: 12,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Icon(statusIcon, size: 14, color: statusColor),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          pairing.expiryText,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: statusColor,
+                            fontWeight: FontWeight.w500,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-                trailing: !_isSelectionMode
-                    ? IconButton(
-                        icon: Icon(
-                          Icons.add_circle_outline,
-                          color: theme.colorScheme.primary,
-                        ),
-                        onPressed: () {
-                          if (widget.onSelect != null) {
-                            widget.onSelect?.call(pairing.name);
-                            Navigator.pop(context, pairing.name);
-                          } else {
-                            _addSingleToCart(pairing.name);
-                          }
-                        },
-                      )
-                    : null,
-                onTap: !_isSelectionMode
-                    ? () {
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              trailing: !_isSelectionMode
+                  ? IconButton(
+                      icon: Icon(
+                        Icons.add_circle_outline,
+                        color: theme.colorScheme.primary,
+                      ),
+                      onPressed: () {
                         if (widget.onSelect != null) {
                           widget.onSelect?.call(pairing.name);
                           Navigator.pop(context, pairing.name);
                         } else {
                           _addSingleToCart(pairing.name);
                         }
+                      },
+                    )
+                  : null,
+              onTap: !_isSelectionMode
+                  ? () {
+                      if (widget.onSelect != null) {
+                        widget.onSelect?.call(pairing.name);
+                        Navigator.pop(context, pairing.name);
+                      } else {
+                        _addSingleToCart(pairing.name);
                       }
-                    : null,
-              ),
+                    }
+                  : null,
             ),
-          );
-        },
-        childCount: list.length,
-      ),
+          ),
+        );
+      }, childCount: list.length),
     );
   }
 
@@ -595,7 +596,9 @@ class _IngredientSearchListScreenState
               ),
               const SizedBox(height: 16),
               Text(
-                isCustomMode ? '표시할 식재료가 없습니다.' : '$title 요리에 필요한\n재료 정보가 아직 없습니다.',
+                isCustomMode
+                    ? '표시할 식재료가 없습니다.'
+                    : '$title 요리에 필요한\n재료 정보가 아직 없습니다.',
                 style: theme.textTheme.bodyLarge,
                 textAlign: TextAlign.center,
               ),
@@ -605,9 +608,13 @@ class _IngredientSearchListScreenState
       );
     }
 
-    final mainTitle = isCustomMode ? '재고 확인 및 선택' : '${_mainIngredient!.primaryName} 요리';
+    final mainTitle = isCustomMode
+        ? '재고 확인 및 선택'
+        : '${_mainIngredient!.primaryName} 요리';
     final totalCount = _cookingList.length + _dessertList.length;
-    final subTitle = isCustomMode ? '식재료 $totalCount개' : '필요한 재료 ($totalCount개)';
+    final subTitle = isCustomMode
+        ? '식재료 $totalCount개'
+        : '필요한 재료 ($totalCount개)';
 
     // 페어링 재료 리스트 표시
     return Scaffold(
@@ -632,42 +639,44 @@ class _IngredientSearchListScreenState
         ),
         elevation: 0,
         actions: [
-            // 전체 선택/해제 버튼 (선택 모드일 때만 표시하거나 항상 표시)
-             if (_isSelectionMode)
-              TextButton(
-                onPressed: _selectAll,
-                 child: Text(
-                  _selectedNames.length == totalCount ? '해제' : '전체',
-                ),
-              ),
+          // 전체 선택/해제 버튼 (선택 모드일 때만 표시하거나 항상 표시)
+          if (_isSelectionMode)
+            TextButton(
+              onPressed: _selectAll,
+              child: Text(_selectedNames.length == totalCount ? '해제' : '전체'),
+            ),
         ],
       ),
       body: CustomScrollView(
         slivers: [
           // 0. 파싱 로직 안내 (간단한 헤더)
-           SliverToBoxAdapter(
+          SliverToBoxAdapter(
             child: Padding(
-               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-               child: Row(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
                 children: [
-                   Icon(Icons.info_outline, size: 14, color: theme.colorScheme.onSurfaceVariant),
-                   const SizedBox(width: 6),
-                   Expanded(
-                     child: Text(
-                       '상품명과 수량이 자동으로 분리되어 표시됩니다.',
-                       style: theme.textTheme.labelSmall?.copyWith(
-                         color: theme.colorScheme.onSurfaceVariant,
-                       ),
-                     ),
-                   ),
+                  Icon(
+                    Icons.info_outline,
+                    size: 14,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      '상품명과 수량이 자동으로 분리되어 표시됩니다.',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
                 ],
-               ),
+              ),
             ),
-           ),
+          ),
 
           // 1. 요리 재료 섹션
           if (_cookingList.isNotEmpty) ...[
-             SliverToBoxAdapter(
+            SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                 child: Text(
@@ -690,7 +699,11 @@ class _IngredientSearchListScreenState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Divider(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3)),
+                    Divider(
+                      color: theme.colorScheme.outlineVariant.withValues(
+                        alpha: 0.3,
+                      ),
+                    ),
                     const SizedBox(height: 8),
                     Text(
                       '🍰 후식 메뉴 추천',
@@ -705,7 +718,7 @@ class _IngredientSearchListScreenState
             ),
             _buildSliverList(theme, _dessertList),
           ],
-          
+
           const SliverPadding(padding: EdgeInsets.only(bottom: 80)),
         ],
       ),
@@ -755,7 +768,6 @@ class _IngredientSearchListScreenState
     );
   }
 }
-
 
 /// 페어링 식재료 정보
 class PairingIngredient {
@@ -823,5 +835,3 @@ enum InventoryStatus {
   lowStock, // 🟡 부족
   noStock, // 🔴 없음
 }
-
-

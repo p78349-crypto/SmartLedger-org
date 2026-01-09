@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/services/account_service.dart';
-import 'package:smart_ledger/utils/icon_catalog.dart';
-import 'package:smart_ledger/widgets/month_end_carryover_dialog.dart';
-import 'package:smart_ledger/widgets/root_auth_gate.dart';
+import '../services/account_service.dart';
+import '../utils/icon_catalog.dart';
+import '../widgets/month_end_carryover_dialog.dart';
+import '../widgets/root_auth_gate.dart';
 
 /// ROOT 전용 - 전체 계정 월말 정산
 class RootMonthEndScreen extends StatefulWidget {

@@ -3,17 +3,17 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_ledger/screens/application_settings_screen.dart';
-import 'package:smart_ledger/screens/_verify_current_user_password_dialog.dart';
-import 'package:smart_ledger/screens/_verify_current_user_pin_dialog.dart';
-import 'package:smart_ledger/services/auth_service.dart';
-import 'package:smart_ledger/services/backup_service.dart';
-import 'package:smart_ledger/services/user_password_service.dart';
-import 'package:smart_ledger/services/user_pin_service.dart';
-import 'package:smart_ledger/services/user_pref_service.dart';
-import 'package:smart_ledger/utils/icon_catalog.dart';
-import 'package:smart_ledger/utils/pref_keys.dart';
-import 'package:smart_ledger/widgets/background_widget.dart';
+import 'application_settings_screen.dart';
+import '_verify_current_user_password_dialog.dart';
+import '_verify_current_user_pin_dialog.dart';
+import '../services/auth_service.dart';
+import '../services/backup_service.dart';
+import '../services/user_password_service.dart';
+import '../services/user_pin_service.dart';
+import '../services/user_pref_service.dart';
+import '../utils/icon_catalog.dart';
+import '../utils/pref_keys.dart';
+import '../widgets/background_widget.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});

@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:smart_ledger/models/recipe.dart';
+import '../models/recipe.dart';
 
 class RecipeService {
   static final RecipeService instance = RecipeService._();

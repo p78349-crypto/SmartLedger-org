@@ -52,7 +52,9 @@ class PrefKeys {
   static const String txRecentInputsEnabledV1 = 'tx_recent_inputs_enabled_v1';
   static const String txRecentInputsAutofillEnabledV1 =
       'tx_recent_inputs_autofill_enabled_v1';
-  static const String txRecentInputsMaxCountV1 = 'tx_recent_inputs_max_count_v1';
+  static const String txRecentInputsMaxCountV1 =
+      'tx_recent_inputs_'
+      'max_count_v1';
 
   /// Stock use: auto-add to shopping cart when predicted depletion is near.
   ///
@@ -70,15 +72,16 @@ class PrefKeys {
   static const String stockUseAutoAddDepletionDaysHouseholdV1 =
       'stock_use_auto_add_depletion_days_household_v1';
 
-  /// Stock use: whether to schedule local notifications for predicted depletion.
+  /// Stock use: whether to schedule local notifications for predicted
+  /// depletion.
   /// Default: ON.
   static const String stockUsePredictedDepletionNotifyEnabledV1 =
       'stock_use_predicted_depletion_notify_enabled_v1';
 
-    /// Units treated as count-like (e.g., 개/롤/팩) for one-tap '-1' decrement UI.
-    ///
-    /// Stored as JSON list string.
-    static const String countLikeUnitsV1 = 'count_like_units_v1';
+  /// Units treated as count-like (e.g., 개/롤/팩) for one-tap '-1' decrement UI.
+  ///
+  /// Stored as JSON list string.
+  static const String countLikeUnitsV1 = 'count_like_units_v1';
 
   /// Category usage counts (label -> count).
   ///
@@ -98,6 +101,7 @@ class PrefKeys {
 
   /// UI Style (Standard, Modern, Classic, Bold)
   static const String themeUiStyle = 'theme_ui_style_v1';
+
   // Whether the selected wallpaper preset also applies to
   // the screen saver background
   static const String themeWallpaperSyncScreenSaver =

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/services/user_pref_service.dart';
-import 'package:smart_ledger/utils/main_feature_icon_catalog.dart';
+import '../services/user_pref_service.dart';
+import '../utils/main_feature_icon_catalog.dart';
 
 class Page1FullScreenAdOverlay extends StatefulWidget {
   final VoidCallback onClose;

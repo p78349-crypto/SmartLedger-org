@@ -1,5 +1,4 @@
-// ignore_for_file: dead_code, dead_null_aware_expression, avoid_redundant_argument_values, prefer_const_declarations
-import 'package:smart_ledger/models/food_expiry_item.dart';
+import '../models/food_expiry_item.dart';
 
 /// 월별 예상 지출, 예산 알림 유틸리티
 class CostPredictionUtils {
@@ -15,7 +14,7 @@ class CostPredictionUtils {
           return item.expiryDate.year == now.year &&
               item.expiryDate.month == now.month;
         })
-        .fold(0.0, (sum, item) => sum + (item.price ?? 0.0));
+        .fold(0.0, (sum, item) => sum + item.price);
   }
 
   /// 월별 예상 지출 계산 (현재 추세 기반)
@@ -30,12 +29,14 @@ class CostPredictionUtils {
     int monthCount = 0;
 
     for (int i = 0; i < 3; i++) {
-      final month = DateTime(targetMonth.year, targetMonth.month - i, 1);
+      final month = DateTime(targetMonth.year, targetMonth.month - i);
       final monthCost = items
-          .where((item) =>
-              item.expiryDate.year == month.year &&
-              item.expiryDate.month == month.month)
-          .fold(0.0, (sum, item) => sum + (item.price ?? 0));
+          .where(
+            (item) =>
+                item.expiryDate.year == month.year &&
+                item.expiryDate.month == month.month,
+          )
+          .fold(0.0, (sum, item) => sum + item.price);
 
       if (monthCost > 0) {
         totalCost += monthCost;
@@ -83,8 +84,8 @@ class CostPredictionUtils {
   static double getDailyAverageExpense(List<FoodExpiryItem> items) {
     if (items.isEmpty) return 0;
 
-    final totalCost = items.fold(0.0, (sum, item) => sum + (item.price ?? 0));
-    final daysInMonth = 30;
+    final totalCost = items.fold(0.0, (sum, item) => sum + item.price);
+    const daysInMonth = 30;
 
     return totalCost / daysInMonth;
   }
@@ -94,8 +95,8 @@ class CostPredictionUtils {
     final spending = <String, double>{};
 
     for (final item in items) {
-      final category = item.category ?? '미분류';
-      spending[category] = (spending[category] ?? 0.0) + (item.price ?? 0.0);
+      final category = item.category;
+      spending[category] = (spending[category] ?? 0.0) + item.price;
     }
 
     return spending;
@@ -112,7 +113,8 @@ class CostPredictionUtils {
       ..sort((a, b) => b.value.compareTo(a.value));
 
     final topCategory = entries.first;
-    final percentage = (topCategory.value / monthlyBudget * 100).toStringAsFixed(1);
+    final percentage = (topCategory.value / monthlyBudget * 100)
+        .toStringAsFixed(1);
 
     return '💡 가장 많이 지출하는 카테고리: ${topCategory.key} ($percentage%)';
   }
@@ -122,8 +124,8 @@ class CostPredictionUtils {
     List<FoodExpiryItem> items,
     double priceThreshold,
   ) {
-    return items.where((item) => (item.price ?? 0.0) <= priceThreshold).toList()
-      ..sort((a, b) => (a.price ?? 0.0).compareTo(b.price ?? 0.0));
+    return items.where((item) => item.price <= priceThreshold).toList()
+      ..sort((a, b) => a.price.compareTo(b.price));
   }
 
   /// 예상 절약액 계산 (저가 식재료로 전환시)
@@ -131,8 +133,7 @@ class CostPredictionUtils {
     List<FoodExpiryItem> items,
     double targetPricePerItem,
   ) {
-    final currentTotal =
-        items.fold(0.0, (sum, item) => sum + (item.price ?? 0.0));
+    final currentTotal = items.fold(0.0, (sum, item) => sum + item.price);
     final potentialTotal = items.length * targetPricePerItem;
 
     return currentTotal - potentialTotal;
@@ -149,10 +150,10 @@ class CostPredictionUtils {
     for (final item in items) {
       if (item.expiryDate.year == currentMonth.year &&
           item.expiryDate.month == currentMonth.month) {
-        thisMonthCost += item.price ?? 0;
+        thisMonthCost += item.price;
       } else if (item.expiryDate.year == currentMonth.year &&
           item.expiryDate.month == currentMonth.month - 1) {
-        lastMonthCost += item.price ?? 0;
+        lastMonthCost += item.price;
       }
     }
 

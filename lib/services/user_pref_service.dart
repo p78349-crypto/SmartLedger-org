@@ -2,17 +2,17 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_ledger/models/category_hint.dart';
-import 'package:smart_ledger/models/main_page_config.dart';
-import 'package:smart_ledger/models/shopping_cart_history_entry.dart';
-import 'package:smart_ledger/models/shopping_cart_item.dart';
-import 'package:smart_ledger/models/shopping_points_draft_entry.dart';
-import 'package:smart_ledger/models/shopping_template_item.dart';
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/services/account_service.dart';
-import 'package:smart_ledger/services/transaction_service.dart';
-import 'package:smart_ledger/utils/page1_bottom_quick_icons.dart';
-import 'package:smart_ledger/utils/pref_keys.dart';
+import '../models/category_hint.dart';
+import '../models/main_page_config.dart';
+import '../models/shopping_cart_history_entry.dart';
+import '../models/shopping_cart_item.dart';
+import '../models/shopping_points_draft_entry.dart';
+import '../models/shopping_template_item.dart';
+import '../models/transaction.dart';
+import 'account_service.dart';
+import 'transaction_service.dart';
+import '../utils/page1_bottom_quick_icons.dart';
+import '../utils/pref_keys.dart';
 
 class UserPrefService {
   static const String lastAccountKey = 'lastAccountName';

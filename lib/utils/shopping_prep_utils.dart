@@ -1,4 +1,4 @@
-import 'package:smart_ledger/models/shopping_cart_item.dart';
+import '../models/shopping_cart_item.dart';
 
 class ShoppingPrepUtils {
   ShoppingPrepUtils._();

@@ -1,6 +1,6 @@
-import 'package:smart_ledger/models/shopping_cart_history_entry.dart';
-import 'package:smart_ledger/models/shopping_cart_item.dart';
-import 'package:smart_ledger/repositories/shopping_cart_repository.dart';
+import '../../models/shopping_cart_history_entry.dart';
+import '../../models/shopping_cart_item.dart';
+import '../shopping_cart_repository.dart';
 
 class FirebaseShoppingCartRepository implements ShoppingCartRepository {
   FirebaseShoppingCartRepository({required this.familyId});

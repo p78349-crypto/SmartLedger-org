@@ -3,7 +3,7 @@
 /// - getNetExpense: 환불 내역을 반영한 실제 지출금액 계산
 library;
 
-import 'package:smart_ledger/models/transaction.dart';
+import '../models/transaction.dart';
 
 /// 환불 내역을 반영한 실제 지출금액 계산
 /// [original] : 원본 거래

@@ -3,28 +3,28 @@ import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_ledger/models/food_expiry_item.dart';
-import 'package:smart_ledger/models/recipe.dart';
-import 'package:smart_ledger/models/shopping_cart_history_entry.dart';
-import 'package:smart_ledger/models/shopping_cart_item.dart';
-import 'package:smart_ledger/services/food_expiry_notification_service.dart';
-import 'package:smart_ledger/services/food_expiry_prediction_engine.dart';
-import 'package:smart_ledger/services/food_expiry_service.dart';
-import 'package:smart_ledger/services/recipe_service.dart';
-import 'package:smart_ledger/services/user_pref_service.dart';
-import 'package:smart_ledger/services/health_guardrail_service.dart';
-import 'package:smart_ledger/services/replacement_cycle_notification_service.dart';
-import 'package:smart_ledger/utils/currency_formatter.dart';
-import 'package:smart_ledger/utils/icon_catalog.dart';
-import 'package:smart_ledger/utils/interaction_blockers.dart';
-import 'package:smart_ledger/utils/shopping_prep_utils.dart';
-import 'package:smart_ledger/screens/savings_statistics_screen.dart';
-import 'package:smart_ledger/navigation/app_routes.dart';
-import 'package:smart_ledger/widgets/daily_recipe_recommendation_widget.dart';
-import 'package:smart_ledger/widgets/ingredients_recommendation_widget.dart';
-import 'package:smart_ledger/widgets/meal_plan_widget.dart';
-import 'package:smart_ledger/widgets/cost_analysis_widget.dart';
-import 'package:smart_ledger/widgets/user_preferences_widget.dart';
+import '../models/food_expiry_item.dart';
+import '../models/recipe.dart';
+import '../models/shopping_cart_history_entry.dart';
+import '../models/shopping_cart_item.dart';
+import '../services/food_expiry_notification_service.dart';
+import '../services/food_expiry_prediction_engine.dart';
+import '../services/food_expiry_service.dart';
+import '../services/recipe_service.dart';
+import '../services/user_pref_service.dart';
+import '../services/health_guardrail_service.dart';
+import '../services/replacement_cycle_notification_service.dart';
+import '../utils/currency_formatter.dart';
+import '../utils/icon_catalog.dart';
+import '../utils/interaction_blockers.dart';
+import '../utils/shopping_prep_utils.dart';
+import 'savings_statistics_screen.dart';
+import '../navigation/app_routes.dart';
+import '../widgets/daily_recipe_recommendation_widget.dart';
+import '../widgets/ingredients_recommendation_widget.dart';
+import '../widgets/meal_plan_widget.dart';
+import '../widgets/cost_analysis_widget.dart';
+import '../widgets/user_preferences_widget.dart';
 
 /// 식품 유통기한 관리 전용 메인 네비게이션 화면
 class FoodExpiryMainScreen extends StatefulWidget {
@@ -800,10 +800,7 @@ class _FoodExpiryMainScreenState extends State<FoodExpiryMainScreen> {
     if (widget.autoUsageMode) {
       // 유통기한 관리 / 요리 모드
       return const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.soup_kitchen),
-          label: '요리 모드',
-        ),
+        BottomNavigationBarItem(icon: Icon(Icons.soup_kitchen), label: '요리 모드'),
         BottomNavigationBarItem(
           icon: Icon(IconCatalog.warningAmber),
           label: '알림',
@@ -818,10 +815,7 @@ class _FoodExpiryMainScreenState extends State<FoodExpiryMainScreen> {
     } else {
       // 재고 확인 모드
       return const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.inventory_2),
-          label: '재고 목록',
-        ),
+        BottomNavigationBarItem(icon: Icon(Icons.inventory_2), label: '재고 목록'),
         BottomNavigationBarItem(
           icon: Icon(IconCatalog.warningAmber),
           label: '알림',
@@ -1735,16 +1729,17 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
   final Map<String, double> _usageMap = {};
   final Set<String> _activeUsageItems = {};
 
-  Set<String> _countLikeUnits =
-      UserPrefService.defaultCountLikeUnitsV1.toSet();
+  Set<String> _countLikeUnits = UserPrefService.defaultCountLikeUnitsV1.toSet();
 
   Future<void> _loadCountLikeUnits() async {
     try {
       final units = await UserPrefService.getCountLikeUnitsV1();
       if (!mounted) return;
       setState(() {
-        _countLikeUnits =
-            units.map((e) => e.trim()).where((e) => e.isNotEmpty).toSet();
+        _countLikeUnits = units
+            .map((e) => e.trim())
+            .where((e) => e.isNotEmpty)
+            .toSet();
       });
     } catch (_) {
       // Best-effort
@@ -1777,8 +1772,9 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
         actions: [
           TextButton(
             onPressed: () {
-              controller.text =
-                  UserPrefService.defaultCountLikeUnitsV1.join(', ');
+              controller.text = UserPrefService.defaultCountLikeUnitsV1.join(
+                ', ',
+              );
             },
             child: const Text('기본값'),
           ),
@@ -1880,9 +1876,10 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
     String ingredient,
     List<FoodExpiryItem> items,
   ) {
-    return _matchAllItemsForIngredient(ingredient, items)
-        .where((it) => it.quantity > 0)
-        .toList();
+    return _matchAllItemsForIngredient(
+      ingredient,
+      items,
+    ).where((it) => it.quantity > 0).toList();
   }
 
   String _formatQuantityValue(double quantity, String unit) {
@@ -2034,7 +2031,8 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
           tags: item.healthTags,
         );
         try {
-          await ReplacementCycleNotificationService.instance.rescheduleFromPrefs();
+          await ReplacementCycleNotificationService.instance
+              .rescheduleFromPrefs();
         } catch (_) {
           // ignore
         }
@@ -2105,7 +2103,8 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
         tags: item.healthTags,
       );
       try {
-        await ReplacementCycleNotificationService.instance.rescheduleFromPrefs();
+        await ReplacementCycleNotificationService.instance
+            .rescheduleFromPrefs();
       } catch (_) {
         // ignore
       }
@@ -2197,9 +2196,9 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
 
     if (merged.added <= 0) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('추가할 새 항목이 없습니다.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('추가할 새 항목이 없습니다.')));
       }
       return;
     }
@@ -2490,14 +2489,15 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
 
         for (var ingredient in selectedRecipe.ingredients) {
           // FIFO: 유통기한 빠른 순서로 정렬된 항목 중 매칭되는 것 선택
-          final matchedItems = items
-              .where(
-                (i) =>
-                    i.name.contains(ingredient.name) ||
-                    ingredient.name.contains(i.name),
-              )
-              .toList()
-            ..sort((a, b) => a.expiryDate.compareTo(b.expiryDate));
+          final matchedItems =
+              items
+                  .where(
+                    (i) =>
+                        i.name.contains(ingredient.name) ||
+                        ingredient.name.contains(i.name),
+                  )
+                  .toList()
+                ..sort((a, b) => a.expiryDate.compareTo(b.expiryDate));
 
           if (matchedItems.isNotEmpty) {
             final item = matchedItems.first; // FIFO: 유통기한 가장 빠른 것
@@ -2683,9 +2683,7 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
           // 로케이션 필터 적용
           final items = _locationFilter == null || _locationFilter == '전체'
               ? allItems
-              : allItems
-                    .where((it) => it.location == _locationFilter)
-                    .toList();
+              : allItems.where((it) => it.location == _locationFilter).toList();
 
           final ingredientNames = _normalizeIngredientNames(
             widget.initialIngredients,
@@ -2694,7 +2692,8 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
           final missingIngredients = <String>[];
           if (ingredientNames.isNotEmpty) {
             for (final ing in ingredientNames) {
-              // Treat "quantity <= 0" as effectively missing (still showable in detail)
+              // Treat "quantity <= 0" as effectively missing
+              // (still showable in detail)
               final hasAvailable = items.any(
                 (it) => _ingredientMatchesItem(ing, it) && it.quantity > 0,
               );
@@ -2723,11 +2722,13 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
               // 로케이션 필터 칩
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 child: Row(
                   children: _locationOptions.map((loc) {
-                    final isSelected =
-                        (_locationFilter ?? '전체') == loc;
+                    final isSelected = (_locationFilter ?? '전체') == loc;
                     return Padding(
                       padding: const EdgeInsets.only(right: 8),
                       child: FilterChip(
@@ -2808,8 +2809,9 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
                   margin: const EdgeInsets.fromLTRB(12, 0, 12, 12),
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceContainerHighest
-                        .withValues(alpha: 0.25),
+                    color: theme.colorScheme.surfaceContainerHighest.withValues(
+                      alpha: 0.25,
+                    ),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: theme.colorScheme.outline.withValues(alpha: 0.2),
@@ -2834,13 +2836,9 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
                           ),
                           const Spacer(),
                           TextButton.icon(
-                            onPressed: () => _addIngredientNamesToCart(
-                              ingredientNames,
-                            ),
-                            icon: const Icon(
-                              Icons.playlist_add,
-                              size: 16,
-                            ),
+                            onPressed: () =>
+                                _addIngredientNamesToCart(ingredientNames),
+                            icon: const Icon(Icons.playlist_add, size: 16),
                             label: const Text('모두 담기'),
                             style: TextButton.styleFrom(
                               visualDensity: VisualDensity.compact,
@@ -2848,9 +2846,8 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
                           ),
                           if (missingIngredients.isNotEmpty)
                             TextButton.icon(
-                              onPressed: () => _addMissingToCart(
-                                missingIngredients,
-                              ),
+                              onPressed: () =>
+                                  _addMissingToCart(missingIngredients),
                               icon: const Icon(
                                 Icons.shopping_cart_outlined,
                                 size: 16,
@@ -2876,30 +2873,34 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
                         final nearest = isMissing ? null : matched.first;
                         final left = nearest?.daysLeft(DateTime.now());
                         final leftText = left == null
-                          ? ''
-                          : (left < 0 ? '지남 ${-left}일' : '$left일 남음');
+                            ? ''
+                            : (left < 0 ? '지남 ${-left}일' : '$left일 남음');
                         final nearestExpiry = left == null
                             ? null
-                            : DateFormat('yyyy-MM-dd').format(nearest!.expiryDate);
+                            : DateFormat(
+                                'yyyy-MM-dd',
+                              ).format(nearest!.expiryDate);
 
                         final subtitle = isMissing
                             ? (matchedAll.isEmpty
                                   ? '재고: 0 (없음)'
                                   : '재고: 0 (수량 0)')
-                            : '총 ${_formatMatchedTotal(matched)} / 가장 빠른 기한: $nearestExpiry ($leftText)';
+                            : '총 ${_formatMatchedTotal(matched)} / '
+                                  '가장 빠른 기한: $nearestExpiry ($leftText)';
 
-                        final warnColor =
-                            (left != null && left <= 2) ? theme.colorScheme.error : null;
+                        final warnColor = (left != null && left <= 2)
+                            ? theme.colorScheme.error
+                            : null;
 
                         return [
                           InkWell(
                             onTap: matchedAll.isEmpty
                                 ? null
                                 : () => _showIngredientMatchesDetail(
-                                      context,
-                                      ingredientName: ing,
-                                      matched: matchedAll,
-                                    ),
+                                    context,
+                                    ingredientName: ing,
+                                    matched: matchedAll,
+                                  ),
                             child: Padding(
                               padding: const EdgeInsets.symmetric(vertical: 6),
                               child: Row(
@@ -2914,8 +2915,8 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
                                           ing,
                                           style: theme.textTheme.bodyMedium
                                               ?.copyWith(
-                                            fontWeight: FontWeight.w600,
-                                          ),
+                                                fontWeight: FontWeight.w600,
+                                              ),
                                         ),
                                         const SizedBox(height: 2),
                                         Text(
@@ -2948,8 +2949,7 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
                           ),
                           const Divider(height: 1),
                         ];
-                      }).toList()
-                        ..removeLast(),
+                      }).toList()..removeLast(),
                     ],
                   ),
                 ),
@@ -3085,11 +3085,11 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
                                         it.category,
                                         style: theme.textTheme.labelSmall
                                             ?.copyWith(
-                                          color: theme
-                                              .colorScheme
-                                              .onSecondaryContainer,
-                                          fontSize: 10,
-                                        ),
+                                              color: theme
+                                                  .colorScheme
+                                                  .onSecondaryContainer,
+                                              fontSize: 10,
+                                            ),
                                       ),
                                     ),
                                   ),
@@ -3110,12 +3110,8 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
                                       Icon(
                                         Icons.info_outline,
                                         size: 14,
-                                        color: theme
-                                            .colorScheme
-                                            .primary
-                                            .withValues(
-                                              alpha: 0.5,
-                                            ),
+                                        color: theme.colorScheme.primary
+                                            .withValues(alpha: 0.5),
                                       ),
                                     ],
                                   ),
@@ -3137,14 +3133,16 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
                                               -1.0,
                                             ),
                                             style: FilledButton.styleFrom(
-                                              visualDensity: VisualDensity.compact,
+                                              visualDensity:
+                                                  VisualDensity.compact,
                                               tapTargetSize:
-                                                  MaterialTapTargetSize.shrinkWrap,
+                                                  MaterialTapTargetSize
+                                                      .shrinkWrap,
                                               padding:
                                                   const EdgeInsets.symmetric(
-                                                horizontal: 10,
-                                                vertical: 8,
-                                              ),
+                                                    horizontal: 10,
+                                                    vertical: 8,
+                                                  ),
                                             ),
                                             child: const Text(
                                               '-1',
@@ -3160,10 +3158,8 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
                                               size: 20,
                                             ),
                                             padding: EdgeInsets.zero,
-                                            constraints:
-                                                const BoxConstraints(),
-                                            onPressed: () =>
-                                                _adjustQuantity(
+                                            constraints: const BoxConstraints(),
+                                            onPressed: () => _adjustQuantity(
                                               context,
                                               it,
                                               -1.0,
@@ -3176,14 +3172,15 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
                                           child: InkWell(
                                             onTap: () =>
                                                 _editQuantity(context, it),
-                                            borderRadius:
-                                                BorderRadius.circular(4),
+                                            borderRadius: BorderRadius.circular(
+                                              4,
+                                            ),
                                             child: Padding(
                                               padding:
                                                   const EdgeInsets.symmetric(
-                                                horizontal: 8,
-                                                vertical: 4,
-                                              ),
+                                                    horizontal: 8,
+                                                    vertical: 4,
+                                                  ),
                                               child: Text(
                                                 _formatQuantity(it),
                                                 style: theme
@@ -3192,8 +3189,10 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
                                                     ?.copyWith(
                                                       fontWeight:
                                                           FontWeight.bold,
-                                                      color:
-                                                          _qtyColor(theme, it),
+                                                      color: _qtyColor(
+                                                        theme,
+                                                        it,
+                                                      ),
                                                       decoration: TextDecoration
                                                           .underline,
                                                       decorationStyle:
@@ -3211,11 +3210,8 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
                                           ),
                                           padding: EdgeInsets.zero,
                                           constraints: const BoxConstraints(),
-                                          onPressed: () => _adjustQuantity(
-                                            context,
-                                            it,
-                                            1.0,
-                                          ),
+                                          onPressed: () =>
+                                              _adjustQuantity(context, it, 1.0),
                                         ),
                                       ],
                                     )
@@ -3228,10 +3224,11 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
                                           '잔량: ${_formatQuantity(it)}',
                                           style: theme.textTheme.bodySmall
                                               ?.copyWith(
-                                            color: theme.colorScheme
-                                                .onSurfaceVariant,
-                                            fontSize: 11,
-                                          ),
+                                                color: theme
+                                                    .colorScheme
+                                                    .onSurfaceVariant,
+                                                fontSize: 11,
+                                              ),
                                         ),
                                         const SizedBox(height: 4),
                                         _UsageInput(

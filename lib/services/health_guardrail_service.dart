@@ -18,11 +18,11 @@ class HealthConsumptionRecord {
   });
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'timestamp': timestamp.toIso8601String(),
-        'itemName': itemName,
-        'amount': amount,
-        'tags': tags,
-      };
+    'timestamp': timestamp.toIso8601String(),
+    'itemName': itemName,
+    'amount': amount,
+    'tags': tags,
+  };
 
   factory HealthConsumptionRecord.fromJson(Map<String, dynamic> json) {
     final tagsRaw = json['tags'];
@@ -37,7 +37,8 @@ class HealthConsumptionRecord {
     }
 
     return HealthConsumptionRecord(
-      timestamp: DateTime.tryParse((json['timestamp'] as String?) ?? '') ??
+      timestamp:
+          DateTime.tryParse((json['timestamp'] as String?) ?? '') ??
           DateTime.fromMillisecondsSinceEpoch(0),
       itemName: (json['itemName'] as String?)?.trim() ?? '',
       amount: (json['amount'] as num?)?.toDouble() ?? 0.0,
@@ -94,11 +95,7 @@ class HealthGuardrailWarning {
 class HealthGuardrailService {
   HealthGuardrailService._();
 
-  static const List<String> defaultTags = <String>[
-    '탄수화물',
-    '당류',
-    '주류',
-  ];
+  static const List<String> defaultTags = <String>['탄수화물', '당류', '주류'];
 
   static const String _kSettings = 'health_guardrail_settings_v1';
   static const String _kLog = 'health_consumption_log_v1';
@@ -228,7 +225,8 @@ class HealthGuardrailService {
     return next;
   }
 
-  static DateTime _startOfDay(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
+  static DateTime _startOfDay(DateTime dt) =>
+      DateTime(dt.year, dt.month, dt.day);
 
   static bool _isSameDay(DateTime a, DateTime b) {
     return a.year == b.year && a.month == b.month && a.day == b.day;
@@ -260,7 +258,8 @@ class HealthGuardrailService {
     return sum;
   }
 
-  /// Records a usage event and returns a warning if weekly/monthly limit exceeded.
+  /// Records a usage event and returns a warning if weekly/monthly
+  /// limit exceeded.
   ///
   /// - `amount` should be positive.
   /// - If settings disabled or tags empty, returns null.
@@ -309,7 +308,10 @@ class HealthGuardrailService {
               period: 'weekly',
               total: weeklyTotal,
               limit: weeklyLimit,
-              message: '이번 주 $tag 섭취가 많아요 (${weeklyTotal.toStringAsFixed(0)}/${weeklyLimit.toStringAsFixed(0)})',
+              message:
+                  '이번 주 $tag 섭취가 많아요 '
+                  '(${weeklyTotal.toStringAsFixed(0)}/'
+                  '${weeklyLimit.toStringAsFixed(0)})',
             );
           }
         }
@@ -325,7 +327,10 @@ class HealthGuardrailService {
               period: 'monthly',
               total: monthlyTotal,
               limit: monthlyLimit,
-              message: '이번 달 $tag 섭취가 많아요 (${monthlyTotal.toStringAsFixed(0)}/${monthlyLimit.toStringAsFixed(0)})',
+              message:
+                  '이번 달 $tag 섭취가 많아요 '
+                  '(${monthlyTotal.toStringAsFixed(0)}/'
+                  '${monthlyLimit.toStringAsFixed(0)})',
             );
           }
         }

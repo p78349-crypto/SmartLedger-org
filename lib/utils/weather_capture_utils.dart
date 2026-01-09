@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/utils/icon_catalog.dart';
+import 'icon_catalog.dart';
 
 /// 날씨 수집 유틸리티
 /// - 하루 1회 자동 수집 (앱 시작 시)

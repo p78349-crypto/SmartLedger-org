@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/models/account.dart';
-import 'package:smart_ledger/navigation/app_routes.dart';
-import 'package:smart_ledger/services/account_service.dart';
-import 'package:smart_ledger/services/asset_move_service.dart';
-import 'package:smart_ledger/services/asset_service.dart';
-import 'package:smart_ledger/services/budget_service.dart';
-import 'package:smart_ledger/services/emergency_fund_service.dart';
-import 'package:smart_ledger/services/fixed_cost_service.dart';
-import 'package:smart_ledger/services/income_split_service.dart';
-import 'package:smart_ledger/services/savings_plan_service.dart';
-import 'package:smart_ledger/services/transaction_service.dart';
-import 'package:smart_ledger/services/trash_service.dart';
-import 'package:smart_ledger/services/user_pref_service.dart';
-import 'package:smart_ledger/utils/dialog_utils.dart';
-import 'package:smart_ledger/utils/icon_catalog.dart';
-import 'package:smart_ledger/utils/snackbar_utils.dart';
-import 'package:smart_ledger/widgets/root_auth_gate.dart';
+import '../models/account.dart';
+import '../navigation/app_routes.dart';
+import '../services/account_service.dart';
+import '../services/asset_move_service.dart';
+import '../services/asset_service.dart';
+import '../services/budget_service.dart';
+import '../services/emergency_fund_service.dart';
+import '../services/fixed_cost_service.dart';
+import '../services/income_split_service.dart';
+import '../services/savings_plan_service.dart';
+import '../services/transaction_service.dart';
+import '../services/trash_service.dart';
+import '../services/user_pref_service.dart';
+import '../utils/dialog_utils.dart';
+import '../utils/icon_catalog.dart';
+import '../utils/snackbar_utils.dart';
+import '../widgets/root_auth_gate.dart';
 
 /// ROOT 전용 - 계정 삭제 관리
 class RootAccountManageScreen extends StatefulWidget {

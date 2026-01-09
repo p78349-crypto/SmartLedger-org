@@ -3,7 +3,7 @@ library;
 
 import 'dart:math' show pow, log;
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/utils/icon_catalog.dart';
+import 'icon_catalog.dart';
 
 /// Chart display types
 enum ChartDisplayType {

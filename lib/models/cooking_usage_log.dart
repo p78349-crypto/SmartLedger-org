@@ -4,18 +4,18 @@ import 'package:flutter/foundation.dart';
 @immutable
 class CookingUsageLog {
   final String id;
-  final String recipeName;        // 요리명: '김치찌개', 'Pasta' 등
-  final DateTime usageDate;       // 요리한 날짜
-  final String memo;              // 추가 메모
-  
+  final String recipeName; // 요리명: '김치찌개', 'Pasta' 등
+  final DateTime usageDate; // 요리한 날짜
+  final String memo; // 추가 메모
+
   /// 이 요리에서 사용된 식재료들의 총 금액 (원)
   /// 계산 방식: 각 재료의 (가격/원래수량 * 사용량)의 합
   final double totalUsedPrice;
-  
+
   /// 사용된 식재료 목록 (JSON 형식으로 저장)
   /// [{"name": "김치", "used": 0.25, "unit": "포기", "price": 5000}, ...]
   final String usedIngredientsJson;
-  
+
   /// 냉파 챌린지 기간(20일~말일)에 추가 구매 없이 해결했는가?
   final bool isFromExistingInventory;
 
@@ -49,7 +49,8 @@ class CookingUsageLog {
       memo: (json['memo'] as String?) ?? '',
       totalUsedPrice: (json['totalUsedPrice'] as num?)?.toDouble() ?? 0.0,
       usedIngredientsJson: (json['usedIngredientsJson'] as String?) ?? '[]',
-      isFromExistingInventory: (json['isFromExistingInventory'] as bool?) ?? false,
+      isFromExistingInventory:
+          (json['isFromExistingInventory'] as bool?) ?? false,
     );
   }
 }

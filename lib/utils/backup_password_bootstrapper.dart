@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_ledger/services/auth_service.dart';
-import 'package:smart_ledger/services/backup_service.dart';
-import 'package:smart_ledger/utils/pref_keys.dart';
-import 'package:smart_ledger/utils/snackbar_utils.dart';
+import '../services/auth_service.dart';
+import '../services/backup_service.dart';
+import 'pref_keys.dart';
+import 'snackbar_utils.dart';
 
 class BackupPasswordBootstrapper {
   const BackupPasswordBootstrapper._();

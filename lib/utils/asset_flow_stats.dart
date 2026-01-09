@@ -1,4 +1,4 @@
-import 'package:smart_ledger/models/asset_move.dart';
+import '../models/asset_move.dart';
 
 /// Asset flow statistics for the "내 자산 흐름" feature.
 ///

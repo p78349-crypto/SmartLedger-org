@@ -1,5 +1,5 @@
-import 'package:smart_ledger/models/weather_snapshot.dart';
-import 'package:smart_ledger/utils/benefit_memo_utils.dart';
+import 'weather_snapshot.dart';
+import '../utils/benefit_memo_utils.dart';
 
 enum TransactionType { expense, income, savings, refund }
 

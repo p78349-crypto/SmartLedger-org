@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/utils/icon_catalog.dart';
+import '../utils/icon_catalog.dart';
 
 class EmergencyFundTransferDialog extends StatefulWidget {
   final double currentBalance;

@@ -1,4 +1,4 @@
-import 'package:smart_ledger/models/food_expiry_item.dart';
+import '../models/food_expiry_item.dart';
 
 /// 유통기한이 임박한 식재료를 필터링하는 유틸리티
 class ExpiringIngredientsUtils {

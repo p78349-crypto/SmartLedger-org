@@ -1,4 +1,4 @@
-import 'package:smart_ledger/models/transaction.dart';
+import '../models/transaction.dart';
 
 class TransactionButtonUtils {
   static void handleTransactionTypeToggle<T>({

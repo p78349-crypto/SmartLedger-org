@@ -1,15 +1,16 @@
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_ledger/models/consumable_inventory_item.dart';
-import 'package:smart_ledger/models/shopping_cart_history_entry.dart';
-import 'package:smart_ledger/models/shopping_cart_item.dart';
-import 'package:smart_ledger/repositories/consumable_inventory_repository.dart';
-import 'package:smart_ledger/repositories/shopping_cart_repository.dart';
-import 'package:smart_ledger/services/user_pref_service.dart';
+import '../models/consumable_inventory_item.dart';
+import '../models/shopping_cart_history_entry.dart';
+import '../models/shopping_cart_item.dart';
+import 'consumable_inventory_repository.dart';
+import 'shopping_cart_repository.dart';
+import '../services/user_pref_service.dart';
 
 class AppRepositories {
-  // Swap these at runtime later (e.g., after Firebase login / family selection).
+  // Swap these at runtime later
+  // (e.g., after Firebase login / family selection).
   static ConsumableInventoryRepository consumableInventory =
       SharedPrefsConsumableInventoryRepository();
   static ShoppingCartRepository shoppingCart = UserPrefShoppingCartRepository();

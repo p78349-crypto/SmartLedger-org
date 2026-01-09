@@ -1,5 +1,5 @@
 import 'package:flutter/services.dart';
-import 'package:smart_ledger/utils/number_formats.dart';
+import 'number_formats.dart';
 
 /// TextInputFormatter that adds thousand separators while typing currency.
 class CurrencyInputFormatter extends TextInputFormatter {

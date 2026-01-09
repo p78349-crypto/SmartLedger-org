@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/models/account.dart';
-import 'package:smart_ledger/services/account_service.dart';
-import 'package:smart_ledger/services/backup_service.dart';
-import 'package:smart_ledger/utils/account_name_language_tag.dart';
-import 'package:smart_ledger/utils/backup_password_bootstrapper.dart';
-import 'package:smart_ledger/utils/dialog_utils.dart';
-import 'package:smart_ledger/utils/snackbar_utils.dart';
+import '../models/account.dart';
+import '../services/account_service.dart';
+import '../services/backup_service.dart';
+import '../utils/account_name_language_tag.dart';
+import '../utils/backup_password_bootstrapper.dart';
+import '../utils/dialog_utils.dart';
+import '../utils/snackbar_utils.dart';
 
 class AccountCreateScreen extends StatefulWidget {
   const AccountCreateScreen({super.key});

@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/navigation/app_routes.dart';
-import 'package:smart_ledger/services/'
-    'quick_simple_expense_input_history_service.dart';
-import 'package:smart_ledger/services/transaction_service.dart';
-import 'package:smart_ledger/utils/currency_formatter.dart';
-import 'package:smart_ledger/utils/icon_catalog.dart';
+import '../models/transaction.dart';
+import '../navigation/app_routes.dart';
+import '../services/quick_simple_expense_input_history_service.dart';
+import '../services/transaction_service.dart';
+import '../utils/currency_formatter.dart';
+import '../utils/icon_catalog.dart';
 
 class QuickSimpleExpenseInputScreen extends StatefulWidget {
   const QuickSimpleExpenseInputScreen({

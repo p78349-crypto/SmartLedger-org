@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/services/transaction_service.dart';
-import 'package:smart_ledger/utils/benefit_aggregation_utils.dart';
-import 'package:smart_ledger/utils/currency_formatter.dart';
+import '../models/transaction.dart';
+import '../services/transaction_service.dart';
+import '../utils/benefit_aggregation_utils.dart';
+import '../utils/currency_formatter.dart';
 
 class MicroSavingsNudgeScreen extends StatefulWidget {
   const MicroSavingsNudgeScreen({super.key, required this.accountName});

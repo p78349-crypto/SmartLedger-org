@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
-import 'package:smart_ledger/models/consumable_inventory_item.dart';
-import 'package:smart_ledger/repositories/app_repositories.dart';
-import 'package:smart_ledger/services/health_guardrail_service.dart';
-import 'package:smart_ledger/services/replacement_cycle_notification_service.dart';
-import 'package:smart_ledger/services/stock_depletion_notification_service.dart';
+import '../models/consumable_inventory_item.dart';
+import '../repositories/app_repositories.dart';
+import 'health_guardrail_service.dart';
+import 'replacement_cycle_notification_service.dart';
+import 'stock_depletion_notification_service.dart';
 
 class ConsumableInventoryService {
   ConsumableInventoryService._internal();
@@ -69,8 +69,9 @@ class ConsumableInventoryService {
       // Keep predicted-depletion notifications up to date.
       // Best-effort: do not fail the update flow if scheduling throws.
       try {
-        await StockDepletionNotificationService.instance
-            .rescheduleForItem(next[index]);
+        await StockDepletionNotificationService.instance.rescheduleForItem(
+          next[index],
+        );
       } catch (_) {
         // ignore
       }
@@ -89,14 +90,16 @@ class ConsumableInventoryService {
       final actualUsed = amount <= 0
           ? 0.0
           : amount > item.currentStock
-              ? item.currentStock
-              : amount;
-      final nextStock =
-          (item.currentStock - amount).clamp(0.0, double.infinity);
+          ? item.currentStock
+          : amount;
+      final nextStock = (item.currentStock - amount).clamp(
+        0.0,
+        double.infinity,
+      );
 
       final now = DateTime.now();
-      final nextHistory = <ConsumableUsageRecord>[...
-        item.usageHistory,
+      final nextHistory = <ConsumableUsageRecord>[
+        ...item.usageHistory,
         if (actualUsed > 0)
           ConsumableUsageRecord(timestamp: now, amount: actualUsed),
       ];
@@ -107,10 +110,7 @@ class ConsumableInventoryService {
           : nextHistory.sublist(nextHistory.length - 60);
 
       await updateItem(
-        item.copyWith(
-          currentStock: nextStock,
-          usageHistory: bounded,
-        ),
+        item.copyWith(currentStock: nextStock, usageHistory: bounded),
       );
 
       if (actualUsed > 0) {
@@ -122,7 +122,8 @@ class ConsumableInventoryService {
 
         // Best-effort: keep replacement-cycle notifications up to date.
         try {
-          await ReplacementCycleNotificationService.instance.rescheduleFromPrefs();
+          await ReplacementCycleNotificationService.instance
+              .rescheduleFromPrefs();
         } catch (_) {
           // ignore
         }

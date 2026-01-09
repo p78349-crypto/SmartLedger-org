@@ -1,11 +1,11 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:smart_ledger/models/fixed_cost.dart';
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/services/account_service.dart';
-import 'package:smart_ledger/services/fixed_cost_service.dart';
-import 'package:smart_ledger/services/transaction_service.dart';
-import 'package:smart_ledger/utils/date_formatter.dart';
+import '../models/fixed_cost.dart';
+import '../models/transaction.dart';
+import 'account_service.dart';
+import 'fixed_cost_service.dart';
+import 'transaction_service.dart';
+import '../utils/date_formatter.dart';
 
 class FixedCostAutoRecordService {
   static const String _stampPrefix = 'fixed_cost_auto_recorded_v1';
@@ -15,7 +15,10 @@ class FixedCostAutoRecordService {
   /// [backfillMonths] will also attempt creation for previous months
   /// (e.g. 1 = last month + this month). This is best-effort and uses
   /// stamps/duplicate detection to prevent re-creating entries.
-  Future<void> runForAllAccounts({DateTime? now, int backfillMonths = 0}) async {
+  Future<void> runForAllAccounts({
+    DateTime? now,
+    int backfillMonths = 0,
+  }) async {
     await AccountService().loadAccounts();
     await FixedCostService().loadFixedCosts();
     await TransactionService().loadTransactions();
@@ -99,8 +102,11 @@ class FixedCostAutoRecordService {
           memoBuffer.write(trimmedMemo);
         }
 
+        final monthText = targetMonth.month.toString().padLeft(2, '0');
+        final txId = 'fixed_${cost.id}_${targetMonth.year}$monthText';
+
         final transaction = Transaction(
-          id: 'fixed_${cost.id}_${targetMonth.year}${targetMonth.month.toString().padLeft(2, '0')}',
+          id: txId,
           type: TransactionType.expense,
           description: cost.name,
           amount: cost.amount,

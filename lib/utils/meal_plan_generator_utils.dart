@@ -1,4 +1,4 @@
-import 'package:smart_ledger/models/food_expiry_item.dart';
+import '../models/food_expiry_item.dart';
 
 /// 3일/1주일 식단표 자동 제안 유틸리티
 class MealPlanGeneratorUtils {

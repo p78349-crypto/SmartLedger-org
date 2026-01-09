@@ -1,7 +1,7 @@
-import 'package:smart_ledger/services/account_service.dart';
-import 'package:smart_ledger/services/user_pref_service.dart';
-import 'package:smart_ledger/utils/main_feature_icon_catalog.dart';
-import 'package:smart_ledger/utils/page1_bottom_quick_icons.dart';
+import '../services/account_service.dart';
+import '../services/user_pref_service.dart';
+import 'main_feature_icon_catalog.dart';
+import 'page1_bottom_quick_icons.dart';
 
 class MainPageMigration {
   /// Move all asset-related icons into [targetPageIndex] for every account.

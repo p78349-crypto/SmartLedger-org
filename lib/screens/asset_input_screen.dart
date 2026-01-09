@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/models/asset.dart';
-import 'package:smart_ledger/services/asset_service.dart';
-import 'package:smart_ledger/utils/date_formats.dart';
-import 'package:smart_ledger/utils/utils.dart';
-import 'package:smart_ledger/widgets/smart_input_field.dart';
+import '../models/asset.dart';
+import '../services/asset_service.dart';
+import '../utils/date_formats.dart';
+import '../utils/utils.dart';
+import '../widgets/smart_input_field.dart';
 
 class AssetInputScreen extends StatefulWidget {
   final String accountName;

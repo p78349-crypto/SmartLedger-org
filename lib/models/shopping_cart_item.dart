@@ -4,6 +4,8 @@ class ShoppingCartItem {
   final int quantity;
   final double unitPrice;
   final String unitLabel;
+  final int bundleCount;
+  final int unitsPerBundle;
 
   /// Optional note per item.
   /// Used to highlight items needing attention.
@@ -26,12 +28,15 @@ class ShoppingCartItem {
     this.quantity = 1,
     this.unitPrice = 0,
     this.unitLabel = '',
+    int? bundleCount,
+    int? unitsPerBundle,
     this.memo = '',
     this.isPlanned = true,
     this.isChecked = false,
     required this.createdAt,
     required this.updatedAt,
-  });
+  }) : bundleCount = bundleCount ?? quantity,
+       unitsPerBundle = unitsPerBundle ?? 1;
 
   ShoppingCartItem copyWith({
     String? id,
@@ -39,6 +44,8 @@ class ShoppingCartItem {
     int? quantity,
     double? unitPrice,
     String? unitLabel,
+    int? bundleCount,
+    int? unitsPerBundle,
     String? memo,
     bool? isPlanned,
     bool? isChecked,
@@ -51,6 +58,8 @@ class ShoppingCartItem {
       quantity: quantity ?? this.quantity,
       unitPrice: unitPrice ?? this.unitPrice,
       unitLabel: unitLabel ?? this.unitLabel,
+      bundleCount: bundleCount ?? this.bundleCount,
+      unitsPerBundle: unitsPerBundle ?? this.unitsPerBundle,
       memo: memo ?? this.memo,
       isPlanned: isPlanned ?? this.isPlanned,
       isChecked: isChecked ?? this.isChecked,
@@ -69,6 +78,8 @@ class ShoppingCartItem {
         final raw = (json['unitLabel'] as String?)?.trim();
         return raw ?? '';
       }(),
+      bundleCount: (json['bundleCount'] as num?)?.toInt(),
+      unitsPerBundle: (json['unitsPerBundle'] as num?)?.toInt(),
       memo: (json['memo'] as String?) ?? '',
       isPlanned: (json['isPlanned'] as bool?) ?? true,
       isChecked: (json['isChecked'] as bool?) ?? false,
@@ -88,6 +99,8 @@ class ShoppingCartItem {
       'quantity': quantity,
       'unitPrice': unitPrice,
       'unitLabel': unitLabel,
+      'bundleCount': bundleCount,
+      'unitsPerBundle': unitsPerBundle,
       'memo': memo,
       'isPlanned': isPlanned,
       'isChecked': isChecked,

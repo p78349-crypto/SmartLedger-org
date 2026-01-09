@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_ledger/theme/theme_preset.dart';
-import 'package:smart_ledger/theme/ui_style.dart';
-import 'package:smart_ledger/utils/pref_keys.dart';
+import 'theme_preset.dart';
+import 'ui_style.dart';
+import '../utils/pref_keys.dart';
 
 class AppThemeSeedController {
   AppThemeSeedController._();

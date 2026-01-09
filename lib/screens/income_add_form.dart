@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/services/recent_input_service.dart';
-import 'package:smart_ledger/utils/date_formatter.dart';
+import '../services/recent_input_service.dart';
+import '../utils/date_formatter.dart';
 
 class IncomeAddForm extends StatefulWidget {
   final void Function(Map<String, dynamic> incomeData)? onSave;

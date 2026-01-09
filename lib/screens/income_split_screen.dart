@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:smart_ledger/services/account_service.dart';
-import 'package:smart_ledger/services/budget_service.dart';
-import 'package:smart_ledger/services/income_split_service.dart';
-import 'package:smart_ledger/utils/category_definitions.dart';
-import 'package:smart_ledger/utils/income_category_definitions.dart';
-import 'package:smart_ledger/utils/utils.dart';
-import 'package:smart_ledger/widgets/smart_input_field.dart';
+import '../services/account_service.dart';
+import '../services/budget_service.dart';
+import '../services/income_split_service.dart';
+import '../utils/category_definitions.dart';
+import '../utils/income_category_definitions.dart';
+import '../utils/utils.dart';
+import '../widgets/smart_input_field.dart';
 
 class IncomeSplitScreen extends StatefulWidget {
   final String accountName;

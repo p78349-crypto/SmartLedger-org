@@ -1,6 +1,6 @@
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/navigation/app_routes.dart';
-import 'package:smart_ledger/utils/top_level_stats_utils.dart';
+import '../models/transaction.dart';
+import '../navigation/app_routes.dart';
+import 'top_level_stats_utils.dart';
 
 class IconLaunchRequest {
   const IconLaunchRequest({required this.routeName, this.arguments});
@@ -127,6 +127,13 @@ class IconLaunchUtils {
           accountName: accountName,
           initialDate: DateTime.now(),
         ),
+      );
+    }
+
+    if (routeName == AppRoutes.quickStockUse) {
+      return IconLaunchRequest(
+        routeName: routeName,
+        arguments: QuickStockUseArgs(accountName: accountName),
       );
     }
 

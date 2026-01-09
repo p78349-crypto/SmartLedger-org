@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/screens/food_expiry_main_screen.dart';
+import 'food_expiry_main_screen.dart';
 
 /// Dedicated screen for cooking start mode.
 /// 

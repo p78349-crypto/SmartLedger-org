@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/screens/account_main_screen.dart';
-import 'package:smart_ledger/screens/account_stats_screen.dart';
-import 'package:smart_ledger/screens/fixed_cost_input_screen.dart';
-import 'package:smart_ledger/screens/income_input_screen.dart';
-import 'package:smart_ledger/screens/transaction_add_screen.dart';
+import 'account_main_screen.dart';
+import 'account_stats_screen.dart';
+import 'fixed_cost_input_screen.dart';
+import 'income_input_screen.dart';
+import 'transaction_add_screen.dart';
 
 class MainScreen extends StatelessWidget {
   final String accountName;

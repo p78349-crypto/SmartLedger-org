@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/foundation.dart';
-import 'package:smart_ledger/utils/nutrition_food_knowledge.dart'; // Reuse data models if possible or redefine
-import 'package:smart_ledger/models/food_expiry_item.dart';
+import '../utils/nutrition_food_knowledge.dart';
+// Reuse data models if possible or redefine
+import '../models/food_expiry_item.dart';
 
 /// Service to handle Recipe/Food Knowledge from JSON data.
 /// Replaces the hardcoded [NutritionFoodKnowledge].
@@ -17,24 +18,30 @@ class RecipeKnowledgeService {
   Future<void> loadData() async {
     if (_isLoaded) return;
     try {
-      final jsonString = await rootBundle.loadString('assets/data/food_knowledge.json');
+      final jsonString = await rootBundle.loadString(
+        'assets/data/food_knowledge.json',
+      );
       final List<dynamic> jsonList = jsonDecode(jsonString);
-      
+
       _entries = jsonList.map((json) {
         return FoodKnowledgeEntry(
           primaryName: json['primaryName'] ?? '',
           keywords: List<String>.from(json['keywords'] ?? []),
           dailyIntakeText: json['dailyIntakeText'] ?? '',
-          pairings: (json['pairings'] as List<dynamic>?)?.map((p) {
-            return FoodPairingSuggestion(
-              ingredient: p['ingredient'] ?? '',
-              why: p['why'] ?? '',
-            );
-          }).toList() ?? [],
-          quantitySuggestions: List<String>.from(json['quantitySuggestions'] ?? []),
+          pairings:
+              (json['pairings'] as List<dynamic>?)?.map((p) {
+                return FoodPairingSuggestion(
+                  ingredient: p['ingredient'] ?? '',
+                  why: p['why'] ?? '',
+                );
+              }).toList() ??
+              [],
+          quantitySuggestions: List<String>.from(
+            json['quantitySuggestions'] ?? [],
+          ),
         );
       }).toList();
-      
+
       _isLoaded = true;
       debugPrint('RecipeKnowledgeService: Loaded ${_entries.length} entries.');
     } catch (e) {
@@ -74,9 +81,11 @@ class RecipeKnowledgeService {
 
   /// Finds recipes where the primary ingredient matches items in the inventory.
   /// Returns a list of recipes (entries) that can be made with current stock.
-  List<FoodKnowledgeEntry> findRecipesByInventory(List<FoodExpiryItem> inventory) {
+  List<FoodKnowledgeEntry> findRecipesByInventory(
+    List<FoodExpiryItem> inventory,
+  ) {
     if (!_isLoaded) return [];
-    
+
     final matches = <FoodKnowledgeEntry>[];
     final inventoryNames = inventory.map((e) => _normalize(e.name)).toSet();
 

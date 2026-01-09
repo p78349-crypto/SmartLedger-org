@@ -4,29 +4,29 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_ledger/utils/pref_keys.dart';
-import 'package:smart_ledger/models/asset.dart';
-import 'package:smart_ledger/models/category_hint.dart';
-import 'package:smart_ledger/models/shopping_cart_item.dart';
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/screens/income_split_screen.dart';
+import '../utils/pref_keys.dart';
+import '../models/asset.dart';
+import '../models/category_hint.dart';
+import '../models/shopping_cart_item.dart';
+import '../models/transaction.dart';
+import 'income_split_screen.dart';
 // import 'package:smart_ledger/screens/nutrition_report_screen.dart';
 // Preserved but disabled per request.
-import 'package:smart_ledger/services/asset_service.dart';
-import 'package:smart_ledger/services/category_usage_service.dart';
-import 'package:smart_ledger/services/food_expiry_service.dart';
-import 'package:smart_ledger/services/recent_input_service.dart';
-import 'package:smart_ledger/services/transaction_service.dart';
-import 'package:smart_ledger/services/user_pref_service.dart';
-import 'package:smart_ledger/utils/shopping_cart_bulk_ledger_utils.dart';
-import 'package:smart_ledger/utils/category_definitions.dart';
-import 'package:smart_ledger/utils/detailed_category_definitions.dart';
-import 'package:smart_ledger/utils/currency_formatter.dart';
-import 'package:smart_ledger/utils/date_formatter.dart';
-import 'package:smart_ledger/utils/icon_catalog.dart';
-import 'package:smart_ledger/utils/income_category_definitions.dart';
-import 'package:smart_ledger/utils/snackbar_utils.dart';
-import 'package:smart_ledger/utils/store_memo_utils.dart';
+import '../services/asset_service.dart';
+import '../services/category_usage_service.dart';
+import '../services/food_expiry_service.dart';
+import '../services/recent_input_service.dart';
+import '../services/transaction_service.dart';
+import '../services/user_pref_service.dart';
+import '../utils/shopping_cart_bulk_ledger_utils.dart';
+import '../utils/category_definitions.dart';
+import '../utils/detailed_category_definitions.dart';
+import '../utils/currency_formatter.dart';
+import '../utils/date_formatter.dart';
+import '../utils/icon_catalog.dart';
+import '../utils/income_category_definitions.dart';
+import '../utils/snackbar_utils.dart';
+import '../utils/store_memo_utils.dart';
 
 // 최근 결제수단/메모 저장 키 및 최대 개수
 const String _recentDescriptionsKey = 'recent_descriptions';
@@ -111,7 +111,8 @@ class _TransactionAddDetailedScreenState
                       IconButton(
                         tooltip: '장바구니 불러오기',
                         icon: const Icon(IconCatalog.shoppingCart),
-                        onPressed: () => _formStateKey.currentState?.openShoppingCartPicker(),
+                        onPressed: () => _formStateKey.currentState
+                            ?.openShoppingCartPicker(),
                       ),
                       IconButton(
                         tooltip: '입력값 되돌리기',
@@ -632,10 +633,20 @@ class _TransactionAddDetailedFormState
                       itemCount: local.length,
                       itemBuilder: (context, index) {
                         final it = local[index];
+                        final qty = it.quantity <= 0 ? 1 : it.quantity;
+                        final unitPriceText = it.unitPrice <= 0
+                            ? '-'
+                            : CurrencyFormatter.formatWithDecimals(
+                                it.unitPrice,
+                                showUnit: false,
+                              );
                         return CheckboxListTile(
                           value: it.isChecked,
                           title: Text(it.name),
-                          subtitle: Text('수량: ${it.quantity <= 0 ? 1 : it.quantity}    단가: ${it.unitPrice <= 0 ? '-' : CurrencyFormatter.formatWithDecimals(it.unitPrice, showUnit: false)}'),
+                          subtitle: Text(
+                            '수량: $qty'
+                            '    단가: $unitPriceText',
+                          ),
                           onChanged: (v) {
                             local[index] = it.copyWith(isChecked: v ?? false);
                             // rebuild sheet
@@ -651,14 +662,16 @@ class _TransactionAddDetailedFormState
                       children: [
                         Expanded(
                           child: OutlinedButton(
-                            onPressed: () => Navigator.of(sheetContext).pop(false),
+                            onPressed: () =>
+                                Navigator.of(sheetContext).pop(false),
                             child: const Text('취소'),
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: FilledButton(
-                            onPressed: () => Navigator.of(sheetContext).pop(true),
+                            onPressed: () =>
+                                Navigator.of(sheetContext).pop(true),
                             child: const Text('선택 항목 지출입력으로 이동'),
                           ),
                         ),
@@ -693,7 +706,10 @@ class _TransactionAddDetailedFormState
       items: items,
       categoryHints: hints,
       saveItems: (next) async {
-        await UserPrefService.setShoppingCartItems(accountName: widget.accountName, items: next);
+        await UserPrefService.setShoppingCartItems(
+          accountName: widget.accountName,
+          items: next,
+        );
       },
       reload: () async {},
     );
@@ -768,22 +784,32 @@ class _TransactionAddDetailedFormState
       setState(() {
         _descController.text = decoded['desc'] ?? '';
         _qtyController.text = decoded['qty'] ?? _qtyController.text;
-        _unitPriceController.text = decoded['unitPrice'] ?? _unitPriceController.text;
+        _unitPriceController.text =
+            decoded['unitPrice'] ?? _unitPriceController.text;
         _amountController.text = decoded['amount'] ?? _amountController.text;
         _cardChargedAmountController.text = decoded['card'] ?? '';
         _memoController.text = decoded['memo'] ?? '';
         _storeController.text = decoded['store'] ?? '';
         _paymentController.text = decoded['payment'] ?? '';
         try {
-          _selectedType = TransactionType.values.firstWhere((e) => e.name == (decoded['type'] ?? ''), orElse: () => _selectedType);
+          _selectedType = TransactionType.values.firstWhere(
+            (e) => e.name == (decoded['type'] ?? ''),
+            orElse: () => _selectedType,
+          );
         } catch (_) {}
         try {
-          _savingsAllocation = SavingsAllocation.values.firstWhere((e) => e.name == (decoded['savingsAllocation'] ?? ''), orElse: () => _savingsAllocation);
+          _savingsAllocation = SavingsAllocation.values.firstWhere(
+            (e) => e.name == (decoded['savingsAllocation'] ?? ''),
+            orElse: () => _savingsAllocation,
+          );
         } catch (_) {}
         try {
-          _transactionDate = DateTime.parse(decoded['date'] ?? _transactionDate.toIso8601String());
+          _transactionDate = DateTime.parse(
+            decoded['date'] ?? _transactionDate.toIso8601String(),
+          );
         } catch (_) {}
-        _selectedMainCategory = decoded['mainCategory'] ?? _selectedMainCategory;
+        _selectedMainCategory =
+            decoded['mainCategory'] ?? _selectedMainCategory;
         _selectedSubCategory = decoded['subCategory'];
         _selectedDetailCategory = decoded['detailCategory'];
         _locationController.text = decoded['location'] ?? '';

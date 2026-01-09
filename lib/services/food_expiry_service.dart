@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_ledger/models/food_expiry_item.dart';
-import 'package:smart_ledger/services/food_expiry_notification_service.dart';
+import '../models/food_expiry_item.dart';
+import 'food_expiry_notification_service.dart';
 
 class FoodExpiryService {
   FoodExpiryService._internal();

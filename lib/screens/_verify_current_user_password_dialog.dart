@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_ledger/services/user_password_service.dart';
+import '../services/user_password_service.dart';
 
 class VerifyCurrentUserPasswordDialog extends StatefulWidget {
   const VerifyCurrentUserPasswordDialog({

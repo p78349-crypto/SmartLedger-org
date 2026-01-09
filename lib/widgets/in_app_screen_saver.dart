@@ -7,19 +7,19 @@ import 'package:flutter/material.dart';
 // intl removed: use DateFormatter for formatting
 import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_ledger/models/asset.dart';
-import 'package:smart_ledger/models/asset_move.dart';
-import 'package:smart_ledger/services/asset_move_service.dart';
-import 'package:smart_ledger/services/asset_service.dart';
-import 'package:smart_ledger/services/budget_service.dart';
-import 'package:smart_ledger/services/emergency_fund_service.dart';
-import 'package:smart_ledger/services/monthly_agg_cache_service.dart';
-import 'package:smart_ledger/services/transaction_service.dart';
-import 'package:smart_ledger/utils/asset_dashboard_utils.dart';
-import 'package:smart_ledger/utils/asset_flow_stats.dart';
-import 'package:smart_ledger/utils/date_formatter.dart';
-import 'package:smart_ledger/utils/icon_catalog.dart';
-import 'package:smart_ledger/utils/pref_keys.dart';
+import '../models/asset.dart';
+import '../models/asset_move.dart';
+import '../services/asset_move_service.dart';
+import '../services/asset_service.dart';
+import '../services/budget_service.dart';
+import '../services/emergency_fund_service.dart';
+import '../services/monthly_agg_cache_service.dart';
+import '../services/transaction_service.dart';
+import '../utils/asset_dashboard_utils.dart';
+import '../utils/asset_flow_stats.dart';
+import '../utils/date_formatter.dart';
+import '../utils/icon_catalog.dart';
+import '../utils/pref_keys.dart';
 
 class InAppScreenSaver extends StatefulWidget {
   final String accountName;

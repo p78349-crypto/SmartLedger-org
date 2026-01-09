@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/models/fixed_cost.dart';
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/services/fixed_cost_service.dart';
-import 'package:smart_ledger/services/recent_input_service.dart';
-import 'package:smart_ledger/services/transaction_service.dart';
-import 'package:smart_ledger/utils/date_formats.dart';
-import 'package:smart_ledger/utils/utils.dart';
-import 'package:smart_ledger/widgets/smart_input_field.dart';
+import '../models/fixed_cost.dart';
+import '../models/transaction.dart';
+import '../services/fixed_cost_service.dart';
+import '../services/recent_input_service.dart';
+import '../services/transaction_service.dart';
+import '../utils/date_formats.dart';
+import '../utils/utils.dart';
+import '../widgets/smart_input_field.dart';
 
 class FixedCostTabScreen extends StatefulWidget {
   final String accountName;

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_ledger/services/user_pin_service.dart';
-import 'package:smart_ledger/utils/icon_catalog.dart';
-import 'package:smart_ledger/utils/pref_keys.dart';
+import '../services/user_pin_service.dart';
+import '../utils/icon_catalog.dart';
+import '../utils/pref_keys.dart';
 
 class UserPinGate extends StatefulWidget {
   const UserPinGate({super.key, required this.child});

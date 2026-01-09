@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:smart_ledger/models/fixed_cost.dart';
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/services/fixed_cost_service.dart';
-import 'package:smart_ledger/services/transaction_service.dart';
-import 'package:smart_ledger/utils/date_formatter.dart';
-import 'package:smart_ledger/utils/localized_date_formatter.dart';
-import 'package:smart_ledger/utils/number_formats.dart';
-import 'package:smart_ledger/utils/period_utils.dart' as period;
-import 'package:smart_ledger/utils/refund_utils.dart';
-import 'package:smart_ledger/utils/stats_labels.dart';
+import '../models/fixed_cost.dart';
+import '../models/transaction.dart';
+import '../services/fixed_cost_service.dart';
+import '../services/transaction_service.dart';
+import '../utils/date_formatter.dart';
+import '../utils/localized_date_formatter.dart';
+import '../utils/number_formats.dart';
+import '../utils/period_utils.dart' as period;
+import '../utils/refund_utils.dart';
+import '../utils/stats_labels.dart';
 
 class PeriodDetailStatsScreen extends StatefulWidget {
   final String accountName;

@@ -3,13 +3,13 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:smart_ledger/models/account.dart';
-import 'package:smart_ledger/navigation/app_routes.dart';
-import 'package:smart_ledger/screens/permission_gate_screen.dart';
-import 'package:smart_ledger/services/account_service.dart';
-import 'package:smart_ledger/services/user_pref_service.dart';
-import 'package:smart_ledger/utils/pref_keys.dart';
-import 'package:smart_ledger/widgets/background_widget.dart';
+import '../models/account.dart';
+import '../navigation/app_routes.dart';
+import 'permission_gate_screen.dart';
+import '../services/account_service.dart';
+import '../services/user_pref_service.dart';
+import '../utils/pref_keys.dart';
+import '../widgets/background_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LaunchScreen extends StatefulWidget {

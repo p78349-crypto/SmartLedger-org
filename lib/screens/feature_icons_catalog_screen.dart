@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/services/account_service.dart';
-import 'package:smart_ledger/utils/constants.dart';
-import 'package:smart_ledger/utils/icon_launch_utils.dart';
-import 'package:smart_ledger/utils/main_feature_icon_catalog.dart';
-import 'package:smart_ledger/widgets/theme_preview_widget.dart';
+import '../services/account_service.dart';
+import '../utils/constants.dart';
+import '../utils/icon_launch_utils.dart';
+import '../utils/main_feature_icon_catalog.dart';
+import '../widgets/theme_preview_widget.dart';
 
 /// 기능 아이콘 카탈로그를 파트별로 표시하는 화면
 class FeatureIconsCatalogScreen extends StatefulWidget {

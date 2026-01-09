@@ -2,14 +2,14 @@ import 'dart:math' as math;
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/services/account_service.dart';
-import 'package:smart_ledger/services/budget_service.dart';
-import 'package:smart_ledger/services/income_split_service.dart';
-import 'package:smart_ledger/services/transaction_service.dart';
-import 'package:smart_ledger/utils/date_formats.dart';
-import 'package:smart_ledger/utils/utils.dart';
-import 'package:smart_ledger/widgets/background_widget.dart';
+import '../models/transaction.dart';
+import '../services/account_service.dart';
+import '../services/budget_service.dart';
+import '../services/income_split_service.dart';
+import '../services/transaction_service.dart';
+import '../utils/date_formats.dart';
+import '../utils/utils.dart';
+import '../widgets/background_widget.dart';
 
 class BudgetStatusScreen extends StatefulWidget {
   final String accountName;

@@ -4,20 +4,63 @@
 class IngredientParsingUtils {
   // 정형화된 식재료 이름 목록 (외부에서 참조 가능)
   static const Set<String> knownIngredients = {
-    '닭고기', '돼지고기', '소고기', '양파', '마늘', '대파', '쪽파', '당근',
-    '감자', '고구마', '두부', '계란', '달걀', '우유', '치즈',
-    '김치', '쌀', '현미', '잡곡', '귀리',
-    '사과', '바나나', '딸기', '토마토', '오이', '가지', '호박',
-    '고추장', '된장', '간장', '소금', '설탕', '후추',
-    '참기름', '들기름', '올리브유', '식용유',
+    '닭고기',
+    '돼지고기',
+    '소고기',
+    '양파',
+    '마늘',
+    '대파',
+    '쪽파',
+    '당근',
+    '감자',
+    '고구마',
+    '두부',
+    '계란',
+    '달걀',
+    '우유',
+    '치즈',
+    '김치',
+    '쌀',
+    '현미',
+    '잡곡',
+    '귀리',
+    '사과',
+    '바나나',
+    '딸기',
+    '토마토',
+    '오이',
+    '가지',
+    '호박',
+    '고추장',
+    '된장',
+    '간장',
+    '소금',
+    '설탕',
+    '후추',
+    '참기름',
+    '들기름',
+    '올리브유',
+    '식용유',
   };
 
   /// 텍스트 단위 (파싱용)
   static const List<String> _textUnits = [
-    '조금', '약간', '적당량', '반 줌', '한 줌', '두 줌',
-    '반 개', '한 개', '두 개', '세 개',
-    '반 컵', '한 컵', '두 컵',
-    '한 큰술', '반 큰술', '한 작은술',
+    '조금',
+    '약간',
+    '적당량',
+    '반 줌',
+    '한 줌',
+    '두 줌',
+    '반 개',
+    '한 개',
+    '두 개',
+    '세 개',
+    '반 컵',
+    '한 컵',
+    '두 컵',
+    '한 큰술',
+    '반 큰술',
+    '한 작은술',
   ];
 
   /// 원본 문자열에서 (상품명, 수량)을 분리하여 반환
@@ -36,10 +79,10 @@ class IngredientParsingUtils {
     if (match != null) {
       final name = match.group(1)?.trim() ?? '';
       final amount = match.group(2)?.trim() ?? '';
-      
+
       // 이름이 비어있다면(예: "1개"만 들어온 경우) 원본 반환 또는 처리
       if (name.isEmpty) return (cleaned, '(정보 없음)');
-      
+
       return (name, amount);
     }
 
@@ -56,11 +99,13 @@ class IngredientParsingUtils {
     if (cleaned.endsWith(')')) {
       final startIndex = cleaned.lastIndexOf('(');
       if (startIndex > 0) {
-        final content = cleaned.substring(startIndex + 1, cleaned.length - 1).trim();
+        final content = cleaned
+            .substring(startIndex + 1, cleaned.length - 1)
+            .trim();
         // 괄호 내용이 숫자+단위 형식이면 분리
         if (RegExp(r'^\d+').hasMatch(content) || _textUnits.contains(content)) {
-           final name = cleaned.substring(0, startIndex).trim();
-           return (name, content);
+          final name = cleaned.substring(0, startIndex).trim();
+          return (name, content);
         }
       }
     }

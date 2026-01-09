@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/models/weather_snapshot.dart';
-import 'package:smart_ledger/services/transaction_service.dart';
-import 'package:smart_ledger/utils/number_formats.dart';
-import 'package:smart_ledger/utils/weather_price_prediction_utils.dart';
-import 'package:smart_ledger/widgets/background_widget.dart';
+import '../models/transaction.dart';
+import '../models/weather_snapshot.dart';
+import '../services/transaction_service.dart';
+import '../utils/number_formats.dart';
+import '../utils/weather_price_prediction_utils.dart';
+import '../widgets/background_widget.dart';
 
 /// 날씨 기반 식료품 가격 예측 화면
 ///
@@ -16,10 +16,7 @@ import 'package:smart_ledger/widgets/background_widget.dart';
 class WeatherPricePredictionScreen extends StatefulWidget {
   final String accountName;
 
-  const WeatherPricePredictionScreen({
-    super.key,
-    required this.accountName,
-  });
+  const WeatherPricePredictionScreen({super.key, required this.accountName});
 
   @override
   State<WeatherPricePredictionScreen> createState() =>
@@ -149,8 +146,8 @@ class _WeatherPricePredictionScreenState
           colors: isHot
               ? [Colors.orange.shade300, Colors.red.shade300]
               : isCold
-                  ? [Colors.blue.shade300, Colors.blue.shade600]
-                  : [Colors.blue.shade200, Colors.blue.shade400],
+              ? [Colors.blue.shade300, Colors.blue.shade600]
+              : [Colors.blue.shade200, Colors.blue.shade400],
         ),
         borderRadius: BorderRadius.circular(16),
       ),
@@ -160,8 +157,8 @@ class _WeatherPricePredictionScreenState
             isHot
                 ? Icons.wb_sunny
                 : isCold
-                    ? Icons.ac_unit
-                    : Icons.cloud,
+                ? Icons.ac_unit
+                : Icons.cloud,
             size: 48,
             color: Colors.white,
           ),
@@ -236,7 +233,10 @@ class _WeatherPricePredictionScreenState
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.auto_awesome, color: theme.colorScheme.primary),
+                      Icon(
+                        Icons.auto_awesome,
+                        color: theme.colorScheme.primary,
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         'AI 분석 리포트',
@@ -247,10 +247,7 @@ class _WeatherPricePredictionScreenState
                     ],
                   ),
                   const Divider(),
-                  Text(
-                    report,
-                    style: theme.textTheme.bodyMedium,
-                  ),
+                  Text(report, style: theme.textTheme.bodyMedium),
                 ],
               ),
             ),
@@ -322,10 +319,7 @@ class _WeatherPricePredictionScreenState
             Text(
               '${alert.expectedChangePercent >= 0 ? '+' : ''}'
               '${alert.expectedChangePercent.toStringAsFixed(1)}% 예상',
-              style: TextStyle(
-                color: color,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(color: color, fontWeight: FontWeight.w600),
             ),
             Text('${alert.triggerWeather} · ${alert.daysUntilImpact}일 내'),
             const SizedBox(height: 4),
@@ -374,17 +368,19 @@ class _WeatherPricePredictionScreenState
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
-              children: [
-                '배추', '시금치', '상추', '사과', '수박', '고추', '양파'
-              ].map((item) => Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: ActionChip(
-                  label: Text(item),
-                  onPressed: () {
-                    setState(() => _searchQuery = item);
-                  },
-                ),
-              )).toList(),
+              children: ['배추', '시금치', '상추', '사과', '수박', '고추', '양파']
+                  .map(
+                    (item) => Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: ActionChip(
+                        label: Text(item),
+                        onPressed: () {
+                          setState(() => _searchQuery = item);
+                        },
+                      ),
+                    ),
+                  )
+                  .toList(),
             ),
           ),
 
@@ -439,8 +435,7 @@ class _WeatherPricePredictionScreenState
           const SizedBox(height: 16),
 
           // 날씨 상관관계
-          if (correlation != null)
-            _buildCorrelationCard(correlation, theme),
+          if (correlation != null) _buildCorrelationCard(correlation, theme),
 
           const SizedBox(height: 16),
 
@@ -458,8 +453,8 @@ class _WeatherPricePredictionScreenState
     final trendColor = isRising
         ? Colors.red
         : isFalling
-            ? Colors.green
-            : theme.colorScheme.onSurface;
+        ? Colors.green
+        : theme.colorScheme.onSurface;
 
     return Card(
       child: Padding(
@@ -473,8 +468,8 @@ class _WeatherPricePredictionScreenState
                   isRising
                       ? Icons.trending_up
                       : isFalling
-                          ? Icons.trending_down
-                          : Icons.trending_flat,
+                      ? Icons.trending_down
+                      : Icons.trending_flat,
                   color: trendColor,
                   size: 32,
                 ),
@@ -489,10 +484,7 @@ class _WeatherPricePredictionScreenState
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Text(
-                        '7일 후 가격 예측',
-                        style: theme.textTheme.bodySmall,
-                      ),
+                      Text('7일 후 가격 예측', style: theme.textTheme.bodySmall),
                     ],
                   ),
                 ),
@@ -524,7 +516,10 @@ class _WeatherPricePredictionScreenState
             // 변동률
             Center(
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: trendColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
@@ -553,10 +548,7 @@ class _WeatherPricePredictionScreenState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    '📊 분석 근거',
-                    style: theme.textTheme.titleSmall,
-                  ),
+                  Text('📊 분석 근거', style: theme.textTheme.titleSmall),
                   const SizedBox(height: 4),
                   Text(prediction.reason),
                 ],
@@ -566,16 +558,22 @@ class _WeatherPricePredictionScreenState
             // 추천
             if (prediction.recommendations.isNotEmpty) ...[
               const SizedBox(height: 12),
-              ...prediction.recommendations.map((rec) => Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Row(
-                  children: [
-                    const Icon(Icons.lightbulb, size: 16, color: Colors.amber),
-                    const SizedBox(width: 8),
-                    Expanded(child: Text(rec)),
-                  ],
+              ...prediction.recommendations.map(
+                (rec) => Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.lightbulb,
+                        size: 16,
+                        color: Colors.amber,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(child: Text(rec)),
+                    ],
+                  ),
                 ),
-              )),
+              ),
             ],
 
             // 신뢰도
@@ -631,8 +629,8 @@ class _WeatherPricePredictionScreenState
     final color = strength > 0.5
         ? Colors.red
         : strength > 0.3
-            ? Colors.orange
-            : Colors.green;
+        ? Colors.orange
+        : Colors.green;
 
     return Card(
       child: Padding(
@@ -665,10 +663,7 @@ class _WeatherPricePredictionScreenState
                 const SizedBox(width: 12),
                 Text(
                   '${(strength * 100).toStringAsFixed(0)}%',
-                  style: TextStyle(
-                    color: color,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(color: color, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -711,10 +706,7 @@ class _WeatherPricePredictionScreenState
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Row(
                   children: [
-                    SizedBox(
-                      width: 100,
-                      child: Text(seasonLabel),
-                    ),
+                    SizedBox(width: 100, child: Text(seasonLabel)),
                     Expanded(
                       child: Text(
                         '평균 ${_currencyFormat.format(stat.avgPrice)}',
@@ -741,8 +733,11 @@ class _WeatherPricePredictionScreenState
   Widget _buildSeasonalTab(ThemeData theme) {
     final now = DateTime.now();
     final currentSeason = WeatherPricePredictionUtils.getSeason(now);
-    final seasonLabel = WeatherPricePredictionUtils.getSeasonLabel(currentSeason);
-    final recommendations = WeatherPricePredictionUtils.getSeasonalRecommendations(now);
+    final seasonLabel = WeatherPricePredictionUtils.getSeasonLabel(
+      currentSeason,
+    );
+    final recommendations =
+        WeatherPricePredictionUtils.getSeasonalRecommendations(now);
 
     // 전체 카테고리별 제철 식품
     const allCategories = WeatherPricePredictionUtils.weatherSensitiveItems;
@@ -772,19 +767,20 @@ class _WeatherPricePredictionScreenState
                       ),
                     ],
                   ),
-                  Text(
-                    seasonLabel,
-                    style: theme.textTheme.bodySmall,
-                  ),
+                  Text(seasonLabel, style: theme.textTheme.bodySmall),
                   const SizedBox(height: 12),
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: recommendations.map((item) => Chip(
-                      avatar: const Icon(Icons.check_circle, size: 18),
-                      label: Text(item),
-                      backgroundColor: Colors.green.shade100,
-                    )).toList(),
+                    children: recommendations
+                        .map(
+                          (item) => Chip(
+                            avatar: const Icon(Icons.check_circle, size: 18),
+                            label: Text(item),
+                            backgroundColor: Colors.green.shade100,
+                          ),
+                        )
+                        .toList(),
                   ),
                   const SizedBox(height: 12),
                   Container(
@@ -822,59 +818,63 @@ class _WeatherPricePredictionScreenState
           ),
           const SizedBox(height: 12),
 
-          ...allCategories.entries.map((entry) => Card(
-            margin: const EdgeInsets.only(bottom: 12),
-            child: ExpansionTile(
-              leading: Icon(_getCategoryIcon(entry.key)),
-              title: Text(entry.key),
-              subtitle: Text('${entry.value.length}개 품목'),
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: entry.value.map((item) {
-                      final sensitivity = WeatherPricePredictionUtils
-                          .itemWeatherSensitivity[item] ?? 0.5;
-                      final sensitivityLabel = sensitivity >= 0.7
-                          ? '높음'
-                          : sensitivity >= 0.5
-                              ? '중간'
-                              : '낮음';
-                      final color = sensitivity >= 0.7
-                          ? Colors.red
-                          : sensitivity >= 0.5
-                              ? Colors.orange
-                              : Colors.green;
+          ...allCategories.entries.map(
+            (entry) => Card(
+              margin: const EdgeInsets.only(bottom: 12),
+              child: ExpansionTile(
+                leading: Icon(_getCategoryIcon(entry.key)),
+                title: Text(entry.key),
+                subtitle: Text('${entry.value.length}개 품목'),
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: entry.value.map((item) {
+                        final sensitivity =
+                            WeatherPricePredictionUtils
+                                .itemWeatherSensitivity[item] ??
+                            0.5;
+                        final sensitivityLabel = sensitivity >= 0.7
+                            ? '높음'
+                            : sensitivity >= 0.5
+                            ? '중간'
+                            : '낮음';
+                        final color = sensitivity >= 0.7
+                            ? Colors.red
+                            : sensitivity >= 0.5
+                            ? Colors.orange
+                            : Colors.green;
 
-                      return ActionChip(
-                        avatar: CircleAvatar(
-                          radius: 10,
-                          backgroundColor: color.withValues(alpha: 0.2),
-                          child: Text(
-                            sensitivityLabel[0],
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: color,
-                              fontWeight: FontWeight.bold,
+                        return ActionChip(
+                          avatar: CircleAvatar(
+                            radius: 10,
+                            backgroundColor: color.withValues(alpha: 0.2),
+                            child: Text(
+                              sensitivityLabel[0],
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: color,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                        ),
-                        label: Text(item),
-                        onPressed: () {
-                          setState(() {
-                            _searchQuery = item;
-                            _tabController.animateTo(1);
-                          });
-                        },
-                      );
-                    }).toList(),
+                          label: Text(item),
+                          onPressed: () {
+                            setState(() {
+                              _searchQuery = item;
+                              _tabController.animateTo(1);
+                            });
+                          },
+                        );
+                      }).toList(),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          )),
+          ),
 
           const SizedBox(height: 16),
 

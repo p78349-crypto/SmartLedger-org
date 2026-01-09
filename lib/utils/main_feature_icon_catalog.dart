@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_ledger/navigation/app_routes.dart';
-import 'package:smart_ledger/services/account_service.dart';
-import 'package:smart_ledger/services/user_pref_service.dart';
-import 'package:smart_ledger/utils/icon_catalog.dart';
+import '../navigation/app_routes.dart';
+import '../services/account_service.dart';
+import '../services/user_pref_service.dart';
+import 'icon_catalog.dart';
 
 /// App feature icon catalog (data-only).
 ///

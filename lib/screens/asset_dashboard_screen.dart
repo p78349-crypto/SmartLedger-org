@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-import 'package:smart_ledger/models/asset.dart';
-import 'package:smart_ledger/models/asset_move.dart';
-import 'package:smart_ledger/screens/asset_detail_screen.dart';
-import 'package:smart_ledger/services/asset_move_service.dart';
-import 'package:smart_ledger/services/asset_service.dart';
-import 'package:smart_ledger/services/transaction_service.dart';
-import 'package:smart_ledger/utils/asset_dashboard_utils.dart';
+import '../models/asset.dart';
+import '../models/asset_move.dart';
+import 'asset_detail_screen.dart';
+import '../services/asset_move_service.dart';
+import '../services/asset_service.dart';
+import '../services/transaction_service.dart';
+import '../utils/asset_dashboard_utils.dart';
 
 /// 자산 대시보드 - 총 자산, 총 손익, 자산별 카드 뷰, 타임라인
 class AssetDashboardScreen extends StatefulWidget {

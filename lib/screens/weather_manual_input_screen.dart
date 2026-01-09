@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_ledger/models/weather_snapshot.dart';
-import 'package:smart_ledger/utils/snackbar_utils.dart';
+import '../models/weather_snapshot.dart';
+import '../utils/snackbar_utils.dart';
 
 /// 수동 날씨 입력 화면
 ///
@@ -40,15 +40,15 @@ class _WeatherManualInputScreenState extends State<WeatherManualInputScreen> {
     ),
     _WeatherConditionItem('cloudy', '흐림', Icons.cloud, Colors.grey),
     _WeatherConditionItem('rain', '비', Icons.umbrella, Colors.blue),
-    _WeatherConditionItem('heavy_rain', '폭우', Icons.thunderstorm, Colors.indigo),
+    _WeatherConditionItem(
+      'heavy_rain',
+      '폭우',
+      Icons.thunderstorm,
+      Colors.indigo,
+    ),
     _WeatherConditionItem('snow', '눈', Icons.ac_unit, Colors.cyan),
     _WeatherConditionItem('fog', '안개', Icons.blur_on, Colors.blueGrey),
-    _WeatherConditionItem(
-      'windy',
-      '바람',
-      Icons.air,
-      Colors.teal,
-    ),
+    _WeatherConditionItem('windy', '바람', Icons.air, Colors.teal),
     _WeatherConditionItem(
       'hot',
       '무더위',
@@ -391,15 +391,20 @@ class _WeatherManualInputScreenState extends State<WeatherManualInputScreen> {
       itemBuilder: (context, index) {
         final weather = displayHistory[index];
         final date = weather.capturedAt;
-        final dateStr = date != null
-            ? '${date.month}/${date.day} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}'
-            : '날짜 없음';
+        final dateStr = date == null
+            ? '날짜 없음'
+            : () {
+                final hh = date.hour.toString().padLeft(2, '0');
+                final mm = date.minute.toString().padLeft(2, '0');
+                return '${date.month}/${date.day} $hh:$mm';
+              }();
 
         return Card(
           child: ListTile(
             leading: CircleAvatar(
-              backgroundColor:
-                  _getConditionColor(weather.condition).withValues(alpha: 0.2),
+              backgroundColor: _getConditionColor(
+                weather.condition,
+              ).withValues(alpha: 0.2),
               child: Icon(
                 _getConditionIcon(weather.condition),
                 color: _getConditionColor(weather.condition),
@@ -442,8 +447,9 @@ class _WeatherManualInputScreenState extends State<WeatherManualInputScreen> {
                     child: Text(
                       '${weather.humidityPct}%',
                       style: TextStyle(
-                        color:
-                            Theme.of(context).colorScheme.onSecondaryContainer,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSecondaryContainer,
                       ),
                     ),
                   ),
@@ -471,19 +477,13 @@ class _WeatherManualInputScreenState extends State<WeatherManualInputScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                '날씨 데이터 활용',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
+              Text('날씨 데이터 활용', style: TextStyle(fontWeight: FontWeight.bold)),
               SizedBox(height: 8),
               Text('• 식료품 가격 변동 예측에 활용됩니다'),
               Text('• 계절별 구매 패턴 분석에 사용됩니다'),
               Text('• 날씨와 지출 관계를 파악합니다'),
               SizedBox(height: 16),
-              Text(
-                '입력 팁',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
+              Text('입력 팁', style: TextStyle(fontWeight: FontWeight.bold)),
               SizedBox(height: 8),
               Text('• 장보기 전/후에 날씨를 기록하세요'),
               Text('• 기온/습도는 선택 입력입니다'),

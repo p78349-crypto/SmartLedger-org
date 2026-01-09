@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:smart_ledger/services/root_overview_service.dart';
-import 'package:smart_ledger/utils/date_formatter.dart';
-import 'package:smart_ledger/utils/dialog_utils.dart';
-import 'package:smart_ledger/utils/icon_catalog.dart';
-import 'package:smart_ledger/utils/number_formats.dart';
-import 'package:smart_ledger/utils/snackbar_utils.dart';
-import 'package:smart_ledger/widgets/background_widget.dart';
+import '../services/root_overview_service.dart';
+import '../utils/date_formatter.dart';
+import '../utils/dialog_utils.dart';
+import '../utils/icon_catalog.dart';
+import '../utils/number_formats.dart';
+import '../utils/snackbar_utils.dart';
+import '../widgets/background_widget.dart';
 
 class RootAccountScreen extends StatelessWidget {
   RootAccountScreen({

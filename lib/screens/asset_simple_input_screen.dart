@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/models/asset.dart';
-import 'package:smart_ledger/services/asset_service.dart';
-import 'package:smart_ledger/services/recent_input_service.dart';
-import 'package:smart_ledger/widgets/smart_input_field.dart';
+import '../models/asset.dart';
+import '../services/asset_service.dart';
+import '../services/recent_input_service.dart';
+import '../widgets/smart_input_field.dart';
 
 class AssetSimpleInputScreen extends StatefulWidget {
   final String accountName;

@@ -1,4 +1,4 @@
-import 'package:smart_ledger/models/food_expiry_item.dart';
+import '../models/food_expiry_item.dart';
 
 /// 사용 가능한 식재료 기반 요리 추천
 class RecipeRecommendationUtils {
@@ -54,7 +54,8 @@ class RecipeRecommendationUtils {
     // 기본 요리 목록에서 추천
     for (final recipeData in defaultRecipes) {
       final recipeName = recipeData['name'] as String;
-      final requiredIngredients = (recipeData['ingredients'] as List).cast<String>();
+      final requiredIngredients = (recipeData['ingredients'] as List)
+          .cast<String>();
 
       if (requiredIngredients.isEmpty) continue;
 
@@ -62,14 +63,17 @@ class RecipeRecommendationUtils {
       int matchCount = 0;
       for (final required in requiredIngredients) {
         final normalized = required.toLowerCase().trim();
-        if (availableNames.any((available) => available.contains(normalized) ||
-            normalized.contains(available))) {
+        if (availableNames.any(
+          (available) =>
+              available.contains(normalized) || normalized.contains(available),
+        )) {
           matchCount++;
         }
       }
 
       // 최소 50% 이상의 재료가 있으면 추천
-      final matchPercentage = (matchCount / requiredIngredients.length * 100).toInt();
+      final matchPercentage = (matchCount / requiredIngredients.length * 100)
+          .toInt();
       if (matchPercentage >= 50) {
         recommendations[recipeName] = RecipeMatch(
           recipeName: recipeName,
@@ -82,7 +86,9 @@ class RecipeRecommendationUtils {
 
     // 매칭 비율 순으로 정렬
     final sortedEntries = recommendations.entries.toList()
-      ..sort((a, b) => b.value.matchPercentage.compareTo(a.value.matchPercentage));
+      ..sort(
+        (a, b) => b.value.matchPercentage.compareTo(a.value.matchPercentage),
+      );
 
     return Map.fromEntries(sortedEntries);
   }

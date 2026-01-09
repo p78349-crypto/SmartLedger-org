@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/models/food_expiry_item.dart';
-import 'package:smart_ledger/services/food_expiry_service.dart';
-import 'package:smart_ledger/utils/expiring_ingredients_utils.dart';
-import 'package:smart_ledger/utils/icon_catalog.dart';
-import 'package:smart_ledger/utils/recipe_recommendation_utils.dart';
+import '../models/food_expiry_item.dart';
+import '../services/food_expiry_service.dart';
+import '../utils/expiring_ingredients_utils.dart';
+import '../utils/icon_catalog.dart';
+import '../utils/recipe_recommendation_utils.dart';
 
 /// 오늘의 요리 추천 위젯
 class DailyRecipeRecommendationWidget extends StatefulWidget {
   final String? accountName;
 
-  const DailyRecipeRecommendationWidget({
-    super.key,
-    this.accountName,
-  });
+  const DailyRecipeRecommendationWidget({super.key, this.accountName});
 
   @override
   State<DailyRecipeRecommendationWidget> createState() =>
@@ -52,8 +49,10 @@ class _DailyRecipeRecommendationWidgetState
         }
 
         // 추천 요리 생성
-        final topRecipes =
-            RecipeRecommendationUtils.getTopRecommendations(expiring, limit: 1);
+        final topRecipes = RecipeRecommendationUtils.getTopRecommendations(
+          expiring,
+          limit: 1,
+        );
 
         setState(() {
           _expiringItems = expiring;
@@ -62,7 +61,10 @@ class _DailyRecipeRecommendationWidgetState
         });
       }
     } catch (e) {
-      debugPrint('DailyRecipeRecommendation: Error loading recommendation - $e');
+      debugPrint(
+        'DailyRecipeRecommendation: Error loading recommendation - '
+        '$e',
+      );
       if (mounted) {
         setState(() => _isLoading = false);
       }
@@ -129,8 +131,9 @@ class _DailyRecipeRecommendationWidgetState
               Text(
                 '이 재료들이 곧 상해요:',
                 style: theme.textTheme.labelSmall?.copyWith(
-                  color: theme.colorScheme.onPrimaryContainer
-                      .withValues(alpha: 0.7),
+                  color: theme.colorScheme.onPrimaryContainer.withValues(
+                    alpha: 0.7,
+                  ),
                 ),
               ),
               const SizedBox(height: 8),
@@ -138,7 +141,9 @@ class _DailyRecipeRecommendationWidgetState
                 spacing: 6,
                 runSpacing: 6,
                 children: _expiringItems!.take(3).map((item) {
-                  final daysLeft = ExpiringIngredientsUtils.daysUntilExpiry(item);
+                  final daysLeft = ExpiringIngredientsUtils.daysUntilExpiry(
+                    item,
+                  );
                   return Chip(
                     label: Text(
                       '${item.name} ($daysLeft일)',
@@ -149,8 +154,8 @@ class _DailyRecipeRecommendationWidgetState
                     backgroundColor: daysLeft == 0
                         ? Colors.red.shade100
                         : daysLeft == 1
-                            ? Colors.orange.shade100
-                            : Colors.yellow.shade100,
+                        ? Colors.orange.shade100
+                        : Colors.yellow.shade100,
                     side: BorderSide.none,
                   );
                 }).toList(),
@@ -204,8 +209,9 @@ class _DailyRecipeRecommendationWidgetState
                     Text(
                       _recommendedRecipe!.message,
                       style: theme.textTheme.labelSmall?.copyWith(
-                        color: theme.colorScheme.onPrimaryContainer
-                            .withValues(alpha: 0.8),
+                        color: theme.colorScheme.onPrimaryContainer.withValues(
+                          alpha: 0.8,
+                        ),
                       ),
                     ),
                   ],

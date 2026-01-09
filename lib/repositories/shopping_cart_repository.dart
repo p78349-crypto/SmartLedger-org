@@ -1,5 +1,5 @@
-import 'package:smart_ledger/models/shopping_cart_history_entry.dart';
-import 'package:smart_ledger/models/shopping_cart_item.dart';
+import '../models/shopping_cart_history_entry.dart';
+import '../models/shopping_cart_item.dart';
 
 abstract class ShoppingCartRepository {
   Future<List<ShoppingCartItem>> getItems({required String accountName});

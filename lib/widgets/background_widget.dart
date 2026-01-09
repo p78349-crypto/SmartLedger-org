@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/services/background_service.dart';
+import '../services/background_service.dart';
 
 /// 배경 설정을 가져와서 Scaffold의 backgroundColor로 사용할 수 있는 위젯
 class BackgroundWidget extends StatefulWidget {

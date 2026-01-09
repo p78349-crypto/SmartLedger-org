@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/models/savings_plan.dart';
-import 'package:smart_ledger/screens/savings_plan_search_screen.dart';
-import 'package:smart_ledger/services/savings_plan_service.dart';
-import 'package:smart_ledger/services/transaction_service.dart';
-import 'package:smart_ledger/theme/app_colors.dart';
-import 'package:smart_ledger/utils/date_formats.dart';
-import 'package:smart_ledger/utils/utils.dart';
+import '../models/savings_plan.dart';
+import 'savings_plan_search_screen.dart';
+import '../services/savings_plan_service.dart';
+import '../services/transaction_service.dart';
+import '../theme/app_colors.dart';
+import '../utils/date_formats.dart';
+import '../utils/utils.dart';
 
 class SavingsPlanFormScreen extends StatefulWidget {
   final String accountName;

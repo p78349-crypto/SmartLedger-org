@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/services/user_pref_service.dart';
-import 'package:smart_ledger/utils/image_utils.dart';
+import 'user_pref_service.dart';
+import '../utils/image_utils.dart';
 
-import 'package:smart_ledger/utils/theme_presets.dart';
+import '../utils/theme_presets.dart';
 
 class ThemeService extends ChangeNotifier {
   ThemeVariant? _preview;

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/screens/asset_input_screen.dart';
-import 'package:smart_ledger/screens/asset_tab_screen.dart';
+import 'asset_input_screen.dart';
+import 'asset_tab_screen.dart';
 
 class AssetManagementScreen extends StatelessWidget {
   final String accountName;

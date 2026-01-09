@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_ledger/utils/pref_keys.dart';
-import 'package:smart_ledger/widgets/root_auth_gate.dart';
+import '../utils/pref_keys.dart';
+import '../widgets/root_auth_gate.dart';
 
 class RootScreenSaverExposureSettingsScreen extends StatefulWidget {
   const RootScreenSaverExposureSettingsScreen({super.key});

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_ledger/models/main_page_config.dart';
-import 'package:smart_ledger/navigation/app_routes.dart';
-import 'package:smart_ledger/services/user_pref_service.dart';
-import 'package:smart_ledger/utils/main_feature_icon_catalog.dart';
-import 'package:smart_ledger/utils/page1_bottom_quick_icons.dart';
-import 'package:smart_ledger/utils/pref_keys.dart';
-import 'package:smart_ledger/utils/screen_saver_ids.dart';
+import '../models/main_page_config.dart';
+import '../navigation/app_routes.dart';
+import '../services/user_pref_service.dart';
+import '../utils/main_feature_icon_catalog.dart';
+import '../utils/page1_bottom_quick_icons.dart';
+import '../utils/pref_keys.dart';
+import '../utils/screen_saver_ids.dart';
 
 class IconManagementScreen extends StatefulWidget {
   final String accountName;
@@ -1296,40 +1296,35 @@ class _IconManagementScreenState extends State<IconManagementScreen> {
 
   Widget _buildApplyEnterKeyButton(ThemeData theme) {
     final scheme = theme.colorScheme;
+    final isEnabled = _pendingIds.isNotEmpty;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 6),
-      child: OutlinedButton(
-        onPressed: _pendingIds.isEmpty ? null : _applyPending,
-        style: ButtonStyle(
-          minimumSize: const WidgetStatePropertyAll(Size(0, 32)),
-          padding: const WidgetStatePropertyAll(
-            EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-          ),
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          visualDensity: VisualDensity.compact,
-          shape: const WidgetStatePropertyAll(
-            RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(8)),
+      child: Opacity(
+        opacity: isEnabled ? 1.0 : 0.5,
+        child: ElevatedButton(
+          onPressed: isEnabled ? _applyPending : null,
+          style: ButtonStyle(
+            minimumSize: const WidgetStatePropertyAll(Size(0, 32)),
+            padding: const WidgetStatePropertyAll(
+              EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             ),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            visualDensity: VisualDensity.compact,
+            shape: const WidgetStatePropertyAll(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(8)),
+              ),
+            ),
+            backgroundColor: WidgetStatePropertyAll(scheme.primary),
+            foregroundColor: WidgetStatePropertyAll(scheme.onPrimary),
           ),
-          side: WidgetStateProperty.resolveWith<BorderSide>((states) {
-            final base = scheme.outlineVariant;
-            if (states.contains(WidgetState.disabled)) {
-              return BorderSide(color: base.withValues(alpha: 0.55));
-            }
-            return BorderSide(color: base);
-          }),
-          foregroundColor: WidgetStateProperty.resolveWith<Color>((states) {
-            if (states.contains(WidgetState.disabled)) {
-              return scheme.onSurfaceVariant.withValues(alpha: 0.55);
-            }
-            return scheme.onSurfaceVariant;
-          }),
-          backgroundColor: const WidgetStatePropertyAll<Color>(
-            Colors.transparent,
+          child: const Text(
+            'ENT',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontWeight: FontWeight.bold),
           ),
         ),
-        child: const Text('ENT', maxLines: 1, overflow: TextOverflow.ellipsis),
       ),
     );
   }

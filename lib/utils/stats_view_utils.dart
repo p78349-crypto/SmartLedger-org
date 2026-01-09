@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/utils/icon_catalog.dart';
+import '../models/transaction.dart';
+import 'icon_catalog.dart';
 
 /// 통계 화면 뷰 타입
 enum StatsView {

@@ -3,10 +3,10 @@ import 'dart:math' as math;
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/services/income_split_service.dart';
-import 'package:smart_ledger/services/transaction_service.dart';
-import 'package:smart_ledger/utils/utils.dart';
+import '../models/transaction.dart';
+import '../services/income_split_service.dart';
+import '../services/transaction_service.dart';
+import '../utils/utils.dart';
 
 class IncomeSplitStatusScreen extends StatefulWidget {
   final String accountName;

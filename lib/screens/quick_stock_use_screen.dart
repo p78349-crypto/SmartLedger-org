@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/models/consumable_inventory_item.dart';
-import 'package:smart_ledger/services/consumable_inventory_service.dart';
-import 'package:smart_ledger/services/user_pref_service.dart';
-import 'package:smart_ledger/utils/quick_stock_use_utils.dart';
+import '../models/consumable_inventory_item.dart';
+import '../services/consumable_inventory_service.dart';
+import '../services/user_pref_service.dart';
+import '../utils/quick_stock_use_utils.dart';
 
 /// 식료품/생활용품 사용기록 화면
 ///
@@ -31,9 +31,7 @@ class _QuickStockUseScreenState extends State<QuickStockUseScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('빠른 재고 차감'),
-      ),
+      appBar: AppBar(title: const Text('빠른 재고 차감'), centerTitle: true),
       body: _QuickStockUseBody(
         accountName: widget.accountName,
         initialProductName: widget.initialProductName,
@@ -71,9 +69,10 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
     _nameController.addListener(_onNameChanged);
     _amountController.addListener(_onAmountChanged);
     _loadShoppingHistoryNames();
-    
+
     // 초기 상품명 설정 (생활용품 화면에서 전달된 경우)
-    if (widget.initialProductName != null && widget.initialProductName!.isNotEmpty) {
+    if (widget.initialProductName != null &&
+        widget.initialProductName!.isNotEmpty) {
       _nameController.text = widget.initialProductName!;
       _onNameChanged();
     }
@@ -111,7 +110,10 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
     });
   }
 
-  List<String> _searchHistoryNames(String query, {required List<String> names}) {
+  List<String> _searchHistoryNames(
+    String query, {
+    required List<String> names,
+  }) {
     final q = query.trim();
     if (q.isEmpty || names.isEmpty) return const [];
 
@@ -188,9 +190,7 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
       return;
     }
 
-    await ConsumableInventoryService.instance.addItem(
-      name: trimmed,
-    );
+    await ConsumableInventoryService.instance.addItem(name: trimmed);
 
     final created = QuickStockUseUtils.findExactItem(trimmed);
     if (created != null) {
@@ -199,9 +199,9 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
     }
 
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('상품 등록에 실패했습니다')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('상품 등록에 실패했습니다')));
   }
 
   void _selectItem(ConsumableInventoryItem item) {
@@ -221,7 +221,7 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
           _QuickButton(
             label: value.toString(),
             onTap: () => _amountController.text = value.toString(),
-          )
+          ),
       ];
     }
 
@@ -253,8 +253,8 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
       if (_selectedItem != null && _selectedItem!.bundleSize > 1)
         _QuickButton(
           label: '묶음',
-          onTap: () => _amountController.text =
-              _selectedItem!.bundleSize.toStringAsFixed(0),
+          onTap: () => _amountController.text = _selectedItem!.bundleSize
+              .toStringAsFixed(0),
         ),
     ];
   }
@@ -275,26 +275,34 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
     }) {
       final enabled = onTap != null;
       final colorScheme = Theme.of(context).colorScheme;
-      return InkWell(
-        onTap: onTap,
-        borderRadius: pillRadius,
-        child: Container(
-          padding: padding ?? pillPadding,
-          decoration: BoxDecoration(
-            color: isPrimary && enabled
-                ? colorScheme.primary
-                : (enabled ? colorScheme.surface : colorScheme.surfaceContainerHighest),
-            border: Border.all(width: 1.3, color: isPrimary && enabled ? colorScheme.primary : colorScheme.outline),
-            borderRadius: pillRadius,
-            boxShadow: [
-              BoxShadow(
-                color: colorScheme.shadow.withValues(alpha: 0.05),
-                blurRadius: 6,
-                offset: const Offset(0, 3),
+      return Opacity(
+        opacity: enabled ? 1.0 : 0.5,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: pillRadius,
+          child: Container(
+            padding: padding ?? pillPadding,
+            decoration: BoxDecoration(
+              color: isPrimary
+                  ? colorScheme.primary
+                  : (enabled
+                        ? colorScheme.surface
+                        : colorScheme.surfaceContainerHighest),
+              border: Border.all(
+                width: 1.3,
+                color: isPrimary ? colorScheme.primary : colorScheme.outline,
               ),
-            ],
+              borderRadius: pillRadius,
+              boxShadow: [
+                BoxShadow(
+                  color: colorScheme.shadow.withValues(alpha: 0.05),
+                  blurRadius: 6,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: child,
           ),
-          child: child,
         ),
       );
     }
@@ -303,70 +311,72 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
       children: [
         Expanded(
           flex: 3,
-            child: buildPill(
-              onTap: hasItem ? () => _showStockInfo(stockText) : null,
-              padding: pillPadding,
-              child: Builder(
-                builder: (context) {
-                  final colorScheme = Theme.of(context).colorScheme;
-                  return Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(
-                          text: '현재고량 ',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: colorScheme.onSurface,
-                          ),
+          child: buildPill(
+            onTap: hasItem ? () => _showStockInfo(stockText) : null,
+            padding: pillPadding,
+            child: Builder(
+              builder: (context) {
+                final colorScheme = Theme.of(context).colorScheme;
+                return Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: '현재고량 ',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: colorScheme.onSurface,
                         ),
-                        TextSpan(
-                          text: stockText,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color: hasItem ? colorScheme.onSurface : colorScheme.onSurfaceVariant,
-                          ),
+                      ),
+                      TextSpan(
+                        text: stockText,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: hasItem
+                              ? colorScheme.onSurface
+                              : colorScheme.onSurfaceVariant,
                         ),
-                        TextSpan(
-                          text: '  ⊖ ENT',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: colorScheme.onSurfaceVariant,
-                          ),
+                      ),
+                      TextSpan(
+                        text: '  ⊖ ENT',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: colorScheme.onSurfaceVariant,
                         ),
-                      ],
-                    ),
-                    softWrap: false,
-                    overflow: TextOverflow.ellipsis,
-                  );
-                },
-              ),
+                      ),
+                    ],
+                  ),
+                  softWrap: false,
+                  overflow: TextOverflow.ellipsis,
+                );
+              },
             ),
+          ),
         ),
         const SizedBox(width: 12),
         Expanded(
           flex: 3,
-            child: buildPill(
-              onTap: hasItem ? _submit : null,
-              padding: pillPadding,
-              isPrimary: true,
-              child: Builder(
-                builder: (context) {
-                  final colorScheme = Theme.of(context).colorScheme;
-                  return Center(
-                    child: Text(
-                      'ENT',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: hasItem ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
-                      ),
+          child: buildPill(
+            onTap: hasItem ? _submit : null,
+            padding: pillPadding,
+            isPrimary: true,
+            child: Builder(
+              builder: (context) {
+                final colorScheme = Theme.of(context).colorScheme;
+                return Center(
+                  child: Text(
+                    'ENT',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: colorScheme.onPrimary,
                     ),
-                  );
-                },
-              ),
+                  ),
+                );
+              },
             ),
+          ),
         ),
       ],
     );
@@ -383,27 +393,27 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
 
   Future<void> _submit() async {
     if (_selectedItem == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('상품을 선택해주세요')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('상품을 선택해주세요')));
       return;
     }
 
     final amount = double.tryParse(_amountController.text) ?? 0;
     if (amount <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('사용량을 입력해주세요')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('사용량을 입력해주세요')));
       return;
     }
 
     // 재고 초과 체크
     if (amount > _selectedItem!.currentStock) {
+      final currentLabel =
+          '${_formatQty(_selectedItem!.currentStock)}${_selectedItem!.unit}';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            '재고 부족! 현재: ${_formatQty(_selectedItem!.currentStock)}${_selectedItem!.unit}',
-          ),
+          content: Text('재고 부족! 현재: $currentLabel'),
           backgroundColor: Colors.red,
           duration: const Duration(seconds: 2),
         ),
@@ -445,22 +455,30 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
 
         if (result.addedToCart) {
           // 부족분이 장바구니에 추가됨
-          message = '⚠️ ${_selectedItem!.name} '
+          message =
+              '⚠️ ${_selectedItem!.name} '
               '${_formatQty(result.actualUsed)}${_selectedItem!.unit} 차감\n'
-              '부족분 ${_formatQty(result.shortage)}${_selectedItem!.unit} → 장바구니 추가됨';
+              '부족분 '
+              '${_formatQty(result.shortage)}${_selectedItem!.unit} '
+              '→ 장바구니 추가됨';
           bgColor = Colors.orange;
         } else if (result.remaining == 0) {
           // 재고 소진
-          message = '✅ ${_selectedItem!.name} '
+          message =
+              '✅ ${_selectedItem!.name} '
               '${_formatQty(result.actualUsed)}${_selectedItem!.unit} 차감 완료\n'
               '⚠️ 재고가 모두 소진되었습니다!';
           bgColor = Colors.orange.shade700;
         } else {
           // 정상 차감
-          message = '✅ ${_selectedItem!.name} '
+          final predictionLine = result.addedToCartByPrediction
+              ? '\n예상 소진 임박 → 장바구니 추가됨'
+              : '';
+          message =
+              '✅ ${_selectedItem!.name} '
               '${_formatQty(result.actualUsed)}${_selectedItem!.unit} 차감 완료\n'
               '남은 재고: ${_formatQty(result.remaining)}${_selectedItem!.unit}'
-              '${result.addedToCartByPrediction ? '\n예상 소진 임박 → 장바구니 추가됨' : ''}';
+              '$predictionLine';
           bgColor = Colors.green;
         }
 
@@ -502,14 +520,13 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
             child: const Padding(
               padding: EdgeInsets.all(12),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.bolt, color: Colors.orange),
                   SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      '상품명 입력 → 사용량 입력 → ENT',
-                      style: TextStyle(fontWeight: FontWeight.w500),
-                    ),
+                  Text(
+                    '상품명 입력 → 사용량 입력 → ENT',
+                    style: TextStyle(fontWeight: FontWeight.w500),
                   ),
                 ],
               ),
@@ -526,8 +543,13 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
               hintText: '휴지, 세제, 샴푸 등',
               prefixIcon: const Icon(Icons.search),
               border: const OutlineInputBorder(),
-              contentPadding:
-                  const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.grey.shade300),
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                vertical: 16,
+                horizontal: 16,
+              ),
               suffixIcon: _selectedItem != null
                   ? const Icon(Icons.check_circle, color: Colors.green)
                   : null,
@@ -557,8 +579,8 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
                             backgroundColor: isEmpty
                                 ? Colors.red
                                 : isLow
-                                    ? Colors.orange
-                                    : Colors.grey,
+                                ? Colors.orange
+                                : Colors.grey,
                             child: isEmpty
                                 ? const Icon(
                                     Icons.warning,
@@ -592,13 +614,14 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
                             ],
                           ),
                           subtitle: Text(
-                            '재고: ${_formatQty(item.currentStock)}${item.unit} | 📍${item.location}',
+                            '재고: ${_formatQty(item.currentStock)}${item.unit} '
+                            '| 📍${item.location}',
                             style: TextStyle(
                               color: isEmpty
                                   ? Colors.red
                                   : isLow
-                                      ? Colors.orange
-                                      : null,
+                                  ? Colors.orange
+                                  : null,
                             ),
                           ),
                           onTap: () => _selectItem(item),
@@ -641,6 +664,9 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
                       decoration: InputDecoration(
                         labelText: '사용량',
                         border: const OutlineInputBorder(),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
                         suffixText: _selectedItem?.unit ?? '개',
                         contentPadding: const EdgeInsets.symmetric(
                           vertical: 14,
@@ -664,7 +690,10 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
                         ),
                         const SizedBox(height: 4),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 2,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             border: Border.all(color: Colors.grey.shade400),
@@ -732,26 +761,28 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
 
                   final first = sorted.first.timestamp;
                   final last = sorted.last.timestamp;
-                  final spanDays = startOfDay(last)
-                      .difference(startOfDay(first))
-                      .inDays
-                      .abs();
+                  final spanDays = startOfDay(
+                    last,
+                  ).difference(startOfDay(first)).inDays.abs();
                   final denomDays = spanDays < 1 ? 1 : spanDays;
-                  final totalUsed =
-                      sorted.fold<double>(0.0, (sum, r) => sum + r.amount);
+                  final totalUsed = sorted.fold<double>(
+                    0.0,
+                    (sum, r) => sum + r.amount,
+                  );
                   final avgPerDay = totalUsed / denomDays;
 
                   if (avgPerDay > 0 && item.currentStock > 0) {
                     expectedDaysLeft = (item.currentStock / avgPerDay).ceil();
-                    expectedDepletionDate =
-                    startOfDay(DateTime.now()).add(Duration(days: expectedDaysLeft));
+                    expectedDepletionDate = startOfDay(
+                      DateTime.now(),
+                    ).add(Duration(days: expectedDaysLeft));
                   }
 
                   final intervals = <int>[];
                   for (var i = 1; i < sorted.length; i++) {
-                    final delta = startOfDay(sorted[i].timestamp)
-                        .difference(startOfDay(sorted[i - 1].timestamp))
-                        .inDays;
+                    final delta = startOfDay(
+                      sorted[i].timestamp,
+                    ).difference(startOfDay(sorted[i - 1].timestamp)).inDays;
                     if (delta > 0) intervals.add(delta);
                   }
                   if (intervals.isNotEmpty) {
@@ -766,25 +797,36 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
 
                 final expiry = item.expiryDate;
                 if (expiry != null) {
-                  final dDayValue = startOfDay(expiry)
-                    .difference(startOfDay(DateTime.now()))
-                    .inDays;
+                  final dDayValue = startOfDay(
+                    expiry,
+                  ).difference(startOfDay(DateTime.now())).inDays;
 
-                  secondaryLine = '유통기한: ${formatDate(expiry)}'
-                    '${dDayValue < 0 ? ' (경과 ${-dDayValue}일)' : ' (D-$dDayValue)'}';
+                  final dDayText = dDayValue < 0
+                      ? ' (경과 ${-dDayValue}일)'
+                      : ' (D-$dDayValue)';
+
+                  secondaryLine =
+                      '유통기한: ${formatDate(expiry)}'
+                      '$dDayText';
                   secondaryColor = dDayValue < 0
-                    ? Colors.red
-                    : (dDayValue <= 2
-                      ? Colors.orange
-                      : Theme.of(context).colorScheme.onSurfaceVariant);
-                } else if (expectedDaysLeft != null && expectedDepletionDate != null) {
+                      ? Colors.red
+                      : (dDayValue <= 2
+                            ? Colors.orange
+                            : Theme.of(context).colorScheme.onSurfaceVariant);
+                } else if (expectedDaysLeft != null &&
+                    expectedDepletionDate != null) {
                   final expectedLeft = expectedDaysLeft;
                   final expectedDate = expectedDepletionDate;
-                  secondaryLine = '예상 소진: $expectedLeft일 뒤 (${formatDate(expectedDate)})'
-                    '${avgIntervalDays == null ? '' : ' (평균 $avgIntervalDays일 사용)'}';
+
+                  final avgText = avgIntervalDays == null
+                      ? ''
+                      : ' (평균 $avgIntervalDays일 사용)';
+                  secondaryLine =
+                      '예상 소진: $expectedLeft일 뒤 (${formatDate(expectedDate)})'
+                      '$avgText';
                   secondaryColor = expectedLeft <= 2
-                    ? Colors.orange
-                    : Theme.of(context).colorScheme.onSurfaceVariant;
+                      ? Colors.orange
+                      : Theme.of(context).colorScheme.onSurfaceVariant;
                 }
 
                 return Card(
@@ -810,14 +852,15 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
                                     horizontal: 4,
                                   ),
                                   child: Text(
-                                    '현재 ${_formatQty(item.currentStock)}${item.unit} 남음',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodySmall
+                                    '현재 '
+                                    '${_formatQty(item.currentStock)}'
+                                    '${item.unit} '
+                                    '남음',
+                                    style: Theme.of(context).textTheme.bodySmall
                                         ?.copyWith(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .onSurfaceVariant,
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.onSurfaceVariant,
                                         ),
                                   ),
                                 ),
@@ -826,8 +869,9 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
                             if (item.currentStock > 0)
                               TextButton(
                                 onPressed: () {
-                                  _amountController.text =
-                                      _formatQty(item.currentStock);
+                                  _amountController.text = _formatQty(
+                                    item.currentStock,
+                                  );
                                   FocusScope.of(context).unfocus();
                                 },
                                 style: TextButton.styleFrom(
@@ -839,13 +883,11 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
                               ),
                             Text(
                               '최근 차감: ${relativeLastUpdated()}',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
+                              style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
                                   ),
                             ),
                           ],
@@ -854,9 +896,7 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
                           const SizedBox(height: 4),
                           Text(
                             secondaryLine,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
+                            style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(color: secondaryColor),
                           ),
                         ],
@@ -867,18 +907,14 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
                               child: Text(
                                 '차감 후 예상 남은 재고: '
                                 '${_formatQty(remainingClamped)}${item.unit}',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
+                                style: Theme.of(context).textTheme.bodyMedium
                                     ?.copyWith(fontWeight: FontWeight.w600),
                               ),
                             ),
                             if (shortageClamped > 0)
                               Text(
                                 '부족 ${_formatQty(shortageClamped)}${item.unit}',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
+                                style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(color: Colors.orange),
                               ),
                           ],
@@ -894,42 +930,44 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
           // 최근 사용 기록
           if (_recentUses.isNotEmpty) ...[
             const SizedBox(height: 32),
-            Text(
-              '최근 차감 기록',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            Text('최근 차감 기록', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
             ...(_recentUses.map((r) {
               final hasShortage = r.shortage > 0;
               final isEmpty = r.remaining == 0;
+              final minute = r.time.minute.toString().padLeft(2, '0');
+              final timeLabel = '${r.time.hour}:$minute';
 
               return Card(
                 color: hasShortage
                     ? Colors.orange.shade50
                     : isEmpty
-                        ? Colors.red.shade50
-                        : null,
+                    ? Colors.red.shade50
+                    : null,
                 child: ListTile(
                   leading: Icon(
                     hasShortage
                         ? Icons.shopping_cart
                         : isEmpty
-                            ? Icons.warning
-                            : Icons.check_circle,
+                        ? Icons.warning
+                        : Icons.check_circle,
                     color: hasShortage
                         ? Colors.orange
                         : isEmpty
-                            ? Colors.red
-                            : Colors.green,
+                        ? Colors.red
+                        : Colors.green,
                   ),
-                  title: Text('${r.name} -${r.amount.toStringAsFixed(0)}${r.unit}'),
+                  title: Text(
+                    '${r.name} -${r.amount.toStringAsFixed(0)}${r.unit}',
+                  ),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         isEmpty
                             ? '⚠️ 재고 없음!'
-                            : '남은 재고: ${r.remaining.toStringAsFixed(0)}${r.unit}',
+                            : '남은 재고: '
+                                  '${r.remaining.toStringAsFixed(0)}${r.unit}',
                         style: TextStyle(
                           color: isEmpty ? Colors.red : null,
                           fontWeight: isEmpty ? FontWeight.bold : null,
@@ -937,13 +975,15 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
                       ),
                       if (hasShortage)
                         Text(
-                          '🛒 부족분 ${r.shortage.toStringAsFixed(0)}${r.unit} 장바구니 추가됨',
+                          '🛒 부족분 '
+                          '${r.shortage.toStringAsFixed(0)}${r.unit} '
+                          '장바구니 추가됨',
                           style: const TextStyle(color: Colors.orange),
                         ),
                     ],
                   ),
                   trailing: Text(
-                    '${r.time.hour}:${r.time.minute.toString().padLeft(2, '0')}',
+                    timeLabel,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                   isThreeLine: hasShortage,
@@ -998,8 +1038,13 @@ class _QuickButton extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       borderRadius: borderRadius,
-        child: Container(
-        constraints: const BoxConstraints(minWidth: 38, minHeight: 38, maxWidth: 38, maxHeight: 38),
+      child: Container(
+        constraints: const BoxConstraints(
+          minWidth: 38,
+          minHeight: 38,
+          maxWidth: 38,
+          maxHeight: 38,
+        ),
         padding: EdgeInsets.zero,
         decoration: BoxDecoration(
           color: isHighRisk ? Colors.red.shade50 : Colors.white,
@@ -1048,8 +1093,5 @@ class _ScoredName {
   final String name;
   final int score;
 
-  const _ScoredName({
-    required this.name,
-    required this.score,
-  });
+  const _ScoredName({required this.name, required this.score});
 }

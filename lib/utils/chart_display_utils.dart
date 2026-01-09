@@ -1,7 +1,7 @@
 /// 차트 디스플레이 유틸리티 - 공용 `ChartDisplayType` 재사용
 library;
 
-import 'package:smart_ledger/utils/chart_utils.dart';
+import 'chart_utils.dart';
 
 class ChartDisplayUtils {
   ChartDisplayUtils._();

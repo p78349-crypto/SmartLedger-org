@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/navigation/app_routes.dart';
+import '../navigation/app_routes.dart';
 
 /// Navigation helpers for actions triggered from the user main
 /// (AccountHomeScreen).

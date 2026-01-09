@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/services/food_expiry_service.dart';
-import 'package:smart_ledger/utils/meal_plan_generator_utils.dart';
-import 'package:smart_ledger/utils/user_preference_utils.dart';
+import '../services/food_expiry_service.dart';
+import '../utils/meal_plan_generator_utils.dart';
+import '../utils/user_preference_utils.dart';
 
 /// 식사 계획 자동 생성 위젯
 class MealPlanWidget extends StatefulWidget {

@@ -4,7 +4,7 @@
 /// 행동 가이드 제공 등 사용자의 지출 절감을 돕습니다.
 library;
 
-import 'package:smart_ledger/utils/spending_analysis_utils.dart';
+import 'spending_analysis_utils.dart';
 
 /// 절약 팁 타입
 enum SavingTipType {
@@ -362,15 +362,17 @@ class SavingTipsUtils {
         final tip = categoryTips.first;
         // 예상 절약 금액 계산 (현재 지출의 20% 가정)
         final estimatedSaving = category.totalAmount * 0.2;
-        tips.add(SavingTip(
-          title: tip.title,
-          description: tip.description,
-          type: tip.type,
-          category: category.category,
-          estimatedMonthlySaving: estimatedSaving,
-          actionItems: tip.actionItems,
-          priority: tip.priority,
-        ));
+        tips.add(
+          SavingTip(
+            title: tip.title,
+            description: tip.description,
+            type: tip.type,
+            category: category.category,
+            estimatedMonthlySaving: estimatedSaving,
+            actionItems: tip.actionItems,
+            priority: tip.priority,
+          ),
+        );
       }
     }
 
@@ -378,42 +380,49 @@ class SavingTipsUtils {
     for (final pattern in recurringPatterns.take(3)) {
       if (pattern.frequency >= 4) {
         // 월 4회 이상 반복 구매
-        tips.add(SavingTip(
-          title: '${pattern.name} 구매 패턴 발견',
-          description:
-              '월 평균 ${pattern.frequency}회 구매 중입니다. '
-              '대용량 구매나 구독 서비스를 고려해보세요.',
-          type: SavingTipType.bulk,
-          category: pattern.category,
-          estimatedMonthlySaving: pattern.avgAmount * pattern.frequency * 0.15,
-          actionItems: [
-            '대용량 제품으로 전환 시 약 15% 절약 가능',
-            '정기배송 서비스 할인 확인하기',
-            '묶음 구매 프로모션 활용하기',
-          ],
-          priority: 2,
-          relatedItem: pattern.name,
-        ));
+        tips.add(
+          SavingTip(
+            title: '${pattern.name} 구매 패턴 발견',
+            description:
+                '월 평균 ${pattern.frequency}회 구매 중입니다. '
+                '대용량 구매나 구독 서비스를 고려해보세요.',
+            type: SavingTipType.bulk,
+            category: pattern.category,
+            estimatedMonthlySaving:
+                pattern.avgAmount * pattern.frequency * 0.15,
+            actionItems: [
+              '대용량 제품으로 전환 시 약 15% 절약 가능',
+              '정기배송 서비스 할인 확인하기',
+              '묶음 구매 프로모션 활용하기',
+            ],
+            priority: 2,
+            relatedItem: pattern.name,
+          ),
+        );
       }
     }
 
     // 3. 전월 대비 증가 카테고리 경고 팁
     for (final category in topCategories) {
       if (category.monthOverMonthChange > 30) {
-        tips.add(SavingTip(
-          title: '${category.category} 지출 급증 주의',
-          description:
-              '전월 대비 ${category.monthOverMonthChange.toStringAsFixed(0)}% 증가했습니다. '
-              '지출 원인을 점검해보세요.',
-          type: SavingTipType.habit,
-          category: category.category,
-          actionItems: [
-            '이번 달 ${category.category} 내역 확인하기',
-            '불필요한 지출이 있었는지 검토하기',
-            '다음 달 예산 재설정하기',
-          ],
-          priority: 1,
-        ));
+        tips.add(
+          SavingTip(
+            title: '${category.category} 지출 급증 주의',
+            description:
+                '전월 대비 '
+                '${category.monthOverMonthChange.toStringAsFixed(0)}% '
+                '증가했습니다. '
+                '지출 원인을 점검해보세요.',
+            type: SavingTipType.habit,
+            category: category.category,
+            actionItems: [
+              '이번 달 ${category.category} 내역 확인하기',
+              '불필요한 지출이 있었는지 검토하기',
+              '다음 달 예산 재설정하기',
+            ],
+            priority: 1,
+          ),
+        );
       }
     }
 

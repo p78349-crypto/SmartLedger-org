@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:smart_ledger/models/fixed_cost.dart';
-import 'package:smart_ledger/navigation/app_routes.dart';
-import 'package:smart_ledger/services/fixed_cost_service.dart';
-import 'package:smart_ledger/utils/number_formats.dart';
-import 'package:smart_ledger/utils/stats_labels.dart';
+import '../models/fixed_cost.dart';
+import '../navigation/app_routes.dart';
+import '../services/fixed_cost_service.dart';
+import '../utils/number_formats.dart';
+import '../utils/stats_labels.dart';
 
 class FixedCostStatsScreen extends StatefulWidget {
   final String accountName;

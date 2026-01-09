@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_ledger/services/user_pin_service.dart';
+import '../services/user_pin_service.dart';
 
 class VerifyCurrentUserPinDialog extends StatefulWidget {
   const VerifyCurrentUserPinDialog({

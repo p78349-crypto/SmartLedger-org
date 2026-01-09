@@ -1,6 +1,6 @@
-import 'package:smart_ledger/database/app_database.dart';
-import 'package:smart_ledger/models/search_filter.dart';
-import 'package:smart_ledger/utils/date_formatter.dart';
+import '../database/app_database.dart';
+import '../models/search_filter.dart';
+import '../utils/date_formatter.dart';
 
 class SearchService {
   static final SearchService _instance = SearchService._internal();

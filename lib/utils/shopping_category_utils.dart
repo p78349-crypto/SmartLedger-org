@@ -1,8 +1,8 @@
-import 'package:smart_ledger/models/category_hint.dart';
-import 'package:smart_ledger/models/shopping_cart_item.dart';
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/utils/category_definitions.dart';
-import 'package:smart_ledger/utils/shopping_category_rules.dart';
+import '../models/category_hint.dart';
+import '../models/shopping_cart_item.dart';
+import '../models/transaction.dart';
+import 'category_definitions.dart';
+import 'shopping_category_rules.dart';
 
 /// Shopping-category suggestion utilities.
 ///

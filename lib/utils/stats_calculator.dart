@@ -3,7 +3,7 @@
 /// AccountStatsScreen에서 추출한 통계 계산 로직
 library;
 
-import 'package:smart_ledger/models/transaction.dart';
+import '../models/transaction.dart';
 
 /// 월별 집계 결과
 class MonthlyStats {

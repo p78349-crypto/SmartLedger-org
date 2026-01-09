@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/screens/ingredient_search_list_screen.dart';
-import 'package:smart_ledger/services/food_expiry_service.dart';
-import 'package:smart_ledger/services/recipe_knowledge_service.dart';
-import 'package:smart_ledger/services/user_pref_service.dart';
-import 'package:smart_ledger/utils/number_formats.dart';
-import 'package:smart_ledger/utils/nutrition_food_knowledge.dart';
-import 'package:smart_ledger/utils/nutrition_report_utils.dart';
+import 'ingredient_search_list_screen.dart';
+import '../services/food_expiry_service.dart';
+import '../services/recipe_knowledge_service.dart';
+import '../services/user_pref_service.dart';
+import '../utils/number_formats.dart';
+import '../utils/nutrition_food_knowledge.dart';
+import '../utils/nutrition_report_utils.dart';
 
 class NutritionReportScreen extends StatefulWidget {
   const NutritionReportScreen({
@@ -58,7 +58,9 @@ class _NutritionReportScreenState extends State<NutritionReportScreen> {
 
   void _showInventoryBasedRecipes() {
     final inventory = FoodExpiryService.instance.items.value;
-    final matches = RecipeKnowledgeService.instance.findRecipesByInventory(inventory);
+    final matches = RecipeKnowledgeService.instance.findRecipesByInventory(
+      inventory,
+    );
 
     showModalBottomSheet(
       context: context,
@@ -97,8 +99,8 @@ class _NutritionReportScreenState extends State<NutritionReportScreen> {
                     child: Text(
                       '냉장고 파먹기 추천 (${matches.length}건)',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   );
                 }
@@ -109,7 +111,8 @@ class _NutritionReportScreenState extends State<NutritionReportScreen> {
                 for (final pairing in recipe.pairings) {
                   bool hasIt = false;
                   for (final item in inventory) {
-                    if (item.name.contains(pairing.ingredient) || pairing.ingredient.contains(item.name)) {
+                    if (item.name.contains(pairing.ingredient) ||
+                        pairing.ingredient.contains(item.name)) {
                       hasIt = true;
                       break;
                     }
@@ -122,7 +125,8 @@ class _NutritionReportScreenState extends State<NutritionReportScreen> {
                 String subtitleText = '주재료 보유 중';
                 if (missingIngredients.isNotEmpty) {
                   final missingStr = missingIngredients.take(3).join(', ');
-                  subtitleText = '부족한 재료: $missingStr${missingIngredients.length > 3 ? '...' : ''}';
+                  final ellipsis = missingIngredients.length > 3 ? '...' : '';
+                  subtitleText = '부족한 재료: $missingStr$ellipsis';
                 } else if (recipe.pairings.isNotEmpty) {
                   subtitleText = '주재료 및 짝꿍 재료 모두 보유!';
                 }
@@ -130,12 +134,20 @@ class _NutritionReportScreenState extends State<NutritionReportScreen> {
                 return Card(
                   margin: const EdgeInsets.symmetric(vertical: 4),
                   child: ListTile(
-                    leading: const Icon(Icons.restaurant_menu, color: Colors.orange),
-                    title: Text(recipe.primaryName, style: const TextStyle(fontWeight: FontWeight.w600)),
+                    leading: const Icon(
+                      Icons.restaurant_menu,
+                      color: Colors.orange,
+                    ),
+                    title: Text(
+                      recipe.primaryName,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
                     subtitle: Text(
                       subtitleText,
                       style: TextStyle(
-                        color: missingIngredients.isNotEmpty ? Colors.red[300] : Colors.green[600],
+                        color: missingIngredients.isNotEmpty
+                            ? Colors.red[300]
+                            : Colors.green[600],
                         fontSize: 12,
                       ),
                     ),
@@ -258,7 +270,10 @@ class _NutritionReportScreenState extends State<NutritionReportScreen> {
                         children: [
                           Row(
                             children: [
-                              Icon(Icons.savings_outlined, color: Colors.green[800]),
+                              Icon(
+                                Icons.savings_outlined,
+                                color: Colors.green[800],
+                              ),
                               const SizedBox(width: 8),
                               Text(
                                 '냉장고 파먹기 챌린지 기간! 🍳',
@@ -272,7 +287,9 @@ class _NutritionReportScreenState extends State<NutritionReportScreen> {
                           ),
                           const SizedBox(height: 8),
                           const Text(
-                            '매달 20일은 냉장고 비우기 챌린지 시작일입니다.\n남은 10일간 식재료 구입 없이 냉장고 속 재료로만 요리해보세요!\n식비 절약과 냉장고 정리를 동시에 실천할 수 있습니다.',
+                            '매달 20일은 냉장고 비우기 챌린지 시작일입니다.\n'
+                            '남은 10일간 식재료 구입 없이 냉장고 속 재료로만 요리해보세요!\n'
+                            '식비 절약과 냉장고 정리를 동시에 실천할 수 있습니다.',
                             style: TextStyle(height: 1.5, fontSize: 14),
                           ),
                         ],
@@ -511,7 +528,7 @@ class _NutritionReportScreenState extends State<NutritionReportScreen> {
     final entry = query.isEmpty ? null : NutritionFoodKnowledge.lookup(query);
     if (entry != null) {
       addMany(entry.pairings.map((p) => p.ingredient));
-      
+
       // 추천 재료량(예시)에 있는 항목들도 추가
       // 예: "양파 1개", "닭고기(적은 것) 1마리" 등
       // 문구 그대로 추가하여 수량 정보도 함께 장바구니에 담기도록 함
@@ -596,7 +613,8 @@ class _FoodSearchResultState extends State<_FoodSearchResult> {
     }
 
     // Attempt to look up via Service first, fallback to static if needed
-    final entry = RecipeKnowledgeService.instance.lookup(trimmed) ??
+    final entry =
+        RecipeKnowledgeService.instance.lookup(trimmed) ??
         NutritionFoodKnowledge.lookup(trimmed);
 
     if (entry == null) {
@@ -675,7 +693,7 @@ class _FoodSearchResultState extends State<_FoodSearchResult> {
                       color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 2,
                       offset: const Offset(0, 1),
-                    )
+                    ),
                   ]
                 : null,
           ),
@@ -716,11 +734,17 @@ class _FoodSearchResultState extends State<_FoodSearchResult> {
       children: [
         Row(
           children: [
-            Icon(Icons.info_outline, size: 16, color: theme.colorScheme.primary),
+            Icon(
+              Icons.info_outline,
+              size: 16,
+              color: theme.colorScheme.primary,
+            ),
             const SizedBox(width: 8),
             Text(
               '1인 하루 섭취 권장량',
-              style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ],
         ),
@@ -772,16 +796,25 @@ class _FoodSearchResultState extends State<_FoodSearchResult> {
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.restaurant, size: 14, color: Colors.orange),
+                          const Icon(
+                            Icons.restaurant,
+                            size: 14,
+                            color: Colors.orange,
+                          ),
                           const SizedBox(width: 6),
-                          Text(p.ingredient,
-                              style: const TextStyle(fontWeight: FontWeight.bold)),
+                          Text(
+                            p.ingredient,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 4),
-                      Text(p.why,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant)),
+                      Text(
+                        p.why,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -791,11 +824,11 @@ class _FoodSearchResultState extends State<_FoodSearchResult> {
                     icon: const Icon(Icons.add, size: 18),
                     onPressed: () => widget.onAdd?.call(p.ingredient),
                     tooltip: '장바구니 담기',
-                    constraints:
-                        const BoxConstraints(minWidth: 32, minHeight: 32),
-                    style: IconButton.styleFrom(
-                      padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(
+                      minWidth: 32,
+                      minHeight: 32,
                     ),
+                    style: IconButton.styleFrom(padding: EdgeInsets.zero),
                   ),
                 ],
               ],
@@ -826,14 +859,18 @@ class _FoodSearchResultState extends State<_FoodSearchResult> {
           ),
           child: Row(
             children: [
-              Icon(Icons.lightbulb_outline,
-                  size: 16, color: theme.colorScheme.onSecondaryContainer),
+              Icon(
+                Icons.lightbulb_outline,
+                size: 16,
+                color: theme.colorScheme.onSecondaryContainer,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   '인원과 취향에 따라 조절하세요.',
                   style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSecondaryContainer),
+                    color: theme.colorScheme.onSecondaryContainer,
+                  ),
                 ),
               ),
             ],
@@ -845,14 +882,18 @@ class _FoodSearchResultState extends State<_FoodSearchResult> {
             padding: const EdgeInsets.symmetric(vertical: 6),
             child: Row(
               children: [
-                Icon(Icons.check_circle,
-                    size: 18, color: theme.colorScheme.primary),
+                Icon(
+                  Icons.check_circle,
+                  size: 18,
+                  color: theme.colorScheme.primary,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     line,
-                    style: theme.textTheme.bodyMedium
-                        ?.copyWith(fontWeight: FontWeight.w500),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
               ],
@@ -1258,7 +1299,10 @@ class _CookingPreparationGuide extends StatelessWidget {
           }
         }
 
-        if (t.startsWith('재료') || t.startsWith('야채') || t.startsWith('버섯') || t.startsWith('양념')) {
+        if (t.startsWith('재료') ||
+            t.startsWith('야채') ||
+            t.startsWith('버섯') ||
+            t.startsWith('양념')) {
           final idx = t.indexOf(':');
           if (idx >= 0 && idx + 1 < t.length) {
             addSplit(t.substring(idx + 1));
@@ -1267,7 +1311,10 @@ class _CookingPreparationGuide extends StatelessWidget {
         }
 
         // Generic: lines with obvious ingredient separators
-        if (t.contains(',') || t.contains('/') || t.contains(' + ') || t.contains('또는')) {
+        if (t.contains(',') ||
+            t.contains('/') ||
+            t.contains(' + ') ||
+            t.contains('또는')) {
           addSplit(t);
         }
       }

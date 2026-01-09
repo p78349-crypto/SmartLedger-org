@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:smart_ledger/utils/icon_catalog.dart';
+import 'icon_catalog.dart';
 
 class RefundUtils {
   RefundUtils._();

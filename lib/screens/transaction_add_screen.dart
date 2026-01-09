@@ -5,31 +5,31 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_ledger/models/asset.dart';
-import 'package:smart_ledger/models/category_hint.dart';
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/screens/income_split_screen.dart';
+import '../models/asset.dart';
+import '../models/category_hint.dart';
+import '../models/transaction.dart';
+import 'income_split_screen.dart';
 // import 'package:smart_ledger/screens/nutrition_report_screen.dart';
 // Preserved but disabled per request.
-import 'package:smart_ledger/services/asset_service.dart';
-import 'package:smart_ledger/services/category_usage_service.dart';
-import 'package:smart_ledger/services/consumable_inventory_service.dart';
-import 'package:smart_ledger/services/food_expiry_service.dart';
-import 'package:smart_ledger/services/recent_input_service.dart';
-import 'package:smart_ledger/services/transaction_service.dart';
-import 'package:smart_ledger/services/user_pref_service.dart';
-import 'package:smart_ledger/theme/app_theme_seed_controller.dart';
-import 'package:smart_ledger/utils/category_definitions.dart';
-import 'package:smart_ledger/utils/currency_formatter.dart';
-import 'package:smart_ledger/utils/date_formatter.dart';
-import 'package:smart_ledger/utils/icon_catalog.dart';
-import 'package:smart_ledger/utils/income_category_definitions.dart';
-import 'package:smart_ledger/utils/snackbar_utils.dart';
-import 'package:smart_ledger/utils/store_memo_utils.dart';
-import 'package:smart_ledger/utils/pref_keys.dart';
-import 'package:smart_ledger/widgets/background_widget.dart';
-import 'package:smart_ledger/widgets/smart_input_field.dart';
-import 'package:smart_ledger/widgets/special_backgrounds.dart';
+import '../services/asset_service.dart';
+import '../services/category_usage_service.dart';
+import '../services/consumable_inventory_service.dart';
+import '../services/food_expiry_service.dart';
+import '../services/recent_input_service.dart';
+import '../services/transaction_service.dart';
+import '../services/user_pref_service.dart';
+import '../theme/app_theme_seed_controller.dart';
+import '../utils/category_definitions.dart';
+import '../utils/currency_formatter.dart';
+import '../utils/date_formatter.dart';
+import '../utils/icon_catalog.dart';
+import '../utils/income_category_definitions.dart';
+import '../utils/snackbar_utils.dart';
+import '../utils/store_memo_utils.dart';
+import '../utils/pref_keys.dart';
+import '../widgets/background_widget.dart';
+import '../widgets/smart_input_field.dart';
+import '../widgets/special_backgrounds.dart';
 
 // 최근 결제수단/메모 저장 키 및 최대 개수
 const String _recentDescriptionsKey = 'recent_descriptions';
@@ -72,8 +72,7 @@ class TransactionAddScreen extends StatefulWidget {
 }
 
 class _TransactionAddScreenState extends State<TransactionAddScreen> {
-  final GlobalKey<_NO1FormState> _formStateKey =
-      GlobalKey<_NO1FormState>();
+  final GlobalKey<_NO1FormState> _formStateKey = GlobalKey<_NO1FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -577,9 +576,9 @@ class _NO1FormState extends State<NO1Form> {
       _recentDescriptions = descriptions
           .take(_recentInputsMaxCount)
           .toList(growable: false);
-      _recentPayments = payments.take(_recentInputsMaxCount).toList(
-            growable: false,
-          );
+      _recentPayments = payments
+          .take(_recentInputsMaxCount)
+          .toList(growable: false);
       _recentMemos = memos.take(_recentInputsMaxCount).toList(growable: false);
     });
 
@@ -759,7 +758,8 @@ class _NO1FormState extends State<NO1Form> {
 
     final key = event.logicalKey;
     final isEnter =
-        key == LogicalKeyboardKey.enter || key == LogicalKeyboardKey.numpadEnter;
+        key == LogicalKeyboardKey.enter ||
+        key == LogicalKeyboardKey.numpadEnter;
     if (!isEnter) return false;
 
     // Avoid accidental saves while navigating earlier fields.
@@ -2098,8 +2098,8 @@ class _NO1FormState extends State<NO1Form> {
     final selectedCategoryText = _selectedSubCategory != null
         ? '$_selectedMainCategory > $_selectedSubCategory'
         : _selectedMainCategory != _defaultCategory
-            ? _selectedMainCategory
-            : null;
+        ? _selectedMainCategory
+        : null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -2115,8 +2115,10 @@ class _NO1FormState extends State<NO1Form> {
                     const SizedBox(width: 8),
                     Flexible(
                       child: Container(
-                        padding:
-                            const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: theme.colorScheme.primaryContainer,
                           borderRadius: BorderRadius.circular(8),
@@ -2151,9 +2153,7 @@ class _NO1FormState extends State<NO1Form> {
               },
               icon: const Icon(IconCatalog.visibilityOffOutlined, size: 16),
               label: const Text('숨기기'),
-              style: TextButton.styleFrom(
-                visualDensity: VisualDensity.compact,
-              ),
+              style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
             ),
           ),
         const SizedBox(height: 8),

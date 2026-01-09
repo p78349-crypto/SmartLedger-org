@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/models/asset.dart';
-import 'package:smart_ledger/models/asset_move.dart';
-import 'package:smart_ledger/services/asset_move_service.dart';
-import 'package:smart_ledger/services/asset_service.dart';
-import 'package:smart_ledger/utils/currency_formatter.dart';
-import 'package:smart_ledger/utils/date_formatter.dart';
-import 'package:smart_ledger/utils/profit_loss_calculator.dart';
+import '../models/asset.dart';
+import '../models/asset_move.dart';
+import '../services/asset_move_service.dart';
+import '../services/asset_service.dart';
+import '../utils/currency_formatter.dart';
+import '../utils/date_formatter.dart';
+import '../utils/profit_loss_calculator.dart';
 
 /// 자산 상세 화면 - 이동 기록 타임라인 표시
 class AssetDetailScreen extends StatefulWidget {

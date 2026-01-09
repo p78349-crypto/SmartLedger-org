@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_ledger/screens/background_settings_screen.dart';
-import 'package:smart_ledger/screens/theme_settings_screen.dart';
-import 'package:smart_ledger/services/activity_household_estimator_service.dart';
-import 'package:smart_ledger/services/health_guardrail_service.dart';
-import 'package:smart_ledger/services/replacement_cycle_notification_service.dart';
-import 'package:smart_ledger/services/annual_household_report_service.dart';
-import 'package:smart_ledger/utils/icon_catalog.dart';
-import 'package:smart_ledger/utils/pref_keys.dart';
+import 'background_settings_screen.dart';
+import 'theme_settings_screen.dart';
+import '../services/activity_household_estimator_service.dart';
+import '../services/health_guardrail_service.dart';
+import '../services/replacement_cycle_notification_service.dart';
+import '../services/annual_household_report_service.dart';
+import '../utils/icon_catalog.dart';
+import '../utils/pref_keys.dart';
 
 class ApplicationSettingsScreen extends StatefulWidget {
   const ApplicationSettingsScreen({super.key});
@@ -55,14 +55,34 @@ class _ApplicationSettingsScreenState extends State<ApplicationSettingsScreen>
     }
   }
 
+  String _buildActivityHouseholdEstimateText({
+    required ActivityHouseholdEstimate estimate,
+    required ActivityHouseholdTrendComparison? trend,
+  }) {
+    final indicators = estimate.usedIndicators.join(', ');
+    final trendText = trend == null
+        ? ''
+        : '\n\n현재/평소 비교\n'
+              '최근 ${trend.shortWindow.usedWindowDays}일은 '
+              '최근 ${trend.baselineWindow.usedWindowDays}일 대비 '
+              '${trend.ratio}배 소비 중입니다.';
+
+    return '최근 ${estimate.usedWindowDays}일 추정: '
+        '약 ${estimate.estimatedPeople}명 (신뢰도 ${estimate.confidence})\n'
+        '근거 품목: $indicators'
+        '$trendText';
+  }
+
   Future<void> _loadStockUseSettings() async {
     final prefs = await SharedPreferences.getInstance();
     final vFood = prefs.getInt(PrefKeys.stockUseAutoAddDepletionDaysFoodV1);
-    final vHousehold =
-        prefs.getInt(PrefKeys.stockUseAutoAddDepletionDaysHouseholdV1);
+    final vHousehold = prefs.getInt(
+      PrefKeys.stockUseAutoAddDepletionDaysHouseholdV1,
+    );
 
-    final notifyEnabled =
-      prefs.getBool(PrefKeys.stockUsePredictedDepletionNotifyEnabledV1);
+    final notifyEnabled = prefs.getBool(
+      PrefKeys.stockUsePredictedDepletionNotifyEnabledV1,
+    );
 
     final legacy = prefs.getInt(PrefKeys.stockUseAutoAddDepletionDaysV1);
     if (!mounted) return;
@@ -167,9 +187,9 @@ class _ApplicationSettingsScreenState extends State<ApplicationSettingsScreen>
     await prefs.setStringList('recent_memos', const <String>[]);
 
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('저장된 입력내용을 삭제했습니다.')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('저장된 입력내용을 삭제했습니다.')));
   }
 
   Future<void> _checkPermissions() async {
@@ -255,8 +275,8 @@ class _ApplicationSettingsScreenState extends State<ApplicationSettingsScreen>
                       child: Text(
                         tag,
                         style: Theme.of(ctx).textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 6),
@@ -265,7 +285,8 @@ class _ApplicationSettingsScreenState extends State<ApplicationSettingsScreen>
                         Expanded(
                           child: TextField(
                             controller: weeklyControllers[tag],
-                            keyboardType: const TextInputType.numberWithOptions(),
+                            keyboardType:
+                                const TextInputType.numberWithOptions(),
                             decoration: const InputDecoration(
                               labelText: '주간 한도(비우면 무제한)',
                               border: OutlineInputBorder(),
@@ -276,7 +297,8 @@ class _ApplicationSettingsScreenState extends State<ApplicationSettingsScreen>
                         Expanded(
                           child: TextField(
                             controller: monthlyControllers[tag],
-                            keyboardType: const TextInputType.numberWithOptions(),
+                            keyboardType:
+                                const TextInputType.numberWithOptions(),
                             decoration: const InputDecoration(
                               labelText: '월간 한도(비우면 무제한)',
                               border: OutlineInputBorder(),
@@ -348,9 +370,9 @@ class _ApplicationSettingsScreenState extends State<ApplicationSettingsScreen>
     }
 
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('건강 가드레일 설정을 저장했습니다.')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('건강 가드레일 설정을 저장했습니다.')));
   }
 
   Future<void> _showActiveHouseholdEstimatorDialog() async {
@@ -401,9 +423,10 @@ class _ApplicationSettingsScreenState extends State<ApplicationSettingsScreen>
                     Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: Text(
-                        '최근 ${estimate.usedWindowDays}일 추정: 약 ${estimate.estimatedPeople}명 (신뢰도 ${estimate.confidence})\n'
-                        '근거 품목: ${estimate.usedIndicators.join(', ')}'
-                        '${trend == null ? '' : '\n\n현재/평소 비교\n최근 ${trend.shortWindow.usedWindowDays}일은 최근 ${trend.baselineWindow.usedWindowDays}일 대비 ${trend.ratio}배 소비 중입니다.'}',
+                        _buildActivityHouseholdEstimateText(
+                          estimate: estimate,
+                          trend: trend,
+                        ),
                         style: Theme.of(ctx).textTheme.bodyMedium,
                       ),
                     )
@@ -466,8 +489,8 @@ class _ApplicationSettingsScreenState extends State<ApplicationSettingsScreen>
                   Text(
                     '지표 품목(1인당/일 기준)',
                     style: Theme.of(ctx).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   for (var i = 0; i < indicators.length; i++) ...[
@@ -583,8 +606,8 @@ class _ApplicationSettingsScreenState extends State<ApplicationSettingsScreen>
     for (var i = 0; i < indicators.length; i++) {
       final name = (controllers[i]?['name']?.text ?? '').trim();
       final unit = (controllers[i]?['unit']?.text ?? '').trim();
-      final ppd = double.tryParse((controllers[i]?['ppd']?.text ?? '').trim()) ??
-          0.0;
+      final ppdText = (controllers[i]?['ppd']?.text ?? '').trim();
+      final ppd = double.tryParse(ppdText) ?? 0.0;
       final it = ActivityIndicatorItem(
         name: name,
         unit: unit,
@@ -602,14 +625,14 @@ class _ApplicationSettingsScreenState extends State<ApplicationSettingsScreen>
     await ActivityHouseholdEstimatorService.saveSettings(next);
 
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('활동 가족 수 추정 설정을 저장했습니다.')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('활동 가족 수 추정 설정을 저장했습니다.')));
   }
 
   Future<void> _showReplacementCycleNotificationDialog() async {
-    final settings =
-        await ReplacementCycleNotificationService.instance.loadSettings();
+    final settings = await ReplacementCycleNotificationService.instance
+        .loadSettings();
 
     var enabled = settings.enabled;
     var maxWindowDays = settings.maxWindowDays;
@@ -617,8 +640,9 @@ class _ApplicationSettingsScreenState extends State<ApplicationSettingsScreen>
     var minCycleDays = settings.minCycleDays;
 
     final leadController = TextEditingController(text: leadDays.toString());
-    final minCycleController =
-        TextEditingController(text: minCycleDays.toString());
+    final minCycleController = TextEditingController(
+      text: minCycleDays.toString(),
+    );
 
     if (!mounted) return;
     final saved = await showDialog<bool>(
@@ -729,9 +753,9 @@ class _ApplicationSettingsScreenState extends State<ApplicationSettingsScreen>
     }
 
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('교체 주기 알림 설정을 저장했습니다.')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('교체 주기 알림 설정을 저장했습니다.')));
   }
 
   Future<void> _showAnnualReportDialog() async {
@@ -744,17 +768,21 @@ class _ApplicationSettingsScreenState extends State<ApplicationSettingsScreen>
         final theme = Theme.of(ctx);
         String body;
         if (report == null) {
-          body = '아직 연간 리포트를 만들 데이터가 부족합니다.\n'
+          body =
+              '아직 연간 리포트를 만들 데이터가 부족합니다.\n'
               '품목을 차감(-1)하거나 수량을 줄이면 데이터가 쌓입니다.';
         } else {
+          final topItemAmountText = report.topItemAmount.toStringAsFixed(0);
+          final topItemLine = '${report.topItemName}: $topItemAmountText';
           final topLines = report.topItems
               .map((e) => '- ${e.key}: ${e.value.toStringAsFixed(0)}')
               .join('\n');
-          body = '최근 ${report.windowDays}일 기준\n'
+          body =
+              '최근 ${report.windowDays}일 기준\n'
               '총 차감 이벤트: ${report.totalEvents}건\n'
               '관리한 품목 수(고유): ${report.distinctItems}개\n\n'
               '가장 많이 차감한 품목\n'
-              '${report.topItemName}: ${report.topItemAmount.toStringAsFixed(0)}\n\n'
+              '$topItemLine\n\n'
               'TOP 5\n$topLines';
         }
 
@@ -948,8 +976,9 @@ class _ApplicationSettingsScreenState extends State<ApplicationSettingsScreen>
                           '지출입력 화면에서 결제수단/메모를 최근 값으로 미리 채웁니다.',
                         ),
                         value: _txRecentAutofill,
-                        onChanged:
-                          _txRecentEnabled ? _setTxRecentAutofill : null,
+                        onChanged: _txRecentEnabled
+                            ? _setTxRecentAutofill
+                            : null,
                       ),
                       ListTile(
                         title: const Text('기억 개수'),
@@ -996,9 +1025,7 @@ class _ApplicationSettingsScreenState extends State<ApplicationSettingsScreen>
                     children: [
                       SwitchListTile(
                         title: const Text('예상 소진 알림'),
-                        subtitle: const Text(
-                          '예상 소진 임박 시 로컬 알림을 표시합니다.',
-                        ),
+                        subtitle: const Text('예상 소진 임박 시 로컬 알림을 표시합니다.'),
                         value: _stockDepletionNotifyEnabled,
                         onChanged: _setStockDepletionNotifyEnabled,
                       ),

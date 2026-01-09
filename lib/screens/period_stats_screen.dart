@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/screens/category_stats_screen.dart';
-import 'package:smart_ledger/services/transaction_service.dart';
-import 'package:smart_ledger/utils/date_formatter.dart';
-import 'package:smart_ledger/utils/localized_date_formatter.dart';
-import 'package:smart_ledger/utils/number_formats.dart';
-import 'package:smart_ledger/widgets/background_widget.dart';
-import 'package:smart_ledger/utils/period_utils.dart' as period;
+import '../models/transaction.dart';
+import 'category_stats_screen.dart';
+import '../services/transaction_service.dart';
+import '../utils/date_formatter.dart';
+import '../utils/localized_date_formatter.dart';
+import '../utils/number_formats.dart';
+import '../widgets/background_widget.dart';
+import '../utils/period_utils.dart' as period;
 
 class PeriodStatsScreen extends StatefulWidget {
   const PeriodStatsScreen({

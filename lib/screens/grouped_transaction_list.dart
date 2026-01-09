@@ -1,7 +1,7 @@
 // 날짜별 거래 그룹핑 및 합계 표시용 위젯
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/models/transaction.dart' as model;
-import 'package:smart_ledger/utils/currency_formatter.dart';
+import '../models/transaction.dart' as model;
+import '../utils/currency_formatter.dart';
 
 class GroupedTransactionList extends StatelessWidget {
   final List<model.Transaction> transactions;

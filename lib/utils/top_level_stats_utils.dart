@@ -1,10 +1,10 @@
-import 'package:smart_ledger/models/account.dart';
-import 'package:smart_ledger/models/fixed_cost.dart';
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/services/account_service.dart';
-import 'package:smart_ledger/services/fixed_cost_service.dart';
-import 'package:smart_ledger/services/transaction_service.dart';
-import 'package:smart_ledger/widgets/root_summary_card.dart';
+import '../models/account.dart';
+import '../models/fixed_cost.dart';
+import '../models/transaction.dart';
+import '../services/account_service.dart';
+import '../services/fixed_cost_service.dart';
+import '../services/transaction_service.dart';
+import '../widgets/root_summary_card.dart';
 
 /// RootDashboardContext groups raw data and precomputed summary for the UI.
 class RootDashboardContext {

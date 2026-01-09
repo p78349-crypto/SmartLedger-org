@@ -1,5 +1,5 @@
 // ignore_for_file: dead_code, dead_null_aware_expression
-import 'package:smart_ledger/models/food_expiry_item.dart';
+import '../models/food_expiry_item.dart';
 
 /// 식재료 추천 강화 유틸리티
 /// - 유통기한별 가격 최적화

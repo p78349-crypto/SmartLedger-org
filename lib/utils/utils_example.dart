@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/utils/utils.dart';
+import 'utils.dart';
 
 /// Utils 사용 예시 파일
 /// 이 파일은 참고용이며, 실제 프로젝트에서는 삭제하거나 주석 처리하세요.

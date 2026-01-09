@@ -1,7 +1,7 @@
 // ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/utils/meal_plan_generator_utils.dart';
-import 'package:smart_ledger/utils/user_preference_utils.dart';
+import '../utils/meal_plan_generator_utils.dart';
+import '../utils/user_preference_utils.dart';
 
 /// 사용자 설정 커스터마이징 위젯
 class UserPreferencesWidget extends StatefulWidget {
@@ -56,8 +56,9 @@ class _UserPreferencesWidgetState extends State<UserPreferencesWidget> {
     showDialog(
       context: context,
       builder: (context) {
-        final controller =
-            TextEditingController(text: _preferences?.mealPrepName ?? '');
+        final controller = TextEditingController(
+          text: _preferences?.mealPrepName ?? '',
+        );
         return AlertDialog(
           title: const Text('식사 준비 이름 설정'),
           content: TextField(
@@ -99,19 +100,21 @@ class _UserPreferencesWidgetState extends State<UserPreferencesWidget> {
             child: ListView(
               shrinkWrap: true,
               children: options
-                  .map((option) => ListTile(
-                        title: Text(option),
-                        leading: Radio<String>(
-                          value: option,
-                          groupValue: _preferences?.mealPreference,
-                          onChanged: (value) {
-                            if (value != null) {
-                              _updateMealPreference(value);
-                              Navigator.pop(context);
-                            }
-                          },
-                        ),
-                      ))
+                  .map(
+                    (option) => ListTile(
+                      title: Text(option),
+                      leading: Radio<String>(
+                        value: option,
+                        groupValue: _preferences?.mealPreference,
+                        onChanged: (value) {
+                          if (value != null) {
+                            _updateMealPreference(value);
+                            Navigator.pop(context);
+                          }
+                        },
+                      ),
+                    ),
+                  )
                   .toList(),
             ),
           ),
@@ -193,8 +196,9 @@ class _UserPreferencesWidgetState extends State<UserPreferencesWidget> {
                 const SizedBox(width: 12),
                 Text(
                   '⚙️ 개인 설정',
-                  style: theme.textTheme.titleMedium
-                      ?.copyWith(fontWeight: FontWeight.bold),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -262,8 +266,9 @@ class _UserPreferencesWidgetState extends State<UserPreferencesWidget> {
             child: Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: theme.colorScheme.primaryContainer
-                    .withValues(alpha: 0.3),
+                color: theme.colorScheme.primaryContainer.withValues(
+                  alpha: 0.3,
+                ),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Column(
@@ -278,8 +283,9 @@ class _UserPreferencesWidgetState extends State<UserPreferencesWidget> {
                   const SizedBox(height: 6),
                   Text(
                     _preferences!.getSummary(),
-                    style: theme.textTheme.labelMedium
-                        ?.copyWith(fontWeight: FontWeight.bold),
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
@@ -316,23 +322,21 @@ class _UserPreferencesWidgetState extends State<UserPreferencesWidget> {
                 children: [
                   Text(
                     label,
-                    style: theme.textTheme.labelMedium
-                        ?.copyWith(fontWeight: FontWeight.bold),
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     value,
-                    style: theme.textTheme.labelSmall
-                        ?.copyWith(color: Colors.grey[600]),
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: Colors.grey[600],
+                    ),
                   ),
                 ],
               ),
             ),
-            Icon(
-              Icons.edit,
-              size: 20,
-              color: theme.colorScheme.primary,
-            ),
+            Icon(Icons.edit, size: 20, color: theme.colorScheme.primary),
           ],
         ),
       ),
@@ -350,21 +354,16 @@ class _UserPreferencesWidgetState extends State<UserPreferencesWidget> {
       children: [
         Text(
           label,
-          style:
-              theme.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold),
+          style: theme.textTheme.labelMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        Switch(
-          value: value,
-          onChanged: onChanged,
-        ),
+        Switch(value: value, onChanged: onChanged),
       ],
     );
   }
 
-  Widget _buildRestrictionsSection(
-    BuildContext context,
-    ThemeData theme,
-  ) {
+  Widget _buildRestrictionsSection(BuildContext context, ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -373,15 +372,19 @@ class _UserPreferencesWidgetState extends State<UserPreferencesWidget> {
           children: [
             Text(
               '🚫 식단 제한사항',
-              style: theme.textTheme.labelMedium
-                  ?.copyWith(fontWeight: FontWeight.bold),
+              style: theme.textTheme.labelMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
             OutlinedButton.icon(
               onPressed: () => _showRestrictionDialog(context),
               icon: const Icon(Icons.add, size: 18),
               label: const Text('추가'),
               style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
               ),
             ),
           ],
@@ -390,24 +393,27 @@ class _UserPreferencesWidgetState extends State<UserPreferencesWidget> {
         if ((_preferences?.dietaryRestrictions ?? []).isEmpty)
           Text(
             '제한사항이 없습니다.',
-            style: theme.textTheme.labelSmall
-                ?.copyWith(color: Colors.grey[600]),
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: Colors.grey[600],
+            ),
           )
         else
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: (_preferences?.dietaryRestrictions ?? [])
-                .map((restriction) => Chip(
-                      label: Text(restriction),
-                      onDeleted: () async {
-                        await UserPreferenceUtils.removeRestriction(restriction);
-                        await _loadPreferences();
-                      },
-                      backgroundColor: theme.colorScheme.tertiaryContainer
-                          .withValues(alpha: 0.5),
-                      deleteIconColor: theme.colorScheme.tertiary,
-                    ))
+                .map(
+                  (restriction) => Chip(
+                    label: Text(restriction),
+                    onDeleted: () async {
+                      await UserPreferenceUtils.removeRestriction(restriction);
+                      await _loadPreferences();
+                    },
+                    backgroundColor: theme.colorScheme.tertiaryContainer
+                        .withValues(alpha: 0.5),
+                    deleteIconColor: theme.colorScheme.tertiary,
+                  ),
+                )
                 .toList(),
           ),
       ],
@@ -436,26 +442,27 @@ class _UserPreferencesWidgetState extends State<UserPreferencesWidget> {
             child: ListView(
               shrinkWrap: true,
               children: restrictions
-                  .map((restriction) => CheckboxListTile(
-                        title: Text(restriction),
-                        value: (_preferences?.dietaryRestrictions ?? [])
-                            .contains(restriction),
-                        onChanged: (value) async {
-                          if (value == true) {
-                            await UserPreferenceUtils.addRestriction(
-                              restriction,
-                            );
-                          } else {
-                            await UserPreferenceUtils.removeRestriction(
-                              restriction,
-                            );
-                          }
-                          await _loadPreferences();
-                          if (context.mounted) {
-                            Navigator.pop(context);
-                          }
-                        },
-                      ))
+                  .map(
+                    (restriction) => CheckboxListTile(
+                      title: Text(restriction),
+                      value: (_preferences?.dietaryRestrictions ?? []).contains(
+                        restriction,
+                      ),
+                      onChanged: (value) async {
+                        if (value == true) {
+                          await UserPreferenceUtils.addRestriction(restriction);
+                        } else {
+                          await UserPreferenceUtils.removeRestriction(
+                            restriction,
+                          );
+                        }
+                        await _loadPreferences();
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                        }
+                      },
+                    ),
+                  )
                   .toList(),
             ),
           ),

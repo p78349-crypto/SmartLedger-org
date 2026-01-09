@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/screens/icon_management_screen.dart';
-import 'package:smart_ledger/utils/main_feature_icon_catalog.dart';
+import 'icon_management_screen.dart';
+import '../utils/main_feature_icon_catalog.dart';
 
 class IconManagement2Screen extends StatelessWidget {
   const IconManagement2Screen({super.key, required this.accountName});

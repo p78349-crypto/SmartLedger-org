@@ -6,8 +6,8 @@
 /// - 다음 달 가격 예측 및 알림
 library;
 
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/models/weather_snapshot.dart';
+import '../models/transaction.dart';
+import '../models/weather_snapshot.dart';
 
 /// 날씨 조건 분류
 enum WeatherConditionType {
@@ -137,24 +137,61 @@ class WeatherPricePredictionUtils {
   WeatherPricePredictionUtils._();
 
   // ========== 날씨 민감 품목 데이터 ==========
-  
+
   /// 날씨에 민감한 품목 목록 (카테고리별)
   static const Map<String, List<String>> weatherSensitiveItems = {
     '채소': [
-      '배추', '무', '시금치', '상추', '깻잎', '양배추', '브로콜리', '당근',
-      '고추', '파', '양파', '마늘', '감자', '고구마', '호박', '오이', '가지',
+      '배추',
+      '무',
+      '시금치',
+      '상추',
+      '깻잎',
+      '양배추',
+      '브로콜리',
+      '당근',
+      '고추',
+      '파',
+      '양파',
+      '마늘',
+      '감자',
+      '고구마',
+      '호박',
+      '오이',
+      '가지',
     ],
     '과일': [
-      '사과', '배', '포도', '복숭아', '수박', '참외', '딸기', '귤', '오렌지',
-      '바나나', '키위', '망고', '체리', '블루베리', '토마토',
+      '사과',
+      '배',
+      '포도',
+      '복숭아',
+      '수박',
+      '참외',
+      '딸기',
+      '귤',
+      '오렌지',
+      '바나나',
+      '키위',
+      '망고',
+      '체리',
+      '블루베리',
+      '토마토',
     ],
     '수산물': [
-      '고등어', '삼치', '갈치', '명태', '오징어', '낙지', '새우', '조개',
-      '굴', '홍합', '미역', '김', '다시마',
+      '고등어',
+      '삼치',
+      '갈치',
+      '명태',
+      '오징어',
+      '낙지',
+      '새우',
+      '조개',
+      '굴',
+      '홍합',
+      '미역',
+      '김',
+      '다시마',
     ],
-    '육류': [
-      '삼겹살', '목살', '등심', '안심', '닭가슴살', '닭다리',
-    ],
+    '육류': ['삼겹살', '목살', '등심', '안심', '닭가슴살', '닭다리'],
   };
 
   /// 품목별 날씨 민감도 (0~1, 높을수록 민감)
@@ -163,15 +200,15 @@ class WeatherPricePredictionUtils {
     '배추': 0.9, '시금치': 0.85, '상추': 0.85, '무': 0.8, '깻잎': 0.75,
     '양배추': 0.7, '고추': 0.8, '파': 0.65, '양파': 0.6, '마늘': 0.55,
     '오이': 0.75, '호박': 0.7, '가지': 0.7,
-    
+
     // 과일 (중~높은 민감도)
     '수박': 0.85, '참외': 0.85, '딸기': 0.8, '포도': 0.75, '복숭아': 0.75,
     '사과': 0.6, '배': 0.55, '귤': 0.5, '바나나': 0.3, '토마토': 0.7,
-    
+
     // 수산물 (중간 민감도)
     '고등어': 0.6, '삼치': 0.6, '갈치': 0.65, '오징어': 0.55, '새우': 0.5,
     '굴': 0.7, '미역': 0.4, '김': 0.35,
-    
+
     // 육류 (낮은 민감도)
     '삼겹살': 0.3, '닭가슴살': 0.25, '등심': 0.3,
   };
@@ -227,22 +264,25 @@ class WeatherPricePredictionUtils {
   }) {
     final now = DateTime.now();
     final oneYearAgo = now.subtract(const Duration(days: 365));
-    
+
     // 해당 품목의 가격 이력 추출
     final priceHistory = _extractPriceHistory(
       transactions,
       startDate: oneYearAgo,
     );
-    
+
     final records = priceHistory[itemName] ?? [];
     if (records.length < 3) return null; // 데이터 부족
 
     // 현재 평균 가격 (최근 30일)
     final recentDate = now.subtract(const Duration(days: 30));
-    final recentRecords = records.where((r) => r.date.isAfter(recentDate)).toList();
+    final recentRecords = records
+        .where((r) => r.date.isAfter(recentDate))
+        .toList();
     if (recentRecords.isEmpty) return null;
 
-    final currentPrice = recentRecords.fold<double>(0, (s, r) => s + r.unitPrice) / 
+    final currentPrice =
+        recentRecords.fold<double>(0, (s, r) => s + r.unitPrice) /
         recentRecords.length;
 
     // 예측 로직
@@ -253,7 +293,7 @@ class WeatherPricePredictionUtils {
     // 1. 날씨 영향 분석
     final sensitivity = itemWeatherSensitivity[itemName] ?? 0.5;
     final weatherType = _classifyWeather(currentWeather);
-    
+
     // 기온 영향
     final temp = currentWeather.tempC ?? 20.0;
     if (temp >= 30) {
@@ -288,10 +328,10 @@ class WeatherPricePredictionUtils {
     // 2. 계절 영향
     final targetSeason = getSeason(targetDate ?? now);
     final seasonalStats = calculateSeasonalStats(itemName, transactions);
-    final seasonStat = seasonalStats.where(
-      (s) => s.season == targetSeason
-    ).firstOrNull;
-    
+    final seasonStat = seasonalStats
+        .where((s) => s.season == targetSeason)
+        .firstOrNull;
+
     if (seasonStat != null && seasonStat.sampleCount >= 3) {
       // 계절 평균 대비 조정
       final seasonalAdjustment = seasonStat.avgPrice / currentPrice;
@@ -302,10 +342,13 @@ class WeatherPricePredictionUtils {
     }
 
     // 트렌드 결정
-    final changePercent = ((predictedPrice - currentPrice) / currentPrice) * 100;
-    final trend = changePercent > 5 
-        ? PriceTrend.rising 
-        : changePercent < -5 ? PriceTrend.falling : PriceTrend.stable;
+    final changePercent =
+        ((predictedPrice - currentPrice) / currentPrice) * 100;
+    final trend = changePercent > 5
+        ? PriceTrend.rising
+        : changePercent < -5
+        ? PriceTrend.falling
+        : PriceTrend.stable;
 
     // 신뢰도 계산
     final confidence = _calculateConfidence(
@@ -337,60 +380,70 @@ class WeatherPricePredictionUtils {
 
     // 폭염 알림
     if (temp >= 30) {
-      alerts.add(const WeatherPriceAlert(
-        itemName: '배추',
-        category: '채소',
-        triggerWeather: '폭염 (30도 이상)',
-        expectedTrend: PriceTrend.rising,
-        expectedChangePercent: 20.0,
-        daysUntilImpact: 7,
-        recommendation: '배추를 미리 구매하세요! 폭염 지속시 가격 상승 예상',
-      ));
-      alerts.add(const WeatherPriceAlert(
-        itemName: '시금치',
-        category: '채소',
-        triggerWeather: '폭염 (30도 이상)',
-        expectedTrend: PriceTrend.rising,
-        expectedChangePercent: 25.0,
-        daysUntilImpact: 5,
-        recommendation: '엽채류 미리 구매 추천',
-      ));
-      alerts.add(const WeatherPriceAlert(
-        itemName: '수박',
-        category: '과일',
-        triggerWeather: '폭염 (30도 이상)',
-        expectedTrend: PriceTrend.falling,
-        expectedChangePercent: -15.0,
-        daysUntilImpact: 3,
-        recommendation: '수박은 조금 기다리면 더 싸게 살 수 있어요!',
-      ));
+      alerts.add(
+        const WeatherPriceAlert(
+          itemName: '배추',
+          category: '채소',
+          triggerWeather: '폭염 (30도 이상)',
+          expectedTrend: PriceTrend.rising,
+          expectedChangePercent: 20.0,
+          daysUntilImpact: 7,
+          recommendation: '배추를 미리 구매하세요! 폭염 지속시 가격 상승 예상',
+        ),
+      );
+      alerts.add(
+        const WeatherPriceAlert(
+          itemName: '시금치',
+          category: '채소',
+          triggerWeather: '폭염 (30도 이상)',
+          expectedTrend: PriceTrend.rising,
+          expectedChangePercent: 25.0,
+          daysUntilImpact: 5,
+          recommendation: '엽채류 미리 구매 추천',
+        ),
+      );
+      alerts.add(
+        const WeatherPriceAlert(
+          itemName: '수박',
+          category: '과일',
+          triggerWeather: '폭염 (30도 이상)',
+          expectedTrend: PriceTrend.falling,
+          expectedChangePercent: -15.0,
+          daysUntilImpact: 3,
+          recommendation: '수박은 조금 기다리면 더 싸게 살 수 있어요!',
+        ),
+      );
     }
 
     // 한파 알림
     if (temp <= -5) {
-      alerts.add(const WeatherPriceAlert(
-        itemName: '채소류',
-        category: '채소',
-        triggerWeather: '한파 (-5도 이하)',
-        expectedTrend: PriceTrend.rising,
-        expectedChangePercent: 15.0,
-        daysUntilImpact: 5,
-        recommendation: '한파 전에 채소를 미리 구매하세요',
-      ));
+      alerts.add(
+        const WeatherPriceAlert(
+          itemName: '채소류',
+          category: '채소',
+          triggerWeather: '한파 (-5도 이하)',
+          expectedTrend: PriceTrend.rising,
+          expectedChangePercent: 15.0,
+          daysUntilImpact: 5,
+          recommendation: '한파 전에 채소를 미리 구매하세요',
+        ),
+      );
     }
 
     // 비/장마 알림
     if (weatherType == WeatherConditionType.rainy ||
         (currentWeather.precipitation1hMm ?? 0) > 10) {
-      alerts.add(const WeatherPriceAlert(
-        itemName: '엽채류',
-        category: '채소',
-        triggerWeather: '장마/폭우',
-        expectedTrend: PriceTrend.rising,
-        expectedChangePercent: 20.0,
-        daysUntilImpact: 7,
-        recommendation: '장마 전에 채소를 비축해두세요',
-      ));
+      alerts.add(
+        const WeatherPriceAlert(
+          itemName: '엽채류',
+          category: '채소',
+          triggerWeather: '장마/폭우',
+          expectedTrend: PriceTrend.rising,
+          expectedChangePercent: 20.0,
+          daysUntilImpact: 7,
+          recommendation: '장마 전에 채소를 비축해두세요',
+        ),
+      );
     }
 
     return alerts;
@@ -403,7 +456,7 @@ class WeatherPricePredictionUtils {
   ) {
     final priceHistory = _extractPriceHistory(transactions);
     final records = priceHistory[itemName] ?? [];
-    
+
     // 날씨 데이터가 있는 레코드만 필터
     final weatherRecords = records.where((r) => r.weather != null).toList();
     if (weatherRecords.length < 5) return null;
@@ -411,7 +464,7 @@ class WeatherPricePredictionUtils {
     // 기온과 가격의 상관관계 계산 (단순화)
     final temps = weatherRecords.map((r) => r.weather!.tempC ?? 20.0).toList();
     final prices = weatherRecords.map((r) => r.unitPrice).toList();
-    
+
     final correlation = _calculateCorrelation(temps, prices);
     final category = _getItemCategory(itemName);
     final sensitivity = itemWeatherSensitivity[itemName] ?? 0.5;
@@ -453,7 +506,7 @@ class WeatherPricePredictionUtils {
     return seasonGroups.entries.map((entry) {
       final prices = entry.value;
       final avg = prices.fold<double>(0, (s, p) => s + p) / prices.length;
-      
+
       return SeasonalPriceStat(
         season: entry.key,
         itemName: itemName,
@@ -479,11 +532,11 @@ class WeatherPricePredictionUtils {
     final temp = currentWeather.tempC ?? 20.0;
     final now = DateTime.now();
     final month = now.month;
-    
+
     // 현재 날씨 요약
     buffer.writeln('## 현재 날씨 분석');
     buffer.writeln('기온: ${temp.toStringAsFixed(1)}도');
-    
+
     if (temp >= 30) {
       buffer.writeln('\n### 폭염 주의보');
       buffer.writeln('• 엽채류(배추, 시금치, 상추) 가격 상승 예상');
@@ -554,17 +607,18 @@ class WeatherPricePredictionUtils {
   static WeatherConditionType _classifyWeather(WeatherSnapshot weather) {
     final condition = weather.condition.toLowerCase();
     final temp = weather.tempC ?? 20.0;
-    
+
     if (temp >= 30) return WeatherConditionType.hot;
     if (temp <= -5) return WeatherConditionType.cold;
-    
+
     if (condition.contains('비') || condition.contains('rain')) {
       return WeatherConditionType.rainy;
     }
     if (condition.contains('눈') || condition.contains('snow')) {
       return WeatherConditionType.snowy;
     }
-    if (condition.contains('맑') || condition.contains('sunny') || 
+    if (condition.contains('맑') ||
+        condition.contains('sunny') ||
         condition.contains('clear')) {
       return WeatherConditionType.sunny;
     }
@@ -581,15 +635,15 @@ class WeatherPricePredictionUtils {
     DateTime? endDate,
   }) {
     final history = <String, List<PriceRecord>>{};
-    
+
     for (final tx in transactions) {
       if (tx.type != TransactionType.expense) continue;
       if (tx.unitPrice <= 0) continue;
-      
+
       // 기간 필터
       if (startDate != null && tx.date.isBefore(startDate)) continue;
       if (endDate != null && tx.date.isAfter(endDate)) continue;
-      
+
       // 식료품 카테고리만
       final cat = tx.mainCategory.toLowerCase();
       if (!cat.contains('식') && !cat.contains('마트') && !cat.contains('장보기')) {
@@ -602,11 +656,15 @@ class WeatherPricePredictionUtils {
       final itemName = tx.description.trim();
       if (itemName.isEmpty) continue;
 
-      history.putIfAbsent(itemName, () => []).add(PriceRecord(
-        date: tx.date,
-        unitPrice: tx.unitPrice,
-        weather: weather,
-      ));
+      history
+          .putIfAbsent(itemName, () => [])
+          .add(
+            PriceRecord(
+              date: tx.date,
+              unitPrice: tx.unitPrice,
+              weather: weather,
+            ),
+          );
     }
 
     return history;
@@ -655,15 +713,15 @@ class WeatherPricePredictionUtils {
   /// 피어슨 상관계수 계산 (단순화)
   static double _calculateCorrelation(List<double> x, List<double> y) {
     if (x.length != y.length || x.isEmpty) return 0;
-    
+
     final n = x.length;
     final meanX = x.reduce((a, b) => a + b) / n;
     final meanY = y.reduce((a, b) => a + b) / n;
-    
+
     var numerator = 0.0;
     var denomX = 0.0;
     var denomY = 0.0;
-    
+
     for (var i = 0; i < n; i++) {
       final dx = x[i] - meanX;
       final dy = y[i] - meanY;
@@ -671,7 +729,7 @@ class WeatherPricePredictionUtils {
       denomX += dx * dx;
       denomY += dy * dy;
     }
-    
+
     final denom = denomX * denomY;
     if (denom <= 0) return 0;
     return numerator / (denom > 0 ? denom.sqrt() : 1);
@@ -719,7 +777,7 @@ class PriceRecord {
 
 extension on double {
   double sqrt() => this > 0 ? _sqrt(this) : 0;
-  
+
   static double _sqrt(double x) {
     if (x <= 0) return 0;
     var guess = x / 2;

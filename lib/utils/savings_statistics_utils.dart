@@ -1,4 +1,4 @@
-import 'package:smart_ledger/models/cooking_usage_log.dart';
+import '../models/cooking_usage_log.dart';
 
 /// 절약 통계 계산을 담당하는 유틸리티 클래스
 /// 이 클래스는 pure 계산 함수들을 제공하므로, 어디서든 재사용 가능합니다.
@@ -15,10 +15,12 @@ class SavingsStatisticsUtils {
     final challengeEnd = nextMonth.subtract(const Duration(days: 1));
 
     return logs
-        .where((log) =>
-            log.isFromExistingInventory &&
-            log.usageDate.isAfter(challengeStart) &&
-            log.usageDate.isBefore(challengeEnd.add(const Duration(days: 1))))
+        .where(
+          (log) =>
+              log.isFromExistingInventory &&
+              log.usageDate.isAfter(challengeStart) &&
+              log.usageDate.isBefore(challengeEnd.add(const Duration(days: 1))),
+        )
         .length;
   }
 
@@ -31,7 +33,8 @@ class SavingsStatisticsUtils {
 
   /// 월별 식비 지출 변화 데이터 계산
   static Map<String, double> calculateMonthlyFoodExpenses(
-      List<dynamic> transactions) {
+    List<dynamic> transactions,
+  ) {
     final result = <String, double>{};
 
     for (final tx in transactions) {
@@ -49,8 +52,9 @@ class SavingsStatisticsUtils {
   /// 식비 카테고리 판정
   static bool _isFoodCategory(String category) {
     const foodKeywords = ['식품', '식비', '음료', 'food', 'drink'];
-    return foodKeywords
-        .any((keyword) => category.toLowerCase().contains(keyword));
+    return foodKeywords.any(
+      (keyword) => category.toLowerCase().contains(keyword),
+    );
   }
 
   /// 두 달간의 지출 비교
@@ -58,13 +62,13 @@ class SavingsStatisticsUtils {
     double beforePrice,
     double afterPrice,
     double savingsAmount,
-    double savingsPercent
-  }) compareSavings(Map<String, double> monthlyExpenses) {
+    double savingsPercent,
+  })
+  compareSavings(Map<String, double> monthlyExpenses) {
     final now = DateTime.now();
 
     // 이번 달
-    final thisMonthKey =
-        '${now.year}-${now.month.toString().padLeft(2, '0')}';
+    final thisMonthKey = '${now.year}-${now.month.toString().padLeft(2, '0')}';
     final afterPrice = monthlyExpenses[thisMonthKey] ?? 0.0;
 
     // 지난 달
@@ -73,9 +77,13 @@ class SavingsStatisticsUtils {
         '${beforeDate.year}-${beforeDate.month.toString().padLeft(2, '0')}';
     final beforePrice = monthlyExpenses[beforeMonthKey] ?? 0.0;
 
-    final savingsAmount = (beforePrice - afterPrice).clamp(0.0, double.infinity);
-    final savingsPercent =
-        beforePrice > 0 ? ((savingsAmount / beforePrice) * 100) : 0.0;
+    final savingsAmount = (beforePrice - afterPrice).clamp(
+      0.0,
+      double.infinity,
+    );
+    final savingsPercent = beforePrice > 0
+        ? ((savingsAmount / beforePrice) * 100)
+        : 0.0;
 
     return (
       beforePrice: beforePrice,

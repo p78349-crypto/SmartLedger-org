@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/theme/ui_style.dart';
+import 'ui_style.dart';
 
 class AppTheme {
   // Smart Ledger style light theme (seed-based palette + simple surfaces)

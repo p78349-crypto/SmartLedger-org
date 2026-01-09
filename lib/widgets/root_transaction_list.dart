@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/navigation/app_routes.dart';
-import 'package:smart_ledger/utils/date_formats.dart';
-import 'package:smart_ledger/utils/number_formats.dart';
-import 'package:smart_ledger/widgets/state_placeholders.dart';
+import '../models/transaction.dart';
+import '../navigation/app_routes.dart';
+import '../utils/date_formats.dart';
+import '../utils/number_formats.dart';
+import 'state_placeholders.dart';
 
 class RootTransactionList extends StatelessWidget {
   RootTransactionList({

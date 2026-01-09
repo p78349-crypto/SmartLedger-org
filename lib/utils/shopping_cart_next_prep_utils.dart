@@ -1,25 +1,27 @@
 import 'package:flutter/material.dart';
 
-import 'package:smart_ledger/models/category_hint.dart';
-import 'package:smart_ledger/models/shopping_cart_history_entry.dart';
-import 'package:smart_ledger/models/shopping_cart_item.dart';
-import 'package:smart_ledger/models/shopping_template_item.dart';
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/services/store_alias_service.dart';
-import 'package:smart_ledger/services/transaction_service.dart';
-import 'package:smart_ledger/services/user_pref_service.dart';
-import 'package:smart_ledger/services/activity_household_estimator_service.dart';
-import 'package:smart_ledger/utils/icon_catalog.dart';
-import 'package:smart_ledger/utils/shopping_cart_next_prep_dialog_utils.dart';
-import 'package:smart_ledger/utils/shopping_prep_utils.dart';
-import 'package:smart_ledger/utils/store_memo_utils.dart';
+import '../models/category_hint.dart';
+import '../models/shopping_cart_history_entry.dart';
+import '../models/shopping_cart_item.dart';
+import '../models/shopping_template_item.dart';
+import '../models/transaction.dart';
+import '../services/store_alias_service.dart';
+import '../services/transaction_service.dart';
+import '../services/user_pref_service.dart';
+import '../services/activity_household_estimator_service.dart';
+import 'icon_catalog.dart';
+import 'shopping_cart_next_prep_dialog_utils.dart';
+import 'shopping_prep_utils.dart';
+import 'store_memo_utils.dart';
 
-import 'package:smart_ledger/screens/nutrition_report_screen.dart';
+import '../screens/nutrition_report_screen.dart';
 
 class ShoppingCartNextPrepUtils {
   ShoppingCartNextPrepUtils._();
 
-  static double? _resolveQuantityFactorFromTrend(ActivityHouseholdTrendComparison? trend) {
+  static double? _resolveQuantityFactorFromTrend(
+    ActivityHouseholdTrendComparison? trend,
+  ) {
     if (trend == null) return null;
     final r = trend.ratio;
     if (!r.isFinite || r <= 0) return null;

@@ -4,8 +4,8 @@
 /// 사용자에게 실질적인 지출 인사이트를 제공합니다.
 library;
 
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/utils/stats_calculator.dart';
+import '../models/transaction.dart';
+import 'stats_calculator.dart';
 
 /// 항목별 지출 분석 결과
 class ItemSpendingAnalysis {
@@ -35,10 +35,11 @@ class ItemSpendingAnalysis {
     final dates = transactions.map((t) => t.date).toList()..sort();
     final firstDate = dates.first;
     final lastDate = dates.last;
-    final months = ((lastDate.year - firstDate.year) * 12 +
-            lastDate.month -
-            firstDate.month)
-        .clamp(1, 999);
+    final months =
+        ((lastDate.year - firstDate.year) * 12 +
+                lastDate.month -
+                firstDate.month)
+            .clamp(1, 999);
     return totalAmount / months;
   }
 }
@@ -72,7 +73,9 @@ class RecurringSpendingPattern {
     }
     if (intervals.isEmpty) return 0.0;
     final avg = intervals.reduce((a, b) => a + b) / intervals.length;
-    final variance = intervals.map((i) => (i - avg) * (i - avg)).reduce((a, b) => a + b) / intervals.length;
+    final variance =
+        intervals.map((i) => (i - avg) * (i - avg)).reduce((a, b) => a + b) /
+        intervals.length;
     final stdDev = variance > 0 ? variance / avg : 0.0;
     // 표준편차가 낮을수록 높은 신뢰도
     return (1.0 - stdDev.clamp(0.0, 1.0)).clamp(0.3, 1.0);
@@ -160,7 +163,11 @@ class SpendingAnalysisUtils {
 
     // 현재 월 거래
     final currentMonthStart = DateTime(currentMonth.year, currentMonth.month);
-    final currentMonthEnd = DateTime(currentMonth.year, currentMonth.month + 1, 0);
+    final currentMonthEnd = DateTime(
+      currentMonth.year,
+      currentMonth.month + 1,
+      0,
+    );
     final currentMonthTx = StatsCalculator.filterByRange(
       StatsCalculator.filterByType(transactions, TransactionType.expense),
       currentMonthStart,
@@ -277,24 +284,30 @@ class SpendingAnalysisUtils {
 
       // 월 평균 빈도 계산
       final monthSpan = _calculateMonthSpan(txList);
-      final frequency = monthSpan > 0 ? (txList.length / monthSpan).round() : txList.length;
+      final frequency = monthSpan > 0
+          ? (txList.length / monthSpan).round()
+          : txList.length;
 
       // 다음 구매 예측
       final lastPurchase = dates.last;
-      final predictedNext = lastPurchase.add(Duration(days: avgInterval.round()));
+      final predictedNext = lastPurchase.add(
+        Duration(days: avgInterval.round()),
+      );
 
       // 평균 금액
       final avgAmount = StatsCalculator.calculateTotal(txList) / txList.length;
 
-      patterns.add(RecurringSpendingPattern(
-        name: entry.key,
-        avgAmount: avgAmount,
-        frequency: frequency,
-        avgInterval: avgInterval,
-        predictedNextPurchase: predictedNext,
-        purchaseDates: dates,
-        category: txList.first.mainCategory,
-      ));
+      patterns.add(
+        RecurringSpendingPattern(
+          name: entry.key,
+          avgAmount: avgAmount,
+          frequency: frequency,
+          avgInterval: avgInterval,
+          predictedNextPurchase: predictedNext,
+          purchaseDates: dates,
+          category: txList.first.mainCategory,
+        ),
+      );
     }
 
     // 빈도순 정렬
@@ -379,13 +392,16 @@ class SpendingAnalysisUtils {
       final monthStart = DateTime(now.year, now.month - i);
       final monthEnd = DateTime(now.year, now.month - i + 1, 0);
 
-      final monthTx = StatsCalculator.filterByRange(
-        transactions,
-        monthStart,
-        monthEnd,
-      ).where((tx) =>
-          tx.type == TransactionType.expense &&
-          _normalizeItemName(tx.description) == normalizedName);
+      final monthTx =
+          StatsCalculator.filterByRange(
+            transactions,
+            monthStart,
+            monthEnd,
+          ).where(
+            (tx) =>
+                tx.type == TransactionType.expense &&
+                _normalizeItemName(tx.description) == normalizedName,
+          );
 
       trend.add(StatsCalculator.calculateTotal(monthTx.toList()));
     }

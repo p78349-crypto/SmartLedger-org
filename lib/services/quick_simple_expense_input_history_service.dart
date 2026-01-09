@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:smart_ledger/services/monthly_agg_cache_service.dart';
+import 'monthly_agg_cache_service.dart';
 
 @immutable
 class QuickSimpleExpenseInputEntry {

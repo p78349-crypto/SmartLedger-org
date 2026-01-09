@@ -1,9 +1,10 @@
-// ignore_for_file: dead_code, dead_null_aware_expression, invalid_null_aware_operator, unchecked_use_of_nullable_value
+// ignore_for_file: dead_code, dead_null_aware_expression,
+//   invalid_null_aware_operator, unchecked_use_of_nullable_value
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/models/food_expiry_item.dart';
-import 'package:smart_ledger/services/food_expiry_service.dart';
-import 'package:smart_ledger/utils/icon_catalog.dart';
-import 'package:smart_ledger/utils/ingredients_recommendation_utils.dart';
+import '../models/food_expiry_item.dart';
+import '../services/food_expiry_service.dart';
+import '../utils/icon_catalog.dart';
+import '../utils/ingredients_recommendation_utils.dart';
 
 /// 식재료 추천 강화 위젯
 class IngredientsRecommendationWidget extends StatefulWidget {
@@ -31,18 +32,16 @@ class _IngredientsRecommendationWidgetState
       final items = FoodExpiryService.instance.items.value;
 
       // 금주 활용할 식재료
-      final thisWeek =
-          IngredientsRecommendationUtils.getThisWeekItems(items);
+      final thisWeek = IngredientsRecommendationUtils.getThisWeekItems(items);
 
       // 가격 효율성 기반 추천
       final optimized =
           IngredientsRecommendationUtils.getOptimizedRecommendations(
-        thisWeek,
-        limit: 5,
-      );
+            thisWeek,
+            limit: 5,
+          );
 
-      final advice =
-          IngredientsRecommendationUtils.getNutritionAdvice(items);
+      final advice = IngredientsRecommendationUtils.getNutritionAdvice(items);
 
       if (mounted) {
         setState(() {
@@ -92,8 +91,9 @@ class _IngredientsRecommendationWidgetState
                 const SizedBox(width: 12),
                 Text(
                   '🍽️ 이번주 추천 식재료',
-                  style: theme.textTheme.titleMedium
-                      ?.copyWith(fontWeight: FontWeight.bold),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -108,12 +108,11 @@ class _IngredientsRecommendationWidgetState
             separatorBuilder: (context, index) => const Divider(height: 1),
             itemBuilder: (context, index) {
               final item = _recommendations![index];
-              final nutrition = IngredientsRecommendationUtils
-                  .getNutritionInfo(item.name);
-              final message =
-                  IngredientsRecommendationUtils.getRecommendationMessage(
-                item,
+              final nutrition = IngredientsRecommendationUtils.getNutritionInfo(
+                item.name,
               );
+              final message =
+                  IngredientsRecommendationUtils.getRecommendationMessage(item);
               final priceScore =
                   IngredientsRecommendationUtils.getPriceValueScore(item);
 
@@ -132,8 +131,9 @@ class _IngredientsRecommendationWidgetState
                             children: [
                               Text(
                                 item.name,
-                                style: theme.textTheme.bodyLarge
-                                    ?.copyWith(fontWeight: FontWeight.bold),
+                                style: theme.textTheme.bodyLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                               const SizedBox(height: 4),
                               Row(
@@ -154,11 +154,11 @@ class _IngredientsRecommendationWidgetState
                                     ),
                                     child: Text(
                                       '점수: $priceScore',
-                                      style:
-                                          theme.textTheme.labelSmall?.copyWith(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                      style: theme.textTheme.labelSmall
+                                          ?.copyWith(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                     ),
                                   ),
                                 ],
@@ -167,7 +167,7 @@ class _IngredientsRecommendationWidgetState
                           ),
                         ),
                         Text(
-                          '${item.price?.toStringAsFixed(0) ?? '가격 미정'}원',
+                          '${item.price.toStringAsFixed(0)}원',
                           style: theme.textTheme.labelLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: theme.colorScheme.primary,
@@ -185,20 +185,18 @@ class _IngredientsRecommendationWidgetState
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.primaryContainer
-                            .withValues(alpha: 0.3),
+                        color: theme.colorScheme.primaryContainer.withValues(
+                          alpha: 0.3,
+                        ),
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: Text(
-                        message,
-                        style: theme.textTheme.labelMedium,
-                      ),
+                      child: Text(message, style: theme.textTheme.labelMedium),
                     ),
 
                     // 수량 정보
                     const SizedBox(height: 8),
                     Text(
-                      '보유량: ${item.quantity} ${item.unit ?? '개'}',
+                      '보유량: ${item.quantity} ${item.unit}',
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: Colors.grey[600],
                       ),
@@ -218,8 +216,9 @@ class _IngredientsRecommendationWidgetState
               child: Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.secondaryContainer
-                      .withValues(alpha: 0.3),
+                  color: theme.colorScheme.secondaryContainer.withValues(
+                    alpha: 0.3,
+                  ),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Row(

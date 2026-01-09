@@ -1,9 +1,9 @@
 import 'package:drift/drift.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:smart_ledger/database/database_provider.dart';
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/services/transaction_service.dart';
+import '../database/database_provider.dart';
+import '../models/transaction.dart';
+import 'transaction_service.dart';
 
 class TransactionFtsHit {
   const TransactionFtsHit({

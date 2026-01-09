@@ -6,21 +6,22 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:smart_ledger/screens/memo_stats_screen.dart';
-import 'package:smart_ledger/services/user_pref_service.dart';
-import 'package:smart_ledger/utils/icon_catalog.dart';
-import 'package:smart_ledger/utils/icon_launch_utils.dart';
-import 'package:smart_ledger/utils/interaction_blockers.dart';
-import 'package:smart_ledger/utils/main_feature_icon_catalog.dart';
-import 'package:smart_ledger/utils/memo_search_utils.dart';
-import 'package:smart_ledger/utils/page1_bottom_quick_icons.dart';
-import 'package:smart_ledger/utils/page_indicator.dart';
-import 'package:smart_ledger/utils/pref_keys.dart';
-import 'package:smart_ledger/utils/screen_saver_ids.dart';
-import 'package:smart_ledger/utils/screen_saver_launcher.dart';
-import 'package:smart_ledger/widgets/background_widget.dart';
-import 'package:smart_ledger/widgets/special_backgrounds.dart';
-import 'package:smart_ledger/theme/app_theme_seed_controller.dart';
+import 'memo_stats_screen.dart';
+import '../services/user_pref_service.dart';
+import '../theme/app_colors.dart';
+import '../utils/icon_catalog.dart';
+import '../utils/icon_launch_utils.dart';
+import '../utils/interaction_blockers.dart';
+import '../utils/main_feature_icon_catalog.dart';
+import '../utils/memo_search_utils.dart';
+import '../utils/page1_bottom_quick_icons.dart';
+import '../utils/page_indicator.dart';
+import '../utils/pref_keys.dart';
+import '../utils/screen_saver_ids.dart';
+import '../utils/screen_saver_launcher.dart';
+import '../widgets/background_widget.dart';
+import '../widgets/special_backgrounds.dart';
+import '../theme/app_theme_seed_controller.dart';
 
 class AccountMainScreen extends StatefulWidget {
   final String accountName;
@@ -381,166 +382,160 @@ class _AccountMainScreenState extends State<AccountMainScreen>
         return Stack(
           children: [
             Positioned.fill(
+              child: Builder(
+                builder: (context) {
+                  if (bgType == 'image' && bgImagePath != null) {
+                    return Image.file(
+                      File(bgImagePath),
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                          ColoredBox(color: effectiveBgColor),
+                    );
+                  }
+
+                  if (presetId == 'midnight_gold') {
+                    return MidnightGoldBackground(baseColor: effectiveBgColor);
+                  } else if (presetId == 'starlight_navy') {
+                    return StarlightNavyBackground(baseColor: effectiveBgColor);
+                  }
+                  return ColoredBox(color: effectiveBgColor);
+                },
+              ),
+            ),
+
+            // 2. Blur Effect (if image)
+            if (bgType == 'image' && bgImagePath != null && bgBlur > 0)
+              Positioned.fill(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: bgBlur, sigmaY: bgBlur),
+                  child: const ColoredBox(color: Colors.transparent),
+                ),
+              ),
+
+            // 3. Dark Overlay for images to ensure readability
+            if (bgType == 'image' && bgImagePath != null)
+              Positioned.fill(
+                child: ColoredBox(color: Colors.black.withValues(alpha: 0.2)),
+              ),
+
+            PageView.builder(
+              controller: _controller,
+              physics: _disablePageSwipe
+                  ? const NeverScrollableScrollPhysics()
+                  : const PageScrollPhysics(),
+              itemCount: _pageCount,
+              onPageChanged: (index) {
+                setState(() {
+                  _currentIndex = index;
+                  _disablePageSwipe =
+                      _pageKeys[index].currentState?.isEditMode ?? false;
+                });
+                if (_isRestoringIndex) return;
+                // Fire-and-forget: a best-effort persistence.
+                UserPrefService.setMainPageIndex(
+                  accountName: widget.accountName,
+                  index: index,
+                );
+              },
+              itemBuilder: (context, index) {
+                return _IconGridPage(
+                  key: _pageKeys[index],
+                  accountName: widget.accountName,
+                  pageIndex: index,
+                  pageCount: _pageCount,
+                  currentPage: _currentIndex,
+                  pageController: _controller,
+                  onRequestResetMainPages: _confirmAndResetMainPages,
+                  onRequestQuickJump: _showQuickJumpSheet,
+                  onRequestJumpToPage: (targetIndex) {
+                    if (targetIndex < 0 || targetIndex >= _pageCount) {
+                      return;
+                    }
+                    _controller.animateToPage(
+                      targetIndex,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeOut,
+                    );
+                  },
+                  onEditModeChanged: (isEditMode) {
+                    if (index != _currentIndex) return;
+                    if (_disablePageSwipe == isEditMode) return;
+                    setState(() => _disablePageSwipe = isEditMode);
+                  },
+                );
+              },
+            ),
+            // Page quick-jump indicator (bottom center)
+            if (_pageCount > 0)
+              // Top page label for pages 1..7 (small, non-intrusive)
+              Positioned(
+                left: 0,
+                right: 0,
+                top: isLandscape ? 4 : 12,
+                child: SafeArea(
+                  bottom: false,
                   child: Builder(
                     builder: (context) {
-                      if (bgType == 'image' && bgImagePath != null) {
-                        return Image.file(
-                          File(bgImagePath),
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              ColoredBox(color: effectiveBgColor),
-                        );
-                      }
+                      final showLabel =
+                          _currentIndex >= 0 &&
+                          _currentIndex < _pageNameLabels.length;
+                      if (!showLabel) return const SizedBox.shrink();
+                      final label = _pageNameLabels[_currentIndex];
+                      final scheme = Theme.of(context).colorScheme;
 
-                      if (presetId == 'midnight_gold') {
-                        return MidnightGoldBackground(
-                          baseColor: effectiveBgColor,
-                        );
-                      } else if (presetId == 'starlight_navy') {
-                        return StarlightNavyBackground(
-                          baseColor: effectiveBgColor,
-                        );
-                      }
-                      return ColoredBox(color: effectiveBgColor);
+                      return Center(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 6.0,
+                            horizontal: 16.0,
+                          ),
+                          decoration: BoxDecoration(
+                            color: scheme.surfaceContainerLow.withValues(
+                              alpha: 0.7,
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: scheme.primary.withValues(alpha: 0.2),
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.05),
+                                blurRadius: 10,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Text(
+                            label,
+                            style: Theme.of(context).textTheme.titleSmall
+                                ?.copyWith(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.bold,
+                                  color: scheme.primary,
+                                  letterSpacing: -0.2,
+                                ),
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      );
                     },
                   ),
                 ),
+              ),
 
-                // 2. Blur Effect (if image)
-                if (bgType == 'image' && bgImagePath != null && bgBlur > 0)
-                  Positioned.fill(
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: bgBlur, sigmaY: bgBlur),
-                      child: const ColoredBox(color: Colors.transparent),
-                    ),
+            // DEBUG: 그리드 오버레이 (프로토타입/개발 모드 전용, 출시 전 자동 제거됨)
+            if (kDebugMode)
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: GridPaper(
+                    color: Colors.blue.withValues(alpha: 0.15),
+                    interval: 50,
                   ),
-
-                // 3. Dark Overlay for images to ensure readability
-                if (bgType == 'image' && bgImagePath != null)
-                  Positioned.fill(
-                    child: ColoredBox(
-                      color: Colors.black.withValues(alpha: 0.2),
-                    ),
-                  ),
-
-                PageView.builder(
-                  controller: _controller,
-                  physics: _disablePageSwipe
-                      ? const NeverScrollableScrollPhysics()
-                      : const PageScrollPhysics(),
-                  itemCount: _pageCount,
-                  onPageChanged: (index) {
-                    setState(() {
-                      _currentIndex = index;
-                      _disablePageSwipe =
-                          _pageKeys[index].currentState?.isEditMode ?? false;
-                    });
-                    if (_isRestoringIndex) return;
-                    // Fire-and-forget: a best-effort persistence.
-                    UserPrefService.setMainPageIndex(
-                      accountName: widget.accountName,
-                      index: index,
-                    );
-                  },
-                  itemBuilder: (context, index) {
-                    return _IconGridPage(
-                      key: _pageKeys[index],
-                      accountName: widget.accountName,
-                      pageIndex: index,
-                      pageCount: _pageCount,
-                      currentPage: _currentIndex,
-                      pageController: _controller,
-                      onRequestResetMainPages: _confirmAndResetMainPages,
-                      onRequestQuickJump: _showQuickJumpSheet,
-                      onRequestJumpToPage: (targetIndex) {
-                        if (targetIndex < 0 || targetIndex >= _pageCount) {
-                          return;
-                        }
-                        _controller.animateToPage(
-                          targetIndex,
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeOut,
-                        );
-                      },
-                      onEditModeChanged: (isEditMode) {
-                        if (index != _currentIndex) return;
-                        if (_disablePageSwipe == isEditMode) return;
-                        setState(() => _disablePageSwipe = isEditMode);
-                      },
-                    );
-                  },
                 ),
-                // Page quick-jump indicator (bottom center)
-                if (_pageCount > 0)
-                  // Top page label for pages 1..7 (small, non-intrusive)
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    top: isLandscape ? 4 : 12,
-                    child: SafeArea(
-                      bottom: false,
-                      child: Builder(
-                        builder: (context) {
-                          final showLabel =
-                              _currentIndex >= 0 &&
-                              _currentIndex < _pageNameLabels.length;
-                          if (!showLabel) return const SizedBox.shrink();
-                          final label = _pageNameLabels[_currentIndex];
-                          final scheme = Theme.of(context).colorScheme;
-
-                          return Center(
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 6.0,
-                                horizontal: 16.0,
-                              ),
-                              decoration: BoxDecoration(
-                                color: scheme.surfaceContainerLow.withValues(
-                                  alpha: 0.7,
-                                ),
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                  color: scheme.primary.withValues(alpha: 0.2),
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.05),
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: Text(
-                                label,
-                                style: Theme.of(context).textTheme.titleSmall
-                                    ?.copyWith(
-                                      fontSize: 12.5,
-                                      fontWeight: FontWeight.bold,
-                                      color: scheme.primary,
-                                      letterSpacing: -0.2,
-                                    ),
-                                textAlign: TextAlign.center,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-
-                // DEBUG: 그리드 오버레이 (프로토타입/개발 모드 전용, 출시 전 자동 제거됨)
-                if (kDebugMode)
-                  Positioned.fill(
-                    child: IgnorePointer(
-                      child: GridPaper(
-                        color: Colors.blue.withValues(alpha: 0.15),
-                        interval: 50,
-                      ),
-                    ),
-                  ),
-              ],
+              ),
+          ],
         );
       },
     );
@@ -1002,166 +997,167 @@ class _IconGridPageState extends State<_IconGridPage> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.only(top: 70),
-        child: Column(
-          children: [
-            Expanded(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  const crossAxisCount = 4;
-                  const rows =
-                      (_defaultSlotCount + crossAxisCount - 1) ~/
-                      crossAxisCount;
-                  const mainAxisSpacing = 12.0;
-                  const horizontalPadding = 16.0 * 2; // left + right
-                  const verticalPadding = 16.0 * 2; // top + bottom
-                  const totalVerticalSpacing = mainAxisSpacing * (rows - 1);
-                  final usableWidth =
-                      constraints.maxWidth -
-                      horizontalPadding -
-                      (12.0 * (crossAxisCount - 1));
-                  final itemWidth = usableWidth / crossAxisCount;
-                  const childAspectRatio = 0.75; // width / height
-                  final itemHeight = itemWidth / childAspectRatio;
-                  final gridHeight =
-                      (rows * itemHeight) +
-                      totalVerticalSpacing +
-                      verticalPadding;
+    final scheme = Theme.of(context).colorScheme;
 
-                  return Align(
-                    alignment: Alignment.bottomCenter,
-                    child: SizedBox(
-                      height: gridHeight,
-                      width: double.infinity,
-                      child: GridView.count(
-                        padding: const EdgeInsets.all(16),
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        crossAxisCount: 4,
-                        mainAxisSpacing: 12,
-                        crossAxisSpacing: 12,
-                        childAspectRatio: childAspectRatio,
-                        children: List.generate(_defaultSlotCount, (index) {
-                          final slotKey = ValueKey<String>(
-                            'main_icon_slot_${widget.pageIndex}_$index',
-                          );
-                          final id = _slots[index];
-                          final isEmpty = id.isEmpty;
-                          final icon = isEmpty ? null : _iconById(id);
+    Widget buildGrid() {
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          const crossAxisCount = 4;
+          const rows =
+              (_defaultSlotCount + crossAxisCount - 1) ~/ crossAxisCount;
+          const mainAxisSpacing = 12.0;
+          const horizontalPadding = 16.0 * 2; // left + right
+          const verticalPadding = 16.0 * 2; // top + bottom
+          const totalVerticalSpacing = mainAxisSpacing * (rows - 1);
+          final usableWidth =
+              constraints.maxWidth -
+              horizontalPadding -
+              (12.0 * (crossAxisCount - 1));
+          final itemWidth = usableWidth / crossAxisCount;
+          const childAspectRatio = 0.75; // width / height
+          final itemHeight = itemWidth / childAspectRatio;
+          final gridHeight =
+              (rows * itemHeight) + totalVerticalSpacing + verticalPadding;
 
-                          if (!_isEditMode && _hideEmptySlots && isEmpty) {
-                            return SizedBox.expand(key: slotKey);
-                          }
+          return Align(
+            alignment: Alignment.bottomCenter,
+            child: SizedBox(
+              height: gridHeight,
+              width: double.infinity,
+              child: GridView.count(
+                padding: const EdgeInsets.all(16),
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: 4,
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                childAspectRatio: childAspectRatio,
+                children: List.generate(_defaultSlotCount, (index) {
+                  final slotKey = ValueKey<String>(
+                    'main_icon_slot_${widget.pageIndex}_$index',
+                  );
+                  final id = _slots[index];
+                  final isEmpty = id.isEmpty;
+                  final icon = isEmpty ? null : _iconById(id);
 
-                          final tile = icon != null
-                              ? _IconTile(
-                                  label: icon.labelFor(context),
-                                  icon: icon.icon,
-                                  isEditMode: _isEditMode,
-                                  liveDataWidget: null,
-                                  onTap: InteractionBlockers.gate(() {
-                                    if (_isEditMode) return;
-                                    _navigateToIcon(icon);
-                                  }),
-                                )
-                              : _EmptySlotTile(isEditMode: _isEditMode);
+                  if (!_isEditMode && _hideEmptySlots && isEmpty) {
+                    return SizedBox.expand(key: slotKey);
+                  }
 
-                          if (!_isEditMode) {
-                            return SizedBox(key: slotKey, child: tile);
-                          }
+                  final tile = icon != null
+                      ? _IconTile(
+                          label: icon.labelFor(context),
+                          icon: icon.icon,
+                          isEditMode: _isEditMode,
+                          pageIndex: widget.pageIndex,
+                          itemIndex: index,
+                          liveDataWidget: null,
+                          onTap: InteractionBlockers.gate(() {
+                            if (_isEditMode) return;
+                            _navigateToIcon(icon);
+                          }),
+                        )
+                      : _EmptySlotTile(isEditMode: _isEditMode);
 
-                          return SizedBox(
-                            key: slotKey,
-                            child: LongPressDraggable<String>(
-                              data: id,
-                              feedback: Opacity(
-                                opacity: 0.9,
-                                child: SizedBox(width: 80, child: tile),
-                              ),
-                              childWhenDragging: Opacity(
-                                opacity: id.isEmpty ? 1.0 : 0.3,
-                                child: tile,
-                              ),
-                              child: DragTarget<String>(
-                                onWillAcceptWithDetails: (details) => true,
-                                onAcceptWithDetails: (details) {
-                                  final draggedId = details.data;
-                                  if (draggedId.isEmpty) return;
-                                  _assignOrSwap(draggedId, index);
-                                },
-                                builder:
-                                    (context, candidateData, rejectedData) {
-                                  final highlight = candidateData.isNotEmpty;
-                                  return AnimatedContainer(
-                                    duration: const Duration(
-                                      milliseconds: 120,
-                                    ),
-                                    transform: Matrix4.diagonal3Values(
-                                      highlight ? 1.03 : 1.0,
-                                      highlight ? 1.03 : 1.0,
-                                      1.0,
-                                    ),
-                                    child: tile,
-                                  );
-                                },
-                              ),
+                  if (!_isEditMode) {
+                    return SizedBox(key: slotKey, child: tile);
+                  }
+
+                  return SizedBox(
+                    key: slotKey,
+                    child: LongPressDraggable<String>(
+                      data: id,
+                      feedback: Opacity(
+                        opacity: 0.9,
+                        child: SizedBox(width: 80, child: tile),
+                      ),
+                      childWhenDragging: Opacity(
+                        opacity: id.isEmpty ? 1.0 : 0.3,
+                        child: tile,
+                      ),
+                      child: DragTarget<String>(
+                        onWillAcceptWithDetails: (details) => true,
+                        onAcceptWithDetails: (details) {
+                          final draggedId = details.data;
+                          if (draggedId.isEmpty) return;
+                          _assignOrSwap(draggedId, index);
+                        },
+                        builder: (context, candidateData, rejectedData) {
+                          final highlight = candidateData.isNotEmpty;
+                          return AnimatedContainer(
+                            duration: const Duration(milliseconds: 120),
+                            transform: Matrix4.diagonal3Values(
+                              highlight ? 1.03 : 1.0,
+                              highlight ? 1.03 : 1.0,
+                              1.0,
                             ),
+                            child: tile,
                           );
-                        }),
+                        },
                       ),
                     ),
                   );
-                },
+                }),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      PageIndicator(
-                        pageCount: widget.pageCount,
-                        currentPage: widget.currentPage,
-                        onPageTap: (index) {
-                          widget.pageController.animateToPage(
-                            index,
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeInOut,
-                          );
-                        },
-                      ),
-                      _PageQuickMenuButton(
-                        isEditMode: _isEditMode,
-                        onToggleEditMode: _toggleEditMode,
-                        onResetMainPages: widget.onRequestResetMainPages,
-                        onPageSelected: (pageIndex) {
-                          if (pageIndex < 0 || pageIndex >= widget.pageCount) {
-                            return;
-                          }
-                          widget.pageController.animateToPage(
-                            pageIndex,
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeOut,
-                          );
-                        },
-                      ),
-                    ],
-                  ),
+          );
+        },
+      );
+    }
 
-                ],
+    return Container(
+      color: scheme.surface,
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.only(top: 70),
+          child: Column(
+            children: [
+              Expanded(child: buildGrid()),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        PageIndicator(
+                          pageCount: widget.pageCount,
+                          currentPage: widget.currentPage,
+                          onPageTap: (index) {
+                            widget.pageController.animateToPage(
+                              index,
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                            );
+                          },
+                        ),
+                        _PageQuickMenuButton(
+                          isEditMode: _isEditMode,
+                          onToggleEditMode: _toggleEditMode,
+                          onResetMainPages: widget.onRequestResetMainPages,
+                          onPageSelected: (pageIndex) {
+                            if (pageIndex < 0 ||
+                                pageIndex >= widget.pageCount) {
+                              return;
+                            }
+                            widget.pageController.animateToPage(
+                              pageIndex,
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeOut,
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
-
-
 }
 
 class _PageQuickMenuButton extends StatelessWidget {
@@ -1318,6 +1314,8 @@ class _IconTile extends StatelessWidget {
   final String label;
   final IconData icon;
   final bool isEditMode;
+  final int pageIndex;
+  final int itemIndex;
   final Widget? liveDataWidget;
   final VoidCallback? onTap;
 
@@ -1325,6 +1323,8 @@ class _IconTile extends StatelessWidget {
     required this.label,
     required this.icon,
     required this.isEditMode,
+    required this.pageIndex,
+    required this.itemIndex,
     required this.liveDataWidget,
     required this.onTap,
   });
@@ -1335,13 +1335,17 @@ class _IconTile extends StatelessWidget {
     final scheme = theme.colorScheme;
     final live = liveDataWidget;
 
-    // Use more vibrant colors from the theme
+    // Get page-based icon color
+    final featureColor = AppColors.getFeatureIconColor(pageIndex, itemIndex);
+
+    // Use theme color for background, feature color for icon
     final bgColor = !isEditMode
         ? scheme.primary.withValues(alpha: 0.12)
         : scheme.primaryContainer;
-    final iconColor = !isEditMode ? scheme.primary : scheme.onPrimaryContainer;
+    final iconColor = !isEditMode ? featureColor : scheme.onPrimaryContainer;
+    final labelStyle = theme.textTheme.labelMedium;
     final labelColor = !isEditMode
-        ? scheme.onSurface
+        ? (labelStyle?.color ?? scheme.onSurface)
         : scheme.onPrimaryContainer;
 
     return AnimatedRotation(
@@ -1367,7 +1371,7 @@ class _IconTile extends StatelessWidget {
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: scheme.primary.withValues(alpha: 0.2),
+                            color: featureColor.withValues(alpha: 0.2),
                             blurRadius: 12,
                             spreadRadius: 2,
                           ),
@@ -1394,12 +1398,23 @@ class _IconTile extends StatelessWidget {
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: labelColor,
-                  fontWeight: isEditMode ? FontWeight.bold : FontWeight.w500,
-                  fontSize: 11,
-                  letterSpacing: -0.4,
-                ),
+                style:
+                    labelStyle?.copyWith(
+                      color: labelColor,
+                      fontWeight: isEditMode
+                          ? FontWeight.bold
+                          : FontWeight.w500,
+                      fontSize: 11,
+                      letterSpacing: -0.4,
+                    ) ??
+                    TextStyle(
+                      color: labelColor,
+                      fontWeight: isEditMode
+                          ? FontWeight.bold
+                          : FontWeight.w500,
+                      fontSize: 11,
+                      letterSpacing: -0.4,
+                    ),
               ),
               if (!isEditMode && live != null) ...[
                 const SizedBox(height: 4),

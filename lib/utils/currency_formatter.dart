@@ -1,7 +1,7 @@
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_ledger/utils/pref_keys.dart';
-import 'package:smart_ledger/utils/type_converters.dart';
+import 'pref_keys.dart';
+import 'type_converters.dart';
 
 /// 통화(금액) 포맷 관련 유틸리티 클래스
 class CurrencyFormatter {

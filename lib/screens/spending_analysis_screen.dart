@@ -1,14 +1,14 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/services/transaction_service.dart';
-import 'package:smart_ledger/utils/chart_colors.dart';
-import 'package:smart_ledger/utils/number_formats.dart';
-import 'package:smart_ledger/utils/period_utils.dart' as period;
-import 'package:smart_ledger/utils/saving_tips_utils.dart';
-import 'package:smart_ledger/utils/spending_analysis_utils.dart';
-import 'package:smart_ledger/widgets/background_widget.dart';
+import '../models/transaction.dart';
+import '../services/transaction_service.dart';
+import '../utils/chart_colors.dart';
+import '../utils/number_formats.dart';
+import '../utils/period_utils.dart' as period;
+import '../utils/saving_tips_utils.dart';
+import '../utils/spending_analysis_utils.dart';
+import '../widgets/background_widget.dart';
 
 /// 지출 분석 + 절약 팁 화면
 ///
@@ -315,8 +315,9 @@ class _SpendingAnalysisScreenState extends State<SpendingAnalysisScreen>
                     return const SizedBox.shrink();
                   }
                   final name = items[idx].name;
-                  final displayName =
-                      name.length > 6 ? '${name.substring(0, 6)}...' : name;
+                  final displayName = name.length > 6
+                      ? '${name.substring(0, 6)}...'
+                      : name;
                   return Padding(
                     padding: const EdgeInsets.only(top: 8),
                     child: Text(
@@ -366,15 +367,13 @@ class _SpendingAnalysisScreenState extends State<SpendingAnalysisScreen>
     );
   }
 
-  Widget _buildTopItemsList(
-    List<ItemSpendingAnalysis> items,
-    ThemeData theme,
-  ) {
+  Widget _buildTopItemsList(List<ItemSpendingAnalysis> items, ThemeData theme) {
     return Card(
       child: Column(
         children: items.asMap().entries.map((entry) {
           final index = entry.key;
           final item = entry.value;
+          final avgAmountText = _currencyFormat.format(item.avgAmount);
           return ListTile(
             leading: CircleAvatar(
               backgroundColor: ChartColors.getColorForIndex(index, theme),
@@ -387,7 +386,7 @@ class _SpendingAnalysisScreenState extends State<SpendingAnalysisScreen>
               ),
             ),
             title: Text(item.name),
-            subtitle: Text('${item.count}회 구매 · 평균 ${_currencyFormat.format(item.avgAmount)}'),
+            subtitle: Text('${item.count}회 구매 · 평균 $avgAmountText'),
             trailing: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -421,18 +420,21 @@ class _SpendingAnalysisScreenState extends State<SpendingAnalysisScreen>
         children: categories.asMap().entries.map((entry) {
           final index = entry.key;
           final cat = entry.value;
+          final changePrefix = cat.monthOverMonthChange >= 0 ? '+' : '';
+          final changeText =
+              '$changePrefix${cat.monthOverMonthChange.toStringAsFixed(0)}%';
 
           // 전월 대비 변동 표시
           final changeIcon = cat.monthOverMonthChange > 0
               ? Icons.trending_up
               : (cat.monthOverMonthChange < 0
-                  ? Icons.trending_down
-                  : Icons.trending_flat);
+                    ? Icons.trending_down
+                    : Icons.trending_flat);
           final changeColor = cat.monthOverMonthChange > 10
               ? theme.colorScheme.error
               : (cat.monthOverMonthChange < -10
-                  ? Colors.green
-                  : theme.colorScheme.onSurfaceVariant);
+                    ? Colors.green
+                    : theme.colorScheme.onSurfaceVariant);
 
           return ListTile(
             leading: CircleAvatar(
@@ -452,7 +454,7 @@ class _SpendingAnalysisScreenState extends State<SpendingAnalysisScreen>
                 const SizedBox(width: 8),
                 Icon(changeIcon, size: 16, color: changeColor),
                 Text(
-                  '${cat.monthOverMonthChange >= 0 ? '+' : ''}${cat.monthOverMonthChange.toStringAsFixed(0)}%',
+                  changeText,
                   style: TextStyle(color: changeColor, fontSize: 12),
                 ),
               ],
@@ -517,7 +519,11 @@ class _SpendingAnalysisScreenState extends State<SpendingAnalysisScreen>
     );
 
     if (patterns.isEmpty) {
-      return _buildEmptyState(theme, '반복 구매 패턴이 감지되지 않았습니다.\n거래 데이터가 쌓이면 분석됩니다.');
+      return _buildEmptyState(
+        theme,
+        '반복 구매 패턴이 감지되지 않았습니다.\n'
+        '거래 데이터가 쌓이면 분석됩니다.',
+      );
     }
 
     return SingleChildScrollView(
@@ -562,10 +568,7 @@ class _SpendingAnalysisScreenState extends State<SpendingAnalysisScreen>
         return Card(
           color: theme.colorScheme.errorContainer.withValues(alpha: 0.3),
           child: ListTile(
-            leading: Icon(
-              Icons.warning,
-              color: theme.colorScheme.error,
-            ),
+            leading: Icon(Icons.warning, color: theme.colorScheme.error),
             title: Text(risk.name),
             subtitle: Text(
               '$daysSinceLast일 전 구매함 · 평균 주기 ${risk.avgInterval.round()}일',
@@ -620,10 +623,7 @@ class _SpendingAnalysisScreenState extends State<SpendingAnalysisScreen>
                   ),
                   child: Text(
                     '신뢰도 ${(confidence * 100).toStringAsFixed(0)}%',
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: confidenceColor,
-                    ),
+                    style: TextStyle(fontSize: 10, color: confidenceColor),
                   ),
                 ),
               ],
@@ -652,15 +652,20 @@ class _SpendingAnalysisScreenState extends State<SpendingAnalysisScreen>
     List<RecurringSpendingPattern> patterns,
     ThemeData theme,
   ) {
-    final upcoming = patterns
-        .where((p) => p.predictedNextPurchase != null)
-        .where((p) => p.predictedNextPurchase!.isAfter(DateTime.now()))
-        .where((p) =>
-            p.predictedNextPurchase!.difference(DateTime.now()).inDays <= 14)
-        .toList()
-      ..sort((a, b) => a.predictedNextPurchase!.compareTo(
-            b.predictedNextPurchase!,
-          ));
+    final upcoming =
+        patterns
+            .where((p) => p.predictedNextPurchase != null)
+            .where((p) => p.predictedNextPurchase!.isAfter(DateTime.now()))
+            .where(
+              (p) =>
+                  p.predictedNextPurchase!.difference(DateTime.now()).inDays <=
+                  14,
+            )
+            .toList()
+          ..sort(
+            (a, b) =>
+                a.predictedNextPurchase!.compareTo(b.predictedNextPurchase!),
+          );
 
     if (upcoming.isEmpty) {
       return _buildEmptyCard(theme, '2주 내 예정된 구매가 없습니다');
@@ -672,8 +677,10 @@ class _SpendingAnalysisScreenState extends State<SpendingAnalysisScreen>
           final daysUntil = pattern.predictedNextPurchase!
               .difference(DateTime.now())
               .inDays;
-          final dateStr = DateFormat('M/d(E)', 'ko')
-              .format(pattern.predictedNextPurchase!);
+          final dateStr = DateFormat(
+            'M/d(E)',
+            'ko',
+          ).format(pattern.predictedNextPurchase!);
 
           return ListTile(
             leading: CircleAvatar(
@@ -731,10 +738,16 @@ class _SpendingAnalysisScreenState extends State<SpendingAnalysisScreen>
     final allTips = [...duplicateWarnings, ...tips];
 
     // 총 예상 절약 금액
-    final totalSavings = SavingTipsUtils.calculateTotalPotentialSavings(allTips);
+    final totalSavings = SavingTipsUtils.calculateTotalPotentialSavings(
+      allTips,
+    );
 
     if (allTips.isEmpty) {
-      return _buildEmptyState(theme, '아직 분석할 데이터가 부족합니다.\n거래 내역이 쌓이면 맞춤 팁을 제공합니다.');
+      return _buildEmptyState(
+        theme,
+        '아직 분석할 데이터가 부족합니다.\n'
+        '거래 내역이 쌓이면 맞춤 팁을 제공합니다.',
+      );
     }
 
     return SingleChildScrollView(
@@ -876,10 +889,7 @@ class _SpendingAnalysisScreenState extends State<SpendingAnalysisScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  tip.description,
-                  style: theme.textTheme.bodyMedium,
-                ),
+                Text(tip.description, style: theme.textTheme.bodyMedium),
                 if (tip.actionItems.isNotEmpty) ...[
                   const SizedBox(height: 12),
                   Text(
@@ -889,16 +899,18 @@ class _SpendingAnalysisScreenState extends State<SpendingAnalysisScreen>
                     ),
                   ),
                   const SizedBox(height: 8),
-                  ...tip.actionItems.map((action) => Padding(
-                        padding: const EdgeInsets.only(bottom: 4),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('• '),
-                            Expanded(child: Text(action)),
-                          ],
-                        ),
-                      )),
+                  ...tip.actionItems.map(
+                    (action) => Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('• '),
+                          Expanded(child: Text(action)),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ],
             ),

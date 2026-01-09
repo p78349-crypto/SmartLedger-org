@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-import 'package:smart_ledger/models/asset.dart';
-import 'package:smart_ledger/models/emergency_transaction.dart';
-import 'package:smart_ledger/services/asset_service.dart';
-import 'package:smart_ledger/services/emergency_fund_service.dart';
-import 'package:smart_ledger/utils/utils.dart';
-import 'package:smart_ledger/widgets/state_placeholders.dart';
+import '../models/asset.dart';
+import '../models/emergency_transaction.dart';
+import '../services/asset_service.dart';
+import '../services/emergency_fund_service.dart';
+import '../utils/utils.dart';
+import '../widgets/state_placeholders.dart';
 
 class EmergencyFundScreen extends StatefulWidget {
   final String accountName;

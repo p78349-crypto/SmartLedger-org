@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/services/transaction_service.dart';
-import 'package:smart_ledger/theme/app_colors.dart';
-import 'package:smart_ledger/utils/refund_utils.dart';
+import '../models/transaction.dart';
+import '../services/transaction_service.dart';
+import '../theme/app_colors.dart';
+import '../utils/refund_utils.dart';
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key, required this.accountName});

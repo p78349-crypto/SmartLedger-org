@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/services/transaction_service.dart';
-import 'package:smart_ledger/utils/shopping_price_seasonality_utils.dart';
-import 'package:smart_ledger/utils/utils.dart';
+import '../models/transaction.dart';
+import '../services/transaction_service.dart';
+import '../utils/shopping_price_seasonality_utils.dart';
+import '../utils/utils.dart';
 
 class ShoppingCheapestMonthScreen extends StatefulWidget {
   final String accountName;

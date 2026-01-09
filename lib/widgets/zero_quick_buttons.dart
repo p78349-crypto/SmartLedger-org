@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/utils/number_formats.dart';
+import '../utils/number_formats.dart';
 
 class ZeroQuickButtons extends StatelessWidget {
   const ZeroQuickButtons({

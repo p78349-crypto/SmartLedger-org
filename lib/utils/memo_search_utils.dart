@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/screens/account_stats_screen.dart';
+import '../screens/account_stats_screen.dart';
 
 class MemoSearchUtils {
   const MemoSearchUtils._();

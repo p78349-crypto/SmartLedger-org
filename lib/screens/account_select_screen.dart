@@ -2,11 +2,11 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/navigation/app_routes.dart';
-import 'package:smart_ledger/services/account_service.dart';
-import 'package:smart_ledger/theme/app_theme_seed_controller.dart';
-import 'package:smart_ledger/widgets/background_widget.dart';
-import 'package:smart_ledger/widgets/special_backgrounds.dart';
+import '../navigation/app_routes.dart';
+import '../services/account_service.dart';
+import '../theme/app_theme_seed_controller.dart';
+import '../widgets/background_widget.dart';
+import '../widgets/special_backgrounds.dart';
 
 class AccountSelectScreen extends StatelessWidget {
   final List<String> accounts;

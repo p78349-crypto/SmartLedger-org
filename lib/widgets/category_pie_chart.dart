@@ -1,7 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/utils/chart_colors.dart';
-import 'package:smart_ledger/utils/stats_calculator.dart';
+import '../utils/chart_colors.dart';
+import '../utils/stats_calculator.dart';
 
 /// 카테고리별 지출/수입 비율을 보여주는 파이 차트 위젯
 class CategoryPieChart extends StatelessWidget {

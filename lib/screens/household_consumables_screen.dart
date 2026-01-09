@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/navigation/app_routes.dart';
-import 'package:smart_ledger/theme/app_colors.dart';
-import 'package:smart_ledger/utils/household_consumables_utils.dart';
+import '../models/transaction.dart';
+import '../navigation/app_routes.dart';
+import '../theme/app_colors.dart';
+import '../utils/household_consumables_utils.dart';
 
 class HouseholdConsumablesScreen extends StatelessWidget {
   final String accountName;
 
-  const HouseholdConsumablesScreen({
-    super.key,
-    required this.accountName,
-  });
+  const HouseholdConsumablesScreen({super.key, required this.accountName});
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +63,9 @@ class HouseholdConsumablesScreen extends StatelessWidget {
                     child: Icon(
                       item.icon,
                       size: 32,
-                      color: AppColors.consumableIconColors[index % AppColors.consumableIconColors.length],
+                      color:
+                          AppColors.consumableIconColors[index %
+                              AppColors.consumableIconColors.length],
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -110,9 +109,9 @@ class HouseholdConsumablesScreen extends StatelessWidget {
             // 선택 항목 표시
             Text(
               item.name,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
 

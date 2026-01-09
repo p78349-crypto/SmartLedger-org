@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:smart_ledger/services/transaction_service.dart';
-import 'package:smart_ledger/utils/icon_catalog.dart';
-import 'package:smart_ledger/utils/number_formats.dart';
-import 'package:smart_ledger/utils/points_stats_utils.dart';
-import 'package:smart_ledger/utils/pref_keys.dart';
+import '../services/transaction_service.dart';
+import '../utils/icon_catalog.dart';
+import '../utils/number_formats.dart';
+import '../utils/points_stats_utils.dart';
+import '../utils/pref_keys.dart';
 
 @immutable
 class _Horizon {

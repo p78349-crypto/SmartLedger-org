@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/utils/screen_saver_ids.dart';
-import 'package:smart_ledger/widgets/in_app_screen_saver.dart';
+import 'screen_saver_ids.dart';
+import '../widgets/in_app_screen_saver.dart';
 
 /// Helper to launch the in-app screen saver from anywhere.
 class ScreenSaverLauncher {

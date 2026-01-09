@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/theme/app_colors.dart';
+import 'app_colors.dart';
 
 class AppTextStyles {
   // Display

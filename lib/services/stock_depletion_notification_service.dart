@@ -7,13 +7,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
-import 'package:smart_ledger/models/consumable_inventory_item.dart';
-import 'package:smart_ledger/navigation/app_routes.dart';
-import 'package:smart_ledger/navigation/global_navigator_key.dart';
-import 'package:smart_ledger/services/account_service.dart';
-import 'package:smart_ledger/services/activity_household_estimator_service.dart';
-import 'package:smart_ledger/services/user_pref_service.dart';
-import 'package:smart_ledger/utils/pref_keys.dart';
+import '../models/consumable_inventory_item.dart';
+import '../navigation/app_routes.dart';
+import '../navigation/global_navigator_key.dart';
+import 'account_service.dart';
+import 'activity_household_estimator_service.dart';
+import 'user_pref_service.dart';
+import '../utils/pref_keys.dart';
 
 class StockDepletionNotificationService {
   StockDepletionNotificationService._internal();
@@ -49,7 +49,9 @@ class StockDepletionNotificationService {
     );
 
     final androidImpl = _plugin
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
     await androidImpl?.createNotificationChannel(
       const AndroidNotificationChannel(
         _androidChannelId,
@@ -174,7 +176,9 @@ class StockDepletionNotificationService {
 
     final first = sorted.first.timestamp;
     final last = sorted.last.timestamp;
-    final spanDays = _startOfDay(last).difference(_startOfDay(first)).inDays.abs();
+    final spanDays = _startOfDay(
+      last,
+    ).difference(_startOfDay(first)).inDays.abs();
     final denomDays = spanDays < 1 ? 1 : spanDays;
     final totalUsed = sorted.fold<double>(0.0, (sum, r) => sum + r.amount);
     final avgPerDay = totalUsed / denomDays;
@@ -183,12 +187,14 @@ class StockDepletionNotificationService {
     return (item.currentStock / avgPerDay).ceil();
   }
 
-  /// Reschedule (cancel + schedule) predicted depletion notification for an item.
+  /// Reschedule (cancel + schedule) predicted depletion notification
+  /// for an item.
   ///
   /// - If user disabled notifications, cancels existing.
   /// - If there isn't enough usage history, cancels existing.
   /// - Schedules at 09:00 on (expectedDepletionDate - thresholdDays).
-  /// - If already within the threshold window, schedules an immediate notification.
+  /// - If already within the threshold window, schedules an immediate
+  ///   notification.
   Future<void> rescheduleForItem(ConsumableInventoryItem item) async {
     await _ensureInit();
 
@@ -217,10 +223,15 @@ class StockDepletionNotificationService {
         : await UserPrefService.getStockUseAutoAddDepletionDaysHouseholdV1();
 
     final now = DateTime.now();
-    final expectedDepletionDate = _startOfDay(now).add(Duration(days: expectedDaysLeft));
+    final expectedDepletionDate = _startOfDay(
+      now,
+    ).add(Duration(days: expectedDaysLeft));
 
-    // Notify at threshold boundary (09:00), or immediately if already within window.
-    final plannedNotifyDay = expectedDepletionDate.subtract(Duration(days: thresholdDays));
+    // Notify at threshold boundary (09:00), or immediately if already
+    // within window.
+    final plannedNotifyDay = expectedDepletionDate.subtract(
+      Duration(days: thresholdDays),
+    );
     var notifyAt = DateTime(
       plannedNotifyDay.year,
       plannedNotifyDay.month,
@@ -236,13 +247,16 @@ class StockDepletionNotificationService {
     final title = item.expiryDate != null ? '식료품 소진 알림' : '생활용품 소진 알림';
     final remaining = _formatQtyWithUnit(item.currentStock, item.unit);
     final expectedText = expectedDaysLeft <= 0
-      ? '거의 소진됨'
-      : '$expectedDaysLeft일 후 소진 예상';
+        ? '거의 소진됨'
+        : '$expectedDaysLeft일 후 소진 예상';
 
     final trendLine = await _activityTrendLine();
     final body =
-      '${item.name} $thresholdDays일 이내 소진 가능성\n현재 잔량: $remaining\n예상: $expectedText'
-      '${trendLine == null ? '' : '\n$trendLine'}\n쇼핑준비를 확인하세요.';
+        '${item.name} $thresholdDays일 이내 소진 가능성\n'
+        '현재 잔량: $remaining\n'
+        '예상: $expectedText'
+        '${trendLine == null ? '' : '\n$trendLine'}\n'
+        '쇼핑준비를 확인하세요.';
 
     final payload = jsonEncode({'itemId': item.id, 'itemName': item.name});
 

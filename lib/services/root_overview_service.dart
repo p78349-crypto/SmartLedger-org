@@ -1,11 +1,11 @@
-import 'package:smart_ledger/models/account.dart';
-import 'package:smart_ledger/models/asset.dart';
-import 'package:smart_ledger/models/fixed_cost.dart';
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/services/account_service.dart';
-import 'package:smart_ledger/services/asset_service.dart';
-import 'package:smart_ledger/services/fixed_cost_service.dart';
-import 'package:smart_ledger/services/transaction_service.dart';
+import '../models/account.dart';
+import '../models/asset.dart';
+import '../models/fixed_cost.dart';
+import '../models/transaction.dart';
+import 'account_service.dart';
+import 'asset_service.dart';
+import 'fixed_cost_service.dart';
+import 'transaction_service.dart';
 
 class AccountFinancialOverview {
   final String accountName;

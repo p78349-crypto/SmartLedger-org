@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_ledger/models/asset_move.dart';
+import '../models/asset_move.dart';
 
 /// 자산 이동/전환 기록 관리 서비스
 class AssetMoveService {

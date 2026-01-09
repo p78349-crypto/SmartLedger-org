@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:smart_ledger/services/food_expiry_service.dart';
-import 'package:smart_ledger/utils/icon_catalog.dart';
-import 'package:smart_ledger/utils/cost_prediction_utils.dart';
-import 'package:smart_ledger/utils/user_preference_utils.dart';
+import '../services/food_expiry_service.dart';
+import '../utils/icon_catalog.dart';
+import '../utils/cost_prediction_utils.dart';
+import '../utils/user_preference_utils.dart';
 
 /// 비용 예측 분석 위젯
 class CostAnalysisWidget extends StatefulWidget {
@@ -36,16 +36,14 @@ class _CostAnalysisWidgetState extends State<CostAnalysisWidget> {
         monthlyBudget: budget,
       );
 
-      final categorySpending =
-          CostPredictionUtils.getCategorySpending(items);
+      final categorySpending = CostPredictionUtils.getCategorySpending(items);
 
       final monthlyTrend = CostPredictionUtils.getMonthlyTrend(
         items,
         DateTime.now(),
       );
 
-      final purchasingAdvice =
-          CostPredictionUtils.getOptimalPurchasingAdvice(
+      final purchasingAdvice = CostPredictionUtils.getOptimalPurchasingAdvice(
         items,
         budget,
       );
@@ -101,8 +99,9 @@ class _CostAnalysisWidgetState extends State<CostAnalysisWidget> {
                 const SizedBox(width: 12),
                 Text(
                   '💰 비용 분석',
-                  style: theme.textTheme.titleMedium
-                      ?.copyWith(fontWeight: FontWeight.bold),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -128,8 +127,9 @@ class _CostAnalysisWidgetState extends State<CostAnalysisWidget> {
                   children: [
                     Text(
                       '월 지출 현황',
-                      style: theme.textTheme.labelMedium
-                          ?.copyWith(fontWeight: FontWeight.bold),
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     Text(
                       '${_analysis!.usagePercentage.toStringAsFixed(1)}%',
@@ -147,7 +147,9 @@ class _CostAnalysisWidgetState extends State<CostAnalysisWidget> {
                     value: (_analysis!.usagePercentage / 100).clamp(0, 1),
                     minHeight: 8,
                     backgroundColor: Colors.grey[300],
-                    valueColor: AlwaysStoppedAnimation<Color>(_getStatusColor()),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      _getStatusColor(),
+                    ),
                   ),
                 ),
               ],
@@ -181,8 +183,9 @@ class _CostAnalysisWidgetState extends State<CostAnalysisWidget> {
                 children: [
                   Text(
                     '📊 카테고리별 지출',
-                    style: theme.textTheme.labelLarge
-                        ?.copyWith(fontWeight: FontWeight.bold),
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 10),
                   ..._buildCategoryRows(theme),
@@ -205,8 +208,9 @@ class _CostAnalysisWidgetState extends State<CostAnalysisWidget> {
                     child: Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.secondaryContainer
-                            .withValues(alpha: 0.3),
+                        color: theme.colorScheme.secondaryContainer.withValues(
+                          alpha: 0.3,
+                        ),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -221,8 +225,9 @@ class _CostAnalysisWidgetState extends State<CostAnalysisWidget> {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.tertiaryContainer
-                          .withValues(alpha: 0.3),
+                      color: theme.colorScheme.tertiaryContainer.withValues(
+                        alpha: 0.3,
+                      ),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Row(
@@ -280,8 +285,9 @@ class _CostAnalysisWidgetState extends State<CostAnalysisWidget> {
                   ),
                   Text(
                     '${_budgetLimit.toStringAsFixed(0)}원',
-                    style: theme.textTheme.headlineSmall
-                        ?.copyWith(fontWeight: FontWeight.bold),
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
@@ -314,13 +320,15 @@ class _CostAnalysisWidgetState extends State<CostAnalysisWidget> {
                 children: [
                   Text(
                     '남은 예산',
-                    style: theme.textTheme.labelSmall
-                        ?.copyWith(color: Colors.grey[600]),
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: Colors.grey[600],
+                    ),
                   ),
                   Text(
                     '${_analysis!.remaining.toStringAsFixed(0)}원',
-                    style: theme.textTheme.bodyMedium
-                        ?.copyWith(fontWeight: FontWeight.bold),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
@@ -355,23 +363,20 @@ class _CostAnalysisWidgetState extends State<CostAnalysisWidget> {
       ..sort((a, b) => b.value.compareTo(a.value));
 
     return entries.take(5).map((entry) {
-      final percentage =
-          (entry.value / _budgetLimit * 100).toStringAsFixed(1);
+      final percentage = (entry.value / _budgetLimit * 100).toStringAsFixed(1);
       return Padding(
         padding: const EdgeInsets.only(bottom: 8),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Expanded(
-              child: Text(
-                entry.key,
-                style: theme.textTheme.labelMedium,
-              ),
+              child: Text(entry.key, style: theme.textTheme.labelMedium),
             ),
             Text(
               '${entry.value.toStringAsFixed(0)}원 ($percentage%)',
-              style: theme.textTheme.labelSmall
-                  ?.copyWith(fontWeight: FontWeight.bold),
+              style: theme.textTheme.labelSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ],
         ),

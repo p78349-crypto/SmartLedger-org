@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_ledger/models/cooking_usage_log.dart';
-import 'package:smart_ledger/services/transaction_service.dart';
-import 'package:smart_ledger/utils/savings_statistics_utils.dart';
+import '../models/cooking_usage_log.dart';
+import 'transaction_service.dart';
+import '../utils/savings_statistics_utils.dart';
 
 /// 절약 통계를 계산해주는 서비스
 /// 1. 냉파 성공 지수 (챌린지 기간 동안 추가 구매 없이 해결한 끼니 수)
@@ -86,20 +86,34 @@ class SavingsStatisticsService {
       final transactions = service.getTransactions(accountName);
       return SavingsStatisticsUtils.calculateMonthlyFoodExpenses(transactions);
     } catch (e) {
-      debugPrint('SavingsStatisticsService: Error calculating monthly expenses - $e');
+      debugPrint(
+        'SavingsStatisticsService: Error calculating monthly expenses - $e',
+      );
       return {};
     }
   }
 
   /// 챌린지 도입 전(1개월 이전)과 현재(이번 달) 식비 비교
-  Future<({double beforePrice, double afterPrice, double savingsAmount, double savingsPercent})>
-      calculateSavingsCompare() async {
+  Future<
+    ({
+      double beforePrice,
+      double afterPrice,
+      double savingsAmount,
+      double savingsPercent,
+    })
+  >
+  calculateSavingsCompare() async {
     try {
       final monthlyExpenses = await calculateMonthlyFoodExpenses();
       return SavingsStatisticsUtils.compareSavings(monthlyExpenses);
     } catch (e) {
       debugPrint('SavingsStatisticsService: Error calculating savings - $e');
-      return (beforePrice: 0.0, afterPrice: 0.0, savingsAmount: 0.0, savingsPercent: 0.0);
+      return (
+        beforePrice: 0.0,
+        afterPrice: 0.0,
+        savingsAmount: 0.0,
+        savingsPercent: 0.0,
+      );
     }
   }
 }

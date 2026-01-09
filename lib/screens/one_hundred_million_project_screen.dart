@@ -1,14 +1,14 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_ledger/models/asset.dart';
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/services/asset_service.dart';
-import 'package:smart_ledger/services/transaction_service.dart';
-import 'package:smart_ledger/utils/benefit_aggregation_utils.dart';
-import 'package:smart_ledger/utils/currency_formatter.dart';
-import 'package:smart_ledger/utils/pref_keys.dart';
-import 'package:smart_ledger/widgets/smart_input_field.dart';
+import '../models/asset.dart';
+import '../models/transaction.dart';
+import '../services/asset_service.dart';
+import '../services/transaction_service.dart';
+import '../utils/benefit_aggregation_utils.dart';
+import '../utils/currency_formatter.dart';
+import '../utils/pref_keys.dart';
+import '../widgets/smart_input_field.dart';
 
 class OneHundredMillionProjectScreen extends StatefulWidget {
   final String accountName;

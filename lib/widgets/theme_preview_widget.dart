@@ -2,10 +2,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:smart_ledger/services/theme_service.dart';
-import 'package:smart_ledger/services/user_pref_service.dart';
-import 'package:smart_ledger/utils/device_utils.dart';
-import 'package:smart_ledger/utils/theme_presets.dart';
+import '../services/theme_service.dart';
+import '../services/user_pref_service.dart';
+import '../utils/device_utils.dart';
+import '../utils/theme_presets.dart';
 
 enum ApplyScope { icons, wallpaper, both }
 

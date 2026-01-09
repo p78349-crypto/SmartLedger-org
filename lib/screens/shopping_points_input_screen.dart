@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import 'package:smart_ledger/models/shopping_points_draft_entry.dart';
-import 'package:smart_ledger/models/transaction.dart';
-import 'package:smart_ledger/services/transaction_service.dart';
-import 'package:smart_ledger/services/user_pref_service.dart';
-import 'package:smart_ledger/utils/benefit_aggregation_utils.dart';
-import 'package:smart_ledger/utils/currency_formatter.dart';
-import 'package:smart_ledger/utils/thousands_input_formatter.dart';
-import 'package:smart_ledger/widgets/smart_input_field.dart';
+import '../models/shopping_points_draft_entry.dart';
+import '../models/transaction.dart';
+import '../services/transaction_service.dart';
+import '../services/user_pref_service.dart';
+import '../utils/benefit_aggregation_utils.dart';
+import '../utils/currency_formatter.dart';
+import '../utils/thousands_input_formatter.dart';
+import '../widgets/smart_input_field.dart';
 
 class ShoppingPointsInputScreen extends StatefulWidget {
   const ShoppingPointsInputScreen({super.key, required this.accountName});

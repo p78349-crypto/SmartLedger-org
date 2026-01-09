@@ -4,6 +4,9 @@ import '../services/food_expiry_service.dart';
 import '../utils/expiring_ingredients_utils.dart';
 import '../utils/icon_catalog.dart';
 import '../utils/recipe_recommendation_utils.dart';
+import '../utils/recipe_recommendation_style_utils.dart';
+import '../utils/daily_recipe_recommendation_utils.dart';
+import '../mixins/food_expiry_items_auto_refresh_mixin.dart';
 
 /// 오늘의 요리 추천 위젯
 class DailyRecipeRecommendationWidget extends StatefulWidget {
@@ -17,38 +20,19 @@ class DailyRecipeRecommendationWidget extends StatefulWidget {
 }
 
 class _DailyRecipeRecommendationWidgetState
-    extends State<DailyRecipeRecommendationWidget> {
+    extends State<DailyRecipeRecommendationWidget>
+    with FoodExpiryItemsAutoRefreshMixin {
   List<FoodExpiryItem>? _expiringItems;
   RecipeMatch? _recommendedRecipe;
   bool _isLoading = true;
 
-  Color _chipBackgroundColor(ThemeData theme, int daysLeft) {
-    final scheme = theme.colorScheme;
-    if (daysLeft <= 0) return scheme.errorContainer;
-    if (daysLeft == 1) return scheme.tertiaryContainer;
-    return scheme.secondaryContainer;
-  }
-
-  Color _badgeBackgroundColor(ThemeData theme, int percentage) {
-    final scheme = theme.colorScheme;
-    if (percentage >= 100) return scheme.primary;
-    if (percentage >= 80) return scheme.secondary;
-    if (percentage >= 60) return scheme.tertiary;
-    return scheme.error;
-  }
-
-  Color _badgeForegroundColor(ThemeData theme, int percentage) {
-    final scheme = theme.colorScheme;
-    if (percentage >= 100) return scheme.onPrimary;
-    if (percentage >= 80) return scheme.onSecondary;
-    if (percentage >= 60) return scheme.onTertiary;
-    return scheme.onError;
-  }
+  @override
+  Future<void> onFoodExpiryItemsChanged() => _loadRecommendation();
 
   @override
   void initState() {
     super.initState();
-    _loadRecommendation();
+    requestFoodExpiryItemsRefresh();
   }
 
   Future<void> _loadRecommendation() async {
@@ -57,29 +41,11 @@ class _DailyRecipeRecommendationWidgetState
       final allItems = FoodExpiryService.instance.items.value;
 
       if (mounted) {
-        // 3일 이내 유통기한 항목만 필터링
-        final expiring = ExpiringIngredientsUtils.getExpiringWithin3Days(
-          allItems,
-        );
-
-        // 유통기한 임박한 항목이 없으면 표시하지 않음
-        if (expiring.isEmpty) {
-          setState(() {
-            _isLoading = false;
-            _expiringItems = [];
-          });
-          return;
-        }
-
-        // 추천 요리 생성
-        final topRecipes = RecipeRecommendationUtils.getTopRecommendations(
-          expiring,
-          limit: 1,
-        );
+        final result = DailyRecipeRecommendationUtils.build(allItems);
 
         setState(() {
-          _expiringItems = expiring;
-          _recommendedRecipe = topRecipes.isNotEmpty ? topRecipes.first : null;
+          _expiringItems = result.expiringItems;
+          _recommendedRecipe = result.recommendedRecipe;
           _isLoading = false;
         });
       }
@@ -174,7 +140,11 @@ class _DailyRecipeRecommendationWidgetState
                         color: theme.colorScheme.onPrimaryContainer,
                       ),
                     ),
-                    backgroundColor: _chipBackgroundColor(theme, daysLeft),
+                    backgroundColor:
+                        RecipeRecommendationStyleUtils.chipBackgroundColor(
+                          theme,
+                          daysLeft,
+                        ),
                     side: BorderSide.none,
                   );
                 }).toList(),
@@ -211,7 +181,8 @@ class _DailyRecipeRecommendationWidgetState
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: _badgeBackgroundColor(
+                            color: RecipeRecommendationStyleUtils
+                                .matchBadgeBackgroundColor(
                               theme,
                               _recommendedRecipe!.matchPercentage,
                             ),
@@ -220,7 +191,8 @@ class _DailyRecipeRecommendationWidgetState
                           child: Text(
                             '${_recommendedRecipe!.matchPercentage}% 준비됨',
                             style: theme.textTheme.labelSmall?.copyWith(
-                              color: _badgeForegroundColor(
+                              color: RecipeRecommendationStyleUtils
+                                  .matchBadgeForegroundColor(
                                 theme,
                                 _recommendedRecipe!.matchPercentage,
                               ),

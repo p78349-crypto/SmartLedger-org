@@ -15,10 +15,7 @@ class VoiceShortcutsScreen extends StatelessWidget {
     final isIOS = Platform.isIOS;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('음성 단축어'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('음성 단축어'), centerTitle: true),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -28,11 +25,7 @@ class VoiceShortcutsScreen extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  Icon(
-                    Icons.mic,
-                    size: 48,
-                    color: theme.colorScheme.primary,
-                  ),
+                  Icon(Icons.mic, size: 48, color: theme.colorScheme.primary),
                   const SizedBox(height: 12),
                   Text(
                     '음성으로 가계부를 관리하세요',
@@ -148,20 +141,16 @@ class VoiceShortcutsScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                FilledButton.tonal(
-                  onPressed: onSetup,
-                  child: Text(setupLabel),
-                ),
+                FilledButton.tonal(onPressed: onSetup, child: Text(setupLabel)),
               ],
             ),
           ),
 
           // 단축어 목록
-          ...shortcuts.map((shortcut) => _buildShortcutTile(
-                context,
-                shortcut: shortcut,
-                color: color,
-              )),
+          ...shortcuts.map(
+            (shortcut) =>
+                _buildShortcutTile(context, shortcut: shortcut, color: color),
+          ),
         ],
       ),
     );
@@ -185,9 +174,7 @@ class VoiceShortcutsScreen extends StatelessWidget {
       ),
       title: Text(
         shortcut.phrase,
-        style: theme.textTheme.bodyLarge?.copyWith(
-          fontWeight: FontWeight.w500,
-        ),
+        style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
       ),
       subtitle: Text(
         shortcut.description,
@@ -216,20 +203,19 @@ class VoiceShortcutsScreen extends StatelessWidget {
 
     return Card(
       child: ExpansionTile(
-        leading: Icon(
-          Icons.list_alt,
-          color: theme.colorScheme.primary,
-        ),
+        leading: Icon(Icons.list_alt, color: theme.colorScheme.primary),
         title: const Text('모든 음성 명령어'),
         subtitle: const Text('사용 가능한 전체 명령어 목록'),
         children: [
           const Divider(height: 1),
-          ..._allCommands.map((cmd) => ListTile(
-                dense: true,
-                leading: Icon(cmd.icon, size: 20),
-                title: Text(cmd.command),
-                subtitle: Text(cmd.action),
-              )),
+          ..._allCommands.map(
+            (cmd) => ListTile(
+              dense: true,
+              leading: Icon(cmd.icon, size: 20),
+              title: Text(cmd.command),
+              subtitle: Text(cmd.action),
+            ),
+          ),
           const SizedBox(height: 8),
         ],
       ),

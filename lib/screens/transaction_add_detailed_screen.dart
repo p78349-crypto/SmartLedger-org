@@ -420,17 +420,12 @@ class _TransactionAddDetailedFormState
 
     // Remove trailing size/unit/count patterns.
     s = s.replaceAll(
-      RegExp(
-        r'(\d+(?:\.\d+)?)(ml|l|kg|g|mg|개|입|팩|봉|병|캔|장|p|pcs|pc|box)$',
-      ),
+      RegExp(r'(\d+(?:\.\d+)?)(ml|l|kg|g|mg|개|입|팩|봉|병|캔|장|p|pcs|pc|box)$'),
       '',
     );
 
     // Remove common Korean promotion tokens.
-    s = s.replaceAll(
-      RegExp(r'(행사|증정|무료|덤|할인|특가|세일)$'),
-      '',
-    );
+    s = s.replaceAll(RegExp(r'(행사|증정|무료|덤|할인|특가|세일)$'), '');
 
     return s;
   }
@@ -518,8 +513,9 @@ class _TransactionAddDetailedFormState
 
           final hintSub = hint.subCategory?.trim() ?? '';
           if (hintSub.isNotEmpty) {
-            final allowedSub =
-                DetailedCategoryDefinitions.getSubCategories(main);
+            final allowedSub = DetailedCategoryDefinitions.getSubCategories(
+              main,
+            );
             if (allowedSub.contains(hintSub)) {
               nextSub = hintSub;
 
@@ -527,9 +523,9 @@ class _TransactionAddDetailedFormState
               if (hintDetail.isNotEmpty) {
                 final allowedDetail =
                     DetailedCategoryDefinitions.getDetailCategories(
-                  main,
-                  hintSub,
-                );
+                      main,
+                      hintSub,
+                    );
                 if (allowedDetail.contains(hintDetail)) {
                   nextDetail = hintDetail;
                 }
@@ -548,8 +544,9 @@ class _TransactionAddDetailedFormState
             main = kwMain;
             final kwSub = kwResult.$2;
             if (kwSub != null) {
-              final allowedSub =
-                  DetailedCategoryDefinitions.getSubCategories(main);
+              final allowedSub = DetailedCategoryDefinitions.getSubCategories(
+                main,
+              );
               if (allowedSub.contains(kwSub)) {
                 nextSub = kwSub;
               }
@@ -2620,7 +2617,9 @@ class _TransactionAddDetailedFormState
                     _selectedSubCategory = null;
                     _selectedDetailCategory = null;
                   });
-                  unawaited(_persistLastCategoryForType(_selectedType, main: cat));
+                  unawaited(
+                    _persistLastCategoryForType(_selectedType, main: cat),
+                  );
                 },
               );
             }).toList(),
@@ -2700,7 +2699,9 @@ class _TransactionAddDetailedFormState
                   _selectedSubCategory = null;
                   _selectedDetailCategory = null;
                 });
-                unawaited(_persistLastCategoryForType(_selectedType, main: cat));
+                unawaited(
+                  _persistLastCategoryForType(_selectedType, main: cat),
+                );
               },
             );
           }).toList(),

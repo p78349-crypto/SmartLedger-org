@@ -27,3 +27,14 @@ All notable changes to this project will be documented in this file.
 
 ### Notes
 - 2026-01-09 checkpoint: `lib/**/*.dart` has 0 lines over 80 chars; `flutter analyze` reports no issues; import-style work continues (next: mixed import style cleanup).
+
+## [Unreleased] - 2026-01-09
+
+### Added
+- Food expiry dashboard auto-refresh mixin: standardized item-change refresh behavior across widgets.
+- Daily recipe recommendation builder utils: standardized recommendation result construction.
+
+### Changed
+- Expiring ingredients utils: generalized “within 3 days” filtering to “within N days” and retained backwards-compatible wrapper.
+- Auto-refresh mixin: added small debounce (default 250ms) to reduce repeated recompute on rapid updates.
+- Recipe knowledge data: prevent repeated concurrent asset loads by guarding `RecipeKnowledgeService.loadData()`.

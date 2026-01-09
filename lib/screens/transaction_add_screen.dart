@@ -93,10 +93,7 @@ class _TransactionAddScreenState extends State<TransactionAddScreen> {
         if (!mounted) return;
         // No OCR/auto camera start is implemented here yet.
         // This is a safe hook point for assistant-triggered flows.
-        SnackbarUtils.showInfo(
-          context,
-          '영수증 스캔을 시작하려면 영수증/카메라 버튼을 눌러주세요.',
-        );
+        SnackbarUtils.showInfo(context, '영수증 스캔을 시작하려면 영수증/카메라 버튼을 눌러주세요.');
       });
     }
   }
@@ -461,17 +458,12 @@ class _NO1FormState extends State<NO1Form> {
     // Remove trailing size/unit/count patterns to match across variants.
     // Examples: 900ml, 1l, 500g, 10kg, 2개, 10입, 1팩
     s = s.replaceAll(
-      RegExp(
-        r'(\d+(?:\.\d+)?)(ml|l|kg|g|mg|개|입|팩|봉|병|캔|장|p|pcs|pc|box)$',
-      ),
+      RegExp(r'(\d+(?:\.\d+)?)(ml|l|kg|g|mg|개|입|팩|봉|병|캔|장|p|pcs|pc|box)$'),
       '',
     );
 
     // Remove common Korean promotion tokens.
-    s = s.replaceAll(
-      RegExp(r'(행사|증정|무료|덤|할인|특가|세일)$'),
-      '',
-    );
+    s = s.replaceAll(RegExp(r'(행사|증정|무료|덤|할인|특가|세일)$'), '');
 
     return s;
   }

@@ -95,8 +95,16 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
   // 상품별 단위/중량/가격 매핑
   static const Map<String, _ProductUnitInfo> _productUnitMap = {
     '팽이버섯': _ProductUnitInfo(unit: '봉', weightPerUnit: 180, pricePerUnit: 2268),
-    '새송이버섯': _ProductUnitInfo(unit: '팩', weightPerUnit: 300, pricePerUnit: 3500),
-    '느타리버섯': _ProductUnitInfo(unit: '봉', weightPerUnit: 200, pricePerUnit: 2500),
+    '새송이버섯': _ProductUnitInfo(
+      unit: '팩',
+      weightPerUnit: 300,
+      pricePerUnit: 3500,
+    ),
+    '느타리버섯': _ProductUnitInfo(
+      unit: '봉',
+      weightPerUnit: 200,
+      pricePerUnit: 2500,
+    ),
     '양파': _ProductUnitInfo(unit: '개', weightPerUnit: 200, pricePerUnit: 500),
     '감자': _ProductUnitInfo(unit: '개', weightPerUnit: 150, pricePerUnit: 400),
     '당근': _ProductUnitInfo(unit: '개', weightPerUnit: 180, pricePerUnit: 600),
@@ -125,16 +133,16 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
     if (widget.initialProductName != null &&
         widget.initialProductName!.isNotEmpty) {
       _nameController.text = widget.initialProductName!;
-      
+
       // 초기 수량도 설정
       if (widget.initialAmount != null && widget.initialAmount! > 0) {
         _amountController.text = _formatQty(widget.initialAmount!);
       }
-      
+
       // 상품 선택 처리
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _onNameChanged();
-        
+
         // 자동 제출이면 잠시 후 실행
         if (widget.autoSubmit && _selectedItem != null) {
           Future.delayed(const Duration(milliseconds: 500), () {
@@ -183,11 +191,12 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
           _amountController.text = parsed.amount.toString();
           // ENT 버튼으로 포커스 이동
           _entButtonFocus.requestFocus();
-          
+
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                '🎤 "${parsed.productName}" ${parsed.amount}${parsed.unit ?? '개'} 입력됨',
+                '🎤 "${parsed.productName}" '
+                '${parsed.amount}${parsed.unit ?? '개'} 입력됨',
               ),
               backgroundColor: Colors.green,
               duration: const Duration(seconds: 2),
@@ -252,17 +261,25 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
 
   String _convertKoreanNumber(String text) {
     const koreanNumbers = {
-      '한': '1', '두': '2', '세': '3', '네': '4', '다섯': '5',
-      '여섯': '6', '일곱': '7', '여덟': '8', '아홉': '9', '열': '10',
+      '한': '1',
+      '두': '2',
+      '세': '3',
+      '네': '4',
+      '다섯': '5',
+      '여섯': '6',
+      '일곱': '7',
+      '여덟': '8',
+      '아홉': '9',
+      '열': '10',
     };
     return koreanNumbers[text] ?? text;
   }
 
   Future<void> _startListening() async {
     if (!_speechAvailable) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('음성 인식을 사용할 수 없습니다')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('음성 인식을 사용할 수 없습니다')));
       return;
     }
 
@@ -439,7 +456,7 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
   Widget _buildSuggestionTile(ConsumableInventoryItem item) {
     final isLow = item.currentStock <= item.threshold;
     final isEmpty = item.currentStock == 0;
-    
+
     // 유통기한 정보
     String? expiryBadge;
     Color? expiryColor;
@@ -456,20 +473,20 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
         expiryColor = Colors.amber.shade700;
       }
     }
-    
+
     // 상품 가격 정보
     final productUnit = _getProductUnit(item.name);
-    final priceText = productUnit != null 
+    final priceText = productUnit != null
         ? '약 ${_formatPrice(productUnit.pricePerUnit)}원/${productUnit.unit}'
         : null;
-    
+
     return ListTile(
       leading: CircleAvatar(
         backgroundColor: isEmpty
             ? Colors.red
             : isLow
-                ? Colors.orange
-                : Colors.grey,
+            ? Colors.orange
+            : Colors.grey,
         child: isEmpty
             ? const Icon(Icons.warning, color: Colors.white, size: 18)
             : Text(item.name[0]),
@@ -521,7 +538,11 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
               Text(
                 '📦 ${_formatQty(item.currentStock)}${item.unit}',
                 style: TextStyle(
-                  color: isEmpty ? Colors.red : isLow ? Colors.orange : null,
+                  color: isEmpty
+                      ? Colors.red
+                      : isLow
+                      ? Colors.orange
+                      : null,
                   fontWeight: isEmpty || isLow ? FontWeight.bold : null,
                 ),
               ),
@@ -561,13 +582,13 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
     final amount = double.tryParse(_amountController.text) ?? 1;
     final totalWeight = (unitInfo.weightPerUnit * amount).round();
     final totalPrice = (unitInfo.pricePerUnit * amount).round();
-    
+
     // 중량이 0이면 (휴지, 세제 등 비식품) 가격만 표시
-    final weightText = unitInfo.weightPerUnit > 0 
-        ? '약 ${_formatWeight(totalWeight)}' 
+    final weightText = unitInfo.weightPerUnit > 0
+        ? '약 ${_formatWeight(totalWeight)}'
         : '';
     final priceText = '${_formatPrice(totalPrice)}원 차감';
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
@@ -581,7 +602,7 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              weightText.isNotEmpty 
+              weightText.isNotEmpty
                   ? '($weightText / $priceText)'
                   : '($priceText)',
               style: TextStyle(
@@ -724,7 +745,9 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
           flex: 3,
           child: buildPill(
             // 상품 선택 전: 재고 목록 보기, 선택 후: 재고 정보 표시
-            onTap: hasItem ? () => _showStockInfo(stockText) : _showStockListBottomSheet,
+            onTap: hasItem
+                ? () => _showStockInfo(stockText)
+                : _showStockListBottomSheet,
             padding: pillPadding,
             child: Builder(
               builder: (context) {
@@ -813,18 +836,23 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
             builder: (context, setModalState) {
               final colorScheme = Theme.of(context).colorScheme;
               final items = ConsumableInventoryService.instance.items.value;
-              
+
               // 정렬 옵션
               final sortOptions = ['유통기한 임박순', '자주 쓰는 순', '재고 많은 순', '이름순'];
               var selectedSort = '유통기한 임박순';
-              
+
               // 정렬된 목록
-              List<ConsumableInventoryItem> sortedItems = _sortItems(items, selectedSort);
-              
+              List<ConsumableInventoryItem> sortedItems = _sortItems(
+                items,
+                selectedSort,
+              );
+
               return Container(
                 decoration: BoxDecoration(
                   color: colorScheme.surface,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(20),
+                  ),
                 ),
                 child: Column(
                   children: [
@@ -904,7 +932,9 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
                                   const SizedBox(height: 16),
                                   Text(
                                     '등록된 재고가 없습니다',
-                                    style: TextStyle(color: colorScheme.outline),
+                                    style: TextStyle(
+                                      color: colorScheme.outline,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -938,7 +968,7 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
   ) {
     final now = DateTime.now();
     final sorted = [...items];
-    
+
     switch (sortOption) {
       case '유통기한 임박순':
         sorted.sort((a, b) {
@@ -971,7 +1001,7 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
         sorted.sort((a, b) => a.name.compareTo(b.name));
         break;
     }
-    
+
     return sorted;
   }
 
@@ -980,7 +1010,7 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
     final colorScheme = Theme.of(context).colorScheme;
     final isLow = item.currentStock <= item.threshold;
     final isEmpty = item.currentStock == 0;
-    
+
     // 유통기한 정보
     String? expiryText;
     Color? expiryColor;
@@ -997,36 +1027,38 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
         expiryColor = Colors.amber.shade700;
       }
     }
-    
+
     // 최근 사용 빈도
     final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
     final recentUsageCount = item.usageHistory
         .where((r) => r.timestamp.isAfter(thirtyDaysAgo))
         .length;
-    
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      color: isEmpty 
-          ? Colors.red.shade50 
-          : expiryColor == Colors.red 
-              ? Colors.red.shade50
-              : expiryColor == Colors.orange
-                  ? Colors.orange.shade50
-                  : null,
+      color: isEmpty
+          ? Colors.red.shade50
+          : expiryColor == Colors.red
+          ? Colors.red.shade50
+          : expiryColor == Colors.orange
+          ? Colors.orange.shade50
+          : null,
       child: ListTile(
         onTap: isEmpty ? null : onTap,
         leading: CircleAvatar(
           backgroundColor: isEmpty
               ? Colors.red
               : isLow
-                  ? Colors.orange
-                  : colorScheme.primaryContainer,
+              ? Colors.orange
+              : colorScheme.primaryContainer,
           child: isEmpty
               ? const Icon(Icons.warning, color: Colors.white, size: 18)
               : Text(
                   item.name.isNotEmpty ? item.name[0] : '?',
                   style: TextStyle(
-                    color: isLow ? Colors.white : colorScheme.onPrimaryContainer,
+                    color: isLow
+                        ? Colors.white
+                        : colorScheme.onPrimaryContainer,
                   ),
                 ),
         ),
@@ -1056,7 +1088,11 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
             Text(
               '재고: ${_formatQty(item.currentStock)}${item.unit}',
               style: TextStyle(
-                color: isEmpty ? Colors.red : isLow ? Colors.orange : null,
+                color: isEmpty
+                    ? Colors.red
+                    : isLow
+                    ? Colors.orange
+                    : null,
                 fontWeight: isEmpty || isLow ? FontWeight.bold : null,
               ),
             ),
@@ -1239,9 +1275,7 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
                         vertical: 8,
                       ),
                       decoration: BoxDecoration(
-                        color: _isListening 
-                            ? Colors.red 
-                            : colorScheme.primary,
+                        color: _isListening ? Colors.red : colorScheme.primary,
                         borderRadius: BorderRadius.circular(24),
                       ),
                       child: Row(
@@ -1254,8 +1288,8 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            _isListening 
-                                ? '듣는 중... "$_recognizedText"' 
+                            _isListening
+                                ? '듣는 중... "$_recognizedText"'
                                 : '🎤 음성으로 입력하기',
                             style: const TextStyle(
                               color: Colors.white,
@@ -1272,7 +1306,9 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
                       '예: "팽이버섯 1봉", "달걀 한판"',
                       style: TextStyle(
                         fontSize: 11,
-                        color: colorScheme.onSecondaryContainer.withValues(alpha: 0.7),
+                        color: colorScheme.onSecondaryContainer.withValues(
+                          alpha: 0.7,
+                        ),
                       ),
                     ),
                   ],
@@ -1343,9 +1379,12 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
             builder: (context) {
               final quickButtons = _buildQuickButtons();
               // 상품별 단위 자동 설정
-              final productUnit = _getProductUnit(_selectedItem?.name ?? _nameController.text);
-              final displayUnit = _selectedItem?.unit ?? productUnit?.unit ?? '개';
-              
+              final productUnit = _getProductUnit(
+                _selectedItem?.name ?? _nameController.text,
+              );
+              final displayUnit =
+                  _selectedItem?.unit ?? productUnit?.unit ?? '개';
+
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -1363,7 +1402,9 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
                             labelText: '사용량',
                             border: const OutlineInputBorder(),
                             enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.grey.shade300),
+                              borderSide: BorderSide(
+                                color: Colors.grey.shade300,
+                              ),
                             ),
                             suffixText: displayUnit,
                             contentPadding: const EdgeInsets.symmetric(
@@ -1805,7 +1846,7 @@ class _ScoredName {
 class _ProductUnitInfo {
   final String unit;
   final int weightPerUnit; // 단위당 중량 (g)
-  final int pricePerUnit;  // 단위당 가격 (원)
+  final int pricePerUnit; // 단위당 가격 (원)
 
   const _ProductUnitInfo({
     required this.unit,

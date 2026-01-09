@@ -13,6 +13,7 @@ class RecipeKnowledgeService {
 
   List<FoodKnowledgeEntry> _entries = [];
   bool _isLoaded = false;
+  Future<void>? _loadFuture;
 
   /// Suggests main ingredients to buy/add when the current inventory lacks a
   /// clear main ingredient.
@@ -23,10 +24,14 @@ class RecipeKnowledgeService {
     List<FoodExpiryItem> inventory, {
     int limit = 3,
   }) {
-    if (!_isLoaded || limit <= 0) return const <MissingMainIngredientSuggestion>[];
+    if (!_isLoaded || limit <= 0) {
+      return const <MissingMainIngredientSuggestion>[];
+    }
 
     final inventoryNames = inventory.map((e) => _normalize(e.name)).toSet();
-    if (inventoryNames.isEmpty) return const <MissingMainIngredientSuggestion>[];
+    if (inventoryNames.isEmpty) {
+      return const <MissingMainIngredientSuggestion>[];
+    }
 
     bool hasMainIngredient(FoodKnowledgeEntry entry) {
       for (final k in entry.keywords) {
@@ -53,7 +58,9 @@ class RecipeKnowledgeService {
         for (final t in tokens) {
           final nt = _normalize(t);
           if (nt.isEmpty) continue;
-          if (inventoryNames.any((inv) => inv.contains(nt) || nt.contains(inv))) {
+          if (inventoryNames.any(
+            (inv) => inv.contains(nt) || nt.contains(inv),
+          )) {
             matchedThisPairing = true;
             break;
           }
@@ -101,6 +108,20 @@ class RecipeKnowledgeService {
   /// Loads the food knowledge data from JSON asset.
   Future<void> loadData() async {
     if (_isLoaded) return;
+    if (_loadFuture != null) return _loadFuture;
+
+    _loadFuture = _loadInternal();
+    try {
+      await _loadFuture;
+    } finally {
+      // Allow retry if load failed (i.e. _isLoaded remained false).
+      if (!_isLoaded) {
+        _loadFuture = null;
+      }
+    }
+  }
+
+  Future<void> _loadInternal() async {
     try {
       final jsonString = await rootBundle.loadString(
         'assets/data/food_knowledge.json',

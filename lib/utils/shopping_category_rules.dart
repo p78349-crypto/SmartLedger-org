@@ -1,5 +1,8 @@
-typedef ShoppingCategoryPair =
-    ({String mainCategory, String? subCategory, String? detailCategory});
+typedef ShoppingCategoryPair = ({
+  String mainCategory,
+  String? subCategory,
+  String? detailCategory,
+});
 
 /// SSOT keyword rules for shopping item → category suggestion.
 ///

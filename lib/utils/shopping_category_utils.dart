@@ -77,9 +77,7 @@ class ShoppingCategoryUtils {
     return null;
   }
 
-  static ShoppingCategoryPair suggestBuiltIn(
-    ShoppingCartItem item,
-  ) {
+  static ShoppingCategoryPair suggestBuiltIn(ShoppingCartItem item) {
     final name = item.name.trim();
     if (name.isEmpty) {
       return (

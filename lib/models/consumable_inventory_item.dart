@@ -5,15 +5,12 @@ class ConsumableUsageRecord {
   final DateTime timestamp;
   final double amount;
 
-  const ConsumableUsageRecord({
-    required this.timestamp,
-    required this.amount,
-  });
+  const ConsumableUsageRecord({required this.timestamp, required this.amount});
 
   Map<String, dynamic> toJson() => {
-        'timestamp': timestamp.toIso8601String(),
-        'amount': amount,
-      };
+    'timestamp': timestamp.toIso8601String(),
+    'amount': amount,
+  };
 
   factory ConsumableUsageRecord.fromJson(Map<String, dynamic> json) {
     return ConsumableUsageRecord(
@@ -68,21 +65,21 @@ class ConsumableInventoryItem {
   });
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'currentStock': currentStock,
-        'unit': unit,
-        'threshold': threshold,
-        'bundleSize': bundleSize,
-        'category': category,
-        'detailCategory': detailCategory,
-        'location': location,
-        'createdAt': createdAt.toIso8601String(),
-        'lastUpdated': lastUpdated.toIso8601String(),
-      'expiryDate': expiryDate?.toIso8601String(),
-        'healthTags': healthTags,
-        'usageHistory': usageHistory.map((e) => e.toJson()).toList(),
-      };
+    'id': id,
+    'name': name,
+    'currentStock': currentStock,
+    'unit': unit,
+    'threshold': threshold,
+    'bundleSize': bundleSize,
+    'category': category,
+    'detailCategory': detailCategory,
+    'location': location,
+    'createdAt': createdAt.toIso8601String(),
+    'lastUpdated': lastUpdated.toIso8601String(),
+    'expiryDate': expiryDate?.toIso8601String(),
+    'healthTags': healthTags,
+    'usageHistory': usageHistory.map((e) => e.toJson()).toList(),
+  };
 
   factory ConsumableInventoryItem.fromJson(Map<String, dynamic> json) {
     final lastUpdated = DateTime.parse(json['lastUpdated'] as String);

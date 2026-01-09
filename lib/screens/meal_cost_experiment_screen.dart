@@ -102,10 +102,7 @@ class _MealCostExperimentScreenState extends State<MealCostExperimentScreen> {
           '오늘의 한 끼: ${CurrencyFormatter.format(_ingredientsTotal)}',
           style: theme.textTheme.titleLarge,
         ),
-        subtitle: Text(
-          '쌀은 참고용으로 분리 표시됩니다.',
-          style: theme.textTheme.bodySmall,
-        ),
+        subtitle: Text('쌀은 참고용으로 분리 표시됩니다.', style: theme.textTheme.bodySmall),
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         children: [
           Row(
@@ -124,17 +121,9 @@ class _MealCostExperimentScreenState extends State<MealCostExperimentScreen> {
             tilePadding: EdgeInsets.zero,
             title: const Text('상세 내역 (실측 무게 기반)'),
             children: [
-              _buildDetailGroup(
-                theme,
-                title: '식재료',
-                items: _ingredients,
-              ),
+              _buildDetailGroup(theme, title: '식재료', items: _ingredients),
               const SizedBox(height: 8),
-              _buildDetailGroup(
-                theme,
-                title: '쌀(참고)',
-                items: _rice,
-              ),
+              _buildDetailGroup(theme, title: '쌀(참고)', items: _rice),
             ],
           ),
         ],
@@ -260,10 +249,7 @@ class _MealCostExperimentScreenState extends State<MealCostExperimentScreen> {
             },
           ),
           const SizedBox(height: 12),
-          FilledButton(
-            onPressed: _save,
-            child: const Text('저장 (소비 기록에 추가)'),
-          ),
+          FilledButton(onPressed: _save, child: const Text('저장 (소비 기록에 추가)')),
         ],
       ),
     );

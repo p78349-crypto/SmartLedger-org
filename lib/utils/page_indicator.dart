@@ -34,9 +34,7 @@ class PageIndicator extends StatelessWidget {
         decoration: BoxDecoration(
           color: scheme.primaryContainer.withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: scheme.primary.withValues(alpha: 0.5),
-          ),
+          border: Border.all(color: scheme.primary.withValues(alpha: 0.5)),
         ),
         child: Text(
           '${currentPage + 1}',

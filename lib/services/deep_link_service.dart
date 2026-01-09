@@ -8,17 +8,25 @@ import '../models/transaction.dart';
 /// Supported URI schemes:
 /// - `smartledger://transaction/add?type=expense&amount=5000&description=커피`
 /// - `smartledger://transaction/add?type=income&amount=3000000`
-/// - `smartledger://transaction/add?type=expense&amount=5000&description=커피&autoSubmit=true` (거래 저장: 확인 필요)
-/// - `smartledger://transaction/add?type=expense&amount=5000&description=커피&autoSubmit=true&confirmed=true` (거래 저장: 확인 완료)
-  /// - `smartledger://transaction/add?type=expense&action=scan` (영수증 스캔(훅): 화면 열고 스캔 시작 유도)
+/// - smartledger://transaction/add?type=expense&amount=5000&description=커피
+///   &autoSubmit=true
+///   (거래 저장: 확인 필요)
+/// - smartledger://transaction/add?type=expense&amount=5000&description=커피
+///   &autoSubmit=true&confirmed=true
+///   (거래 저장: 확인 완료)
+/// - `smartledger://transaction/add?type=expense&action=scan`
+///   (영수증 스캔(훅): 화면 열고 스캔 시작 유도)
 /// - `smartledger://dashboard`
 /// - `smartledger://feature/food_expiry`
 /// - `smartledger://feature/shopping_cart`
 /// - `smartledger://feature/assets`
 /// - `smartledger://feature/recipe`
 /// - `smartledger://stock/check?product=팽이버섯` (재고 조회)
-/// - `smartledger://stock/use?product=팽이버섯&amount=1&autoSubmit=true` (재고 차감: 확인 필요)
-/// - `smartledger://stock/use?product=팽이버섯&amount=1&autoSubmit=true&confirmed=true` (재고 차감: 확인 완료)
+/// - `smartledger://stock/use?product=팽이버섯&amount=1&autoSubmit=true`
+///   (재고 차감: 확인 필요)
+/// - smartledger://stock/use?product=팽이버섯&amount=1&autoSubmit=true
+///   &confirmed=true
+///   (재고 차감: 확인 완료)
 /// - `smartledger://nav/open?route=/settings` (안전한 네비게이션)
 class DeepLinkService {
   DeepLinkService._();
@@ -90,7 +98,9 @@ class DeepLinkService {
             paymentMethod: params['paymentMethod'] ?? params['payment'],
             store: params['store'],
             memo: params['memo'],
-            savingsAllocation: _parseSavingsAllocation(params['savingsAllocation']),
+            savingsAllocation: _parseSavingsAllocation(
+              params['savingsAllocation'],
+            ),
             currency: params['currency'] ?? 'KRW',
             autoSubmit: params['autoSubmit'] == 'true',
             confirmed: params['confirmed'] == 'true',
@@ -116,14 +126,16 @@ class DeepLinkService {
         if (pathSegments.isNotEmpty) {
           final action = pathSegments.first;
           final product = params['product'];
-          
+
           if (action == 'check' && product != null) {
             // 재고 조회
             return DeepLinkAction.checkStock(productName: product);
           } else if (action == 'use' && product != null) {
             // 재고 차감
             final amountParam = params['amount'];
-            final parsedAmount = amountParam == null ? null : double.tryParse(amountParam);
+            final parsedAmount = amountParam == null
+                ? null
+                : double.tryParse(amountParam);
             return DeepLinkAction.useStock(
               productName: product,
               amount: parsedAmount,
@@ -139,10 +151,7 @@ class DeepLinkService {
           final route = params['route'];
           if (route == null || route.isEmpty) return null;
 
-          final extras = Map<String, String>.of(params)
-            ..remove('route')
-            ..remove('account')
-            ..remove('intent');
+          final extras = _sanitizeNavExtras(params);
           return DeepLinkAction.openRoute(
             routeName: route,
             accountName: params['account'],
@@ -156,6 +165,41 @@ class DeepLinkService {
     }
 
     return null;
+  }
+
+  static const int _maxNavExtraCount = 40;
+  static const int _maxNavKeyLength = 50;
+  static const int _maxNavValueLength = 300;
+
+  Map<String, String> _sanitizeNavExtras(Map<String, String> params) {
+    final extras = Map<String, String>.of(params)
+      ..remove('route')
+      ..remove('account')
+      ..remove('intent')
+      ..remove('autoSubmit')
+      ..remove('confirmed');
+
+    if (extras.isEmpty) return const <String, String>{};
+
+    final sanitized = <String, String>{};
+    for (final entry in extras.entries) {
+      if (sanitized.length >= _maxNavExtraCount) break;
+
+      final rawKey = entry.key.trim();
+      if (rawKey.isEmpty || rawKey.length > _maxNavKeyLength) continue;
+      // Only allow simple keys to reduce weird/unicode injection.
+      if (!RegExp(r'^[a-zA-Z0-9_\-]+$').hasMatch(rawKey)) continue;
+
+      final rawValue = entry.value.trim();
+      if (rawValue.isEmpty) continue;
+      final value = rawValue.length <= _maxNavValueLength
+          ? rawValue
+          : rawValue.substring(0, _maxNavValueLength);
+
+      sanitized[rawKey] = value;
+    }
+
+    return sanitized;
   }
 
   void dispose() {
@@ -187,7 +231,8 @@ sealed class DeepLinkAction {
 
   const factory DeepLinkAction.openDashboard() = OpenDashboardAction;
 
-  const factory DeepLinkAction.openFeature(String featureId) = OpenFeatureAction;
+  const factory DeepLinkAction.openFeature(String featureId) =
+      OpenFeatureAction;
 
   const factory DeepLinkAction.openRoute({
     required String routeName,
@@ -198,9 +243,8 @@ sealed class DeepLinkAction {
     bool? confirmed,
   }) = OpenRouteAction;
 
-  const factory DeepLinkAction.checkStock({
-    required String productName,
-  }) = CheckStockAction;
+  const factory DeepLinkAction.checkStock({required String productName}) =
+      CheckStockAction;
 
   const factory DeepLinkAction.useStock({
     required String productName,
@@ -341,14 +385,19 @@ class OpenRouteAction extends DeepLinkAction {
     Map<String, String>? params,
     bool? autoSubmit,
     bool? confirmed,
-  })  : params = params ?? const <String, String>{},
-        autoSubmit = autoSubmit ?? false,
-        confirmed = confirmed ?? false;
+  }) : params = params ?? const <String, String>{},
+       autoSubmit = autoSubmit ?? false,
+       confirmed = confirmed ?? false;
 
   @override
   String toString() =>
-      'OpenRouteAction(routeName: $routeName, accountName: $accountName, intent: $intent, '
-      'autoSubmit: $autoSubmit, confirmed: $confirmed, params: $params)';
+      'OpenRouteAction('
+      'routeName: $routeName, '
+      'accountName: $accountName, '
+      'intent: $intent, '
+      'autoSubmit: $autoSubmit, '
+      'confirmed: $confirmed, '
+      'params: $params)';
 }
 
 /// 재고 조회 액션
@@ -377,5 +426,9 @@ class UseStockAction extends DeepLinkAction {
 
   @override
   String toString() =>
-      'UseStockAction(productName: $productName, amount: $amount, autoSubmit: $autoSubmit, confirmed: $confirmed)';
+      'UseStockAction('
+      'productName: $productName, '
+      'amount: $amount, '
+      'autoSubmit: $autoSubmit, '
+      'confirmed: $confirmed)';
 }

@@ -6,6 +6,7 @@ import '../services/food_expiry_service.dart';
 import '../services/recipe_knowledge_service.dart';
 import '../utils/icon_catalog.dart';
 import '../utils/ingredients_recommendation_utils.dart';
+import '../mixins/food_expiry_items_auto_refresh_mixin.dart';
 
 /// 식재료 추천 강화 위젯
 class IngredientsRecommendationWidget extends StatefulWidget {
@@ -17,16 +18,20 @@ class IngredientsRecommendationWidget extends StatefulWidget {
 }
 
 class _IngredientsRecommendationWidgetState
-    extends State<IngredientsRecommendationWidget> {
+    extends State<IngredientsRecommendationWidget>
+    with FoodExpiryItemsAutoRefreshMixin {
   List<FoodExpiryItem>? _recommendations;
   String? _nutritionAdvice;
   List<MissingMainIngredientSuggestion>? _missingMain;
   bool _isLoading = true;
 
   @override
+  Future<void> onFoodExpiryItemsChanged() => _loadRecommendations();
+
+  @override
   void initState() {
     super.initState();
-    _loadRecommendations();
+    requestFoodExpiryItemsRefresh();
   }
 
   Future<void> _loadRecommendations() async {
@@ -39,10 +44,11 @@ class _IngredientsRecommendationWidgetState
       final thisWeek = IngredientsRecommendationUtils.getThisWeekItems(items);
 
       // 가격 효율성 기반 추천
-      final optimized = IngredientsRecommendationUtils.getOptimizedRecommendations(
-        thisWeek,
-        limit: 5,
-      );
+      final optimized =
+          IngredientsRecommendationUtils.getOptimizedRecommendations(
+            thisWeek,
+            limit: 5,
+          );
 
       final advice = IngredientsRecommendationUtils.getNutritionAdvice(items);
       final missingMain = RecipeKnowledgeService.instance

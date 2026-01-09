@@ -123,11 +123,13 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
     final budget = BudgetService().getBudget(_accountName);
     final transactions = TransactionService()
         .getTransactions(_accountName)
-        .where((t) =>
-            t.date.year == now.year &&
-            t.date.month == now.month &&
-            t.date.day == now.day &&
-            t.type == TransactionType.expense)
+        .where(
+          (t) =>
+              t.date.year == now.year &&
+              t.date.month == now.month &&
+              t.date.day == now.day &&
+              t.type == TransactionType.expense,
+        )
         .toList();
 
     double foodExp = 0;
@@ -216,12 +218,15 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
     } catch (e) {
       setState(() {
         _isProcessing = false;
-        _recentResults.insert(0, VoiceCommandResult(
-          command: command,
-          success: false,
-          message: '처리 중 오류가 발생했습니다',
-          type: VoiceCommandType.unknown,
-        ));
+        _recentResults.insert(
+          0,
+          VoiceCommandResult(
+            command: command,
+            success: false,
+            message: '처리 중 오류가 발생했습니다',
+            type: VoiceCommandType.unknown,
+          ),
+        );
       });
     }
   }
@@ -361,10 +366,7 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
       mainCategory: mainCategory,
     );
 
-    await TransactionService().addTransaction(
-      _accountName,
-      transaction,
-    );
+    await TransactionService().addTransaction(_accountName, transaction);
 
     return VoiceCommandResult(
       command: command,
@@ -382,7 +384,7 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
   VoiceCommandResult _handleIngredientQuery(String command) {
     // 식재료 서비스에서 조회
     final items = FoodExpiryService.instance.items.value;
-    
+
     // 특정 재료 검색
     final keywords = command
         .replaceAll('남은', '')
@@ -406,25 +408,30 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
       return VoiceCommandResult(
         command: command,
         success: true,
-        message: '현재 $count개의 재료가 있어요. ${expiringSoon > 0 ? '$expiringSoon개는 곧 유통기한이에요.' : ''}',
+        message:
+            '현재 $count개의 재료가 있어요. '
+            '${expiringSoon > 0 ? '$expiringSoon개는 곧 유통기한이에요.' : ''}',
         type: VoiceCommandType.query,
       );
     }
 
     // 특정 재료 검색
     for (final keyword in keywords) {
-      final matches = items.where((i) =>
-          i.name.contains(keyword) || keyword.contains(i.name)).toList();
-      
+      final matches = items
+          .where((i) => i.name.contains(keyword) || keyword.contains(i.name))
+          .toList();
+
       if (matches.isNotEmpty) {
         final item = matches.first;
         final daysLeft = item.expiryDate.difference(DateTime.now()).inDays;
         final quantityStr = '${item.quantity}${item.unit}';
-        
+
         return VoiceCommandResult(
           command: command,
           success: true,
-          message: '${item.name} $quantityStr 있어요. ${daysLeft >= 0 ? '$daysLeft일 남았어요.' : '유통기한이 지났어요!'}',
+          message:
+              '${item.name} $quantityStr 있어요. '
+              '${daysLeft >= 0 ? '$daysLeft일 남았어요.' : '유통기한이 지났어요!'}',
           type: VoiceCommandType.query,
           data: {'item': item.name, 'daysLeft': daysLeft},
         );
@@ -450,7 +457,11 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
       success: true,
       message: message,
       type: VoiceCommandType.query,
-      data: {'remaining': remaining, 'budget': _todayBudget, 'spent': _todaySpent},
+      data: {
+        'remaining': remaining,
+        'budget': _todayBudget,
+        'spent': _todaySpent,
+      },
     );
   }
 
@@ -513,15 +524,12 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
     return VoiceCommandResult(
       command: '오늘 요약',
       success: true,
-      message: '오늘 ${CurrencyFormatter.format(_todaySpent)} 썼어요. '
+      message:
+          '오늘 ${CurrencyFormatter.format(_todaySpent)} 썼어요. '
           '식재료비 ${CurrencyFormatter.format(_foodExpense)}, '
           '기타 ${CurrencyFormatter.format(_fixedCost)}이에요.',
       type: VoiceCommandType.query,
-      data: {
-        'total': _todaySpent,
-        'food': _foodExpense,
-        'fixed': _fixedCost,
-      },
+      data: {'total': _todaySpent, 'food': _foodExpense, 'fixed': _fixedCost},
     );
   }
 
@@ -600,16 +608,14 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
     final statusText = _isListening
         ? '🟢 듣고 있어요...'
         : _isProcessing
-            ? '⏳ 처리 중...'
-            : '⚪ 대기 중';
+        ? '⏳ 처리 중...'
+        : '⚪ 대기 중';
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerHighest,
-        border: Border(
-          bottom: BorderSide(color: colorScheme.outlineVariant),
-        ),
+        border: Border(bottom: BorderSide(color: colorScheme.outlineVariant)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -678,11 +684,17 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
               ),
               child: Row(
                 children: [
-                  Icon(Icons.format_quote, size: 20, color: colorScheme.primary),
+                  Icon(
+                    Icons.format_quote,
+                    size: 20,
+                    color: colorScheme.primary,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      _currentText.isNotEmpty ? _currentText : _lastRecognizedText,
+                      _currentText.isNotEmpty
+                          ? _currentText
+                          : _lastRecognizedText,
                       style: TextStyle(
                         fontSize: 15,
                         fontStyle: FontStyle.italic,
@@ -746,19 +758,11 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
             Row(
               children: [
                 Expanded(
-                  child: _buildCostChip(
-                    '🥬 식재료비',
-                    _foodExpense,
-                    Colors.green,
-                  ),
+                  child: _buildCostChip('🥬 식재료비', _foodExpense, Colors.green),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: _buildCostChip(
-                    '📦 고정비',
-                    _fixedCost,
-                    Colors.orange,
-                  ),
+                  child: _buildCostChip('📦 고정비', _fixedCost, Colors.orange),
                 ),
               ],
             ),
@@ -878,7 +882,8 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
     return AnimatedBuilder(
       animation: _feedbackAnimation,
       builder: (context, child) {
-        final isLatest = _recentResults.isNotEmpty && _recentResults.first == result;
+        final isLatest =
+            _recentResults.isNotEmpty && _recentResults.first == result;
         return Container(
           margin: const EdgeInsets.only(bottom: 8),
           padding: const EdgeInsets.all(12),
@@ -905,7 +910,8 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
                     ),
                     if (result.data != null && result.data!['amount'] != null)
                       Text(
-                        '${result.data!['description']} • ${result.data!['category']}',
+                        '${result.data!['description']} '
+                        '• ${result.data!['category']}',
                         style: TextStyle(
                           fontSize: 12,
                           color: colorScheme.outline,
@@ -1007,10 +1013,14 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
                       margin: EdgeInsets.only(right: index < 3 ? 6 : 0),
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       decoration: BoxDecoration(
-                        color: isSelected ? color : color.withValues(alpha: 0.1),
+                        color: isSelected
+                            ? color
+                            : color.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: color.withValues(alpha: isSelected ? 1.0 : 0.3),
+                          color: color.withValues(
+                            alpha: isSelected ? 1.0 : 0.3,
+                          ),
                         ),
                       ),
                       child: Column(
@@ -1092,36 +1102,50 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
           ),
           const SizedBox(height: 10),
           // 예시 문장들
-          ...guide.examples.map((example) => Padding(
-            padding: const EdgeInsets.only(bottom: 6),
-            child: InkWell(
-              onTap: () {
-                final command = example.replaceAll('"', '');
-                _processVoiceCommand(command);
-              },
-              borderRadius: BorderRadius.circular(8),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                decoration: BoxDecoration(
-                  color: colorScheme.surface,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: levelColor.withValues(alpha: 0.2)),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.play_circle_outline, size: 16, color: levelColor),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        example,
-                        style: TextStyle(fontSize: 13, color: colorScheme.onSurface),
-                      ),
+          ...guide.examples.map(
+            (example) => Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: InkWell(
+                onTap: () {
+                  final command = example.replaceAll('"', '');
+                  _processVoiceCommand(command);
+                },
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colorScheme.surface,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: levelColor.withValues(alpha: 0.2),
                     ),
-                  ],
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.play_circle_outline,
+                        size: 16,
+                        color: levelColor,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          example,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          )),
+          ),
           const SizedBox(height: 6),
           // 팁
           Row(
@@ -1160,7 +1184,9 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
           return Container(
             decoration: BoxDecoration(
               color: colorScheme.surface,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
+              ),
             ),
             child: Column(
               children: [
@@ -1319,7 +1345,9 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: colorScheme.primaryContainer.withValues(alpha: 0.3),
+                          color: colorScheme.primaryContainer.withValues(
+                            alpha: 0.3,
+                          ),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                             color: colorScheme.primary.withValues(alpha: 0.3),
@@ -1330,8 +1358,10 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
                           children: [
                             Row(
                               children: [
-                                Icon(Icons.tips_and_updates, 
-                                     color: colorScheme.primary),
+                                Icon(
+                                  Icons.tips_and_updates,
+                                  color: colorScheme.primary,
+                                ),
                                 const SizedBox(width: 8),
                                 const Text(
                                   '💡 꿀팁!',
@@ -1395,7 +1425,11 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
     );
   }
 
-  Widget _buildGuideItemTile(_GuideItem item, Color color, ColorScheme colorScheme) {
+  Widget _buildGuideItemTile(
+    _GuideItem item,
+    Color color,
+    ColorScheme colorScheme,
+  ) {
     return InkWell(
       onTap: () {
         Navigator.pop(context);
@@ -1408,9 +1442,7 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
         decoration: BoxDecoration(
           color: colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: color.withValues(alpha: 0.2),
-          ),
+          border: Border.all(color: color.withValues(alpha: 0.2)),
         ),
         child: Row(
           children: [
@@ -1437,10 +1469,7 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
                   const SizedBox(height: 2),
                   Text(
                     item.description,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: colorScheme.outline,
-                    ),
+                    style: TextStyle(fontSize: 12, color: colorScheme.outline),
                   ),
                 ],
               ),
@@ -1563,13 +1592,14 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
                       height: 80,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: _isListening
-                            ? Colors.red
-                            : colorScheme.primary,
+                        color: _isListening ? Colors.red : colorScheme.primary,
                         boxShadow: [
                           BoxShadow(
-                            color: (_isListening ? Colors.red : colorScheme.primary)
-                                .withValues(alpha: 0.4),
+                            color:
+                                (_isListening
+                                        ? Colors.red
+                                        : colorScheme.primary)
+                                    .withValues(alpha: 0.4),
                             blurRadius: _isListening ? 20 : 10,
                             spreadRadius: _isListening ? 5 : 2,
                           ),
@@ -1649,13 +1679,7 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
 
 // ============ 데이터 모델 ============
 
-enum VoiceCommandType {
-  expense,
-  query,
-  recommend,
-  shopping,
-  unknown,
-}
+enum VoiceCommandType { expense, query, recommend, shopping, unknown }
 
 class VoiceCommandResult {
   final String command;

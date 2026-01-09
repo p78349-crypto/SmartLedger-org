@@ -937,22 +937,22 @@ class UserPrefService {
     try {
       final decoded = jsonDecode(raw);
       if (decoded is! List) return const [];
-      
+
       final now = DateTime.now();
       final cutoffDate = now.subtract(const Duration(days: 15));
-      
+
       final items = decoded
           .whereType<Map<String, dynamic>>()
           .map(ShoppingCartItem.fromJson)
           .where((i) => i.id.trim().isNotEmpty && i.name.trim().isNotEmpty)
           .where((i) => i.updatedAt.isAfter(cutoffDate)) // 15일 이내 항목만
           .toList();
-      
+
       // 필터링으로 항목이 제거되었으면 저장
       if (items.length < decoded.length) {
         await setShoppingCartItems(accountName: accountName, items: items);
       }
-      
+
       return items;
     } catch (_) {
       return const [];

@@ -5,7 +5,9 @@ import '../utils/pref_keys.dart';
 class FeedbackService {
   const FeedbackService._();
 
-  static const String _defaultFoodExpiryTemplate = '{item} 저장 완료. 유통기한: {date}.';
+  static const String _defaultFoodExpiryTemplate =
+      '{item} 저장 완료. '
+      '유통기한: {date}.';
 
   /// Returns a short, friendly message after saving an item.
   ///
@@ -21,7 +23,8 @@ class FeedbackService {
       return '$label 유통기한 항목이 저장되었습니다.';
     }
 
-    // Lightweight, keyword-based personalization (no lab values / health claims).
+    // Lightweight, keyword-based personalization
+    // (no lab values / health claims).
     if (name.contains('사태살')) {
       return '$name 저장 완료. 유통기한: $label.';
     }

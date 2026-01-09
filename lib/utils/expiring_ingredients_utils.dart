@@ -4,25 +4,32 @@ import '../models/food_expiry_item.dart';
 class ExpiringIngredientsUtils {
   ExpiringIngredientsUtils._();
 
+  /// N일 이내 유통기한 식재료 필터링
+  static List<FoodExpiryItem> getExpiringWithinDays(
+    List<FoodExpiryItem> allItems, {
+    required int days,
+    DateTime? now,
+  }) {
+    final effectiveNow = now ?? DateTime.now();
+    final targetDay = effectiveNow.add(Duration(days: days));
+
+    return allItems.where((item) {
+        // 유통기한이 지나지 않았는지 확인
+        if (item.expiryDate.isBefore(effectiveNow)) {
+          return false; // 이미 지난 항목은 제외
+        }
+        // N일 이내인지 확인
+        return item.expiryDate.isBefore(targetDay) ||
+            item.expiryDate.isAtSameMomentAs(targetDay);
+      }).toList()
+      ..sort((a, b) => a.expiryDate.compareTo(b.expiryDate)); // 임박한 순서로 정렬
+  }
+
   /// 3일 이내 유통기한 식재료 필터링
   static List<FoodExpiryItem> getExpiringWithin3Days(
     List<FoodExpiryItem> allItems,
   ) {
-    final now = DateTime.now();
-    final threeDaysLater = now.add(const Duration(days: 3));
-
-    return allItems
-        .where((item) {
-          // 유통기한이 지나지 않았는지 확인
-          if (item.expiryDate.isBefore(now)) {
-            return false; // 이미 지난 항목은 제외
-          }
-          // 3일 이내인지 확인
-          return item.expiryDate.isBefore(threeDaysLater) ||
-              item.expiryDate.isAtSameMomentAs(threeDaysLater);
-        })
-        .toList()
-      ..sort((a, b) => a.expiryDate.compareTo(b.expiryDate)); // 임박한 순서로 정렬
+    return getExpiringWithinDays(allItems, days: 3);
   }
 
   /// 가장 임박한 N개 식재료 반환
@@ -59,9 +66,7 @@ class ExpiringIngredientsUtils {
   }
 
   /// 식재료 목록을 위험도 순으로 정렬
-  static List<FoodExpiryItem> sortByUrgency(
-    List<FoodExpiryItem> items,
-  ) {
+  static List<FoodExpiryItem> sortByUrgency(List<FoodExpiryItem> items) {
     return List.from(items)
       ..sort((a, b) => daysUntilExpiry(a).compareTo(daysUntilExpiry(b)));
   }

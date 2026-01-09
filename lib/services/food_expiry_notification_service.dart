@@ -332,9 +332,9 @@ class FoodExpiryNotificationService {
         continue;
       }
 
-        const title = '유통기한 알림';
-        final remaining = _formatQtyWithUnit(it.quantity, it.unit);
-        final body = daysBefore == 0
+      const title = '유통기한 알림';
+      final remaining = _formatQtyWithUnit(it.quantity, it.unit);
+      final body = daysBefore == 0
           ? '${it.name} 유통기한 당일입니다.\n잔량: $remaining'
           : '${it.name} 유통기한까지 $daysBefore일입니다.\n잔량: $remaining';
 

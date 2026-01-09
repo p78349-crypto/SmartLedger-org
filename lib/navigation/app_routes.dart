@@ -141,7 +141,9 @@ class FoodExpiryArgs {
   final FoodExpiryUpsertPrefill? upsertPrefill;
 
   /// If true, the dialog will attempt to save automatically once opened.
-  /// (Safety gate should be handled by the deep-link handler using confirmed flags.)
+  ///
+  /// (Safety gate should be handled by the deep-link handler using confirmed
+  /// flags.)
   final bool upsertAutoSubmit;
 }
 
@@ -208,7 +210,8 @@ class TransactionAddArgs {
   final bool closeAfterSave;
   final bool autoSubmit;
 
-  /// If true, the transaction input screen should prompt/start the receipt scan flow
+  /// If true, the transaction input screen should prompt/start the receipt scan
+  /// flow
   /// right after the first frame.
   ///
   /// Note: This flag itself should never cause state-changing behavior.
@@ -298,10 +301,7 @@ class ShoppingCartArgs {
 }
 
 class QuickStockUseArgs {
-  const QuickStockUseArgs({
-    required this.accountName,
-    this.initialProductName,
-  });
+  const QuickStockUseArgs({required this.accountName, this.initialProductName});
   final String accountName;
   final String? initialProductName;
 }
@@ -310,4 +310,3 @@ class TopLevelStatsDetailArgs {
   const TopLevelStatsDetailArgs({required this.dashboard});
   final dynamic dashboard;
 }
-

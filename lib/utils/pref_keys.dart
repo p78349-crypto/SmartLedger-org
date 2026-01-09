@@ -83,13 +83,14 @@ class PrefKeys {
   /// Stored as JSON list string.
   static const String countLikeUnitsV1 = 'count_like_units_v1';
 
-    /// Food expiry: snack-bar message template shown after saving an upsert item.
-    ///
-    /// Placeholders:
-    /// - {item}: item name
-    /// - {date}: expiry date label (오늘/내일/모레/1월 20일)
-    static const String foodExpirySavedFeedbackTemplateV1 =
-            'food_expiry_saved_feedback_template_v1';
+  /// Food expiry: snack-bar message template shown after saving an
+  /// upsert item.
+  ///
+  /// Placeholders:
+  /// - {item}: item name
+  /// - {date}: expiry date label (오늘/내일/모레/1월 20일)
+  static const String foodExpirySavedFeedbackTemplateV1 =
+      'food_expiry_saved_feedback_template_v1';
 
   /// Category usage counts (label -> count).
   ///

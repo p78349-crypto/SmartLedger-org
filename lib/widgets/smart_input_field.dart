@@ -72,9 +72,9 @@ class SmartInputField extends StatelessWidget {
     );
 
     OutlineInputBorder subtleBorder({double width = 0.5}) => OutlineInputBorder(
-          borderRadius: borderRadius,
-          borderSide: BorderSide(color: subtleBorderColor, width: width),
-        );
+      borderRadius: borderRadius,
+      borderSide: BorderSide(color: subtleBorderColor, width: width),
+    );
 
     final textColor = scheme.onSurface;
 

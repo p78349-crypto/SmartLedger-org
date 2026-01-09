@@ -3,6 +3,7 @@ import '../services/food_expiry_service.dart';
 import '../utils/icon_catalog.dart';
 import '../utils/cost_prediction_utils.dart';
 import '../utils/user_preference_utils.dart';
+import '../mixins/food_expiry_items_auto_refresh_mixin.dart';
 
 /// 비용 예측 분석 위젯
 class CostAnalysisWidget extends StatefulWidget {
@@ -12,7 +13,8 @@ class CostAnalysisWidget extends StatefulWidget {
   State<CostAnalysisWidget> createState() => _CostAnalysisWidgetState();
 }
 
-class _CostAnalysisWidgetState extends State<CostAnalysisWidget> {
+class _CostAnalysisWidgetState extends State<CostAnalysisWidget>
+    with FoodExpiryItemsAutoRefreshMixin {
   BudgetAnalysis? _analysis;
   Map<String, double>? _categorySpending;
   String? _monthlyTrend;
@@ -21,9 +23,12 @@ class _CostAnalysisWidgetState extends State<CostAnalysisWidget> {
   int _budgetLimit = 500000;
 
   @override
+  Future<void> onFoodExpiryItemsChanged() => _loadAnalysis();
+
+  @override
   void initState() {
     super.initState();
-    _loadAnalysis();
+    requestFoodExpiryItemsRefresh();
   }
 
   Future<void> _loadAnalysis() async {

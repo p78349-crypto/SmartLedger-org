@@ -40,7 +40,7 @@ class DeepLinkHandler {
       return;
     }
 
-    debugPrint('DeepLinkHandler: Received action: $action');
+    debugPrint('DeepLinkHandler: Received action: ${_summarizeAction(action)}');
 
     switch (action) {
       case AddTransactionAction():
@@ -58,19 +58,49 @@ class DeepLinkHandler {
     }
   }
 
+  String _summarizeAction(DeepLinkAction action) {
+    switch (action) {
+      case AddTransactionAction():
+        return 'AddTransactionAction(type: ${action.type}, '
+            'autoSubmit: ${action.autoSubmit}, '
+            'confirmed: ${action.confirmed}, '
+            'openReceiptScannerOnStart: ${action.openReceiptScannerOnStart})';
+      case OpenDashboardAction():
+        return 'OpenDashboardAction()';
+      case OpenFeatureAction():
+        return 'OpenFeatureAction(featureId: ${action.featureId})';
+      case OpenRouteAction():
+        final keys = action.params.keys.toList()..sort();
+        return 'OpenRouteAction(routeName: ${action.routeName}, '
+            'intent: ${action.intent}, '
+            'autoSubmit: ${action.autoSubmit}, '
+            'confirmed: ${action.confirmed}, '
+            'paramKeys: $keys)';
+      case CheckStockAction():
+        return 'CheckStockAction()';
+      case UseStockAction():
+        return 'UseStockAction(autoSubmit: ${action.autoSubmit}, '
+            'confirmed: ${action.confirmed})';
+    }
+  }
+
   void _handleOpenRoute(NavigatorState navigator, OpenRouteAction action) {
     final spec = AssistantRouteCatalog.specs[action.routeName];
     if (spec == null) {
       debugPrint('DeepLinkHandler: Route not allowed: ${action.routeName}');
       _showSimpleInfoDialog(
         navigator,
-        title: '지원되지 않는 화면',
-        message: '해당 화면은 음성으로 바로 열 수 없습니다.\n(${action.routeName})',
+        title: '보안 안내',
+        message:
+            '보안 사항 접근 안 됩니다.'
+            '\n음성비서로는 해당 화면을 열 수 없습니다.'
+            '\n(${action.routeName})',
       );
       return;
     }
 
-    final accountName = action.accountName ?? AssistantRouteCatalog.resolveDefaultAccountName();
+    final accountName =
+        action.accountName ?? AssistantRouteCatalog.resolveDefaultAccountName();
     if (spec.requiresAccount && (accountName == null || accountName.isEmpty)) {
       _showSimpleInfoDialog(
         navigator,
@@ -82,13 +112,24 @@ class DeepLinkHandler {
 
     final args = spec.buildArgs(accountName);
 
+    final filteredParams = _filterAllowedRouteParams(
+      routeName: action.routeName,
+      intent: action.intent,
+      params: action.params,
+    );
+
     // Safe intent: receipt scan hook for transaction add.
-    if (action.routeName == AppRoutes.transactionAdd && args is TransactionAddArgs) {
+    if (action.routeName == AppRoutes.transactionAdd &&
+        args is TransactionAddArgs) {
       final intent = (action.intent ?? '').trim().toLowerCase();
-      final requestedAction = (action.params['action'] ?? '').trim().toLowerCase();
+      final requestedAction = (filteredParams['action'] ?? '')
+          .trim()
+          .toLowerCase();
 
       final wantsScan =
-          intent == 'scan_receipt' || intent == 'scan' || requestedAction == 'scan';
+          intent == 'scan_receipt' ||
+          intent == 'scan' ||
+          requestedAction == 'scan';
 
       if (wantsScan) {
         navigator.pushNamed(
@@ -96,7 +137,8 @@ class DeepLinkHandler {
           arguments: TransactionAddArgs(
             accountName: args.accountName,
             initialTransaction: args.initialTransaction,
-            learnCategoryHintFromDescription: args.learnCategoryHintFromDescription,
+            learnCategoryHintFromDescription:
+                args.learnCategoryHintFromDescription,
             confirmBeforeSave: args.confirmBeforeSave,
             treatAsNew: args.treatAsNew,
             closeAfterSave: args.closeAfterSave,
@@ -110,17 +152,23 @@ class DeepLinkHandler {
 
     // Allow safe, explicit intents for a small set of routes.
     if (action.routeName == AppRoutes.foodExpiry && action.intent == 'upsert') {
-      final p = action.params;
+      final p = filteredParams;
 
       String? name = p['name'] ?? p['item'] ?? p['product'];
       name = name?.trim();
 
-      final quantity = double.tryParse((p['quantity'] ?? p['qty'] ?? '').trim());
+      final quantity = double.tryParse(
+        (p['quantity'] ?? p['qty'] ?? '').trim(),
+      );
       final unit = (p['unit'] ?? '').trim();
       final location = (p['location'] ?? '').trim();
       final category = (p['category'] ?? '').trim();
       final supplier =
-          (p['supplier'] ?? p['purchasePlace'] ?? p['place'] ?? p['store'] ?? '')
+          (p['supplier'] ??
+                  p['purchasePlace'] ??
+                  p['place'] ??
+                  p['store'] ??
+                  '')
               .trim();
       final memo = (p['memo'] ?? p['note'] ?? p['desc'] ?? '').trim();
       final price = double.tryParse((p['price'] ?? '').trim());
@@ -236,6 +284,17 @@ class DeepLinkHandler {
           showDialog<bool>(
             context: navigator.context,
             builder: (dialogContext) {
+              final purchaseDateText = purchaseDate
+                  ?.toLocal()
+                  .toString()
+                  .split(' ')
+                  .first;
+              final expiryDateText = expiryDate
+                  ?.toLocal()
+                  .toString()
+                  .split(' ')
+                  .first;
+
               return AlertDialog(
                 title: const Text('등록 전에 확인'),
                 content: Column(
@@ -250,10 +309,9 @@ class DeepLinkHandler {
                     if (supplierText != null) Text('구매처: $supplierText'),
                     if (memoText != null) Text('메모: $memoText'),
                     if (tagsText != null) Text('태그: $tagsText'),
-                    if (purchaseDate != null)
-                      Text('구매일: ${purchaseDate.toLocal().toString().split(' ').first}'),
-                    if (expiryDate != null)
-                      Text('유통기한: ${expiryDate.toLocal().toString().split(' ').first}'),
+                    if (purchaseDateText != null)
+                      Text('구매일: $purchaseDateText'),
+                    if (expiryDateText != null) Text('유통기한: $expiryDateText'),
                     const SizedBox(height: 8),
                     const Text('이대로 등록할까요?'),
                   ],
@@ -311,15 +369,14 @@ class DeepLinkHandler {
       if (intent == 'usage_mode' || intent == 'auto_usage') {
         navigator.pushNamed(
           spec.routeName,
-          arguments: const FoodExpiryArgs(
-            autoUsageMode: true,
-          ),
+          arguments: const FoodExpiryArgs(autoUsageMode: true),
         );
         return;
       }
     }
 
-    if (action.routeName == AppRoutes.assetSimpleInput && action.intent == 'asset_add') {
+    if (action.routeName == AppRoutes.assetSimpleInput &&
+        action.intent == 'asset_add') {
       final p = action.params;
 
       final category = (p['category'] ?? p['assetCategory'] ?? '').trim();
@@ -332,7 +389,10 @@ class DeepLinkHandler {
         navigator.pushNamed(
           spec.routeName,
           arguments: AssetSimpleInputArgs(
-            accountName: accountName ?? AssistantRouteCatalog.resolveDefaultAccountName() ?? '',
+            accountName:
+                accountName ??
+                AssistantRouteCatalog.resolveDefaultAccountName() ??
+                '',
             initialCategory: category.isEmpty ? null : category,
             initialName: name.isEmpty ? null : name,
             initialAmount: amount,
@@ -349,7 +409,9 @@ class DeepLinkHandler {
           _showSimpleInfoDialog(
             navigator,
             title: '자동 저장 불가',
-            message: '자동 저장을 위해서는 자산명과 금액이 필요합니다.\n화면을 열어 입력을 계속 진행하세요.',
+            message:
+                '자동 저장을 위해서는 자산명과 금액이 필요합니다.'
+                '\n화면을 열어 입력을 계속 진행하세요.',
           );
           openScreen(autoSubmit: false);
           return;
@@ -407,7 +469,8 @@ class DeepLinkHandler {
       return;
     }
 
-    if (action.routeName == AppRoutes.quickSimpleExpenseInput && action.intent == 'quick_expense_add') {
+    if (action.routeName == AppRoutes.quickSimpleExpenseInput &&
+        action.intent == 'quick_expense_add') {
       final p = action.params;
 
       final rawLine = (p['line'] ?? p['raw'] ?? '').toString().trim();
@@ -440,7 +503,10 @@ class DeepLinkHandler {
         navigator.pushNamed(
           spec.routeName,
           arguments: QuickSimpleExpenseInputArgs(
-            accountName: accountName ?? AssistantRouteCatalog.resolveDefaultAccountName() ?? '',
+            accountName:
+                accountName ??
+                AssistantRouteCatalog.resolveDefaultAccountName() ??
+                '',
             initialDate: DateTime.now(),
             initialLine: line.isEmpty ? null : line,
             autoSubmit: autoSubmit,
@@ -461,7 +527,10 @@ class DeepLinkHandler {
           _showSimpleInfoDialog(
             navigator,
             title: '자동 저장 불가',
-            message: '자동 저장을 위해서는 금액이 필요합니다.\n예: 커피 3000원\n화면을 열어 입력을 계속 진행하세요.',
+            message:
+                '자동 저장을 위해서는 금액이 필요합니다.'
+                '\n예: 커피 3000원'
+                '\n화면을 열어 입력을 계속 진행하세요.',
           );
           openScreen(autoSubmit: false);
           return;
@@ -470,9 +539,7 @@ class DeepLinkHandler {
         if (!action.confirmed) {
           final previewText = line.isNotEmpty
               ? line
-              : (description.isNotEmpty
-                    ? description
-                    : '간편 지출(1줄)');
+              : (description.isNotEmpty ? description : '간편 지출(1줄)');
           final amountText = amount != null
               ? (amount == amount.roundToDouble()
                     ? amount.toStringAsFixed(0)
@@ -524,6 +591,63 @@ class DeepLinkHandler {
     navigator.pushNamed(spec.routeName, arguments: args);
   }
 
+  Map<String, String> _filterAllowedRouteParams({
+    required String routeName,
+    required String? intent,
+    required Map<String, String> params,
+  }) {
+    if (params.isEmpty) return const <String, String>{};
+
+    final allowed = <String>{};
+
+    // Transaction add: allow scan receipt trigger via action param.
+    if (routeName == AppRoutes.transactionAdd) {
+      allowed.addAll({'action'});
+    }
+
+    // Food expiry upsert supports a limited prefill schema.
+    if (routeName == AppRoutes.foodExpiry &&
+        (intent ?? '').trim().toLowerCase() == 'upsert') {
+      allowed.addAll({
+        'name',
+        'item',
+        'product',
+        'quantity',
+        'qty',
+        'unit',
+        'location',
+        'category',
+        'supplier',
+        'purchasePlace',
+        'place',
+        'store',
+        'memo',
+        'note',
+        'desc',
+        'price',
+        'healthTags',
+        'tags',
+        'purchaseDate',
+        'purchasedAt',
+        'buyDate',
+        'expiryDate',
+        'expiry',
+        'expiryDays',
+        'days',
+      });
+    }
+
+    if (allowed.isEmpty) return const <String, String>{};
+
+    final filtered = <String, String>{};
+    for (final entry in params.entries) {
+      if (!allowed.contains(entry.key)) continue;
+      filtered[entry.key] = entry.value;
+    }
+
+    return filtered;
+  }
+
   void _showSimpleInfoDialog(
     NavigatorState navigator, {
     required String title,
@@ -545,7 +669,10 @@ class DeepLinkHandler {
     );
   }
 
-  void _handleAddTransaction(NavigatorState navigator, AddTransactionAction action) {
+  void _handleAddTransaction(
+    NavigatorState navigator,
+    AddTransactionAction action,
+  ) {
     final resolvedAccountName =
         AssistantRouteCatalog.resolveDefaultAccountName() ??
         (AccountService().accounts.isNotEmpty
@@ -563,12 +690,12 @@ class DeepLinkHandler {
 
     final now = DateTime.now();
     final type = action.isIncome
-      ? TransactionType.income
-      : action.isSavings
-      ? TransactionType.savings
-      : action.isRefund
-      ? TransactionType.refund
-      : TransactionType.expense;
+        ? TransactionType.income
+        : action.isSavings
+        ? TransactionType.savings
+        : action.isRefund
+        ? TransactionType.refund
+        : TransactionType.expense;
     final amount = action.amount;
     final quantityRaw = action.quantity;
     final unit = action.unit?.trim() ?? '';
@@ -589,9 +716,10 @@ class DeepLinkHandler {
     Transaction? initialTransaction;
     final hasDesc = desc != null && desc.isNotEmpty;
     if (amount != null || hasDesc || hasUnitPrice || hasQty) {
-      final computedAmount = amount ?? (hasUnitPrice ? (unitPriceRaw * qty) : 0);
+      final computedAmount =
+          amount ?? (hasUnitPrice ? (unitPriceRaw * qty) : 0);
       final computedUnitPrice = hasUnitPrice
-        ? unitPriceRaw
+          ? unitPriceRaw
           : (qty > 0 ? (computedAmount / qty) : computedAmount);
       initialTransaction = Transaction(
         id: '',
@@ -613,7 +741,9 @@ class DeepLinkHandler {
       );
     }
 
-    final routeName = action.isIncome ? AppRoutes.transactionAddIncome : AppRoutes.transactionAdd;
+    final routeName = action.isIncome
+        ? AppRoutes.transactionAddIncome
+        : AppRoutes.transactionAdd;
 
     void openScreen({required bool autoSubmit}) {
       navigator.pushNamed(
@@ -636,7 +766,9 @@ class DeepLinkHandler {
         _showSimpleInfoDialog(
           navigator,
           title: '자동 저장 불가',
-          message: '자동 저장을 위해서는 설명과 금액이 필요합니다.\n화면을 열어 입력을 계속 진행하세요.',
+          message:
+              '자동 저장을 위해서는 설명과 금액이 필요합니다.'
+              '\n화면을 열어 입력을 계속 진행하세요.',
         );
         openScreen(autoSubmit: false);
         return;
@@ -644,19 +776,24 @@ class DeepLinkHandler {
 
       if (!action.confirmed) {
         final typeText = action.isIncome
-          ? '수입'
-          : action.isSavings
-          ? '저축'
-          : action.isRefund
-          ? '반품'
-          : '지출';
-        final categoryText = (action.category == null || action.category!.trim().isEmpty)
+            ? '수입'
+            : action.isSavings
+            ? '저축'
+            : action.isRefund
+            ? '반품'
+            : '지출';
+        final categoryText =
+            (action.category == null || action.category!.trim().isEmpty)
             ? '미분류'
             : action.category!.trim();
-        final amountText = amount.toStringAsFixed(amount == amount.roundToDouble() ? 0 : 2);
+        final amountText = amount.toStringAsFixed(
+          amount == amount.roundToDouble() ? 0 : 2,
+        );
         final qtyText = qty <= 1 ? '' : qty.toString();
         final unitText = unit.isEmpty ? '' : unit;
-        final unitLine = (qtyText.isEmpty && unitText.isEmpty) ? '' : '$qtyText$unitText';
+        final unitLine = (qtyText.isEmpty && unitText.isEmpty)
+            ? ''
+            : '$qtyText$unitText';
 
         showDialog<bool>(
           context: navigator.context,
@@ -713,6 +850,14 @@ class DeepLinkHandler {
     final route = action.routeName;
     if (route == null) {
       debugPrint('DeepLinkHandler: Unknown feature: ${action.featureId}');
+      _showSimpleInfoDialog(
+        navigator,
+        title: '보안 안내',
+        message:
+            '보안 사항 접근 안 됩니다.'
+            '\n음성비서로는 지원되지 않는 기능입니다.'
+            '\n(${action.featureId})',
+      );
       return;
     }
 
@@ -746,13 +891,27 @@ class DeepLinkHandler {
       case 'voice_dashboard':
         navigator.pushNamed(AppRoutes.voiceDashboard);
       case 'transaction_add':
-        _handleAddTransaction(navigator, const AddTransactionAction(type: 'expense'));
+        _handleAddTransaction(
+          navigator,
+          const AddTransactionAction(type: 'expense'),
+        );
       case 'income_add':
-        _handleAddTransaction(navigator, const AddTransactionAction(type: 'income'));
+        _handleAddTransaction(
+          navigator,
+          const AddTransactionAction(type: 'income'),
+        );
       case 'quick_stock':
         navigator.pushNamed(AppRoutes.quickStockUse);
       default:
         debugPrint('DeepLinkHandler: No route mapping for ${action.featureId}');
+        _showSimpleInfoDialog(
+          navigator,
+          title: '보안 안내',
+          message:
+              '보안 사항 접근 안 됩니다.'
+              '\n음성비서로는 지원되지 않는 기능입니다.'
+              '\n(${action.featureId})',
+        );
     }
   }
 
@@ -760,12 +919,15 @@ class DeepLinkHandler {
   void _handleCheckStock(NavigatorState navigator, CheckStockAction action) {
     final items = ConsumableInventoryService.instance.items.value;
     final product = action.productName.toLowerCase();
-    
+
     // 상품 검색
-    final found = items.where((item) => 
-      item.name.toLowerCase().contains(product) ||
-      product.contains(item.name.toLowerCase())
-    ).toList();
+    final found = items
+        .where(
+          (item) =>
+              item.name.toLowerCase().contains(product) ||
+              product.contains(item.name.toLowerCase()),
+        )
+        .toList();
 
     if (found.isEmpty) {
       _showStockNotFoundDialog(navigator, action.productName);
@@ -790,10 +952,13 @@ class DeepLinkHandler {
     if (initialAmount == null) {
       final items = ConsumableInventoryService.instance.items.value;
       final product = action.productName.toLowerCase();
-      final found = items.where((item) =>
-        item.name.toLowerCase().contains(product) ||
-        product.contains(item.name.toLowerCase())
-      ).toList();
+      final found = items
+          .where(
+            (item) =>
+                item.name.toLowerCase().contains(product) ||
+                product.contains(item.name.toLowerCase()),
+          )
+          .toList();
       if (found.isNotEmpty) {
         initialAmount = found.first.currentStock;
       }
@@ -829,7 +994,7 @@ class DeepLinkHandler {
       );
       return;
     }
-    
+
     // 빠른 재고 차감 화면으로 이동 (파라미터 전달)
     navigator.pushNamed(
       AppRoutes.quickStockUse,
@@ -923,7 +1088,7 @@ class DeepLinkHandler {
   /// 재고 정보 다이얼로그 (음성 확인용)
   void _showStockInfoDialog(NavigatorState navigator, dynamic item) {
     final context = navigator.context;
-    
+
     // 유통기한 정보
     String? expiryInfo;
     if (item.expiryDate != null) {
@@ -955,7 +1120,9 @@ class DeepLinkHandler {
             _buildInfoRow(
               '📦 현재 재고',
               '${_formatQty(item.currentStock)}${item.unit}',
-              item.currentStock <= item.threshold ? Colors.orange : Colors.green,
+              item.currentStock <= item.threshold
+                  ? Colors.orange
+                  : Colors.green,
             ),
             const SizedBox(height: 12),
             // 유통기한
@@ -963,8 +1130,11 @@ class DeepLinkHandler {
               _buildInfoRow(
                 '📅 유통기한',
                 expiryInfo,
-                expiryInfo.contains('경과') ? Colors.red : 
-                  expiryInfo.contains('임박') ? Colors.orange : Colors.grey,
+                expiryInfo.contains('경과')
+                    ? Colors.red
+                    : expiryInfo.contains('임박')
+                    ? Colors.orange
+                    : Colors.grey,
               ),
               const SizedBox(height: 12),
             ],

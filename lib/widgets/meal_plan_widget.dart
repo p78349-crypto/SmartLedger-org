@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/food_expiry_service.dart';
 import '../utils/meal_plan_generator_utils.dart';
 import '../utils/user_preference_utils.dart';
+import '../mixins/food_expiry_items_auto_refresh_mixin.dart';
 
 /// 식사 계획 자동 생성 위젯
 class MealPlanWidget extends StatefulWidget {
@@ -11,16 +12,20 @@ class MealPlanWidget extends StatefulWidget {
   State<MealPlanWidget> createState() => _MealPlanWidgetState();
 }
 
-class _MealPlanWidgetState extends State<MealPlanWidget> {
+class _MealPlanWidgetState extends State<MealPlanWidget>
+    with FoodExpiryItemsAutoRefreshMixin {
   List<DayMealPlan>? _mealPlans;
   String _selectedPeriod = '3일'; // 3일 또는 1주일
   bool _isLoading = true;
   String _mealPreference = '한식 중심';
 
   @override
+  Future<void> onFoodExpiryItemsChanged() => _loadMealPlans();
+
+  @override
   void initState() {
     super.initState();
-    _loadMealPlans();
+    requestFoodExpiryItemsRefresh();
   }
 
   Future<void> _loadMealPlans() async {
@@ -101,8 +106,9 @@ class _MealPlanWidgetState extends State<MealPlanWidget> {
                     const SizedBox(width: 12),
                     Text(
                       '📅 식단 계획',
-                      style: theme.textTheme.titleMedium
-                          ?.copyWith(fontWeight: FontWeight.bold),
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
@@ -125,14 +131,12 @@ class _MealPlanWidgetState extends State<MealPlanWidget> {
             child: Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: theme.colorScheme.primaryContainer
-                    .withValues(alpha: 0.3),
+                color: theme.colorScheme.primaryContainer.withValues(
+                  alpha: 0.3,
+                ),
                 borderRadius: BorderRadius.circular(4),
               ),
-              child: Text(
-                summary,
-                style: theme.textTheme.labelMedium,
-              ),
+              child: Text(summary, style: theme.textTheme.labelMedium),
             ),
           ),
 
@@ -160,8 +164,9 @@ class _MealPlanWidgetState extends State<MealPlanWidget> {
                   const SizedBox(height: 12),
                   Text(
                     '식사 팁',
-                    style: theme.textTheme.labelLarge
-                        ?.copyWith(fontWeight: FontWeight.bold),
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -182,8 +187,9 @@ class _MealPlanWidgetState extends State<MealPlanWidget> {
     return OutlinedButton(
       onPressed: () => _changePeriod(period),
       style: OutlinedButton.styleFrom(
-        backgroundColor:
-            isSelected ? theme.colorScheme.primary : Colors.transparent,
+        backgroundColor: isSelected
+            ? theme.colorScheme.primary
+            : Colors.transparent,
         side: BorderSide(
           color: theme.colorScheme.primary,
           width: isSelected ? 2 : 1,
@@ -271,8 +277,9 @@ class _MealPlanWidgetState extends State<MealPlanWidget> {
                 const SizedBox(height: 4),
                 Text(
                   meal,
-                  style: theme.textTheme.bodyMedium
-                      ?.copyWith(fontWeight: FontWeight.bold),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -285,8 +292,9 @@ class _MealPlanWidgetState extends State<MealPlanWidget> {
             ),
             child: Text(
               difficulty,
-              style: theme.textTheme.labelSmall
-                  ?.copyWith(fontWeight: FontWeight.bold),
+              style: theme.textTheme.labelSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],

@@ -137,9 +137,9 @@ class ThemeSettingsSection extends StatelessWidget {
                           '여성 스타일 (10)',
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
                                 fontWeight: FontWeight.w600,
                               ),
                         ),
@@ -152,10 +152,7 @@ class ThemeSettingsSection extends StatelessWidget {
                                 p.id.contains('intense'),
                           )
                           .map(
-                            (preset) => _presetTile(
-                              context,
-                              preset: preset,
-                            ),
+                            (preset) => _presetTile(context, preset: preset),
                           ),
                       const Divider(height: 12),
                     ],
@@ -169,18 +166,15 @@ class ThemeSettingsSection extends StatelessWidget {
                           '스페셜 스타일',
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
                                 fontWeight: FontWeight.w600,
                               ),
                         ),
                       ),
                       ...ThemePresets.special.map(
-                        (preset) => _presetTile(
-                          context,
-                          preset: preset,
-                        ),
+                        (preset) => _presetTile(context, preset: preset),
                       ),
                       const Divider(height: 12),
                     ],
@@ -192,9 +186,9 @@ class ThemeSettingsSection extends StatelessWidget {
                           '남성 스타일 (10)',
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
                                 fontWeight: FontWeight.w600,
                               ),
                         ),
@@ -207,10 +201,7 @@ class ThemeSettingsSection extends StatelessWidget {
                                 p.id.contains('intense'),
                           )
                           .map(
-                            (preset) => _presetTile(
-                              context,
-                              preset: preset,
-                            ),
+                            (preset) => _presetTile(context, preset: preset),
                           ),
                     ],
                   ],
@@ -375,4 +366,3 @@ class _AppIconSyncSectionState extends State<_AppIconSyncSection> {
     );
   }
 }
-

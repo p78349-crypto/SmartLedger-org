@@ -433,8 +433,7 @@ class AppRouter {
         final a = args as AccountArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) =>
-              SpendingAnalysisScreen(accountName: a.accountName),
+          builder: (_) => SpendingAnalysisScreen(accountName: a.accountName),
         );
 
       case AppRoutes.weatherPricePrediction:
@@ -590,9 +589,8 @@ class AppRouter {
         final a = args as AccountArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => HouseholdConsumablesScreen(
-            accountName: a.accountName,
-          ),
+          builder: (_) =>
+              HouseholdConsumablesScreen(accountName: a.accountName),
         );
 
       case AppRoutes.consumableInventory:
@@ -670,7 +668,9 @@ class AppRouter {
       case AppRoutes.assetSimpleInput:
         final a = args is AssetSimpleInputArgs
             ? args
-            : AssetSimpleInputArgs(accountName: (args as AccountArgs).accountName);
+            : AssetSimpleInputArgs(
+                accountName: (args as AccountArgs).accountName,
+              );
         return MaterialPageRoute(
           settings: settings,
           builder: (_) => AssetRouteAuthGate(
@@ -800,17 +800,15 @@ class _IngredientSearchInputScreenState
 
   void _search(String query) {
     if (query.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('검색어를 입력하세요.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('검색어를 입력하세요.')));
       return;
     }
 
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => IngredientSearchListScreen(
-          searchQuery: query,
-        ),
+        builder: (_) => IngredientSearchListScreen(searchQuery: query),
       ),
     );
   }
@@ -820,10 +818,7 @@ class _IngredientSearchInputScreenState
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('요리 필요 재료 검색'),
-        elevation: 0,
-      ),
+      appBar: AppBar(title: const Text('요리 필요 재료 검색'), elevation: 0),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(

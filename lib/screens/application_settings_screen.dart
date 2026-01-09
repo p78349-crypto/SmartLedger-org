@@ -79,9 +79,9 @@ class _ApplicationSettingsScreenState extends State<ApplicationSettingsScreen>
       await prefs.setString(PrefKeys.foodExpirySavedFeedbackTemplateV1, t);
     }
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('피드백 문구 템플릿을 저장했습니다.')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('피드백 문구 템플릿을 저장했습니다.')));
   }
 
   Future<void> _resetFoodExpiryFeedbackTemplate() async {
@@ -91,9 +91,9 @@ class _ApplicationSettingsScreenState extends State<ApplicationSettingsScreen>
     setState(() {
       _foodExpiryFeedbackTemplateController.text = '';
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('피드백 문구 템플릿을 기본값으로 되돌렸습니다.')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('피드백 문구 템플릿을 기본값으로 되돌렸습니다.')));
   }
 
   String _buildActivityHouseholdEstimateText({

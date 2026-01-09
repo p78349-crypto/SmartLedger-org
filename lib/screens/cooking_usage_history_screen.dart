@@ -96,10 +96,7 @@ class CookingUsageHistoryScreen extends StatelessWidget {
               ],
               const SizedBox(height: 12),
               if (rows.isEmpty)
-                Text(
-                  '사용된 식재료 상세가 없습니다.',
-                  style: theme.textTheme.bodyMedium,
-                )
+                Text('사용된 식재료 상세가 없습니다.', style: theme.textTheme.bodyMedium)
               else
                 Flexible(
                   child: ListView(
@@ -173,102 +170,106 @@ class CookingUsageHistoryScreen extends StatelessWidget {
         body: ValueListenableBuilder<List<CookingUsageLog>>(
           valueListenable: SavingsStatisticsService.instance.logs,
           builder: (context, logs, _) {
-          final sorted = List<CookingUsageLog>.from(logs)
-            ..sort((a, b) => b.usageDate.compareTo(a.usageDate));
+            final sorted = List<CookingUsageLog>.from(logs)
+              ..sort((a, b) => b.usageDate.compareTo(a.usageDate));
 
-          final total = sorted.fold<double>(
-            0.0,
-            (acc, l) => acc + l.totalUsedPrice,
-          );
-
-          if (sorted.isEmpty) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Text(
-                  '아직 소비 기록이 없습니다.\n'
-                  '재고 목록에서 요리/사용 모드로 사용량을 적용하면\n'
-                  '여기에 기록이 쌓입니다.',
-                  style: theme.textTheme.bodyLarge,
-                  textAlign: TextAlign.center,
-                ),
-              ),
+            final total = sorted.fold<double>(
+              0.0,
+              (acc, l) => acc + l.totalUsedPrice,
             );
-          }
 
-          return Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
-                child: Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '소비 기록',
-                              style: theme.textTheme.titleMedium,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '${sorted.length}건',
-                              style: theme.textTheme.bodySmall,
-                            ),
-                          ],
-                        ),
-                        Text(
-                          CurrencyFormatter.format(total),
-                          style: theme.textTheme.titleLarge,
-                        ),
-                      ],
+            if (sorted.isEmpty) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Text(
+                    '아직 소비 기록이 없습니다.\n'
+                    '재고 목록에서 요리/사용 모드로 사용량을 적용하면\n'
+                    '여기에 기록이 쌓입니다.',
+                    style: theme.textTheme.bodyLarge,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              );
+            }
+
+            return Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('소비 기록', style: theme.textTheme.titleMedium),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${sorted.length}건',
+                                style: theme.textTheme.bodySmall,
+                              ),
+                            ],
+                          ),
+                          Text(
+                            CurrencyFormatter.format(total),
+                            style: theme.textTheme.titleLarge,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-              Expanded(
-                child: ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-                  itemCount: sorted.length,
-                  separatorBuilder: (context, index) =>
-                      const SizedBox(height: 6),
-                  itemBuilder: (ctx, i) {
-                    final log = sorted[i];
-                    final rows = _parseUsedIngredients(log.usedIngredientsJson);
+                Expanded(
+                  child: ListView.separated(
+                    padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                    itemCount: sorted.length,
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 6),
+                    itemBuilder: (ctx, i) {
+                      final log = sorted[i];
+                      final rows = _parseUsedIngredients(
+                        log.usedIngredientsJson,
+                      );
 
-                    bool isRiceGroup(String g) => g == 'rice' || g == 'rice_snack';
-                    final riceTotal = rows
-                        .where((r) => isRiceGroup(r.group))
-                        .fold<double>(0.0, (acc, r) => acc + r.price);
+                      bool isRiceGroup(String g) =>
+                          g == 'rice' || g == 'rice_snack';
+                      final riceTotal = rows
+                          .where((r) => isRiceGroup(r.group))
+                          .fold<double>(0.0, (acc, r) => acc + r.price);
 
-                    final subtitle =
-                        '${DateFormat('MM/dd HH:mm').format(log.usageDate)}'
-                        ' · ${rows.isEmpty ? '-' : '${rows.length}종'}'
-                        '${riceTotal > 0 ? ' · 쌀(참고) ${CurrencyFormatter.format(riceTotal)}' : ''}';
+                      final riceSuffix = riceTotal > 0
+                          ? ' · 쌀(참고) ${CurrencyFormatter.format(riceTotal)}'
+                          : '';
 
-                    return Card(
-                      child: ListTile(
-                        title: Text(
-                          log.recipeName.isEmpty ? '사용 기록' : log.recipeName,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                      final subtitle =
+                          '${DateFormat('MM/dd HH:mm').format(log.usageDate)}'
+                          ' · ${rows.isEmpty ? '-' : '${rows.length}종'}'
+                          '$riceSuffix';
+
+                      return Card(
+                        child: ListTile(
+                          title: Text(
+                            log.recipeName.isEmpty ? '사용 기록' : log.recipeName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          subtitle: Text(subtitle),
+                          trailing: Text(
+                            CurrencyFormatter.format(log.totalUsedPrice),
+                            style: theme.textTheme.titleMedium,
+                          ),
+                          onTap: () => _showLogDetail(context, log),
                         ),
-                        subtitle: Text(subtitle),
-                        trailing: Text(
-                          CurrencyFormatter.format(log.totalUsedPrice),
-                          style: theme.textTheme.titleMedium,
-                        ),
-                        onTap: () => _showLogDetail(context, log),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
-              ),
-            ],
-          );
+              ],
+            );
           },
         ),
       ),

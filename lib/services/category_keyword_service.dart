@@ -585,9 +585,7 @@ class CategoryKeywordService {
 
     // Remove trailing units
     s = s.replaceAll(
-      RegExp(
-        r'(\d+(?:\.\d+)?)(ml|l|kg|g|mg|개|입|팩|봉|병|캔|장|p|pcs|pc|box)$',
-      ),
+      RegExp(r'(\d+(?:\.\d+)?)(ml|l|kg|g|mg|개|입|팩|봉|병|캔|장|p|pcs|pc|box)$'),
       '',
     );
 

@@ -110,10 +110,7 @@ class MealPlanGeneratorUtils {
   }
 
   /// 식사 추천 이유 설명
-  static String getMealExplanation(
-    String meal,
-    List<FoodExpiryItem> items,
-  ) {
+  static String getMealExplanation(String meal, List<FoodExpiryItem> items) {
     final hasRelevantIngredients = items
         .where((item) => meal.toLowerCase().contains(item.name.toLowerCase()))
         .isNotEmpty;
@@ -136,16 +133,16 @@ class MealPlanGeneratorUtils {
     final dateRange = dayCount == 3
         ? '향후 3일'
         : dayCount == 7
-            ? '향후 1주일'
-            : '향후 $dayCount일';
+        ? '향후 1주일'
+        : '향후 $dayCount일';
 
     return '$dateRange의 식사 계획이 준비되었습니다. ($firstDay ~ $lastDay)';
   }
 
   /// 영양가 분석
   static String analyzeMealNutrition(DayMeals meals) {
-    final allMeals =
-        '${meals.breakfast}${meals.lunch}${meals.dinner}'.toLowerCase();
+    final allMeals = '${meals.breakfast}${meals.lunch}${meals.dinner}'
+        .toLowerCase();
 
     int proteinCount = 0;
     int vegetableCount = 0;
@@ -185,24 +182,9 @@ class MealPlanGeneratorUtils {
 
   /// 조리 난이도 평가
   static String getCookingDifficulty(String meal) {
-    final simpleMeals = [
-      '계란',
-      '밥',
-      '스프',
-      '샐러드',
-      '우동',
-      '면',
-      '국',
-    ];
+    final simpleMeals = ['계란', '밥', '스프', '샐러드', '우동', '면', '국'];
 
-    final complexMeals = [
-      '조림',
-      '구이',
-      '전',
-      '찜',
-      '국수',
-      '카레',
-    ];
+    final complexMeals = ['조림', '구이', '전', '찜', '국수', '카레'];
 
     for (final simple in simpleMeals) {
       if (meal.contains(simple)) return '⭐ 쉬움';

@@ -21,9 +21,7 @@ class ShoppingCartBulkLedgerUtils {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('장바구니 정리'),
-        content: Text(
-          '지출 입력이 완료되었습니다.\n남은 $remainingCount개 항목을 장바구니에서 삭제할까요?',
-        ),
+        content: Text('지출 입력이 완료되었습니다.\n남은 $remainingCount개 항목을 장바구니에서 삭제할까요?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),

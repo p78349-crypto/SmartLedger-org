@@ -953,8 +953,7 @@ class _AssetTabScreenState extends State<AssetTabScreen> {
                                         RadioListTile<String>(
                                           dense: true,
                                           contentPadding: EdgeInsets.zero,
-                                          title:
-                                              Text('별도 사용 (ROOT 추가 인증)'),
+                                          title: Text('별도 사용 (ROOT 추가 인증)'),
                                           value: 'separate',
                                         ),
                                       ],

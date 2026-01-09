@@ -1097,9 +1097,9 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
     final micStatus = await Permission.microphone.request();
     if (!micStatus.isGranted) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('마이크 권한이 필요합니다')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('마이크 권한이 필요합니다')));
       }
       _speechAvailable = false;
       return false;
@@ -1124,9 +1124,9 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
           setState(() {
             _isVoiceListening = false;
           });
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('음성 인식 중 오류가 발생했습니다')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('음성 인식 중 오류가 발생했습니다')));
         },
       );
     } catch (e) {
@@ -1154,9 +1154,9 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
       _isVoiceListening = true;
       _voiceDraft = '';
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('말씀하세요… (예: 팽이버섯 2봉 냉장 내일)')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('말씀하세요… (예: 팽이버섯 2봉 냉장 내일)')));
 
     await _speech.listen(
       localeId: 'ko_KR',
@@ -1186,7 +1186,8 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
       if (parsed.name != null && parsed.name!.trim().isNotEmpty) {
         _nameController.text = parsed.name!;
       }
-      if (parsed.quantityText != null && parsed.quantityText!.trim().isNotEmpty) {
+      if (parsed.quantityText != null &&
+          parsed.quantityText!.trim().isNotEmpty) {
         _quantityController.text = parsed.quantityText!;
       }
       if (parsed.unit != null && parsed.unit!.trim().isNotEmpty) {
@@ -1211,9 +1212,9 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
       }
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('음성 입력 적용: $text')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('음성 입력 적용: $text')));
   }
 
   _UpsertVoiceParseResult _parseUpsertVoice(String input) {
@@ -1264,7 +1265,9 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
           final day = int.tryParse(md.group(2) ?? '');
           if (month != null && day != null) {
             var candidate = DateTime(dateOnly.year, month, day);
-            if (candidate.isBefore(dateOnly.subtract(const Duration(days: 1)))) {
+            if (candidate.isBefore(
+              dateOnly.subtract(const Duration(days: 1)),
+            )) {
               candidate = DateTime(dateOnly.year + 1, month, day);
             }
             expiry = candidate;
@@ -1276,9 +1279,10 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
     String? qtyText;
     String? unit;
     const unitPattern =
-      r'(개|봉지|봉|팩|통|단|모|장|판|박스|상자|병|캔|그램|그람|g|kg|킬로|킬로그램|ml|밀리리터|l|리터)';
-    final qtyMatch = RegExp(r'(\d+(?:[\.,]\d+)?)\s*' + unitPattern)
-        .firstMatch(lower);
+        r'(개|봉지|봉|팩|통|단|모|장|판|박스|상자|병|캔|그램|그람|g|kg|킬로|킬로그램|ml|밀리리터|l|리터)';
+    final qtyMatch = RegExp(
+      r'(\d+(?:[\.,]\d+)?)\s*' + unitPattern,
+    ).firstMatch(lower);
     if (qtyMatch != null) {
       qtyText = (qtyMatch.group(1) ?? '').replaceAll(',', '.');
       unit = _normalizeUnit(qtyMatch.group(2));
@@ -1302,10 +1306,19 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
     }
     candidateName = candidateName
         .replaceAll(RegExp(r'(오늘|내일|모레|유통기한|기한|까지|후|뒤)'), ' ')
-        .replaceAll(RegExp(r'(등록|추가|저장|입력|해줘|해주세요|할래|해|좀|우리집|식재료|생활용품|품목|재료)'), ' ');
+        .replaceAll(
+          RegExp(r'(등록|추가|저장|입력|해줘|해주세요|할래|해|좀|우리집|식재료|생활용품|품목|재료)'),
+          ' ',
+        );
     candidateName = candidateName.replaceAll(RegExp(r'\d{1,9}\s*원'), ' ');
-    candidateName = candidateName.replaceAll(RegExp(r'(\d{1,3})\s*일\s*(후|뒤)'), ' ');
-    candidateName = candidateName.replaceAll(RegExp(r'(\d{1,2})\s*월\s*(\d{1,2})\s*일'), ' ');
+    candidateName = candidateName.replaceAll(
+      RegExp(r'(\d{1,3})\s*일\s*(후|뒤)'),
+      ' ',
+    );
+    candidateName = candidateName.replaceAll(
+      RegExp(r'(\d{1,2})\s*월\s*(\d{1,2})\s*일'),
+      ' ',
+    );
     if (qtyMatch != null) {
       candidateName = candidateName.replaceAll(qtyMatch.group(0) ?? '', ' ');
     }
@@ -1662,10 +1675,11 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
     }
 
     if (_importQueue.isEmpty) {
-      final message = await FeedbackService.getFoodExpirySavedMessageWithTemplate(
-        itemName: name,
-        expiryDate: effective,
-      );
+      final message =
+          await FeedbackService.getFoodExpirySavedMessageWithTemplate(
+            itemName: name,
+            expiryDate: effective,
+          );
       if (!mounted) return;
       SnackbarUtils.showSuccess(context, message);
     }
@@ -2089,6 +2103,7 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
     );
   }
 }
+
 class _FoodExpiryItemsScreen extends StatefulWidget {
   final Future<void> Function(BuildContext, {FoodExpiryItem? existing})?
   onUpsert;

@@ -253,7 +253,17 @@ train ([치즈](FoodExpiryItemName) [토요일까지](ExpiryPhrase) 등록해) {
   route: UpsertFoodExpiryItem
 }
 
+train ([우유](FoodExpiryItemName) [토까지](ExpiryPhrase) 등록해) {
+  goal: UpsertFoodExpiryItem
+  route: UpsertFoodExpiryItem
+}
+
 train ([요거트](FoodExpiryItemName) [일요일까지](ExpiryPhrase) 등록해) {
+  goal: UpsertFoodExpiryItem
+  route: UpsertFoodExpiryItem
+}
+
+train ([치즈](FoodExpiryItemName) [일까지](ExpiryPhrase) 등록해) {
   goal: UpsertFoodExpiryItem
   route: UpsertFoodExpiryItem
 }

@@ -11,7 +11,6 @@ Android 기기에서 Google Assistant를 통해 SmartLedger를 음성으로 제�
 ### 3. Apple Siri (App Intents) - iOS 16+
 iPhone/iPad에서 Siri를 통해 SmartLedger를 음성으로 제어할 수 있습니다.
 
----
 
 ## 🎤 지원되는 음성 명령
 
@@ -30,6 +29,9 @@ iPhone/iPad에서 Siri를 통해 SmartLedger를 음성으로 제어할 수 있�
 "시리야, SmartLedger 지출 기록"
 "시리야, SmartLedger에서 지출 추가"
 ```
+
+관련 정책(데이터 접근/보관 기준):
+- [VOICE_ASSISTANT_DATA_ACCESS_POLICY.md](VOICE_ASSISTANT_DATA_ACCESS_POLICY.md)
 
 ### 반품/환불 입력
 ```
@@ -182,6 +184,8 @@ smartledger://nav/open?route=/food/expiry&intent=upsert&name=우유&healthTags=�
 - "우유 주말까지 등록해"
 - "치즈 토요일까지 등록해"
 - "요거트 일요일까지 등록해"
+- "우유 토까지 등록해"
+- "치즈 일까지 등록해"
 
 카테고리 값 예시(앱 선택지 기준)
 

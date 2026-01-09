@@ -1,0 +1,199 @@
+// SmartLedger Bixby Capsule - Concepts
+// 거래 유형, 금액, 상품명 등의 개념 정의
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Primitives
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+decimal (TransactionAmount) {
+  description (거래 금액)
+  min (0)
+}
+
+text (TransactionDescription) {
+  description (상품명 또는 거래 설명)
+}
+
+text (CategoryName) {
+  description (카테고리 이름)
+}
+
+enum (TransactionType) {
+  description (거래 유형)
+  symbol (expense) { description (지출) }
+  symbol (income) { description (수입) }
+  symbol (savings) { description (저축) }
+}
+
+enum (FeatureType) {
+  description (기능 유형)
+  symbol (dashboard) { description (대시보드) }
+  symbol (food_expiry) { description (유통기한) }
+  symbol (food_expiry_upsert) { description (식재료 등록) }
+  symbol (shopping_cart) { description (장바구니) }
+  symbol (shopping_prep) { description (쇼핑준비) }
+  symbol (assets) { description (자산) }
+  symbol (recipe) { description (레시피) }
+  symbol (transaction_add) { description (지출입력) }
+  symbol (transaction_add_income) { description (수입입력) }
+  symbol (transaction_add_detailed) { description (상세입력) }
+  symbol (daily_transactions) { description (일일내역) }
+  symbol (monthly_stats) { description (월간통계) }
+  symbol (spending_analysis) { description (소비분석) }
+  symbol (card_discount_stats) { description (카드할인통계) }
+  symbol (points_motivation_stats) { description (포인트통계) }
+  symbol (savings_plan) { description (저축플랜) }
+  symbol (emergency_fund) { description (비상금) }
+  symbol (quick_stock) { description (빠른재고차감) }
+  symbol (consumables) { description (소모품) }
+  symbol (consumable_inventory) { description (재고목록) }
+  symbol (calendar) { description (캘린더) }
+  symbol (settings) { description (설정) }
+  symbol (backup) { description (백업) }
+  symbol (trash) { description (휴지통) }
+  symbol (voice_shortcuts) { description (음성단축키) }
+  symbol (voice_dashboard) { description (음성대시보드) }
+}
+
+// 재고 관련 개념
+text (ProductName) {
+  description (상품명)
+}
+
+decimal (StockAmount) {
+  description (재고 수량)
+  min (0)
+}
+
+text (StockUnit) {
+  description (재고 단위 - 개, 봉, 판 등)
+}
+
+// 유통기한(식재료/생활용품) 등록 입력
+text (FoodExpiryItemName) {
+  description (등록할 품목명)
+}
+
+decimal (FoodExpiryItemQuantity) {
+  description (등록할 수량)
+  min (0)
+}
+
+text (FoodExpiryItemUnit) {
+  description (등록 단위)
+}
+
+text (StorageLocationName) {
+  description (보관 위치 - 냉장/냉동/실온/팬트리)
+}
+
+decimal (ExpiryDays) {
+  description (유통기한까지 남은 일수)
+  min (0)
+}
+
+decimal (ItemPrice) {
+  description (가격)
+  min (0)
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Structures
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+structure (Transaction) {
+  description (거래 정보)
+  property (type) {
+    type (TransactionType)
+    min (Required)
+  }
+  property (amount) {
+    type (TransactionAmount)
+    min (Optional)
+  }
+  property (description) {
+    type (TransactionDescription)
+    min (Optional)
+  }
+  property (category) {
+    type (CategoryName)
+    min (Optional)
+  }
+}
+
+structure (AppLaunchResult) {
+  description (앱 실행 결과)
+  property (success) {
+    type (core.Boolean)
+    min (Required)
+  }
+  property (deepLink) {
+    type (core.Text)
+    min (Required)
+  }
+  property (message) {
+    type (core.Text)
+    min (Optional)
+  }
+}
+
+// 거래 추가 미리보기 (확인 단계)
+structure (TransactionAddPreviewResult) {
+  description (거래 추가 미리보기)
+  property (type) {
+    type (TransactionType)
+    min (Required)
+  }
+  property (amount) {
+    type (TransactionAmount)
+    min (Optional)
+  }
+  property (description) {
+    type (TransactionDescription)
+    min (Optional)
+  }
+  property (category) {
+    type (CategoryName)
+    min (Optional)
+  }
+  property (message) {
+    type (core.Text)
+    min (Optional)
+  }
+}
+
+// 재고 조회 결과
+structure (StockCheckResult) {
+  description (재고 조회 결과)
+  property (productName) {
+    type (ProductName)
+    min (Required)
+  }
+  property (currentStock) {
+    type (StockAmount)
+    min (Required)
+  }
+  property (unit) {
+    type (StockUnit)
+    min (Required)
+  }
+  property (expiryDays) {
+    type (core.Integer)
+    min (Optional)
+    description (유통기한까지 남은 일수)
+  }
+  property (lastPrice) {
+    type (core.Integer)
+    min (Optional)
+    description (마지막 구매 가격)
+  }
+  property (location) {
+    type (core.Text)
+    min (Optional)
+    description (보관 위치)
+  }
+  property (deepLink) {
+    type (core.Text)
+    min (Required)
+  }
+}

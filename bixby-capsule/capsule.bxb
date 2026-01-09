@@ -1,0 +1,22 @@
+capsule {
+  id (smartledger.expense)
+  version (1.0.0)
+  format (3)
+  targets {
+    target (bixby-mobile-ko-KR)
+  }
+  
+  runtime-flags {
+    concepts-inherit-super-role-types (true)
+    modern-default-view-behavior (true)
+    use-input-views-for-selection (true)
+  }
+  
+  # Samsung Bixby Capsule for SmartLedger
+  # 
+  # Voice Commands:
+  # - "빅스비야, 스마트렛저에 5000원 커피 지출 기록해"
+  # - "빅스비야, 스마트렛저 대시보드 열어"
+  # - "빅스비야, 스마트렛저에서 유통기한 확인해"
+  # - "빅스비야, 스마트렛저로 수입 30만원 추가해"
+}

@@ -61,5 +61,24 @@
 	<string>현재 위치 기반 기능을 위해 앱 사용 중 위치 접근이 필요합니다.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>앱 보호를 위한 생체 인증(Face ID) 사용을 위해 필요합니다.</string>
+
+	<!-- URL Scheme for Deep Links (Siri, App Links) -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.example.smartledger</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>smartledger</string>
+			</array>
+		</dict>
+	</array>
+
+	<!-- Siri Support -->
+	<key>NSSiriUsageDescription</key>
+	<string>Siri를 통해 지출/수입 기록 및 가계부 기능을 사용하기 위해 필요합니다.</string>
 </dict>
 </plist>

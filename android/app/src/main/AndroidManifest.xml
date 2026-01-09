@@ -42,6 +42,27 @@
             <meta-data
                 android:name="io.flutter.embedding.android.NormalTheme"
                 android:resource="@style/NormalTheme" />
+            
+            <!-- Deep Link Intent Filter for App Actions -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="smartledger"
+                    android:host="transaction" />
+                <data
+                    android:scheme="smartledger"
+                    android:host="dashboard" />
+                <data
+                    android:scheme="smartledger"
+                    android:host="feature" />
+            </intent-filter>
+            
+            <!-- Shortcuts (Static + App Actions) -->
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
         </activity>
 
         <!-- Launcher aliases (icon themes) -->

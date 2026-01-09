@@ -62,6 +62,7 @@ class SavingsStatisticsService {
       usageDate: now,
       totalUsedPrice: totalUsedPrice,
       usedIngredientsJson: usedIngredientsJson,
+      isFromExistingInventory: isFromExistingInventory,
     );
     logs.value = [...logs.value, log];
     await _save();

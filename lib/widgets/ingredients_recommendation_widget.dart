@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import '../models/food_expiry_item.dart';
 import '../services/food_expiry_service.dart';
+import '../services/recipe_knowledge_service.dart';
 import '../utils/icon_catalog.dart';
 import '../utils/ingredients_recommendation_utils.dart';
 
@@ -19,6 +20,7 @@ class _IngredientsRecommendationWidgetState
     extends State<IngredientsRecommendationWidget> {
   List<FoodExpiryItem>? _recommendations;
   String? _nutritionAdvice;
+  List<MissingMainIngredientSuggestion>? _missingMain;
   bool _isLoading = true;
 
   @override
@@ -31,25 +33,28 @@ class _IngredientsRecommendationWidgetState
     try {
       final items = FoodExpiryService.instance.items.value;
 
+      await RecipeKnowledgeService.instance.loadData();
+
       // 금주 활용할 식재료
       final thisWeek = IngredientsRecommendationUtils.getThisWeekItems(items);
 
       // 가격 효율성 기반 추천
-      final optimized =
-          IngredientsRecommendationUtils.getOptimizedRecommendations(
-            thisWeek,
-            limit: 5,
-          );
+      final optimized = IngredientsRecommendationUtils.getOptimizedRecommendations(
+        thisWeek,
+        limit: 5,
+      );
 
       final advice = IngredientsRecommendationUtils.getNutritionAdvice(items);
+      final missingMain = RecipeKnowledgeService.instance
+          .suggestMissingMainIngredients(items);
 
-      if (mounted) {
-        setState(() {
-          _recommendations = optimized;
-          _nutritionAdvice = advice;
-          _isLoading = false;
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _recommendations = optimized;
+        _nutritionAdvice = advice;
+        _missingMain = missingMain;
+        _isLoading = false;
+      });
     } catch (_) {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -239,6 +244,60 @@ class _IngredientsRecommendationWidgetState
                 ),
               ),
             ),
+
+          // 주재료 추천
+          if (_missingMain != null && _missingMain!.isNotEmpty) ...[
+            const Divider(height: 1),
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.add_shopping_cart,
+                    size: 20,
+                    color: theme.colorScheme.primary,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '주재료가 없을 때 추천',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _missingMain!.length,
+              separatorBuilder: (context, index) => const Divider(height: 1),
+              itemBuilder: (context, index) {
+                final s = _missingMain![index];
+                final hint = s.matchedPairings.isEmpty
+                    ? '집에 있는 재료와 잘 어울려요.'
+                    : '집에 있는 재료: ${s.matchedPairings.take(2).join(', ')}';
+
+                return ListTile(
+                  title: Text(
+                    s.primaryName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  subtitle: Text(
+                    hint,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                );
+              },
+            ),
+          ],
         ],
       ),
     );

@@ -1,0 +1,47 @@
+result-view {
+  match: AppLaunchResult
+
+  message {
+    template ("#{value(this.message)}")
+  }
+
+  render {
+    layout {
+      section {
+        content {
+          paragraph {
+            value ("#{value(this.message)}")
+            style (Title_L)
+          }
+        }
+      }
+      
+      section {
+        content {
+          cell-card {
+            slot2 {
+              content {
+                single-line {
+                  text {
+                    value ("딥링크: #{value(this.deepLink)}")
+                    style (Detail_M_Soft)
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  // Open the app with deep link
+  conversation-drivers {
+    if (exists(this.deepLink)) {
+      conversation-driver {
+        template("앱 열기")
+        // Note: Actual deep link launch happens via result handler
+      }
+    }
+  }
+}

@@ -1,0 +1,155 @@
+result-view {
+  match: StockCheckResult
+
+  message {
+    if (this.currentStock > 0) {
+      if (exists(this.expiryDays)) {
+        if (this.expiryDays <= 3) {
+          template ("#{value(this.productName)}이(가) #{value(this.currentStock)}#{value(this.unit)} 남았어요. ⚠️ 유통기한이 #{value(this.expiryDays)}일 남았으니 빨리 드세요!")
+        } else {
+          template ("#{value(this.productName)}이(가) #{value(this.currentStock)}#{value(this.unit)} 남았어요. 유통기한 #{value(this.expiryDays)}일 남았습니다.")
+        }
+      } else {
+        template ("#{value(this.productName)}이(가) #{value(this.currentStock)}#{value(this.unit)} 남았어요.")
+      }
+    } else {
+      template ("#{value(this.productName)}이(가) 없어요. 장바구니에 추가할까요?")
+    }
+  }
+
+  render {
+    layout {
+      // 상품명 헤더
+      section {
+        content {
+          paragraph {
+            value ("#{value(this.productName)}")
+            style (Title_XL)
+          }
+        }
+      }
+      
+      // 재고 정보 카드
+      section {
+        title ("재고 현황")
+        content {
+          cell-card {
+            slot1 {
+              image {
+                url ("/images/stock_icon.png")
+                shape (Circle)
+              }
+            }
+            slot2 {
+              content {
+                order (PrimarySecondary)
+                primary ("현재 재고")
+                secondary ("#{value(this.currentStock)} #{value(this.unit)}")
+              }
+            }
+          }
+        }
+      }
+      
+      // 유통기한 정보 (있을 경우)
+      if (exists(this.expiryDays)) {
+        section {
+          title ("유통기한")
+          content {
+            cell-card {
+              slot1 {
+                image {
+                  if (this.expiryDays <= 3) {
+                    url ("/images/warning_icon.png")
+                  } else {
+                    url ("/images/calendar_icon.png")
+                  }
+                  shape (Circle)
+                }
+              }
+              slot2 {
+                content {
+                  order (PrimarySecondary)
+                  if (this.expiryDays <= 0) {
+                    primary ("유통기한 지남!")
+                  } else-if (this.expiryDays <= 3) {
+                    primary ("#{value(this.expiryDays)}일 남음 ⚠️")
+                  } else {
+                    primary ("#{value(this.expiryDays)}일 남음")
+                  }
+                  secondary ("빨리 소비해주세요")
+                }
+              }
+            }
+          }
+        }
+      }
+      
+      // 마지막 구매 가격 (있을 경우)
+      if (exists(this.lastPrice)) {
+        section {
+          title ("마지막 구매 정보")
+          content {
+            cell-card {
+              slot1 {
+                image {
+                  url ("/images/price_icon.png")
+                  shape (Circle)
+                }
+              }
+              slot2 {
+                content {
+                  order (PrimarySecondary)
+                  primary ("구매 가격")
+                  secondary ("#{value(this.lastPrice)}원")
+                }
+              }
+            }
+          }
+        }
+      }
+      
+      // 보관 위치 (있을 경우)
+      if (exists(this.location)) {
+        section {
+          title ("보관 위치")
+          content {
+            single-line {
+              text {
+                value ("📍 #{value(this.location)}")
+                style (Detail_L)
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  // 후속 액션 버튼
+  conversation-drivers {
+    // 재고가 있으면 사용 옵션 제공
+    if (this.currentStock > 0) {
+      // 컨텍스트 의존도를 낮추기 위해 상품명을 포함한 발화를 제안
+      conversation-driver {
+        template ("#{value(this.productName)} 전량 사용")
+      }
+      conversation-driver {
+        template ("#{value(this.productName)} 다 썼어")
+      }
+      conversation-driver {
+        template ("사용했어")
+      }
+      conversation-driver {
+        template ("전량 사용")
+      }
+    }
+    
+    // 재고가 없거나 적으면 장바구니 추가
+    if (this.currentStock <= 1) {
+      conversation-driver {
+        template ("장바구니에 추가")
+      }
+    }
+  }
+}

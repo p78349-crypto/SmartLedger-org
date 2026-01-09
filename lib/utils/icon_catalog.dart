@@ -57,6 +57,8 @@ class IconCatalog {
   static const IconData cloudQueue = Icons.cloud_queue;
   static const IconData acUnit = Icons.ac_unit;
   static const IconData history = Icons.history;
+  static const IconData mic = Icons.mic;
+  static const IconData stopCircle = Icons.stop_circle;
   static const IconData autoAwesome = Icons.auto_awesome;
   static const IconData barChart = Icons.bar_chart;
   static const IconData showChart = Icons.show_chart;

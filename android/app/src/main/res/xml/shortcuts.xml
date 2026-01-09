@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Google App Actions Shortcuts for SmartLedger
+  
+  Supported voice commands:
+  - "Hey Google, add expense in SmartLedger"
+  - "Hey Google, record 5000원 coffee expense in SmartLedger"
+  - "OK Google, show my spending in SmartLedger"
+  - "OK Google, open SmartLedger dashboard"
+-->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <!-- Static Shortcuts (long-press launcher icon) -->
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    
+    <shortcut
+        android:shortcutId="add_expense"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_add"
+        android:shortcutShortLabel="@string/shortcut_add_expense_short"
+        android:shortcutLongLabel="@string/shortcut_add_expense_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.example.smartledger"
+            android:targetClass="com.example.smartledger.MainActivity"
+            android:data="smartledger://transaction/add?type=expense" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="add_income"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_income"
+        android:shortcutShortLabel="@string/shortcut_add_income_short"
+        android:shortcutLongLabel="@string/shortcut_add_income_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.example.smartledger"
+            android:targetClass="com.example.smartledger.MainActivity"
+            android:data="smartledger://transaction/add?type=income" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="view_dashboard"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_dashboard"
+        android:shortcutShortLabel="@string/shortcut_dashboard_short"
+        android:shortcutLongLabel="@string/shortcut_dashboard_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.example.smartledger"
+            android:targetClass="com.example.smartledger.MainActivity"
+            android:data="smartledger://dashboard" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <!-- App Actions (Google Assistant Integration) -->
+    <!-- Built-In Intents (BII) for Finance Apps -->
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+
+    <!-- 
+      CREATE_MONEY_TRANSFER (지출/수입 기록)
+      "Hey Google, add 5000원 expense for coffee in SmartLedger"
+      "OK Google, record grocery expense 15000원 in SmartLedger"
+    -->
+    <capability android:name="actions.intent.CREATE_MONEY_TRANSFER">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.example.smartledger"
+            android:targetClass="com.example.smartledger.MainActivity">
+            <parameter
+                android:name="moneyTransfer.amount.value"
+                android:key="amount" />
+            <parameter
+                android:name="moneyTransfer.amount.currencyCode"
+                android:key="currency" />
+            <parameter
+                android:name="moneyTransfer.moneyTransferDestination.name"
+                android:key="description" />
+            <url-template android:value="smartledger://transaction/add?type=expense&amp;amount={amount}&amp;currency={currency}&amp;description={description}" />
+        </intent>
+    </capability>
+
+    <!-- 
+      GET_ACCOUNT (잔액/대시보드 조회)
+      "Hey Google, show my balance in SmartLedger"
+      "OK Google, what's my spending this month in SmartLedger"
+    -->
+    <capability android:name="actions.intent.GET_ACCOUNT">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.example.smartledger"
+            android:targetClass="com.example.smartledger.MainActivity">
+            <url-template android:value="smartledger://dashboard" />
+        </intent>
+    </capability>
+
+    <!-- 
+      OPEN_APP_FEATURE (특정 기능 열기)
+      "Hey Google, open expense tracker in SmartLedger"
+      "OK Google, show food expiry list in SmartLedger"
+    -->
+    <capability android:name="actions.intent.OPEN_APP_FEATURE">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.example.smartledger"
+            android:targetClass="com.example.smartledger.MainActivity">
+            <parameter
+                android:name="feature"
+                android:key="feature" />
+            <url-template android:value="smartledger://feature/{feature}" />
+        </intent>
+        <!-- Inline inventory for feature names -->
+        <shortcut-fulfillment>
+            <parameter android:name="feature">
+                <entity-set-reference android:entitySetId="AppFeatures" />
+            </parameter>
+        </shortcut-fulfillment>
+    </capability>
+
+    <!-- Feature inventory for OPEN_APP_FEATURE -->
+    <entity-set android:entitySetId="AppFeatures">
+        <entity
+            android:name="지출입력"
+            android:alternateName="@array/expense_synonyms"
+            android:identifier="transaction_add" />
+        <entity
+            android:name="수입입력"
+            android:alternateName="@array/income_synonyms"
+            android:identifier="income_add" />
+        <entity
+            android:name="대시보드"
+            android:alternateName="@array/dashboard_synonyms"
+            android:identifier="dashboard" />
+        <entity
+            android:name="유통기한"
+            android:alternateName="@array/expiry_synonyms"
+            android:identifier="food_expiry" />
+        <entity
+            android:name="장바구니"
+            android:alternateName="@array/shopping_synonyms"
+            android:identifier="shopping_cart" />
+        <entity
+            android:name="자산"
+            android:alternateName="@array/asset_synonyms"
+            android:identifier="assets" />
+        <entity
+            android:name="레시피"
+            android:alternateName="@array/recipe_synonyms"
+            android:identifier="recipe" />
+    </entity-set>
+
+</shortcuts>

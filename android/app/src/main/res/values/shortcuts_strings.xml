@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Static Shortcut Labels -->
+    <string name="shortcut_add_expense_short">지출 추가</string>
+    <string name="shortcut_add_expense_long">새 지출 거래 입력</string>
+    <string name="shortcut_add_income_short">수입 추가</string>
+    <string name="shortcut_add_income_long">새 수입 거래 입력</string>
+    <string name="shortcut_dashboard_short">대시보드</string>
+    <string name="shortcut_dashboard_long">대시보드 열기</string>
+    
+    <!-- App Actions Feature Synonyms (Korean) -->
+    <string-array name="expense_synonyms">
+        <item>지출</item>
+        <item>지출 입력</item>
+        <item>expense</item>
+        <item>add expense</item>
+        <item>기록</item>
+        <item>결제</item>
+        <item>소비</item>
+    </string-array>
+    
+    <string-array name="income_synonyms">
+        <item>수입</item>
+        <item>수입 입력</item>
+        <item>income</item>
+        <item>add income</item>
+        <item>월급</item>
+        <item>입금</item>
+    </string-array>
+    
+    <string-array name="dashboard_synonyms">
+        <item>대시보드</item>
+        <item>dashboard</item>
+        <item>홈</item>
+        <item>home</item>
+        <item>메인</item>
+        <item>요약</item>
+        <item>현황</item>
+    </string-array>
+    
+    <string-array name="expiry_synonyms">
+        <item>유통기한</item>
+        <item>expiry</item>
+        <item>식재료</item>
+        <item>냉장고</item>
+        <item>food</item>
+        <item>재료</item>
+    </string-array>
+    
+    <string-array name="shopping_synonyms">
+        <item>장바구니</item>
+        <item>shopping</item>
+        <item>쇼핑</item>
+        <item>구매목록</item>
+        <item>cart</item>
+    </string-array>
+    
+    <string-array name="asset_synonyms">
+        <item>자산</item>
+        <item>assets</item>
+        <item>재산</item>
+        <item>잔액</item>
+        <item>balance</item>
+        <item>통장</item>
+    </string-array>
+    
+    <string-array name="recipe_synonyms">
+        <item>레시피</item>
+        <item>recipe</item>
+        <item>요리</item>
+        <item>추천</item>
+        <item>메뉴</item>
+    </string-array>
+</resources>

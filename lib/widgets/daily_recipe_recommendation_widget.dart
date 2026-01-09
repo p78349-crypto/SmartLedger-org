@@ -22,6 +22,29 @@ class _DailyRecipeRecommendationWidgetState
   RecipeMatch? _recommendedRecipe;
   bool _isLoading = true;
 
+  Color _chipBackgroundColor(ThemeData theme, int daysLeft) {
+    final scheme = theme.colorScheme;
+    if (daysLeft <= 0) return scheme.errorContainer;
+    if (daysLeft == 1) return scheme.tertiaryContainer;
+    return scheme.secondaryContainer;
+  }
+
+  Color _badgeBackgroundColor(ThemeData theme, int percentage) {
+    final scheme = theme.colorScheme;
+    if (percentage >= 100) return scheme.primary;
+    if (percentage >= 80) return scheme.secondary;
+    if (percentage >= 60) return scheme.tertiary;
+    return scheme.error;
+  }
+
+  Color _badgeForegroundColor(ThemeData theme, int percentage) {
+    final scheme = theme.colorScheme;
+    if (percentage >= 100) return scheme.onPrimary;
+    if (percentage >= 80) return scheme.onSecondary;
+    if (percentage >= 60) return scheme.onTertiary;
+    return scheme.onError;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -151,11 +174,7 @@ class _DailyRecipeRecommendationWidgetState
                         color: theme.colorScheme.onPrimaryContainer,
                       ),
                     ),
-                    backgroundColor: daysLeft == 0
-                        ? Colors.red.shade100
-                        : daysLeft == 1
-                        ? Colors.orange.shade100
-                        : Colors.yellow.shade100,
+                    backgroundColor: _chipBackgroundColor(theme, daysLeft),
                     side: BorderSide.none,
                   );
                 }).toList(),
@@ -166,7 +185,9 @@ class _DailyRecipeRecommendationWidgetState
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.5),
+                  color: theme.colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.5,
+                  ),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Column(
@@ -190,7 +211,8 @@ class _DailyRecipeRecommendationWidgetState
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: _getMatchColor(
+                            color: _badgeBackgroundColor(
+                              theme,
                               _recommendedRecipe!.matchPercentage,
                             ),
                             borderRadius: BorderRadius.circular(6),
@@ -198,7 +220,10 @@ class _DailyRecipeRecommendationWidgetState
                           child: Text(
                             '${_recommendedRecipe!.matchPercentage}% 준비됨',
                             style: theme.textTheme.labelSmall?.copyWith(
-                              color: Colors.white,
+                              color: _badgeForegroundColor(
+                                theme,
+                                _recommendedRecipe!.matchPercentage,
+                              ),
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -222,13 +247,5 @@ class _DailyRecipeRecommendationWidgetState
         ),
       ),
     );
-  }
-
-  /// 매칭 비율에 따른 색상
-  Color _getMatchColor(int percentage) {
-    if (percentage >= 100) return Colors.green;
-    if (percentage >= 80) return Colors.lightGreen;
-    if (percentage >= 60) return Colors.amber;
-    return Colors.orange;
   }
 }

@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'application_settings_screen.dart';
+import 'voice_shortcuts_screen.dart';
 import '_verify_current_user_password_dialog.dart';
 import '_verify_current_user_pin_dialog.dart';
 import '../services/auth_service.dart';
@@ -617,6 +618,20 @@ class _SettingsScreenState extends State<SettingsScreen>
                       Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (_) => const ApplicationSettingsScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  _buildSettingsCard(
+                    context,
+                    icon: Icons.mic_outlined,
+                    title: '음성 단축어',
+                    subtitle: 'Bixby, Siri, Google Assistant 단축어 설정',
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const VoiceShortcutsScreen(),
                         ),
                       );
                     },

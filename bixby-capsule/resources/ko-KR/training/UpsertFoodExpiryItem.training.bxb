@@ -1,0 +1,24 @@
+train ([팽이버섯](FoodExpiryItemName) 등록해) {
+  goal: UpsertFoodExpiryItem
+  route: UpsertFoodExpiryItem
+}
+
+train ([팽이버섯](FoodExpiryItemName) [2](FoodExpiryItemQuantity) [봉](FoodExpiryItemUnit) 등록해) {
+  goal: UpsertFoodExpiryItem
+  route: UpsertFoodExpiryItem
+}
+
+train ([팽이버섯](FoodExpiryItemName) [2](FoodExpiryItemQuantity) [봉](FoodExpiryItemUnit) [냉장](StorageLocationName) 등록해) {
+  goal: UpsertFoodExpiryItem
+  route: UpsertFoodExpiryItem
+}
+
+train ([팽이버섯](FoodExpiryItemName) [2](FoodExpiryItemQuantity) [봉](FoodExpiryItemUnit) [냉장](StorageLocationName) [3](ExpiryDays)일 후 등록해) {
+  goal: UpsertFoodExpiryItem
+  route: UpsertFoodExpiryItem
+}
+
+train ([세제](FoodExpiryItemName) [1](FoodExpiryItemQuantity) [개](FoodExpiryItemUnit) [팬트리](StorageLocationName) [30](ExpiryDays)일 후 등록해) {
+  goal: UpsertFoodExpiryItem
+  route: UpsertFoodExpiryItem
+}

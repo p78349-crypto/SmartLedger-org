@@ -1,0 +1,89 @@
+train (지출 기록해) {
+  goal: AddTransaction
+  route: AddTransaction
+}
+
+train (지출 입력) {
+  goal: AddTransaction
+  route: AddTransaction
+}
+
+train (소비 기록) {
+  goal: AddTransaction
+  route: AddTransaction
+}
+
+train ([오늘](viv.time.DateTimeExpression) 지출 [5000](viv.core.Integer:TransactionAmount)원 기록해) {
+  goal: AddTransaction
+  route: AddTransaction
+}
+
+train (지출 [만](viv.core.Integer:TransactionAmount)원 추가) {
+  goal: AddTransaction
+  route: AddTransaction
+}
+
+train ([삼만](viv.core.Integer:TransactionAmount)원 지출) {
+  goal: AddTransaction
+  route: AddTransaction
+}
+
+train (수입 기록해) {
+  goal: AddTransaction
+  route: AddTransaction
+}
+
+train (수입 입력) {
+  goal: AddTransaction
+  route: AddTransaction
+}
+
+train (월급 [이백만](viv.core.Integer:TransactionAmount)원 들어왔어) {
+  goal: AddTransaction
+  route: AddTransaction
+}
+
+train (급여 기록) {
+  goal: AddTransaction
+  route: AddTransaction
+}
+
+train (저축 기록) {
+  goal: AddTransaction
+  route: AddTransaction
+}
+
+train ([오만](viv.core.Integer:TransactionAmount)원 저축했어) {
+  goal: AddTransaction
+  route: AddTransaction
+}
+
+train (적금 [삼십만](viv.core.Integer:TransactionAmount)원 넣었어) {
+  goal: AddTransaction
+  route: AddTransaction
+}
+
+train ([커피](raw.description) [5천](viv.core.Integer:TransactionAmount)원 지출) {
+  goal: AddTransaction
+  route: AddTransaction
+}
+
+train ([커피](raw.description) [5000](viv.core.Integer:TransactionAmount)원 지출 기록해) {
+  goal: AddTransaction
+  route: AddTransaction
+}
+
+train ([월급](raw.description) [3000000](viv.core.Integer:TransactionAmount)원 수입 기록해) {
+  goal: AddTransaction
+  route: AddTransaction
+}
+
+train ([점심](raw.description) [만이천](viv.core.Integer:TransactionAmount)원 기록) {
+  goal: AddTransaction
+  route: AddTransaction
+}
+
+train ([대중교통](raw.description) 비용 기록해) {
+  goal: AddTransaction
+  route: AddTransaction
+}

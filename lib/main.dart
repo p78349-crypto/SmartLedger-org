@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'navigation/app_router.dart';
+import 'navigation/deep_link_handler.dart';
 import 'navigation/global_navigator_key.dart';
 import 'screens/launch_screen.dart';
 import 'services/account_service.dart';
@@ -135,6 +136,12 @@ Future<void> main() async {
         } catch (_) {
           // ignore
         }
+      }
+      // Initialize deep link handler for App Actions / Bixby integration
+      try {
+        await DeepLinkHandler.instance.init();
+      } catch (e) {
+        debugPrint('DeepLinkHandler init failed: $e');
       }
       runApp(const MyApp());
     },

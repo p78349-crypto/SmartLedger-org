@@ -1,0 +1,59 @@
+train (가계부 열어) {
+  goal: OpenDashboard
+  route: OpenDashboard
+}
+
+train (대시보드 열어) {
+  goal: OpenDashboard
+  route: OpenDashboard
+}
+
+train (스마트렛저 열어) {
+  goal: OpenDashboard
+  route: OpenDashboard
+}
+
+train (지출 현황 보여줘) {
+  goal: OpenDashboard
+  route: OpenDashboard
+}
+
+train (이번달 지출 확인) {
+  goal: OpenDashboard
+  route: OpenDashboard
+}
+
+train (소비 내역 보여줘) {
+  goal: OpenDashboard
+  route: OpenDashboard
+}
+
+train (가계부 확인) {
+  goal: OpenDashboard
+  route: OpenDashboard
+}
+
+train (수입지출 요약) {
+  goal: OpenDashboard
+  route: OpenDashboard
+}
+
+train (재정 현황 보여줘) {
+  goal: OpenDashboard
+  route: OpenDashboard
+}
+
+train (오늘 얼마 썼어) {
+  goal: OpenDashboard
+  route: OpenDashboard
+}
+
+train (이번주 지출 얼마야) {
+  goal: OpenDashboard
+  route: OpenDashboard
+}
+
+train (잔액 확인) {
+  goal: OpenDashboard
+  route: OpenDashboard
+}

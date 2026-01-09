@@ -1,0 +1,139 @@
+train ([유통기한](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([식재료](FeatureType) 관리 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([식재료 등록](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([생활용품 등록](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([냉장고](FeatureType) 확인) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([장바구니](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([쇼핑목록](FeatureType) 보여줘) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train (장볼것 확인) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([자산](FeatureType) 현황 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([통장](FeatureType) 확인) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train (재산 현황 보여줘) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([레시피](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([요리](FeatureType) 메뉴 추천해줘) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train (뭐 해먹지) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([설정](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([백업](FeatureType) 화면 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([휴지통](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([월간통계](FeatureType) 보여줘) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([소비분석](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([캘린더](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([저축플랜](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([비상금](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([쇼핑준비](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([재고목록](FeatureType) 확인) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([음성단축키](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train (오늘 뭐 먹을까) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([지출입력](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train (새 지출 추가하러 가기) {
+  goal: OpenFeature
+  route: OpenFeature
+}

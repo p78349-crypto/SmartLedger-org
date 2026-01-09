@@ -1,0 +1,202 @@
+// UseStock 트레이닝 데이터
+// 재고 차감 발화 예시
+
+train ([팽이버섯](~ProductName) [1](~StockAmount)[봉](~StockUnit) 썼어) {
+  goal: UseStock
+  route: UseStock
+}
+
+train ([양파](~ProductName) [2](~StockAmount)[개](~StockUnit) 사용했어) {
+  goal: UseStock
+  route: UseStock
+}
+
+train ([달걀](~ProductName) [3](~StockAmount)[개](~StockUnit) 썼어) {
+  goal: UseStock
+  route: UseStock
+}
+
+train ([계란](~ProductName) [한](~StockAmount)[판](~StockUnit) 다 썼어) {
+  goal: UseStock
+  route: UseStock
+}
+
+train ([우유](~ProductName) [1](~StockAmount)[팩](~StockUnit) 먹었어) {
+  goal: UseStock
+  route: UseStock
+}
+
+train ([마늘](~ProductName) [1](~StockAmount)[통](~StockUnit) 사용) {
+  goal: UseStock
+  route: UseStock
+}
+
+train ([두부](~ProductName) [1](~StockAmount)[모](~StockUnit) 썼어) {
+  goal: UseStock
+  route: UseStock
+}
+
+train ([대파](~ProductName) [반](~StockAmount)[단](~StockUnit) 사용했어) {
+  goal: UseStock
+  route: UseStock
+}
+
+train ([당근](~ProductName) [1](~StockAmount)[개](~StockUnit) 썼어) {
+  goal: UseStock
+  route: UseStock
+}
+
+train ([감자](~ProductName) [3](~StockAmount)[개](~StockUnit) 사용) {
+  goal: UseStock
+  route: UseStock
+}
+
+train ([소고기](~ProductName) [200](~StockAmount)[그램](~StockUnit) 썼어) {
+  goal: UseStock
+  route: UseStock
+}
+
+train ([삼겹살](~ProductName) [300](~StockAmount)[g](~StockUnit) 구웠어) {
+  goal: UseStock
+  route: UseStock
+}
+
+train ([치즈](~ProductName) [2](~StockAmount)[장](~StockUnit) 사용) {
+  goal: UseStock
+  route: UseStock
+}
+
+train ([라면](~ProductName) [1](~StockAmount)[개](~StockUnit) 끓였어) {
+  goal: UseStock
+  route: UseStock
+}
+
+train ([새송이버섯](~ProductName) [1](~StockAmount)[팩](~StockUnit) 썼어) {
+  goal: UseStock
+  route: UseStock
+}
+
+train ([닭고기](~ProductName) [500](~StockAmount)[g](~StockUnit) 요리했어) {
+  goal: UseStock
+  route: UseStock
+}
+
+// 수량 없이 기본 1개 차감
+train ([팽이버섯](~ProductName) 썼어) {
+  goal: UseStock
+  route: UseStock
+}
+
+train ([양파](~ProductName) 하나 썼어) {
+  goal: UseStock
+  route: UseStock
+}
+
+train ([달걀](~ProductName) 사용했어) {
+  goal: UseStock
+  route: UseStock
+}
+
+train ([우유](~ProductName) 마셨어) {
+  goal: UseStock
+  route: UseStock
+}
+
+train ([두부](~ProductName) 요리했어) {
+  goal: UseStock
+  route: UseStock
+}
+
+// 한국어 숫자 표현
+train ([달걀](~ProductName) [세](~StockAmount)[개](~StockUnit) 썼어) {
+  goal: UseStock
+  route: UseStock
+}
+
+train ([양파](~ProductName) [두](~StockAmount)[개](~StockUnit) 사용) {
+  goal: UseStock
+  route: UseStock
+}
+
+// 전량 사용
+train ([팽이버섯](~ProductName) 다 썼어) {
+  goal: UseStock
+  route: UseStock
+}
+
+train ([팽이버섯](~ProductName) 전량 사용) {
+  goal: UseStock
+  route: UseStock
+}
+
+train ([팽이버섯](~ProductName) 전부 썼어) {
+  goal: UseStock
+  route: UseStock
+}
+
+train ([팽이버섯](~ProductName) 모두 썼어) {
+  goal: UseStock
+  route: UseStock
+}
+
+train ([양파](~ProductName) 전량 사용) {
+  goal: UseStock
+  route: UseStock
+}
+
+train ([달걀](~ProductName) 전량 사용) {
+  goal: UseStock
+  route: UseStock
+}
+
+train ([우유](~ProductName) 전량 사용) {
+  goal: UseStock
+  route: UseStock
+}
+
+train ([우유](~ProductName) 다 마셨어) {
+  goal: UseStock
+  route: UseStock
+}
+
+// 재고 조회 직후 확인 응답 (컨텍스트에서 productName을 이어받아 전량 처리)
+train (응) {
+  goal: UseStock
+  route: UseStock
+}
+
+train (그래) {
+  goal: UseStock
+  route: UseStock
+}
+
+train (좋아) {
+  goal: UseStock
+  route: UseStock
+}
+
+train (전량 사용) {
+  goal: UseStock
+  route: UseStock
+}
+
+train (다 써) {
+  goal: UseStock
+  route: UseStock
+}
+
+// 빠른 재고 차감 화면 열기
+train (재고 차감) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train (빠른 재고 차감) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train (재료 사용 기록) {
+  goal: OpenFeature
+  route: OpenFeature
+}

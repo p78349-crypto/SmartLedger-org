@@ -18,6 +18,7 @@ import '../services/food_expiry_service.dart';
 import '../services/recent_input_service.dart';
 import '../services/transaction_service.dart';
 import '../services/user_pref_service.dart';
+import '../services/category_keyword_service.dart';
 import '../theme/app_theme_seed_controller.dart';
 import '../utils/category_definitions.dart';
 import '../utils/currency_formatter.dart';
@@ -57,6 +58,7 @@ class TransactionAddScreen extends StatefulWidget {
   final bool confirmBeforeSave;
   final bool treatAsNew;
   final bool closeAfterSave;
+  final bool autoSubmit;
   const TransactionAddScreen({
     super.key,
     required this.accountName,
@@ -65,6 +67,7 @@ class TransactionAddScreen extends StatefulWidget {
     this.confirmBeforeSave = false,
     this.treatAsNew = false,
     this.closeAfterSave = false,
+    this.autoSubmit = false,
   });
 
   @override
@@ -73,6 +76,16 @@ class TransactionAddScreen extends StatefulWidget {
 
 class _TransactionAddScreenState extends State<TransactionAddScreen> {
   final GlobalKey<_NO1FormState> _formStateKey = GlobalKey<_NO1FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.autoSubmit) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        unawaited(_formStateKey.currentState?.triggerAutoSubmit());
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -286,6 +299,11 @@ class _NO1FormState extends State<NO1Form> {
   List<String> _recentPayments = [];
   List<String> _recentMemos = [];
 
+  Map<String, CategoryHint> _shoppingCategoryHintsNormalized = const {};
+  bool _shoppingCategoryHintsLoaded = false;
+  bool _userPickedCategory = false;
+  Timer? _autoCategoryDebounce;
+
   bool _recentInputsEnabled = true;
   bool _recentInputsAutofillEnabled = true;
   int _recentInputsMaxCount = _defaultMaxRecentInputs;
@@ -336,6 +354,10 @@ class _NO1FormState extends State<NO1Form> {
   bool _installedHardwareKeyboardHandler = false;
 
   bool get didSave => _didSaveAtLeastOnce;
+
+  Future<void> triggerAutoSubmit() async {
+    await _saveTransaction(skipConfirm: true);
+  }
 
   DateTime _dateOnly(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
 
@@ -410,6 +432,149 @@ class _NO1FormState extends State<NO1Form> {
   bool get _isEditing =>
       widget.initialTransaction != null && !widget.treatAsNew;
 
+  String _normalizeShoppingHintKey(String raw) {
+    var s = raw.trim().toLowerCase();
+    if (s.isEmpty) return '';
+
+    // Remove common promotion/multiplier patterns before stripping symbols.
+    // Examples: 1+1, 2 + 1, 3x2, 3×2
+    s = s.replaceAll(RegExp(r'\d+\s*[+×x]\s*\d+'), ' ');
+
+    // Collapse whitespace, then remove punctuation/symbols.
+    s = s.replaceAll(RegExp(r'\s+'), '');
+    s = s.replaceAll(RegExp(r'[^a-z0-9가-힣]'), '');
+
+    // Remove trailing size/unit/count patterns to match across variants.
+    // Examples: 900ml, 1l, 500g, 10kg, 2개, 10입, 1팩
+    s = s.replaceAll(
+      RegExp(
+        r'(\d+(?:\.\d+)?)(ml|l|kg|g|mg|개|입|팩|봉|병|캔|장|p|pcs|pc|box)$',
+      ),
+      '',
+    );
+
+    // Remove common Korean promotion tokens.
+    s = s.replaceAll(
+      RegExp(r'(행사|증정|무료|덤|할인|특가|세일)$'),
+      '',
+    );
+
+    return s;
+  }
+
+  Future<void> _loadShoppingCategoryHints() async {
+    if (_isEditing) return;
+    try {
+      var hints = await UserPrefService.getShoppingCategoryHints(
+        accountName: widget.accountName,
+      );
+      if (hints.isEmpty) {
+        await UserPrefService.bootstrapShoppingCategoryHintsFromTransactions(
+          accountName: widget.accountName,
+        );
+        hints = await UserPrefService.getShoppingCategoryHints(
+          accountName: widget.accountName,
+        );
+      }
+
+      final normalized = <String, CategoryHint>{};
+      for (final e in hints.entries) {
+        final k = _normalizeShoppingHintKey(e.key);
+        if (k.isEmpty) continue;
+        normalized[k] = e.value;
+      }
+
+      if (!mounted) return;
+      setState(() {
+        _shoppingCategoryHintsNormalized = normalized;
+        _shoppingCategoryHintsLoaded = true;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _shoppingCategoryHintsNormalized = const {};
+        _shoppingCategoryHintsLoaded = true;
+      });
+    }
+  }
+
+  CategoryHint? _findBestCategoryHint(String description) {
+    if (_shoppingCategoryHintsNormalized.isEmpty) return null;
+    final key = _normalizeShoppingHintKey(description);
+    if (key.isEmpty) return null;
+
+    final direct = _shoppingCategoryHintsNormalized[key];
+    if (direct != null) return direct;
+
+    CategoryHint? best;
+    var bestLen = 0;
+    for (final entry in _shoppingCategoryHintsNormalized.entries) {
+      final k = entry.key;
+      if (k.isEmpty) continue;
+      if (k.length <= bestLen) continue;
+      if (key.contains(k)) {
+        best = entry.value;
+        bestLen = k.length;
+      }
+    }
+    return best;
+  }
+
+  void _handleDescriptionChanged(String value) {
+    if (_isEditing) return;
+    if (_selectedType != TransactionType.expense) return;
+    if (_userPickedCategory) return;
+    if (!_shoppingCategoryHintsLoaded) return;
+
+    _autoCategoryDebounce?.cancel();
+    _autoCategoryDebounce = Timer(const Duration(milliseconds: 120), () {
+      if (!mounted) return;
+
+      final categoryMap = _categoryOptionsFor(_selectedType);
+      String? main;
+      String? sub;
+
+      // 1) Try user history hints first
+      final hint = _findBestCategoryHint(value);
+      if (hint != null) {
+        final hintMain = hint.mainCategory.trim();
+        if (hintMain.isNotEmpty &&
+            hintMain != _defaultCategory &&
+            categoryMap.containsKey(hintMain)) {
+          main = hintMain;
+          final hintSub = hint.subCategory?.trim() ?? '';
+          final allowedSubs = categoryMap[main] ?? const <String>[];
+          sub = (hintSub.isNotEmpty && allowedSubs.contains(hintSub))
+              ? hintSub
+              : null;
+        }
+      }
+
+      // 2) Fallback to keyword dictionary
+      if (main == null) {
+        final kwResult = CategoryKeywordService.instance.classify(value);
+        if (kwResult != null) {
+          final kwMain = kwResult.$1;
+          if (categoryMap.containsKey(kwMain)) {
+            main = kwMain;
+            final kwSub = kwResult.$2;
+            final allowedSubs = categoryMap[main] ?? const <String>[];
+            sub = (kwSub != null && allowedSubs.contains(kwSub)) ? kwSub : null;
+          }
+        }
+      }
+
+      if (main == null) return;
+      if (main == _selectedMainCategory && sub == _selectedSubCategory) return;
+
+      setState(() {
+        _selectedMainCategory = main!;
+        _selectedSubCategory = sub;
+      });
+      unawaited(_persistLastCategoryForType(_selectedType, main: main));
+    });
+  }
+
   // ...existing code...
   String _lastCategoryMainKeyFor(TransactionType type) =>
       '${_lastCategoryMainKeyPrefix}_${widget.accountName}_${type.name}';
@@ -480,6 +645,8 @@ class _NO1FormState extends State<NO1Form> {
     if (initial == null) {
       unawaited(_restoreLastCategoryForType(_selectedType));
     }
+
+    unawaited(_loadShoppingCategoryHints());
 
     unawaited(_loadRecentInputs());
     unawaited(_loadSortedCategories()); // Load sorted categories
@@ -729,6 +896,7 @@ class _NO1FormState extends State<NO1Form> {
 
   @override
   void dispose() {
+    _autoCategoryDebounce?.cancel();
     if (_installedHardwareKeyboardHandler) {
       HardwareKeyboard.instance.removeHandler(_handleHardwareKeyEvent);
     }
@@ -993,7 +1161,7 @@ class _NO1FormState extends State<NO1Form> {
     });
   }
 
-  Future<void> _saveTransaction() async {
+  Future<void> _saveTransaction({bool skipConfirm = false}) async {
     if (!_formKey.currentState!.validate()) return;
 
     final navigator = Navigator.of(context);
@@ -1078,7 +1246,7 @@ class _NO1FormState extends State<NO1Form> {
       if (!ok) return;
     }
 
-    if (widget.confirmBeforeSave) {
+    if (widget.confirmBeforeSave && !skipConfirm) {
       final isShoppingCategory = _isShoppingCategory(
         effectiveMainCategory,
         effectiveSubCategory,
@@ -1304,6 +1472,8 @@ class _NO1FormState extends State<NO1Form> {
         void resetForNextEntry() {
           setState(() {
             _suppressAmountAutoUpdate = true;
+
+            _userPickedCategory = false;
 
             _descController.clear();
             // _memoController.clear();
@@ -2184,6 +2354,7 @@ class _NO1FormState extends State<NO1Form> {
                     onSelected: (selected) {
                       if (!selected) return;
                       setState(() {
+                        _userPickedCategory = true;
                         _selectedMainCategory = cat;
                         _selectedSubCategory = null;
                       });
@@ -2232,6 +2403,7 @@ class _NO1FormState extends State<NO1Form> {
                 onSelected: (selected) {
                   if (!selected) return;
                   setState(() {
+                    _userPickedCategory = true;
                     _selectedSubCategory = sub;
                   });
                   unawaited(
@@ -2283,7 +2455,10 @@ class _NO1FormState extends State<NO1Form> {
         validator: (value) =>
             value == null || value.trim().isEmpty ? emptyMessage : null,
         onFieldSubmitted: onFieldSubmitted,
-        onChanged: (_) => setState(() {}),
+        onChanged: (v) {
+          _handleDescriptionChanged(v);
+          setState(() {});
+        },
         label: labelText,
         suffixIcon: IconButton(
           tooltip: '입력내용 불러오기',
@@ -2300,6 +2475,7 @@ class _NO1FormState extends State<NO1Form> {
               _descController.selection = TextSelection.fromPosition(
                 TextPosition(offset: v.length),
               );
+              _handleDescriptionChanged(v);
               setState(() {});
             },
             title: '상품명 입력내용 불러오기',

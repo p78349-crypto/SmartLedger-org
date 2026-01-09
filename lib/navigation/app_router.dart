@@ -71,6 +71,8 @@ import '../screens/transaction_add_screen.dart';
 import '../screens/transaction_add_detailed_screen.dart';
 import '../screens/transaction_detail_screen.dart';
 import '../screens/trash_screen.dart';
+import '../screens/voice_shortcuts_screen.dart';
+import '../screens/voice_dashboard_screen.dart';
 import '../widgets/asset_route_auth_gate.dart';
 import '../widgets/root_auth_gate.dart';
 import '../widgets/user_account_auth_gate.dart';
@@ -133,6 +135,7 @@ class AppRouter {
             confirmBeforeSave: a.confirmBeforeSave,
             treatAsNew: a.treatAsNew,
             closeAfterSave: a.closeAfterSave,
+            autoSubmit: a.autoSubmit,
           ),
         );
 
@@ -148,6 +151,7 @@ class AppRouter {
             confirmBeforeSave: a.confirmBeforeSave,
             treatAsNew: a.treatAsNew,
             closeAfterSave: a.closeAfterSave,
+            autoSubmit: a.autoSubmit,
           ),
         );
 
@@ -163,6 +167,7 @@ class AppRouter {
             confirmBeforeSave: a.confirmBeforeSave,
             treatAsNew: a.treatAsNew,
             closeAfterSave: a.closeAfterSave,
+            autoSubmit: a.autoSubmit,
           ),
         );
 
@@ -338,6 +343,19 @@ class AppRouter {
         return MaterialPageRoute(
           settings: settings,
           builder: (_) => const CurrencySettingsScreen(),
+        );
+
+      case AppRoutes.voiceShortcuts:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const VoiceShortcutsScreen(),
+        );
+
+      case AppRoutes.voiceDashboard:
+        final a = args as AccountArgs?;
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => VoiceDashboardScreen(accountName: a?.accountName),
         );
 
       case AppRoutes.page1BottomIconSettings:
@@ -522,6 +540,8 @@ class AppRouter {
             autoUsageMode: a.autoUsageMode,
             openUpsertOnStart: a.openUpsertOnStart,
             openCookableRecipePickerOnStart: a.openCookableRecipePickerOnStart,
+            upsertPrefill: a.upsertPrefill,
+            upsertAutoSubmit: a.upsertAutoSubmit,
           ),
         );
 

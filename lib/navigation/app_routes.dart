@@ -42,6 +42,8 @@ class AppRoutes {
   static const backgroundSettings = '/settings/background';
   static const displaySettings = '/display-settings';
   static const currencySettings = '/currency-settings';
+  static const voiceShortcuts = '/settings/voice-shortcuts';
+  static const voiceDashboard = '/voice/dashboard';
   static const page1BottomIconSettings = '/page1/bottom-icons';
   static const privacyPolicy = '/privacy-policy';
   static const fileViewer = '/file-viewer';
@@ -120,11 +122,40 @@ class FoodExpiryArgs {
     this.autoUsageMode = false,
     this.openUpsertOnStart = false,
     this.openCookableRecipePickerOnStart = false,
+    this.upsertPrefill,
+    this.upsertAutoSubmit = false,
   });
   final List<String>? initialIngredients;
   final bool autoUsageMode;
   final bool openUpsertOnStart;
   final bool openCookableRecipePickerOnStart;
+
+  /// Optional prefill values when opening the upsert dialog via assistant.
+  final FoodExpiryUpsertPrefill? upsertPrefill;
+
+  /// If true, the dialog will attempt to save automatically once opened.
+  /// (Safety gate should be handled by the deep-link handler using confirmed flags.)
+  final bool upsertAutoSubmit;
+}
+
+class FoodExpiryUpsertPrefill {
+  const FoodExpiryUpsertPrefill({
+    this.name,
+    this.quantity,
+    this.unit,
+    this.location,
+    this.category,
+    this.expiryDate,
+    this.price,
+  });
+
+  final String? name;
+  final double? quantity;
+  final String? unit;
+  final String? location;
+  final String? category;
+  final DateTime? expiryDate;
+  final double? price;
 }
 
 class AccountMainArgs {
@@ -151,6 +182,7 @@ class TransactionAddArgs {
     this.confirmBeforeSave = false,
     this.treatAsNew = false,
     this.closeAfterSave = false,
+    this.autoSubmit = false,
   });
   final String accountName;
   final Object? initialTransaction;
@@ -158,6 +190,7 @@ class TransactionAddArgs {
   final bool confirmBeforeSave;
   final bool treatAsNew;
   final bool closeAfterSave;
+  final bool autoSubmit;
 }
 
 class TransactionDetailArgs {

@@ -1,11 +1,13 @@
 package com.example.smartledger
 
 import android.content.ComponentName
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.net.Uri
 import com.example.smartledger.BuildConfig
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -15,6 +17,7 @@ import java.io.ByteArrayOutputStream
 class MainActivity : FlutterActivity() {
     companion object {
         private const val APP_ICON_CHANNEL = "smart_ledger/app_icon"
+        private const val DEEP_LINK_CHANNEL = "com.example.smartledger/deeplink"
         private const val ICON_THEME_AUTO = "auto"
         private const val ICON_THEME_LIGHT = "light"
         private const val ICON_THEME_DARK = "dark"
@@ -22,8 +25,30 @@ class MainActivity : FlutterActivity() {
         private const val ICON_THEME_DARK_INTENSE = "dark_intense"
     }
 
+    private var deepLinkChannel: MethodChannel? = null
+    private var initialDeepLink: String? = null
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+
+        // Deep Link Channel for App Actions / Bixby / Voice Assistants
+        deepLinkChannel = MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            DEEP_LINK_CHANNEL
+        ).apply {
+            setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "getInitialLink" -> {
+                        result.success(initialDeepLink)
+                        initialDeepLink = null // Clear after consumed
+                    }
+                    else -> result.notImplemented()
+                }
+            }
+        }
+
+        // Process initial intent
+        handleIntent(intent)
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, APP_ICON_CHANNEL)
             .setMethodCallHandler { call, result ->
@@ -109,5 +134,31 @@ class MainActivity : FlutterActivity() {
         drawable.setBounds(0, 0, canvas.width, canvas.height)
         drawable.draw(canvas)
         return bitmap
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // Deep Link Handling (App Actions / Bixby / Voice Assistants)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleIntent(intent)
+    }
+
+    private fun handleIntent(intent: Intent?) {
+        if (intent == null) return
+
+        val uri: Uri? = intent.data
+        if (uri != null && uri.scheme == "smartledger") {
+            val uriString = uri.toString()
+
+            // If Flutter engine is ready, send immediately
+            if (deepLinkChannel != null) {
+                deepLinkChannel?.invokeMethod("onDeepLink", uriString)
+            } else {
+                // Store for later retrieval via getInitialLink
+                initialDeepLink = uriString
+            }
+        }
     }
 }

@@ -1,0 +1,59 @@
+train ([커피](raw.description) [5000](viv.core.Integer:TransactionAmount)원 지출 저장해) {
+  goal: ConfirmAddTransaction
+  route: ConfirmAddTransaction
+}
+
+train ([점심](raw.description) [12000](viv.core.Integer:TransactionAmount)원 지출 저장해) {
+  goal: ConfirmAddTransaction
+  route: ConfirmAddTransaction
+}
+
+train ([월급](raw.description) [3000000](viv.core.Integer:TransactionAmount)원 수입 저장해) {
+  goal: ConfirmAddTransaction
+  route: ConfirmAddTransaction
+}
+
+train ([적금](raw.description) [300000](viv.core.Integer:TransactionAmount)원 저축 저장해) {
+  goal: ConfirmAddTransaction
+  route: ConfirmAddTransaction
+}
+
+train ([5000](viv.core.Integer:TransactionAmount)원 지출 저장해) {
+  goal: ConfirmAddTransaction
+  route: ConfirmAddTransaction
+}
+
+train ([5000](viv.core.Integer:TransactionAmount)원 수입 저장해) {
+  goal: ConfirmAddTransaction
+  route: ConfirmAddTransaction
+}
+
+train ([커피](raw.description) 지출 저장해) {
+  goal: ConfirmAddTransaction
+  route: ConfirmAddTransaction
+}
+
+train (저장해) {
+  goal: ConfirmAddTransaction
+  route: ConfirmAddTransaction
+}
+
+train (응 저장해) {
+  goal: ConfirmAddTransaction
+  route: ConfirmAddTransaction
+}
+
+train (그래 저장해) {
+  goal: ConfirmAddTransaction
+  route: ConfirmAddTransaction
+}
+
+train (좋아 저장해) {
+  goal: ConfirmAddTransaction
+  route: ConfirmAddTransaction
+}
+
+train (저장해줘) {
+  goal: ConfirmAddTransaction
+  route: ConfirmAddTransaction
+}

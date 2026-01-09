@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../models/food_expiry_item.dart';
 import '../models/recipe.dart';
 import '../models/shopping_cart_history_entry.dart';
@@ -14,11 +17,13 @@ import '../services/recipe_service.dart';
 import '../services/user_pref_service.dart';
 import '../services/health_guardrail_service.dart';
 import '../services/replacement_cycle_notification_service.dart';
+import '../services/savings_statistics_service.dart';
 import '../utils/currency_formatter.dart';
 import '../utils/icon_catalog.dart';
 import '../utils/interaction_blockers.dart';
 import '../utils/shopping_prep_utils.dart';
 import 'savings_statistics_screen.dart';
+import 'cooking_usage_history_screen.dart';
 import '../navigation/app_routes.dart';
 import '../widgets/daily_recipe_recommendation_widget.dart';
 import '../widgets/ingredients_recommendation_widget.dart';
@@ -32,6 +37,8 @@ class FoodExpiryMainScreen extends StatefulWidget {
   final bool autoUsageMode;
   final bool openUpsertOnStart;
   final bool openCookableRecipePickerOnStart;
+  final FoodExpiryUpsertPrefill? upsertPrefill;
+  final bool upsertAutoSubmit;
 
   const FoodExpiryMainScreen({
     super.key,
@@ -39,6 +46,8 @@ class FoodExpiryMainScreen extends StatefulWidget {
     this.autoUsageMode = false,
     this.openUpsertOnStart = false,
     this.openCookableRecipePickerOnStart = false,
+    this.upsertPrefill,
+    this.upsertAutoSubmit = false,
   });
 
   @override
@@ -774,11 +783,16 @@ class _FoodExpiryMainScreenState extends State<FoodExpiryMainScreen> {
     super.initState();
     FoodExpiryService.instance.load();
     RecipeService.instance.load();
+    SavingsStatisticsService.instance.load();
 
     if (widget.openUpsertOnStart) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        _openUpsertDialog(context);
+        _openUpsertDialog(
+          context,
+          prefill: widget.upsertPrefill,
+          autoSubmit: widget.upsertAutoSubmit,
+        );
       });
     }
   }
@@ -791,7 +805,7 @@ class _FoodExpiryMainScreenState extends State<FoodExpiryMainScreen> {
       openCookableRecipePickerOnStart: widget.openCookableRecipePickerOnStart,
     ),
     const _FoodExpiryNotificationsScreen(),
-    const _FoodExpiryPlaceholderScreen(title: '소비 기록'),
+    const CookingUsageHistoryScreen(),
     const SavingsStatisticsScreen(),
   ];
 
@@ -846,10 +860,16 @@ class _FoodExpiryMainScreenState extends State<FoodExpiryMainScreen> {
   Future<void> _openUpsertDialog(
     BuildContext context, {
     FoodExpiryItem? existing,
+    FoodExpiryUpsertPrefill? prefill,
+    bool autoSubmit = false,
   }) async {
     await showDialog(
       context: context,
-      builder: (ctx) => _FoodExpiryUpsertDialog(existing: existing),
+      builder: (ctx) => _FoodExpiryUpsertDialog(
+        existing: existing,
+        prefill: prefill,
+        autoSubmit: autoSubmit,
+      ),
     );
   }
 
@@ -881,11 +901,40 @@ class _FoodExpiryMainScreenState extends State<FoodExpiryMainScreen> {
 
 class _FoodExpiryUpsertDialog extends StatefulWidget {
   final FoodExpiryItem? existing;
-  const _FoodExpiryUpsertDialog({this.existing});
+  final FoodExpiryUpsertPrefill? prefill;
+  final bool autoSubmit;
+
+  const _FoodExpiryUpsertDialog({
+    this.existing,
+    this.prefill,
+    this.autoSubmit = false,
+  });
 
   @override
   State<_FoodExpiryUpsertDialog> createState() =>
       _FoodExpiryUpsertDialogState();
+}
+
+class _UpsertVoiceParseResult {
+  const _UpsertVoiceParseResult({
+    required this.name,
+    required this.quantityText,
+    required this.unit,
+    required this.location,
+    required this.category,
+    required this.expiryDate,
+    required this.priceText,
+    required this.healthTags,
+  });
+
+  final String? name;
+  final String? quantityText;
+  final String? unit;
+  final String? location;
+  final String? category;
+  final DateTime? expiryDate;
+  final String? priceText;
+  final Set<String> healthTags;
 }
 
 class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
@@ -933,6 +982,13 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
   List<ShoppingCartHistoryEntry> _importQueue = [];
   int _importTotal = 0;
 
+  // Voice input (STT)
+  final stt.SpeechToText _speech = stt.SpeechToText();
+  bool _speechAvailable = false;
+  bool _speechInitAttempted = false;
+  bool _isVoiceListening = false;
+  String _voiceDraft = '';
+
   @override
   void initState() {
     super.initState();
@@ -955,14 +1011,315 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
     _healthTags = widget.existing?.healthTags ?? const <String>[];
 
     if (widget.existing == null) {
-      _loadLastCategory();
-      _loadLastLocation();
-      _loadLastUnit();
+      if (widget.prefill == null) {
+        _loadLastCategory();
+        _loadLastLocation();
+        _loadLastUnit();
+      }
+
+      final p = widget.prefill;
+      if (p != null) {
+        if (p.name != null && p.name!.trim().isNotEmpty) {
+          _nameController.text = p.name!.trim();
+        }
+        if (p.quantity != null) {
+          final v = p.quantity!;
+          _quantityController.text = v == v.roundToDouble()
+              ? v.toStringAsFixed(0)
+              : v.toString();
+        }
+        if (p.unit != null && p.unit!.trim().isNotEmpty) {
+          _unitController.text = p.unit!.trim();
+        }
+        if (p.location != null && _locations.contains(p.location)) {
+          _location = p.location!;
+        }
+        if (p.category != null && _categories.contains(p.category)) {
+          _category = p.category!;
+        }
+        if (p.expiryDate != null) {
+          _pickedExpiryDate = p.expiryDate;
+        }
+        if (p.price != null) {
+          final v = p.price!;
+          _priceController.text = v == v.roundToDouble()
+              ? v.toStringAsFixed(0)
+              : v.toString();
+        }
+
+        if (widget.autoSubmit) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            _save();
+          });
+        }
+      }
     }
 
     if (widget.existing != null) {
       _addQtyController.addListener(_updateTotal);
       _subQtyController.addListener(_updateTotal);
+    }
+  }
+
+  Future<bool> _ensureSpeechReady() async {
+    if (_speechInitAttempted) {
+      return _speechAvailable;
+    }
+    _speechInitAttempted = true;
+
+    final micStatus = await Permission.microphone.request();
+    if (!micStatus.isGranted) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('마이크 권한이 필요합니다')),
+        );
+      }
+      _speechAvailable = false;
+      return false;
+    }
+
+    try {
+      _speechAvailable = await _speech.initialize(
+        onStatus: (status) {
+          if (!mounted) return;
+          if (status == 'done' || status == 'notListening') {
+            if (_voiceDraft.trim().isNotEmpty) {
+              _applyVoiceInput(_voiceDraft);
+            }
+            setState(() {
+              _isVoiceListening = false;
+            });
+          }
+        },
+        onError: (error) {
+          debugPrint('FoodExpiryUpsert: speech error: $error');
+          if (!mounted) return;
+          setState(() {
+            _isVoiceListening = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('음성 인식 중 오류가 발생했습니다')),
+          );
+        },
+      );
+    } catch (e) {
+      debugPrint('FoodExpiryUpsert: speech init error: $e');
+      _speechAvailable = false;
+    }
+    return _speechAvailable;
+  }
+
+  Future<void> _toggleVoiceInput() async {
+    if (_isVoiceListening) {
+      await _speech.stop();
+      if (!mounted) return;
+      setState(() {
+        _isVoiceListening = false;
+      });
+      return;
+    }
+
+    final ok = await _ensureSpeechReady();
+    if (!ok) return;
+
+    if (!mounted) return;
+    setState(() {
+      _isVoiceListening = true;
+      _voiceDraft = '';
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('말씀하세요… (예: 팽이버섯 2봉 냉장 내일)')),
+    );
+
+    await _speech.listen(
+      localeId: 'ko_KR',
+      onResult: (result) {
+        if (!mounted) return;
+        setState(() {
+          _voiceDraft = result.recognizedWords;
+        });
+        if (result.finalResult) {
+          _applyVoiceInput(result.recognizedWords);
+          setState(() {
+            _isVoiceListening = false;
+          });
+        }
+      },
+      listenOptions: stt.SpeechListenOptions(),
+    );
+  }
+
+  void _applyVoiceInput(String raw) {
+    final text = raw.trim();
+    if (text.isEmpty) return;
+
+    final parsed = _parseUpsertVoice(text);
+
+    setState(() {
+      if (parsed.name != null && parsed.name!.trim().isNotEmpty) {
+        _nameController.text = parsed.name!;
+      }
+      if (parsed.quantityText != null && parsed.quantityText!.trim().isNotEmpty) {
+        _quantityController.text = parsed.quantityText!;
+      }
+      if (parsed.unit != null && parsed.unit!.trim().isNotEmpty) {
+        _unitController.text = parsed.unit!;
+      }
+      if (parsed.location != null && _locations.contains(parsed.location)) {
+        _location = parsed.location!;
+      }
+      if (parsed.category != null && _categories.contains(parsed.category)) {
+        _category = parsed.category!;
+      }
+      if (parsed.expiryDate != null) {
+        _pickedExpiryDate = parsed.expiryDate;
+      }
+      if (parsed.priceText != null && parsed.priceText!.trim().isNotEmpty) {
+        _priceController.text = parsed.priceText!;
+      }
+      if (parsed.healthTags.isNotEmpty) {
+        final next = <String>{..._healthTags};
+        next.addAll(parsed.healthTags);
+        _healthTags = next.toList();
+      }
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('음성 입력 적용: $text')),
+    );
+  }
+
+  _UpsertVoiceParseResult _parseUpsertVoice(String input) {
+    final raw = input.replaceAll(RegExp(r'\s+'), ' ').trim();
+    final lower = raw.toLowerCase();
+
+    String? location;
+    for (final l in _locations) {
+      if (raw.contains(l)) {
+        location = l;
+        break;
+      }
+    }
+
+    String? category;
+    for (final c in _categories) {
+      if (raw.contains(c)) {
+        category = c;
+        break;
+      }
+    }
+
+    final healthTags = <String>{};
+    for (final t in HealthGuardrailService.defaultTags) {
+      if (raw.contains(t)) healthTags.add(t);
+    }
+
+    DateTime? expiry;
+    final now = DateTime.now();
+    final dateOnly = DateTime(now.year, now.month, now.day);
+    if (raw.contains('오늘')) {
+      expiry = dateOnly;
+    } else if (raw.contains('내일')) {
+      expiry = dateOnly.add(const Duration(days: 1));
+    } else if (raw.contains('모레')) {
+      expiry = dateOnly.add(const Duration(days: 2));
+    } else {
+      final m = RegExp(r'(\d{1,3})\s*일\s*(후|뒤)').firstMatch(raw);
+      if (m != null) {
+        final days = int.tryParse(m.group(1) ?? '');
+        if (days != null) {
+          expiry = dateOnly.add(Duration(days: days));
+        }
+      } else {
+        final md = RegExp(r'(\d{1,2})\s*월\s*(\d{1,2})\s*일').firstMatch(raw);
+        if (md != null) {
+          final month = int.tryParse(md.group(1) ?? '');
+          final day = int.tryParse(md.group(2) ?? '');
+          if (month != null && day != null) {
+            var candidate = DateTime(dateOnly.year, month, day);
+            if (candidate.isBefore(dateOnly.subtract(const Duration(days: 1)))) {
+              candidate = DateTime(dateOnly.year + 1, month, day);
+            }
+            expiry = candidate;
+          }
+        }
+      }
+    }
+
+    String? qtyText;
+    String? unit;
+    const unitPattern =
+      r'(개|봉지|봉|팩|통|단|모|장|판|박스|상자|병|캔|그램|그람|g|kg|킬로|킬로그램|ml|밀리리터|l|리터)';
+    final qtyMatch = RegExp(r'(\d+(?:[\.,]\d+)?)\s*' + unitPattern)
+        .firstMatch(lower);
+    if (qtyMatch != null) {
+      qtyText = (qtyMatch.group(1) ?? '').replaceAll(',', '.');
+      unit = _normalizeUnit(qtyMatch.group(2));
+    }
+
+    String? priceText;
+    final priceMatch = RegExp(r'(\d{1,9})\s*원').firstMatch(raw);
+    if (priceMatch != null) {
+      priceText = priceMatch.group(1);
+    }
+
+    String candidateName = raw;
+    for (final l in _locations) {
+      candidateName = candidateName.replaceAll(l, ' ');
+    }
+    for (final c in _categories) {
+      candidateName = candidateName.replaceAll(c, ' ');
+    }
+    for (final t in HealthGuardrailService.defaultTags) {
+      candidateName = candidateName.replaceAll(t, ' ');
+    }
+    candidateName = candidateName
+        .replaceAll(RegExp(r'(오늘|내일|모레|유통기한|기한|까지|후|뒤)'), ' ')
+        .replaceAll(RegExp(r'(등록|추가|저장|입력|해줘|해주세요|할래|해|좀|우리집|식재료|생활용품|품목|재료)'), ' ');
+    candidateName = candidateName.replaceAll(RegExp(r'\d{1,9}\s*원'), ' ');
+    candidateName = candidateName.replaceAll(RegExp(r'(\d{1,3})\s*일\s*(후|뒤)'), ' ');
+    candidateName = candidateName.replaceAll(RegExp(r'(\d{1,2})\s*월\s*(\d{1,2})\s*일'), ' ');
+    if (qtyMatch != null) {
+      candidateName = candidateName.replaceAll(qtyMatch.group(0) ?? '', ' ');
+    }
+    candidateName = candidateName.replaceAll(RegExp(r'\s+'), ' ').trim();
+
+    final name = candidateName.isEmpty ? null : candidateName;
+
+    return _UpsertVoiceParseResult(
+      name: name,
+      quantityText: qtyText,
+      unit: unit,
+      location: location,
+      category: category,
+      expiryDate: expiry,
+      priceText: priceText,
+      healthTags: healthTags,
+    );
+  }
+
+  String? _normalizeUnit(String? rawUnit) {
+    if (rawUnit == null) return null;
+    final u = rawUnit.trim().toLowerCase();
+    switch (u) {
+      case '봉지':
+        return '봉';
+      case '상자':
+        return '박스';
+      case '그램':
+      case '그람':
+        return 'g';
+      case '킬로':
+      case '킬로그램':
+        return 'kg';
+      case '밀리리터':
+        return 'ml';
+      case '리터':
+      case 'l':
+        return 'L';
+      default:
+        return rawUnit.trim();
     }
   }
 
@@ -1426,6 +1783,21 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
                   ),
                   const SizedBox(width: 8),
                   IconButton.outlined(
+                    onPressed: _toggleVoiceInput,
+                    icon: Icon(
+                      _isVoiceListening
+                          ? IconCatalog.stopCircle
+                          : IconCatalog.mic,
+                    ),
+                    tooltip: _isVoiceListening ? '음성 입력 중지' : '음성 입력',
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton.outlined(
                     onPressed: _showHistoryPicker,
                     icon: const Icon(IconCatalog.history),
                     tooltip: '쇼핑 기록 불러오기',
@@ -1682,30 +2054,6 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
     );
   }
 }
-
-class _FoodExpiryPlaceholderScreen extends StatelessWidget {
-  final String title;
-
-  const _FoodExpiryPlaceholderScreen({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return SafeArea(
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Text(
-            '$title 화면은 준비 중입니다.',
-            style: theme.textTheme.bodyLarge,
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _FoodExpiryItemsScreen extends StatefulWidget {
   final Future<void> Function(BuildContext, {FoodExpiryItem? existing})?
   onUpsert;
@@ -1728,6 +2076,8 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
   bool _isUsageMode = false;
   final Map<String, double> _usageMap = {};
   final Set<String> _activeUsageItems = {};
+
+  String? _activeRecipeName;
 
   Set<String> _countLikeUnits = UserPrefService.defaultCountLikeUnitsV1.toSet();
 
@@ -2368,6 +2718,7 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
       _isUsageMode = !_isUsageMode;
       _usageMap.clear();
       _activeUsageItems.clear();
+      _activeRecipeName = null;
     });
   }
 
@@ -2413,9 +2764,14 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
   Future<void> _applyBulkUsage() async {
     if (_usageMap.isEmpty) return;
 
+    final recipeName = (_activeRecipeName ?? '').trim();
+
     int updatedCount = 0;
     final items = FoodExpiryService.instance.items.value;
     final List<String> itemsToRemove = [];
+
+    final usedIngredients = <Map<String, dynamic>>[];
+    double totalUsedPrice = 0.0;
 
     for (var entry in _usageMap.entries) {
       if (entry.value <= 0) continue;
@@ -2427,6 +2783,27 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
       if (item.id != entry.key) continue;
 
       final newQty = (item.quantity - entry.value).clamp(0.0, double.infinity);
+
+      // Estimate used price based on (item.price / item.quantity) * used.
+      // This assumes item.price is the total price for the current quantity.
+      if (item.price > 0 && item.quantity > 0 && entry.value > 0) {
+        final unitPrice = item.price / item.quantity;
+        final usedPrice = unitPrice * entry.value;
+        totalUsedPrice += usedPrice;
+        usedIngredients.add(<String, dynamic>{
+          'name': item.name,
+          'used': entry.value,
+          'unit': item.unit,
+          'price': usedPrice,
+        });
+      } else {
+        usedIngredients.add(<String, dynamic>{
+          'name': item.name,
+          'used': entry.value,
+          'unit': item.unit,
+          'price': 0.0,
+        });
+      }
 
       if (newQty <= 0) {
         itemsToRemove.add(item.id);
@@ -2458,7 +2835,17 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
       _isUsageMode = false;
       _usageMap.clear();
       _activeUsageItems.clear();
+      _activeRecipeName = null;
     });
+
+    if (usedIngredients.isNotEmpty) {
+      await SavingsStatisticsService.instance.addLog(
+        recipeName: recipeName.isEmpty ? '사용 기록' : recipeName,
+        totalUsedPrice: totalUsedPrice,
+        usedIngredientsJson: jsonEncode(usedIngredients),
+        isFromExistingInventory: widget.autoUsageMode,
+      );
+    }
 
     if (mounted) {
       String msg = '$updatedCount개의 항목 사용량이 기록되었습니다.';
@@ -2486,6 +2873,7 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
       setState(() {
         _isUsageMode = true;
         _usageMap.clear();
+        _activeRecipeName = selectedRecipe.name;
 
         for (var ingredient in selectedRecipe.ingredients) {
           // FIFO: 유통기한 빠른 순서로 정렬된 항목 중 매칭되는 것 선택

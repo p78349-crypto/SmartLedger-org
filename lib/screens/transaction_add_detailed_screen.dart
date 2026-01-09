@@ -18,6 +18,7 @@ import '../services/food_expiry_service.dart';
 import '../services/recent_input_service.dart';
 import '../services/transaction_service.dart';
 import '../services/user_pref_service.dart';
+import '../services/category_keyword_service.dart';
 import '../utils/shopping_cart_bulk_ledger_utils.dart';
 import '../utils/category_definitions.dart';
 import '../utils/detailed_category_definitions.dart';
@@ -55,6 +56,7 @@ class TransactionAddDetailedScreen extends StatefulWidget {
   final bool confirmBeforeSave;
   final bool treatAsNew;
   final bool closeAfterSave;
+  final bool autoSubmit;
   const TransactionAddDetailedScreen({
     super.key,
     required this.accountName,
@@ -63,6 +65,7 @@ class TransactionAddDetailedScreen extends StatefulWidget {
     this.confirmBeforeSave = false,
     this.treatAsNew = false,
     this.closeAfterSave = false,
+    this.autoSubmit = false,
   });
 
   @override
@@ -74,6 +77,16 @@ class _TransactionAddDetailedScreenState
     extends State<TransactionAddDetailedScreen> {
   final GlobalKey<_TransactionAddDetailedFormState> _formStateKey =
       GlobalKey<_TransactionAddDetailedFormState>();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.autoSubmit) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        unawaited(_formStateKey.currentState?.triggerAutoSubmit());
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -221,6 +234,11 @@ class _TransactionAddDetailedFormState
   List<String> _recentDescriptions = [];
   List<String> _recentPayments = [];
   List<String> _recentMemos = [];
+
+  Map<String, CategoryHint> _shoppingCategoryHintsNormalized = const {};
+  bool _shoppingCategoryHintsLoaded = false;
+  bool _userPickedCategory = false;
+  Timer? _autoCategoryDebounce;
   static const int _priceRiseLookbackCount = 20;
   static const int _priceRiseMinSamples = 3;
   static const double _priceRisePctThreshold = 0.10; // 10%
@@ -312,6 +330,10 @@ class _TransactionAddDetailedFormState
 
   bool get didSave => _didSaveAtLeastOnce;
 
+  Future<void> triggerAutoSubmit() async {
+    await _saveTransaction(skipConfirm: true);
+  }
+
   DateTime _dateOnly(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
 
   bool _isShoppingCategory(String mainCategory, String? subCategory) {
@@ -385,9 +407,191 @@ class _TransactionAddDetailedFormState
   bool get _isEditing =>
       widget.initialTransaction != null && !widget.treatAsNew;
 
+  String _normalizeShoppingHintKey(String raw) {
+    var s = raw.trim().toLowerCase();
+    if (s.isEmpty) return '';
+
+    // Remove common promotion/multiplier patterns before stripping symbols.
+    s = s.replaceAll(RegExp(r'\d+\s*[+×x]\s*\d+'), ' ');
+
+    // Collapse whitespace, then remove punctuation/symbols.
+    s = s.replaceAll(RegExp(r'\s+'), '');
+    s = s.replaceAll(RegExp(r'[^a-z0-9가-힣]'), '');
+
+    // Remove trailing size/unit/count patterns.
+    s = s.replaceAll(
+      RegExp(
+        r'(\d+(?:\.\d+)?)(ml|l|kg|g|mg|개|입|팩|봉|병|캔|장|p|pcs|pc|box)$',
+      ),
+      '',
+    );
+
+    // Remove common Korean promotion tokens.
+    s = s.replaceAll(
+      RegExp(r'(행사|증정|무료|덤|할인|특가|세일)$'),
+      '',
+    );
+
+    return s;
+  }
+
+  Future<void> _loadShoppingCategoryHints() async {
+    if (_isEditing) return;
+    try {
+      var hints = await UserPrefService.getShoppingCategoryHints(
+        accountName: widget.accountName,
+      );
+      if (hints.isEmpty) {
+        await UserPrefService.bootstrapShoppingCategoryHintsFromTransactions(
+          accountName: widget.accountName,
+        );
+        hints = await UserPrefService.getShoppingCategoryHints(
+          accountName: widget.accountName,
+        );
+      }
+
+      final normalized = <String, CategoryHint>{};
+      for (final e in hints.entries) {
+        final k = _normalizeShoppingHintKey(e.key);
+        if (k.isEmpty) continue;
+        normalized[k] = e.value;
+      }
+
+      if (!mounted) return;
+      setState(() {
+        _shoppingCategoryHintsNormalized = normalized;
+        _shoppingCategoryHintsLoaded = true;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _shoppingCategoryHintsNormalized = const {};
+        _shoppingCategoryHintsLoaded = true;
+      });
+    }
+  }
+
+  CategoryHint? _findBestCategoryHint(String description) {
+    if (_shoppingCategoryHintsNormalized.isEmpty) return null;
+    final key = _normalizeShoppingHintKey(description);
+    if (key.isEmpty) return null;
+
+    final direct = _shoppingCategoryHintsNormalized[key];
+    if (direct != null) return direct;
+
+    CategoryHint? best;
+    var bestLen = 0;
+    for (final entry in _shoppingCategoryHintsNormalized.entries) {
+      final k = entry.key;
+      if (k.isEmpty) continue;
+      if (k.length <= bestLen) continue;
+      if (key.contains(k)) {
+        best = entry.value;
+        bestLen = k.length;
+      }
+    }
+    return best;
+  }
+
+  void _handleDescriptionChanged(String value) {
+    if (_isEditing) return;
+    if (_selectedType != TransactionType.expense) return;
+    if (_userPickedCategory) return;
+    if (!_shoppingCategoryHintsLoaded) return;
+
+    _autoCategoryDebounce?.cancel();
+    _autoCategoryDebounce = Timer(const Duration(milliseconds: 120), () {
+      if (!mounted) return;
+
+      String? main;
+      String? nextSub;
+      String? nextDetail;
+
+      // 1) Try user history hints first
+      final hint = _findBestCategoryHint(value);
+      if (hint != null) {
+        final hintMain = hint.mainCategory.trim();
+        if (hintMain.isNotEmpty &&
+            hintMain != _defaultCategory &&
+            DetailedCategoryDefinitions.mainCategories.contains(hintMain)) {
+          main = hintMain;
+
+          final hintSub = hint.subCategory?.trim() ?? '';
+          if (hintSub.isNotEmpty) {
+            final allowedSub =
+                DetailedCategoryDefinitions.getSubCategories(main);
+            if (allowedSub.contains(hintSub)) {
+              nextSub = hintSub;
+
+              final hintDetail = hint.detailCategory?.trim() ?? '';
+              if (hintDetail.isNotEmpty) {
+                final allowedDetail =
+                    DetailedCategoryDefinitions.getDetailCategories(
+                  main,
+                  hintSub,
+                );
+                if (allowedDetail.contains(hintDetail)) {
+                  nextDetail = hintDetail;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // 2) Fallback to keyword dictionary
+      if (main == null) {
+        final kwResult = CategoryKeywordService.instance.classify(value);
+        if (kwResult != null) {
+          final kwMain = kwResult.$1;
+          if (DetailedCategoryDefinitions.mainCategories.contains(kwMain)) {
+            main = kwMain;
+            final kwSub = kwResult.$2;
+            if (kwSub != null) {
+              final allowedSub =
+                  DetailedCategoryDefinitions.getSubCategories(main);
+              if (allowedSub.contains(kwSub)) {
+                nextSub = kwSub;
+              }
+            }
+          }
+        }
+      }
+
+      if (main == null) return;
+
+      final unchanged =
+          main == _selectedMainCategory &&
+          nextSub == _selectedSubCategory &&
+          nextDetail == _selectedDetailCategory;
+      if (unchanged) return;
+
+      setState(() {
+        _selectedMainCategory = main!;
+        _selectedSubCategory = nextSub;
+        _selectedDetailCategory = nextDetail;
+      });
+      unawaited(_persistLastCategoryForType(_selectedType, main: main));
+    });
+  }
+
   // ...existing code...
   String _lastCategoryMainKeyFor(TransactionType type) =>
       '${_lastCategoryMainKeyPrefix}_${widget.accountName}_${type.name}';
+
+  Future<void> _persistLastCategoryForType(
+    TransactionType type, {
+    required String main,
+  }) async {
+    if (_isEditing) return;
+    final prefs = await SharedPreferences.getInstance();
+    final trimmed = main.trim();
+    if (trimmed.isEmpty) {
+      await prefs.remove(_lastCategoryMainKeyFor(type));
+      return;
+    }
+    await prefs.setString(_lastCategoryMainKeyFor(type), trimmed);
+  }
 
   @override
   void initState() {
@@ -452,6 +656,8 @@ class _TransactionAddDetailedFormState
     if (initial == null) {
       unawaited(_restoreLastCategoryForType(_selectedType));
     }
+
+    unawaited(_loadShoppingCategoryHints());
 
     unawaited(_loadRecentInputs());
     unawaited(_loadDraftIfRecent());
@@ -918,6 +1124,7 @@ class _TransactionAddDetailedFormState
   @override
   void dispose() {
     unawaited(_saveDraft());
+    _autoCategoryDebounce?.cancel();
     _descController.dispose();
     _qtyController.dispose();
     _unitPriceController.dispose();
@@ -1147,7 +1354,7 @@ class _TransactionAddDetailedFormState
     });
   }
 
-  Future<void> _saveTransaction() async {
+  Future<void> _saveTransaction({bool skipConfirm = false}) async {
     if (!_formKey.currentState!.validate()) return;
 
     final navigator = Navigator.of(context);
@@ -1234,7 +1441,7 @@ class _TransactionAddDetailedFormState
       if (!ok) return;
     }
 
-    if (widget.confirmBeforeSave) {
+    if (widget.confirmBeforeSave && !skipConfirm) {
       final isShoppingCategory = _isShoppingCategory(
         effectiveMainCategory,
         effectiveSubCategory,
@@ -1513,6 +1720,8 @@ class _TransactionAddDetailedFormState
         void resetForNextEntry() {
           setState(() {
             _suppressAmountAutoUpdate = true;
+
+            _userPickedCategory = false;
 
             _descController.clear();
             // _memoController.clear();
@@ -2406,10 +2615,12 @@ class _TransactionAddDetailedFormState
                 onSelected: (selected) {
                   if (!selected) return;
                   setState(() {
+                    _userPickedCategory = true;
                     _selectedMainCategory = cat;
                     _selectedSubCategory = null;
                     _selectedDetailCategory = null;
                   });
+                  unawaited(_persistLastCategoryForType(_selectedType, main: cat));
                 },
               );
             }).toList(),
@@ -2436,6 +2647,7 @@ class _TransactionAddDetailedFormState
                   onSelected: (selected) {
                     if (!selected) return;
                     setState(() {
+                      _userPickedCategory = true;
                       _selectedSubCategory = cat;
                       _selectedDetailCategory = null;
                     });
@@ -2483,10 +2695,12 @@ class _TransactionAddDetailedFormState
               onSelected: (selected) {
                 if (!selected) return;
                 setState(() {
+                  _userPickedCategory = true;
                   _selectedMainCategory = cat;
                   _selectedSubCategory = null;
                   _selectedDetailCategory = null;
                 });
+                unawaited(_persistLastCategoryForType(_selectedType, main: cat));
               },
             );
           }).toList(),
@@ -2513,6 +2727,7 @@ class _TransactionAddDetailedFormState
                 onSelected: (selected) {
                   if (!selected) return;
                   setState(() {
+                    _userPickedCategory = true;
                     _selectedSubCategory = cat;
                     _selectedDetailCategory = null;
                   });
@@ -2543,6 +2758,7 @@ class _TransactionAddDetailedFormState
                 onSelected: (selected) {
                   if (!selected) return;
                   setState(() {
+                    _userPickedCategory = true;
                     _selectedDetailCategory = cat;
                   });
                 },
@@ -2569,7 +2785,10 @@ class _TransactionAddDetailedFormState
         validator: (value) =>
             value == null || value.trim().isEmpty ? emptyMessage : null,
         onFieldSubmitted: onFieldSubmitted,
-        onChanged: (_) => setState(() {}),
+        onChanged: (v) {
+          _handleDescriptionChanged(v);
+          setState(() {});
+        },
         decoration: _standardInputDecoration(
           labelText: labelText,
           suffixIcon: IconButton(
@@ -2587,6 +2806,7 @@ class _TransactionAddDetailedFormState
                 _descController.selection = TextSelection.fromPosition(
                   TextPosition(offset: v.length),
                 );
+                _handleDescriptionChanged(v);
                 setState(() {});
               },
               title: '상품명 입력내용 불러오기',

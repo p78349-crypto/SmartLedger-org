@@ -14,6 +14,90 @@ class RecipeKnowledgeService {
   List<FoodKnowledgeEntry> _entries = [];
   bool _isLoaded = false;
 
+  /// Suggests main ingredients to buy/add when the current inventory lacks a
+  /// clear main ingredient.
+  ///
+  /// Scoring is based on how many pairing ingredients match the current stock.
+  /// Entries whose main ingredient is already present are excluded.
+  List<MissingMainIngredientSuggestion> suggestMissingMainIngredients(
+    List<FoodExpiryItem> inventory, {
+    int limit = 3,
+  }) {
+    if (!_isLoaded || limit <= 0) return const <MissingMainIngredientSuggestion>[];
+
+    final inventoryNames = inventory.map((e) => _normalize(e.name)).toSet();
+    if (inventoryNames.isEmpty) return const <MissingMainIngredientSuggestion>[];
+
+    bool hasMainIngredient(FoodKnowledgeEntry entry) {
+      for (final k in entry.keywords) {
+        final nk = _normalize(k);
+        if (nk.isEmpty) continue;
+        if (inventoryNames.any((inv) => inv.contains(nk) || nk.contains(inv))) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    final candidates = <MissingMainIngredientSuggestion>[];
+    for (final entry in _entries) {
+      if (entry.keywords.isEmpty) continue;
+      if (hasMainIngredient(entry)) continue;
+
+      final matched = <String>[];
+      var score = 0;
+
+      for (final p in entry.pairings) {
+        final tokens = _tokenizePairingIngredient(p.ingredient);
+        var matchedThisPairing = false;
+        for (final t in tokens) {
+          final nt = _normalize(t);
+          if (nt.isEmpty) continue;
+          if (inventoryNames.any((inv) => inv.contains(nt) || nt.contains(inv))) {
+            matchedThisPairing = true;
+            break;
+          }
+        }
+        if (matchedThisPairing) {
+          score += 1;
+          final label = p.ingredient.trim();
+          if (label.isNotEmpty && !matched.contains(label)) {
+            matched.add(label);
+          }
+        }
+      }
+
+      if (score <= 0) continue;
+
+      // Mild preference for common "main" ingredients.
+      final primary = entry.primaryName;
+      final primaryN = _normalize(primary);
+      final preferred = <String>{
+        _normalize('달걀'),
+        _normalize('계란'),
+        _normalize('닭고기'),
+        _normalize('돼지고기'),
+        _normalize('소고기'),
+        _normalize('두부'),
+      };
+      final bonus = preferred.any((p) => p.isNotEmpty && primaryN.contains(p))
+          ? 0.5
+          : 0.0;
+
+      candidates.add(
+        MissingMainIngredientSuggestion(
+          primaryName: primary,
+          score: score + bonus,
+          matchedPairings: matched,
+        ),
+      );
+    }
+
+    candidates.sort((a, b) => b.score.compareTo(a.score));
+    if (candidates.length <= limit) return candidates;
+    return candidates.take(limit).toList();
+  }
+
   /// Loads the food knowledge data from JSON asset.
   Future<void> loadData() async {
     if (_isLoaded) return;
@@ -111,4 +195,32 @@ class RecipeKnowledgeService {
 
   static String _normalize(String s) =>
       s.trim().toLowerCase().replaceAll(' ', '').replaceAll('-', '');
+
+  static List<String> _tokenizePairingIngredient(String raw) {
+    final s = raw
+        .replaceAll('(', ' ')
+        .replaceAll(')', ' ')
+        .replaceAll('[', ' ')
+        .replaceAll(']', ' ')
+        .trim();
+    if (s.isEmpty) return const <String>[];
+
+    return s
+        .split(RegExp(r'[/,·]'))
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
+  }
+}
+
+class MissingMainIngredientSuggestion {
+  final String primaryName;
+  final double score;
+  final List<String> matchedPairings;
+
+  const MissingMainIngredientSuggestion({
+    required this.primaryName,
+    required this.score,
+    required this.matchedPairings,
+  });
 }

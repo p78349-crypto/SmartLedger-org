@@ -1,0 +1,205 @@
+// SmartLedger Bixby Capsule - Actions
+// 지출 기록, 대시보드 열기 등의 액션 정의
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 거래 추가 액션
+// "빅스비야, 스마트렛저에 5000원 커피 지출 기록해"
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+action (AddTransaction) {
+  description (거래를 추가합니다)
+  type (Search)
+  
+  collect {
+    input (type) {
+      type (TransactionType)
+      min (Optional)
+      default-init {
+        intent {
+          goal: TransactionType
+          value: TransactionType(expense)
+        }
+      }
+    }
+    
+    input (amount) {
+      type (TransactionAmount)
+      min (Optional)
+    }
+    
+    input (description) {
+      type (TransactionDescription)
+      min (Optional)
+    }
+    
+    input (category) {
+      type (CategoryName)
+      min (Optional)
+    }
+  }
+
+  output (TransactionAddPreviewResult)
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 거래 저장 확인
+// "커피 5000원 지출 저장해" → confirmed=true 딥링크 반환
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+action (ConfirmAddTransaction) {
+  description (거래 저장을 확인하고 실행합니다)
+  type (Search)
+
+  collect {
+    input (type) {
+      type (TransactionType)
+      min (Optional)
+      default-init {
+        intent {
+          goal: TransactionType
+          value: TransactionType(expense)
+        }
+      }
+    }
+
+    input (amount) {
+      type (TransactionAmount)
+      min (Optional)
+    }
+
+    input (description) {
+      type (TransactionDescription)
+      min (Optional)
+    }
+
+    input (category) {
+      type (CategoryName)
+      min (Optional)
+    }
+  }
+
+  output (AppLaunchResult)
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 식재료/생활용품 등록 (유통기한)
+// "빅스비야, 스마트렛저에 팽이버섯 2봉 냉장 3일 후 등록해"
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+action (UpsertFoodExpiryItem) {
+  description (식재료/생활용품을 등록합니다)
+  type (Search)
+
+  collect {
+    input (name) {
+      type (FoodExpiryItemName)
+      min (Required)
+    }
+
+    input (quantity) {
+      type (FoodExpiryItemQuantity)
+      min (Optional)
+    }
+
+    input (unit) {
+      type (FoodExpiryItemUnit)
+      min (Optional)
+    }
+
+    input (location) {
+      type (StorageLocationName)
+      min (Optional)
+    }
+
+    input (expiryDays) {
+      type (ExpiryDays)
+      min (Optional)
+    }
+
+    input (price) {
+      type (ItemPrice)
+      min (Optional)
+    }
+  }
+
+  output (AppLaunchResult)
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 대시보드 열기
+// "빅스비야, 스마트렛저 대시보드 열어"
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+action (OpenDashboard) {
+  description (대시보드를 엽니다)
+  type (Search)
+  
+  output (AppLaunchResult)
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 특정 기능 열기
+// "빅스비야, 스마트렛저에서 유통기한 확인해"
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+action (OpenFeature) {
+  description (특정 기능을 엽니다)
+  type (Search)
+  
+  collect {
+    input (feature) {
+      type (FeatureType)
+      min (Required)
+    }
+  }
+  
+  output (AppLaunchResult)
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 재고 조회
+// "빅스비야, 스마트렛저에서 팽이버섯 얼마나 남았어?"
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+action (CheckStock) {
+  description (재고를 조회합니다)
+  type (Search)
+  
+  collect {
+    input (productName) {
+      type (ProductName)
+      min (Required)
+    }
+  }
+  
+  output (StockCheckResult)
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 재고 차감
+// "빅스비야, 스마트렛저에서 팽이버섯 1봉 썼어"
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+action (UseStock) {
+  description (재고를 차감합니다)
+  type (Search)
+  
+  collect {
+    input (productName) {
+      type (ProductName)
+      min (Required)
+    }
+    
+    input (amount) {
+      type (StockAmount)
+      min (Optional)
+    }
+    
+    input (unit) {
+      type (StockUnit)
+      min (Optional)
+    }
+  }
+  
+  output (AppLaunchResult)
+}

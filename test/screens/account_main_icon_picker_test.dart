@@ -103,10 +103,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final entFinder = find.widgetWithText(OutlinedButton, 'ENT');
+    final entFinder = find.widgetWithText(ElevatedButton, 'ENT');
     expect(entFinder, findsOneWidget);
 
-    final entButton = tester.widget<OutlinedButton>(entFinder);
+    final entButton = tester.widget<ElevatedButton>(entFinder);
     expect(entButton.onPressed, isNull);
 
     final icon = find.byKey(const ValueKey('icon_mgmt_catalog_transactionAdd'));
@@ -121,7 +121,7 @@ void main() {
     await tester.tap(icon, warnIfMissed: false);
     await tester.pumpAndSettle();
 
-    final entButtonAfter = tester.widget<OutlinedButton>(entFinder);
+    final entButtonAfter = tester.widget<ElevatedButton>(entFinder);
     expect(entButtonAfter.onPressed, isNotNull);
   });
 }

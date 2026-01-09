@@ -35,6 +35,24 @@
 
 ---
 
+## ✅ 추가 검증(완료)
+
+- `flutter test`: ✅ All tests passed
+- 테스트 보정:
+  - `ENT` 적용 버튼이 `OutlinedButton`이 아니라 `ElevatedButton`으로 구현되어
+    [test/screens/account_main_icon_picker_test.dart](test/screens/account_main_icon_picker_test.dart)의
+    finder 타입을 `ElevatedButton` 기준으로 수정
+
+---
+
+## ✅ 커밋/백업(완료)
+
+- 커밋: `c69924c` (2026-01-09) — voice assistant safety gates + auto-refresh utils + formatting
+- 백업(전체): `C:\Users\plain\SmartLedger_backups\SmartLedger_backup_2026-01-09_211854`
+- 백업(스냅샷): `C:\Users\plain\SmartLedger\backups\auto-backup-2026-01-09_21-18-48`
+
+---
+
 ## ✅ 안정화(완료)
 
 - 자동 갱신 과다 호출 방지: `FoodExpiryItemsAutoRefreshMixin`에 debounce(기본 250ms) 옵션 추가

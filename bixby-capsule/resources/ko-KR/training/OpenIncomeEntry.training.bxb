@@ -1,0 +1,31 @@
+// OpenIncomeEntry 트레이닝 데이터
+
+train (월급 기록해) {
+  goal: OpenIncomeEntry
+  route: OpenIncomeEntry
+}
+
+train (빅스비 월급 기록해) {
+  goal: OpenIncomeEntry
+  route: OpenIncomeEntry
+}
+
+train (월급 입력해) {
+  goal: OpenIncomeEntry
+  route: OpenIncomeEntry
+}
+
+train (급여 기록해) {
+  goal: OpenIncomeEntry
+  route: OpenIncomeEntry
+}
+
+train (빅스비 급여 기록해) {
+  goal: OpenIncomeEntry
+  route: OpenIncomeEntry
+}
+
+train (급여 입력해) {
+  goal: OpenIncomeEntry
+  route: OpenIncomeEntry
+}

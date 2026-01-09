@@ -1,0 +1,18 @@
+// 간편 지출(1줄) 저장 확인
+// 충돌 방지를 위해 "저장해" 같은 짧은 발화는 제외하고 기능을 명시합니다.
+
+train (간편 지출 저장해) {
+  action { ConfirmAddQuickSimpleExpense }
+}
+
+train (간편지출 저장해) {
+  action { ConfirmAddQuickSimpleExpense }
+}
+
+train ((TransactionDescription) (TransactionAmount)원 간편 지출 저장해) {
+  action { ConfirmAddQuickSimpleExpense }
+}
+
+train ((TransactionAmount)원 간편 지출 저장해) {
+  action { ConfirmAddQuickSimpleExpense }
+}

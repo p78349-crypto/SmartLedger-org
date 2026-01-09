@@ -24,10 +24,18 @@ iPhone/iPad에서 Siri를 통해 SmartLedger를 음성으로 제어할 수 있�
 # Samsung Bixby
 "빅스비, 지출 기록해"
 "빅스비, 커피 5천원 지출"
+"빅스비, 커피 2잔 단가 2500원 지출 저장해"
 
 # Apple Siri
 "시리야, SmartLedger 지출 기록"
 "시리야, SmartLedger에서 지출 추가"
+```
+
+### 반품/환불 입력
+```
+# Samsung Bixby
+"빅스비, 커피 5000원 반품 저장해"
+"빅스비, 옷 3만원 환불 저장해"
 ```
 
 ### 수입 입력
@@ -84,6 +92,12 @@ smartledger://transaction/add?type=expense
 smartledger://transaction/add?type=expense&amount=5000
 smartledger://transaction/add?type=expense&amount=5000&description=커피
 smartledger://transaction/add?type=income&amount=3000000
+
+# 수량/단위/단가
+smartledger://transaction/add?type=expense&description=커피&quantity=2&unit=잔&unitPrice=2500
+
+# 반품/환불
+smartledger://transaction/add?type=refund&amount=5000&description=커피
 ```
 
 ### 대시보드
@@ -103,6 +117,144 @@ smartledger://feature/savings          # 저축 계획
 smartledger://feature/emergency_fund   # 비상금
 smartledger://feature/stats            # 통계
 ```
+
+---
+
+## 음성 기반 3단계 자동화(Preview → Confirm → App Auto-Submit)
+
+SmartLedger는 음성에서 “바로 실행”을 목표로 하되, 상태 변경(저장/차감)은 안전을 위해 `confirmed=true`를 요구합니다.
+즉, Bixby(또는 다른 어시스턴트)는 기본적으로 2단계 확인(미리보기 → 확인)을 거쳐 `confirmed` 딥링크를 반환하고,
+앱은 `autoSubmit=true&confirmed=true`일 때만 자동 저장/자동 차감을 수행합니다.
+
+### 1) Deep Link + 화이트리스트로 화면 진입
+앱은 `smartledger://nav/open` 형태로 **허용된 route만** 열 수 있습니다.
+
+예: 유통기한 등록(프리필 포함)
+```
+smartledger://nav/open?route=/food/expiry&intent=upsert&name=우유&quantity=1&unit=팩&expiryDays=1
+```
+
+예: 보관 위치만 포함(프리필)
+```
+smartledger://nav/open?route=/food/expiry&intent=upsert&name=우유&location=냉장
+```
+
+예: 가격 포함(프리필)
+```
+smartledger://nav/open?route=/food/expiry&intent=upsert&name=우유&price=3900
+```
+
+예: 카테고리 포함(프리필)
+```
+smartledger://nav/open?route=/food/expiry&intent=upsert&name=우유&category=유제품
+```
+
+예: 구매처 포함(프리필)
+```
+smartledger://nav/open?route=/food/expiry&intent=upsert&name=우유&supplier=이마트
+```
+
+예: 메모 포함(프리필)
+```
+smartledger://nav/open?route=/food/expiry&intent=upsert&name=우유&memo=행사상품
+```
+
+예: 구매일 포함(프리필)
+```
+smartledger://nav/open?route=/food/expiry&intent=upsert&name=우유&purchaseDate=오늘
+```
+
+예: 건강 태그 포함(프리필)
+```
+smartledger://nav/open?route=/food/expiry&intent=upsert&name=우유&healthTags=당류
+```
+
+권장 발화 예시(Bixby)
+ - "요거트 메모 행사라서요! 내일 등록해"
+ - "우유 메모 1+1이라서요 등록해"
+- "우유 메모 행사라서 등록해"
+- "오늘 산 우유 내일 등록해"
+- "어제 산 요거트 등록해"
+- "방금 산 치즈 모레 등록해"
+- "우유 오늘까지 등록해"
+- "치즈 내일까지 등록해"
+- "요거트 이번주까지 등록해"
+- "우유 주말까지 등록해"
+- "치즈 토요일까지 등록해"
+- "요거트 일요일까지 등록해"
+
+카테고리 값 예시(앱 선택지 기준)
+
+파라미터 호환(동일 의미)
+- `name` 또는 `item` 또는 `product`
+- `quantity` 또는 `qty`
+- `expiryDate` 또는 `expiry` (ISO-8601, 예: 2026-01-10)
+- `expiryDays` 또는 `days` (상대 일수)
+
+추가 프리필 파라미터
+- `supplier` (구매처/구입처)
+- `memo` (메모)
+- `purchaseDate` (구매일 - 예: 오늘/어제/2026-01-09/1월 3일)
+- `healthTags` (건강 태그 - 예: 탄수화물, 당류, 주류)
+
+추가 예: 레시피 추천 섹션으로 이동(네비게이션 전용, 상태 변경 없음)
+```
+smartledger://nav/open?route=/food/expiry&intent=recipe_recommendation
+```
+
+권장 발화 예시(Bixby)
+- "레시피 추천해줘"
+- "뭐 해먹지"
+- "오늘 뭐 먹을까"
+
+추가 예: 보관 중인 식재료 요리 피커 열기(네비게이션 전용, 상태 변경 없음)
+```
+smartledger://nav/open?route=/food/expiry&intent=cookable_recipe_picker
+```
+
+권장 발화 예시(Bixby)
+- "냉장고 재료로 요리 추천해줘"
+- "보관 중인 식재료로 요리 보여줘"
+
+추가 예: 유통기한 사용(차감) 모드 열기(네비게이션 전용, 상태 변경 없음)
+```
+smartledger://nav/open?route=/food/expiry&intent=usage_mode
+```
+
+권장 발화 예시(Bixby)
+- "유통기한 사용 모드 열어"
+- "식재료 차감 모드 열어"
+
+### 2) Intent 기반 프리필(Pre-fill) + 자동 저장
+자동 저장을 원할 경우, 어시스턴트는 아래처럼 `autoSubmit=true`를 포함해 호출합니다.
+
+```
+smartledger://nav/open?route=/food/expiry&intent=upsert&name=우유&quantity=1&unit=팩&expiryDays=1&autoSubmit=true
+```
+
+앱 안전 정책
+- `autoSubmit=true`인데 `confirmed=true`가 없으면: 앱이 **자체 확인 다이얼로그**를 한 번 더 띄운 뒤에만 자동 등록을 진행합니다.
+- `autoSubmit=true&confirmed=true`이면: 앱 진입 후 자동 등록을 시도합니다.
+
+확인 완료(confirmed) 호출 예시
+```
+smartledger://nav/open?route=/food/expiry&intent=upsert&name=우유&quantity=1&unit=팩&expiryDays=1&autoSubmit=true&confirmed=true
+```
+
+### 3) Bixby 자연어 날짜 인식 보강
+Bixby는 날짜 표현을 개념(예: `ExpiryPhrase`, `ExpiryDays`)으로 파싱한 뒤, 앱에는 `expiryDate`(절대일자) 또는 `expiryDays`(상대일수)로 전달하는 방식을 권장합니다.
+
+권장 발화 패턴 예시
+- "내일 우유 등록해"
+- "모레 아욱 등록해"
+- "3일 뒤에 치즈 등록"
+- "1월 20일에 요구르트 등록"
+
+### 전체 UX 예시(권장)
+1) 사용자: "우유 1팩 내일 등록해줘"
+2) Bixby: 미리보기 카드로 요약(등록 내용) 표시
+3) 사용자: "응, 등록해" (Confirm)
+4) Bixby: `confirmed=true` 딥링크 반환 + "앱 열기"로 이어서 진행 유도
 
 ---
 

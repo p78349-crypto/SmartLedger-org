@@ -1,0 +1,44 @@
+// ConfirmUseStock 트레이닝 데이터
+// 재고 차감 미리보기 이후 확인 발화
+
+train ([팽이버섯](~ProductName) [1](~StockAmount)[봉](~StockUnit) 차감해) {
+  goal: ConfirmUseStock
+  route: ConfirmUseStock
+}
+
+train ([양파](~ProductName) [2](~StockAmount)[개](~StockUnit) 차감해) {
+  goal: ConfirmUseStock
+  route: ConfirmUseStock
+}
+
+train ([사태살](~ProductName) [반](~StockAmount)[개](~StockUnit) 차감해) {
+  goal: ConfirmUseStock
+  route: ConfirmUseStock
+}
+
+train ([아욱](~ProductName) [세](~StockAmount)[줌](~StockUnit) 차감해) {
+  goal: ConfirmUseStock
+  route: ConfirmUseStock
+}
+
+train ([팽이버섯](~ProductName) 전량 차감해) {
+  goal: ConfirmUseStock
+  route: ConfirmUseStock
+}
+
+// 컨텍스트만으로는 모호할 수 있어 '전량'을 포함한 확인 문장만 추가
+train (전량 차감해) {
+  goal: ConfirmUseStock
+  route: ConfirmUseStock
+}
+
+// 사용자 습관 문장(저장해)을 productName 포함 형태로만 추가해 모호성을 줄임
+train ([사태살](~ProductName) 저장해) {
+  goal: ConfirmUseStock
+  route: ConfirmUseStock
+}
+
+train ([아욱](~ProductName) 저장해) {
+  goal: ConfirmUseStock
+  route: ConfirmUseStock
+}

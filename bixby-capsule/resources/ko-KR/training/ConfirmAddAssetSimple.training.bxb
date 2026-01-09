@@ -1,0 +1,24 @@
+train ([통장](name) 자산 [100000](viv.core.Integer:AssetAmount)원 자산 저장해) {
+  goal: ConfirmAddAssetSimple
+  route: ConfirmAddAssetSimple
+}
+
+train ([현금](AssetCategory) [통장](name) 자산 [100000](viv.core.Integer:AssetAmount)원 자산 저장해) {
+  goal: ConfirmAddAssetSimple
+  route: ConfirmAddAssetSimple
+}
+
+train (자산 저장해) {
+  goal: ConfirmAddAssetSimple
+  route: ConfirmAddAssetSimple
+}
+
+train (자산 저장해줘) {
+  goal: ConfirmAddAssetSimple
+  route: ConfirmAddAssetSimple
+}
+
+train (자산 등록해) {
+  goal: ConfirmAddAssetSimple
+  route: ConfirmAddAssetSimple
+}

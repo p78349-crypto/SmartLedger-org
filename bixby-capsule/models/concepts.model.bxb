@@ -10,8 +10,26 @@ decimal (TransactionAmount) {
   min (0)
 }
 
+decimal (TransactionQuantity) {
+  description (거래 수량)
+  min (0)
+}
+
+text (TransactionUnit) {
+  description (거래 단위 - 개, 잔, kg 등)
+}
+
+decimal (TransactionUnitPrice) {
+  description (단가)
+  min (0)
+}
+
 text (TransactionDescription) {
   description (상품명 또는 거래 설명)
+}
+
+text (TransactionMemo) {
+  description (거래 메모)
 }
 
 text (CategoryName) {
@@ -23,6 +41,7 @@ enum (TransactionType) {
   symbol (expense) { description (지출) }
   symbol (income) { description (수입) }
   symbol (savings) { description (저축) }
+  symbol (refund) { description (반품/환불) }
 }
 
 enum (FeatureType) {
@@ -31,23 +50,61 @@ enum (FeatureType) {
   symbol (food_expiry) { description (유통기한) }
   symbol (food_expiry_upsert) { description (식재료 등록) }
   symbol (shopping_cart) { description (장바구니) }
+  symbol (shopping_points_input) { description (포인트 입력) }
   symbol (shopping_prep) { description (쇼핑준비) }
   symbol (assets) { description (자산) }
   symbol (recipe) { description (레시피) }
   symbol (transaction_add) { description (지출입력) }
   symbol (transaction_add_income) { description (수입입력) }
   symbol (transaction_add_detailed) { description (상세입력) }
+  symbol (quick_simple_expense_input) { description (간편 지출) }
   symbol (daily_transactions) { description (일일내역) }
+  symbol (income_detail) { description (수입 상세) }
+  symbol (income_split) { description (수입배분) }
+  symbol (refunds) { description (반품) }
+  symbol (project_100m) { description (1억 프로젝트) }
+  symbol (weather_manual_input) { description (날씨 입력) }
+  symbol (stats_overview) { description (통계) }
+  symbol (fixed_cost_stats) { description (고정비 통계) }
+  symbol (period_stats_week) { description (주간 리포트) }
+  symbol (period_stats_month) { description (월간 리포트) }
+  symbol (period_stats_quarter) { description (분기 리포트) }
+  symbol (period_stats_half_year) { description (반기 리포트) }
+  symbol (period_stats_year) { description (연간 리포트) }
+  symbol (period_stats_decade) { description (10년) }
+  symbol (stats_search) { description (통계 검색) }
+  symbol (shopping_cheapest_month) { description (최저가 달) }
   symbol (monthly_stats) { description (월간통계) }
   symbol (spending_analysis) { description (소비분석) }
   symbol (card_discount_stats) { description (카드할인통계) }
   symbol (points_motivation_stats) { description (포인트통계) }
+  symbol (weather_price_prediction) { description (날씨 기반 가격 예측) }
   symbol (savings_plan) { description (저축플랜) }
   symbol (emergency_fund) { description (비상금) }
   symbol (quick_stock) { description (빠른재고차감) }
   symbol (consumables) { description (소모품) }
   symbol (consumable_inventory) { description (재고목록) }
   symbol (calendar) { description (캘린더) }
+
+  symbol (asset_input) { description (자산 입력) }
+  symbol (asset_allocation) { description (자산 배분) }
+  symbol (asset_management) { description (자산 평가) }
+  symbol (icon_management_asset) { description (자산 아이콘 관리) }
+
+  symbol (root_transactions) { description (전체 거래) }
+  symbol (root_search) { description (루트 검색) }
+  symbol (root_account_manage) { description (계정 관리) }
+  symbol (root_month_end) { description (월말 정산) }
+  symbol (screen_saver_settings) { description (보호기 설정) }
+  symbol (icon_management_root) { description (루트 아이콘 관리) }
+
+  symbol (application_settings) { description (애플리케이션 설정) }
+  symbol (theme_settings) { description (테마) }
+  symbol (display_settings) { description (표시/폰트) }
+  symbol (language_settings) { description (언어 설정) }
+  symbol (currency_settings) { description (통화 설정) }
+
+  symbol (nutrition_report) { description (레시피/식재료 검색) }
   symbol (settings) { description (설정) }
   symbol (backup) { description (백업) }
   symbol (trash) { description (휴지통) }
@@ -87,14 +144,79 @@ text (StorageLocationName) {
   description (보관 위치 - 냉장/냉동/실온/팬트리)
 }
 
+text (FoodExpiryCategoryName) {
+  description (식재료 분류 - 채소/과일/육류/유제품 등)
+}
+
+text (FoodExpirySupplierName) {
+  description (구매처/구입처 - 마트/온라인/가게명)
+}
+
+text (FoodExpiryMemo) {
+  description (메모 - 예: 행사상품/1+1/브랜드 등)
+}
+
+text (FoodExpiryPurchaseDateText) {
+  description (구매일 표현 - 오늘/어제/2026-01-09/1월 3일 등)
+}
+
+text (FoodExpiryHealthTagsText) {
+  description (건강 태그 - 예: 탄수화물/당류/주류)
+}
+
 decimal (ExpiryDays) {
   description (유통기한까지 남은 일수)
   min (0)
 }
 
+text (ExpiryPhrase) {
+  description (유통기한 표현 - 오늘/내일/모레/3일 뒤/1월 20일 등)
+}
+
 decimal (ItemPrice) {
   description (가격)
   min (0)
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 자산 입력(간편) 관련 개념
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+decimal (AssetAmount) {
+  description (자산 금액)
+  min (0)
+}
+
+text (AssetName) {
+  description (자산명)
+}
+
+text (AssetLocation) {
+  description (위치 - 은행/앱/보관장소)
+}
+
+text (AssetMemo) {
+  description (자산 메모)
+}
+
+enum (AssetCategory) {
+  description (자산 종류)
+  symbol (cash) { description (현금) }
+  symbol (deposit) { description (예금/적금) }
+  symbol (stock) { description (소액 투자) }
+  symbol (other) { description (기타 실물 자산) }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 간편 지출(1줄) 관련 개념
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+text (QuickExpensePayment) {
+  description (결제 수단 - 신용카드/현금/계좌이체/페이 등)
+}
+
+text (QuickExpenseStore) {
+  description (매장/상호)
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -148,12 +270,147 @@ structure (TransactionAddPreviewResult) {
     type (TransactionAmount)
     min (Optional)
   }
+  property (quantity) {
+    type (TransactionQuantity)
+    min (Optional)
+  }
+  property (unit) {
+    type (TransactionUnit)
+    min (Optional)
+  }
+  property (unitPrice) {
+    type (TransactionUnitPrice)
+    min (Optional)
+  }
   property (description) {
     type (TransactionDescription)
     min (Optional)
   }
   property (category) {
     type (CategoryName)
+    min (Optional)
+  }
+  property (memo) {
+    type (TransactionMemo)
+    min (Optional)
+  }
+  property (paymentMethod) {
+    type (QuickExpensePayment)
+    min (Optional)
+  }
+  property (store) {
+    type (QuickExpenseStore)
+    min (Optional)
+  }
+  property (message) {
+    type (core.Text)
+    min (Optional)
+  }
+}
+
+// 식재료/생활용품 등록 미리보기 (확인 단계)
+structure (FoodExpiryUpsertPreviewResult) {
+  description (식재료/생활용품 등록 미리보기)
+  property (name) {
+    type (FoodExpiryItemName)
+    min (Required)
+  }
+  property (quantity) {
+    type (FoodExpiryItemQuantity)
+    min (Optional)
+  }
+  property (unit) {
+    type (FoodExpiryItemUnit)
+    min (Optional)
+  }
+  property (location) {
+    type (StorageLocationName)
+    min (Optional)
+  }
+  property (category) {
+    type (FoodExpiryCategoryName)
+    min (Optional)
+  }
+  property (supplier) {
+    type (FoodExpirySupplierName)
+    min (Optional)
+  }
+  property (memo) {
+    type (FoodExpiryMemo)
+    min (Optional)
+  }
+  property (purchaseDateText) {
+    type (FoodExpiryPurchaseDateText)
+    min (Optional)
+  }
+  property (healthTagsText) {
+    type (FoodExpiryHealthTagsText)
+    min (Optional)
+  }
+  property (expiryDays) {
+    type (ExpiryDays)
+    min (Optional)
+  }
+  property (price) {
+    type (ItemPrice)
+    min (Optional)
+  }
+  property (message) {
+    type (core.Text)
+    min (Optional)
+  }
+}
+
+// 자산 입력(간편) 미리보기 (확인 단계)
+structure (AssetAddPreviewResult) {
+  description (자산 입력 미리보기)
+  property (category) {
+    type (AssetCategory)
+    min (Optional)
+  }
+  property (name) {
+    type (AssetName)
+    min (Required)
+  }
+  property (amount) {
+    type (AssetAmount)
+    min (Required)
+  }
+  property (location) {
+    type (AssetLocation)
+    min (Optional)
+  }
+  property (memo) {
+    type (AssetMemo)
+    min (Optional)
+  }
+  property (message) {
+    type (core.Text)
+    min (Optional)
+  }
+}
+
+// 간편 지출(1줄) 미리보기 (확인 단계)
+structure (QuickSimpleExpenseAddPreviewResult) {
+  description (간편 지출 저장 미리보기)
+  property (amount) {
+    type (TransactionAmount)
+    min (Optional)
+  }
+  property (description) {
+    type (TransactionDescription)
+    min (Optional)
+  }
+  property (payment) {
+    type (QuickExpensePayment)
+    min (Optional)
+  }
+  property (store) {
+    type (QuickExpenseStore)
+    min (Optional)
+  }
+  property (rawLine) {
+    type (core.Text)
     min (Optional)
   }
   property (message) {
@@ -195,5 +452,26 @@ structure (StockCheckResult) {
   property (deepLink) {
     type (core.Text)
     min (Required)
+  }
+}
+
+// 재고 차감 미리보기 (확인 단계)
+structure (UseStockPreviewResult) {
+  description (재고 차감 미리보기)
+  property (productName) {
+    type (ProductName)
+    min (Required)
+  }
+  property (amount) {
+    type (StockAmount)
+    min (Optional)
+  }
+  property (unit) {
+    type (StockUnit)
+    min (Optional)
+  }
+  property (message) {
+    type (core.Text)
+    min (Optional)
   }
 }

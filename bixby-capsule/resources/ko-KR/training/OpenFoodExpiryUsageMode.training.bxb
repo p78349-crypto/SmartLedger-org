@@ -1,0 +1,24 @@
+train (유통기한 사용 모드 열어) {
+  goal: OpenFoodExpiryUsageMode
+  route: OpenFoodExpiryUsageMode
+}
+
+train (유통기한 차감 모드 열어) {
+  goal: OpenFoodExpiryUsageMode
+  route: OpenFoodExpiryUsageMode
+}
+
+train (식재료 사용 모드 열어) {
+  goal: OpenFoodExpiryUsageMode
+  route: OpenFoodExpiryUsageMode
+}
+
+train (냉장고 재료 차감 모드 열어) {
+  goal: OpenFoodExpiryUsageMode
+  route: OpenFoodExpiryUsageMode
+}
+
+train (스마트렛저 유통기한 사용 모드 열어) {
+  goal: OpenFoodExpiryUsageMode
+  route: OpenFoodExpiryUsageMode
+}

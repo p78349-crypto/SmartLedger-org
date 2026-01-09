@@ -1,0 +1,18 @@
+// 간편 지출(1줄) 미리보기
+// 예: "간편 지출 커피 3000원 저장"
+
+train (간편 지출 (TransactionDescription) (TransactionAmount)원 저장) {
+  action { AddQuickSimpleExpense }
+}
+
+train (1줄 지출 (TransactionDescription) (TransactionAmount)원 저장) {
+  action { AddQuickSimpleExpense }
+}
+
+train (간편지출 (TransactionDescription) (TransactionAmount)원 저장) {
+  action { AddQuickSimpleExpense }
+}
+
+train (간편 지출 (TransactionAmount)원 저장) {
+  action { AddQuickSimpleExpense }
+}

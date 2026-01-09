@@ -6,7 +6,23 @@ import '../widgets/smart_input_field.dart';
 
 class AssetSimpleInputScreen extends StatefulWidget {
   final String accountName;
-  const AssetSimpleInputScreen({super.key, required this.accountName});
+  const AssetSimpleInputScreen({
+    super.key,
+    required this.accountName,
+    this.initialCategory,
+    this.initialName,
+    this.initialAmount,
+    this.initialLocation,
+    this.initialMemo,
+    this.autoSubmitOnStart = false,
+  });
+
+  final String? initialCategory;
+  final String? initialName;
+  final double? initialAmount;
+  final String? initialLocation;
+  final String? initialMemo;
+  final bool autoSubmitOnStart;
 
   @override
   State<AssetSimpleInputScreen> createState() => _AssetSimpleInputScreenState();
@@ -29,6 +45,29 @@ class _AssetSimpleInputScreenState extends State<AssetSimpleInputScreen> {
   @override
   void initState() {
     super.initState();
+    final category = (widget.initialCategory ?? '').trim();
+    if (category.isNotEmpty) {
+      _category = category;
+    }
+    final initialName = (widget.initialName ?? '').trim();
+    if (initialName.isNotEmpty) {
+      _nameController.text = initialName;
+    }
+    final initialAmount = widget.initialAmount;
+    if (initialAmount != null) {
+      final amountText = initialAmount == initialAmount.roundToDouble()
+          ? initialAmount.toStringAsFixed(0)
+          : initialAmount.toString();
+      _amountController.text = amountText;
+    }
+    final initialLocation = (widget.initialLocation ?? '').trim();
+    if (initialLocation.isNotEmpty) {
+      _locationController.text = initialLocation;
+    }
+    final initialMemo = (widget.initialMemo ?? '').trim();
+    if (initialMemo.isNotEmpty) {
+      _memoController.text = initialMemo;
+    }
     _loadRecentMemos();
   }
 
@@ -54,6 +93,14 @@ class _AssetSimpleInputScreenState extends State<AssetSimpleInputScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _captureInitialSnapshotIfNeeded();
     });
+
+    if (widget.autoSubmitOnStart) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _submit();
+        }
+      });
+    }
   }
 
   void _captureInitialSnapshotIfNeeded() {

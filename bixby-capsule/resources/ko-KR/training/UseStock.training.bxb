@@ -41,6 +41,17 @@ train ([대파](~ProductName) [반](~StockAmount)[단](~StockUnit) 사용했어)
   route: UseStock
 }
 
+// Top 문장 보강: "반 개" / "줌" / 식재료 고유명사
+train ([사태살](~ProductName) [반](~StockAmount)[개](~StockUnit) 썼어) {
+  goal: UseStock
+  route: UseStock
+}
+
+train ([아욱](~ProductName) [세](~StockAmount)[줌](~StockUnit) 썼어) {
+  goal: UseStock
+  route: UseStock
+}
+
 train ([당근](~ProductName) [1](~StockAmount)[개](~StockUnit) 썼어) {
   goal: UseStock
   route: UseStock
@@ -155,22 +166,6 @@ train ([우유](~ProductName) 전량 사용) {
 }
 
 train ([우유](~ProductName) 다 마셨어) {
-  goal: UseStock
-  route: UseStock
-}
-
-// 재고 조회 직후 확인 응답 (컨텍스트에서 productName을 이어받아 전량 처리)
-train (응) {
-  goal: UseStock
-  route: UseStock
-}
-
-train (그래) {
-  goal: UseStock
-  route: UseStock
-}
-
-train (좋아) {
   goal: UseStock
   route: UseStock
 }

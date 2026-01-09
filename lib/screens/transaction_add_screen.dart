@@ -59,6 +59,7 @@ class TransactionAddScreen extends StatefulWidget {
   final bool treatAsNew;
   final bool closeAfterSave;
   final bool autoSubmit;
+  final bool openReceiptScannerOnStart;
   const TransactionAddScreen({
     super.key,
     required this.accountName,
@@ -68,6 +69,7 @@ class TransactionAddScreen extends StatefulWidget {
     this.treatAsNew = false,
     this.closeAfterSave = false,
     this.autoSubmit = false,
+    this.openReceiptScannerOnStart = false,
   });
 
   @override
@@ -83,6 +85,18 @@ class _TransactionAddScreenState extends State<TransactionAddScreen> {
     if (widget.autoSubmit) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         unawaited(_formStateKey.currentState?.triggerAutoSubmit());
+      });
+    }
+
+    if (widget.openReceiptScannerOnStart) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        // No OCR/auto camera start is implemented here yet.
+        // This is a safe hook point for assistant-triggered flows.
+        SnackbarUtils.showInfo(
+          context,
+          '영수증 스캔을 시작하려면 영수증/카메라 버튼을 눌러주세요.',
+        );
       });
     }
   }

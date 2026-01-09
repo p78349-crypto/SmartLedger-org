@@ -24,12 +24,22 @@ module.exports.function = function openFeature(featureType, $vivContext) {
     '재료 등록': 'food_expiry_upsert',
     '우리집 식재료 등록': 'food_expiry_upsert',
     '우리집 생활용품 등록': 'food_expiry_upsert',
+    '유통기한 등록': 'food_expiry_upsert',
+    '유통기한 입력': 'food_expiry_upsert',
+    '유통기한 등록 화면': 'food_expiry_upsert',
     
     // 장바구니 관련
     '장바구니': 'shopping_cart',
     '쇼핑리스트': 'shopping_cart',
     '쇼핑목록': 'shopping_cart',
     '구매목록': 'shopping_cart',
+
+    // 포인트 입력
+    '포인트 입력': 'shopping_points_input',
+    '포인트입력': 'shopping_points_input',
+    '쇼핑 포인트 입력': 'shopping_points_input',
+    '포인트 기록': 'shopping_points_input',
+    '포인트 등록': 'shopping_points_input',
 
     // 쇼핑 준비
     '쇼핑준비': 'shopping_prep',
@@ -66,6 +76,12 @@ module.exports.function = function openFeature(featureType, $vivContext) {
     // 일일내역
     '일일내역': 'daily_transactions',
     '오늘 내역': 'daily_transactions',
+    '오늘 지출': 'daily_transactions',
+    '일일지출': 'daily_transactions',
+    '오늘 소비': 'daily_transactions',
+    '오늘 쓴 돈': 'daily_transactions',
+    '오늘 지출 내역': 'daily_transactions',
+    '오늘 소비 내역': 'daily_transactions',
 
     // 통계/분석
     '월간통계': 'monthly_stats',

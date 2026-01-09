@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/services.dart';
+import '../models/transaction.dart';
 
 /// Service for handling deep links from App Actions, Bixby, and other sources.
 ///
@@ -9,6 +10,7 @@ import 'package:flutter/services.dart';
 /// - `smartledger://transaction/add?type=income&amount=3000000`
 /// - `smartledger://transaction/add?type=expense&amount=5000&description=커피&autoSubmit=true` (거래 저장: 확인 필요)
 /// - `smartledger://transaction/add?type=expense&amount=5000&description=커피&autoSubmit=true&confirmed=true` (거래 저장: 확인 완료)
+  /// - `smartledger://transaction/add?type=expense&action=scan` (영수증 스캔(훅): 화면 열고 스캔 시작 유도)
 /// - `smartledger://dashboard`
 /// - `smartledger://feature/food_expiry`
 /// - `smartledger://feature/shopping_cart`
@@ -80,11 +82,21 @@ class DeepLinkService {
           return DeepLinkAction.addTransaction(
             type: params['type'] ?? 'expense',
             amount: double.tryParse(params['amount'] ?? ''),
+            quantity: double.tryParse(params['quantity'] ?? ''),
+            unit: params['unit'],
+            unitPrice: double.tryParse(params['unitPrice'] ?? ''),
             description: params['description'],
             category: params['category'],
+            paymentMethod: params['paymentMethod'] ?? params['payment'],
+            store: params['store'],
+            memo: params['memo'],
+            savingsAllocation: _parseSavingsAllocation(params['savingsAllocation']),
             currency: params['currency'] ?? 'KRW',
             autoSubmit: params['autoSubmit'] == 'true',
             confirmed: params['confirmed'] == 'true',
+            openReceiptScannerOnStart:
+                (params['action'] ?? '').trim().toLowerCase() == 'scan' ||
+                (params['intent'] ?? '').trim().toLowerCase() == 'scan_receipt',
           );
         }
         break;
@@ -158,11 +170,19 @@ sealed class DeepLinkAction {
   const factory DeepLinkAction.addTransaction({
     required String type,
     double? amount,
+    double? quantity,
+    String? unit,
+    double? unitPrice,
     String? description,
     String? category,
+    String? paymentMethod,
+    String? store,
+    String? memo,
+    SavingsAllocation? savingsAllocation,
     String currency,
     bool autoSubmit,
     bool confirmed,
+    bool openReceiptScannerOnStart,
   }) = AddTransactionAction;
 
   const factory DeepLinkAction.openDashboard() = OpenDashboardAction;
@@ -193,31 +213,67 @@ sealed class DeepLinkAction {
 class AddTransactionAction extends DeepLinkAction {
   final String type; // 'expense' | 'income' | 'savings'
   final double? amount;
+  final double? quantity;
+  final String? unit;
+  final double? unitPrice;
   final String? description;
   final String? category;
+  final String? paymentMethod;
+  final String? store;
+  final String? memo;
+  final SavingsAllocation? savingsAllocation;
   final String currency;
   final bool autoSubmit;
   final bool confirmed;
+  final bool openReceiptScannerOnStart;
 
   const AddTransactionAction({
     required this.type,
     this.amount,
+    this.quantity,
+    this.unit,
+    this.unitPrice,
     this.description,
     this.category,
+    this.paymentMethod,
+    this.store,
+    this.memo,
+    this.savingsAllocation,
     this.currency = 'KRW',
     this.autoSubmit = false,
     this.confirmed = false,
+    this.openReceiptScannerOnStart = false,
   });
 
   bool get isExpense => type == 'expense';
   bool get isIncome => type == 'income';
   bool get isSavings => type == 'savings';
+  bool get isRefund => type == 'refund';
 
   @override
   String toString() =>
       'AddTransactionAction(type: $type, amount: $amount, '
+      'quantity: $quantity, unit: $unit, unitPrice: $unitPrice, '
       'description: $description, category: $category, '
-      'autoSubmit: $autoSubmit, confirmed: $confirmed)';
+      'paymentMethod: $paymentMethod, store: $store, '
+      'memo: $memo, savingsAllocation: $savingsAllocation, '
+      'autoSubmit: $autoSubmit, confirmed: $confirmed, '
+      'openReceiptScannerOnStart: $openReceiptScannerOnStart)';
+}
+
+SavingsAllocation? _parseSavingsAllocation(String? raw) {
+  if (raw == null) return null;
+  final normalized = raw.trim().toLowerCase();
+  switch (normalized) {
+    case 'assetincrease':
+    case 'asset_increase':
+    case 'asset':
+    case 'assetincreaseoption':
+      return SavingsAllocation.assetIncrease;
+    case 'expense':
+      return SavingsAllocation.expense;
+  }
+  return null;
 }
 
 class OpenDashboardAction extends DeepLinkAction {

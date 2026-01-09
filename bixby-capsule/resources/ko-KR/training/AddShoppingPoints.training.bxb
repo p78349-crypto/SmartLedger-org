@@ -1,0 +1,59 @@
+train (오늘 쇼핑 포인트 입력해줘) {
+  goal: AddShoppingPoints
+  route: AddShoppingPoints
+}
+
+train (쇼핑 포인트 입력해줘) {
+  goal: AddShoppingPoints
+  route: AddShoppingPoints
+}
+
+train (오늘 포인트 입력해줘) {
+  goal: AddShoppingPoints
+  route: AddShoppingPoints
+}
+
+train (포인트 입력해줘) {
+  goal: AddShoppingPoints
+  route: AddShoppingPoints
+}
+
+train (쇼핑 포인트 [5000](viv.core.Integer:TransactionAmount)원 입력해줘) {
+  goal: AddShoppingPoints
+  route: AddShoppingPoints
+}
+
+train (오늘 쇼핑 포인트 [5000](viv.core.Integer:TransactionAmount)원 입력해줘) {
+  goal: AddShoppingPoints
+  route: AddShoppingPoints
+}
+
+train (포인트 [5000](viv.core.Integer:TransactionAmount)원 입력해줘) {
+  goal: AddShoppingPoints
+  route: AddShoppingPoints
+}
+
+train (오늘 포인트 [5000](viv.core.Integer:TransactionAmount)원 입력해줘) {
+  goal: AddShoppingPoints
+  route: AddShoppingPoints
+}
+
+train (쇼핑 포인트 [5천](viv.core.Integer:TransactionAmount)원 적립했어) {
+  goal: AddShoppingPoints
+  route: AddShoppingPoints
+}
+
+train (오늘 쇼핑 포인트 [5천](viv.core.Integer:TransactionAmount)원 적립했어) {
+  goal: AddShoppingPoints
+  route: AddShoppingPoints
+}
+
+train ([이마트](raw.description) 포인트 [3000](viv.core.Integer:TransactionAmount)원 입력해줘) {
+  goal: AddShoppingPoints
+  route: AddShoppingPoints
+}
+
+train ([쿠팡](raw.description) 포인트 [3000](viv.core.Integer:TransactionAmount)원 입력해줘) {
+  goal: AddShoppingPoints
+  route: AddShoppingPoints
+}

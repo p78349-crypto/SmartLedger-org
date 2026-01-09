@@ -1,0 +1,54 @@
+train (레시피 추천해줘) {
+  goal: RecommendRecipe
+  route: RecommendRecipe
+}
+
+train (스마트렛저에서 레시피 추천해줘) {
+  goal: RecommendRecipe
+  route: RecommendRecipe
+}
+
+train (빅스비 레시피 추천해줘) {
+  goal: RecommendRecipe
+  route: RecommendRecipe
+}
+
+train (레시피 추천) {
+  goal: RecommendRecipe
+  route: RecommendRecipe
+}
+
+train (오늘 메뉴 추천해줘) {
+  goal: RecommendRecipe
+  route: RecommendRecipe
+}
+
+train (요리 메뉴 추천해줘) {
+  goal: RecommendRecipe
+  route: RecommendRecipe
+}
+
+train (오늘 요리 추천해줘) {
+  goal: RecommendRecipe
+  route: RecommendRecipe
+}
+
+train (뭐 해먹지) {
+  goal: RecommendRecipe
+  route: RecommendRecipe
+}
+
+train (스마트렛저 뭐 해먹지) {
+  goal: RecommendRecipe
+  route: RecommendRecipe
+}
+
+train (오늘 뭐 먹을까) {
+  goal: RecommendRecipe
+  route: RecommendRecipe
+}
+
+train (스마트렛저 오늘 뭐 먹을까) {
+  goal: RecommendRecipe
+  route: RecommendRecipe
+}

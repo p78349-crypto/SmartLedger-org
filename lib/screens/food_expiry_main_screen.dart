@@ -13,6 +13,7 @@ import '../models/shopping_cart_item.dart';
 import '../services/food_expiry_notification_service.dart';
 import '../services/food_expiry_prediction_engine.dart';
 import '../services/food_expiry_service.dart';
+import '../services/feedback_service.dart';
 import '../services/recipe_service.dart';
 import '../services/user_pref_service.dart';
 import '../services/health_guardrail_service.dart';
@@ -21,6 +22,7 @@ import '../services/savings_statistics_service.dart';
 import '../utils/currency_formatter.dart';
 import '../utils/icon_catalog.dart';
 import '../utils/interaction_blockers.dart';
+import '../utils/snackbar_utils.dart';
 import '../utils/shopping_prep_utils.dart';
 import 'savings_statistics_screen.dart';
 import 'cooking_usage_history_screen.dart';
@@ -37,6 +39,7 @@ class FoodExpiryMainScreen extends StatefulWidget {
   final bool autoUsageMode;
   final bool openUpsertOnStart;
   final bool openCookableRecipePickerOnStart;
+  final bool scrollToDailyRecipeRecommendationOnStart;
   final FoodExpiryUpsertPrefill? upsertPrefill;
   final bool upsertAutoSubmit;
 
@@ -46,6 +49,7 @@ class FoodExpiryMainScreen extends StatefulWidget {
     this.autoUsageMode = false,
     this.openUpsertOnStart = false,
     this.openCookableRecipePickerOnStart = false,
+    this.scrollToDailyRecipeRecommendationOnStart = false,
     this.upsertPrefill,
     this.upsertAutoSubmit = false,
   });
@@ -803,6 +807,8 @@ class _FoodExpiryMainScreenState extends State<FoodExpiryMainScreen> {
       initialIngredients: widget.initialIngredients,
       autoUsageMode: widget.autoUsageMode,
       openCookableRecipePickerOnStart: widget.openCookableRecipePickerOnStart,
+      scrollToDailyRecipeRecommendationOnStart:
+          widget.scrollToDailyRecipeRecommendationOnStart,
     ),
     const _FoodExpiryNotificationsScreen(),
     const CookingUsageHistoryScreen(),
@@ -1045,6 +1051,26 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
           _priceController.text = v == v.roundToDouble()
               ? v.toStringAsFixed(0)
               : v.toString();
+        }
+        if (p.supplier != null && p.supplier!.trim().isNotEmpty) {
+          _supplierController.text = p.supplier!.trim();
+        }
+        if (p.memo != null && p.memo!.trim().isNotEmpty) {
+          _memoController.text = p.memo!.trim();
+        }
+        if (p.purchaseDate != null) {
+          _purchaseDate = p.purchaseDate!;
+        }
+        if (p.healthTags != null && p.healthTags!.isNotEmpty) {
+          final allowed = HealthGuardrailService.defaultTags.toSet();
+          final next = <String>{..._healthTags};
+          for (final t in p.healthTags!) {
+            final tag = t.trim();
+            if (tag.isEmpty) continue;
+            if (!allowed.contains(tag)) continue;
+            next.add(tag);
+          }
+          _healthTags = next.toList();
         }
 
         if (widget.autoSubmit) {
@@ -1635,6 +1661,15 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
       );
     }
 
+    if (_importQueue.isEmpty) {
+      final message = await FeedbackService.getFoodExpirySavedMessageWithTemplate(
+        itemName: name,
+        expiryDate: effective,
+      );
+      if (!mounted) return;
+      SnackbarUtils.showSuccess(context, message);
+    }
+
     await _saveLastCategory(_category);
     await _saveLastLocation(_location);
     await _saveLastUnit(unit);
@@ -2060,12 +2095,14 @@ class _FoodExpiryItemsScreen extends StatefulWidget {
   final List<String>? initialIngredients;
   final bool autoUsageMode;
   final bool openCookableRecipePickerOnStart;
+  final bool scrollToDailyRecipeRecommendationOnStart;
 
   const _FoodExpiryItemsScreen({
     this.onUpsert,
     this.initialIngredients,
     this.autoUsageMode = false,
     this.openCookableRecipePickerOnStart = false,
+    this.scrollToDailyRecipeRecommendationOnStart = false,
   });
 
   @override
@@ -2076,6 +2113,8 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
   bool _isUsageMode = false;
   final Map<String, double> _usageMap = {};
   final Set<String> _activeUsageItems = {};
+
+  final GlobalKey _dailyRecipeSectionKey = GlobalKey();
 
   String? _activeRecipeName;
 
@@ -2182,6 +2221,19 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
     }
 
     _loadCountLikeUnits();
+
+    if (widget.scrollToDailyRecipeRecommendationOnStart) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final ctx = _dailyRecipeSectionKey.currentContext;
+        if (!mounted || ctx == null) return;
+        Scrollable.ensureVisible(
+          ctx,
+          alignment: 0.08,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOut,
+        );
+      });
+    }
 
     if (widget.openCookableRecipePickerOnStart) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -3134,7 +3186,10 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
                 ),
               ),
               // 오늘의 요리 추천 위젯
-              const DailyRecipeRecommendationWidget(),
+              KeyedSubtree(
+                key: _dailyRecipeSectionKey,
+                child: const DailyRecipeRecommendationWidget(),
+              ),
               // 식재료 추천 강화 위젯
               const IngredientsRecommendationWidget(),
               // 식단 계획 위젯

@@ -26,6 +26,21 @@ action (AddTransaction) {
       type (TransactionAmount)
       min (Optional)
     }
+
+    input (quantity) {
+      type (TransactionQuantity)
+      min (Optional)
+    }
+
+    input (unit) {
+      type (TransactionUnit)
+      min (Optional)
+    }
+
+    input (unitPrice) {
+      type (TransactionUnitPrice)
+      min (Optional)
+    }
     
     input (description) {
       type (TransactionDescription)
@@ -34,6 +49,21 @@ action (AddTransaction) {
     
     input (category) {
       type (CategoryName)
+      min (Optional)
+    }
+
+    input (memo) {
+      type (TransactionMemo)
+      min (Optional)
+    }
+
+    input (paymentMethod) {
+      type (QuickExpensePayment)
+      min (Optional)
+    }
+
+    input (store) {
+      type (QuickExpenseStore)
       min (Optional)
     }
   }
@@ -67,6 +97,21 @@ action (ConfirmAddTransaction) {
       min (Optional)
     }
 
+    input (quantity) {
+      type (TransactionQuantity)
+      min (Optional)
+    }
+
+    input (unit) {
+      type (TransactionUnit)
+      min (Optional)
+    }
+
+    input (unitPrice) {
+      type (TransactionUnitPrice)
+      min (Optional)
+    }
+
     input (description) {
       type (TransactionDescription)
       min (Optional)
@@ -74,6 +119,227 @@ action (ConfirmAddTransaction) {
 
     input (category) {
       type (CategoryName)
+      min (Optional)
+    }
+
+    input (memo) {
+      type (TransactionMemo)
+      min (Optional)
+    }
+
+    input (paymentMethod) {
+      type (QuickExpensePayment)
+      min (Optional)
+    }
+
+    input (store) {
+      type (QuickExpenseStore)
+      min (Optional)
+    }
+  }
+
+  output (AppLaunchResult)
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 쇼핑 포인트 입력 (저축/자산증가 + #포인트모으기)
+// "오늘 쇼핑 포인트 입력해줘" → 미리보기
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+action (AddShoppingPoints) {
+  description (쇼핑 포인트를 기록합니다)
+  type (Search)
+
+  collect {
+    input (amount) {
+      type (TransactionAmount)
+      min (Required)
+    }
+
+    input (description) {
+      type (TransactionDescription)
+      min (Optional)
+    }
+  }
+
+  output (TransactionAddPreviewResult)
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 쇼핑 포인트 입력 확인
+// "저장해" / "입력해" → confirmed=true 딥링크 반환
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+action (ConfirmAddShoppingPoints) {
+  description (쇼핑 포인트 입력을 확인하고 실행합니다)
+  type (Search)
+
+  collect {
+    input (amount) {
+      type (TransactionAmount)
+      min (Required)
+    }
+
+    input (description) {
+      type (TransactionDescription)
+      min (Optional)
+    }
+  }
+
+  output (AppLaunchResult)
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 자산 입력(간편) - 미리보기
+// "자산 10만원 추가해" → 미리보기
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+action (AddAssetSimple) {
+  description (자산을 기록합니다)
+  type (Search)
+
+  collect {
+    input (amount) {
+      type (AssetAmount)
+      min (Required)
+    }
+
+    input (name) {
+      type (AssetName)
+      min (Required)
+    }
+
+    input (category) {
+      type (AssetCategory)
+      min (Optional)
+      default-init {
+        intent {
+          goal: AssetCategory
+          value: AssetCategory(cash)
+        }
+      }
+    }
+
+    input (location) {
+      type (AssetLocation)
+      min (Optional)
+    }
+
+    input (memo) {
+      type (AssetMemo)
+      min (Optional)
+    }
+  }
+
+  output (AssetAddPreviewResult)
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 자산 입력(간편) - 확인
+// "자산 저장해" → confirmed=true 딥링크 반환
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+action (ConfirmAddAssetSimple) {
+  description (자산 저장을 확인하고 실행합니다)
+  type (Search)
+
+  collect {
+    input (amount) {
+      type (AssetAmount)
+      min (Required)
+    }
+
+    input (name) {
+      type (AssetName)
+      min (Required)
+    }
+
+    input (category) {
+      type (AssetCategory)
+      min (Optional)
+      default-init {
+        intent {
+          goal: AssetCategory
+          value: AssetCategory(cash)
+        }
+      }
+    }
+
+    input (location) {
+      type (AssetLocation)
+      min (Optional)
+    }
+
+    input (memo) {
+      type (AssetMemo)
+      min (Optional)
+    }
+  }
+
+  output (AppLaunchResult)
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 간편 지출(1줄) - 미리보기
+// "간편 지출 커피 3000원 저장" → 미리보기
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+action (AddQuickSimpleExpense) {
+  description (간편 지출(1줄)을 기록합니다)
+  type (Search)
+
+  collect {
+    input (amount) {
+      type (TransactionAmount)
+      min (Required)
+    }
+
+    input (description) {
+      type (TransactionDescription)
+      min (Optional)
+    }
+
+    input (payment) {
+      type (QuickExpensePayment)
+      min (Optional)
+    }
+
+    input (store) {
+      type (QuickExpenseStore)
+      min (Optional)
+    }
+  }
+
+  output (QuickSimpleExpenseAddPreviewResult)
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 간편 지출(1줄) - 확인
+// "간편 지출 저장해" → confirmed=true 딥링크 반환
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+action (ConfirmAddQuickSimpleExpense) {
+  description (간편 지출 저장을 확인하고 실행합니다)
+  type (Search)
+
+  collect {
+    input (amount) {
+      type (TransactionAmount)
+      min (Required)
+    }
+
+    input (description) {
+      type (TransactionDescription)
+      min (Optional)
+    }
+
+    input (payment) {
+      type (QuickExpensePayment)
+      min (Optional)
+    }
+
+    input (store) {
+      type (QuickExpenseStore)
       min (Optional)
     }
   }
@@ -111,8 +377,112 @@ action (UpsertFoodExpiryItem) {
       min (Optional)
     }
 
+    input (category) {
+      type (FoodExpiryCategoryName)
+      min (Optional)
+    }
+
+    input (supplier) {
+      type (FoodExpirySupplierName)
+      min (Optional)
+    }
+
+    input (memo) {
+      type (FoodExpiryMemo)
+      min (Optional)
+    }
+
+    input (purchaseDateText) {
+      type (FoodExpiryPurchaseDateText)
+      min (Optional)
+    }
+
+    input (healthTagsText) {
+      type (FoodExpiryHealthTagsText)
+      min (Optional)
+    }
+
     input (expiryDays) {
       type (ExpiryDays)
+      min (Optional)
+    }
+
+    input (expiryText) {
+      type (ExpiryPhrase)
+      min (Optional)
+    }
+
+    input (price) {
+      type (ItemPrice)
+      min (Optional)
+    }
+  }
+
+  output (FoodExpiryUpsertPreviewResult)
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 식재료/생활용품 등록 확인
+// "등록해" / "응 등록해" → confirmed=true 딥링크 반환
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+action (ConfirmUpsertFoodExpiryItem) {
+  description (식재료/생활용품 등록을 확인하고 실행합니다)
+  type (Search)
+
+  collect {
+    input (name) {
+      type (FoodExpiryItemName)
+      min (Required)
+    }
+
+    input (quantity) {
+      type (FoodExpiryItemQuantity)
+      min (Optional)
+    }
+
+    input (unit) {
+      type (FoodExpiryItemUnit)
+      min (Optional)
+    }
+
+    input (location) {
+      type (StorageLocationName)
+      min (Optional)
+    }
+
+    input (category) {
+      type (FoodExpiryCategoryName)
+      min (Optional)
+    }
+
+    input (supplier) {
+      type (FoodExpirySupplierName)
+      min (Optional)
+    }
+
+    input (memo) {
+      type (FoodExpiryMemo)
+      min (Optional)
+    }
+
+    input (purchaseDateText) {
+      type (FoodExpiryPurchaseDateText)
+      min (Optional)
+    }
+
+    input (healthTagsText) {
+      type (FoodExpiryHealthTagsText)
+      min (Optional)
+    }
+
+    input (expiryDays) {
+      type (ExpiryDays)
+      min (Optional)
+    }
+
+    input (expiryText) {
+      type (ExpiryPhrase)
       min (Optional)
     }
 
@@ -153,6 +523,58 @@ action (OpenFeature) {
     }
   }
   
+  output (AppLaunchResult)
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 레시피 추천 섹션 열기 (유통기한 화면 내)
+// "레시피 추천해줘" / "뭐 해먹지" 등
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+action (RecommendRecipe) {
+  description (오늘의 요리 추천 섹션을 엽니다)
+  type (Search)
+
+  output (AppLaunchResult)
+}
+
+// 유통기한 화면에서 "보관 중인 식재료 요리" 피커 열기 (네비게이션 전용)
+action (OpenCookableRecipePicker) {
+  description (보관 중인 식재료로 만들 수 있는 요리 피커를 엽니다)
+  type (Search)
+
+  output (AppLaunchResult)
+}
+
+// 유통기한 화면을 "사용(차감) 모드"로 열기 (네비게이션 전용)
+action (OpenFoodExpiryUsageMode) {
+  description (유통기한 화면을 사용/차감 모드로 엽니다)
+  type (Search)
+
+  output (AppLaunchResult)
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 수입 입력 화면 열기 (월급/급여)
+// "월급 기록해" 같이 FeatureType을 말하지 않는 발화 대응
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+action (OpenIncomeEntry) {
+  description (수입 입력 화면을 엽니다)
+  type (Search)
+
+  output (AppLaunchResult)
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 영수증 스캔 → 지출 입력 화면 열기
+// "영수증 스캔해서 지출 기록해" (앱 내 영수증 아이콘으로 스캔 시작)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+action (ScanReceiptExpense) {
+  description (영수증 스캔을 위해 지출 입력 화면을 엽니다)
+  type (Search)
+
   output (AppLaunchResult)
 }
 
@@ -200,6 +622,35 @@ action (UseStock) {
       min (Optional)
     }
   }
-  
+
+  output (UseStockPreviewResult)
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 재고 차감 확인
+// "응 차감해" / "그래 차감해" → confirmed=true 딥링크 반환
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+action (ConfirmUseStock) {
+  description (재고 차감을 확인하고 실행합니다)
+  type (Search)
+
+  collect {
+    input (productName) {
+      type (ProductName)
+      min (Optional)
+    }
+
+    input (amount) {
+      type (StockAmount)
+      min (Optional)
+    }
+
+    input (unit) {
+      type (StockUnit)
+      min (Optional)
+    }
+  }
+
   output (AppLaunchResult)
 }

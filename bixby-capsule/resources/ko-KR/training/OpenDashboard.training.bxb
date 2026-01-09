@@ -3,6 +3,11 @@ train (가계부 열어) {
   route: OpenDashboard
 }
 
+train (빅스비 가계부 열어) {
+  goal: OpenDashboard
+  route: OpenDashboard
+}
+
 train (대시보드 열어) {
   goal: OpenDashboard
   route: OpenDashboard
@@ -19,6 +24,11 @@ train (지출 현황 보여줘) {
 }
 
 train (이번달 지출 확인) {
+  goal: OpenDashboard
+  route: OpenDashboard
+}
+
+train (빅스비 이번달 지출 확인) {
   goal: OpenDashboard
   route: OpenDashboard
 }

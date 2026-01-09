@@ -1,0 +1,82 @@
+result-view {
+  match: UseStockPreviewResult
+
+  message {
+    if (exists(this.message)) {
+      template ("#{value(this.message)}")
+    } else {
+      template ("차감할까요?")
+    }
+  }
+
+  render {
+    layout {
+      section {
+        content {
+          paragraph {
+            value ("재고 차감 확인")
+            style (Title_L)
+          }
+        }
+      }
+
+      section {
+        title ("요약")
+        content {
+          single-line {
+            text {
+              value ("품목: #{value(this.productName)}")
+              style (Detail_L)
+            }
+          }
+
+          if (exists(this.amount)) {
+            single-line {
+              text {
+                if (exists(this.unit)) {
+                  value ("수량: #{value(this.amount)}#{value(this.unit)}")
+                } else {
+                  value ("수량: #{value(this.amount)}")
+                }
+                style (Detail_L)
+              }
+            }
+          } else {
+            single-line {
+              text {
+                value ("수량: 전량")
+                style (Detail_L)
+              }
+            }
+          }
+        }
+      }
+
+      section {
+        content {
+          paragraph {
+            value ("이대로 차감할까요?")
+            style (Detail_L)
+          }
+        }
+      }
+    }
+  }
+
+  conversation-drivers {
+    // 컨텍스트 의존도를 줄이기 위해 productName 포함 발화를 우선 제안
+    if (exists(this.amount) && exists(this.unit)) {
+      conversation-driver { template ("#{value(this.productName)} #{value(this.amount)}#{value(this.unit)} 차감해") }
+    } else-if (exists(this.amount) && !exists(this.unit)) {
+      conversation-driver { template ("#{value(this.productName)} #{value(this.amount)} 차감해") }
+    } else {
+      conversation-driver { template ("#{value(this.productName)} 전량 차감해") }
+    }
+
+    // 짧은 확인은 충돌 위험이 커서 제외 (productName 포함 발화를 우선)
+    conversation-driver { template ("#{value(this.productName)} 차감해") }
+    conversation-driver { template ("#{value(this.productName)} 전량 차감해") }
+
+    conversation-driver { template ("취소") }
+  }
+}

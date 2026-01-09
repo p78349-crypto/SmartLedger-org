@@ -136,6 +136,7 @@ class AppRouter {
             treatAsNew: a.treatAsNew,
             closeAfterSave: a.closeAfterSave,
             autoSubmit: a.autoSubmit,
+            openReceiptScannerOnStart: a.openReceiptScannerOnStart,
           ),
         );
 
@@ -168,6 +169,7 @@ class AppRouter {
             treatAsNew: a.treatAsNew,
             closeAfterSave: a.closeAfterSave,
             autoSubmit: a.autoSubmit,
+            openReceiptScannerOnStart: a.openReceiptScannerOnStart,
           ),
         );
 
@@ -227,6 +229,8 @@ class AppRouter {
           builder: (_) => QuickSimpleExpenseInputScreen(
             accountName: a.accountName,
             initialDate: a.initialDate,
+            initialLine: a.initialLine,
+            autoSubmitOnStart: a.autoSubmit,
           ),
         );
 
@@ -540,6 +544,8 @@ class AppRouter {
             autoUsageMode: a.autoUsageMode,
             openUpsertOnStart: a.openUpsertOnStart,
             openCookableRecipePickerOnStart: a.openCookableRecipePickerOnStart,
+            scrollToDailyRecipeRecommendationOnStart:
+                a.scrollToDailyRecipeRecommendationOnStart,
             upsertPrefill: a.upsertPrefill,
             upsertAutoSubmit: a.upsertAutoSubmit,
           ),
@@ -662,11 +668,21 @@ class AppRouter {
         );
 
       case AppRoutes.assetSimpleInput:
-        final a = args as AccountArgs;
+        final a = args is AssetSimpleInputArgs
+            ? args
+            : AssetSimpleInputArgs(accountName: (args as AccountArgs).accountName);
         return MaterialPageRoute(
           settings: settings,
           builder: (_) => AssetRouteAuthGate(
-            child: AssetSimpleInputScreen(accountName: a.accountName),
+            child: AssetSimpleInputScreen(
+              accountName: a.accountName,
+              initialCategory: a.initialCategory,
+              initialName: a.initialName,
+              initialAmount: a.initialAmount,
+              initialLocation: a.initialLocation,
+              initialMemo: a.initialMemo,
+              autoSubmitOnStart: a.autoSubmit,
+            ),
           ),
         );
 

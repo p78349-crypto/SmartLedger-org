@@ -1,0 +1,254 @@
+train ([팽이버섯](FoodExpiryItemName) 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([팽이버섯](FoodExpiryItemName) [2](FoodExpiryItemQuantity) [봉](FoodExpiryItemUnit) [냉장](StorageLocationName) [3](ExpiryDays)일 후 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([팽이버섯](FoodExpiryItemName) [냉장](StorageLocationName) 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([치즈](FoodExpiryItemName) [냉동](StorageLocationName) [내일](ExpiryPhrase) 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([우유](FoodExpiryItemName) [실온](StorageLocationName) 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([우유](FoodExpiryItemName) [1](FoodExpiryItemQuantity) [팩](FoodExpiryItemUnit) [내일](ExpiryPhrase) 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([우유](FoodExpiryItemName) [3900](ItemPrice) [내일](ExpiryPhrase) 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([치즈](FoodExpiryItemName) [12900](ItemPrice) 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([두부](FoodExpiryItemName) [모레](ExpiryPhrase) 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([치즈](FoodExpiryItemName) [1월 20일](ExpiryPhrase) 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([양파](FoodExpiryItemName) [채소](FoodExpiryCategoryName) 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([사과](FoodExpiryItemName) [과일](FoodExpiryCategoryName) [냉장](StorageLocationName) 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([돼지고기](FoodExpiryItemName) [육류](FoodExpiryCategoryName) [내일](ExpiryPhrase) 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([우유](FoodExpiryItemName) [유제품](FoodExpiryCategoryName) [냉장](StorageLocationName) 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([우유](FoodExpiryItemName) 구매처 [이마트](FoodExpirySupplierName) 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([우유](FoodExpiryItemName) 메모 [행사상품](FoodExpiryMemo) 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([우유](FoodExpiryItemName) [유제품](FoodExpiryCategoryName) 구매처 [쿠팡](FoodExpirySupplierName) [내일](ExpiryPhrase) 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([우유](FoodExpiryItemName) 구매일 [오늘](FoodExpiryPurchaseDateText) [내일](ExpiryPhrase) 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([우유](FoodExpiryItemName) 구매일 [어제](FoodExpiryPurchaseDateText) 구매처 [이마트](FoodExpirySupplierName) 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([우유](FoodExpiryItemName) 태그 [당류](FoodExpiryHealthTagsText) 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([맥주](FoodExpiryItemName) 태그 [주류](FoodExpiryHealthTagsText) [내일](ExpiryPhrase) 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([빵](FoodExpiryItemName) 태그 [탄수화물 당류](FoodExpiryHealthTagsText) 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([우유](FoodExpiryItemName) [당류 주의](FoodExpiryHealthTagsText)로 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([맥주](FoodExpiryItemName) [주류](FoodExpiryHealthTagsText) 체크해서 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([빵](FoodExpiryItemName) [탄수화물](FoodExpiryHealthTagsText) 표시하고 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([과자](FoodExpiryItemName) [탄수화물 당류 주류](FoodExpiryHealthTagsText) 태그로 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([우유](FoodExpiryItemName) 구매처 [이마트](FoodExpirySupplierName) 메모 [1+1](FoodExpiryMemo) [당류 주의](FoodExpiryHealthTagsText) 구매일 [오늘](FoodExpiryPurchaseDateText) [내일](ExpiryPhrase) 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([맥주](FoodExpiryItemName) 구매처 [편의점](FoodExpirySupplierName) [주류](FoodExpiryHealthTagsText) 체크해서 [모레](ExpiryPhrase) 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([빵](FoodExpiryItemName) 메모 [다이어트용](FoodExpiryMemo) [탄수화물](FoodExpiryHealthTagsText) 표시하고 구매일 [어제](FoodExpiryPurchaseDateText) 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([요거트](FoodExpiryItemName) [유제품](FoodExpiryCategoryName) 구매처 [쿠팡](FoodExpirySupplierName) 메모 [행사상품](FoodExpiryMemo) [당류](FoodExpiryHealthTagsText) 태그로 [3](ExpiryDays)일 후 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([이마트](FoodExpirySupplierName)에서 산 [우유](FoodExpiryItemName) [내일](ExpiryPhrase) 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([쿠팡](FoodExpirySupplierName)에서 구매한 [요거트](FoodExpiryItemName) [당류](FoodExpiryHealthTagsText) 태그로 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train (구매처 [홈플러스](FoodExpirySupplierName)에서 산 [치즈](FoodExpiryItemName) 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([우유](FoodExpiryItemName) 메모 [행사라서](FoodExpiryMemo) 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([요거트](FoodExpiryItemName) 메모 [1+1이라서](FoodExpiryMemo) [내일](ExpiryPhrase) 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([두부](FoodExpiryItemName) 메모 [브랜드라서](FoodExpiryMemo) 구매처 [이마트](FoodExpirySupplierName)에서 산 거 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([요거트](FoodExpiryItemName) 메모 [행사라서요!](FoodExpiryMemo) [내일](ExpiryPhrase) 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([우유](FoodExpiryItemName) 메모 [1+1이라서요](FoodExpiryMemo) 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([오늘 산](FoodExpiryPurchaseDateText) [우유](FoodExpiryItemName) [내일](ExpiryPhrase) 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([어제 산](FoodExpiryPurchaseDateText) [요거트](FoodExpiryItemName) 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([방금 산](FoodExpiryPurchaseDateText) [치즈](FoodExpiryItemName) [모레](ExpiryPhrase) 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([오늘 샀어](FoodExpiryPurchaseDateText) [우유](FoodExpiryItemName) 구매처 [이마트](FoodExpirySupplierName)에서 산 거 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([우유](FoodExpiryItemName) [오늘까지](ExpiryPhrase) 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([치즈](FoodExpiryItemName) [내일까지](ExpiryPhrase) 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([요거트](FoodExpiryItemName) [이번주까지](ExpiryPhrase) 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([우유](FoodExpiryItemName) [주말까지](ExpiryPhrase) 등록해줘) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([치즈](FoodExpiryItemName) [토요일까지](ExpiryPhrase) 등록해줘) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train ([요거트](FoodExpiryItemName) [일요일까지](ExpiryPhrase) 등록해줘) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train (등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train (응 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}
+
+train (그래 등록해) {
+  goal: ConfirmUpsertFoodExpiryItem
+  route: ConfirmUpsertFoodExpiryItem
+}

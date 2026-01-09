@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../models/transaction.dart';
 import '../services/account_service.dart';
 import 'app_routes.dart';
 
@@ -87,6 +88,32 @@ class AssistantRouteCatalog {
       buildArgs: (_) => null,
     ),
 
+    // Quick input / detail
+    AppRoutes.quickSimpleExpenseInput: AssistantRouteSpec(
+      routeName: AppRoutes.quickSimpleExpenseInput,
+      requiresAccount: true,
+      buildArgs: (accountName) => QuickSimpleExpenseInputArgs(
+        accountName: accountName ?? resolveDefaultAccountName() ?? '',
+        initialDate: DateTime.now(),
+      ),
+    ),
+    AppRoutes.transactionDetail: AssistantRouteSpec(
+      routeName: AppRoutes.transactionDetail,
+      requiresAccount: true,
+      buildArgs: (accountName) => TransactionDetailArgs(
+        accountName: accountName ?? resolveDefaultAccountName() ?? '',
+        initialType: TransactionType.expense,
+      ),
+    ),
+    AppRoutes.transactionDetailIncome: AssistantRouteSpec(
+      routeName: AppRoutes.transactionDetailIncome,
+      requiresAccount: true,
+      buildArgs: (accountName) => TransactionDetailArgs(
+        accountName: accountName ?? resolveDefaultAccountName() ?? '',
+        initialType: TransactionType.income,
+      ),
+    ),
+
     // Account / ledger
     AppRoutes.accountMain: AssistantRouteSpec(
       routeName: AppRoutes.accountMain,
@@ -152,9 +179,104 @@ class AssistantRouteCatalog {
       ),
     ),
 
+    AppRoutes.incomeSplit: AssistantRouteSpec(
+      routeName: AppRoutes.incomeSplit,
+      requiresAccount: true,
+      buildArgs: (accountName) => AccountArgs(
+        accountName: accountName ?? resolveDefaultAccountName() ?? '',
+      ),
+    ),
+
+    AppRoutes.emergencyFund: AssistantRouteSpec(
+      routeName: AppRoutes.emergencyFund,
+      requiresAccount: true,
+      buildArgs: (accountName) => AccountArgs(
+        accountName: accountName ?? resolveDefaultAccountName() ?? '',
+      ),
+    ),
+
     // Stats
     AppRoutes.accountStats: AssistantRouteSpec(
       routeName: AppRoutes.accountStats,
+      requiresAccount: true,
+      buildArgs: (accountName) => AccountArgs(
+        accountName: accountName ?? resolveDefaultAccountName() ?? '',
+      ),
+    ),
+    AppRoutes.accountStatsDecade: AssistantRouteSpec(
+      routeName: AppRoutes.accountStatsDecade,
+      requiresAccount: true,
+      buildArgs: (accountName) => AccountArgs(
+        accountName: accountName ?? resolveDefaultAccountName() ?? '',
+      ),
+    ),
+    AppRoutes.accountStatsSearch: AssistantRouteSpec(
+      routeName: AppRoutes.accountStatsSearch,
+      requiresAccount: true,
+      buildArgs: (accountName) => AccountArgs(
+        accountName: accountName ?? resolveDefaultAccountName() ?? '',
+      ),
+    ),
+    AppRoutes.categoryStats: AssistantRouteSpec(
+      routeName: AppRoutes.categoryStats,
+      requiresAccount: true,
+      buildArgs: (accountName) => AccountArgs(
+        accountName: accountName ?? resolveDefaultAccountName() ?? '',
+      ),
+    ),
+
+    AppRoutes.periodStatsWeek: AssistantRouteSpec(
+      routeName: AppRoutes.periodStatsWeek,
+      requiresAccount: true,
+      buildArgs: (accountName) => AccountArgs(
+        accountName: accountName ?? resolveDefaultAccountName() ?? '',
+      ),
+    ),
+    AppRoutes.periodStatsMonth: AssistantRouteSpec(
+      routeName: AppRoutes.periodStatsMonth,
+      requiresAccount: true,
+      buildArgs: (accountName) => AccountArgs(
+        accountName: accountName ?? resolveDefaultAccountName() ?? '',
+      ),
+    ),
+    AppRoutes.periodStatsQuarter: AssistantRouteSpec(
+      routeName: AppRoutes.periodStatsQuarter,
+      requiresAccount: true,
+      buildArgs: (accountName) => AccountArgs(
+        accountName: accountName ?? resolveDefaultAccountName() ?? '',
+      ),
+    ),
+    AppRoutes.periodStatsHalfYear: AssistantRouteSpec(
+      routeName: AppRoutes.periodStatsHalfYear,
+      requiresAccount: true,
+      buildArgs: (accountName) => AccountArgs(
+        accountName: accountName ?? resolveDefaultAccountName() ?? '',
+      ),
+    ),
+    AppRoutes.periodStatsYear: AssistantRouteSpec(
+      routeName: AppRoutes.periodStatsYear,
+      requiresAccount: true,
+      buildArgs: (accountName) => AccountArgs(
+        accountName: accountName ?? resolveDefaultAccountName() ?? '',
+      ),
+    ),
+    AppRoutes.periodStatsDecade: AssistantRouteSpec(
+      routeName: AppRoutes.periodStatsDecade,
+      requiresAccount: true,
+      buildArgs: (accountName) => AccountArgs(
+        accountName: accountName ?? resolveDefaultAccountName() ?? '',
+      ),
+    ),
+
+    AppRoutes.shoppingCheapestMonth: AssistantRouteSpec(
+      routeName: AppRoutes.shoppingCheapestMonth,
+      requiresAccount: true,
+      buildArgs: (accountName) => AccountArgs(
+        accountName: accountName ?? resolveDefaultAccountName() ?? '',
+      ),
+    ),
+    AppRoutes.weatherPricePrediction: AssistantRouteSpec(
+      routeName: AppRoutes.weatherPricePrediction,
       requiresAccount: true,
       buildArgs: (accountName) => AccountArgs(
         accountName: accountName ?? resolveDefaultAccountName() ?? '',
@@ -189,6 +311,14 @@ class AssistantRouteCatalog {
       ),
     ),
 
+    AppRoutes.fixedCostStats: AssistantRouteSpec(
+      routeName: AppRoutes.fixedCostStats,
+      requiresAccount: true,
+      buildArgs: (accountName) => AccountArgs(
+        accountName: accountName ?? resolveDefaultAccountName() ?? '',
+      ),
+    ),
+
     // Food / shopping / household
     AppRoutes.foodExpiry: AssistantRouteSpec(
       routeName: AppRoutes.foodExpiry,
@@ -199,6 +329,35 @@ class AssistantRouteCatalog {
       routeName: AppRoutes.foodCookingStart,
       requiresAccount: false,
       buildArgs: (_) => null,
+    ),
+    AppRoutes.nutritionReport: AssistantRouteSpec(
+      routeName: AppRoutes.nutritionReport,
+      requiresAccount: false,
+      buildArgs: (_) => null,
+    ),
+    AppRoutes.weatherManualInput: AssistantRouteSpec(
+      routeName: AppRoutes.weatherManualInput,
+      requiresAccount: false,
+      buildArgs: (_) => null,
+    ),
+    AppRoutes.ingredientSearch: AssistantRouteSpec(
+      routeName: AppRoutes.ingredientSearch,
+      requiresAccount: false,
+      buildArgs: (_) => null,
+    ),
+    AppRoutes.microSavings: AssistantRouteSpec(
+      routeName: AppRoutes.microSavings,
+      requiresAccount: true,
+      buildArgs: (accountName) => AccountArgs(
+        accountName: accountName ?? resolveDefaultAccountName() ?? '',
+      ),
+    ),
+    AppRoutes.savingsPlanList: AssistantRouteSpec(
+      routeName: AppRoutes.savingsPlanList,
+      requiresAccount: true,
+      buildArgs: (accountName) => AccountArgs(
+        accountName: accountName ?? resolveDefaultAccountName() ?? '',
+      ),
     ),
     AppRoutes.shoppingCart: AssistantRouteSpec(
       routeName: AppRoutes.shoppingCart,
@@ -213,6 +372,13 @@ class AssistantRouteCatalog {
       buildArgs: (accountName) => ShoppingCartArgs(
         accountName: accountName ?? resolveDefaultAccountName() ?? '',
         openPrepOnStart: true,
+      ),
+    ),
+    AppRoutes.shoppingPointsInput: AssistantRouteSpec(
+      routeName: AppRoutes.shoppingPointsInput,
+      requiresAccount: true,
+      buildArgs: (accountName) => AccountArgs(
+        accountName: accountName ?? resolveDefaultAccountName() ?? '',
       ),
     ),
     AppRoutes.householdConsumables: AssistantRouteSpec(
@@ -279,6 +445,98 @@ class AssistantRouteCatalog {
       buildArgs: (accountName) => AccountArgs(
         accountName: accountName ?? resolveDefaultAccountName() ?? '',
       ),
+    ),
+
+    AppRoutes.assetProject100m: AssistantRouteSpec(
+      routeName: AppRoutes.assetProject100m,
+      requiresAccount: true,
+      buildArgs: (accountName) => AccountArgs(
+        accountName: accountName ?? resolveDefaultAccountName() ?? '',
+      ),
+    ),
+
+    // Settings / customization
+    AppRoutes.currencySettings: AssistantRouteSpec(
+      routeName: AppRoutes.currencySettings,
+      requiresAccount: false,
+      buildArgs: (_) => null,
+    ),
+    AppRoutes.backgroundSettings: AssistantRouteSpec(
+      routeName: AppRoutes.backgroundSettings,
+      requiresAccount: false,
+      buildArgs: (_) => null,
+    ),
+    AppRoutes.fileViewer: AssistantRouteSpec(
+      routeName: AppRoutes.fileViewer,
+      requiresAccount: false,
+      buildArgs: (_) => null,
+    ),
+    AppRoutes.page1BottomIconSettings: AssistantRouteSpec(
+      routeName: AppRoutes.page1BottomIconSettings,
+      requiresAccount: true,
+      buildArgs: (accountName) => AccountArgs(
+        accountName: accountName ?? resolveDefaultAccountName() ?? '',
+      ),
+    ),
+    AppRoutes.featureIconsCatalog: AssistantRouteSpec(
+      routeName: AppRoutes.featureIconsCatalog,
+      requiresAccount: false,
+      buildArgs: (_) => null,
+    ),
+    AppRoutes.iconManagement: AssistantRouteSpec(
+      routeName: AppRoutes.iconManagement,
+      requiresAccount: true,
+      buildArgs: (accountName) => IconManagementArgs(
+        accountName: accountName ?? resolveDefaultAccountName() ?? '',
+      ),
+    ),
+    AppRoutes.iconManagement2: AssistantRouteSpec(
+      routeName: AppRoutes.iconManagement2,
+      requiresAccount: true,
+      buildArgs: (accountName) => IconManagementArgs(
+        accountName: accountName ?? resolveDefaultAccountName() ?? '',
+      ),
+    ),
+    AppRoutes.iconManagementAsset: AssistantRouteSpec(
+      routeName: AppRoutes.iconManagementAsset,
+      requiresAccount: true,
+      buildArgs: (accountName) => IconManagementArgs(
+        accountName: accountName ?? resolveDefaultAccountName() ?? '',
+      ),
+    ),
+    AppRoutes.iconManagementRoot: AssistantRouteSpec(
+      routeName: AppRoutes.iconManagementRoot,
+      requiresAccount: true,
+      buildArgs: (accountName) => IconManagementArgs(
+        accountName: accountName ?? resolveDefaultAccountName() ?? '',
+      ),
+    ),
+
+    // Root (admin) - opened via voice, gated by in-app auth.
+    AppRoutes.rootTransactions: AssistantRouteSpec(
+      routeName: AppRoutes.rootTransactions,
+      requiresAccount: false,
+      buildArgs: (_) => null,
+    ),
+    AppRoutes.rootSearch: AssistantRouteSpec(
+      routeName: AppRoutes.rootSearch,
+      requiresAccount: false,
+      buildArgs: (_) => null,
+    ),
+    AppRoutes.rootAccountManage: AssistantRouteSpec(
+      routeName: AppRoutes.rootAccountManage,
+      requiresAccount: false,
+      buildArgs: (_) => null,
+    ),
+    AppRoutes.rootMonthEnd: AssistantRouteSpec(
+      routeName: AppRoutes.rootMonthEnd,
+      requiresAccount: false,
+      buildArgs: (_) => null,
+    ),
+    AppRoutes.rootScreenSaverSettings: AssistantRouteSpec(
+      routeName: AppRoutes.rootScreenSaverSettings,
+      requiresAccount: false,
+      buildArgs: (_) => null,
     ),
   };
 }

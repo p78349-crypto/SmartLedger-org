@@ -33,27 +33,119 @@ train ([커피](raw.description) 지출 저장해) {
   route: ConfirmAddTransaction
 }
 
-train (저장해) {
+train (거래 저장해) {
   goal: ConfirmAddTransaction
   route: ConfirmAddTransaction
 }
 
-train (응 저장해) {
+train (지출 저장해) {
   goal: ConfirmAddTransaction
   route: ConfirmAddTransaction
 }
 
-train (그래 저장해) {
+train (수입 저장해) {
   goal: ConfirmAddTransaction
   route: ConfirmAddTransaction
 }
 
-train (좋아 저장해) {
+train (저축 저장해) {
   goal: ConfirmAddTransaction
   route: ConfirmAddTransaction
 }
 
-train (저장해줘) {
+train (거래 저장해줘) {
+  goal: ConfirmAddTransaction
+  route: ConfirmAddTransaction
+}
+
+// 메모 포함 확인
+train ([커피](raw.description) [5000](viv.core.Integer:TransactionAmount)원 지출 메모 [회사](memo) 저장해) {
+  goal: ConfirmAddTransaction
+  route: ConfirmAddTransaction
+}
+
+train ([월급](raw.description) [3000000](viv.core.Integer:TransactionAmount)원 수입 메모 [정산](memo) 저장해) {
+  goal: ConfirmAddTransaction
+  route: ConfirmAddTransaction
+}
+
+train ([적금](raw.description) [300000](viv.core.Integer:TransactionAmount)원 저축 메모 [자동이체](memo) 저장해) {
+  goal: ConfirmAddTransaction
+  route: ConfirmAddTransaction
+}
+
+// 카테고리 포함 확인
+train ([커피](raw.description) [5000](viv.core.Integer:TransactionAmount)원 지출 카테고리 [식비](category) 저장해) {
+  goal: ConfirmAddTransaction
+  route: ConfirmAddTransaction
+}
+
+train ([월급](raw.description) [3000000](viv.core.Integer:TransactionAmount)원 수입 카테고리 [급여](category) 저장해) {
+  goal: ConfirmAddTransaction
+  route: ConfirmAddTransaction
+}
+
+train ([적금](raw.description) [300000](viv.core.Integer:TransactionAmount)원 저축 카테고리 [저축](category) 저장해) {
+  goal: ConfirmAddTransaction
+  route: ConfirmAddTransaction
+}
+
+// 카테고리 + 메모 포함 확인
+train ([커피](raw.description) [5000](viv.core.Integer:TransactionAmount)원 지출 카테고리 [식비](category) 메모 [회사](memo) 저장해) {
+  goal: ConfirmAddTransaction
+  route: ConfirmAddTransaction
+}
+
+// 결제/매장 포함 확인
+train ([커피](raw.description) [5000](viv.core.Integer:TransactionAmount)원 지출 결제 [신용카드](paymentMethod) 매장 [스타벅스](store) 저장해) {
+  goal: ConfirmAddTransaction
+  route: ConfirmAddTransaction
+}
+
+train ([점심](raw.description) [12000](viv.core.Integer:TransactionAmount)원 지출 결제 [현금](paymentMethod) 저장해) {
+  goal: ConfirmAddTransaction
+  route: ConfirmAddTransaction
+}
+
+// 수량/단위 포함 확인
+train ([커피](raw.description) [2](TransactionQuantity)[잔](TransactionUnit) [5000](viv.core.Integer:TransactionAmount)원 지출 저장해) {
+  goal: ConfirmAddTransaction
+  route: ConfirmAddTransaction
+}
+
+train ([생수](raw.description) [6](TransactionQuantity)[개](TransactionUnit) [4500](viv.core.Integer:TransactionAmount)원 지출 저장해) {
+  goal: ConfirmAddTransaction
+  route: ConfirmAddTransaction
+}
+
+// 수량/단위 + 단가 포함 확인
+train ([커피](raw.description) [2](TransactionQuantity)[잔](TransactionUnit) 단가 [2500](TransactionUnitPrice)원 지출 저장해) {
+  goal: ConfirmAddTransaction
+  route: ConfirmAddTransaction
+}
+
+train ([커피](raw.description) [2](TransactionQuantity)[잔](TransactionUnit) 단가 [2500](TransactionUnitPrice)원 지출 결제 [신용카드](paymentMethod) 저장해) {
+  goal: ConfirmAddTransaction
+  route: ConfirmAddTransaction
+}
+
+train ([생수](raw.description) [6](TransactionQuantity)[개](TransactionUnit) 단가 [750](TransactionUnitPrice)원 지출 매장 [이마트](store) 저장해) {
+  goal: ConfirmAddTransaction
+  route: ConfirmAddTransaction
+}
+
+// 반품/환불 확인
+train ([커피](raw.description) [5000](viv.core.Integer:TransactionAmount)원 반품 저장해) {
+  goal: ConfirmAddTransaction
+  route: ConfirmAddTransaction
+}
+
+train ([옷](raw.description) [30000](viv.core.Integer:TransactionAmount)원 환불 저장해) {
+  goal: ConfirmAddTransaction
+  route: ConfirmAddTransaction
+}
+
+train ([생수](raw.description) [6](TransactionQuantity)[개](TransactionUnit) 단가 [750](TransactionUnitPrice)원 반품 저장해) {
   goal: ConfirmAddTransaction
   route: ConfirmAddTransaction
 }

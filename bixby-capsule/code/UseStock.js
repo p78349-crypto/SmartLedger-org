@@ -1,19 +1,26 @@
 // UseStock Action Handler
-// 재고 차감 요청을 처리합니다
-
-const endpoints = require('./endpoints.js');
+// 재고 차감 요청을 미리보기(확인) 단계로 반환합니다
 
 module.exports.function = function useStock(productName, amount, unit, $vivContext) {
-  // 상품명 정규화
   const normalizedName = normalizeProductName(productName);
+  const a = normalizeNumber(amount);
+  const u = (unit || '').trim();
 
-  // 딥링크 생성하여 앱에서 재고 차감 실행
-  const result = endpoints.UseStock({
+  const hasAmount = a !== null && !Number.isNaN(a);
+  const message = hasAmount
+    ? `${normalizedName} ${u ? `${a}${u}` : a} 차감 맞나요? 차감할까요?`
+    : `${normalizedName} 전량 차감 맞나요? 차감할까요?`;
+
+  const result = {
     productName: normalizedName,
-    amount: amount,
-    unit: unit
-  });
-  
+    message: message
+  };
+  if (hasAmount) {
+    result.amount = a;
+  }
+  if (u) {
+    result.unit = u;
+  }
   return result;
 };
 
@@ -48,11 +55,26 @@ function normalizeProductName(name) {
     '우유': '우유',
     '치즈': '치즈',
     '두부': '두부',
-    '라면': '라면'
+    '라면': '라면',
+    '사태살': '사태살',
+    '사태': '사태살',
+    '아욱': '아욱',
+    '아우': '아욱'
   };
   
   const cleanName = name.trim();
   return synonymMap[cleanName] || cleanName;
+}
+
+function normalizeNumber(v) {
+  if (v === undefined || v === null) return null;
+  if (typeof v === 'number') return v;
+  if (typeof v === 'object' && v.value !== undefined) {
+    const n = Number(v.value);
+    return Number.isNaN(n) ? null : n;
+  }
+  const n = Number(v);
+  return Number.isNaN(n) ? null : n;
 }
 
 /**

@@ -31,6 +31,9 @@ class _ApplicationSettingsScreenState extends State<ApplicationSettingsScreen>
   int _stockAutoAddDaysHousehold = 5;
   bool _stockDepletionNotifyEnabled = true;
 
+  final TextEditingController _foodExpiryFeedbackTemplateController =
+      TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -38,11 +41,13 @@ class _ApplicationSettingsScreenState extends State<ApplicationSettingsScreen>
     _checkPermissions();
     _loadTxRecentInputSettings();
     _loadStockUseSettings();
+    _loadFoodExpiryFeedbackTemplate();
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _foodExpiryFeedbackTemplateController.dispose();
     super.dispose();
   }
 
@@ -52,7 +57,43 @@ class _ApplicationSettingsScreenState extends State<ApplicationSettingsScreen>
       _checkPermissions();
       _loadTxRecentInputSettings();
       _loadStockUseSettings();
+      _loadFoodExpiryFeedbackTemplate();
     }
+  }
+
+  Future<void> _loadFoodExpiryFeedbackTemplate() async {
+    final prefs = await SharedPreferences.getInstance();
+    final t = prefs.getString(PrefKeys.foodExpirySavedFeedbackTemplateV1) ?? '';
+    if (!mounted) return;
+    setState(() {
+      _foodExpiryFeedbackTemplateController.text = t;
+    });
+  }
+
+  Future<void> _saveFoodExpiryFeedbackTemplate() async {
+    final prefs = await SharedPreferences.getInstance();
+    final t = _foodExpiryFeedbackTemplateController.text.trim();
+    if (t.isEmpty) {
+      await prefs.remove(PrefKeys.foodExpirySavedFeedbackTemplateV1);
+    } else {
+      await prefs.setString(PrefKeys.foodExpirySavedFeedbackTemplateV1, t);
+    }
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('피드백 문구 템플릿을 저장했습니다.')),
+    );
+  }
+
+  Future<void> _resetFoodExpiryFeedbackTemplate() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(PrefKeys.foodExpirySavedFeedbackTemplateV1);
+    if (!mounted) return;
+    setState(() {
+      _foodExpiryFeedbackTemplateController.text = '';
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('피드백 문구 템플릿을 기본값으로 되돌렸습니다.')),
+    );
   }
 
   String _buildActivityHouseholdEstimateText({
@@ -1072,6 +1113,64 @@ class _ApplicationSettingsScreenState extends State<ApplicationSettingsScreen>
                         ),
                       ),
                     ],
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+                _buildSectionHeader(context, '피드백'),
+                Card(
+                  elevation: 0,
+                  color: scheme.surfaceContainerLow,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24),
+                    side: BorderSide(
+                      color: scheme.outlineVariant.withValues(alpha: 0.5),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '유통기한 저장 후 메시지',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          '아래 템플릿이 비어있으면 기본 문구를 사용합니다.\n'
+                          '치환: {item} = 품목명, {date} = 오늘/내일/모레/1월 20일',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: _foodExpiryFeedbackTemplateController,
+                          maxLines: 3,
+                          decoration: const InputDecoration(
+                            hintText: '{item} 저장 완료. 유통기한: {date}.',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            TextButton(
+                              onPressed: _resetFoodExpiryFeedbackTemplate,
+                              child: const Text('기본값'),
+                            ),
+                            const Spacer(),
+                            FilledButton(
+                              onPressed: _saveFoodExpiryFeedbackTemplate,
+                              child: const Text('저장'),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: 32),

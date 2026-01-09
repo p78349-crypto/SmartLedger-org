@@ -1,0 +1,39 @@
+train ([현금](AssetCategory) [시중은행 입출금통장](name) 자산 [1000000](viv.core.Integer:AssetAmount)원 추가해) {
+  goal: AddAssetSimple
+  route: AddAssetSimple
+}
+
+train ([예금/적금](AssetCategory) [적금 통장](name) 자산 [300000](viv.core.Integer:AssetAmount)원 기록해) {
+  goal: AddAssetSimple
+  route: AddAssetSimple
+}
+
+train ([소액 투자](AssetCategory) [미국주식](name) 자산 [500000](viv.core.Integer:AssetAmount)원 추가해) {
+  goal: AddAssetSimple
+  route: AddAssetSimple
+}
+
+train ([기타 실물 자산](AssetCategory) [금](name) 자산 [200000](viv.core.Integer:AssetAmount)원 기록해) {
+  goal: AddAssetSimple
+  route: AddAssetSimple
+}
+
+train ([통장](name) 자산 [10만](viv.core.Integer:AssetAmount)원 추가해) {
+  goal: AddAssetSimple
+  route: AddAssetSimple
+}
+
+train (자산 [10만](viv.core.Integer:AssetAmount)원 [통장](name) 추가해) {
+  goal: AddAssetSimple
+  route: AddAssetSimple
+}
+
+train ([통장](name) 자산 [10만](viv.core.Integer:AssetAmount)원 추가하고 [카카오뱅크](location)로 저장해) {
+  goal: AddAssetSimple
+  route: AddAssetSimple
+}
+
+train ([통장](name) 자산 [10만](viv.core.Integer:AssetAmount)원 추가하고 메모 [월급](memo) 남겨) {
+  goal: AddAssetSimple
+  route: AddAssetSimple
+}

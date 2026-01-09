@@ -1,0 +1,84 @@
+result-view {
+  match: QuickSimpleExpenseAddPreviewResult
+
+  message {
+    if (exists(this.message)) {
+      template ("#{value(this.message)}")
+    } else {
+      template ("간편 지출 저장할까요?")
+    }
+  }
+
+  render {
+    layout {
+      section {
+        content {
+          paragraph {
+            value ("간편 지출 저장 확인")
+            style (Title_L)
+          }
+        }
+      }
+
+      section {
+        title ("요약")
+        content {
+          if (exists(this.description)) {
+            single-line {
+              text {
+                value ("설명: #{value(this.description)}")
+                style (Detail_L)
+              }
+            }
+          }
+          if (exists(this.amount)) {
+            single-line {
+              text {
+                value ("금액: #{value(this.amount)}원")
+                style (Detail_L)
+              }
+            }
+          }
+          if (exists(this.payment)) {
+            single-line {
+              text {
+                value ("결제: #{value(this.payment)}")
+                style (Detail_L)
+              }
+            }
+          }
+          if (exists(this.store)) {
+            single-line {
+              text {
+                value ("매장: #{value(this.store)}")
+                style (Detail_L)
+              }
+            }
+          }
+        }
+      }
+
+      section {
+        content {
+          paragraph {
+            value ("이대로 저장할까요?")
+            style (Detail_L)
+          }
+        }
+      }
+    }
+  }
+
+  conversation-drivers {
+    // 충돌 방지를 위해 기능을 명시
+    if (exists(this.description) && exists(this.amount)) {
+      conversation-driver { template ("#{value(this.description)} #{value(this.amount)}원 간편 지출 저장해") }
+    }
+    if (!exists(this.description) && exists(this.amount)) {
+      conversation-driver { template ("#{value(this.amount)}원 간편 지출 저장해") }
+    }
+
+    conversation-driver { template ("간편 지출 저장해") }
+    conversation-driver { template ("취소") }
+  }
+}

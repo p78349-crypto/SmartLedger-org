@@ -1,0 +1,34 @@
+train (보관 중인 식재료로 요리 보여줘) {
+  goal: OpenCookableRecipePicker
+  route: OpenCookableRecipePicker
+}
+
+train (보관 중인 재료로 요리 보여줘) {
+  goal: OpenCookableRecipePicker
+  route: OpenCookableRecipePicker
+}
+
+train (냉장고 재료로 만들 수 있는 요리 보여줘) {
+  goal: OpenCookableRecipePicker
+  route: OpenCookableRecipePicker
+}
+
+train (냉장고 재료로 요리 보여줘) {
+  goal: OpenCookableRecipePicker
+  route: OpenCookableRecipePicker
+}
+
+train (냉장고 재료로 요리 추천해줘) {
+  goal: OpenCookableRecipePicker
+  route: OpenCookableRecipePicker
+}
+
+train (지금 있는 재료로 요리 추천해줘) {
+  goal: OpenCookableRecipePicker
+  route: OpenCookableRecipePicker
+}
+
+train (스마트렛저 냉장고 재료로 요리 추천해줘) {
+  goal: OpenCookableRecipePicker
+  route: OpenCookableRecipePicker
+}

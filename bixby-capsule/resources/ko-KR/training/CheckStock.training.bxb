@@ -6,6 +6,27 @@ train ([팽이버섯](~ProductName) 얼마나 남았어) {
   route: CheckStock
 }
 
+train (지금 [사태살](~ProductName) 얼마나 남았어) {
+  goal: CheckStock
+  route: CheckStock
+}
+
+train ([사태살](~ProductName) 얼마나 남았어) {
+  goal: CheckStock
+  route: CheckStock
+}
+
+train (빅스비 지금 [사태살](~ProductName) 얼마나 남았어) {
+  goal: CheckStock
+  route: CheckStock
+}
+
+// 구매 고민 문장도 재고 조회로 연결
+train ([팽이버섯](~ProductName) 980원인데 살까 말까) {
+  goal: CheckStock
+  route: CheckStock
+}
+
 train ([양파](~ProductName) 재고 확인해) {
   goal: CheckStock
   route: CheckStock

@@ -7,7 +7,9 @@ import '../models/transaction.dart';
 import '../services/account_service.dart';
 import '../services/deep_link_service.dart';
 import '../services/consumable_inventory_service.dart';
+import '../services/health_guardrail_service.dart';
 import 'assistant_route_catalog.dart';
+import '../utils/date_parser.dart';
 
 /// Deep link handler that listens to incoming deep links
 /// and navigates to the appropriate screen.
@@ -80,6 +82,32 @@ class DeepLinkHandler {
 
     final args = spec.buildArgs(accountName);
 
+    // Safe intent: receipt scan hook for transaction add.
+    if (action.routeName == AppRoutes.transactionAdd && args is TransactionAddArgs) {
+      final intent = (action.intent ?? '').trim().toLowerCase();
+      final requestedAction = (action.params['action'] ?? '').trim().toLowerCase();
+
+      final wantsScan =
+          intent == 'scan_receipt' || intent == 'scan' || requestedAction == 'scan';
+
+      if (wantsScan) {
+        navigator.pushNamed(
+          spec.routeName,
+          arguments: TransactionAddArgs(
+            accountName: args.accountName,
+            initialTransaction: args.initialTransaction,
+            learnCategoryHintFromDescription: args.learnCategoryHintFromDescription,
+            confirmBeforeSave: args.confirmBeforeSave,
+            treatAsNew: args.treatAsNew,
+            closeAfterSave: args.closeAfterSave,
+            autoSubmit: args.autoSubmit,
+            openReceiptScannerOnStart: true,
+          ),
+        );
+        return;
+      }
+    }
+
     // Allow safe, explicit intents for a small set of routes.
     if (action.routeName == AppRoutes.foodExpiry && action.intent == 'upsert') {
       final p = action.params;
@@ -91,12 +119,54 @@ class DeepLinkHandler {
       final unit = (p['unit'] ?? '').trim();
       final location = (p['location'] ?? '').trim();
       final category = (p['category'] ?? '').trim();
+      final supplier =
+          (p['supplier'] ?? p['purchasePlace'] ?? p['place'] ?? p['store'] ?? '')
+              .trim();
+      final memo = (p['memo'] ?? p['note'] ?? p['desc'] ?? '').trim();
       final price = double.tryParse((p['price'] ?? '').trim());
+
+      final healthTagsRaw = (p['healthTags'] ?? p['tags'] ?? '').trim();
+      final allowedTags = HealthGuardrailService.defaultTags.toSet();
+      final healthTags = <String>{};
+      if (healthTagsRaw.isNotEmpty) {
+        // Support comma/pipe/space separated or plain phrases.
+        final normalized = healthTagsRaw.replaceAll('|', ',');
+        final parts = normalized
+            .split(',')
+            .expand((s) => s.split(RegExp(r'\s+')))
+            .map((s) => s.trim())
+            .where((s) => s.isNotEmpty)
+            .toList();
+
+        if (parts.isNotEmpty) {
+          for (final part in parts) {
+            if (allowedTags.contains(part)) {
+              healthTags.add(part);
+            }
+          }
+        }
+
+        // Also allow matching when the value is a phrase like "당류 주류".
+        for (final t in allowedTags) {
+          if (healthTagsRaw.contains(t)) {
+            healthTags.add(t);
+          }
+        }
+      }
+
+      DateTime? purchaseDate;
+      final purchaseDateRaw =
+          (p['purchaseDate'] ?? p['purchasedAt'] ?? p['buyDate'] ?? '').trim();
+      if (purchaseDateRaw.isNotEmpty) {
+        purchaseDate = DateTime.tryParse(purchaseDateRaw);
+        purchaseDate ??= DateParser.parse(purchaseDateRaw);
+      }
 
       DateTime? expiryDate;
       final expiryDateRaw = (p['expiryDate'] ?? p['expiry'] ?? '').trim();
       if (expiryDateRaw.isNotEmpty) {
         expiryDate = DateTime.tryParse(expiryDateRaw);
+        expiryDate ??= DateParser.parse(expiryDateRaw);
       }
       if (expiryDate == null) {
         final days = int.tryParse((p['expiryDays'] ?? p['days'] ?? '').trim());
@@ -111,6 +181,10 @@ class DeepLinkHandler {
         unit: unit.isEmpty ? null : unit,
         location: location.isEmpty ? null : location,
         category: category.isEmpty ? null : category,
+        supplier: supplier.isEmpty ? null : supplier,
+        memo: memo.isEmpty ? null : memo,
+        purchaseDate: purchaseDate,
+        healthTags: healthTags.isEmpty ? null : healthTags.toList(),
         expiryDate: expiryDate,
         price: price,
       );
@@ -147,6 +221,17 @@ class DeepLinkHandler {
                     : quantity.toString());
           final unitText = unit.isEmpty ? '' : unit;
           final locText = location.isEmpty ? '미지정' : location;
+          final catText = category.isEmpty ? '미지정' : category;
+
+          final priceText = price == null
+              ? null
+              : (price == price.roundToDouble()
+                    ? price.toStringAsFixed(0)
+                    : price.toString());
+
+          final supplierText = supplier.isEmpty ? null : supplier;
+          final memoText = memo.isEmpty ? null : memo;
+          final tagsText = healthTags.isEmpty ? null : healthTags.join(', ');
 
           showDialog<bool>(
             context: navigator.context,
@@ -160,6 +245,13 @@ class DeepLinkHandler {
                     Text('품목: $name'),
                     Text('수량: $qtyText$unitText'),
                     Text('보관: $locText'),
+                    if (category.isNotEmpty) Text('분류: $catText'),
+                    if (priceText != null) Text('가격: $priceText'),
+                    if (supplierText != null) Text('구매처: $supplierText'),
+                    if (memoText != null) Text('메모: $memoText'),
+                    if (tagsText != null) Text('태그: $tagsText'),
+                    if (purchaseDate != null)
+                      Text('구매일: ${purchaseDate.toLocal().toString().split(' ').first}'),
                     if (expiryDate != null)
                       Text('유통기한: ${expiryDate.toLocal().toString().split(' ').first}'),
                     const SizedBox(height: 8),
@@ -191,6 +283,242 @@ class DeepLinkHandler {
       }
 
       openDialog(autoSubmit: false);
+      return;
+    }
+
+    if (action.routeName == AppRoutes.foodExpiry) {
+      final intent = (action.intent ?? '').trim().toLowerCase();
+      if (intent == 'recipe_recommendation' || intent == 'recipe_recommend') {
+        navigator.pushNamed(
+          spec.routeName,
+          arguments: const FoodExpiryArgs(
+            scrollToDailyRecipeRecommendationOnStart: true,
+          ),
+        );
+        return;
+      }
+
+      if (intent == 'cookable_recipe_picker' || intent == 'cookable_recipes') {
+        navigator.pushNamed(
+          spec.routeName,
+          arguments: const FoodExpiryArgs(
+            openCookableRecipePickerOnStart: true,
+          ),
+        );
+        return;
+      }
+
+      if (intent == 'usage_mode' || intent == 'auto_usage') {
+        navigator.pushNamed(
+          spec.routeName,
+          arguments: const FoodExpiryArgs(
+            autoUsageMode: true,
+          ),
+        );
+        return;
+      }
+    }
+
+    if (action.routeName == AppRoutes.assetSimpleInput && action.intent == 'asset_add') {
+      final p = action.params;
+
+      final category = (p['category'] ?? p['assetCategory'] ?? '').trim();
+      final name = (p['name'] ?? p['assetName'] ?? '').trim();
+      final amount = double.tryParse((p['amount'] ?? '').trim());
+      final location = (p['location'] ?? '').trim();
+      final memo = (p['memo'] ?? '').trim();
+
+      void openScreen({required bool autoSubmit}) {
+        navigator.pushNamed(
+          spec.routeName,
+          arguments: AssetSimpleInputArgs(
+            accountName: accountName ?? AssistantRouteCatalog.resolveDefaultAccountName() ?? '',
+            initialCategory: category.isEmpty ? null : category,
+            initialName: name.isEmpty ? null : name,
+            initialAmount: amount,
+            initialLocation: location.isEmpty ? null : location,
+            initialMemo: memo.isEmpty ? null : memo,
+            autoSubmit: autoSubmit,
+          ),
+        );
+      }
+
+      if (action.autoSubmit) {
+        final missingForAuto = name.isEmpty || amount == null;
+        if (missingForAuto) {
+          _showSimpleInfoDialog(
+            navigator,
+            title: '자동 저장 불가',
+            message: '자동 저장을 위해서는 자산명과 금액이 필요합니다.\n화면을 열어 입력을 계속 진행하세요.',
+          );
+          openScreen(autoSubmit: false);
+          return;
+        }
+
+        if (!action.confirmed) {
+          final categoryText = category.isEmpty ? '현금' : category;
+          final amountText = amount == amount.roundToDouble()
+              ? amount.toStringAsFixed(0)
+              : amount.toString();
+
+          showDialog<bool>(
+            context: navigator.context,
+            builder: (dialogContext) {
+              return AlertDialog(
+                title: const Text('저장 전에 확인'),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('종류: $categoryText'),
+                    Text('자산명: $name'),
+                    Text('금액: $amountText'),
+                    if (location.isNotEmpty) Text('위치: $location'),
+                    if (memo.isNotEmpty) Text('메모: $memo'),
+                    const SizedBox(height: 8),
+                    const Text('이대로 저장할까요?'),
+                  ],
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(dialogContext).pop(false),
+                    child: const Text('취소'),
+                  ),
+                  FilledButton(
+                    onPressed: () => Navigator.of(dialogContext).pop(true),
+                    child: const Text('저장'),
+                  ),
+                ],
+              );
+            },
+          ).then((confirmed) {
+            if (confirmed == true) {
+              openScreen(autoSubmit: true);
+            }
+          });
+          return;
+        }
+
+        openScreen(autoSubmit: true);
+        return;
+      }
+
+      openScreen(autoSubmit: false);
+      return;
+    }
+
+    if (action.routeName == AppRoutes.quickSimpleExpenseInput && action.intent == 'quick_expense_add') {
+      final p = action.params;
+
+      final rawLine = (p['line'] ?? p['raw'] ?? '').toString().trim();
+      final description = (p['description'] ?? '').toString().trim();
+      final amountStr = (p['amount'] ?? '').toString().trim();
+      final payment = (p['payment'] ?? '').toString().trim();
+      final store = (p['store'] ?? '').toString().trim();
+
+      final amount = double.tryParse(amountStr.replaceAll(',', ''));
+
+      String composeLine() {
+        if (rawLine.isNotEmpty) return rawLine;
+
+        final parts = <String>[];
+        if (description.isNotEmpty) parts.add(description);
+        if (amount != null) {
+          final a = amount == amount.roundToDouble()
+              ? amount.toStringAsFixed(0)
+              : amount.toString();
+          parts.add('$a원');
+        }
+        if (payment.isNotEmpty) parts.add(payment);
+        if (store.isNotEmpty) parts.add(store);
+        return parts.join(' ').trim();
+      }
+
+      final line = composeLine();
+
+      void openScreen({required bool autoSubmit}) {
+        navigator.pushNamed(
+          spec.routeName,
+          arguments: QuickSimpleExpenseInputArgs(
+            accountName: accountName ?? AssistantRouteCatalog.resolveDefaultAccountName() ?? '',
+            initialDate: DateTime.now(),
+            initialLine: line.isEmpty ? null : line,
+            autoSubmit: autoSubmit,
+          ),
+        );
+      }
+
+      bool hasAmountInLine(String text) {
+        final t = text.trim();
+        if (t.isEmpty) return false;
+        return RegExp(r'(\d[\d,]*)\s*원').hasMatch(t) ||
+            RegExp(r'\d[\d,]*\s*$').hasMatch(t);
+      }
+
+      if (action.autoSubmit) {
+        final missingForAuto = !hasAmountInLine(line);
+        if (missingForAuto) {
+          _showSimpleInfoDialog(
+            navigator,
+            title: '자동 저장 불가',
+            message: '자동 저장을 위해서는 금액이 필요합니다.\n예: 커피 3000원\n화면을 열어 입력을 계속 진행하세요.',
+          );
+          openScreen(autoSubmit: false);
+          return;
+        }
+
+        if (!action.confirmed) {
+          final previewText = line.isNotEmpty
+              ? line
+              : (description.isNotEmpty
+                    ? description
+                    : '간편 지출(1줄)');
+          final amountText = amount != null
+              ? (amount == amount.roundToDouble()
+                    ? amount.toStringAsFixed(0)
+                    : amount.toString())
+              : '';
+
+          showDialog<bool>(
+            context: navigator.context,
+            builder: (dialogContext) {
+              return AlertDialog(
+                title: const Text('저장 전에 확인'),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('입력: $previewText'),
+                    if (amountText.isNotEmpty) Text('금액: $amountText'),
+                    const SizedBox(height: 8),
+                    const Text('이대로 저장할까요?'),
+                  ],
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(dialogContext).pop(false),
+                    child: const Text('취소'),
+                  ),
+                  FilledButton(
+                    onPressed: () => Navigator.of(dialogContext).pop(true),
+                    child: const Text('저장'),
+                  ),
+                ],
+              );
+            },
+          ).then((confirmed) {
+            if (confirmed == true) {
+              openScreen(autoSubmit: true);
+            }
+          });
+          return;
+        }
+
+        openScreen(autoSubmit: true);
+        return;
+      }
+
+      openScreen(autoSubmit: false);
       return;
     }
     navigator.pushNamed(spec.routeName, arguments: args);
@@ -234,28 +562,58 @@ class DeepLinkHandler {
     }
 
     final now = DateTime.now();
-    final type = action.isIncome ? TransactionType.income : TransactionType.expense;
+    final type = action.isIncome
+      ? TransactionType.income
+      : action.isSavings
+      ? TransactionType.savings
+      : action.isRefund
+      ? TransactionType.refund
+      : TransactionType.expense;
     final amount = action.amount;
+    final quantityRaw = action.quantity;
+    final unit = action.unit?.trim() ?? '';
+    final unitPriceRaw = action.unitPrice;
     final desc = action.description?.trim();
+    final memo = action.memo?.trim() ?? '';
+    final paymentMethod = action.paymentMethod?.trim() ?? '';
+    final store = action.store?.trim() ?? '';
+    final savingsAllocation = action.savingsAllocation;
+
+    final qty = (quantityRaw != null && quantityRaw > 0)
+        ? quantityRaw.round()
+        : 1;
+
+    final hasUnitPrice = unitPriceRaw != null && unitPriceRaw > 0;
+    final hasQty = quantityRaw != null && quantityRaw > 0;
 
     Transaction? initialTransaction;
-    if (amount != null || (desc != null && desc.isNotEmpty)) {
-      // Prefill unitPrice with amount to avoid validation failures when unit is required.
-      final safeAmount = amount ?? 0;
+    final hasDesc = desc != null && desc.isNotEmpty;
+    if (amount != null || hasDesc || hasUnitPrice || hasQty) {
+      final computedAmount = amount ?? (hasUnitPrice ? (unitPriceRaw * qty) : 0);
+      final computedUnitPrice = hasUnitPrice
+        ? unitPriceRaw
+          : (qty > 0 ? (computedAmount / qty) : computedAmount);
       initialTransaction = Transaction(
         id: '',
         type: type,
-        amount: safeAmount,
-        unitPrice: safeAmount,
+        amount: computedAmount,
+        quantity: qty,
+        unit: unit.isEmpty ? null : unit,
+        unitPrice: computedUnitPrice,
         date: now,
         description: desc ?? '',
+        paymentMethod: paymentMethod.isEmpty ? '현금' : paymentMethod,
+        memo: memo,
+        store: store.isEmpty ? null : store,
+        isRefund: action.isRefund,
+        savingsAllocation: type == TransactionType.savings
+            ? (savingsAllocation ?? SavingsAllocation.assetIncrease)
+            : null,
         mainCategory: action.category,
       );
     }
 
-    final routeName = action.isIncome
-        ? AppRoutes.transactionAddIncome
-        : AppRoutes.transactionAdd;
+    final routeName = action.isIncome ? AppRoutes.transactionAddIncome : AppRoutes.transactionAdd;
 
     void openScreen({required bool autoSubmit}) {
       navigator.pushNamed(
@@ -266,6 +624,7 @@ class DeepLinkHandler {
           treatAsNew: true,
           closeAfterSave: true,
           autoSubmit: autoSubmit,
+          openReceiptScannerOnStart: action.openReceiptScannerOnStart,
         ),
       );
     }
@@ -284,11 +643,20 @@ class DeepLinkHandler {
       }
 
       if (!action.confirmed) {
-        final typeText = action.isIncome ? '수입' : '지출';
+        final typeText = action.isIncome
+          ? '수입'
+          : action.isSavings
+          ? '저축'
+          : action.isRefund
+          ? '반품'
+          : '지출';
         final categoryText = (action.category == null || action.category!.trim().isEmpty)
             ? '미분류'
             : action.category!.trim();
         final amountText = amount.toStringAsFixed(amount == amount.roundToDouble() ? 0 : 2);
+        final qtyText = qty <= 1 ? '' : qty.toString();
+        final unitText = unit.isEmpty ? '' : unit;
+        final unitLine = (qtyText.isEmpty && unitText.isEmpty) ? '' : '$qtyText$unitText';
 
         showDialog<bool>(
           context: navigator.context,
@@ -302,7 +670,9 @@ class DeepLinkHandler {
                   Text('종류: $typeText'),
                   Text('설명: $desc'),
                   Text('금액: $amountText원'),
+                  if (unitLine.isNotEmpty) Text('수량: $unitLine'),
                   Text('카테고리: $categoryText'),
+                  if (memo.isNotEmpty) Text('메모: $memo'),
                   const SizedBox(height: 8),
                   const Text('이대로 저장할까요?'),
                 ],

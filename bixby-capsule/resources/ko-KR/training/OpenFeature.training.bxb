@@ -3,12 +3,32 @@ train ([유통기한](FeatureType) 열어) {
   route: OpenFeature
 }
 
+train ([유통기한](FeatureType) 확인해) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train (빅스비 [유통기한](FeatureType) 확인해) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
 train ([식재료](FeatureType) 관리 열어) {
   goal: OpenFeature
   route: OpenFeature
 }
 
 train ([식재료 등록](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([유통기한 등록](FeatureType) 화면 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([유통기한 입력](FeatureType) 화면 열어줘) {
   goal: OpenFeature
   route: OpenFeature
 }
@@ -23,7 +43,37 @@ train ([냉장고](FeatureType) 확인) {
   route: OpenFeature
 }
 
+train ([냉장고](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train (빅스비 [냉장고](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
 train ([장바구니](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([장바구니](FeatureType) 보여줘) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([장바구니](FeatureType) 표시해줘) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train (빅스비 [장바구니](FeatureType) 보여줘) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train (빅스비 [장바구니](FeatureType) 표시해줘) {
   goal: OpenFeature
   route: OpenFeature
 }
@@ -34,6 +84,21 @@ train ([쇼핑목록](FeatureType) 보여줘) {
 }
 
 train (장볼것 확인) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([일일내역](FeatureType) 보여줘) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([일일내역](FeatureType) 표시해줘) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train (빅스비 [일일내역](FeatureType) 보여줘) {
   goal: OpenFeature
   route: OpenFeature
 }
@@ -58,17 +123,24 @@ train ([레시피](FeatureType) 열어) {
   route: OpenFeature
 }
 
-train ([요리](FeatureType) 메뉴 추천해줘) {
-  goal: OpenFeature
-  route: OpenFeature
-}
-
-train (뭐 해먹지) {
-  goal: OpenFeature
-  route: OpenFeature
-}
+// 레시피 추천 관련 발화는 RecommendRecipe 액션으로 이동 (유통기한 화면 내 섹션 스크롤)
 
 train ([설정](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([포인트 입력](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([포인트 입력](FeatureType) 화면 열어줘) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train (빅스비 [포인트 입력](FeatureType) 열어줘) {
   goal: OpenFeature
   route: OpenFeature
 }
@@ -123,10 +195,7 @@ train ([음성단축키](FeatureType) 열어) {
   route: OpenFeature
 }
 
-train (오늘 뭐 먹을까) {
-  goal: OpenFeature
-  route: OpenFeature
-}
+// "오늘 뭐 먹을까" 등은 RecommendRecipe.training.bxb 참고
 
 train ([지출입력](FeatureType) 열어) {
   goal: OpenFeature
@@ -134,6 +203,171 @@ train ([지출입력](FeatureType) 열어) {
 }
 
 train (새 지출 추가하러 가기) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([간편 지출](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([수입 상세](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([수입배분](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([반품](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([1억 프로젝트](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([날씨 입력](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([통계](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([고정비 통계](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([주간 리포트](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([월간 리포트](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([분기 리포트](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([반기 리포트](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([연간 리포트](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([10년](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([통계 검색](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([최저가 달](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([날씨 기반 가격 예측](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([자산 입력](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([자산 배분](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([자산 평가](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([자산 아이콘 관리](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([전체 거래](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([루트 검색](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([계정 관리](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([월말 정산](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([보호기 설정](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([루트 아이콘 관리](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([애플리케이션 설정](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([테마](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([표시/폰트](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([언어 설정](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([통화 설정](FeatureType) 열어) {
+  goal: OpenFeature
+  route: OpenFeature
+}
+
+train ([레시피/식재료 검색](FeatureType) 열어) {
   goal: OpenFeature
   route: OpenFeature
 }

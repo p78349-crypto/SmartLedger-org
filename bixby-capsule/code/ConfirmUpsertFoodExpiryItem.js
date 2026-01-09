@@ -1,7 +1,9 @@
-// UpsertFoodExpiryItem Action Handler
-// 입력값을 정규화해 "등록할까요?" 미리보기 결과를 반환합니다.
+// ConfirmUpsertFoodExpiryItem Action Handler
+// 미리보기(확인) 이후 confirmed=true 딥링크를 반환합니다
 
-module.exports.function = function upsertFoodExpiryItem(name, quantity, unit, location, category, supplier, memo, purchaseDateText, healthTagsText, expiryDays, expiryText, price, $vivContext) {
+const endpoints = require('./endpoints.js');
+
+module.exports.function = function confirmUpsertFoodExpiryItem(name, quantity, unit, location, category, supplier, memo, purchaseDateText, healthTagsText, expiryDays, expiryText, price, $vivContext) {
   const n = (name || '').trim();
   const q = normalizeNumber(quantity);
   const u = (unit || '').trim();
@@ -14,34 +16,36 @@ module.exports.function = function upsertFoodExpiryItem(name, quantity, unit, lo
   const days = normalizeExpiryDays(expiryDays, expiryText);
   const p = normalizeNumber(price);
 
-  let message = '이대로 등록할까요?';
-  if (n) {
-    const parts = [n];
-    if (q !== null && !Number.isNaN(q)) {
-      parts.push(u ? `${q}${u}` : `${q}`);
-    }
-    if (loc) parts.push(loc);
-    if (cat) parts.push(cat);
-    if (sup) parts.push(`구매처 ${sup}`);
-    if (purchaseText) parts.push(`구매일 ${purchaseText}`);
-    if (tagsText) parts.push(`태그 ${tagsText}`);
-    if (days !== null && !Number.isNaN(days)) parts.push(`${days}일 후`);
-    message = `${parts.join(' ')} 등록할까요?`;
-  }
-
-  return {
+  const result = endpoints.UpsertFoodExpiryItem({
     name: n,
-    quantity: q !== null && !Number.isNaN(q) ? q : null,
+    quantity: q,
     unit: u || null,
     location: loc || null,
     category: cat || null,
     supplier: sup || null,
     memo: m || null,
-    purchaseDateText: purchaseText || null,
-    healthTagsText: tagsText || null,
-    expiryDays: days !== null && !Number.isNaN(days) ? days : null,
-    price: p !== null && !Number.isNaN(p) ? p : null,
-    message: message
+    purchaseDate: purchaseText || null,
+    healthTags: tagsText || null,
+    expiryDays: days,
+    price: p,
+    autoSubmit: true,
+    confirmed: true
+  });
+
+  const parts = [];
+  if (n) parts.push(n);
+  if (q !== null && !Number.isNaN(q)) parts.push(u ? `${q}${u}` : `${q}`);
+  if (loc) parts.push(loc);
+  if (cat) parts.push(cat);
+  if (sup) parts.push(`구매처 ${sup}`);
+  if (purchaseText) parts.push(`구매일 ${purchaseText}`);
+  if (tagsText) parts.push(`태그 ${tagsText}`);
+  if (days !== null && !Number.isNaN(days)) parts.push(`${days}일 후`);
+
+  return {
+    success: true,
+    deepLink: result.deepLink,
+    message: `${parts.length ? parts.join(' ') : '식재료'} 등록을 진행합니다. 지금 "앱 열기"라고 말하면 완료됩니다.`
   };
 };
 
@@ -49,14 +53,12 @@ function normalizeHealthTagsText(v) {
   const raw = (v || '').toString().trim();
   if (!raw) return '';
 
-  // Allowlist based on app defaults
   const known = ['탄수화물', '당류', '주류'];
   const found = [];
   for (const t of known) {
     if (raw.includes(t)) found.push(t);
   }
 
-  // Also support simple delimited values (comma/pipe/space)
   const normalized = raw.replace(/\|/g, ',');
   const parts = normalized
     .split(',')
@@ -75,14 +77,9 @@ function normalizeSupplier(v) {
   const raw = (v || '').toString().trim();
   if (!raw) return '';
 
-  // Common patterns: "이마트에서", "이마트에서 산", "이마트에서 구매"
-  // Keep it conservative: only strip at the end.
   let out = raw;
-
-  // Remove trailing punctuation/spaces
   out = out.replace(/[\s\-–—]+$/g, '').trim();
 
-  // Remove common trailing phrases
   const suffixes = [
     '에서 산 거',
     '에서 산것',
@@ -108,21 +105,16 @@ function normalizeMemo(v) {
   const raw = (v || '').toString().trim();
   if (!raw) return '';
 
-  // Trim common wrappers/markers.
   let out = raw
     .replace(/^메모\s*/g, '')
     .replace(/^노트\s*/g, '')
     .replace(/^설명\s*/g, '')
     .trim();
 
-  // Remove surrounding quotes.
   out = out.replace(/^"(.+)"$/g, '$1').replace(/^'(.+)'$/g, '$1').trim();
 
-  // Remove trailing punctuation that often comes with speech-to-text.
   out = out.replace(/[.!?~]+$/g, '').trim();
 
-  // If user speaks a reason form, strip only common trailing suffixes.
-  // e.g., "행사라서" -> "행사", "1+1이라서요" -> "1+1"
   const suffixes = [
     '이라서요',
     '라서요',
@@ -152,15 +144,12 @@ function normalizePurchaseDateText(v) {
   const raw = (v || '').toString().trim();
   if (!raw) return '';
 
-  // Handle colloquial phrases like "오늘 산", "어제 샀어", "방금 산"
-  // Map to app-friendly tokens where possible.
   const compact = raw.replace(/\s+/g, '');
 
   if (compact.includes('어제')) return '어제';
   if (compact.includes('오늘')) return '오늘';
   if (compact.includes('방금') || compact.includes('막')) return '오늘';
 
-  // Strip common trailing purchase verbs so DateParser can handle the remaining part.
   let out = raw;
   out = out.replace(/[.!?~]+$/g, '').trim();
   const suffixes = [
@@ -186,7 +175,6 @@ function normalizePurchaseDateText(v) {
   const outCompact = out.replace(/\s+/g, '');
   for (const s of suffixes) {
     if (outCompact.endsWith(s)) {
-      // Remove suffix from original string conservatively by length.
       out = out.slice(0, Math.max(0, out.length - s.length)).trim();
       break;
     }
@@ -199,7 +187,6 @@ function normalizeLocation(v) {
   const raw = (v || '').toString().trim();
   if (!raw) return '';
 
-  // Normalize common Korean location variants to app-friendly labels.
   const compact = raw.replace(/\s+/g, '');
 
   if (compact === '냉장고') return '냉장';
@@ -216,7 +203,6 @@ function normalizeCategory(v) {
 
   const compact = raw.replace(/\s+/g, '');
 
-  // Normalize common synonyms to app category labels.
   if (compact === '야채') return '채소';
   if (compact === '고기') return '육류';
   if (compact === '생선' || compact === '해산물') return '수산물';
@@ -260,7 +246,6 @@ function normalizeExpiryDays(expiryDays, expiryText) {
   if (compact === '모레까지') return 2;
 
   // Weekend / weekday deadlines
-  // Interpret "주말까지" as Saturday by default.
   if (compact === '주말까지' || compact === '이번주주말까지') {
     return daysUntilWeekday(6);
   }
@@ -276,19 +261,16 @@ function normalizeExpiryDays(expiryDays, expiryText) {
     return daysUntilWeekday(0);
   }
 
-  // Common Korean phrases
   if (raw === '오늘') return 0;
   if (raw === '내일') return 1;
   if (raw === '모레') return 2;
 
-  // "N일 후/뒤"
   const mDays = raw.match(/(\d{1,3})\s*일\s*(후|뒤)/);
   if (mDays) {
     const n = Number(mDays[1]);
     return Number.isNaN(n) ? null : n;
   }
 
-  // "M월 D일" (assume upcoming date; if already passed this year, roll to next year)
   const mDate = raw.match(/(\d{1,2})\s*월\s*(\d{1,2})\s*일/);
   if (mDate) {
     const month = Number(mDate[1]);
@@ -312,6 +294,6 @@ function normalizeExpiryDays(expiryDays, expiryText) {
 function daysUntilWeekday(targetDay) {
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const day = today.getDay(); // 0=Sun..6=Sat
+  const day = today.getDay();
   return (targetDay - day + 7) % 7;
 }

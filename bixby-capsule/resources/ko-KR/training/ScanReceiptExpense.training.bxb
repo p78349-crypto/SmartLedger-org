@@ -1,0 +1,142 @@
+// ScanReceiptExpense 트레이닝 데이터
+// 영수증 스캔 → 지출 입력 화면 열기
+
+train (영수증 스캔해서 지출 기록해) {
+  goal: ScanReceiptExpense
+  route: ScanReceiptExpense
+}
+
+train (영수증 스캔해서 저장해) {
+  goal: ScanReceiptExpense
+  route: ScanReceiptExpense
+}
+
+train (영수증 스캔해서 기록해) {
+  goal: ScanReceiptExpense
+  route: ScanReceiptExpense
+}
+
+train (영수증 스캔해서 등록해) {
+  goal: ScanReceiptExpense
+  route: ScanReceiptExpense
+}
+
+train (영수증 스캔해서 지출 저장해) {
+  goal: ScanReceiptExpense
+  route: ScanReceiptExpense
+}
+
+train (영수증 스캔해서 지출 등록해) {
+  goal: ScanReceiptExpense
+  route: ScanReceiptExpense
+}
+
+train (빅스비 영수증 스캔해서 저장해) {
+  goal: ScanReceiptExpense
+  route: ScanReceiptExpense
+}
+
+train (빅스비 영수증 스캔해서 기록해) {
+  goal: ScanReceiptExpense
+  route: ScanReceiptExpense
+}
+
+train (빅스비 영수증 스캔해서 등록해) {
+  goal: ScanReceiptExpense
+  route: ScanReceiptExpense
+}
+
+train (영수증 스캔해서 지출 입력해) {
+  goal: ScanReceiptExpense
+  route: ScanReceiptExpense
+}
+
+train (영수증 찍어서 지출 기록해) {
+  goal: ScanReceiptExpense
+  route: ScanReceiptExpense
+}
+
+train (영수증 찍어서 저장해) {
+  goal: ScanReceiptExpense
+  route: ScanReceiptExpense
+}
+
+train (영수증 찍어서 기록해) {
+  goal: ScanReceiptExpense
+  route: ScanReceiptExpense
+}
+
+train (영수증 찍어서 등록해) {
+  goal: ScanReceiptExpense
+  route: ScanReceiptExpense
+}
+
+train (영수증 촬영해서 저장해) {
+  goal: ScanReceiptExpense
+  route: ScanReceiptExpense
+}
+
+train (영수증 촬영해서 기록해) {
+  goal: ScanReceiptExpense
+  route: ScanReceiptExpense
+}
+
+train (영수증 사진 찍어서 저장해) {
+  goal: ScanReceiptExpense
+  route: ScanReceiptExpense
+}
+
+train (영수증 사진 찍어서 기록해) {
+  goal: ScanReceiptExpense
+  route: ScanReceiptExpense
+}
+
+train (빅스비 영수증 촬영해서 저장해) {
+  goal: ScanReceiptExpense
+  route: ScanReceiptExpense
+}
+
+train (빅스비 영수증 사진 찍어서 저장해) {
+  goal: ScanReceiptExpense
+  route: ScanReceiptExpense
+}
+
+train (영수증 찍어서 지출 입력해) {
+  goal: ScanReceiptExpense
+  route: ScanReceiptExpense
+}
+
+train (영수증으로 지출 기록해) {
+  goal: ScanReceiptExpense
+  route: ScanReceiptExpense
+}
+
+train (영수증 스캔) {
+  goal: ScanReceiptExpense
+  route: ScanReceiptExpense
+}
+
+train (방금 장본 영수증 입력할래) {
+  goal: ScanReceiptExpense
+  route: ScanReceiptExpense
+}
+
+train (영수증 찍어서 지출 달아줘) {
+  goal: ScanReceiptExpense
+  route: ScanReceiptExpense
+}
+
+train (식단 기록하게 영수증 스캔 화면 열어) {
+  goal: ScanReceiptExpense
+  route: ScanReceiptExpense
+}
+
+train (빅스비 방금 장본 영수증 입력할래) {
+  goal: ScanReceiptExpense
+  route: ScanReceiptExpense
+}
+
+train (빅스비 영수증 찍어서 지출 달아줘) {
+  goal: ScanReceiptExpense
+  route: ScanReceiptExpense
+}

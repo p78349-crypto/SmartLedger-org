@@ -12,10 +12,17 @@ class QuickSimpleExpenseInputScreen extends StatefulWidget {
     super.key,
     required this.accountName,
     required this.initialDate,
+    this.initialLine,
+    this.autoSubmitOnStart = false,
   });
 
   final String accountName;
   final DateTime initialDate;
+  final String? initialLine;
+
+  /// If true, attempts to save automatically once opened.
+  /// Safety gate must be enforced by DeepLinkHandler using confirmed flags.
+  final bool autoSubmitOnStart;
 
   @override
   State<QuickSimpleExpenseInputScreen> createState() =>
@@ -33,6 +40,18 @@ class _QuickSimpleExpenseInputScreenState
   @override
   void initState() {
     super.initState();
+
+    final prefill = widget.initialLine?.trim() ?? '';
+    if (prefill.isNotEmpty) {
+      _controller.text = prefill;
+    }
+
+    if (widget.autoSubmitOnStart) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _goNext();
+      });
+    }
   }
 
   @override

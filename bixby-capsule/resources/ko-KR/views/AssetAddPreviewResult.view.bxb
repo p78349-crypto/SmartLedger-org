@@ -1,0 +1,83 @@
+result-view {
+  match: AssetAddPreviewResult
+
+  message {
+    if (exists(this.message)) {
+      template ("#{value(this.message)}")
+    } else {
+      template ("자산 저장할까요?")
+    }
+  }
+
+  render {
+    layout {
+      section {
+        content {
+          paragraph {
+            value ("자산 저장 확인")
+            style (Title_L)
+          }
+        }
+      }
+
+      section {
+        title ("요약")
+        content {
+          single-line {
+            text {
+              value ("자산명: #{value(this.name)}")
+              style (Detail_L)
+            }
+          }
+          single-line {
+            text {
+              value ("금액: #{value(this.amount)}원")
+              style (Detail_L)
+            }
+          }
+          if (exists(this.category)) {
+            single-line {
+              text {
+                value ("종류: #{value(this.category)}")
+                style (Detail_L)
+              }
+            }
+          }
+          if (exists(this.location)) {
+            single-line {
+              text {
+                value ("위치: #{value(this.location)}")
+                style (Detail_L)
+              }
+            }
+          }
+          if (exists(this.memo)) {
+            single-line {
+              text {
+                value ("메모: #{value(this.memo)}")
+                style (Detail_L)
+              }
+            }
+          }
+        }
+      }
+
+      section {
+        content {
+          paragraph {
+            value ("이대로 저장할까요?")
+            style (Detail_L)
+          }
+        }
+      }
+    }
+  }
+
+  conversation-drivers {
+    conversation-driver { template ("자산 저장해") }
+    if (exists(this.name) && exists(this.amount)) {
+      conversation-driver { template ("#{value(this.name)} #{value(this.amount)}원 자산 저장해") }
+    }
+    conversation-driver { template ("취소") }
+  }
+}

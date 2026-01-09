@@ -39,10 +39,50 @@ result-view {
               }
             }
           }
+          if (exists(this.quantity) || exists(this.unit)) {
+            single-line {
+              text {
+                value ("수량: #{exists(this.quantity) ? value(this.quantity) : ''}#{exists(this.unit) ? value(this.unit) : ''}")
+                style (Detail_L)
+              }
+            }
+          }
+          if (exists(this.unitPrice)) {
+            single-line {
+              text {
+                value ("단가: #{value(this.unitPrice)}원")
+                style (Detail_L)
+              }
+            }
+          }
           if (exists(this.category)) {
             single-line {
               text {
                 value ("카테고리: #{value(this.category)}")
+                style (Detail_L)
+              }
+            }
+          }
+          if (exists(this.memo)) {
+            single-line {
+              text {
+                value ("메모: #{value(this.memo)}")
+                style (Detail_L)
+              }
+            }
+          }
+          if (exists(this.paymentMethod)) {
+            single-line {
+              text {
+                value ("결제: #{value(this.paymentMethod)}")
+                style (Detail_L)
+              }
+            }
+          }
+          if (exists(this.store)) {
+            single-line {
+              text {
+                value ("매장: #{value(this.store)}")
                 style (Detail_L)
               }
             }
@@ -64,10 +104,38 @@ result-view {
   conversation-drivers {
     // 컨텍스트 의존도를 줄이기 위해 description/amount 포함 발화를 제안
     if (exists(this.description) && exists(this.amount)) {
+      // 수량/단위가 있으면 더 구체적으로 제안
+      if (exists(this.quantity) || exists(this.unit)) {
+        // 단가까지 있으면 단가 포함 문장도 추가
+        if (exists(this.unitPrice)) {
+          if (this.type == TransactionType(expense)) {
+            conversation-driver { template ("#{value(this.description)} #{exists(this.quantity) ? value(this.quantity) : ''}#{exists(this.unit) ? value(this.unit) : ''} 단가 #{value(this.unitPrice)}원 #{value(this.amount)}원 지출 저장해") }
+          } else-if (this.type == TransactionType(income)) {
+            conversation-driver { template ("#{value(this.description)} #{exists(this.quantity) ? value(this.quantity) : ''}#{exists(this.unit) ? value(this.unit) : ''} 단가 #{value(this.unitPrice)}원 #{value(this.amount)}원 수입 저장해") }
+          } else-if (this.type == TransactionType(refund)) {
+            conversation-driver { template ("#{value(this.description)} #{exists(this.quantity) ? value(this.quantity) : ''}#{exists(this.unit) ? value(this.unit) : ''} 단가 #{value(this.unitPrice)}원 #{value(this.amount)}원 반품 저장해") }
+          } else {
+            conversation-driver { template ("#{value(this.description)} #{exists(this.quantity) ? value(this.quantity) : ''}#{exists(this.unit) ? value(this.unit) : ''} 단가 #{value(this.unitPrice)}원 #{value(this.amount)}원 저축 저장해") }
+          }
+        }
+
+        if (this.type == TransactionType(expense)) {
+          conversation-driver { template ("#{value(this.description)} #{exists(this.quantity) ? value(this.quantity) : ''}#{exists(this.unit) ? value(this.unit) : ''} #{value(this.amount)}원 지출 저장해") }
+        } else-if (this.type == TransactionType(income)) {
+          conversation-driver { template ("#{value(this.description)} #{exists(this.quantity) ? value(this.quantity) : ''}#{exists(this.unit) ? value(this.unit) : ''} #{value(this.amount)}원 수입 저장해") }
+        } else-if (this.type == TransactionType(refund)) {
+          conversation-driver { template ("#{value(this.description)} #{exists(this.quantity) ? value(this.quantity) : ''}#{exists(this.unit) ? value(this.unit) : ''} #{value(this.amount)}원 반품 저장해") }
+        } else {
+          conversation-driver { template ("#{value(this.description)} #{exists(this.quantity) ? value(this.quantity) : ''}#{exists(this.unit) ? value(this.unit) : ''} #{value(this.amount)}원 저축 저장해") }
+        }
+      }
+
       if (this.type == TransactionType(expense)) {
         conversation-driver { template ("#{value(this.description)} #{value(this.amount)}원 지출 저장해") }
       } else-if (this.type == TransactionType(income)) {
         conversation-driver { template ("#{value(this.description)} #{value(this.amount)}원 수입 저장해") }
+      } else-if (this.type == TransactionType(refund)) {
+        conversation-driver { template ("#{value(this.description)} #{value(this.amount)}원 반품 저장해") }
       } else {
         conversation-driver { template ("#{value(this.description)} #{value(this.amount)}원 저축 저장해") }
       }
@@ -75,10 +143,36 @@ result-view {
 
     // amount만 있는 경우도 지원
     if (!exists(this.description) && exists(this.amount)) {
+      if (exists(this.quantity) || exists(this.unit)) {
+        if (exists(this.unitPrice)) {
+          if (this.type == TransactionType(expense)) {
+            conversation-driver { template ("#{exists(this.quantity) ? value(this.quantity) : ''}#{exists(this.unit) ? value(this.unit) : ''} 단가 #{value(this.unitPrice)}원 #{value(this.amount)}원 지출 저장해") }
+          } else-if (this.type == TransactionType(income)) {
+            conversation-driver { template ("#{exists(this.quantity) ? value(this.quantity) : ''}#{exists(this.unit) ? value(this.unit) : ''} 단가 #{value(this.unitPrice)}원 #{value(this.amount)}원 수입 저장해") }
+          } else-if (this.type == TransactionType(refund)) {
+            conversation-driver { template ("#{exists(this.quantity) ? value(this.quantity) : ''}#{exists(this.unit) ? value(this.unit) : ''} 단가 #{value(this.unitPrice)}원 #{value(this.amount)}원 반품 저장해") }
+          } else {
+            conversation-driver { template ("#{exists(this.quantity) ? value(this.quantity) : ''}#{exists(this.unit) ? value(this.unit) : ''} 단가 #{value(this.unitPrice)}원 #{value(this.amount)}원 저축 저장해") }
+          }
+        }
+
+        if (this.type == TransactionType(expense)) {
+          conversation-driver { template ("#{exists(this.quantity) ? value(this.quantity) : ''}#{exists(this.unit) ? value(this.unit) : ''} #{value(this.amount)}원 지출 저장해") }
+        } else-if (this.type == TransactionType(income)) {
+          conversation-driver { template ("#{exists(this.quantity) ? value(this.quantity) : ''}#{exists(this.unit) ? value(this.unit) : ''} #{value(this.amount)}원 수입 저장해") }
+        } else-if (this.type == TransactionType(refund)) {
+          conversation-driver { template ("#{exists(this.quantity) ? value(this.quantity) : ''}#{exists(this.unit) ? value(this.unit) : ''} #{value(this.amount)}원 반품 저장해") }
+        } else {
+          conversation-driver { template ("#{exists(this.quantity) ? value(this.quantity) : ''}#{exists(this.unit) ? value(this.unit) : ''} #{value(this.amount)}원 저축 저장해") }
+        }
+      }
+
       if (this.type == TransactionType(expense)) {
         conversation-driver { template ("#{value(this.amount)}원 지출 저장해") }
       } else-if (this.type == TransactionType(income)) {
         conversation-driver { template ("#{value(this.amount)}원 수입 저장해") }
+      } else-if (this.type == TransactionType(refund)) {
+        conversation-driver { template ("#{value(this.amount)}원 반품 저장해") }
       } else {
         conversation-driver { template ("#{value(this.amount)}원 저축 저장해") }
       }
@@ -86,19 +180,40 @@ result-view {
 
     // description만 있는 경우도 지원
     if (exists(this.description) && !exists(this.amount)) {
+      if (exists(this.quantity) || exists(this.unit)) {
+        if (this.type == TransactionType(expense)) {
+          conversation-driver { template ("#{value(this.description)} #{exists(this.quantity) ? value(this.quantity) : ''}#{exists(this.unit) ? value(this.unit) : ''} 지출 저장해") }
+        } else-if (this.type == TransactionType(income)) {
+          conversation-driver { template ("#{value(this.description)} #{exists(this.quantity) ? value(this.quantity) : ''}#{exists(this.unit) ? value(this.unit) : ''} 수입 저장해") }
+        } else-if (this.type == TransactionType(refund)) {
+          conversation-driver { template ("#{value(this.description)} #{exists(this.quantity) ? value(this.quantity) : ''}#{exists(this.unit) ? value(this.unit) : ''} 반품 저장해") }
+        } else {
+          conversation-driver { template ("#{value(this.description)} #{exists(this.quantity) ? value(this.quantity) : ''}#{exists(this.unit) ? value(this.unit) : ''} 저축 저장해") }
+        }
+      }
+
       if (this.type == TransactionType(expense)) {
         conversation-driver { template ("#{value(this.description)} 지출 저장해") }
       } else-if (this.type == TransactionType(income)) {
         conversation-driver { template ("#{value(this.description)} 수입 저장해") }
+      } else-if (this.type == TransactionType(refund)) {
+        conversation-driver { template ("#{value(this.description)} 반품 저장해") }
       } else {
         conversation-driver { template ("#{value(this.description)} 저축 저장해") }
       }
     }
 
-    // 짧은 확인 발화(그래도 '저장' 키워드는 포함)
-    conversation-driver { template ("응 저장해") }
-    conversation-driver { template ("그래 저장해") }
-    conversation-driver { template ("저장해") }
+    // 짧은 확인 발화 (충돌 방지를 위해 기능을 명시)
+    conversation-driver { template ("거래 저장해") }
+    if (this.type == TransactionType(expense)) {
+      conversation-driver { template ("지출 저장해") }
+    } else-if (this.type == TransactionType(income)) {
+      conversation-driver { template ("수입 저장해") }
+    } else-if (this.type == TransactionType(refund)) {
+      conversation-driver { template ("반품 저장해") }
+    } else {
+      conversation-driver { template ("저축 저장해") }
+    }
 
     conversation-driver { template ("취소") }
   }

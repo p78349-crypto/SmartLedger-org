@@ -3,6 +3,11 @@ train (지출 기록해) {
   route: AddTransaction
 }
 
+train (빅스비 지출 기록해) {
+  goal: AddTransaction
+  route: AddTransaction
+}
+
 train (지출 입력) {
   goal: AddTransaction
   route: AddTransaction
@@ -29,6 +34,11 @@ train ([삼만](viv.core.Integer:TransactionAmount)원 지출) {
 }
 
 train (수입 기록해) {
+  goal: AddTransaction
+  route: AddTransaction
+}
+
+train (빅스비 수입 기록해) {
   goal: AddTransaction
   route: AddTransaction
 }
@@ -68,7 +78,17 @@ train ([커피](raw.description) [5천](viv.core.Integer:TransactionAmount)원 �
   route: AddTransaction
 }
 
+train (빅스비 [커피](raw.description) [5천](viv.core.Integer:TransactionAmount)원 지출) {
+  goal: AddTransaction
+  route: AddTransaction
+}
+
 train ([커피](raw.description) [5000](viv.core.Integer:TransactionAmount)원 지출 기록해) {
+  goal: AddTransaction
+  route: AddTransaction
+}
+
+train (빅스비 [커피](raw.description) [5000](viv.core.Integer:TransactionAmount)원 지출 기록해) {
   goal: AddTransaction
   route: AddTransaction
 }
@@ -84,6 +104,98 @@ train ([점심](raw.description) [만이천](viv.core.Integer:TransactionAmount)
 }
 
 train ([대중교통](raw.description) 비용 기록해) {
+  goal: AddTransaction
+  route: AddTransaction
+}
+
+// 메모 포함 (상세 입력 수준)
+train ([커피](raw.description) [5000](viv.core.Integer:TransactionAmount)원 지출 메모 [회사](memo) 기록해) {
+  goal: AddTransaction
+  route: AddTransaction
+}
+
+train ([월급](raw.description) [3000000](viv.core.Integer:TransactionAmount)원 수입 메모 [정산](memo) 기록해) {
+  goal: AddTransaction
+  route: AddTransaction
+}
+
+train ([적금](raw.description) [300000](viv.core.Integer:TransactionAmount)원 저축 메모 [자동이체](memo) 기록해) {
+  goal: AddTransaction
+  route: AddTransaction
+}
+
+// 카테고리 포함
+train ([커피](raw.description) [5000](viv.core.Integer:TransactionAmount)원 지출 카테고리 [식비](category) 기록해) {
+  goal: AddTransaction
+  route: AddTransaction
+}
+
+train ([월급](raw.description) [3000000](viv.core.Integer:TransactionAmount)원 수입 카테고리 [급여](category) 기록해) {
+  goal: AddTransaction
+  route: AddTransaction
+}
+
+train ([적금](raw.description) [300000](viv.core.Integer:TransactionAmount)원 저축 카테고리 [저축](category) 기록해) {
+  goal: AddTransaction
+  route: AddTransaction
+}
+
+// 카테고리 + 메모 포함
+train ([커피](raw.description) [5000](viv.core.Integer:TransactionAmount)원 지출 카테고리 [식비](category) 메모 [회사](memo) 기록해) {
+  goal: AddTransaction
+  route: AddTransaction
+}
+
+// 결제/매장 포함
+train ([커피](raw.description) [5000](viv.core.Integer:TransactionAmount)원 지출 결제 [신용카드](paymentMethod) 매장 [스타벅스](store) 기록해) {
+  goal: AddTransaction
+  route: AddTransaction
+}
+
+train ([점심](raw.description) [12000](viv.core.Integer:TransactionAmount)원 지출 결제 [현금](paymentMethod) 기록해) {
+  goal: AddTransaction
+  route: AddTransaction
+}
+
+// 수량/단위 포함
+train ([커피](raw.description) [2](TransactionQuantity)[잔](TransactionUnit) [5000](viv.core.Integer:TransactionAmount)원 지출 기록해) {
+  goal: AddTransaction
+  route: AddTransaction
+}
+
+train ([생수](raw.description) [6](TransactionQuantity)[개](TransactionUnit) [4500](viv.core.Integer:TransactionAmount)원 지출 기록해) {
+  goal: AddTransaction
+  route: AddTransaction
+}
+
+// 수량/단위 + 단가 포함(명시)
+train ([커피](raw.description) [2](TransactionQuantity)[잔](TransactionUnit) 단가 [2500](TransactionUnitPrice)원 지출 기록해) {
+  goal: AddTransaction
+  route: AddTransaction
+}
+
+train ([커피](raw.description) [2](TransactionQuantity)[잔](TransactionUnit) 단가 [2500](TransactionUnitPrice)원 지출 결제 [신용카드](paymentMethod) 기록해) {
+  goal: AddTransaction
+  route: AddTransaction
+}
+
+train ([생수](raw.description) [6](TransactionQuantity)[개](TransactionUnit) 단가 [750](TransactionUnitPrice)원 지출 매장 [이마트](store) 기록해) {
+  goal: AddTransaction
+  route: AddTransaction
+}
+
+// 반품/환불
+train ([커피](raw.description) [5000](viv.core.Integer:TransactionAmount)원 반품 기록해) {
+  goal: AddTransaction
+  route: AddTransaction
+}
+
+train ([옷](raw.description) [30000](viv.core.Integer:TransactionAmount)원 환불 기록해) {
+  goal: AddTransaction
+  route: AddTransaction
+}
+
+train ([생수](raw.description) [6](TransactionQuantity)[개](TransactionUnit) 단가 [750](TransactionUnitPrice)원 반품 기록해) {
   goal: AddTransaction
   route: AddTransaction
 }

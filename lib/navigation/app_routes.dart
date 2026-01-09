@@ -122,6 +122,7 @@ class FoodExpiryArgs {
     this.autoUsageMode = false,
     this.openUpsertOnStart = false,
     this.openCookableRecipePickerOnStart = false,
+    this.scrollToDailyRecipeRecommendationOnStart = false,
     this.upsertPrefill,
     this.upsertAutoSubmit = false,
   });
@@ -129,6 +130,12 @@ class FoodExpiryArgs {
   final bool autoUsageMode;
   final bool openUpsertOnStart;
   final bool openCookableRecipePickerOnStart;
+
+  /// If true, the screen will scroll to the "오늘의 요리 추천" section
+  /// right after the first frame.
+  ///
+  /// Note: This is navigation-only and must not cause state-changing behavior.
+  final bool scrollToDailyRecipeRecommendationOnStart;
 
   /// Optional prefill values when opening the upsert dialog via assistant.
   final FoodExpiryUpsertPrefill? upsertPrefill;
@@ -145,6 +152,10 @@ class FoodExpiryUpsertPrefill {
     this.unit,
     this.location,
     this.category,
+    this.supplier,
+    this.memo,
+    this.purchaseDate,
+    this.healthTags,
     this.expiryDate,
     this.price,
   });
@@ -154,6 +165,10 @@ class FoodExpiryUpsertPrefill {
   final String? unit;
   final String? location;
   final String? category;
+  final String? supplier;
+  final String? memo;
+  final DateTime? purchaseDate;
+  final List<String>? healthTags;
   final DateTime? expiryDate;
   final double? price;
 }
@@ -183,6 +198,7 @@ class TransactionAddArgs {
     this.treatAsNew = false,
     this.closeAfterSave = false,
     this.autoSubmit = false,
+    this.openReceiptScannerOnStart = false,
   });
   final String accountName;
   final Object? initialTransaction;
@@ -191,6 +207,12 @@ class TransactionAddArgs {
   final bool treatAsNew;
   final bool closeAfterSave;
   final bool autoSubmit;
+
+  /// If true, the transaction input screen should prompt/start the receipt scan flow
+  /// right after the first frame.
+  ///
+  /// Note: This flag itself should never cause state-changing behavior.
+  final bool openReceiptScannerOnStart;
 }
 
 class TransactionDetailArgs {
@@ -223,10 +245,45 @@ class QuickSimpleExpenseInputArgs {
   const QuickSimpleExpenseInputArgs({
     required this.accountName,
     required this.initialDate,
+    this.initialLine,
+    this.autoSubmit = false,
   });
 
   final String accountName;
   final DateTime initialDate;
+
+  /// Optional initial raw line to place in the input field.
+  /// Example: "커피 3000원 신용카드 스타벅스"
+  final String? initialLine;
+
+  /// If true, the screen will attempt to save once opened.
+  /// Safety gate is enforced by DeepLinkHandler using confirmed flags.
+  final bool autoSubmit;
+}
+
+class AssetSimpleInputArgs {
+  const AssetSimpleInputArgs({
+    required this.accountName,
+    this.initialCategory,
+    this.initialName,
+    this.initialAmount,
+    this.initialLocation,
+    this.initialMemo,
+    this.autoSubmit = false,
+  });
+
+  final String accountName;
+
+  /// One of: '현금', '예금/적금', '소액 투자', '기타 실물 자산'
+  final String? initialCategory;
+  final String? initialName;
+  final double? initialAmount;
+  final String? initialLocation;
+  final String? initialMemo;
+
+  /// If true, the screen will attempt to save once opened.
+  /// Safety gate is enforced by DeepLinkHandler using confirmed flags.
+  final bool autoSubmit;
 }
 
 class ShoppingCartArgs {

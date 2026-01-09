@@ -15,6 +15,15 @@ result-view {
           }
         }
       }
+
+      section {
+        content {
+          paragraph {
+            value ("(음성으로 계속하려면) 지금 \"앱 열기\"라고 말해 주세요")
+            style (Detail_M)
+          }
+        }
+      }
       
       section {
         content {
@@ -41,6 +50,18 @@ result-view {
       conversation-driver {
         template("앱 열기")
         // Note: Actual deep link launch happens via result handler
+      }
+
+      conversation-driver {
+        template("앱 열어")
+      }
+
+      conversation-driver {
+        template("스마트렛저 열기")
+      }
+
+      conversation-driver {
+        template("스마트렛저 열어")
       }
     }
   }

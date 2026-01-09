@@ -294,6 +294,27 @@ class AddTransactionAction extends DeepLinkAction {
   bool get isSavings => type == 'savings';
   bool get isRefund => type == 'refund';
 
+  /// 파라미터 Map으로 변환 (분석 로깅용)
+  Map<String, String> toParams() {
+    final params = <String, String>{};
+    if (amount != null) params['amount'] = amount.toString();
+    if (quantity != null) params['quantity'] = quantity.toString();
+    if (unit != null) params['unit'] = unit!;
+    if (unitPrice != null) params['unitPrice'] = unitPrice.toString();
+    if (description != null) params['description'] = description!;
+    if (category != null) params['category'] = category!;
+    if (paymentMethod != null) params['paymentMethod'] = paymentMethod!;
+    if (store != null) params['store'] = store!;
+    if (memo != null) params['memo'] = memo!;
+    if (savingsAllocation != null) {
+      params['savingsAllocation'] = savingsAllocation.toString();
+    }
+    params['currency'] = currency;
+    params['autoSubmit'] = autoSubmit.toString();
+    params['confirmed'] = confirmed.toString();
+    return params;
+  }
+
   @override
   String toString() =>
       'AddTransactionAction(type: $type, amount: $amount, '
@@ -331,6 +352,8 @@ class OpenFeatureAction extends DeepLinkAction {
   final String featureId;
 
   const OpenFeatureAction(this.featureId);
+
+  Map<String, String> get params => {'feature': featureId};
 
   /// Map feature IDs to route names.
   String? get routeName {
@@ -406,6 +429,8 @@ class CheckStockAction extends DeepLinkAction {
 
   const CheckStockAction({required this.productName});
 
+  Map<String, String> get params => {'product': productName};
+
   @override
   String toString() => 'CheckStockAction(productName: $productName)';
 }
@@ -423,6 +448,14 @@ class UseStockAction extends DeepLinkAction {
     this.autoSubmit = false,
     this.confirmed = false,
   });
+
+  Map<String, String> get params {
+    final map = <String, String>{'product': productName};
+    if (amount != null) map['amount'] = amount.toString();
+    if (autoSubmit) map['autoSubmit'] = 'true';
+    if (confirmed) map['confirmed'] = 'true';
+    return map;
+  }
 
   @override
   String toString() =>

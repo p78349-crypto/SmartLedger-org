@@ -8,7 +8,9 @@ import '../services/account_service.dart';
 import '../services/deep_link_service.dart';
 import '../services/consumable_inventory_service.dart';
 import '../services/health_guardrail_service.dart';
+import '../services/voice_assistant_analytics.dart';
 import 'assistant_route_catalog.dart';
+import 'route_param_validator.dart';
 import '../utils/date_parser.dart';
 
 /// Deep link handler that listens to incoming deep links
@@ -87,14 +89,14 @@ class DeepLinkHandler {
   void _handleOpenRoute(NavigatorState navigator, OpenRouteAction action) {
     final spec = AssistantRouteCatalog.specs[action.routeName];
     if (spec == null) {
-      debugPrint('DeepLinkHandler: Route not allowed: ${action.routeName}');
-      _showSimpleInfoDialog(
-        navigator,
-        title: '보안 안내',
-        message:
-            '보안 사항 접근 안 됩니다.'
-            '\n음성비서로는 해당 화면을 열 수 없습니다.'
-            '\n(${action.routeName})',
+      _logAndShowError(
+        navigator: navigator,
+        errorType: 'ROUTE_NOT_ALLOWED',
+        route: action.routeName,
+        assistant: _detectAssistant(action.params),
+        message: '음성비서로는 해당 화면을 열 수 없습니다.\n'
+            '앱에서 직접 열어주세요.\n'
+            '(${action.routeName})',
       );
       return;
     }
@@ -102,21 +104,52 @@ class DeepLinkHandler {
     final accountName =
         action.accountName ?? AssistantRouteCatalog.resolveDefaultAccountName();
     if (spec.requiresAccount && (accountName == null || accountName.isEmpty)) {
-      _showSimpleInfoDialog(
-        navigator,
-        title: '계정이 필요합니다',
-        message: '먼저 계정을 생성/선택한 뒤 다시 시도해주세요.',
+      _logAndShowError(
+        navigator: navigator,
+        errorType: 'ACCOUNT_REQUIRED',
+        route: action.routeName,
+        assistant: _detectAssistant(action.params),
+        message: '먼저 계정을 생성하거나 선택해주세요.',
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(navigator.context);
+              navigator.pushNamed(AppRoutes.accountSelect);
+            },
+            child: const Text('계정 선택'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(navigator.context),
+            child: const Text('취소'),
+          ),
+        ],
       );
       return;
     }
 
     final args = spec.buildArgs(accountName);
 
-    final filteredParams = _filterAllowedRouteParams(
-      routeName: action.routeName,
-      intent: action.intent,
-      params: action.params,
+    // 새로운 파라미터 검증 로직
+    final validationResult = RouteParamValidator.validate(
+      action.routeName,
+      action.params,
     );
+
+    final validatedParams = validationResult.validated;
+
+    // 거부된 파라미터 로깅
+    final rejectedKeys = validationResult.rejected;
+    if (rejectedKeys.isNotEmpty) {
+      debugPrint('DeepLinkHandler: Rejected params: $rejectedKeys');
+      VoiceAssistantAnalytics.logRejectedParams(
+        route: action.routeName,
+        rejected: rejectedKeys,
+        assistant: _detectAssistant(action.params),
+      );
+    }
+
+    // 검증 통과한 파라미터만 사용
+    final filteredParams = validatedParams;
 
     // Safe intent: receipt scan hook for transaction add.
     if (action.routeName == AppRoutes.transactionAdd &&
@@ -238,6 +271,14 @@ class DeepLinkHandler {
       );
 
       void openDialog({required bool autoSubmit}) {
+        // 성공 로깅
+        VoiceAssistantAnalytics.logCommand(
+          assistant: _detectAssistant(action.params),
+          route: action.routeName,
+          intent: action.intent ?? 'upsert',
+          success: true,
+        );
+
         navigator.pushNamed(
           spec.routeName,
           arguments: FoodExpiryArgs(
@@ -367,6 +408,14 @@ class DeepLinkHandler {
       }
 
       if (intent == 'usage_mode' || intent == 'auto_usage') {
+        // 성공 로깅
+        VoiceAssistantAnalytics.logCommand(
+          assistant: _detectAssistant(action.params),
+          route: action.routeName,
+          intent: intent,
+          success: true,
+        );
+
         navigator.pushNamed(
           spec.routeName,
           arguments: const FoodExpiryArgs(autoUsageMode: true),
@@ -377,7 +426,7 @@ class DeepLinkHandler {
 
     if (action.routeName == AppRoutes.assetSimpleInput &&
         action.intent == 'asset_add') {
-      final p = action.params;
+      final p = filteredParams;
 
       final category = (p['category'] ?? p['assetCategory'] ?? '').trim();
       final name = (p['name'] ?? p['assetName'] ?? '').trim();
@@ -461,9 +510,25 @@ class DeepLinkHandler {
           return;
         }
 
+        // 성공 로깅
+        VoiceAssistantAnalytics.logCommand(
+          assistant: _detectAssistant(action.params),
+          route: action.routeName,
+          intent: action.intent ?? 'asset_add',
+          success: true,
+        );
+
         openScreen(autoSubmit: true);
         return;
       }
+
+      // 성공 로깅 (Preview 모드)
+      VoiceAssistantAnalytics.logCommand(
+        assistant: _detectAssistant(action.params),
+        route: action.routeName,
+        intent: action.intent ?? 'asset_add',
+        success: true,
+      );
 
       openScreen(autoSubmit: false);
       return;
@@ -471,7 +536,7 @@ class DeepLinkHandler {
 
     if (action.routeName == AppRoutes.quickSimpleExpenseInput &&
         action.intent == 'quick_expense_add') {
-      final p = action.params;
+      final p = filteredParams;
 
       final rawLine = (p['line'] ?? p['raw'] ?? '').toString().trim();
       final description = (p['description'] ?? '').toString().trim();
@@ -581,16 +646,42 @@ class DeepLinkHandler {
           return;
         }
 
+        // 성공 로깅
+        VoiceAssistantAnalytics.logCommand(
+          assistant: _detectAssistant(action.params),
+          route: action.routeName,
+          intent: action.intent ?? 'quick_expense_add',
+          success: true,
+        );
+
         openScreen(autoSubmit: true);
         return;
       }
 
+      // 성공 로깅 (Preview 모드)
+      VoiceAssistantAnalytics.logCommand(
+        assistant: _detectAssistant(action.params),
+        route: action.routeName,
+        intent: action.intent ?? 'quick_expense_add',
+        success: true,
+      );
+
       openScreen(autoSubmit: false);
       return;
     }
+
+    // 성공 로깅 (일반 route)
+    VoiceAssistantAnalytics.logCommand(
+      assistant: _detectAssistant(action.params),
+      route: action.routeName,
+      intent: action.intent ?? 'open',
+      success: true,
+    );
+
     navigator.pushNamed(spec.routeName, arguments: args);
   }
 
+  // ignore: unused_element
   Map<String, String> _filterAllowedRouteParams({
     required String routeName,
     required String? intent,
@@ -652,6 +743,7 @@ class DeepLinkHandler {
     NavigatorState navigator, {
     required String title,
     required String message,
+    List<Widget>? actions,
   }) {
     final context = navigator.context;
     showDialog(
@@ -659,7 +751,7 @@ class DeepLinkHandler {
       builder: (ctx) => AlertDialog(
         title: Text(title),
         content: Text(message),
-        actions: [
+        actions: actions ?? [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child: const Text('확인'),
@@ -673,6 +765,27 @@ class DeepLinkHandler {
     NavigatorState navigator,
     AddTransactionAction action,
   ) {
+    // 파라미터 검증
+    final validationResult = RouteParamValidator.validate(
+      action.isIncome 
+          ? AppRoutes.transactionAddIncome 
+          : AppRoutes.transactionAdd,
+      action.toParams(),
+    );
+
+    if (!validationResult.isValid) {
+      _logAndShowError(
+        navigator: navigator,
+        errorType: 'INVALID_PARAMS',
+        route: action.isIncome 
+            ? AppRoutes.transactionAddIncome 
+            : AppRoutes.transactionAdd,
+        assistant: _detectAssistant(action.toParams()),
+        rejectedParams: validationResult.rejected,
+      );
+      return;
+    }
+
     final resolvedAccountName =
         AssistantRouteCatalog.resolveDefaultAccountName() ??
         (AccountService().accounts.isNotEmpty
@@ -680,10 +793,13 @@ class DeepLinkHandler {
             : null);
     if (resolvedAccountName == null || resolvedAccountName.isEmpty) {
       debugPrint('DeepLinkHandler: No accounts available');
-      _showSimpleInfoDialog(
-        navigator,
-        title: '계정이 필요합니다',
-        message: '먼저 계정을 생성/선택한 뒤 다시 시도해주세요.',
+      _logAndShowError(
+        navigator: navigator,
+        errorType: 'ACCOUNT_REQUIRED',
+        route: action.isIncome 
+            ? AppRoutes.transactionAddIncome 
+            : AppRoutes.transactionAdd,
+        assistant: _detectAssistant(action.toParams()),
       );
       return;
     }
@@ -834,9 +950,29 @@ class DeepLinkHandler {
         return;
       }
 
+      // 성공 로깅
+      VoiceAssistantAnalytics.logCommand(
+        assistant: _detectAssistant(action.toParams()),
+        route: action.isIncome 
+            ? AppRoutes.transactionAddIncome 
+            : AppRoutes.transactionAdd,
+        intent: 'transaction_add',
+        success: true,
+      );
+
       openScreen(autoSubmit: true);
       return;
     }
+
+    // 성공 로깅 (Preview 모드)
+    VoiceAssistantAnalytics.logCommand(
+      assistant: _detectAssistant(action.toParams()),
+      route: action.isIncome 
+          ? AppRoutes.transactionAddIncome 
+          : AppRoutes.transactionAdd,
+      intent: 'transaction_add',
+      success: true,
+    );
 
     openScreen(autoSubmit: false);
   }
@@ -847,8 +983,23 @@ class DeepLinkHandler {
   }
 
   void _handleOpenFeature(NavigatorState navigator, OpenFeatureAction action) {
+    // 성공 로깅 헬퍼
+    void logSuccess(String routeName) {
+      VoiceAssistantAnalytics.logCommand(
+        assistant: _detectAssistant(action.params),
+        route: routeName,
+        intent: 'open_feature',
+        success: true,
+      );
+    }
+
     final route = action.routeName;
     if (route == null) {
+      VoiceAssistantAnalytics.logError(
+        assistant: _detectAssistant(action.params),
+        route: 'unknown',
+        errorType: 'ROUTE_NOT_ALLOWED',
+      );
       debugPrint('DeepLinkHandler: Unknown feature: ${action.featureId}');
       _showSimpleInfoDialog(
         navigator,
@@ -863,6 +1014,7 @@ class DeepLinkHandler {
 
     // Special handling for dashboard
     if (route == '/') {
+      logSuccess('/');
       navigator.popUntil((route) => route.isFirst);
       return;
     }
@@ -870,25 +1022,36 @@ class DeepLinkHandler {
     // Handle food_expiry, shopping_cart, assets, recipe, consumables
     switch (action.featureId) {
       case 'food_expiry':
+        logSuccess(AppRoutes.foodExpiry);
         navigator.pushNamed(AppRoutes.foodExpiry);
       case 'shopping_cart':
+        logSuccess(AppRoutes.shoppingCart);
+        logSuccess(AppRoutes.shoppingCart);
         navigator.pushNamed(AppRoutes.shoppingCart);
       case 'assets':
+        logSuccess(AppRoutes.assetDashboard);
         navigator.pushNamed(AppRoutes.assetDashboard);
       case 'recipe':
+        logSuccess(AppRoutes.foodCookingStart);
         navigator.pushNamed(AppRoutes.foodCookingStart);
       case 'consumables':
+        logSuccess(AppRoutes.householdConsumables);
         navigator.pushNamed(AppRoutes.householdConsumables);
       case 'calendar':
+        logSuccess(AppRoutes.calendar);
         navigator.pushNamed(AppRoutes.calendar);
       case 'savings':
+        logSuccess(AppRoutes.savingsPlanList);
         navigator.pushNamed(AppRoutes.savingsPlanList);
       case 'emergency_fund':
+        logSuccess(AppRoutes.emergencyFund);
         navigator.pushNamed(AppRoutes.emergencyFund);
       case 'stats':
+        logSuccess(AppRoutes.monthlyStats);
         navigator.pushNamed(AppRoutes.monthlyStats);
       case 'voice':
       case 'voice_dashboard':
+        logSuccess(AppRoutes.voiceDashboard);
         navigator.pushNamed(AppRoutes.voiceDashboard);
       case 'transaction_add':
         _handleAddTransaction(
@@ -901,8 +1064,14 @@ class DeepLinkHandler {
           const AddTransactionAction(type: 'income'),
         );
       case 'quick_stock':
+        logSuccess(AppRoutes.quickStockUse);
         navigator.pushNamed(AppRoutes.quickStockUse);
       default:
+        VoiceAssistantAnalytics.logError(
+          assistant: _detectAssistant(action.params),
+          route: 'unknown',
+          errorType: 'ROUTE_NOT_ALLOWED',
+        );
         debugPrint('DeepLinkHandler: No route mapping for ${action.featureId}');
         _showSimpleInfoDialog(
           navigator,
@@ -930,10 +1099,23 @@ class DeepLinkHandler {
         .toList();
 
     if (found.isEmpty) {
+      VoiceAssistantAnalytics.logCommand(
+        assistant: _detectAssistant(action.params),
+        route: AppRoutes.householdConsumables,
+        intent: 'check_stock',
+        success: false,
+        failureReason: 'STOCK_NOT_FOUND',
+      );
       _showStockNotFoundDialog(navigator, action.productName);
       return;
     }
 
+    VoiceAssistantAnalytics.logCommand(
+      assistant: _detectAssistant(action.params),
+      route: AppRoutes.householdConsumables,
+      intent: 'check_stock',
+      success: true,
+    );
     final item = found.first;
     _showStockInfoDialog(navigator, item);
   }
@@ -943,6 +1125,13 @@ class DeepLinkHandler {
     final accounts = AccountService().accounts;
     if (accounts.isEmpty) {
       debugPrint('DeepLinkHandler: No accounts available');
+      VoiceAssistantAnalytics.logCommand(
+        assistant: _detectAssistant(action.params),
+        route: AppRoutes.quickStockUse,
+        intent: 'use_stock',
+        success: false,
+        failureReason: 'ACCOUNT_REQUIRED',
+      );
       return;
     }
 
@@ -964,6 +1153,16 @@ class DeepLinkHandler {
       }
     }
 
+    // 성공 로깅 헬퍼
+    void logSuccess() {
+      VoiceAssistantAnalytics.logCommand(
+        assistant: _detectAssistant(action.params),
+        route: AppRoutes.quickStockUse,
+        intent: 'use_stock',
+        success: true,
+      );
+    }
+
     // 안전 정책: autoSubmit(즉시 실행) 요청은 반드시 확인을 거친 뒤에만 수행
     if (action.autoSubmit && !action.confirmed) {
       _showStockUseConfirmDialog(
@@ -971,6 +1170,7 @@ class DeepLinkHandler {
         productName: action.productName,
         amount: initialAmount,
         onProceed: () {
+          logSuccess();
           navigator.pushNamed(
             AppRoutes.quickStockUse,
             arguments: QuickStockUseArgs(
@@ -982,6 +1182,7 @@ class DeepLinkHandler {
           );
         },
         onCancel: () {
+          logSuccess();
           navigator.pushNamed(
             AppRoutes.quickStockUse,
             arguments: QuickStockUseArgs(
@@ -995,6 +1196,7 @@ class DeepLinkHandler {
       return;
     }
 
+    logSuccess();
     // 빠른 재고 차감 화면으로 이동 (파라미터 전달)
     navigator.pushNamed(
       AppRoutes.quickStockUse,
@@ -1199,10 +1401,144 @@ class DeepLinkHandler {
     return value.toStringAsFixed(1);
   }
 
+  /// 어시스턴트 감지 (파라미터 기반 추정)
+  String _detectAssistant(Map<String, String>? params) {
+    // 향후 확장: User-Agent 또는 origin 파라미터
+    return VoiceAssistantAnalytics.detectAssistant(params);
+  }
+
+  /// 에러 로깅 및 사용자 친화적 다이얼로그 표시
+  void _logAndShowError({
+    required NavigatorState navigator,
+    required String errorType,
+    required String route,
+    String? assistant,
+    String? message,
+    List<Widget>? actions,
+    List<String>? rejectedParams,
+  }) {
+    // 상세 로깅
+    debugPrint('DeepLinkHandler Error:');
+    debugPrint('  Type: $errorType');
+    debugPrint('  Route: $route');
+    debugPrint('  Assistant: ${assistant ?? "unknown"}');
+    if (rejectedParams != null && rejectedParams.isNotEmpty) {
+      debugPrint('  Rejected Params: $rejectedParams');
+    }
+
+    // 분석 로깅
+    VoiceAssistantAnalytics.logError(
+      errorType: errorType,
+      route: route,
+      assistant: assistant,
+    );
+
+    // 거부된 파라미터 로깅
+    if (rejectedParams != null && rejectedParams.isNotEmpty) {
+      VoiceAssistantAnalytics.logRejectedParams(
+        route: route,
+        rejected: rejectedParams,
+        assistant: assistant,
+      );
+    }
+
+    // 명령 실패 로깅
+    VoiceAssistantAnalytics.logCommand(
+      assistant: assistant ?? 'unknown',
+      route: route,
+      intent: 'open',
+      success: false,
+      failureReason: errorType,
+    );
+
+    // 사용자 메시지
+    final errorMessage = _getErrorMessage(errorType, route, message);
+
+    _showSimpleInfoDialog(
+      navigator,
+      title: errorMessage.title,
+      message: errorMessage.body,
+      actions: actions ?? errorMessage.actions,
+    );
+  }
+
+  /// 에러 타입별 사용자 친화적 메시지
+  _ErrorMessage _getErrorMessage(
+    String errorType,
+    String route, [
+    String? customMessage,
+  ]) {
+    if (customMessage != null) {
+      final title = errorType == 'ROUTE_NOT_ALLOWED'
+          ? '보안 안내'
+          : errorType == 'ACCOUNT_REQUIRED'
+              ? '계정이 필요합니다'
+              : errorType == 'INVALID_PARAMS'
+                  ? '잘못된 명령입니다'
+                  : '오류';
+
+      return _ErrorMessage(
+        title: title,
+        body: customMessage,
+        actions: null,
+      );
+    }
+
+    switch (errorType) {
+      case 'ROUTE_NOT_ALLOWED':
+        return _ErrorMessage(
+          title: '보안 안내',
+          body: '음성 명령으로는 이 화면을 열 수 없습니다.\n앱에서 직접 열어주세요.',
+          actions: null,
+        );
+
+      case 'ACCOUNT_REQUIRED':
+        return _ErrorMessage(
+          title: '계정이 필요합니다',
+          body: '먼저 계정을 생성하거나 선택해주세요.',
+          actions: null,
+        );
+
+      case 'INVALID_PARAMS':
+        return _ErrorMessage(
+          title: '잘못된 명령입니다',
+          body: '음성 명령의 일부를 인식하지 못했습니다.\n다시 시도해주세요.',
+          actions: null,
+        );
+
+      case 'AUTO_SUBMIT_REJECTED':
+        return _ErrorMessage(
+          title: '확인이 필요합니다',
+          body: '안전을 위해 앱에서 직접 확인해주세요.',
+          actions: null,
+        );
+
+      default:
+        return _ErrorMessage(
+          title: '오류',
+          body: '처리 중 문제가 발생했습니다.\n다시 시도해주세요.',
+          actions: null,
+        );
+    }
+  }
+
   void dispose() {
     _subscription?.cancel();
     _subscription = null;
   }
+}
+
+/// 에러 메시지 모델
+class _ErrorMessage {
+  final String title;
+  final String body;
+  final List<Widget>? actions;
+
+  const _ErrorMessage({
+    required this.title,
+    required this.body,
+    this.actions,
+  });
 }
 
 /// Quick Stock Use 화면 인자

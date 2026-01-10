@@ -7,6 +7,7 @@ import '../models/transaction.dart';
 import '../services/account_service.dart';
 import '../services/budget_service.dart';
 import '../services/food_expiry_service.dart';
+import '../services/consumable_inventory_service.dart';
 import '../services/transaction_service.dart';
 import '../services/category_keyword_service.dart';
 import 'transaction_add_screen.dart';
@@ -293,6 +294,12 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
       return await _handleOpenExpenseInputPrefilled(command);
     }
 
+    // 0-1.5. 재고/유통기한 리포트 (음성 응답)
+    if (_isInventoryReportCommand(normalized)) {
+      debugPrint('[Voice] → 재고/유통기한 리포트');
+      return await _handleInventoryReport(command);
+    }
+
     // 0-2. 화면 네비게이션 명령어 (가계부, 대시보드, 자산 등)
     if (_isNavigationCommand(normalized)) {
       debugPrint('[Voice] → 네비게이션 명령');
@@ -466,29 +473,44 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
 
   /// 화면 네비게이션 명령어 감지
   bool _isNavigationCommand(String cmd) {
-    // 가계부/대시보드
     if (cmd.contains('가계부') || cmd.contains('대시보드') || cmd.contains('홈')) {
       return true;
     }
-    // 자산 현황
     if (cmd.contains('자산') || cmd.contains('통장')) {
       return true;
     }
-    // 지출 현황/통계
-    if ((cmd.contains('지출') || cmd.contains('이번달')) && 
-        (cmd.contains('현황') || cmd.contains('통계') || cmd.contains('내역'))) {
+    if (cmd.contains('지출') && (cmd.contains('현황') || cmd.contains('통계') || cmd.contains('내역'))) {
       return true;
     }
-    // 유통기한/냉장고
-    if (cmd.contains('유통기한') || cmd.contains('냉장고') || 
-        cmd.contains('재료') || cmd.contains('식재료')) {
+    // 식재료/냉장고/유통기한 (화면 이동)
+    if ((cmd.contains('냉장고') || cmd.contains('식재료')) && (cmd.contains('열어') || cmd.contains('가줘') || cmd.contains('보여줘'))) {
       return true;
     }
-    // 저축
+    if (cmd.contains('유통기한') && (cmd.contains('관리') || cmd.contains('화면'))) {
+      return true;
+    }
     if (cmd.contains('저축') || cmd.contains('적금')) {
       return true;
     }
+    if (cmd.contains('달력') || cmd.contains('캘린더')) {
+      return true;
+    }
+    if (cmd.contains('장바구니') || cmd.contains('쇼핑리스트')) {
+      return true;
+    }
+    if (cmd.contains('생필품') || cmd.contains('소모품')) {
+      return true;
+    }
+    if (cmd.contains('설정') || cmd.contains('세팅')) {
+      return true;
+    }
     return false;
+  }
+
+  bool _isInventoryReportCommand(String cmd) {
+    // "재고 알려줘", "남은 재료", "유통기한 알려줘" 등
+    return (cmd.contains('재고') || cmd.contains('남은') || cmd.contains('유통기한') || cmd.contains('부족한')) &&
+           (cmd.contains('알려줘') || cmd.contains('뭐야') || cmd.contains('확인') || cmd.contains('체크') || cmd.contains('조회'));
   }
 
   // ============ 명령어 처리 ============
@@ -624,6 +646,60 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
     );
   }
 
+  Future<VoiceCommandResult> _handleInventoryReport(String command) async {
+    // 1. Food Expiry Check
+    final foodItems = FoodExpiryService.instance.items.value;
+    final now = DateTime.now();
+    final expiringFood = foodItems.where((i) {
+      final days = i.expiryDate.difference(now).inDays;
+      return days >= 0 && days <= 3;
+    }).toList();
+
+    // 2. Consumable Inventory Check
+    final consumableItems = ConsumableInventoryService.instance.items.value;
+    final lowStockItems = consumableItems
+        .where((i) => i.currentStock <= i.threshold)
+        .toList();
+
+    // Build Message
+    final sb = StringBuffer();
+    bool hasIssue = false;
+
+    if (expiringFood.isEmpty && lowStockItems.isEmpty) {
+      return VoiceCommandResult(
+        command: command,
+        success: true,
+        message: '유통기한 임박 식재료나 부족한 생필품이 없습니다.',
+        type: VoiceCommandType.query,
+      );
+    }
+
+    if (expiringFood.isNotEmpty) {
+      hasIssue = true;
+      sb.write('유통기한 임박 재료가 ${expiringFood.length}개 있습니다. ');
+      if (expiringFood.length <= 3) {
+        final names = expiringFood.map((e) => e.name).join(', ');
+        sb.write('($names) ');
+      }
+    }
+
+    if (lowStockItems.isNotEmpty) {
+      if (hasIssue) sb.write('\n');
+      sb.write('부족한 생필품이 ${lowStockItems.length}개 있습니다. ');
+      if (lowStockItems.length <= 3) {
+        final names = lowStockItems.map((e) => e.name).join(', ');
+        sb.write('($names)');
+      }
+    }
+
+    return VoiceCommandResult(
+      command: command,
+      success: true,
+      message: sb.toString().trim(),
+      type: VoiceCommandType.query,
+    );
+  }
+
   /// 화면 네비게이션 명령 처리
   Future<VoiceCommandResult> _handleNavigationCommand(String cmd) async {
     String? route;
@@ -636,25 +712,49 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
     }
     // 자산 현황
     else if (cmd.contains('자산') || cmd.contains('통장')) {
-      route = '/asset-dashboard';
+      route = '/asset/dashboard';
       screenName = '자산 대시보드';
     }
     // 지출 현황/통계
-    else if ((cmd.contains('지출') || cmd.contains('이번달')) && 
-        (cmd.contains('현황') || cmd.contains('통계') || cmd.contains('내역'))) {
-      route = '/spending-analysis';
+    else if (cmd.contains('지출') && (cmd.contains('현황') || cmd.contains('통계') || cmd.contains('내역'))) {
+      route = '/stats/spending-analysis';
       screenName = '지출 통계';
     }
     // 유통기한/냉장고/재료
     else if (cmd.contains('유통기한') || cmd.contains('냉장고') || 
         cmd.contains('재료') || cmd.contains('식재료')) {
-      route = '/ingredient-manager';
+      route = '/food/expiry';
       screenName = '식재료 관리';
     }
     // 저축/적금
     else if (cmd.contains('저축') || cmd.contains('적금')) {
-      route = '/savings';
+      route = '/nudges/micro-savings';
       screenName = '저축 관리';
+    }
+    // 달력/캘린더
+    else if (cmd.contains('달력') || cmd.contains('캘린더')) {
+      route = '/calendar';
+      screenName = '달력';
+    }
+    // 장바구니
+    else if (cmd.contains('장바구니') || cmd.contains('쇼핑')) {
+      route = '/shopping/cart';
+      screenName = '장바구니';
+    }
+    // 생필품/소모품
+    else if (cmd.contains('생필품') || cmd.contains('소모품')) {
+      if (cmd.contains('입력') || cmd.contains('추가')) {
+        route = '/household/consumables';
+        screenName = '생필품 입력';
+      } else {
+        route = '/household/inventory';
+        screenName = '생필품 재고';
+      }
+    }
+    // 설정
+    else if (cmd.contains('설정')) {
+      route = '/settings';
+      screenName = '설정';
     }
 
     if (route == null) {

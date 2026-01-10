@@ -11,6 +11,7 @@ class VoiceAssistantSettings extends ChangeNotifier {
 
   static const String _keyActiveListenDuration = 'voice_active_listen_duration';
   static const String _keyActiveListenEndTime = 'voice_active_listen_end_time';
+  static const String _keySpeechRate = 'voice_speech_rate'; // 1.0 = normal (Bixby standard)
 
   /// 상시 대기 시간 옵션 (분 단위, 0 = 꺼짐)
   static const List<int> durationOptions = [0, 10, 20, 30, 40, 60];
@@ -24,9 +25,11 @@ class VoiceAssistantSettings extends ChangeNotifier {
 
   int _activeListenDuration = 0; // 분 단위
   DateTime? _activeListenEndTime;
+  double _speechRate = 1.0; // 기본 속도 1.0
 
   int get activeListenDuration => _activeListenDuration;
   DateTime? get activeListenEndTime => _activeListenEndTime;
+  double get speechRate => _speechRate;
 
   /// 상시 대기 모드가 활성화되어 있는지
   bool get isActiveListenEnabled {
@@ -57,6 +60,7 @@ class VoiceAssistantSettings extends ChangeNotifier {
   Future<void> initialize() async {
     final prefs = await SharedPreferences.getInstance();
     _activeListenDuration = prefs.getInt(_keyActiveListenDuration) ?? 0;
+    _speechRate = prefs.getDouble(_keySpeechRate) ?? 1.0;
 
     final endTimeMillis = prefs.getInt(_keyActiveListenEndTime);
     if (endTimeMillis != null) {
@@ -67,6 +71,14 @@ class VoiceAssistantSettings extends ChangeNotifier {
         await prefs.remove(_keyActiveListenEndTime);
       }
     }
+    notifyListeners();
+  }
+
+  /// 말하기 속도 설정 (0.5 ~ 2.0)
+  Future<void> setSpeechRate(double rate) async {
+    _speechRate = rate;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble(_keySpeechRate, rate);
     notifyListeners();
   }
 

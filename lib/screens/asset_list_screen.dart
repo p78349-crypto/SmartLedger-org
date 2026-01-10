@@ -6,7 +6,9 @@ import 'asset_input_screen.dart';
 import '../services/asset_service.dart';
 import '../utils/date_formatter.dart';
 import '../utils/dialog_utils.dart';
+import '../utils/debounce_utils.dart';
 import '../utils/icon_catalog.dart';
+import '../utils/korean_search_utils.dart';
 import '../utils/number_formats.dart';
 import '../utils/profit_loss_calculator.dart';
 import '../utils/snackbar_utils.dart';
@@ -24,6 +26,9 @@ class AssetListScreen extends StatefulWidget {
 
 class _AssetListScreenState extends State<AssetListScreen> {
   final TextEditingController _searchController = TextEditingController();
+  final Debouncer _searchDebouncer = Debouncer(
+    delay: const Duration(milliseconds: 180),
+  );
   final NumberFormat _currencyFormat = NumberFormats.currency;
   final DateFormat _dateFormat = DateFormatter.defaultDate;
   bool _isSelectionMode = false;
@@ -32,6 +37,7 @@ class _AssetListScreenState extends State<AssetListScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    _searchDebouncer.dispose();
     super.dispose();
   }
 
@@ -111,15 +117,15 @@ class _AssetListScreenState extends State<AssetListScreen> {
 
   List<Asset> _getFilteredAssets() {
     final assets = AssetService().getAssets(widget.accountName);
-    final query = _searchController.text.trim().toLowerCase();
+    final query = _searchController.text;
 
     if (query.isEmpty) {
       return assets;
     }
 
     return assets.where((asset) {
-      return asset.name.toLowerCase().contains(query) ||
-          asset.memo.toLowerCase().contains(query);
+      return KoreanSearchUtils.matches(asset.name, query) ||
+          KoreanSearchUtils.matches(asset.memo, query);
     }).toList();
   }
 
@@ -301,7 +307,12 @@ class _AssetListScreenState extends State<AssetListScreen> {
                       },
                     )
                   : null,
-              onChanged: (_) => setState(() {}),
+              onChanged: (_) {
+                _searchDebouncer.run(() {
+                  if (!mounted) return;
+                  setState(() {});
+                });
+              },
             ),
           ),
           Expanded(

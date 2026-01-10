@@ -17,17 +17,17 @@ iPhone/iPad에서 Siri를 통해 SmartLedger를 음성으로 제어할 수 있�
 ### 지출 입력
 ```
 # Google Assistant
-"Hey Google, SmartLedger에서 지출 기록해"
-"Hey Google, SmartLedger에서 5000원 지출 추가해"
+"Hey Google, 지출 기록"
+"Hey Google, 5000원 지출 추가"
 
 # Samsung Bixby
-"빅스비, 지출 기록해"
+"빅스비, 지출 기록"
 "빅스비, 커피 5천원 지출"
-"빅스비, 커피 2잔 단가 2500원 지출 저장해"
+"빅스비, 커피 2잔 단가 2500원 지출 저장"
 
 # Apple Siri
-"시리야, SmartLedger 지출 기록"
-"시리야, SmartLedger에서 지출 추가"
+"시리야, 지출 기록"
+"시리야, 지출 추가"
 ```
 
 관련 정책(데이터 접근/보관 기준):
@@ -36,20 +36,20 @@ iPhone/iPad에서 Siri를 통해 SmartLedger를 음성으로 제어할 수 있�
 ### 반품/환불 입력
 ```
 # Samsung Bixby
-"빅스비, 커피 5000원 반품 저장해"
-"빅스비, 옷 3만원 환불 저장해"
+"빅스비, 커피 5000원 반품 저장"
+"빅스비, 옷 3만원 환불 저장"
 ```
 
 ### 수입 입력
 ```
 # Google Assistant
-"Hey Google, SmartLedger에서 수입 기록해"
+"Hey Google, 수입 기록"
 
 # Samsung Bixby
-"빅스비, 월급 기록해"
+"빅스비, 월급 기록"
 
 # Apple Siri
-"시리야, SmartLedger 수입 기록"
+"시리야, 수입 기록"
 ```
 
 ### 대시보드 열기
@@ -67,19 +67,255 @@ iPhone/iPad에서 Siri를 통해 SmartLedger를 음성으로 제어할 수 있�
 "시리야, SmartLedger 가계부 확인"
 ```
 
+### 장바구니 보기
+```
+# Samsung Bixby
+"빅스비, 장바구니 보여줘"
+"하이 빅스비, 장보기 목록 다 보여줘"
+"빅스비, 여기서 장보기 목록 보여줘"
+"빅스비, SmartLedger 장바구니 열어"
+
+# Google Assistant  
+"Hey Google, SmartLedger 장바구니 열어"
+
+# Apple Siri
+"시리야, SmartLedger 장바구니 보여줘"
+```
+
+### 장바구니에 추가
+```
+# Google Assistant
+"Hey Google, SmartLedger 장바구니에 우유 담아"
+
+# Samsung Bixby
+"빅스비, 우유 장바구니에 담아"
+"빅스비, 우유 3번 통로에 있어 장바구니에 담아"
+"빅스비, 냉장고에 있는 우유 장바구니에 담아"
+
+# Apple Siri
+"시리야, SmartLedger 장바구니에 우유 추가"
+```
+
+### 쇼핑 안내 (마트에서)
+```
+# Samsung Bixby
+"빅스비, 쇼핑 안내 시작"
+"빅스비, 다음 어디 가야 돼?"
+"빅스비, 장바구니 남은 거 어디 있어?"
+
+# Google Assistant
+"Hey Google, 쇼핑 가이드 열어"
+
+# Apple Siri
+"시리야, 쇼핑 안내"
+```
+
+### 요리 추천 (냉장고 재료 기반)
+```
+# Samsung Bixby
+"빅스비, 요리 뭐로 하지?"
+"빅스비, 오늘 점심 뭐 먹지?"
+"빅스비, 저녁 메뉴 추천"
+"빅스비, 닭고기랑 양파로 뭐 만들지?"
+"빅스비, 냉장고 재료로 요리 추천"
+
+# 유통기한 임박 재료 우선
+"빅스비, 유통기한 임박 재료로 요리 추천"
+"빅스비, 빨리 먹어야 할 거로 뭐 만들지?"
+"빅스비, 상하기 전에 먹을 요리 추천"
+
+# Google Assistant
+"Hey Google, 요리 추천"
+"Hey Google, 점심 메뉴 추천"
+"Hey Google, 유통기한 임박 요리"
+
+# Apple Siri
+"시리야, 요리 추천"
+"시리야, 저녁 메뉴 추천"
+"시리야, 유통기한 임박 요리"
+```
+
+**작동 방식:**
+1. **현재 재고 분석** - 냉장고에 있는 재료를 자동 확인
+2. **만들 수 있는 요리** - 보유 재료로 가능한 레시피 우선 표시
+3. **부족한 재료 안내** - 없는 재료는 빨간색으로 표시
+4. **장바구니 자동 추가** - 부족한 재료를 장바구니에 원클릭 추가
+5. **유통기한 우선** - 임박 재료부터 사용하도록 제안 (FIFO)
+6. **🧠 AI 학습 기능** - 사용자 패턴 자동 학습 및 맞춤 추천
+
+**🧠 스마트 학습 시스템:**
+- **자주 만드는 요리 학습** - 반복 패턴 인식
+- **선호 재료 학습** - 자주 쓰는 재료 우선 추천
+- **시간대별 학습** - 아침/점심/저녁 선호 요리 기억
+- **건강 선호도 학습** - 건강식 선택 빈도 추적
+- **개인화 추천** - 사용할수록 똑똑해짐
+- **👤 사용자 레시피 통합** - 내가 만든 닭고기/돼지고기 레시피도 자동 추천
+
+**사용자 레시피 포함:**
+- ✅ RecipeService에 저장된 모든 사용자 레시피 자동 추천 대상 포함
+- ✅ 기본 레시피와 동일한 우선순위 알고리즘 (유통기한 → 건강 → 매칭률)
+- ✅ UI에서 👤 아이콘으로 사용자 레시피 구분 표시
+- ✅ 건강 점수(1-5) 지원으로 맞춤 추천
+- ✅ 학습 시스템과 완전 통합 (자주 만드는 레시피 우선 추천)
+- 📖 자세한 내용: [사용자 레시피 통합 가이드](CUSTOM_RECIPE_INTEGRATION.md)
+
+**다양한 환경 대응:**
+- 👨‍👩‍👧‍👦 **가족 구성**: 인원수별 레시피 자동 조정
+- 🌍 **지역별**: 한식/양식/중식 선호도 학습
+- 🎯 **목적별**: 다이어트/근육/건강 목표 반영
+- 📅 **계절별**: 봄/여름/가을/겨울 제철 재료 우선
+- 💰 **예산별**: 경제적 요리 vs 프리미엄 요리
+
+**유통기한 임박 모드 (`expiring=true`):**
+- ⚠️ 3일 이내 유통기한 재료만 필터링
+- 🕒 가장 빨리 상하는 재료부터 우선 사용
+- 🗑️ 음식물 쓰레기 줄이기
+- 💰 식재료 낭비 방지
+
+**예시:**
+- 냉장고에 닭고기, 양파, 감자가 있으면 → "닭볶음탕" 추천
+- 당근이 없으면 → "당근 부족" 표시 + 장바구니 추가 제안
+- 유통기한 2일 남은 우유가 있으면 → "크림 스프", "푸딩" 우선 추천
+
+### 영수증 건강도 분석
+```
+# Samsung Bixby
+"빅스비, 영수증 건강도 분석"
+"빅스비, 영수증 분석"
+"빅스비, 마트 재료 건강 점수"
+
+# Google Assistant
+"Hey Google, 영수증 분석"
+"Hey Google, 건강도 분석"
+
+# Apple Siri
+"시리야, 영수증 분석"
+"시리야, 건강도 분석"
+```
+
+**작동 방식:**
+1. **신속 건강 분석 화면 열림** - 17개 주요 재료 체크박스 표시
+2. **재료 선택** - 영수증 보고 구매한 재료 체크
+3. **실시간 점수 계산** - 선택할 때마다 건강 점수 업데이트
+4. **건강 통계 표시** - 평균 점수, 건강한 재료 비율, 카테고리별 분석
+5. **색상 코드 표시** - 💚(5점), 🟢(4점), 🟡(3점), 🟠(2점), 🔴(1점)
+
+**건강 점수 기준:**
+- **5점 (매우 건강)** - 채소류, 버섯류, 해조류
+- **4점 (건강)** - 생선, 해산물, 콩류
+- **3점 (보통)** - 닭고기, 계란, 쌀, 우유
+- **2점 (주의)** - 돼지고기, 소고기, 빵류
+- **1점 (비건강)** - 튀김, 과자, 라면, 탄산음료
+
+**주요 기능:**
+- ✅ **200+ 재료 건강 점수 DB** - 한국 식재료 대부분 지원
+- ✅ **실시간 통계** - 평균 점수, 건강 비율, 카테고리 분석
+- ✅ **간편 체크박스 UI** - 빠른 선택으로 시간 절약
+- ✅ **색상 코드** - 직관적인 건강도 파악
+- 📖 자세한 내용: [영수증 건강도 분석 가이드](RECEIPT_HEALTH_ANALYZER.md)
+
+**예시:**
+- 양배추(5), 브로콜리(5), 닭고기(3), 라면(1) → 평균 3.5점
+- 건강한 재료(4-5점) 비율: 50%
+- 카테고리: 채소 2개, 육류 1개, 가공식품 1개
+
+**참고사항:**
+- � **책스캔 PDF 앱 연계** - ML Kit OCR 처리 전담
+- 현재는 체크박스로 수동 선택 (빠르고 정확)
+- 책스캔앱에서 OCR 처리 후 자동 연계
+
+### 책스캔 OCR 자동 연계 (영수증 입력)
+```
+# Samsung Bixby
+"빅스비, 영수증 지출 기록"
+"빅스비, 영수증 기록"
+"빅스비, 영수증 입력"
+
+# Google Assistant
+"Hey Google, 영수증 기록"
+
+# Apple Siri
+"시리야, 영수증 기록"
+```
+
+**작동 방식:**
+1. **책스캔 PDF 앱에서 촬영** - 영수증 사진 촬영 및 OCR 처리
+2. **텍스트 추출 대기** - 상점명, 금액, 항목들 파싱
+3. **음성 명령 사용** - "빅스비, 영수증 지출 기록"
+4. **책스캔 → SmartLedger** - 자동으로 딥링크 호출
+5. **지출 입력 화면 열림** - 모든 필드 자동 채워짐
+6. **확인 후 저장** - 사용자가 확인만 하면 끝
+
+**딥링크 형식:**
+```
+# 기본 형식
+smartledger://transaction/add?
+  amount=45800&
+  store=이마트&
+  items=양배추,닭고기,우유&
+  source=ocr
+
+# 상세 정보 포함
+smartledger://transaction/add?
+  amount=128500&
+  description=식료품&
+  store=코스트코&
+  items=양배추,브로콜리,닭고기,돼지고기,우유&
+  source=ocr&
+  date=2026-01-10
+```
+
+**자동 채워지는 필드:**
+- ✅ **금액** - OCR에서 추출한 합계 금액
+- ✅ **상점** - OCR에서 추출한 상점명
+- ✅ **메모** - 항목 목록 (📋 이모지 표시)
+- ✅ **발생일** - 영수증 날짜 (선택 사항)
+- ✅ **출처 태그** - source=ocr로 구분
+
+**예시:**
+- 책스캔에서 영수증 OCR 완료
+- "빅스비, 영수증 지출 기록"
+- SmartLedger 자동 실행 → 지출 입력 화면
+- 금액: 45,800원, 상점: 이마트
+- 메모: 📋 양배추, 닭고기, 우유
+- 확인 버튼 클릭 → 저장 완료
+
+**장점:**
+- ✅ 수동 입력 불필요 (OCR이 다 처리)
+- ✅ 음성 명령 한 번으로 자동화
+- ✅ 영수증 항목들을 메모에 자동 기록
+- ✅ 상점명/금액/날짜 자동 추출
+- ✅ 앱 용량 최소화 (ML Kit 없음)
+
+**책스캔앱 구현 필요 사항:**
+```dart
+// 1. OCR 처리 완료 후
+// 2. 추출된 데이터를 Deep Link로 전송
+final deepLink = 'smartledger://transaction/add?'
+    'amount=45800&'
+    'store=이마트&'
+    'items=양배추,닭고기,우유&'
+    'source=ocr';
+
+// 3. URL Launcher로 호출
+await launchUrl(Uri.parse(deepLink));
+```
+
+**참고사항:**
+
 ### 특정 기능 열기
 ```
 # Google Assistant
-"Hey Google, SmartLedger에서 유통기한 확인해"
-"Hey Google, SmartLedger에서 장바구니 열어"
+"Hey Google, 유통기한 확인"
+"Hey Google, 장바구니 열어"
 
 # Samsung Bixby
 "빅스비, 냉장고 열어"
-"빅스비, 레시피 추천해줘"
+"빅스비, 레시피 추천"
 
 # Apple Siri
-"시리야, SmartLedger 유통기한 확인"
-"시리야, SmartLedger 장바구니 열어"
+"시리야, 유통기한 확인"
+"시리야, 장바구니 열어"
 ```
 
 ---
@@ -119,6 +355,47 @@ smartledger://feature/savings          # 저축 계획
 smartledger://feature/emergency_fund   # 비상금
 smartledger://feature/stats            # 통계
 ```
+
+### 장바구니에 상품 추가
+```
+smartledger://shopping/cart/add?name=우유
+smartledger://shopping/cart/add?name=우유&location=냉장고
+smartledger://shopping/cart/add?name=우유&location=3번 통로
+smartledger://shopping/cart/add?name=계란&location=냉장고&quantity=2
+smartledger://shopping/cart/add?name=커피&location=음료 코너&price=3500
+```
+
+### 요리 추천
+```
+smartledger://recipe/recommend                        # 냉장고 재료 기반 추천
+smartledger://recipe/recommend?meal=lunch              # 점심 메뉴 추천
+smartledger://recipe/recommend?meal=dinner             # 저녁 메뉴 추천
+smartledger://recipe/recommend?meal=breakfast          # 아침 메뉴 추천
+smartledger://recipe/recommend?ingredients=닭고기,양파 # 특정 재료로 추천
+smartledger://recipe/recommend?expiring=true           # 유통기한 임박 재료 우선
+smartledger://recipe/recommend?meal=dinner&expiring=true  # 저녁 + 임박 재료
+smartledger://recipe/recommend?meal=dinner&ingredients=닭고기,양파
+```
+
+**파라미터:**
+- `meal` (선택) - 끼니 종류: breakfast, lunch, dinner
+- `ingredients` (선택) - 사용할 재료 (쉼표로 구분)
+- `expiring` (선택) - true로 설정 시 유통기한 임박 재료 우선
+
+**기능:**
+- 냉장고 화면을 열고 레시피 추천 다이얼로그 자동 표시
+- 유통기한 임박 재료 우선 활용
+- 보유 재료로 만들 수 있는 레시피만 표시
+
+**파라미터:**
+- `name` (필수) - 상품명
+- `location` (선택) - 마트 내 위치 (예: "3번 통로", "냉장고", "1층 입구")
+- `quantity` (선택) - 수량 (기본값: 1)
+- `price` (선택) - 예상 가격
+
+**위치 학습:**
+- 상품을 장바구니에 추가할 때 위치를 기록하면, 다음 방문 시 자동으로 위치 제안
+- 음성 명령으로도 위치 포함 가능: "빅스비, 우유 냉장고에 있어 장바구니에 담아"
 
 ---
 

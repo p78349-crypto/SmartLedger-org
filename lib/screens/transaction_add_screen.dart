@@ -31,6 +31,8 @@ import '../utils/pref_keys.dart';
 import '../widgets/background_widget.dart';
 import '../widgets/smart_input_field.dart';
 import '../widgets/special_backgrounds.dart';
+import '../widgets/ingredient_health_analyzer_dialog.dart';
+import '../utils/ingredient_health_score_utils.dart';
 
 // 최근 결제수단/메모 저장 키 및 최대 개수
 const String _recentDescriptionsKey = 'recent_descriptions';
@@ -2466,27 +2468,43 @@ class _NO1FormState extends State<NO1Form> {
           setState(() {});
         },
         label: labelText,
-        suffixIcon: IconButton(
-          tooltip: '입력내용 불러오기',
-          icon: Icon(
-            Icons.list_alt,
-            size: 20,
-            color: Theme.of(context).iconTheme.color,
-          ),
-          onPressed: () => _showRecentInputPicker(
-            context: context,
-            items: _recentDescriptions,
-            onSelected: (v) {
-              _descController.text = v;
-              _descController.selection = TextSelection.fromPosition(
-                TextPosition(offset: v.length),
-              );
-              _handleDescriptionChanged(v);
-              setState(() {});
-            },
-            title: '상품명 입력내용 불러오기',
-          ),
-          padding: EdgeInsets.zero,
+        suffixIcon: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              tooltip: '건강도 분석',
+              icon: Icon(
+                Icons.health_and_safety,
+                size: 20,
+                color: Theme.of(context).iconTheme.color,
+              ),
+              onPressed: _showHealthAnalysis,
+              padding: EdgeInsets.zero,
+            ),
+            if (enableHistory)
+              IconButton(
+                tooltip: '입력내용 불러오기',
+                icon: Icon(
+                  Icons.list_alt,
+                  size: 20,
+                  color: Theme.of(context).iconTheme.color,
+                ),
+                onPressed: () => _showRecentInputPicker(
+                  context: context,
+                  items: _recentDescriptions,
+                  onSelected: (v) {
+                    _descController.text = v;
+                    _descController.selection = TextSelection.fromPosition(
+                      TextPosition(offset: v.length),
+                    );
+                    _handleDescriptionChanged(v);
+                    setState(() {});
+                  },
+                  title: '상품명 입력내용 불러오기',
+                ),
+                padding: EdgeInsets.zero,
+              ),
+          ],
         ),
       ),
     );
@@ -2499,6 +2517,59 @@ class _NO1FormState extends State<NO1Form> {
       return errorMessage;
     }
     return null;
+  }
+
+  /// 입력한 상품명의 건강도 분석
+  Future<void> _showHealthAnalysis() async {
+    final description = _descController.text.trim();
+    if (description.isEmpty) {
+      SnackbarUtils.showInfo(context, '상품명을 먼저 입력하세요');
+      return;
+    }
+
+    // 상품명을 재료 목록으로 변환 (쉼표, 공백으로 분리)
+    final ingredients = description
+        .split(RegExp(r'[,\s]+'))
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
+
+    if (ingredients.isEmpty) {
+      SnackbarUtils.showInfo(context, '분석할 재료가 없습니다');
+      return;
+    }
+
+    final result = await showDialog<IngredientAnalysis>(
+      context: context,
+      builder: (context) => IngredientHealthAnalyzerDialog(
+        initialIngredients: ingredients,
+      ),
+    );
+
+    if (result != null && mounted) {
+      final score = result.overallScore;
+      final label = IngredientHealthScoreUtils.getScoreLabel(score);
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '건강 점수: $score점 ($label)\n${result.summary}',
+          ),
+          backgroundColor: _getScoreColor(score),
+        ),
+      );
+    }
+  }
+
+  Color _getScoreColor(int score) {
+    switch (score) {
+      case 5: return Colors.green;
+      case 4: return Colors.lightGreen;
+      case 3: return Colors.orange;
+      case 2: return Colors.deepOrange;
+      case 1: return Colors.red;
+      default: return Colors.grey;
+    }
   }
 
   /// 거래 저장 후 계속 입력 (Shift+Enter)

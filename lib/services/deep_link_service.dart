@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import '../models/transaction.dart';
+import 'deep_link_diagnostics.dart';
 
 /// Service for handling deep links from App Actions, Bixby, and other sources.
 ///
@@ -19,8 +20,21 @@ import '../models/transaction.dart';
 /// - `smartledger://dashboard`
 /// - `smartledger://feature/food_expiry`
 /// - `smartledger://feature/shopping_cart`
+/// - `smartledger://shopping/cart/add?name=우유&location=냉장고`
+///   (장바구니 상품 추가)
 /// - `smartledger://feature/assets`
 /// - `smartledger://feature/recipe`
+/// - `smartledger://recipe/recommend` (냉장고 재료 기반 요리 추천)
+/// - `smartledger://recipe/recommend?meal=lunch` (점심 요리 추천)
+/// - `smartledger://recipe/recommend?meal=dinner&ingredients=닭고기,양파`
+///   (저녁 요리 추천, 특정 재료 사용)
+/// - `smartledger://receipt/analyze` (영수증 건강도 분석)
+/// - `smartledger://receipt/analyze?ingredients=양배추,닭고기,우유`
+/// 
+/// 책스캔앱 OCR 연계:
+/// - `smartledger://transaction/add?amount=45800&store=이마트&items=양배추,닭고기,우유&source=ocr`
+///   (책스캔앱에서 OCR 처리 후 SmartLedger로 데이터 반환)
+///   (특정 재료 건강도 분석)
 /// - `smartledger://stock/check?product=팽이버섯` (재고 조회)
 /// - `smartledger://stock/use?product=팽이버섯&amount=1&autoSubmit=true`
 ///   (재고 차감: 확인 필요)
@@ -52,6 +66,14 @@ class DeepLinkService {
         final uri = call.arguments as String?;
         if (uri != null && uri.isNotEmpty) {
           final action = parseUri(uri);
+          await DeepLinkDiagnostics.record(
+            uri: uri,
+            parsed: action != null,
+            actionSummary: action != null ? _summarizeAction(action) : null,
+            failureReason: action == null ? 'UNSUPPORTED_OR_INVALID' : null,
+            source: 'android:onDeepLink',
+          );
+
           if (action != null) {
             _linkController.add(action);
           }
@@ -65,12 +87,44 @@ class DeepLinkService {
       final initial = await _channel.invokeMethod<String>('getInitialLink');
       if (initial != null && initial.isNotEmpty) {
         final action = parseUri(initial);
+
+        await DeepLinkDiagnostics.record(
+          uri: initial,
+          parsed: action != null,
+          actionSummary: action != null ? _summarizeAction(action) : null,
+          failureReason: action == null ? 'UNSUPPORTED_OR_INVALID' : null,
+          source: 'android:initial',
+        );
+
         if (action != null) {
           _linkController.add(action);
         }
       }
     } on PlatformException catch (_) {
       // Platform channel not available (e.g., on desktop)
+    }
+  }
+
+  String _summarizeAction(DeepLinkAction action) {
+    switch (action) {
+      case AddTransactionAction():
+        return 'transaction/add type=${action.type} autoSubmit=${action.autoSubmit} confirmed=${action.confirmed}';
+      case OpenDashboardAction():
+        return 'dashboard/open';
+      case OpenFeatureAction():
+        return 'feature/open id=${action.featureId}';
+      case AddToCartAction():
+        return 'shopping/cart/add name=${action.name}';
+      case RecipeRecommendAction():
+        return 'recipe/recommend meal=${action.mealType ?? ""}';
+      case ReceiptAnalyzeAction():
+        return 'receipt/analyze';
+      case OpenRouteAction():
+        return 'nav/open route=${action.routeName} intent=${action.intent ?? ""}';
+      case CheckStockAction():
+        return 'stock/check';
+      case UseStockAction():
+        return 'stock/use autoSubmit=${action.autoSubmit} confirmed=${action.confirmed}';
     }
   }
 
@@ -119,6 +173,49 @@ class DeepLinkService {
           return DeepLinkAction.openFeature(pathSegments.first);
         } else if (params.containsKey('feature')) {
           return DeepLinkAction.openFeature(params['feature']!);
+        }
+        break;
+
+      case 'shopping':
+        if (pathSegments.length >= 2 && pathSegments[0] == 'cart') {
+          if (pathSegments[1] == 'add') {
+            // 장바구니 항목 추가
+            final name = params['name'];
+            if (name != null && name.isNotEmpty) {
+              return DeepLinkAction.addToCart(
+                name: name,
+                location: params['location'],
+                quantity: int.tryParse(params['quantity'] ?? ''),
+                price: double.tryParse(params['price'] ?? ''),
+              );
+            }
+          }
+        }
+        break;
+
+      case 'recipe':
+        if (pathSegments.isNotEmpty && pathSegments.first == 'recommend') {
+          // 요리 추천
+          final mealType = params['meal']; // breakfast, lunch, dinner
+          final ingredientsStr = params['ingredients']; // comma-separated
+          final ingredients = ingredientsStr?.split(',').map((e) => e.trim()).toList();
+          final prioritizeExpiring = params['expiring'] == 'true'; // 유통기한 임박 우선
+          
+          return DeepLinkAction.recommendRecipe(
+            mealType: mealType,
+            ingredients: ingredients,
+            prioritizeExpiring: prioritizeExpiring,
+          );
+        }
+        break;
+
+      case 'receipt':
+        if (pathSegments.isNotEmpty && pathSegments.first == 'analyze') {
+          // 영수증 건강도 분석
+          final ingredientsStr = params['ingredients']; // comma-separated
+          final ingredients = ingredientsStr?.split(',').map((e) => e.trim()).toList();
+          
+          return DeepLinkAction.analyzeReceipt(ingredients: ingredients);
         }
         break;
 
@@ -234,6 +331,23 @@ sealed class DeepLinkAction {
   const factory DeepLinkAction.openFeature(String featureId) =
       OpenFeatureAction;
 
+  const factory DeepLinkAction.addToCart({
+    required String name,
+    String? location,
+    int? quantity,
+    double? price,
+  }) = AddToCartAction;
+
+  const factory DeepLinkAction.recommendRecipe({
+    bool prioritizeExpiring,
+    String? mealType,
+    List<String>? ingredients,
+  }) = RecipeRecommendAction;
+
+  const factory DeepLinkAction.analyzeReceipt({
+    List<String>? ingredients,
+  }) = ReceiptAnalyzeAction;
+
   const factory DeepLinkAction.openRoute({
     required String routeName,
     String? accountName,
@@ -265,6 +379,8 @@ class AddTransactionAction extends DeepLinkAction {
   final String? paymentMethod;
   final String? store;
   final String? memo;
+  final String? items; // 책스캔앱 OCR: 쉼표로 구분된 항목 목록
+  final String? source; // 데이터 출처: 'ocr', 'voice', null
   final SavingsAllocation? savingsAllocation;
   final String currency;
   final bool autoSubmit;
@@ -282,6 +398,8 @@ class AddTransactionAction extends DeepLinkAction {
     this.paymentMethod,
     this.store,
     this.memo,
+    this.items,
+    this.source,
     this.savingsAllocation,
     this.currency = 'KRW',
     this.autoSubmit = false,
@@ -306,6 +424,8 @@ class AddTransactionAction extends DeepLinkAction {
     if (paymentMethod != null) params['paymentMethod'] = paymentMethod!;
     if (store != null) params['store'] = store!;
     if (memo != null) params['memo'] = memo!;
+    if (items != null) params['items'] = items!;
+    if (source != null) params['source'] = source!;
     if (savingsAllocation != null) {
       params['savingsAllocation'] = savingsAllocation.toString();
     }
@@ -321,7 +441,8 @@ class AddTransactionAction extends DeepLinkAction {
       'quantity: $quantity, unit: $unit, unitPrice: $unitPrice, '
       'description: $description, category: $category, '
       'paymentMethod: $paymentMethod, store: $store, '
-      'memo: $memo, savingsAllocation: $savingsAllocation, '
+      'memo: $memo, items: $items, source: $source, '
+      'savingsAllocation: $savingsAllocation, '
       'autoSubmit: $autoSubmit, confirmed: $confirmed, '
       'openReceiptScannerOnStart: $openReceiptScannerOnStart)';
 }
@@ -391,6 +512,28 @@ class OpenFeatureAction extends DeepLinkAction {
 
   @override
   String toString() => 'OpenFeatureAction(featureId: $featureId)';
+}
+
+class AddToCartAction extends DeepLinkAction {
+  final String name;
+  final String? location;
+  final int? quantity;
+  final double? price;
+
+  const AddToCartAction({
+    required this.name,
+    this.location,
+    this.quantity,
+    this.price,
+  });
+
+  @override
+  String toString() =>
+      'AddToCartAction('
+      'name: $name, '
+      'location: $location, '
+      'quantity: $quantity, '
+      'price: $price)';
 }
 
 class OpenRouteAction extends DeepLinkAction {
@@ -464,4 +607,36 @@ class UseStockAction extends DeepLinkAction {
       'amount: $amount, '
       'autoSubmit: $autoSubmit, '
       'confirmed: $confirmed)';
+}
+
+/// 요리 추천 액션
+class RecipeRecommendAction extends DeepLinkAction {
+  /// 끼니 유형: breakfast, lunch, dinner
+  final String? mealType;
+  final List<String>? ingredients;
+  /// 유통기한 임박 재료 우선 사용
+  final bool prioritizeExpiring;
+
+  const RecipeRecommendAction({
+    this.mealType,
+    this.ingredients,
+    this.prioritizeExpiring = false,
+  });
+
+  @override
+  String toString() =>
+      'RecipeRecommendAction('
+      'mealType: $mealType, '
+      'ingredients: $ingredients, '
+      'prioritizeExpiring: $prioritizeExpiring)';
+}
+
+/// 영수증 건강도 분석 액션
+class ReceiptAnalyzeAction extends DeepLinkAction {
+  final List<String>? ingredients;
+
+  const ReceiptAnalyzeAction({this.ingredients});
+
+  @override
+  String toString() => 'ReceiptAnalyzeAction(ingredients: $ingredients)';
 }

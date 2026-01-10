@@ -6,6 +6,7 @@ import '../services/transaction_fts_index_service.dart';
 import '../services/transaction_service.dart';
 import '../utils/icon_catalog.dart';
 import '../utils/number_formats.dart';
+import '../utils/debounce_utils.dart';
 import '../widgets/root_auth_gate.dart';
 import '../widgets/root_transaction_list.dart';
 
@@ -20,6 +21,9 @@ class RootSearchScreen extends StatefulWidget {
 class _RootSearchScreenState extends State<RootSearchScreen> {
   final _searchController = TextEditingController();
   final _focusNode = FocusNode();
+  final Debouncer _searchDebouncer = Debouncer(
+    delay: const Duration(milliseconds: 220),
+  );
   List<Transaction> _searchResults = [];
   List<Transaction> _allTransactions = [];
   final Map<String, Transaction> _transactionById = {};
@@ -40,6 +44,7 @@ class _RootSearchScreenState extends State<RootSearchScreen> {
   void dispose() {
     _searchController.dispose();
     _focusNode.dispose();
+    _searchDebouncer.dispose();
     super.dispose();
   }
 
@@ -144,7 +149,12 @@ class _RootSearchScreenState extends State<RootSearchScreen> {
                               labelText: '거래 검색 (설명, 메모, 금액, 지불수단)',
                               prefixIcon: Icon(IconCatalog.search, size: 26),
                             ),
-                            onChanged: _doSearch,
+                            onChanged: (value) {
+                              _searchDebouncer.run(() {
+                                if (!mounted) return;
+                                _doSearch(value);
+                              });
+                            },
                           ),
                         ),
                         IconButton(

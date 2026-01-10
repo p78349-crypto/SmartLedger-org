@@ -72,10 +72,12 @@ class AppRoutes {
   static const incomeSplit = '/income/split';
   static const foodExpiry = '/food/expiry';
   static const foodCookingStart = '/food/cooking-start';
+  static const healthAnalyzer = '/food/health-analyzer';
   static const calendar = '/calendar';
 
   static const shoppingCart = '/shopping/cart';
   static const shoppingPrep = '/shopping/prep';
+  static const shoppingGuide = '/shopping/guide';
 
   static const householdConsumables = '/household/consumables';
   static const consumableInventory = '/household/inventory';
@@ -298,6 +300,15 @@ class ShoppingCartArgs {
   final String accountName;
   final bool openPrepOnStart;
   final List<ShoppingCartItem>? initialItems;
+}
+
+class ShoppingGuideArgs {
+  const ShoppingGuideArgs({
+    required this.accountName,
+    required this.items,
+  });
+  final String accountName;
+  final List<ShoppingCartItem> items;
 }
 
 class QuickStockUseArgs {

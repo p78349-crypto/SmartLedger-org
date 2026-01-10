@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../models/food_expiry_item.dart';
 import '../services/food_expiry_service.dart';
@@ -6,6 +7,7 @@ import '../utils/icon_catalog.dart';
 import '../utils/recipe_recommendation_utils.dart';
 import '../utils/recipe_recommendation_style_utils.dart';
 import '../utils/daily_recipe_recommendation_utils.dart';
+import '../utils/debounce_utils.dart';
 import '../mixins/food_expiry_items_auto_refresh_mixin.dart';
 
 /// 오늘의 요리 추천 위젯
@@ -25,14 +27,28 @@ class _DailyRecipeRecommendationWidgetState
   List<FoodExpiryItem>? _expiringItems;
   RecipeMatch? _recommendedRecipe;
   bool _isLoading = true;
+  final _debouncer = Debouncer(delay: const Duration(milliseconds: 300));
 
   @override
-  Future<void> onFoodExpiryItemsChanged() => _loadRecommendation();
+  Future<void> onFoodExpiryItemsChanged() async {
+    _loadRecommendationDebounced();
+  }
+
+  /// Debounced 로딩 (300ms 내 연속 호출 시 마지막만 실행)
+  void _loadRecommendationDebounced() {
+    _debouncer.run(_loadRecommendation);
+  }
 
   @override
   void initState() {
     super.initState();
     requestFoodExpiryItemsRefresh();
+  }
+
+  @override
+  void dispose() {
+    _debouncer.dispose();
+    super.dispose();
   }
 
   Future<void> _loadRecommendation() async {
@@ -41,7 +57,9 @@ class _DailyRecipeRecommendationWidgetState
       final allItems = FoodExpiryService.instance.items.value;
 
       if (mounted) {
-        final result = DailyRecipeRecommendationUtils.build(allItems);
+        final result = await DailyRecipeRecommendationUtils.build(
+          allItems,
+        );
 
         setState(() {
           _expiringItems = result.expiringItems;

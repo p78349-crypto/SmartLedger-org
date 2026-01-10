@@ -7,7 +7,11 @@ plugins {
 
 android {
     namespace = "com.example.smartledger"
-    compileSdk = flutter.compileSdkVersion
+    // Required for App Actions shortcuts.xml attributes like android:entitySetId
+    // and android:alternateName.
+    // Several Flutter plugins and recent AndroidX libraries now require
+    // compiling against android-36 (backward compatible).
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     lint {
@@ -36,7 +40,8 @@ android {
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        // Keep runtime behavior stable; compileSdk can be higher than targetSdk.
+        targetSdk = 34
         versionCode = flutter.versionCode
         versionName = flutter.versionName
 

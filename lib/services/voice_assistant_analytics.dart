@@ -101,7 +101,7 @@ class VoiceAssistantAnalytics {
 
       // 간단한 카운터 (향후 Firebase Analytics 연동 시 확장)
       final prefs = await SharedPreferences.getInstance();
-      final key = '${_prefPrefix}rejected_params_count';
+      const key = '${_prefPrefix}rejected_params_count';
       final existing = prefs.getInt(key) ?? 0;
       await prefs.setInt(key, existing + rejected.length);
     } catch (e) {
@@ -118,7 +118,7 @@ class VoiceAssistantAnalytics {
           .where((k) => k.startsWith(_prefPrefix) && !k.contains('error'));
 
       final now = DateTime.now();
-      final cutoff = now.subtract(Duration(days: _maxRetentionDays));
+      final cutoff = now.subtract(const Duration(days: _maxRetentionDays));
 
       final stats = <VoiceCommandStats>[];
       for (final key in keys) {

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<action id="report_price">
+  <description>Report an in-store price and open SmartLedger app form</description>
+  <inputs>
+    <input id="store" type="text" required="true" />
+    <input id="item" type="text" required="true" />
+    <input id="price" type="number" required="true" />
+    <input id="quantity" type="number" required="false" />
+    <input id="discount" type="text" required="false" />
+  </inputs>
+  <outputs>
+    <output type="deep_link" />
+  </outputs>
+  <handler>
+    <![CDATA[
+    // Build deep link to SmartLedger
+    var storeId = normalizeStore(inputs.store);
+    var skuId = normalizeItem(inputs.item);
+    var q = inputs.quantity ? inputs.quantity : 1;
+    var discount = mapDiscount(inputs.discount);
+    var uri = `smartledger://visit_price_form?storeId=${storeId}&skuId=${skuId}&price=${inputs.price}&quantity=${q}`;
+    if (discount) uri += `&discount=${discount}`;
+    callback({ deep_link: uri });
+    ]]>
+  </handler>
+</action>

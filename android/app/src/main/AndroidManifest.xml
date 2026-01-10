@@ -57,6 +57,21 @@
                 <data
                     android:scheme="smartledger"
                     android:host="feature" />
+                <data
+                    android:scheme="smartledger"
+                    android:host="nav" />
+                <data
+                    android:scheme="smartledger"
+                    android:host="shopping" />
+                <data
+                    android:scheme="smartledger"
+                    android:host="recipe" />
+                <data
+                    android:scheme="smartledger"
+                    android:host="receipt" />
+                <data
+                    android:scheme="smartledger"
+                    android:host="stock" />
             </intent-filter>
             
             <!-- Shortcuts (Static + App Actions) -->

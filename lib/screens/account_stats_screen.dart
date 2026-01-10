@@ -19,6 +19,7 @@ import '../utils/date_formatter.dart';
 import '../utils/localization.dart';
 import '../utils/number_formats.dart';
 import '../utils/product_name_utils.dart';
+import '../utils/debounce_utils.dart';
 import '../utils/store_memo_utils.dart';
 
 enum _StatsView {
@@ -4268,6 +4269,9 @@ class _PeriodDetailScreen extends StatefulWidget {
 
 class _PeriodDetailScreenState extends State<_PeriodDetailScreen> {
   final TextEditingController _searchController = TextEditingController();
+  final Debouncer _searchDebouncer = Debouncer(
+    delay: const Duration(milliseconds: 180),
+  );
   final NumberFormat _currencyFormat = NumberFormats.currency;
   final DateFormat _dateFormat = DateFormatter.defaultDate;
   final DateFormat _monthLabelFormat = DateFormatter.monthLabel;
@@ -4287,6 +4291,7 @@ class _PeriodDetailScreenState extends State<_PeriodDetailScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    _searchDebouncer.dispose();
     super.dispose();
   }
 
@@ -4349,11 +4354,11 @@ class _PeriodDetailScreenState extends State<_PeriodDetailScreen> {
 
       if (!inRange) return false;
 
-      if (lower.isEmpty) return true;
+          if (lower.isEmpty) return true;
 
-      return tx.description.toLowerCase().contains(lower) ||
-          tx.memo.toLowerCase().contains(lower) ||
-          tx.paymentMethod.toLowerCase().contains(lower);
+          return tx.description.toLowerCase().contains(lower) ||
+            tx.memo.toLowerCase().contains(lower) ||
+            tx.paymentMethod.toLowerCase().contains(lower);
     }).toList()..sort((a, b) => b.date.compareTo(a.date));
   }
 
@@ -4442,8 +4447,10 @@ class _PeriodDetailScreenState extends State<_PeriodDetailScreen> {
                   isDense: true,
                 ),
                 onChanged: (value) {
-                  setState(() {
-                    _query = value;
+                  _query = value;
+                  _searchDebouncer.run(() {
+                    if (!mounted) return;
+                    setState(() {});
                   });
                 },
               ),

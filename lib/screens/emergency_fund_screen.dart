@@ -4,6 +4,7 @@ import '../models/asset.dart';
 import '../models/emergency_transaction.dart';
 import '../services/asset_service.dart';
 import '../services/emergency_fund_service.dart';
+import '../utils/debounce_utils.dart';
 import '../utils/utils.dart';
 import '../widgets/state_placeholders.dart';
 
@@ -17,6 +18,9 @@ class EmergencyFundScreen extends StatefulWidget {
 
 class _EmergencyFundScreenState extends State<EmergencyFundScreen> {
   late TextEditingController _searchController;
+  final Debouncer _searchDebouncer = Debouncer(
+    delay: const Duration(milliseconds: 220),
+  );
   bool _isLoading = true;
   String? _error;
   List<EmergencyTransaction> _transactions = [];
@@ -26,13 +30,16 @@ class _EmergencyFundScreenState extends State<EmergencyFundScreen> {
   void initState() {
     super.initState();
     _searchController = TextEditingController();
-    _searchController.addListener(_filterTransactions);
+    _searchController.addListener(() {
+      _searchDebouncer.run(_filterTransactions);
+    });
     _loadTransactions();
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _searchDebouncer.dispose();
     super.dispose();
   }
 
@@ -64,7 +71,8 @@ class _EmergencyFundScreenState extends State<EmergencyFundScreen> {
   }
 
   void _filterTransactions() {
-    final query = _searchController.text.toLowerCase();
+    final query = _searchController.text.trim();
+    final lower = query.toLowerCase();
     setState(() {
       if (query.isEmpty) {
         _filteredTransactions = _transactions;
@@ -72,7 +80,7 @@ class _EmergencyFundScreenState extends State<EmergencyFundScreen> {
         _filteredTransactions = _transactions
             .where(
               (t) =>
-                  t.description.toLowerCase().contains(query) ||
+                  t.description.toLowerCase().contains(lower) ||
                   t.amount.toString().contains(query),
             )
             .toList();

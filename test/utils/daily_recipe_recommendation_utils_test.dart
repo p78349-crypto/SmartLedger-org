@@ -15,14 +15,14 @@ FoodExpiryItem _item(String id, String name, DateTime expiryDate) {
 }
 
 void main() {
-  test('build returns empty when no expiring items', () {
+  test('build returns empty when no expiring items', () async {
     final now = DateTime(2026, 1, 9, 12);
 
     final items = <FoodExpiryItem>[
       _item('late', '늦음', now.add(const Duration(days: 10))),
     ];
 
-    final result = DailyRecipeRecommendationUtils.build(
+    final result = await DailyRecipeRecommendationUtils.build(
       items,
       now: now,
     );

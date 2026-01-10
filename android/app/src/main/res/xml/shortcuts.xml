@@ -113,44 +113,6 @@
                 android:key="feature" />
             <url-template android:value="smartledger://feature/{feature}" />
         </intent>
-        <!-- Inline inventory for feature names -->
-        <shortcut-fulfillment>
-            <parameter android:name="feature">
-                <entity-set-reference android:entitySetId="AppFeatures" />
-            </parameter>
-        </shortcut-fulfillment>
     </capability>
-
-    <!-- Feature inventory for OPEN_APP_FEATURE -->
-    <entity-set android:entitySetId="AppFeatures">
-        <entity
-            android:name="지출입력"
-            android:alternateName="@array/expense_synonyms"
-            android:identifier="transaction_add" />
-        <entity
-            android:name="수입입력"
-            android:alternateName="@array/income_synonyms"
-            android:identifier="income_add" />
-        <entity
-            android:name="대시보드"
-            android:alternateName="@array/dashboard_synonyms"
-            android:identifier="dashboard" />
-        <entity
-            android:name="유통기한"
-            android:alternateName="@array/expiry_synonyms"
-            android:identifier="food_expiry" />
-        <entity
-            android:name="장바구니"
-            android:alternateName="@array/shopping_synonyms"
-            android:identifier="shopping_cart" />
-        <entity
-            android:name="자산"
-            android:alternateName="@array/asset_synonyms"
-            android:identifier="assets" />
-        <entity
-            android:name="레시피"
-            android:alternateName="@array/recipe_synonyms"
-            android:identifier="recipe" />
-    </entity-set>
 
 </shortcuts>

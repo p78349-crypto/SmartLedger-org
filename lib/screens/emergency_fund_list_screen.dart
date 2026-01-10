@@ -5,6 +5,7 @@ import '../services/asset_service.dart';
 import '../services/emergency_fund_service.dart';
 import '../utils/currency_formatter.dart';
 import '../utils/date_formats.dart';
+import '../utils/debounce_utils.dart';
 import '../widgets/state_placeholders.dart';
 
 /// 비상금 지갑 리스트 화면 (자산 리스트 UI와 유사)
@@ -19,6 +20,9 @@ class EmergencyFundListScreen extends StatefulWidget {
 
 class _EmergencyFundListScreenState extends State<EmergencyFundListScreen> {
   final TextEditingController _searchController = TextEditingController();
+  final Debouncer _searchDebouncer = Debouncer(
+    delay: const Duration(milliseconds: 220),
+  );
   bool _isSelectionMode = false;
   final Set<String> _selectedIds = {};
   bool _isLoading = true;
@@ -29,12 +33,15 @@ class _EmergencyFundListScreenState extends State<EmergencyFundListScreen> {
   void initState() {
     super.initState();
     _loadTransactions();
-    _searchController.addListener(_applyFilter);
+    _searchController.addListener(() {
+      _searchDebouncer.run(_applyFilter);
+    });
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _searchDebouncer.dispose();
     super.dispose();
   }
 
@@ -64,10 +71,11 @@ class _EmergencyFundListScreenState extends State<EmergencyFundListScreen> {
   }
 
   List<EmergencyTransaction> get _filtered {
-    final query = _searchController.text.trim().toLowerCase();
+    final query = _searchController.text.trim();
+    final lower = query.toLowerCase();
     if (query.isEmpty) return _transactions;
     return _transactions.where((t) {
-      return t.description.toLowerCase().contains(query) ||
+      return t.description.toLowerCase().contains(lower) ||
           t.amount.toString().contains(query);
     }).toList();
   }

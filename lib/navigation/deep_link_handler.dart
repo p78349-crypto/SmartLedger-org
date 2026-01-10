@@ -3,11 +3,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'app_routes.dart';
 import 'global_navigator_key.dart';
+import '../models/shopping_cart_item.dart';
 import '../models/transaction.dart';
 import '../services/account_service.dart';
 import '../services/deep_link_service.dart';
 import '../services/consumable_inventory_service.dart';
 import '../services/health_guardrail_service.dart';
+import '../services/product_location_service.dart';
+import '../services/user_pref_service.dart';
 import '../services/voice_assistant_analytics.dart';
 import 'assistant_route_catalog.dart';
 import 'route_param_validator.dart';
@@ -51,6 +54,12 @@ class DeepLinkHandler {
         _handleOpenDashboard(navigator);
       case OpenFeatureAction():
         _handleOpenFeature(navigator, action);
+      case AddToCartAction():
+        _handleAddToCart(navigator, action);
+      case RecipeRecommendAction():
+        _handleRecipeRecommend(navigator, action);
+      case ReceiptAnalyzeAction():
+        _handleReceiptAnalyze(navigator, action);
       case OpenRouteAction():
         _handleOpenRoute(navigator, action);
       case CheckStockAction():
@@ -71,6 +80,12 @@ class DeepLinkHandler {
         return 'OpenDashboardAction()';
       case OpenFeatureAction():
         return 'OpenFeatureAction(featureId: ${action.featureId})';
+      case AddToCartAction():
+        return 'AddToCartAction(name: ${action.name}, location: ${action.location})';
+      case RecipeRecommendAction():
+        return 'RecipeRecommendAction(mealType: ${action.mealType}, ingredients: ${action.ingredients}, prioritizeExpiring: ${action.prioritizeExpiring})';
+      case ReceiptAnalyzeAction():
+        return 'ReceiptAnalyzeAction(ingredients: ${action.ingredients})';
       case OpenRouteAction():
         final keys = action.params.keys.toList()..sort();
         return 'OpenRouteAction(routeName: ${action.routeName}, '
@@ -817,10 +832,27 @@ class DeepLinkHandler {
     final unit = action.unit?.trim() ?? '';
     final unitPriceRaw = action.unitPrice;
     final desc = action.description?.trim();
-    final memo = action.memo?.trim() ?? '';
+    var memo = action.memo?.trim() ?? '';
     final paymentMethod = action.paymentMethod?.trim() ?? '';
     final store = action.store?.trim() ?? '';
     final savingsAllocation = action.savingsAllocation;
+
+    // 책스캔앱 OCR 결과 처리: items를 memo에 자동 추가
+    if (action.items != null && action.items!.isNotEmpty) {
+      final itemsList = action.items!
+          .split(',')
+          .map((e) => e.trim())
+          .where((e) => e.isNotEmpty)
+          .toList();
+      if (itemsList.isNotEmpty) {
+        final itemsText = itemsList.join(', ');
+        if (memo.isEmpty) {
+          memo = '📋 $itemsText';
+        } else {
+          memo = '$memo\n📋 $itemsText';
+        }
+      }
+    }
 
     final qty = (quantityRaw != null && quantityRaw > 0)
         ? quantityRaw.round()
@@ -977,6 +1009,79 @@ class DeepLinkHandler {
     openScreen(autoSubmit: false);
   }
 
+  void _handleAddToCart(NavigatorState navigator, AddToCartAction action) async {
+    // 현재 계정 조회
+    final accountService = AccountService();
+    await accountService.loadAccounts();
+    final accounts = accountService.accounts;
+    if (accounts.isEmpty) {
+      _showSimpleInfoDialog(
+        navigator,
+        title: '계정 없음',
+        message: '먼저 계정을 생성해주세요.',
+      );
+      return;
+    }
+
+    final accountName = accounts.first.name;
+    await UserPrefService.setLastAccountName(accountName);
+
+    // 이전 위치 조회 또는 딥링크 위치 사용
+    final locationService = ProductLocationService.instance;
+    final previousLocation = await locationService.getLocation(
+      accountName: accountName,
+      productName: action.name,
+    );
+    final finalLocation = action.location?.isNotEmpty == true
+        ? action.location!
+        : (previousLocation ?? '');
+
+    // 장바구니에 추가
+    final existingItems = await UserPrefService.getShoppingCartItems(
+      accountName: accountName,
+    );
+
+    final now = DateTime.now();
+    final newItem = ShoppingCartItem(
+      id: 'shop_${now.microsecondsSinceEpoch}',
+      name: action.name,
+      quantity: action.quantity ?? 1,
+      unitPrice: action.price ?? 0,
+      storeLocation: finalLocation,
+      createdAt: now,
+      updatedAt: now,
+    );
+
+    final updatedItems = [newItem, ...existingItems];
+    await UserPrefService.setShoppingCartItems(
+      accountName: accountName,
+      items: updatedItems,
+    );
+
+    // 위치 학습에 저장
+    if (finalLocation.isNotEmpty) {
+      await locationService.saveLocation(
+        accountName: accountName,
+        productName: action.name,
+        location: finalLocation,
+      );
+    }
+
+    // 성공 로깅
+    VoiceAssistantAnalytics.logCommand(
+      assistant: 'voice',
+      route: AppRoutes.shoppingCart,
+      intent: 'add_to_cart',
+      success: true,
+    );
+
+    // 장바구니 화면으로 이동
+    navigator.pushNamed(
+      AppRoutes.shoppingCart,
+      arguments: ShoppingCartArgs(accountName: accountName),
+    );
+  }
+
   void _handleOpenDashboard(NavigatorState navigator) {
     // Pop to root and show dashboard
     navigator.popUntil((route) => route.isFirst);
@@ -1118,6 +1223,149 @@ class DeepLinkHandler {
     );
     final item = found.first;
     _showStockInfoDialog(navigator, item);
+  }
+
+  /// 요리 추천 - 빅스비로 "요리 뭐로 하지?" 또는 "점심 뭐 먹지?"
+  void _handleRecipeRecommend(NavigatorState navigator, RecipeRecommendAction action) async {
+    // 현재 계정 조회
+    final accountService = AccountService();
+    await accountService.loadAccounts();
+    final accounts = accountService.accounts;
+    if (accounts.isEmpty) {
+      _showSimpleInfoDialog(
+        navigator,
+        title: '계정 없음',
+        message: '먼저 계정을 생성해주세요.',
+      );
+      VoiceAssistantAnalytics.logCommand(
+        assistant: 'Bixby', // Most likely from Bixby
+        route: '/food/expiry',
+        intent: 'recipe_recommend',
+        success: false,
+        failureReason: 'ACCOUNT_REQUIRED',
+      );
+      return;
+    }
+
+    final accountName = accounts.first.name;
+    await UserPrefService.setLastAccountName(accountName);
+    
+    // 끼니별 메시지
+    final mealLabel = _getMealLabel(action.mealType);
+    
+    // 성공 로깅
+    VoiceAssistantAnalytics.logCommand(
+      assistant: 'Bixby',
+      route: '/food/expiry',
+      intent: 'recipe_recommend',
+      success: true,
+    );
+
+    // 냉장고 화면으로 이동 + 레시피 선택기 자동 열기
+    navigator.pushNamed(
+      AppRoutes.foodExpiry,
+      arguments: const FoodExpiryArgs(
+        openCookableRecipePickerOnStart: true,
+        scrollToDailyRecipeRecommendationOnStart: true,
+      ),
+    );
+
+    // 안내 메시지 표시
+    Future.delayed(const Duration(milliseconds: 800), () {
+      if (navigator.mounted) {
+        String message;
+        if (action.prioritizeExpiring) {
+          // 유통기한 임박 재료 우선 모드
+          message = '⚠️ 유통기한 임박 재료 활용 요리!\n'
+                   '🕒 빨리 소진해야 할 재료 우선 사용\n'
+                   '✅ 현재 재고로 만들 수 있는 레시피\n'
+                   '📝 부족한 재료는 장바구니에 추가';
+        } else if (action.ingredients != null && action.ingredients!.isNotEmpty) {
+          final ingredientsText = action.ingredients!.join(', ');
+          message = '💡 $ingredientsText 사용 가능한 $mealLabel 추천!\n'
+                   '✅ 현재 재고로 만들 수 있는 레시피\n'
+                   '📝 부족한 재료는 장바구니에 자동 추가';
+        } else if (action.mealType != null) {
+          message = '💡 $mealLabel 추천!\n'
+                   '✅ 냉장고 재료로 만들 수 있는 요리\n'
+                   '📝 부족한 재료는 장바구니에 추가 가능';
+        } else {
+          message = '💡 냉장고 재료로 만들 수 있는 요리 추천!\n'
+                   '✅ 유통기한 임박 재료 우선 사용\n'
+                   '📝 부족한 재료는 장바구니에 자동 추가';
+        }
+        
+        ScaffoldMessenger.of(navigator.context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            behavior: SnackBarBehavior.floating,
+            action: SnackBarAction(
+              label: '확인',
+              onPressed: () {},
+            ),
+          ),
+        );
+      }
+    });
+  }
+
+  /// 영수증 건강도 분석 - 빅스비로 "영수증 건강도 분석"
+  void _handleReceiptAnalyze(NavigatorState navigator, ReceiptAnalyzeAction action) async {
+    // 성공 로깅
+    VoiceAssistantAnalytics.logCommand(
+      assistant: 'Bixby',
+      route: '/food/health-analyzer',
+      intent: 'receipt_analyze',
+      success: true,
+    );
+
+    // 건강도 분석 화면으로 이동
+    navigator.pushNamed(AppRoutes.healthAnalyzer);
+
+    // 안내 메시지 표시
+    Future.delayed(const Duration(milliseconds: 800), () {
+      if (navigator.mounted) {
+        String message;
+        if (action.ingredients != null && action.ingredients!.isNotEmpty) {
+          message = '✅ 입력한 재료의 건강도를 분석합니다\n'
+                   '💚 5점: 매우 건강 (채소, 버섯)\n'
+                   '🟡 3점: 보통 (닭고기, 쌀)\n'
+                   '🔴 1점: 비건강 (튀김, 가공식품)';
+        } else {
+          message = '📋 영수증 재료를 입력하세요\n'
+                   '✅ 체크박스로 간편하게 선택\n'
+                   '💚 실시간 건강 점수 계산\n'
+                   '📊 건강한 재료 비율 통계';
+        }
+        
+        ScaffoldMessenger.of(navigator.context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.green,
+            action: SnackBarAction(
+              label: '확인',
+              textColor: Colors.white,
+              onPressed: () {},
+            ),
+          ),
+        );
+      }
+    });
+  }
+
+  String _getMealLabel(String? mealType) {
+    if (mealType == null) return '요리';
+    switch (mealType.toLowerCase()) {
+      case 'breakfast':
+        return '아침 메뉴';
+      case 'lunch':
+        return '점심 메뉴';
+      case 'dinner':
+        return '저녁 메뉴';
+      default:
+        return '요리';
+    }
   }
 
   /// 재고 차감 - 빅스비/제미나이에서 "팽이버섯 1봉 썼어"
@@ -1458,7 +1706,7 @@ class DeepLinkHandler {
       navigator,
       title: errorMessage.title,
       message: errorMessage.body,
-      actions: actions ?? errorMessage.actions,
+      actions: actions,
     );
   }
 
@@ -1480,44 +1728,38 @@ class DeepLinkHandler {
       return _ErrorMessage(
         title: title,
         body: customMessage,
-        actions: null,
       );
     }
 
     switch (errorType) {
       case 'ROUTE_NOT_ALLOWED':
-        return _ErrorMessage(
+        return const _ErrorMessage(
           title: '보안 안내',
           body: '음성 명령으로는 이 화면을 열 수 없습니다.\n앱에서 직접 열어주세요.',
-          actions: null,
         );
 
       case 'ACCOUNT_REQUIRED':
-        return _ErrorMessage(
+        return const _ErrorMessage(
           title: '계정이 필요합니다',
           body: '먼저 계정을 생성하거나 선택해주세요.',
-          actions: null,
         );
 
       case 'INVALID_PARAMS':
-        return _ErrorMessage(
+        return const _ErrorMessage(
           title: '잘못된 명령입니다',
           body: '음성 명령의 일부를 인식하지 못했습니다.\n다시 시도해주세요.',
-          actions: null,
         );
 
       case 'AUTO_SUBMIT_REJECTED':
-        return _ErrorMessage(
+        return const _ErrorMessage(
           title: '확인이 필요합니다',
           body: '안전을 위해 앱에서 직접 확인해주세요.',
-          actions: null,
         );
 
       default:
-        return _ErrorMessage(
+        return const _ErrorMessage(
           title: '오류',
           body: '처리 중 문제가 발생했습니다.\n다시 시도해주세요.',
-          actions: null,
         );
     }
   }
@@ -1532,12 +1774,10 @@ class DeepLinkHandler {
 class _ErrorMessage {
   final String title;
   final String body;
-  final List<Widget>? actions;
 
   const _ErrorMessage({
     required this.title,
     required this.body,
-    this.actions,
   });
 }
 

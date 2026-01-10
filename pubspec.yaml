@@ -45,12 +45,13 @@ dependencies:
   speech_to_text: ^7.3.0
   permission_handler: ^12.0.1
 
-  # 이미지 선택
-  image_picker: ^1.0.7
+  # 이미지 처리 (책스캔앱 연계 전용)
+  # NOTE: image_picker is used by background/theme settings screens.
+  image_picker: ^1.1.2
   image: ^4.3.0
   device_info_plus: ^12.3.0
   http: ^1.2.1
-  camera: ^0.11.3
+  # camera: ^0.11.3 - 제거됨 (앱 용량 최적화, 책스캔앱에서 처리)
   table_calendar: ^3.2.0
   excel: ^4.0.6
   csv: ^6.0.0
@@ -64,10 +65,13 @@ dependencies:
   local_auth: ^3.0.0
   file_picker: ^10.3.8
   share_plus: ^12.0.1
+  url_launcher: ^6.3.1
   flutter_email_sender: ^8.0.0
   provider: ^6.1.2
   geolocator: ^14.0.2
+  connectivity_plus: ^6.0.5
   cryptography: ^2.7.0
+  uri: ^1.0.0
   flutter_secure_storage: ^10.0.0
   flutter_local_notifications: ^19.5.0
   timezone: ^0.10.1

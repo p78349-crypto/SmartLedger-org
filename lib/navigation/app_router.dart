@@ -30,6 +30,7 @@ import '../screens/household_consumables_screen.dart';
 import '../screens/consumable_inventory_screen.dart';
 import '../screens/quick_stock_use_screen.dart';
 import '../screens/food_cooking_start_screen.dart';
+import '../screens/quick_health_analyzer_screen.dart';
 import '../screens/icon_management2_screen.dart';
 import '../screens/icon_management_asset_screen.dart';
 import '../screens/icon_management_root_screen.dart';
@@ -59,6 +60,7 @@ import '../screens/root_transaction_manager_screen.dart';
 import '../screens/savings_plan_list_screen.dart';
 import '../screens/settings_screen.dart';
 import '../screens/shopping_cart_screen.dart';
+import '../screens/shopping_guide_screen.dart';
 import '../screens/shopping_cheapest_month_screen.dart';
 import '../screens/shopping_points_input_screen.dart';
 import '../screens/spending_analysis_screen.dart';
@@ -556,6 +558,12 @@ class AppRouter {
           builder: (_) => const FoodCookingStartScreen(),
         );
 
+      case AppRoutes.healthAnalyzer:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const QuickHealthAnalyzerScreen(),
+        );
+
       case AppRoutes.calendar:
         final a = args as AccountArgs;
         return MaterialPageRoute(
@@ -582,6 +590,16 @@ class AppRouter {
             accountName: a.accountName,
             openPrepOnStart: true,
             initialItems: a.initialItems,
+          ),
+        );
+
+      case AppRoutes.shoppingGuide:
+        final a = args as ShoppingGuideArgs;
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => ShoppingGuideScreen(
+            accountName: a.accountName,
+            items: a.items,
           ),
         );
 

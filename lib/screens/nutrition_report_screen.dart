@@ -3,6 +3,7 @@ import 'ingredient_search_list_screen.dart';
 import '../services/food_expiry_service.dart';
 import '../services/recipe_knowledge_service.dart';
 import '../services/user_pref_service.dart';
+import '../utils/debounce_utils.dart';
 import '../utils/number_formats.dart';
 import '../utils/nutrition_food_knowledge.dart';
 import '../utils/nutrition_report_utils.dart';
@@ -23,6 +24,9 @@ class NutritionReportScreen extends StatefulWidget {
 
 class _NutritionReportScreenState extends State<NutritionReportScreen> {
   final TextEditingController _foodSearchController = TextEditingController();
+  final Debouncer _searchDebouncer = Debouncer(
+    delay: const Duration(milliseconds: 220),
+  );
   String _foodQuery = '';
   List<String> _searchHistory = [];
 
@@ -197,6 +201,7 @@ class _NutritionReportScreenState extends State<NutritionReportScreen> {
     // Save current query as last query on exit
     UserPrefService.setLastRecipeSearchQuery(_foodQuery);
     _foodSearchController.dispose();
+    _searchDebouncer.dispose();
     super.dispose();
   }
 
@@ -243,10 +248,13 @@ class _NutritionReportScreenState extends State<NutritionReportScreen> {
                       ),
               ),
               onChanged: (value) {
-                setState(() {
-                  _foodQuery = value;
+                _searchDebouncer.run(() {
+                  if (!mounted) return;
+                  setState(() {
+                    _foodQuery = value;
+                  });
+                  UserPrefService.setLastRecipeSearchQuery(value);
                 });
-                UserPrefService.setLastRecipeSearchQuery(value);
               },
               onSubmitted: _saveSearch,
             ),

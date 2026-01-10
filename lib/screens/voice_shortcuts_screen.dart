@@ -3,10 +3,29 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'voice_dashboard_screen.dart';
+import '../services/deep_link_diagnostics.dart';
+import '../services/assistant_launcher.dart';
 
 /// 음성 어시스턴트 단축어 설정 및 안내 화면
-class VoiceShortcutsScreen extends StatelessWidget {
+class VoiceShortcutsScreen extends StatefulWidget {
   const VoiceShortcutsScreen({super.key});
+
+  @override
+  State<VoiceShortcutsScreen> createState() => _VoiceShortcutsScreenState();
+}
+
+class _VoiceShortcutsScreenState extends State<VoiceShortcutsScreen> {
+  late Future<DeepLinkDiagnosticsEntry?> _lastDeepLinkFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshLastDeepLink();
+  }
+
+  void _refreshLastDeepLink() {
+    _lastDeepLinkFuture = DeepLinkDiagnostics.getLast();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,6 +90,26 @@ class VoiceShortcutsScreen extends StatelessWidget {
               onSetup: () => _openBixbySettings(context),
               setupLabel: 'Bixby 설정 열기',
             ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: FilledButton.tonalIcon(
+                    onPressed: () => _openBixbyApp(context),
+                    icon: const Icon(Icons.mic_external_on),
+                    label: const Text('Bixby 열기'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: FilledButton.tonalIcon(
+                    onPressed: () => _openSystemAssistant(context),
+                    icon: const Icon(Icons.assistant),
+                    label: const Text('Google/기본 어시스턴트'),
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 16),
             _buildAssistantSection(
               context,
@@ -96,6 +135,127 @@ class VoiceShortcutsScreen extends StatelessWidget {
           ],
 
           const SizedBox(height: 24),
+
+          // 딥링크 수신 진단 (Bixby/Assistant가 앱으로 실제 URI를 전달하는지 확인)
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.bug_report, color: theme.colorScheme.primary),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          '최근 딥링크 수신',
+                          style: theme.textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: '새로고침',
+                        onPressed: () {
+                          setState(_refreshLastDeepLink);
+                        },
+                        icon: const Icon(Icons.refresh),
+                      ),
+                      IconButton(
+                        tooltip: '기록 지우기',
+                        onPressed: () async {
+                          await DeepLinkDiagnostics.clear();
+                          if (!mounted) return;
+                          setState(_refreshLastDeepLink);
+                        },
+                        icon: const Icon(Icons.delete_outline),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  FutureBuilder<DeepLinkDiagnosticsEntry?>(
+                    future: _lastDeepLinkFuture,
+                    builder: (context, snapshot) {
+                      final entry = snapshot.data;
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8),
+                          child: LinearProgressIndicator(),
+                        );
+                      }
+                      if (entry == null) {
+                        return Text(
+                          '아직 수신 기록이 없습니다.\nBixby에서 URL을 실행한 뒤 새로고침하세요.',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        );
+                      }
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '시간: ${entry.receivedAt}',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Row(
+                            children: [
+                              Icon(
+                                entry.parsed
+                                    ? Icons.check_circle
+                                    : Icons.error_outline,
+                                size: 18,
+                                color: entry.parsed
+                                    ? Colors.green
+                                    : theme.colorScheme.error,
+                              ),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  entry.parsed
+                                      ? (entry.actionSummary ?? '파싱 성공')
+                                      : '파싱 실패: ${entry.failureReason ?? "unknown"}',
+                                  style: theme.textTheme.bodyMedium,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            entry.uri,
+                            style: theme.textTheme.bodySmall,
+                          ),
+                          const SizedBox(height: 8),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: FilledButton.tonalIcon(
+                              onPressed: () {
+                                Clipboard.setData(
+                                  ClipboardData(text: entry.uri),
+                                );
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('최근 딥링크 URI 복사됨'),
+                                    duration: Duration(seconds: 2),
+                                  ),
+                                );
+                              },
+                              icon: const Icon(Icons.copy),
+                              label: const Text('URI 복사'),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
 
           // 사용 가능한 명령어 전체 목록
           _buildAllCommandsSection(context),
@@ -233,14 +393,60 @@ class VoiceShortcutsScreen extends StatelessWidget {
 2. 메뉴 > Quick commands
 3. + 버튼으로 새 명령어 추가
 4. 명령어: "가계부 지출"
-5. 동작: 앱 열기 > SmartLedger
+5. 동작: URL 열기
+   - 예시(지출 입력 화면): smartledger://transaction/add?type=expense
+   - 예시(지출 입력+미리채움): smartledger://transaction/add?type=expense&amount=5000&description=커피
+   - 예시(특정 화면 열기): smartledger://nav/open?route=/settings
+
+※ "앱 열기"만 선택하면 앱은 켜지지만, 화면 이동/입력폼 진입은 안 될 수 있습니다.
 
 🗣️ Bixby Routines 설정:
 1. 설정 > 유용한 기능 > Bixby Routines
 2. + 루틴 추가
 3. 조건: 음성 명령
-4. 동작: 앱 열기 > SmartLedger''',
+4. 동작: URL 열기 (위 예시 중 하나 입력)''',
     );
+  }
+
+  Future<void> _openSystemAssistant(BuildContext context) async {
+    if (!Platform.isAndroid) return;
+
+    try {
+      final ok = await AssistantLauncher.openSystemAssistant();
+      if (ok != true && context.mounted) {
+        _showSetupDialog(
+          context,
+          title: '어시스턴트 실행 실패',
+          content:
+              '기기에서 기본 어시스턴트를 실행할 수 없습니다.\n\n설정에서 기본 어시스턴트를 확인해주세요.',
+        );
+      }
+    } catch (_) {
+      if (context.mounted) {
+        _showSetupDialog(
+          context,
+          title: '어시스턴트 실행 실패',
+          content:
+              '어시스턴트를 여는 중 오류가 발생했습니다.\n\n설정에서 기본 어시스턴트를 확인해주세요.',
+        );
+      }
+    }
+  }
+
+  Future<void> _openBixbyApp(BuildContext context) async {
+    if (!Platform.isAndroid) return;
+
+    final ok = await AssistantLauncher.openBixby();
+    if (ok) return;
+
+    if (context.mounted) {
+      _showSetupDialog(
+        context,
+        title: 'Bixby 실행 실패',
+        content:
+            '이 기기에서 Bixby 앱을 자동으로 찾지 못했습니다.\n\nBixby가 설치/활성화되어 있는지 확인해주세요.',
+      );
+    }
   }
 
   void _openGoogleAssistant(BuildContext context) {

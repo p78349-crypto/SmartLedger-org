@@ -15,6 +15,7 @@ import '../services/food_expiry_prediction_engine.dart';
 import '../services/food_expiry_service.dart';
 import '../services/feedback_service.dart';
 import '../services/recipe_service.dart';
+import '../services/recipe_learning_service.dart';
 import '../services/user_pref_service.dart';
 import '../services/health_guardrail_service.dart';
 import '../services/replacement_cycle_notification_service.dart';
@@ -22,6 +23,8 @@ import '../services/savings_statistics_service.dart';
 import '../utils/currency_formatter.dart';
 import '../utils/icon_catalog.dart';
 import '../utils/interaction_blockers.dart';
+import '../utils/debounce_utils.dart';
+import '../utils/korean_search_utils.dart';
 import '../utils/snackbar_utils.dart';
 import '../utils/shopping_prep_utils.dart';
 import 'savings_statistics_screen.dart';
@@ -71,6 +74,9 @@ class _RecipePickerDialogState extends State<_RecipePickerDialog> {
   String _selectedCuisine = 'All';
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
+  final Debouncer _searchDebouncer = Debouncer(
+    delay: const Duration(milliseconds: 180),
+  );
 
   final List<String> _cuisines = [
     'All',
@@ -84,6 +90,7 @@ class _RecipePickerDialogState extends State<_RecipePickerDialog> {
   @override
   void dispose() {
     _searchController.dispose();
+    _searchDebouncer.dispose();
     super.dispose();
   }
 
@@ -126,10 +133,10 @@ class _RecipePickerDialogState extends State<_RecipePickerDialog> {
       if (widget.onlyCookable && !_isCookable(r, inventory)) return false;
 
       if (_searchQuery.isEmpty) return true;
-      final query = _searchQuery.toLowerCase();
-      final matchesName = r.name.toLowerCase().contains(query);
+      final query = _searchQuery;
+      final matchesName = KoreanSearchUtils.matches(r.name, query);
       final matchesIngredient = r.ingredients.any(
-        (ing) => ing.name.toLowerCase().contains(query),
+        (ing) => KoreanSearchUtils.matches(ing.name, query),
       );
       return matchesName || matchesIngredient;
     }).toList();
@@ -174,7 +181,12 @@ class _RecipePickerDialogState extends State<_RecipePickerDialog> {
                 border: const OutlineInputBorder(),
                 contentPadding: const EdgeInsets.symmetric(),
               ),
-              onChanged: (v) => setState(() => _searchQuery = v),
+              onChanged: (v) {
+                _searchDebouncer.run(() {
+                  if (!mounted) return;
+                  setState(() => _searchQuery = v);
+                });
+              },
             ),
             const SizedBox(height: 12),
             SingleChildScrollView(
@@ -594,6 +606,9 @@ class _IngredientUpsertDialogState extends State<_IngredientUpsertDialog> {
   final _nameController = TextEditingController();
   final _qtyController = TextEditingController(text: '1');
   final _unitController = TextEditingController(text: '개');
+  final Debouncer _suggestionDebouncer = Debouncer(
+    delay: const Duration(milliseconds: 120),
+  );
   List<String> _suggestions = [];
   List<String> _allPossibleNames = [];
 
@@ -621,17 +636,26 @@ class _IngredientUpsertDialogState extends State<_IngredientUpsertDialog> {
   }
 
   void _updateSuggestions(String query) {
+    if (!mounted) return;
     if (query.isEmpty) {
       setState(() => _suggestions = []);
       return;
     }
-    final q = query.toLowerCase();
     setState(() {
       _suggestions = _allPossibleNames
-          .where((name) => name.toLowerCase().contains(q))
+          .where((name) => KoreanSearchUtils.matches(name, query))
           .take(5)
           .toList();
     });
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _qtyController.dispose();
+    _unitController.dispose();
+    _suggestionDebouncer.dispose();
+    super.dispose();
   }
 
   @override
@@ -648,7 +672,9 @@ class _IngredientUpsertDialogState extends State<_IngredientUpsertDialog> {
               hintText: '예: 아몬드 분말',
             ),
             autofocus: true,
-            onChanged: _updateSuggestions,
+            onChanged: (query) {
+              _suggestionDebouncer.run(() => _updateSuggestions(query));
+            },
           ),
           if (_suggestions.isNotEmpty)
             Container(
@@ -2935,7 +2961,9 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
 
     if (selectedRecipe != null) {
       final List<String> missingIngredients = [];
-      final List<String> matchedInfo = [];
+      final List<Map<String, dynamic>> availableIngredients = [];
+      final List<Map<String, dynamic>> expiringIngredients = [];
+      final now = DateTime.now();
 
       setState(() {
         _isUsageMode = true;
@@ -2957,80 +2985,587 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
           if (matchedItems.isNotEmpty) {
             final item = matchedItems.first; // FIFO: 유통기한 가장 빠른 것
             _usageMap[item.id] = ingredient.quantity;
-            matchedInfo.add('${item.name} (재고: ${_formatQuantity(item)})');
+            
+            final daysLeft = item.daysLeft(now);
+            final info = {
+              'name': item.name,
+              'quantity': _formatQuantity(item),
+              'daysLeft': daysLeft,
+              'isExpiring': daysLeft <= 3,
+            };
+            
+            if (daysLeft <= 3) {
+              expiringIngredients.add(info);
+            } else {
+              availableIngredients.add(info);
+            }
           } else {
             missingIngredients.add(ingredient.name);
           }
         }
-
-        if (matchedInfo.isNotEmpty) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                '${selectedRecipe.name}: ${matchedInfo.length}개 항목 매칭됨\n'
-                '${matchedInfo.take(3).join(", ")}'
-                '${matchedInfo.length > 3 ? " 등" : ""}',
-              ),
-              duration: const Duration(seconds: 3),
-            ),
-          );
-        } else if (missingIngredients.isNotEmpty) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('일치하는 재고 항목이 없습니다.')));
-        }
       });
 
-      if (missingIngredients.isNotEmpty && mounted) {
-        _promptAddMissingToCart(missingIngredients);
+      // 재료 조합 정보 다이얼로그 표시
+      if (mounted) {
+        await _showIngredientCombinationDialog(
+          selectedRecipe,
+          availableIngredients,
+          expiringIngredients,
+          missingIngredients,
+        );
       }
     }
+  }
+
+  Future<void> _showIngredientCombinationDialog(
+    Recipe recipe,
+    List<Map<String, dynamic>> available,
+    List<Map<String, dynamic>> expiring,
+    List<String> missing,
+  ) async {
+    final recipeName = recipe.name;
+    
+    // 건강 점수 계산 (기본 레시피에서 가져오거나 추정)
+    final healthScore = _estimateHealthScore(recipe, expiring.length);
+    
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(Icons.restaurant_menu, size: 24),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                recipeName,
+                style: const TextStyle(fontSize: 18),
+              ),
+            ),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 유통기한 임박 재료
+              if (expiring.isNotEmpty) ...[
+                Row(
+                  children: [
+                    Icon(Icons.warning_amber, color: Colors.orange.shade700, size: 20),
+                    const SizedBox(width: 6),
+                    Text(
+                      '빨리 먹어야 할 재료 (${expiring.length}개)',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.orange.shade900,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: expiring.map((ing) {
+                      final daysLeft = ing['daysLeft'] as int;
+                      final daysText = daysLeft == 0 
+                          ? '오늘까지' 
+                          : daysLeft < 0 
+                              ? '${-daysLeft}일 지남' 
+                              : '$daysLeft일 남음';
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Row(
+                          children: [
+                            Text(
+                              '⚠️ ${ing['name']}',
+                              style: const TextStyle(fontWeight: FontWeight.w600),
+                            ),
+                            const Spacer(),
+                            Text(
+                              '${ing['quantity']} ($daysText)',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.orange.shade700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+              
+              // 사용 가능한 재료
+              if (available.isNotEmpty) ...[
+                Row(
+                  children: [
+                    Icon(Icons.check_circle, color: Colors.green.shade700, size: 20),
+                    const SizedBox(width: 6),
+                    Text(
+                      '사용 가능한 재료 (${available.length}개)',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.green.withValues(alpha: 0.2)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: available.map((ing) {
+                      final daysLeft = ing['daysLeft'] as int;
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Row(
+                          children: [
+                            Text(
+                              '✅ ${ing['name']}',
+                              style: const TextStyle(fontWeight: FontWeight.w500),
+                            ),
+                            const Spacer(),
+                            Text(
+                              '${ing['quantity']} ($daysLeft일)',
+                              style: const TextStyle(fontSize: 13),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+              
+              // 부족한 재료
+              if (missing.isNotEmpty) ...[
+                Row(
+                  children: [
+                    Icon(Icons.shopping_cart, color: Colors.red.shade700, size: 20),
+                    const SizedBox(width: 6),
+                    Text(
+                      '구매 필요 (${missing.length}개)',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red.shade900,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.red.withValues(alpha: 0.2)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: missing.map((name) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Row(
+                          children: [
+                            Icon(Icons.remove_circle_outline, 
+                                 size: 16, 
+                                 color: Colors.red.shade700),
+                            const SizedBox(width: 8),
+                            Text(
+                              name,
+                              style: TextStyle(
+                                color: Colors.red.shade900,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  '💡 부족한 재료를 장바구니에 추가할까요?',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontStyle: FontStyle.italic,
+                    color: Colors.grey.shade700,
+                  ),
+                ),
+              ],
+              
+              // 요약
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.favorite, size: 20, color: Colors.red),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            _getHealthScoreLabel(healthScore),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          '건강 $healthScore/5',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: _getHealthScoreColor(healthScore),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        const Icon(Icons.info_outline, size: 18),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            expiring.isNotEmpty 
+                                ? '유통기한 임박 재료를 먼저 사용하세요!'
+                                : '재료가 모두 준비됐습니다!',
+                            style: const TextStyle(fontSize: 13),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          if (missing.isNotEmpty)
+            TextButton.icon(
+              onPressed: () {
+                Navigator.pop(ctx, false);
+                _promptAddMissingToCart(missing);
+              },
+              icon: const Icon(Icons.add_shopping_cart, size: 18),
+              label: const Text('장바구니 추가'),
+            ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('취소'),
+          ),
+          FilledButton.icon(
+            onPressed: () => Navigator.pop(ctx, true),
+            icon: const Icon(Icons.restaurant_menu, size: 18),
+            label: const Text('그것 좋겠다!'),
+          ),
+        ],
+      ),
+    );
+
+    // 사용자가 "그것 좋겠다!" 선택 시 학습 기록
+    if (confirmed == true && mounted) {
+      await _recordRecipeLearning(recipe, healthScore, expiring.isNotEmpty);
+      
+      // 학습 완료 메시지 + 건강 점수 알림
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '✅ $recipeName 선택 완료!\n'
+              '${_getHealthScoreLabel(healthScore)}\n'
+              '💡 빅스비가 이 선택을 기억합니다',
+            ),
+            behavior: SnackBarBehavior.floating,
+            action: SnackBarAction(
+              label: '통계 보기',
+              onPressed: _showLearningStats,
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  int _estimateHealthScore(Recipe recipe, int expiringCount) {
+    // 기본 요리별 건강 점수 매핑
+    const healthScores = {
+      '된장국': 5,
+      '김치찌개': 4,
+      '채소 볶음': 5,
+      '계란말이': 4,
+      '시금치나물': 5,
+      '두부조림': 5,
+      '미역국': 5,
+      '닭가슴살 샐러드': 5,
+      '계란탁': 4,
+      '볶음밥': 3,
+      '스파게티': 3,
+      '계란프라이': 3,
+    };
+    
+    int baseScore = healthScores[recipe.name] ?? 3;
+    
+    // 유통기한 임박 재료 사용 시 보너스 (+1)
+    if (expiringCount > 0 && baseScore < 5) {
+      baseScore += 1;
+    }
+    
+    return baseScore;
+  }
+
+  String _getHealthScoreLabel(int score) {
+    switch (score) {
+      case 5: return '💚 매우 건강한 선택입니다!';
+      case 4: return '💚 건강한 요리예요!';
+      case 3: return '🟡 보통 수준의 요리입니다';
+      case 2: return '🟠 가끔 드세요';
+      case 1: return '🔴 자주 드시지 마세요';
+      default: return '🟡 보통 수준의 요리입니다';
+    }
+  }
+
+  Color _getHealthScoreColor(int score) {
+    if (score >= 4) return Colors.green.shade700;
+    if (score == 3) return Colors.orange;
+    return Colors.red.shade700;
+  }
+
+  Future<void> _recordRecipeLearning(
+    Recipe recipe,
+    int healthScore,
+    bool hasExpiringIngredients,
+  ) async {
+    // 현재 시간대 판단
+    final hour = DateTime.now().hour;
+    String? mealTime;
+    if (hour >= 6 && hour < 10) {
+      mealTime = 'breakfast';
+    } else if (hour >= 11 && hour < 15) {
+      mealTime = 'lunch';
+    } else if (hour >= 17 && hour < 22) {
+      mealTime = 'dinner';
+    }
+
+    // 학습 서비스에 기록
+    await RecipeLearningService.instance.recordRecipeUsage(
+      recipeName: recipe.name,
+      ingredients: recipe.ingredients.map((i) => i.name).toList(),
+      healthScore: healthScore,
+      mealTime: mealTime,
+    );
+
+    debugPrint('Recipe learning recorded: ${recipe.name} (health: $healthScore)');
+  }
+
+  Future<void> _showLearningStats() async {
+    final stats = await RecipeLearningService.instance.getStats();
+    
+    if (!mounted) return;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.auto_graph, size: 24),
+            SizedBox(width: 8),
+            Text('AI 학습 통계'),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildStatRow('총 요리 횟수', '${stats.totalRecipesCooked}회'),
+              const SizedBox(height: 16),
+              
+              const Text(
+                '자주 만드는 요리',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              ...stats.topRecipes.map((r) => Padding(
+                padding: const EdgeInsets.only(left: 8, bottom: 4),
+                child: Text('• $r'),
+              )),
+              const SizedBox(height: 16),
+              
+              const Text(
+                '자주 쓰는 재료',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              ...stats.topIngredients.map((i) => Padding(
+                padding: const EdgeInsets.only(left: 8, bottom: 4),
+                child: Text('• $i'),
+              )),
+              const SizedBox(height: 16),
+              
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.green.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.favorite, color: Colors.red),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            stats.healthPreferenceLabel,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            '건강 점수 평균: ${(stats.healthPreferenceScore * 5).toStringAsFixed(1)}/5',
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              
+              const Text(
+                '💡 사용할수록 더 똑똑한 추천을 받을 수 있어요!',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('닫기'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label),
+        Text(
+          value,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
+        ),
+      ],
+    );
   }
 
   Future<void> _promptAddMissingToCart(List<String> missingNames) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('부족한 우리집 식재료 안내'),
+        title: Row(
+          children: [
+            Icon(Icons.shopping_cart, color: Theme.of(context).colorScheme.primary),
+            const SizedBox(width: 8),
+            const Text('부족한 재료'),
+          ],
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('다음 재료는 현재 재고 정보가 없습니다.'),
-            const Text('장바구니에 추가하여 구매를 준비할까요?'),
-            const SizedBox(height: 16),
+            const Text(
+              '✅ 현재 재고로 요리 가능합니다!',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            const Text('하지만 다음 재료가 없어요:'),
+            const SizedBox(height: 12),
             Container(
               width: double.maxFinite,
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.grey.withValues(alpha: 0.1),
+                color: Colors.orange.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: missingNames
                     .map(
                       (name) => Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 2),
-                        child: Text(
-                          '• $name (정보없음)',
-                          style: const TextStyle(color: Colors.redAccent),
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Row(
+                          children: [
+                            Icon(Icons.remove_circle_outline, 
+                                 size: 16, 
+                                 color: Colors.orange.shade700),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                name,
+                                style: TextStyle(
+                                  color: Colors.orange.shade900,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     )
                     .toList(),
               ),
             ),
+            const SizedBox(height: 12),
+            const Text(
+              '💡 장바구니에 추가해서 다음에 구매하세요!',
+              style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+            ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('취소'),
+            child: const Text('나중에'),
           ),
-          FilledButton(
+          FilledButton.icon(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('장바구니 추가'),
+            icon: const Icon(Icons.add_shopping_cart, size: 18),
+            label: const Text('장바구니 추가'),
           ),
         ],
       ),

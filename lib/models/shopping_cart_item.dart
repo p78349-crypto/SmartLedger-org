@@ -11,6 +11,10 @@ class ShoppingCartItem {
   /// Used to highlight items needing attention.
   final String memo;
 
+  /// Store location (e.g., "3번 통로", "냉장고", "1층 입구")
+  /// Learned from previous shopping trips.
+  final String storeLocation;
+
   /// True when user pre-wrote the item before going shopping.
   /// Displayed as a leading dot (●).
   final bool isPlanned;
@@ -31,6 +35,7 @@ class ShoppingCartItem {
     int? bundleCount,
     int? unitsPerBundle,
     this.memo = '',
+    this.storeLocation = '',
     this.isPlanned = true,
     this.isChecked = false,
     required this.createdAt,
@@ -47,6 +52,7 @@ class ShoppingCartItem {
     int? bundleCount,
     int? unitsPerBundle,
     String? memo,
+    String? storeLocation,
     bool? isPlanned,
     bool? isChecked,
     DateTime? createdAt,
@@ -61,6 +67,7 @@ class ShoppingCartItem {
       bundleCount: bundleCount ?? this.bundleCount,
       unitsPerBundle: unitsPerBundle ?? this.unitsPerBundle,
       memo: memo ?? this.memo,
+      storeLocation: storeLocation ?? this.storeLocation,
       isPlanned: isPlanned ?? this.isPlanned,
       isChecked: isChecked ?? this.isChecked,
       createdAt: createdAt ?? this.createdAt,
@@ -81,6 +88,7 @@ class ShoppingCartItem {
       bundleCount: (json['bundleCount'] as num?)?.toInt(),
       unitsPerBundle: (json['unitsPerBundle'] as num?)?.toInt(),
       memo: (json['memo'] as String?) ?? '',
+      storeLocation: (json['storeLocation'] as String?) ?? '',
       isPlanned: (json['isPlanned'] as bool?) ?? true,
       isChecked: (json['isChecked'] as bool?) ?? false,
       createdAt:
@@ -102,6 +110,7 @@ class ShoppingCartItem {
       'bundleCount': bundleCount,
       'unitsPerBundle': unitsPerBundle,
       'memo': memo,
+      'storeLocation': storeLocation,
       'isPlanned': isPlanned,
       'isChecked': isChecked,
       'createdAt': createdAt.toIso8601String(),

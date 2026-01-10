@@ -14,6 +14,7 @@ export 'currency_formatter.dart';
 export 'currency_input_formatter.dart';
 export 'date_formatter.dart';
 export 'dialog_utils.dart';
+export 'korean_search_utils.dart';
 export 'main_feature_icon_catalog.dart';
 export 'snackbar_utils.dart';
 export 'validators.dart';

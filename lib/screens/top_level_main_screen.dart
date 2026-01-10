@@ -22,6 +22,7 @@ import '../utils/number_formats.dart';
 import '../utils/refund_utils.dart';
 import '../utils/snackbar_utils.dart';
 import '../utils/top_level_stats_utils.dart';
+import '../utils/debounce_utils.dart';
 import '../widgets/month_end_carryover_dialog.dart';
 import '../widgets/root_summary_card.dart';
 import '../widgets/root_transaction_list.dart';
@@ -41,6 +42,9 @@ class _TopLevelMainScreenState extends State<TopLevelMainScreen> {
   List<Transaction> searchResults = [];
   bool isSearchFocused = false;
   bool _isLoadingData = true;
+  final Debouncer _rootSearchDebouncer = Debouncer(
+    delay: const Duration(milliseconds: 200),
+  );
 
   @override
   void initState() {
@@ -59,6 +63,7 @@ class _TopLevelMainScreenState extends State<TopLevelMainScreen> {
   void dispose() {
     searchController.dispose();
     searchFocusNode.dispose();
+    _rootSearchDebouncer.dispose();
     super.dispose();
   }
 
@@ -349,7 +354,12 @@ class _TopLevelMainScreenState extends State<TopLevelMainScreen> {
                       labelText: '거래 검색 (설명, 메모, 금액, 지불수단)',
                       prefixIcon: Icon(IconCatalog.search, size: 26),
                     ),
-                    onChanged: doSearch,
+                    onChanged: (value) {
+                      _rootSearchDebouncer.run(() {
+                        if (!mounted) return;
+                        doSearch(value);
+                      });
+                    },
                   ),
                 ),
                 IconButton(

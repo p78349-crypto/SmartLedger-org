@@ -72,12 +72,12 @@ class RouteParamValidator {
         allowedPattern: RegExp(r'^[가-힣a-zA-Z0-9\s\-\(\)]+$'),
       ),
       // 수량
-      RouteParamSpec(
+      const RouteParamSpec(
         name: 'quantity',
         type: ParamType.double_,
         maxLength: 10,
       ),
-      RouteParamSpec(
+      const RouteParamSpec(
         name: 'qty',
         type: ParamType.double_,
         maxLength: 10,
@@ -90,29 +90,29 @@ class RouteParamValidator {
         allowedPattern: RegExp(r'^[가-힣a-zA-Z]+$'),
       ),
       // 유통기한 (상대일수)
-      RouteParamSpec(
+      const RouteParamSpec(
         name: 'expiryDays',
         type: ParamType.integer,
         maxLength: 10,
       ),
-      RouteParamSpec(
+      const RouteParamSpec(
         name: 'days',
         type: ParamType.integer,
         maxLength: 10,
       ),
       // 유통기한 (절대날짜)
-      RouteParamSpec(
+      const RouteParamSpec(
         name: 'expiryDate',
         type: ParamType.date,
         maxLength: 30,
       ),
-      RouteParamSpec(
+      const RouteParamSpec(
         name: 'expiry',
         type: ParamType.date,
         maxLength: 30,
       ),
       // 보관 위치
-      RouteParamSpec(
+      const RouteParamSpec(
         name: 'location',
         type: ParamType.enum_,
         maxLength: 20,
@@ -179,7 +179,7 @@ class RouteParamValidator {
         allowedPattern: RegExp(r'^[가-힣a-zA-Z0-9\s\-\.\,\!\?]+$'),
       ),
       // 가격
-      RouteParamSpec(
+      const RouteParamSpec(
         name: 'price',
         type: ParamType.double_,
         maxLength: 15,
@@ -208,19 +208,19 @@ class RouteParamValidator {
 
     AppRoutes.transactionAdd: [
       // 금액
-      RouteParamSpec(
+      const RouteParamSpec(
         name: 'amount',
         type: ParamType.double_,
         maxLength: 20,
       ),
       // 수량
-      RouteParamSpec(
+      const RouteParamSpec(
         name: 'quantity',
         type: ParamType.double_,
         maxLength: 10,
       ),
       // 단가
-      RouteParamSpec(
+      const RouteParamSpec(
         name: 'unitPrice',
         type: ParamType.double_,
         maxLength: 20,
@@ -270,7 +270,6 @@ class RouteParamValidator {
       RouteParamSpec(
         name: 'memo',
         type: ParamType.string,
-        maxLength: 200,
         allowedPattern: RegExp(r'^[가-힣a-zA-Z0-9\s\-\.\,\!\?]+$'),
       ),
       // 저축 배분
@@ -281,7 +280,7 @@ class RouteParamValidator {
         allowedPattern: RegExp(r'^[a-zA-Z0-9\:\,]+$'),
       ),
       // 통화
-      RouteParamSpec(
+      const RouteParamSpec(
         name: 'currency',
         type: ParamType.enum_,
         maxLength: 10,
@@ -439,7 +438,7 @@ class RouteParamValidator {
       '/*',
       '*/',
     ];
-    return sqlKeywords.any((kw) => lower.contains(kw));
+    return sqlKeywords.any(lower.contains);
   }
 
   /// HTML 태그 포함 여부 검사

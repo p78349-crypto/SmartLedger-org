@@ -7,6 +7,7 @@ import '../utils/date_formatter.dart';
 import '../utils/icon_catalog.dart';
 import '../utils/number_formats.dart';
 import '../utils/refund_utils.dart';
+import '../utils/debounce_utils.dart';
 import '../widgets/smart_input_field.dart';
 
 class RefundTransactionsScreen extends StatefulWidget {
@@ -30,11 +31,15 @@ class _RefundTransactionsScreenState extends State<RefundTransactionsScreen> {
   Map<DateTime, List<Transaction>> _events = {};
   final NumberFormat _numberFormat = NumberFormats.custom('#,###');
   final TextEditingController _searchController = TextEditingController();
+  final Debouncer _searchDebouncer = Debouncer(
+    delay: const Duration(milliseconds: 200),
+  );
   String _searchQuery = '';
 
   @override
   void dispose() {
     _searchController.dispose();
+    _searchDebouncer.dispose();
     super.dispose();
   }
 
@@ -141,8 +146,11 @@ class _RefundTransactionsScreenState extends State<RefundTransactionsScreen> {
                 },
               ),
         onChanged: (v) {
-          setState(() {
-            _searchQuery = v;
+          _searchDebouncer.run(() {
+            if (!mounted) return;
+            setState(() {
+              _searchQuery = v;
+            });
           });
         },
       ),

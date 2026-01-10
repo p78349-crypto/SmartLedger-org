@@ -7,7 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'memo_stats_screen.dart';
+import 'voice_shortcuts_screen.dart';
 import '../services/user_pref_service.dart';
+import '../services/assistant_launcher.dart';
 import '../theme/app_colors.dart';
 import '../utils/icon_catalog.dart';
 import '../utils/icon_launch_utils.dart';
@@ -995,6 +997,135 @@ class _IconGridPageState extends State<_IconGridPage> {
     ).pushNamed(request.routeName, arguments: request.arguments);
   }
 
+  void _openVoiceShortcuts() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const VoiceShortcutsScreen()),
+    );
+  }
+
+  Future<void> _openBixbyFromHome() async {
+    if (!Platform.isAndroid) {
+      _openVoiceShortcuts();
+      return;
+    }
+
+    final ok = await AssistantLauncher.openBixby();
+    if (ok) return;
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Bixby 실행 실패: 단축어 안내로 이동합니다')),
+    );
+    _openVoiceShortcuts();
+  }
+
+  Future<void> _openSystemAssistantFromHome() async {
+    if (!Platform.isAndroid) {
+      _openVoiceShortcuts();
+      return;
+    }
+
+    final ok = await AssistantLauncher.openSystemAssistant();
+    if (ok) return;
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('어시스턴트 실행 실패: 설정/단축어 안내로 이동합니다')),
+    );
+    _openVoiceShortcuts();
+  }
+
+  Widget _buildVoiceAssistantRow(BuildContext context) {
+    final theme = Theme.of(context);
+
+    Widget buildButton({
+      required String label,
+      required IconData icon,
+      required VoidCallback onTap,
+    }) {
+      return Expanded(
+        child: Material(
+          color: theme.colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(12),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(icon, size: 18),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.labelLarge,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    final buttons = <Widget>[];
+    if (Platform.isAndroid) {
+      buttons.addAll([
+        buildButton(
+          label: 'Bixby',
+          icon: Icons.record_voice_over,
+          onTap: () {
+            if (_isEditMode) return;
+            _openBixbyFromHome();
+          },
+        ),
+        const SizedBox(width: 10),
+        buildButton(
+          label: 'Google',
+          icon: Icons.assistant,
+          onTap: () {
+            if (_isEditMode) return;
+            _openSystemAssistantFromHome();
+          },
+        ),
+      ]);
+    } else if (Platform.isIOS) {
+      buttons.add(
+        buildButton(
+          label: 'Siri',
+          icon: Icons.mic,
+          onTap: () {
+            if (_isEditMode) return;
+            _openVoiceShortcuts();
+          },
+        ),
+      );
+    }
+
+    if (buttons.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      children: [
+        Row(children: buttons),
+        const SizedBox(height: 8),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Text(
+            '음성비서 실행 후, 설정된 단축어(또는 URL 열기)로 진행',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
@@ -1117,6 +1248,8 @@ class _IconGridPageState extends State<_IconGridPage> {
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 child: Column(
                   children: [
+                    if (widget.pageIndex == 0 && !_isEditMode)
+                      _buildVoiceAssistantRow(context),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [

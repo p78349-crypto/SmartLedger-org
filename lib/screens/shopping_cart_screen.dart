@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/category_hint.dart';
 import '../models/shopping_cart_item.dart';
+import '../navigation/app_routes.dart';
+import '../services/product_location_service.dart';
 import '../services/user_pref_service.dart';
 import '../utils/currency_formatter.dart';
 import '../utils/icon_catalog.dart';
@@ -562,6 +564,50 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
               onEditingComplete: () => _applyInlineEdits(item),
             ),
           ),
+          const SizedBox(width: 8),
+          // 위치 버튼 추가
+          Tooltip(
+            message: item.storeLocation.isEmpty
+                ? '위치 입력'
+                : '위치: ${item.storeLocation}',
+            child: InkWell(
+              onTap: () => _editItemLocation(item),
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                decoration: BoxDecoration(
+                  color: item.storeLocation.isEmpty
+                      ? Colors.grey.shade200
+                      : theme.colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.location_on,
+                      size: 16,
+                      color: item.storeLocation.isEmpty
+                          ? Colors.grey.shade600
+                          : theme.colorScheme.primary,
+                    ),
+                    if (item.storeLocation.isNotEmpty) ...[
+                      const SizedBox(width: 4),
+                      Text(
+                        item.storeLocation,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ),
           const SizedBox(width: 12),
           SizedBox(
             width: 90,
@@ -678,10 +724,17 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
     final name = _nameController.text.trim();
     if (name.isEmpty) return;
 
+    // 이전 위치 조회
+    final previousLocation = await ProductLocationService.instance.getLocation(
+      accountName: widget.accountName,
+      productName: name,
+    );
+
     final now = DateTime.now();
     final item = ShoppingCartItem(
       id: 'shop_${now.microsecondsSinceEpoch}',
       name: name,
+      storeLocation: previousLocation ?? '',
       createdAt: now,
       updatedAt: now,
     );
@@ -724,6 +777,109 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
     );
   }
 
+  Future<void> _editItemLocation(ShoppingCartItem item) async {
+    FocusScope.of(context).unfocus();
+
+    final controller = TextEditingController(text: item.storeLocation);
+    final result = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(Icons.location_on, size: 20),
+            const SizedBox(width: 8),
+            Expanded(child: Text('${item.name} 위치')),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SmartInputField(
+                hint: '예: 3번 통로, 냉장고, 1층 입구',
+                controller: controller,
+                maxLines: 2,
+                autofocus: true,
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                '자주 사용하는 위치:',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: ProductLocationService.commonLocations
+                    .take(15)
+                    .map(
+                      (loc) => ActionChip(
+                        label: Text(
+                          loc,
+                          style: const TextStyle(fontSize: 11),
+                        ),
+                        onPressed: () {
+                          controller.text = loc;
+                        },
+                      ),
+                    )
+                    .toList(),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('취소'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop(controller.text.trim());
+            },
+            child: const Text('저장'),
+          ),
+        ],
+      ),
+    );
+
+    if (!mounted) return;
+    if (result == null) return;
+
+    final now = DateTime.now();
+    final updated = item.copyWith(
+      storeLocation: result,
+      updatedAt: now,
+    );
+    final next = _items.map((i) => i.id == item.id ? updated : i).toList();
+    await _save(next);
+
+    // 위치 학습에 저장
+    if (result.isNotEmpty) {
+      await ProductLocationService.instance.saveLocation(
+        accountName: widget.accountName,
+        productName: item.name,
+        location: result,
+      );
+    }
+  }
+
+  Future<void> _startShoppingGuide() async {
+    FocusScope.of(context).unfocus();
+    
+    await Navigator.of(context).pushNamed(
+      AppRoutes.shoppingGuide,
+      arguments: ShoppingGuideArgs(
+        accountName: widget.accountName,
+        items: _items,
+      ),
+    );
+    
+    // 가이드에서 돌아온 후 새로고침
+    await _load();
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -740,6 +896,12 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
       appBar: AppBar(
         title: Text(isPrep ? '쇼핑준비' : '장바구니'),
         actions: [
+          if (!isPrep && _items.isNotEmpty)
+            IconButton(
+              tooltip: '쇼핑 안내 시작',
+              onPressed: _startShoppingGuide,
+              icon: const Icon(Icons.map),
+            ),
           IconButton(
             tooltip: '초기화',
             onPressed: _isLoading ? null : _confirmResetAll,

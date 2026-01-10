@@ -18,6 +18,7 @@ class MainActivity : FlutterActivity() {
     companion object {
         private const val APP_ICON_CHANNEL = "smart_ledger/app_icon"
         private const val DEEP_LINK_CHANNEL = "com.example.smartledger/deeplink"
+        private const val ASSISTANT_CHANNEL = "smart_ledger/assistant"
         private const val ICON_THEME_AUTO = "auto"
         private const val ICON_THEME_LIGHT = "light"
         private const val ICON_THEME_DARK = "dark"
@@ -80,6 +81,60 @@ class MainActivity : FlutterActivity() {
                     else -> result.notImplemented()
                 }
             }
+
+        // Voice assistant / external app launcher (best-effort)
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, ASSISTANT_CHANNEL)
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "openVoiceAssistant" -> {
+                        result.success(openVoiceAssistant())
+                    }
+                    "openAppByPackage" -> {
+                        val pkg = call.argument<String>("package")?.trim()
+                        if (pkg.isNullOrEmpty()) {
+                            result.success(false)
+                        } else {
+                            result.success(openAppByPackage(pkg))
+                        }
+                    }
+                    else -> result.notImplemented()
+                }
+            }
+    }
+
+    private fun openVoiceAssistant(): Boolean {
+        // Prefer the system voice assistant entry point.
+        val intents = listOf(
+            Intent(Intent.ACTION_VOICE_ASSIST),
+            Intent(Intent.ACTION_ASSIST),
+            Intent(Intent.ACTION_VOICE_COMMAND)
+        )
+
+        for (intent in intents) {
+            try {
+                if (intent.resolveActivity(packageManager) != null) {
+                    startActivity(intent)
+                    return true
+                }
+            } catch (_: Exception) {
+                // continue
+            }
+        }
+        return false
+    }
+
+    private fun openAppByPackage(packageName: String): Boolean {
+        return try {
+            val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
+            if (launchIntent != null) {
+                startActivity(launchIntent)
+                true
+            } else {
+                false
+            }
+        } catch (_: Exception) {
+            false
+        }
     }
 
     private fun setLauncherIconTheme(theme: String) {

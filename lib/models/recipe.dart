@@ -3,12 +3,14 @@ class Recipe {
   final String name;
   final String cuisine; // '한식', '양식', '일식', etc.
   final List<RecipeIngredient> ingredients;
+  final int healthScore; // 1-5, 높을수록 건강
 
   Recipe({
     required this.id,
     required this.name,
     this.cuisine = '한식',
     required this.ingredients,
+    this.healthScore = 3, // 기본값: 보통
   });
 
   Map<String, dynamic> toJson() => {
@@ -16,6 +18,7 @@ class Recipe {
     'name': name,
     'cuisine': cuisine,
     'ingredients': ingredients.map((e) => e.toJson()).toList(),
+    'healthScore': healthScore,
   };
 
   factory Recipe.fromJson(Map<String, dynamic> json) {
@@ -26,6 +29,7 @@ class Recipe {
       ingredients: (json['ingredients'] as List<dynamic>)
           .map((e) => RecipeIngredient.fromJson(e as Map<String, dynamic>))
           .toList(),
+      healthScore: json['healthScore'] as int? ?? 3,
     );
   }
 }

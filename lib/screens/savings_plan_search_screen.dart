@@ -5,6 +5,8 @@ import 'savings_plan_form_screen.dart';
 import '../services/savings_plan_service.dart';
 import '../utils/date_formatter.dart';
 import '../utils/dialog_utils.dart';
+import '../utils/debounce_utils.dart';
+import '../utils/korean_search_utils.dart';
 import '../utils/number_formats.dart';
 import '../utils/snackbar_utils.dart';
 
@@ -20,6 +22,9 @@ class SavingsPlanSearchScreen extends StatefulWidget {
 class _SavingsPlanSearchScreenState extends State<SavingsPlanSearchScreen> {
   bool _openedFormOnEnter = false;
   final TextEditingController _searchController = TextEditingController();
+  final Debouncer _searchDebouncer = Debouncer(
+    delay: const Duration(milliseconds: 160),
+  );
   final NumberFormat _currencyFormat = NumberFormats.currency;
   final DateFormat _dateFormat = DateFormatter.defaultDate;
   bool _isSelectionMode = false;
@@ -28,6 +33,7 @@ class _SavingsPlanSearchScreenState extends State<SavingsPlanSearchScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    _searchDebouncer.dispose();
     super.dispose();
   }
 
@@ -131,14 +137,14 @@ class _SavingsPlanSearchScreenState extends State<SavingsPlanSearchScreen> {
 
   List<SavingsPlan> _getFilteredPlans() {
     final plans = SavingsPlanService().getPlans(widget.accountName);
-    final query = _searchController.text.trim().toLowerCase();
+    final query = _searchController.text;
 
     if (query.isEmpty) {
       return plans;
     }
 
     return plans.where((plan) {
-      return plan.name.toLowerCase().contains(query);
+      return KoreanSearchUtils.matches(plan.name, query);
     }).toList();
   }
 
@@ -193,7 +199,12 @@ class _SavingsPlanSearchScreenState extends State<SavingsPlanSearchScreen> {
                       )
                     : null,
               ),
-              onChanged: (_) => setState(() {}),
+              onChanged: (_) {
+                _searchDebouncer.run(() {
+                  if (!mounted) return;
+                  setState(() {});
+                });
+              },
             ),
           ),
           Expanded(

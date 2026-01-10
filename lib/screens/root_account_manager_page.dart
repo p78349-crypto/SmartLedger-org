@@ -15,6 +15,7 @@ import '../services/transaction_service.dart';
 import '../services/trash_service.dart';
 import '../services/user_pref_service.dart';
 import '../utils/account_name_language_tag.dart';
+import '../utils/debounce_utils.dart';
 import '../utils/snackbar_utils.dart';
 
 class RootAccountManagerPage extends StatefulWidget {
@@ -37,6 +38,9 @@ class RootAccountManagerPage extends StatefulWidget {
 
 class _RootAccountManagerPageState extends State<RootAccountManagerPage> {
   final TextEditingController _searchController = TextEditingController();
+  final Debouncer _searchDebouncer = Debouncer(
+    delay: const Duration(milliseconds: 160),
+  );
   RootFinancialOverview? _overview;
   bool _loading = false;
   String? _errorMessage;
@@ -46,13 +50,19 @@ class _RootAccountManagerPageState extends State<RootAccountManagerPage> {
   @override
   void initState() {
     super.initState();
-    _searchController.addListener(() => setState(() {}));
+    _searchController.addListener(() {
+      _searchDebouncer.run(() {
+        if (!mounted) return;
+        setState(() {});
+      });
+    });
     _refreshAll();
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _searchDebouncer.dispose();
     super.dispose();
   }
 

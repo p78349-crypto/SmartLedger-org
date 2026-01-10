@@ -111,6 +111,13 @@ class MainFeatureIconCatalog {
           routeName: AppRoutes.foodCookingStart,
         ),
         MainFeatureIcon(
+          id: 'health_analyzer',
+          label: '재료 건강도 분석',
+          labelEn: 'Health Analyzer',
+          icon: Icons.favorite,
+          routeName: AppRoutes.healthAnalyzer,
+        ),
+        MainFeatureIcon(
           id: 'nutrition_report',
           label: '요리 레시피/식재료 검색',
           labelEn: 'Recipe/Ingredient Search',

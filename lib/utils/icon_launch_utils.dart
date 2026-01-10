@@ -33,6 +33,7 @@ class IconLaunchUtils {
     final noArgsRoutes = <String>{
       AppRoutes.trash,
       AppRoutes.settings,
+      AppRoutes.voiceShortcuts,
       AppRoutes.featureIconsCatalog,
       AppRoutes.themeSettings,
       AppRoutes.languageSettings,

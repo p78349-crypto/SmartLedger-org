@@ -76,7 +76,18 @@ class MainFeatureIconCatalog {
   /// Mutable list of pages. Includes predefined icons for various features.
   static List<MainFeaturePage> pages = [
     // Page 0: 홈/보호기 (Home/ScreenSaver)
-    const MainFeaturePage(index: 0, items: []),
+    const MainFeaturePage(
+      index: 0,
+      items: [
+        MainFeatureIcon(
+          id: 'voice_shortcuts',
+          label: '음성 단축어',
+          labelEn: 'Voice Shortcuts',
+          icon: Icons.mic_outlined,
+          routeName: AppRoutes.voiceShortcuts,
+        ),
+      ],
+    ),
 
     // Page 1: 거래 (Purchase/Expense)
     const MainFeaturePage(

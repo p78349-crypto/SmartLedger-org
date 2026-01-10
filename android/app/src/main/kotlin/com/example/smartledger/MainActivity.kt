@@ -105,7 +105,7 @@ class MainActivity : FlutterActivity() {
     private fun openVoiceAssistant(): Boolean {
         // Prefer the system voice assistant entry point.
         val intents = listOf(
-            Intent(Intent.ACTION_VOICE_ASSIST),
+            Intent("android.intent.action.VOICE_ASSIST"),
             Intent(Intent.ACTION_ASSIST),
             Intent(Intent.ACTION_VOICE_COMMAND)
         )

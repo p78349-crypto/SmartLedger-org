@@ -9,13 +9,19 @@ import '../services/budget_service.dart';
 import '../services/food_expiry_service.dart';
 import '../services/transaction_service.dart';
 import '../services/category_keyword_service.dart';
+import 'transaction_add_screen.dart';
 import '../utils/currency_formatter.dart';
 
 /// 음성 제어 전용 대시보드 - 주방에서 손을 쓸 수 없는 상황을 위한 관제 센터
 class VoiceDashboardScreen extends StatefulWidget {
   final String? accountName;
+  final bool autoStartListening;
 
-  const VoiceDashboardScreen({super.key, this.accountName});
+  const VoiceDashboardScreen({
+    super.key,
+    this.accountName,
+    this.autoStartListening = false,
+  });
 
   @override
   State<VoiceDashboardScreen> createState() => _VoiceDashboardScreenState();
@@ -29,6 +35,9 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
   bool _speechAvailable = false;
   String _lastRecognizedText = '';
   String _currentText = '';
+  bool _suspendAutoListen = false;
+
+  bool get _autoListenEnabled => widget.autoStartListening;
 
   // 상태
   final List<VoiceCommandResult> _recentResults = [];
@@ -98,7 +107,18 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
           }
         },
       );
-      if (mounted) setState(() {});
+      if (mounted) {
+        setState(() {});
+
+        if (widget.autoStartListening && _speechAvailable) {
+          // Give the UI a beat before starting the permission/listen flow.
+          Future.delayed(const Duration(milliseconds: 200), () {
+            if (!mounted) return;
+            if (_isListening) return;
+            _startListening();
+          });
+        }
+      }
     } catch (e) {
       debugPrint('Speech init error: $e');
     }
@@ -113,6 +133,17 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
       if (mounted) {
         setState(() {
           _isListening = false;
+        });
+      }
+
+      // Hands-free mode: keep listening for the next command.
+      if (_autoListenEnabled && !_suspendAutoListen) {
+        Future.delayed(const Duration(milliseconds: 250), () {
+          if (!mounted) return;
+          if (_isListening) return;
+          if (_isProcessing) return;
+          if (_suspendAutoListen) return;
+          _startListening();
         });
       }
     }
@@ -228,11 +259,35 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
           ),
         );
       });
+    } finally {
+      // If we navigated to an overlay, it will resume listening itself.
+      if (_autoListenEnabled && mounted && !_suspendAutoListen) {
+        Future.delayed(const Duration(milliseconds: 250), () {
+          if (!mounted) return;
+          if (_isListening) return;
+          if (_isProcessing) return;
+          if (_suspendAutoListen) return;
+          _startListening();
+        });
+      }
     }
   }
 
   Future<VoiceCommandResult> _parseAndExecuteCommand(String command) async {
     final normalized = command.toLowerCase().trim();
+
+    // 0. 화면 열기/이동 같은 네비게이션 명령 (금액 없이도 동작)
+    if (_isOpenIncomeInputCommand(normalized)) {
+      return await _handleOpenIncomeInput();
+    }
+    if (_isOpenExpenseInputCommand(normalized)) {
+      return await _handleOpenExpenseInput();
+    }
+
+    // 0-1. 지출 입력 + 금액 포함: 폼을 미리채움으로 열기(저장까지는 사용자가 확인)
+    if (_isExpenseInputWithAmountCommand(normalized)) {
+      return await _handleOpenExpenseInputPrefilled(command);
+    }
 
     // 1. 지출 기록 명령
     if (_isExpenseCommand(normalized)) {
@@ -274,12 +329,69 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
 
   // ============ 명령어 감지 ============
 
+  bool _containsAmountHint(String cmd) {
+    return RegExp(r'\d').hasMatch(cmd) ||
+        cmd.contains('원') ||
+        cmd.contains('만') ||
+        cmd.contains('천') ||
+        cmd.contains('백') ||
+        cmd.contains('십');
+  }
+
   bool _isExpenseCommand(String cmd) {
-    return cmd.contains('지출') ||
+    // NOTE: Saving money by voice is sensitive.
+    // Only treat as a "save" intent when the user explicitly says a save-like verb.
+    final hasSaveVerb =
         cmd.contains('기록') ||
+        cmd.contains('저장') ||
+        cmd.contains('추가') ||
         cmd.contains('썼어') ||
+        cmd.contains('썼다') ||
         cmd.contains('샀어') ||
-        cmd.contains('원') && (cmd.contains('추가') || cmd.contains('입력'));
+        cmd.contains('샀다') ||
+        cmd.contains('결제') ||
+        cmd.contains('지불');
+
+    if (!hasSaveVerb) return false;
+    if (!_containsAmountHint(cmd)) return false;
+
+    // Allow both explicit "지출" commands and natural spending phrases.
+    return true;
+  }
+
+  bool _isExpenseInputWithAmountCommand(String cmd) {
+    if (!cmd.contains('지출')) return false;
+    final hasInput = cmd.contains('입력') || cmd.contains('입력창');
+    return hasInput && _containsAmountHint(cmd);
+  }
+
+  bool _isOpenExpenseInputCommand(String cmd) {
+    final hasExpense = cmd.contains('지출');
+    if (!hasExpense) return false;
+
+    final hasInput = cmd.contains('입력') || cmd.contains('입력창');
+    final hasOpen = cmd.contains('열어') ||
+      cmd.contains('열러') ||
+      cmd.contains('켜') ||
+      cmd.contains('띄워');
+    final hasMove = cmd.contains('가') || cmd.contains('이동') || cmd.contains('진입');
+
+    // e.g. "지출 입력 열어줘", "지출입력 열어", "지출 입력으로 이동"
+    return (hasInput && (hasOpen || hasMove)) || cmd.contains('지출입력');
+  }
+
+  bool _isOpenIncomeInputCommand(String cmd) {
+    final hasIncome = cmd.contains('수입');
+    if (!hasIncome) return false;
+
+    final hasInput = cmd.contains('입력') || cmd.contains('입력창');
+    final hasOpen = cmd.contains('열어') ||
+        cmd.contains('열러') ||
+        cmd.contains('켜') ||
+        cmd.contains('띄워');
+    final hasMove = cmd.contains('가') || cmd.contains('이동') || cmd.contains('진입');
+
+    return (hasInput && (hasOpen || hasMove)) || cmd.contains('수입입력');
   }
 
   bool _isIngredientQueryCommand(String cmd) {
@@ -315,20 +427,95 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
 
   // ============ 명령어 처리 ============
 
+  double? _extractKrwAmount(String command) {
+    final withWon = RegExp(r'(\d[\d,]*)\s*원').firstMatch(command);
+    if (withWon != null) {
+      final amountStr = withWon.group(1)!.replaceAll(',', '');
+      final amount = double.tryParse(amountStr);
+      if (amount != null && amount > 0) return amount;
+    }
+
+    // Supports: 5천원, 2만 3천, 1만500, 12천 등
+    final unitRegex = RegExp(r'(\d+)\s*(만|천|백|십)');
+    final matches = unitRegex.allMatches(command).toList();
+    if (matches.isNotEmpty) {
+      double sum = 0;
+      for (final m in matches) {
+        final raw = m.group(1);
+        final unit = m.group(2);
+        if (raw == null || unit == null) continue;
+        final v = double.tryParse(raw);
+        if (v == null) continue;
+        switch (unit) {
+          case '만':
+            sum += v * 10000;
+            break;
+          case '천':
+            sum += v * 1000;
+            break;
+          case '백':
+            sum += v * 100;
+            break;
+          case '십':
+            sum += v * 10;
+            break;
+        }
+      }
+
+      // Remainder digits after the last unit (e.g., "1만500")
+      final last = matches.last;
+      final tail = command.substring(last.end);
+      final tailDigits = RegExp(r'(\d[\d,]*)').firstMatch(tail);
+      if (tailDigits != null) {
+        final raw = tailDigits.group(1)!.replaceAll(',', '');
+        final v = double.tryParse(raw);
+        if (v != null) sum += v;
+      }
+      if (sum > 0) return sum;
+    }
+
+    // Fallback: first number token (only when intent already indicates expense)
+    final digits = RegExp(r'(\d[\d,]*)').firstMatch(command);
+    if (digits != null) {
+      final raw = digits.group(1)!.replaceAll(',', '');
+      final amount = double.tryParse(raw);
+      if (amount != null && amount > 0) return amount;
+    }
+
+    return null;
+  }
+
+  String _extractExpenseDescription(String command) {
+    var text = command;
+    // Remove common amount expressions
+    text = text.replaceAll(RegExp(r'\d[\d,]*\s*원'), '');
+    text = text.replaceAll(RegExp(r'(\d+)\s*(만|천|백|십)'), '');
+    // Remove common intent words
+    text = text
+        .replaceAll('지출', '')
+        .replaceAll('기록', '')
+        .replaceAll('저장', '')
+        .replaceAll('추가', '')
+        .replaceAll('입력', '')
+        .replaceAll('열어', '')
+        .replaceAll('열러', '')
+        .replaceAll('켜', '')
+        .replaceAll('띄워', '')
+        .trim();
+    if (text.isEmpty) return '음성 입력';
+    return text;
+  }
+
   Future<VoiceCommandResult> _handleExpenseCommand(String command) async {
-    // 금액 추출
-    final amountMatch = RegExp(r'(\d[\d,]*)\s*원').firstMatch(command);
-    if (amountMatch == null) {
+    final amount = _extractKrwAmount(command);
+    if (amount == null) {
       return VoiceCommandResult(
         command: command,
         success: false,
-        message: '금액을 인식하지 못했어요. "5000원 지출"처럼 말해주세요.',
+        message: '금액을 인식하지 못했어요. "지출 5천원 커피 기록"처럼 말해주세요.',
         type: VoiceCommandType.expense,
       );
     }
-
-    final amountStr = amountMatch.group(1)!.replaceAll(',', '');
-    final amount = double.tryParse(amountStr) ?? 0;
 
     if (amount <= 0) {
       return VoiceCommandResult(
@@ -339,18 +526,7 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
       );
     }
 
-    // 품목명 추출 (금액 앞부분)
-    String description = command
-        .replaceAll(amountMatch.group(0)!, '')
-        .replaceAll('지출', '')
-        .replaceAll('기록', '')
-        .replaceAll('추가', '')
-        .replaceAll('입력', '')
-        .trim();
-
-    if (description.isEmpty) {
-      description = '음성 입력';
-    }
+    final description = _extractExpenseDescription(command);
 
     // 카테고리 자동 분류
     final category = CategoryKeywordService.instance.classify(description);
@@ -378,6 +554,159 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
         'description': description,
         'category': mainCategory,
       },
+    );
+  }
+
+  Future<VoiceCommandResult> _handleOpenExpenseInput({
+    Transaction? initialTransaction,
+    bool treatAsNew = false,
+    String? openedFromCommand,
+  }) async {
+    _suspendAutoListen = true;
+    if (_isListening) {
+      await _stopListening();
+      if (!mounted) {
+        _suspendAutoListen = false;
+        return VoiceCommandResult(
+          command: openedFromCommand ?? '지출 입력 열기',
+          success: false,
+          message: '화면이 닫혀서 실행할 수 없습니다.',
+          type: VoiceCommandType.navigation,
+        );
+      }
+    }
+    await showModalBottomSheet<void>(
+      context: context,
+      useSafeArea: true,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (sheetContext) {
+        final height = MediaQuery.sizeOf(sheetContext).height;
+        return SizedBox(
+          height: height * 0.95,
+          child: TransactionAddScreen(
+            accountName: _accountName,
+            initialTransaction: initialTransaction,
+            treatAsNew: treatAsNew,
+            closeAfterSave: true,
+          ),
+        );
+      },
+    );
+
+    _suspendAutoListen = false;
+    if (_autoListenEnabled && mounted) {
+      Future.delayed(const Duration(milliseconds: 250), () {
+        if (!mounted) return;
+        if (_isListening) return;
+        if (_isProcessing) return;
+        if (_suspendAutoListen) return;
+        _startListening();
+      });
+    }
+
+    return VoiceCommandResult(
+      command: openedFromCommand ?? '지출 입력 열기',
+      success: true,
+      message: initialTransaction == null
+          ? '지출 입력을 열었습니다.'
+          : '지출 입력을 열었습니다. (금액/메모 미리 채움)',
+      type: VoiceCommandType.navigation,
+    );
+  }
+
+  Future<VoiceCommandResult> _handleOpenExpenseInputPrefilled(
+    String command,
+  ) async {
+    final amount = _extractKrwAmount(command);
+    if (amount == null || amount <= 0) {
+      return VoiceCommandResult(
+        command: command,
+        success: false,
+        message: '금액을 인식하지 못했어요. "지출 입력 5천원 커피"처럼 말해주세요.',
+        type: VoiceCommandType.navigation,
+      );
+    }
+
+    final description = _extractExpenseDescription(command);
+    final category = CategoryKeywordService.instance.classify(description);
+    final mainCategory = category?.$1 ?? '식비';
+
+    final template = Transaction(
+      id: 'template_expense_voice',
+      type: TransactionType.expense,
+      amount: amount,
+      date: DateTime.now(),
+      description: description,
+      mainCategory: mainCategory,
+    );
+
+    return _handleOpenExpenseInput(
+      initialTransaction: template,
+      treatAsNew: true,
+      openedFromCommand: command,
+    );
+  }
+
+  Future<VoiceCommandResult> _handleOpenIncomeInput() async {
+    final template = Transaction(
+      id: 'template_income_voice',
+      type: TransactionType.income,
+      description: '',
+      amount: 0,
+      date: DateTime.now(),
+      mainCategory: Transaction.defaultMainCategory,
+    );
+
+    _suspendAutoListen = true;
+    if (_isListening) {
+      await _stopListening();
+      if (!mounted) {
+        _suspendAutoListen = false;
+        return VoiceCommandResult(
+          command: '수입 입력 열기',
+          success: false,
+          message: '화면이 닫혀서 실행할 수 없습니다.',
+          type: VoiceCommandType.navigation,
+        );
+      }
+    }
+
+    await showModalBottomSheet<void>(
+      context: context,
+      useSafeArea: true,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (sheetContext) {
+        final height = MediaQuery.sizeOf(sheetContext).height;
+        return SizedBox(
+          height: height * 0.95,
+          child: TransactionAddScreen(
+            accountName: _accountName,
+            initialTransaction: template,
+            treatAsNew: true,
+            closeAfterSave: true,
+          ),
+        );
+      },
+    );
+
+    _suspendAutoListen = false;
+    if (_autoListenEnabled && mounted) {
+      Future.delayed(const Duration(milliseconds: 250), () {
+        if (!mounted) return;
+        if (_isListening) return;
+        if (_isProcessing) return;
+        if (_suspendAutoListen) return;
+        _startListening();
+      });
+    }
+
+    return VoiceCommandResult(
+      command: '수입 입력 열기',
+      success: true,
+      message: '수입 입력을 열었습니다.',
+      type: VoiceCommandType.navigation,
     );
   }
 
@@ -1679,7 +2008,14 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
 
 // ============ 데이터 모델 ============
 
-enum VoiceCommandType { expense, query, recommend, shopping, unknown }
+enum VoiceCommandType {
+  expense,
+  navigation,
+  query,
+  recommend,
+  shopping,
+  unknown,
+}
 
 class VoiceCommandResult {
   final String command;

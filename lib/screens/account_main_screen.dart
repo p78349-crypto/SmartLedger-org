@@ -7,16 +7,13 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'memo_stats_screen.dart';
-import 'voice_shortcuts_screen.dart';
 import '../services/user_pref_service.dart';
-import '../services/assistant_launcher.dart';
 import '../theme/app_colors.dart';
 import '../utils/icon_catalog.dart';
 import '../utils/icon_launch_utils.dart';
 import '../utils/interaction_blockers.dart';
 import '../utils/main_feature_icon_catalog.dart';
 import '../utils/memo_search_utils.dart';
-import '../utils/page1_bottom_quick_icons.dart';
 import '../utils/page_indicator.dart';
 import '../utils/pref_keys.dart';
 import '../utils/screen_saver_ids.dart';
@@ -68,6 +65,7 @@ class _AccountMainScreenState extends State<AccountMainScreen>
         title: const Text('메인 페이지 초기화'),
         content: const Text(
           '메인 페이지(1~15) 구성과 아이콘 배치가 모두 초기화됩니다.\n'
+          '※ 거래/자산 등 데이터는 삭제되지 않습니다. (배치만 초기화)\n\n'
           '계속할까요?',
         ),
         actions: [
@@ -574,6 +572,7 @@ class _IconGridPage extends StatefulWidget {
 
 class _IconGridPageState extends State<_IconGridPage> {
   static const String _shortcutSettingsPage10Id = 'shortcut_settings_page10';
+  static const String _voiceShortcutsIconId = 'voice_shortcuts';
   static const int _shortcutSettingsAllowedPageIndex = 1; // 2nd page (1-based)
   static const int _settingsReservedPageIndex = 5; // 6th page (1-based)
   bool _isEditMode = false;
@@ -702,8 +701,7 @@ class _IconGridPageState extends State<_IconGridPage> {
   }
 
   // --- Slot-based grid API ---
-  static const int _defaultSlotCount =
-      Page1BottomQuickIcons.slotCount; // 4x6 (24 slots)
+  static const int _defaultSlotCount = 24; // 4x6 (24 slots)
 
   // Reserved page policy (0-based indices):
   // 3: stats (page 4), 4: asset (page 5),
@@ -905,6 +903,35 @@ class _IconGridPageState extends State<_IconGridPage> {
       }
     }
 
+    // Page 0: ensure "음성 단축어" is visible early.
+    // Do not overwrite existing slots; only fill an empty slot if possible.
+    if (widget.pageIndex == 0) {
+      final hasVoiceShortcuts = validated.contains(_voiceShortcutsIconId);
+      if (!hasVoiceShortcuts) {
+        const preferredIndex = 0;
+        final preferredEmpty =
+            preferredIndex < validated.length && validated[preferredIndex].isEmpty;
+        if (preferredEmpty) {
+          validated[preferredIndex] = _voiceShortcutsIconId;
+          await UserPrefService.setPageIconSlots(
+            accountName: widget.accountName,
+            pageIndex: widget.pageIndex,
+            slots: validated,
+          );
+        } else {
+          final emptyIndex = validated.indexOf('');
+          if (emptyIndex != -1) {
+            validated[emptyIndex] = _voiceShortcutsIconId;
+            await UserPrefService.setPageIconSlots(
+              accountName: widget.accountName,
+              pageIndex: widget.pageIndex,
+              slots: validated,
+            );
+          }
+        }
+      }
+    }
+
     // NOTE: removed single-icon-for-page-0 behavior to allow full slot
     // editing and consistent test expectations (page 1 can hold multiple
     // icons). Previously this forced only the first filled slot to remain
@@ -997,134 +1024,6 @@ class _IconGridPageState extends State<_IconGridPage> {
     ).pushNamed(request.routeName, arguments: request.arguments);
   }
 
-  void _openVoiceShortcuts() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const VoiceShortcutsScreen()),
-    );
-  }
-
-  Future<void> _openBixbyFromHome() async {
-    if (!Platform.isAndroid) {
-      _openVoiceShortcuts();
-      return;
-    }
-
-    final ok = await AssistantLauncher.openBixby();
-    if (ok) return;
-
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Bixby 실행 실패: 단축어 안내로 이동합니다')),
-    );
-    _openVoiceShortcuts();
-  }
-
-  Future<void> _openSystemAssistantFromHome() async {
-    if (!Platform.isAndroid) {
-      _openVoiceShortcuts();
-      return;
-    }
-
-    final ok = await AssistantLauncher.openSystemAssistant();
-    if (ok) return;
-
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('어시스턴트 실행 실패: 설정/단축어 안내로 이동합니다')),
-    );
-    _openVoiceShortcuts();
-  }
-
-  Widget _buildVoiceAssistantRow(BuildContext context) {
-    final theme = Theme.of(context);
-
-    Widget buildButton({
-      required String label,
-      required IconData icon,
-      required VoidCallback onTap,
-    }) {
-      return Expanded(
-        child: Material(
-          color: theme.colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(12),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(12),
-            onTap: onTap,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(icon, size: 18),
-                  const SizedBox(width: 8),
-                  Flexible(
-                    child: Text(
-                      label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.labelLarge,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    final buttons = <Widget>[];
-    if (Platform.isAndroid) {
-      buttons.addAll([
-        buildButton(
-          label: 'Bixby',
-          icon: Icons.record_voice_over,
-          onTap: () {
-            if (_isEditMode) return;
-            _openBixbyFromHome();
-          },
-        ),
-        const SizedBox(width: 10),
-        buildButton(
-          label: 'Google',
-          icon: Icons.assistant,
-          onTap: () {
-            if (_isEditMode) return;
-            _openSystemAssistantFromHome();
-          },
-        ),
-      ]);
-    } else if (Platform.isIOS) {
-      buttons.add(
-        buildButton(
-          label: 'Siri',
-          icon: Icons.mic,
-          onTap: () {
-            if (_isEditMode) return;
-            _openVoiceShortcuts();
-          },
-        ),
-      );
-    }
-
-    if (buttons.isEmpty) return const SizedBox.shrink();
-
-    return Column(
-      children: [
-        Row(children: buttons),
-        const SizedBox(height: 8),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: Text(
-            '음성비서 실행 후, 설정된 단축어(또는 URL 열기)로 진행',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -1248,8 +1147,6 @@ class _IconGridPageState extends State<_IconGridPage> {
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 child: Column(
                   children: [
-                    if (widget.pageIndex == 0 && !_isEditMode)
-                      _buildVoiceAssistantRow(context),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [

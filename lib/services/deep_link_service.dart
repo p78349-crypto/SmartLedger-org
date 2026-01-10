@@ -415,6 +415,7 @@ class AddTransactionAction extends DeepLinkAction {
   /// 파라미터 Map으로 변환 (분석 로깅용)
   Map<String, String> toParams() {
     final params = <String, String>{};
+    params['type'] = type;
     if (amount != null) params['amount'] = amount.toString();
     if (quantity != null) params['quantity'] = quantity.toString();
     if (unit != null) params['unit'] = unit!;
@@ -427,7 +428,10 @@ class AddTransactionAction extends DeepLinkAction {
     if (items != null) params['items'] = items!;
     if (source != null) params['source'] = source!;
     if (savingsAllocation != null) {
-      params['savingsAllocation'] = savingsAllocation.toString();
+      params['savingsAllocation'] = switch (savingsAllocation!) {
+        SavingsAllocation.assetIncrease => 'asset_increase',
+        SavingsAllocation.expense => 'expense',
+      };
     }
     params['currency'] = currency;
     params['autoSubmit'] = autoSubmit.toString();

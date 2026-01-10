@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'voice_dashboard_screen.dart';
 import '../services/deep_link_diagnostics.dart';
 import '../services/assistant_launcher.dart';
@@ -54,7 +55,7 @@ class _VoiceShortcutsScreenState extends State<VoiceShortcutsScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '음성 어시스턴트를 통해 빠르게 지출을 기록하고\n가계부 기능을 사용할 수 있습니다.',
+                    '앱 안에서 음성으로 빠르게 화면을 열고\n입력까지 이어갈 수 있습니다.',
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -66,12 +67,22 @@ class _VoiceShortcutsScreenState extends State<VoiceShortcutsScreen> {
                     onPressed: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (_) => const VoiceDashboardScreen(),
+                          builder: (_) => const VoiceDashboardScreen(
+                            autoStartListening: true,
+                          ),
                         ),
                       );
                     },
                     icon: const Icon(Icons.dashboard),
-                    label: const Text('🎙️ 음성 제어 대시보드 열기'),
+                    label: const Text('🎙️ 음성 제어 대시보드 열기(자동 시작)'),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    '※ 외부 어시스턴트(Bixby/Google/Siri)는 기기/설정에 따라\n앱 실행까지만 되고 화면 제어가 안 될 수 있어요.',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
                 ],
               ),
@@ -79,187 +90,290 @@ class _VoiceShortcutsScreenState extends State<VoiceShortcutsScreen> {
           ),
           const SizedBox(height: 24),
 
-          // 플랫폼별 어시스턴트
+          // 사용 가능한 명령어 전체 목록
+          _buildAllCommandsSection(context),
+
+          const SizedBox(height: 16),
+
+          // 고급(외부 어시스턴트/딥링크 진단) - 기본은 숨김
+          _buildAdvancedSection(context, isAndroid: isAndroid, isIOS: isIOS),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAdvancedSection(
+    BuildContext context, {
+    required bool isAndroid,
+    required bool isIOS,
+  }) {
+    final theme = Theme.of(context);
+
+    return Card(
+      child: ExpansionTile(
+        leading: Icon(Icons.build, color: theme.colorScheme.primary),
+        title: const Text('고급/진단(선택)'),
+        subtitle: const Text('외부 어시스턴트/딥링크 테스트 (필요할 때만)'),
+        children: [
+          const Divider(height: 1),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            child: Text(
+              '외부 어시스턴트는 앱 내부 화면 제어가 제한적일 수 있습니다.\n'
+              '필요한 경우에만 아래 설정/진단을 사용하세요.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+
           if (isAndroid) ...[
-            _buildAssistantSection(
-              context,
-              title: 'Samsung Bixby',
-              icon: Icons.record_voice_over,
-              color: Colors.purple,
-              shortcuts: _bixbyShortcuts,
-              onSetup: () => _openBixbySettings(context),
-              setupLabel: 'Bixby 설정 열기',
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: _buildAssistantSection(
+                context,
+                title: 'Samsung Bixby(선택)',
+                icon: Icons.record_voice_over,
+                color: Colors.purple,
+                shortcuts: _bixbyShortcuts,
+                onSetup: () => _openBixbySettings(context),
+                setupLabel: '설정 안내',
+              ),
             ),
             const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: FilledButton.tonalIcon(
-                    onPressed: () => _openBixbyApp(context),
-                    icon: const Icon(Icons.mic_external_on),
-                    label: const Text('Bixby 열기'),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: FilledButton.tonalIcon(
+                      onPressed: () => _openBixbyApp(context),
+                      icon: const Icon(Icons.mic_external_on),
+                      label: const Text('Bixby 열기'),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: FilledButton.tonalIcon(
-                    onPressed: () => _openSystemAssistant(context),
-                    icon: const Icon(Icons.assistant),
-                    label: const Text('Google/기본 어시스턴트'),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: FilledButton.tonalIcon(
+                      onPressed: () => _openSystemAssistant(context),
+                      icon: const Icon(Icons.assistant),
+                      label: const Text('기본 어시스턴트'),
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            _buildAssistantSection(
-              context,
-              title: 'Google Assistant',
-              icon: Icons.assistant,
-              color: Colors.blue,
-              shortcuts: _googleShortcuts,
-              onSetup: () => _openGoogleAssistant(context),
-              setupLabel: 'Assistant 설정 열기',
+                ],
+              ),
             ),
           ],
 
           if (isIOS) ...[
-            _buildAssistantSection(
-              context,
-              title: 'Siri',
-              icon: Icons.mic,
-              color: Colors.orange,
-              shortcuts: _siriShortcuts,
-              onSetup: () => _openSiriSettings(context),
-              setupLabel: 'Siri 설정 열기',
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: _buildAssistantSection(
+                context,
+                title: 'Siri(선택)',
+                icon: Icons.mic,
+                color: Colors.orange,
+                shortcuts: _siriShortcuts,
+                onSetup: () => _openSiriSettings(context),
+                setupLabel: '설정 안내',
+              ),
             ),
           ],
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 12),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: _buildDeepLinkTestCard(context),
+          ),
+          const SizedBox(height: 12),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: _buildDeepLinkRecentCard(context),
+          ),
+        ],
+      ),
+    );
+  }
 
-          // 딥링크 수신 진단 (Bixby/Assistant가 앱으로 실제 URI를 전달하는지 확인)
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.bug_report, color: theme.colorScheme.primary),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          '최근 딥링크 수신',
-                          style: theme.textTheme.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      IconButton(
-                        tooltip: '새로고침',
-                        onPressed: () {
-                          setState(_refreshLastDeepLink);
-                        },
-                        icon: const Icon(Icons.refresh),
-                      ),
-                      IconButton(
-                        tooltip: '기록 지우기',
-                        onPressed: () async {
-                          await DeepLinkDiagnostics.clear();
-                          if (!mounted) return;
-                          setState(_refreshLastDeepLink);
-                        },
-                        icon: const Icon(Icons.delete_outline),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  FutureBuilder<DeepLinkDiagnosticsEntry?>(
-                    future: _lastDeepLinkFuture,
-                    builder: (context, snapshot) {
-                      final entry = snapshot.data;
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 8),
-                          child: LinearProgressIndicator(),
-                        );
-                      }
-                      if (entry == null) {
-                        return Text(
-                          '아직 수신 기록이 없습니다.\nBixby에서 URL을 실행한 뒤 새로고침하세요.',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        );
-                      }
+  Widget _buildDeepLinkTestCard(BuildContext context) {
+    final theme = Theme.of(context);
 
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '시간: ${entry.receivedAt}',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Row(
-                            children: [
-                              Icon(
-                                entry.parsed
-                                    ? Icons.check_circle
-                                    : Icons.error_outline,
-                                size: 18,
-                                color: entry.parsed
-                                    ? Colors.green
-                                    : theme.colorScheme.error,
-                              ),
-                              const SizedBox(width: 6),
-                              Expanded(
-                                child: Text(
-                                  entry.parsed
-                                      ? (entry.actionSummary ?? '파싱 성공')
-                                      : '파싱 실패: ${entry.failureReason ?? "unknown"}',
-                                  style: theme.textTheme.bodyMedium,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            entry.uri,
-                            style: theme.textTheme.bodySmall,
-                          ),
-                          const SizedBox(height: 8),
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: FilledButton.tonalIcon(
-                              onPressed: () {
-                                Clipboard.setData(
-                                  ClipboardData(text: entry.uri),
-                                );
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('최근 딥링크 URI 복사됨'),
-                                    duration: Duration(seconds: 2),
-                                  ),
-                                );
-                              },
-                              icon: const Icon(Icons.copy),
-                              label: const Text('URI 복사'),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
+    return Card(
+      elevation: 0,
+      color: theme.colorScheme.surfaceContainerLow,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.link, color: theme.colorScheme.primary),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    '딥링크 테스트',
+                    style: theme.textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.bold),
                   ),
-                ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'OS 인텐트로 smartledger://... 딥링크를 실행합니다.\n'
+              '외부 어시스턴트가 URL을 제대로 전달하는지 확인할 때 사용하세요.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
-          ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: [
+                FilledButton.tonalIcon(
+                  onPressed: () => _runDeepLinkTest(
+                    context,
+                    'smartledger://transaction/add?type=expense&amount=5000&description=딥링크테스트',
+                  ),
+                  icon: const Icon(Icons.remove_circle_outline),
+                  label: const Text('거래추가'),
+                ),
+                FilledButton.tonalIcon(
+                  onPressed: () => _runDeepLinkTest(
+                    context,
+                    'smartledger://nav/open?route=/settings',
+                  ),
+                  icon: const Icon(Icons.settings),
+                  label: const Text('설정 열기'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
-          // 사용 가능한 명령어 전체 목록
-          _buildAllCommandsSection(context),
-        ],
+  Widget _buildDeepLinkRecentCard(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Card(
+      elevation: 0,
+      color: theme.colorScheme.surfaceContainerLow,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.bug_report, color: theme.colorScheme.primary),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    '최근 딥링크 수신',
+                    style: theme.textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                IconButton(
+                  tooltip: '새로고침',
+                  onPressed: () {
+                    setState(_refreshLastDeepLink);
+                  },
+                  icon: const Icon(Icons.refresh),
+                ),
+                IconButton(
+                  tooltip: '기록 지우기',
+                  onPressed: () async {
+                    await DeepLinkDiagnostics.clear();
+                    if (!mounted) return;
+                    setState(_refreshLastDeepLink);
+                  },
+                  icon: const Icon(Icons.delete_outline),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            FutureBuilder<DeepLinkDiagnosticsEntry?>(
+              future: _lastDeepLinkFuture,
+              builder: (context, snapshot) {
+                final entry = snapshot.data;
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8),
+                    child: LinearProgressIndicator(),
+                  );
+                }
+                if (entry == null) {
+                  return Text(
+                    '아직 수신 기록이 없습니다.\n외부에서 URL을 실행한 뒤 새로고침하세요.',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  );
+                }
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '시간: ${entry.receivedAt}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        Icon(
+                          entry.parsed
+                              ? Icons.check_circle
+                              : Icons.error_outline,
+                          size: 18,
+                          color:
+                              entry.parsed ? Colors.green : theme.colorScheme.error,
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            entry.parsed
+                                ? (entry.actionSummary ?? '파싱 성공')
+                                : '파싱 실패: ${entry.failureReason ?? "unknown"}',
+                            style: theme.textTheme.bodyMedium,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(entry.uri, style: theme.textTheme.bodySmall),
+                    const SizedBox(height: 8),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: FilledButton.tonalIcon(
+                        onPressed: () {
+                          Clipboard.setData(ClipboardData(text: entry.uri));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('최근 딥링크 URI 복사됨'),
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.copy),
+                        label: const Text('URI 복사'),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -449,26 +563,38 @@ class _VoiceShortcutsScreenState extends State<VoiceShortcutsScreen> {
     }
   }
 
-  void _openGoogleAssistant(BuildContext context) {
-    _showSetupDialog(
-      context,
-      title: 'Google Assistant 설정',
-      content: '''Google Assistant로 SmartLedger를 제어하세요.
+  Future<void> _runDeepLinkTest(BuildContext context, String uri) async {
+    final parsed = Uri.tryParse(uri);
+    if (parsed == null) return;
 
-🎤 바로 사용하기:
-"Hey Google, SmartLedger에서 지출 기록해"
-"Hey Google, SmartLedger 열어"
+    try {
+      final ok = await launchUrl(
+        parsed,
+        mode: LaunchMode.externalApplication,
+      );
+      if (!context.mounted) return;
 
-⚙️ Routines 설정:
-1. Google 앱 열기
-2. 프로필 > 설정 > Google Assistant
-3. Routines 선택
-4. + 새 루틴 추가
-5. 음성 명령과 SmartLedger 앱 열기 설정
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            ok
+                ? '딥링크 실행됨 → 아래 “최근 딥링크 수신”에서 확인하세요'
+                : '딥링크 실행 실패(이 기기에서 처리 앱 없음)',
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
 
-💡 팁:
-자주 사용하면 Google이 자동으로 추천해줍니다.''',
-    );
+      setState(_refreshLastDeepLink);
+    } catch (_) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('딥링크 실행 중 오류 발생'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   void _openSiriSettings(BuildContext context) {
@@ -556,25 +682,6 @@ const _bixbyShortcuts = [
     phrase: '빅스비, 이번달 지출 확인',
     description: '지출 현황 보기',
     icon: Icons.pie_chart,
-  ),
-];
-
-// Google Assistant 단축어
-const _googleShortcuts = [
-  VoiceShortcut(
-    phrase: 'Hey Google, SmartLedger 지출 기록',
-    description: '지출 입력 화면 열기',
-    icon: Icons.remove_circle_outline,
-  ),
-  VoiceShortcut(
-    phrase: 'Hey Google, SmartLedger 열어',
-    description: '대시보드 열기',
-    icon: Icons.dashboard,
-  ),
-  VoiceShortcut(
-    phrase: 'Hey Google, SmartLedger 유통기한',
-    description: '식재료 관리 열기',
-    icon: Icons.kitchen,
   ),
 ];
 

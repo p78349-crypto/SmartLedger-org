@@ -19,6 +19,7 @@ import '../utils/pref_keys.dart';
 import '../utils/screen_saver_ids.dart';
 import '../utils/screen_saver_launcher.dart';
 import '../widgets/background_widget.dart';
+import '../widgets/emergency_button.dart';
 import '../widgets/special_backgrounds.dart';
 import '../theme/app_theme_seed_controller.dart';
 
@@ -1143,6 +1144,8 @@ class _IconGridPageState extends State<_IconGridPage> {
           child: Column(
             children: [
               Expanded(child: buildGrid()),
+              // 페이지 1(대시보드)에서만 긴급 버튼 표시
+              if (widget.pageIndex == 0) const EmergencyButton(),
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 child: Column(

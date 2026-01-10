@@ -86,6 +86,13 @@ class MainFeatureIconCatalog {
           icon: Icons.mic_outlined,
           routeName: AppRoutes.voiceShortcuts,
         ),
+        MainFeatureIcon(
+          id: 'emergency_services',
+          label: '긴급 SOS',
+          labelEn: 'Emergency SOS',
+          icon: Icons.emergency,
+          routeName: AppRoutes.emergencyServices,
+        ),
       ],
     ),
 
@@ -456,6 +463,13 @@ class MainFeatureIconCatalog {
           labelEn: 'Settings',
           icon: IconCatalog.settings,
           routeName: AppRoutes.settings,
+        ),
+        MainFeatureIcon(
+          id: 'voice_assistant_settings',
+          label: '음성비서 설정',
+          labelEn: 'Voice Assistant',
+          icon: Icons.record_voice_over,
+          routeName: AppRoutes.voiceAssistantSettings,
         ),
         MainFeatureIcon(
           id: 'settings_screen_saver_settings',

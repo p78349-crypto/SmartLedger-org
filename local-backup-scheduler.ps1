@@ -3,7 +3,7 @@
 # Created: 2025-01-03
 
 $ProjectRoot = $PSScriptRoot
-$BackupDir = Join-Path $ProjectRoot "backups"
+$BackupDir = Join-Path (Split-Path $ProjectRoot -Parent) "SmartLedger_backups"
 $LogFile = Join-Path $ProjectRoot "local-backup.log"
 
 # Create backup directory if it doesn't exist

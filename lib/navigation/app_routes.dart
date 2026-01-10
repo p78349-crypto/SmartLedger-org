@@ -28,6 +28,7 @@ class AppRoutes {
   static const monthEndCarryover = '/month-end/carryover';
 
   static const emergencyFund = '/emergency-fund';
+  static const emergencyServices = '/emergency-services';
   static const trash = '/trash';
   static const backup = '/backup';
   static const settings = '/settings';
@@ -44,6 +45,7 @@ class AppRoutes {
   static const currencySettings = '/currency-settings';
   static const voiceShortcuts = '/settings/voice-shortcuts';
   static const voiceDashboard = '/voice/dashboard';
+  static const voiceAssistantSettings = '/settings/voice-assistant';
   static const page1BottomIconSettings = '/page1/bottom-icons';
   static const privacyPolicy = '/privacy-policy';
   static const fileViewer = '/file-viewer';

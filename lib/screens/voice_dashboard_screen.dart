@@ -275,50 +275,67 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
 
   Future<VoiceCommandResult> _parseAndExecuteCommand(String command) async {
     final normalized = command.toLowerCase().trim();
+    debugPrint('[Voice] 명령어: "$normalized"');
 
     // 0. 화면 열기/이동 같은 네비게이션 명령 (금액 없이도 동작)
     if (_isOpenIncomeInputCommand(normalized)) {
+      debugPrint('[Voice] → 수입 입력 화면 열기');
       return await _handleOpenIncomeInput();
     }
     if (_isOpenExpenseInputCommand(normalized)) {
+      debugPrint('[Voice] → 지출 입력 화면 열기');
       return await _handleOpenExpenseInput();
     }
 
     // 0-1. 지출 입력 + 금액 포함: 폼을 미리채움으로 열기(저장까지는 사용자가 확인)
     if (_isExpenseInputWithAmountCommand(normalized)) {
+      debugPrint('[Voice] → 지출 입력 (금액 포함) 화면 열기');
       return await _handleOpenExpenseInputPrefilled(command);
+    }
+
+    // 0-2. 화면 네비게이션 명령어 (가계부, 대시보드, 자산 등)
+    if (_isNavigationCommand(normalized)) {
+      debugPrint('[Voice] → 네비게이션 명령');
+      return await _handleNavigationCommand(normalized);
     }
 
     // 1. 지출 기록 명령
     if (_isExpenseCommand(normalized)) {
+      debugPrint('[Voice] → 지출 기록 명령');
       return await _handleExpenseCommand(command);
     }
 
     // 2. 재료 조회 명령
     if (_isIngredientQueryCommand(normalized)) {
+      debugPrint('[Voice] → 재료 조회');
       return _handleIngredientQuery(command);
     }
 
     // 3. 예산 조회 명령
     if (_isBudgetQueryCommand(normalized)) {
+      debugPrint('[Voice] → 예산 조회');
       return _handleBudgetQuery();
     }
 
     // 4. 메뉴 추천 명령
     if (_isMenuRecommendCommand(normalized)) {
+      debugPrint('[Voice] → 메뉴 추천');
       return _handleMenuRecommend();
     }
 
     // 5. 장바구니 추가 명령
     if (_isShoppingCartCommand(normalized)) {
+      debugPrint('[Voice] → 장바구니');
       return _handleShoppingCartAdd(command);
     }
 
     // 6. 오늘 지출 요약
     if (_isTodaySummaryCommand(normalized)) {
+      debugPrint('[Voice] → 오늘 요약');
       return _handleTodaySummary();
     }
 
+    debugPrint('[Voice] → 인식 실패');
     return VoiceCommandResult(
       command: command,
       success: false,
@@ -350,7 +367,8 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
         cmd.contains('샀어') ||
         cmd.contains('샀다') ||
         cmd.contains('결제') ||
-        cmd.contains('지불');
+        cmd.contains('지불') ||
+        cmd.contains('지출');
 
     if (!hasSaveVerb) return false;
     if (!_containsAmountHint(cmd)) return false;
@@ -375,13 +393,22 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
       cmd.contains('켜') ||
       cmd.contains('띄워');
     final hasMove = cmd.contains('가') || cmd.contains('이동') || cmd.contains('진입');
+    final hasRecord = cmd.contains('기록') || cmd.contains('저장') || cmd.contains('추가');
 
     // e.g. "지출 입력 열어줘", "지출입력 열어", "지출 입력으로 이동"
-    return (hasInput && (hasOpen || hasMove)) || cmd.contains('지출입력');
+    // Also: "지출 기록해", "지출 입력해", "지출 추가" (금액 없이 화면 열기)
+    if ((hasInput && (hasOpen || hasMove)) || cmd.contains('지출입력')) {
+      return true;
+    }
+    // "지출 기록해", "지출 저장", "지출 추가" (금액 없이) -> 화면 열기
+    if (hasRecord && !_containsAmountHint(cmd)) {
+      return true;
+    }
+    return false;
   }
 
   bool _isOpenIncomeInputCommand(String cmd) {
-    final hasIncome = cmd.contains('수입');
+    final hasIncome = cmd.contains('수입') || cmd.contains('월급');
     if (!hasIncome) return false;
 
     final hasInput = cmd.contains('입력') || cmd.contains('입력창');
@@ -390,8 +417,17 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
         cmd.contains('켜') ||
         cmd.contains('띄워');
     final hasMove = cmd.contains('가') || cmd.contains('이동') || cmd.contains('진입');
+    final hasRecord = cmd.contains('기록') || cmd.contains('저장') || cmd.contains('추가');
 
-    return (hasInput && (hasOpen || hasMove)) || cmd.contains('수입입력');
+    // e.g. "수입 입력 열어줘", "수입입력", "수입 기록해", "월급 기록"
+    if ((hasInput && (hasOpen || hasMove)) || cmd.contains('수입입력')) {
+      return true;
+    }
+    // "수입 기록해", "월급 기록" (금액 없이) -> 화면 열기
+    if (hasRecord && !_containsAmountHint(cmd)) {
+      return true;
+    }
+    return false;
   }
 
   bool _isIngredientQueryCommand(String cmd) {
@@ -411,18 +447,48 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
     return cmd.contains('뭐 먹') ||
         cmd.contains('메뉴 추천') ||
         cmd.contains('뭐 해먹') ||
-        cmd.contains('요리 추천');
+        cmd.contains('요리 추천') ||
+        cmd.contains('레시피 추천') ||
+        cmd.contains('뭐해먹');
   }
 
   bool _isShoppingCartCommand(String cmd) {
     return cmd.contains('장바구니') ||
         cmd.contains('장볼것') ||
+        cmd.contains('쇼핑') && (cmd.contains('목록') || cmd.contains('리스트')) ||
         cmd.contains('사야') && cmd.contains('추가');
   }
 
   bool _isTodaySummaryCommand(String cmd) {
     return cmd.contains('오늘') &&
         (cmd.contains('얼마') || cmd.contains('지출') || cmd.contains('요약'));
+  }
+
+  /// 화면 네비게이션 명령어 감지
+  bool _isNavigationCommand(String cmd) {
+    // 가계부/대시보드
+    if (cmd.contains('가계부') || cmd.contains('대시보드') || cmd.contains('홈')) {
+      return true;
+    }
+    // 자산 현황
+    if (cmd.contains('자산') || cmd.contains('통장')) {
+      return true;
+    }
+    // 지출 현황/통계
+    if ((cmd.contains('지출') || cmd.contains('이번달')) && 
+        (cmd.contains('현황') || cmd.contains('통계') || cmd.contains('내역'))) {
+      return true;
+    }
+    // 유통기한/냉장고
+    if (cmd.contains('유통기한') || cmd.contains('냉장고') || 
+        cmd.contains('재료') || cmd.contains('식재료')) {
+      return true;
+    }
+    // 저축
+    if (cmd.contains('저축') || cmd.contains('적금')) {
+      return true;
+    }
+    return false;
   }
 
   // ============ 명령어 처리 ============
@@ -508,6 +574,7 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
 
   Future<VoiceCommandResult> _handleExpenseCommand(String command) async {
     final amount = _extractKrwAmount(command);
+    debugPrint('[Voice] 금액 추출: $amount from "$command"');
     if (amount == null) {
       return VoiceCommandResult(
         command: command,
@@ -554,6 +621,75 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
         'description': description,
         'category': mainCategory,
       },
+    );
+  }
+
+  /// 화면 네비게이션 명령 처리
+  Future<VoiceCommandResult> _handleNavigationCommand(String cmd) async {
+    String? route;
+    String screenName = '';
+
+    // 가계부/대시보드/홈
+    if (cmd.contains('가계부') || cmd.contains('대시보드') || cmd.contains('홈')) {
+      route = '/';
+      screenName = '메인 대시보드';
+    }
+    // 자산 현황
+    else if (cmd.contains('자산') || cmd.contains('통장')) {
+      route = '/asset-dashboard';
+      screenName = '자산 대시보드';
+    }
+    // 지출 현황/통계
+    else if ((cmd.contains('지출') || cmd.contains('이번달')) && 
+        (cmd.contains('현황') || cmd.contains('통계') || cmd.contains('내역'))) {
+      route = '/spending-analysis';
+      screenName = '지출 통계';
+    }
+    // 유통기한/냉장고/재료
+    else if (cmd.contains('유통기한') || cmd.contains('냉장고') || 
+        cmd.contains('재료') || cmd.contains('식재료')) {
+      route = '/ingredient-manager';
+      screenName = '식재료 관리';
+    }
+    // 저축/적금
+    else if (cmd.contains('저축') || cmd.contains('적금')) {
+      route = '/savings';
+      screenName = '저축 관리';
+    }
+
+    if (route == null) {
+      return VoiceCommandResult(
+        command: cmd,
+        success: false,
+        message: '이동할 화면을 찾지 못했어요.',
+        type: VoiceCommandType.navigation,
+      );
+    }
+
+    // 네비게이션 실행
+    _suspendAutoListen = true;
+    if (_isListening) {
+      await _stopListening();
+    }
+
+    if (!mounted) {
+      _suspendAutoListen = false;
+      return VoiceCommandResult(
+        command: cmd,
+        success: false,
+        message: '화면이 닫혀서 이동할 수 없습니다.',
+        type: VoiceCommandType.navigation,
+      );
+    }
+
+    Navigator.of(context).pushNamed(route);
+    _suspendAutoListen = false;
+
+    return VoiceCommandResult(
+      command: cmd,
+      success: true,
+      message: '$screenName(으)로 이동합니다.',
+      type: VoiceCommandType.navigation,
     );
   }
 

@@ -64,7 +64,7 @@ Write-Log "Commit successful: $CommitHash"
 
 # Step 3: Create Backup
 Write-Log "Creating backup..."
-$BackupDir = Join-Path $ProjectRoot "backups"
+$BackupDir = Join-Path (Split-Path $ProjectRoot -Parent) "SmartLedger_backups"
 $BackupName = "auto-backup-$(Get-Date -Format 'yyyy-MM-dd_HH-mm-ss')"
 $BackupPath = Join-Path $BackupDir $BackupName
 

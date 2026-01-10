@@ -755,7 +755,7 @@ class MultilingualSearchUtils {
   /// 
   /// Example: "Mairie de Paris" → "Mairie Paris"
   static String removeEuropeanArticles(String text, {String? language}) {
-    var result = normalize(text);
+    final result = normalize(text);
     
     // Determine which stop words to use
     Set<String> stopWords;
@@ -875,7 +875,7 @@ class MultilingualSearchUtils {
         if (t.contains(expansion)) return true;
         // Also check individual words from expansion
         final words = expansion.split(' ');
-        if (words.every((w) => t.contains(w))) return true;
+        if (words.every(t.contains)) return true;
       }
     }
     

@@ -4,6 +4,7 @@ import '../models/transaction.dart';
 import '../navigation/app_routes.dart';
 import '../services/quick_simple_expense_input_history_service.dart';
 import '../services/transaction_service.dart';
+import '../services/voice_input_bridge.dart';
 import '../utils/currency_formatter.dart';
 import '../utils/icon_catalog.dart';
 
@@ -52,12 +53,38 @@ class _QuickSimpleExpenseInputScreenState
         _goNext();
       });
     }
+
+    // Listen for voice assistant input
+    VoiceInputBridge.instance.pendingInput.addListener(_onVoiceInputReceived);
+    VoiceInputBridge.instance.requestSubmit.addListener(_onVoiceSubmitRequested);
   }
 
   @override
   void dispose() {
+    VoiceInputBridge.instance.pendingInput.removeListener(_onVoiceInputReceived);
+    VoiceInputBridge.instance.requestSubmit.removeListener(_onVoiceSubmitRequested);
     _controller.dispose();
     super.dispose();
+  }
+
+  void _onVoiceInputReceived() {
+    final text = VoiceInputBridge.instance.pendingInput.value;
+    if (text != null && mounted) {
+      setState(() {
+        _controller.text = text;
+        // Optionally move cursor to end
+        _controller.selection = TextSelection.fromPosition(
+          TextPosition(offset: _controller.text.length),
+        );
+      });
+    }
+  }
+
+  void _onVoiceSubmitRequested() {
+    if (VoiceInputBridge.instance.requestSubmit.value && mounted) {
+      _goNext();
+      VoiceInputBridge.instance.clear();
+    }
   }
 
   DateTime _dateOnly(DateTime dt) => DateTime(dt.year, dt.month, dt.day);

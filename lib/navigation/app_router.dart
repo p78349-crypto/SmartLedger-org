@@ -21,6 +21,7 @@ import '../screens/currency_settings_screen.dart';
 import '../screens/daily_transactions_screen.dart';
 import '../screens/display_settings_screen.dart';
 import '../screens/emergency_fund_screen.dart';
+import '../screens/emergency_screen.dart';
 import '../screens/feature_icons_catalog_screen.dart';
 import '../screens/file_viewer_screen.dart';
 import '../screens/fixed_cost_stats_screen.dart';
@@ -74,6 +75,7 @@ import '../screens/transaction_add_detailed_screen.dart';
 import '../screens/transaction_detail_screen.dart';
 import '../screens/trash_screen.dart';
 import '../screens/voice_shortcuts_screen.dart';
+import '../screens/voice_assistant_settings_screen.dart';
 import '../screens/voice_dashboard_screen.dart';
 import '../widgets/asset_route_auth_gate.dart';
 import '../widgets/root_auth_gate.dart';
@@ -252,6 +254,12 @@ class AppRouter {
           builder: (_) => EmergencyFundScreen(accountName: a.accountName),
         );
 
+      case AppRoutes.emergencyServices:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const EmergencyScreen(),
+        );
+
       case AppRoutes.trash:
         return MaterialPageRoute(
           settings: settings,
@@ -355,6 +363,12 @@ class AppRouter {
         return MaterialPageRoute(
           settings: settings,
           builder: (_) => const VoiceShortcutsScreen(),
+        );
+
+      case AppRoutes.voiceAssistantSettings:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const VoiceAssistantSettingsScreen(),
         );
 
       case AppRoutes.voiceDashboard:

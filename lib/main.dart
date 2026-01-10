@@ -23,6 +23,7 @@ import 'services/user_pref_service.dart';
 import 'services/food_expiry_service.dart';
 import 'services/recipe_service.dart';
 import 'services/recipe_knowledge_service.dart';
+import 'services/voice_assistant_settings.dart';
 import 'theme/app_theme.dart';
 import 'theme/app_theme_mode_controller.dart';
 import 'theme/app_theme_seed_controller.dart';
@@ -32,6 +33,7 @@ import 'utils/icon_catalog.dart';
 import 'utils/main_feature_icon_catalog.dart';
 import 'utils/main_page_migration.dart';
 import 'widgets/background_widget.dart';
+import 'widgets/floating_voice_button.dart';
 
 Future<void> main() async {
   FlutterError.onError = (FlutterErrorDetails details) {
@@ -84,6 +86,7 @@ Future<void> main() async {
         FoodExpiryService.instance.load(),
         RecipeService.instance.load(),
         RecipeKnowledgeService.instance.loadData(),
+        VoiceAssistantSettings.instance.initialize(),
       ]);
 
       // Monthly routine: auto-record fixed costs (local-only).
@@ -216,7 +219,9 @@ class MyApp extends StatelessWidget {
             );
             return MediaQuery(
               data: mediaQuery.copyWith(textScaler: textScaler),
-              child: child ?? const SizedBox.shrink(),
+              child: FloatingVoiceButton(
+                child: child ?? const SizedBox.shrink(),
+              ),
             );
           },
           home: minimalUi ? const _MinimalBootScreen() : const LaunchScreen(),

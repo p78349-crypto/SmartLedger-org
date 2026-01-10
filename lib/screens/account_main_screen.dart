@@ -19,7 +19,6 @@ import '../utils/pref_keys.dart';
 import '../utils/screen_saver_ids.dart';
 import '../utils/screen_saver_launcher.dart';
 import '../widgets/background_widget.dart';
-import '../widgets/emergency_button.dart';
 import '../widgets/special_backgrounds.dart';
 import '../theme/app_theme_seed_controller.dart';
 
@@ -343,21 +342,21 @@ class _AccountMainScreenState extends State<AccountMainScreen>
     // Phase 1: Smart style horizontal main pages (icons-only).
     // Top banner removed: only render the PageView.
     return ListenableBuilder(
-      listenable: Listenable.merge([
-        BackgroundHelper.colorNotifier,
-        BackgroundHelper.typeNotifier,
-        BackgroundHelper.imagePathNotifier,
-        BackgroundHelper.blurNotifier,
-      ]),
-      builder: (context, _) {
-        final bgColor = BackgroundHelper.colorNotifier.value;
-        final bgType = BackgroundHelper.typeNotifier.value;
-        final bgImagePath = BackgroundHelper.imagePathNotifier.value;
-        final bgBlur = BackgroundHelper.blurNotifier.value;
+        listenable: Listenable.merge([
+          BackgroundHelper.colorNotifier,
+          BackgroundHelper.typeNotifier,
+          BackgroundHelper.imagePathNotifier,
+          BackgroundHelper.blurNotifier,
+        ]),
+        builder: (context, _) {
+          final bgColor = BackgroundHelper.colorNotifier.value;
+          final bgType = BackgroundHelper.typeNotifier.value;
+          final bgImagePath = BackgroundHelper.imagePathNotifier.value;
+          final bgBlur = BackgroundHelper.blurNotifier.value;
 
-        final presetId = AppThemeSeedController.instance.presetId.value;
-        final isLandscape =
-            MediaQuery.of(context).orientation == Orientation.landscape;
+          final presetId = AppThemeSeedController.instance.presetId.value;
+          final isLandscape =
+              MediaQuery.of(context).orientation == Orientation.landscape;
 
         // DEBUG: 화면 크기 출력 (프로토타입/개발 모드 전용, 출시 전 자동 제거됨)
         if (kDebugMode) {
@@ -538,8 +537,8 @@ class _AccountMainScreenState extends State<AccountMainScreen>
               ),
           ],
         );
-      },
-    );
+        },
+      );
   }
 }
 
@@ -1144,8 +1143,6 @@ class _IconGridPageState extends State<_IconGridPage> {
           child: Column(
             children: [
               Expanded(child: buildGrid()),
-              // 페이지 1(대시보드)에서만 긴급 버튼 표시
-              if (widget.pageIndex == 0) const EmergencyButton(),
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 child: Column(

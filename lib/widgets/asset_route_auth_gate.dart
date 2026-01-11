@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -48,7 +49,7 @@ class _AssetRouteAuthGateState extends State<AssetRouteAuthGate> {
 
     // Dev override: compile-time flag to bypass security during prototype.
     // This precedes any persisted pref and is intended for temporary use.
-    // Set `kDevBypassSecurity` to `false` to restore normal behavior.
+    // See: lib/utils/dev_overrides.dart (uses --dart-define)
     // See: lib/utils/dev_overrides.dart
     if (kDevBypassSecurity) {
       if (!mounted) return;
@@ -60,7 +61,8 @@ class _AssetRouteAuthGateState extends State<AssetRouteAuthGate> {
     }
 
     // Developer/testing bypass via SharedPreferences key.
-    if (prefs.getBool(PrefKeys.bypassSecurityForTesting) == true) {
+    // Disabled in release builds.
+    if (!kReleaseMode && prefs.getBool(PrefKeys.bypassSecurityForTesting) == true) {
       if (!mounted) return;
       setState(() {
         _ready = true;

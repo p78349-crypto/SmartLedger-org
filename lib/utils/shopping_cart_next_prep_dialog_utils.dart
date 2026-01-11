@@ -65,27 +65,34 @@ class ShoppingCartNextPrepDialogUtils {
       context: context,
       showDragHandle: true,
       builder: (sheetContext) {
+        final screenH = MediaQuery.of(sheetContext).size.height;
+        final sheetH = (screenH * 0.7).clamp(260.0, 520.0);
+
         return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const ListTile(
-                title: Text('쇼핑 준비'),
-                subtitle: Text('원하는 준비 방식을 선택하세요.'),
-              ),
-              const Divider(height: 1),
-              ...actions.map((a) {
-                final isDefault = a == defaultAction;
-                final title = isDefault ? '${titleOf(a)} (추천)' : titleOf(a);
-                return ListTile(
-                  leading: Icon(iconOf(a)),
-                  title: Text(title),
-                  subtitle: Text(subtitleOf(a)),
-                  onTap: () => Navigator.of(sheetContext).pop(a),
-                );
-              }),
-              const SizedBox(height: 8),
-            ],
+          child: SizedBox(
+            height: sheetH,
+            child: ListView(
+              children: [
+                const ListTile(
+                  title: Text('쇼핑 준비'),
+                  subtitle: Text('원하는 준비 방식을 선택하세요.'),
+                ),
+                const Divider(height: 1),
+                ...actions.map((a) {
+                  final isDefault = a == defaultAction;
+                  final title = isDefault
+                      ? '${titleOf(a)} (추천)'
+                      : titleOf(a);
+                  return ListTile(
+                    leading: Icon(iconOf(a)),
+                    title: Text(title),
+                    subtitle: Text(subtitleOf(a)),
+                    onTap: () => Navigator.of(sheetContext).pop(a),
+                  );
+                }),
+                const SizedBox(height: 8),
+              ],
+            ),
           ),
         );
       },

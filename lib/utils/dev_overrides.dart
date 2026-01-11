@@ -1,6 +1,18 @@
 /// Development-only overrides.
 ///
-/// Set `kDevBypassSecurity` to `true` during prototype/testing to bypass
-/// asset/root security gates. **DO NOT** enable this in production builds or
-/// include it in any user-facing release.
-const bool kDevBypassSecurity = true;
+/// Compile-time flag to bypass asset/root security gates.
+///
+/// Safe-by-default:
+/// - Defaults to `false`.
+/// - Forced to `false` in release builds.
+///
+/// Enable only for local prototyping/testing:
+/// `flutter run --dart-define=SL_DEV_BYPASS_SECURITY=true`
+///
+/// **DO NOT** ship with this enabled.
+import 'package:flutter/foundation.dart' show kReleaseMode;
+
+const bool kDevBypassSecurity =
+	kReleaseMode
+		? false
+		: bool.fromEnvironment('SL_DEV_BYPASS_SECURITY', defaultValue: false);

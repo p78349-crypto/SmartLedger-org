@@ -181,6 +181,7 @@ class DialogUtils {
           TextButton(
             onPressed: () {
               if (formKey.currentState?.validate() ?? false) {
+                FocusScope.of(context).unfocus();
                 Navigator.of(context).pop(controller.text.trim());
               }
             },
@@ -189,8 +190,6 @@ class DialogUtils {
         ],
       ),
     );
-
-    controller.dispose();
     return result;
   }
 

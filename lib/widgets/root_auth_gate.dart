@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -38,7 +39,8 @@ class _RootAuthGateState extends State<RootAuthGate> {
     }
 
     // Developer/testing bypass via SharedPreferences key.
-    if (prefs.getBool(PrefKeys.bypassSecurityForTesting) == true) {
+    // Disabled in release builds.
+    if (!kReleaseMode && prefs.getBool(PrefKeys.bypassSecurityForTesting) == true) {
       if (!mounted) return;
       setState(() {
         _enabled = false;

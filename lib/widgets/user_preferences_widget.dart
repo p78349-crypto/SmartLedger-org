@@ -1,4 +1,5 @@
 // ignore_for_file: deprecated_member_use
+// NOTE: Radio groupValue/onChanged는 Flutter 3.32+에서 RadioGroup으로 마이그레이션 필요
 import 'package:flutter/material.dart';
 import '../utils/meal_plan_generator_utils.dart';
 import '../utils/user_preference_utils.dart';

@@ -9,6 +9,7 @@ import '../services/asset_service.dart';
 import '../services/budget_service.dart';
 import '../services/emergency_fund_service.dart';
 import '../services/transaction_service.dart';
+import '../services/recent_input_service.dart';
 import '../utils/currency_formatter.dart';
 import '../utils/date_formatter.dart';
 import '../utils/icon_catalog.dart';
@@ -434,6 +435,13 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
       text: calcDefaultAmount(refundQuantity).toStringAsFixed(0),
     );
     final memoController = TextEditingController(text: tx.memo);
+    final refundMethodController = TextEditingController(
+      text: tx.paymentMethod,
+    );
+    final List<String> recentPaymentMethods =
+        await RecentInputService.loadPaymentMethods();
+    if (!mounted) return;
+    String refundChannel = '카드'; // default selection
     final quantityController = TextEditingController(
       text: refundQuantity.toString(),
     );
@@ -576,6 +584,74 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                               isDense: true,
                             ),
                           ),
+                          const SizedBox(height: 12),
+                          const Text(
+                            '환불 수단을 선택하세요',
+                            style: TextStyle(fontWeight: FontWeight.w500),
+                          ),
+                          const SizedBox(height: 8),
+                          Column(
+                            children: ['계좌이체', '카드', '현금', '기타'].map((option) {
+                              final isSelected = refundChannel == option;
+                              return ListTile(
+                                contentPadding: EdgeInsets.zero,
+                                dense: true,
+                                leading: Icon(
+                                  isSelected
+                                      ? IconCatalog.radioButtonChecked
+                                      : IconCatalog.radioButtonOff,
+                                  color: isSelected
+                                      ? Theme.of(context).colorScheme.primary
+                                      : null,
+                                ),
+                                title: Text(option),
+                                onTap: () =>
+                                    setState(() => refundChannel = option),
+                              );
+                            }).toList(),
+                          ),
+                          const SizedBox(height: 8),
+                          if (refundChannel == '카드' || refundChannel == '기타')
+                            Autocomplete<String>(
+                              initialValue: TextEditingValue(
+                                text: refundMethodController.text,
+                              ),
+                              optionsBuilder:
+                                  (TextEditingValue textEditingValue) {
+                                    final input = textEditingValue.text
+                                        .toLowerCase();
+                                    if (input.isEmpty) {
+                                      return recentPaymentMethods;
+                                    }
+                                    return recentPaymentMethods.where(
+                                      (p) => p.toLowerCase().contains(input),
+                                    );
+                                  },
+                              onSelected: (selection) {
+                                refundMethodController.text = selection;
+                              },
+                              fieldViewBuilder:
+                                  (
+                                    context,
+                                    controller,
+                                    focusNode,
+                                    onFieldSubmitted,
+                                  ) {
+                                    return TextField(
+                                      controller: controller,
+                                      focusNode: focusNode,
+                                      decoration: InputDecoration(
+                                        labelText: refundChannel == '카드'
+                                            ? '카드사/카드명'
+                                            : '환불 수단 상세',
+                                        border: const OutlineInputBorder(),
+                                        isDense: true,
+                                      ),
+                                      onChanged: (v) =>
+                                          refundMethodController.text = v,
+                                    );
+                                  },
+                            ),
                           const SizedBox(height: 16),
                           const Text(
                             '환불금을 어디로 받을까요?',
@@ -690,11 +766,13 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                                       // 환불 거래도 기록 (수입으로, 메모에 지출예산 증가 표시)
                                       final refundAmountText = refundAmount
                                           .toStringAsFixed(0);
+                                      final origDate = DateFormatter.defaultDate
+                                          .format(tx.date);
                                       final autoMemo =
                                           '${tx.description} '
                                           '$refundQuantity개 환불받음 '
-                                          '$refundAmountText원 '
-                                          '지출예산으로 보냈어요';
+                                          '$refundAmountText원 → 지출예산\n'
+                                          '원구매일: $origDate, 원결제수단: ${tx.paymentMethod}';
                                       final refundTx = Transaction(
                                         id: DateTime.now()
                                             .millisecondsSinceEpoch
@@ -705,10 +783,18 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                                         date: DateTime.now(),
                                         quantity: refundQuantity,
                                         unitPrice: tx.unitPrice,
-                                        paymentMethod: tx.paymentMethod,
+                                        paymentMethod:
+                                            refundMethodController.text
+                                                .trim()
+                                                .isEmpty
+                                            ? (refundChannel == '카드'
+                                                  ? '카드'
+                                                  : refundChannel)
+                                            : refundMethodController.text
+                                                  .trim(),
                                         memo: memoController.text.isEmpty
                                             ? autoMemo
-                                            : memoController.text,
+                                            : '${memoController.text}\n원구매일: $origDate, 원결제수단: ${tx.paymentMethod}',
                                         store: tx.store,
                                         isRefund: true,
                                         originalTransactionId: tx.id,
@@ -718,6 +804,9 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                                       await service.addTransaction(
                                         widget.accountName,
                                         refundTx,
+                                      );
+                                      await RecentInputService.savePaymentMethod(
+                                        refundTx.paymentMethod,
                                       );
                                     } else {
                                       // 비상금 또는 자산으로 보내는 경우
@@ -730,12 +819,14 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
 
                                       final refundAmountText2 = refundAmount
                                           .toStringAsFixed(0);
+                                      final origDate2 = DateFormatter
+                                          .defaultDate
+                                          .format(tx.date);
                                       final autoMemo =
                                           '${tx.description} '
                                           '$refundQuantity개 환불받음 '
-                                          '$refundAmountText2원 '
-                                          '$selectedAccount'
-                                          '으로 보냈어요';
+                                          '$refundAmountText2원 → $selectedAccount\n'
+                                          '원구매일: $origDate2, 원결제수단: ${tx.paymentMethod}';
                                       final refundTx = Transaction(
                                         id: DateTime.now()
                                             .millisecondsSinceEpoch
@@ -746,10 +837,18 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                                         date: DateTime.now(),
                                         quantity: refundQuantity,
                                         unitPrice: tx.unitPrice,
-                                        paymentMethod: tx.paymentMethod,
+                                        paymentMethod:
+                                            refundMethodController.text
+                                                .trim()
+                                                .isEmpty
+                                            ? (refundChannel == '카드'
+                                                  ? '카드'
+                                                  : refundChannel)
+                                            : refundMethodController.text
+                                                  .trim(),
                                         memo: memoController.text.isEmpty
                                             ? autoMemo
-                                            : memoController.text,
+                                            : '${memoController.text}\n원구매일: $origDate2, 원결제수단: ${tx.paymentMethod}',
                                         savingsAllocation: allocation,
                                         isRefund: true,
                                         originalTransactionId: tx.id,
@@ -759,6 +858,9 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                                       await service.addTransaction(
                                         widget.accountName,
                                         refundTx,
+                                      );
+                                      await RecentInputService.savePaymentMethod(
+                                        refundTx.paymentMethod,
                                       );
                                     }
 
@@ -805,6 +907,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
       textController.dispose();
       memoController.dispose();
       quantityController.dispose();
+      refundMethodController.dispose();
     }
   }
 
@@ -827,6 +930,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
         tx.id,
       );
       final hasRefund = refunds.isNotEmpty;
+      final refundedQty = refunds.fold<int>(0, (s, r) => s + r.quantity);
 
       final netExpense = _selectedType == TransactionType.expense
           ? getNetExpense(tx, refunds)
@@ -906,12 +1010,46 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                             ),
                           ),
                         ),
+                      if (refundedQty > 0 && refundedQty < tx.quantity)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.withAlpha(30),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            '부분 반품: $refundedQty/${tx.quantity}',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              fontSize: 10,
+                              color: Colors.orange[800],
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ),
             ],
           ),
-          subtitle: tx.memo.isNotEmpty ? Text(tx.memo) : null,
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${DateFormatter.defaultDate.format(tx.date)}${tx.store != null && tx.store!.isNotEmpty ? ' · ${tx.store}' : ''}',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              if (tx.memo.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4.0),
+                  child: Text(tx.memo, style: theme.textTheme.bodySmall),
+                ),
+            ],
+          ),
           trailing: Text(
             CurrencyFormatter.format(tx.amount),
             style: theme.textTheme.titleMedium?.copyWith(
@@ -950,12 +1088,38 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              subtitle: Text(
-                DateFormatter.defaultDate.format(refund.date),
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: Colors.green[600],
-                  fontSize: 11,
-                ),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    DateFormatter.defaultDate.format(refund.date),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: Colors.green[600],
+                      fontSize: 11,
+                    ),
+                  ),
+                  if (refund.memo.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4.0),
+                      child: Text(
+                        refund.memo,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: Colors.green[700],
+                        ),
+                      ),
+                    ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6.0),
+                    child: Text(
+                      '환불수단: ${refund.paymentMethod}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: Colors.green[600],
+                        fontSize: 11,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+                ],
               ),
               trailing: Text(
                 CurrencyFormatter.format(refund.amount),

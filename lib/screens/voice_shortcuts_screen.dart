@@ -92,10 +92,7 @@ class VoiceShortcutsScreen extends StatelessWidget {
                     );
                   },
                   icon: const Icon(Icons.mic),
-                  label: const Text(
-                    '음성 제어 시작',
-                    style: TextStyle(fontSize: 18),
-                  ),
+                  label: const Text('음성 제어 시작', style: TextStyle(fontSize: 18)),
                 ),
               ),
             ],

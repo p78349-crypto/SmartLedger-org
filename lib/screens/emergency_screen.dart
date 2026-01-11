@@ -34,11 +34,7 @@ class EmergencyScreen extends StatelessWidget {
             ),
             child: Column(
               children: [
-                const Icon(
-                  Icons.local_hospital,
-                  color: Colors.white,
-                  size: 48,
-                ),
+                const Icon(Icons.local_hospital, color: Colors.white, size: 48),
                 const SizedBox(height: 12),
                 const Text(
                   '긴급 상황 시 아래 버튼을 사용하세요',
@@ -213,10 +209,7 @@ class EmergencyScreen extends StatelessWidget {
   }
 
   /// 긴급 전화 걸기
-  Future<void> _makeEmergencyCall(
-    BuildContext context,
-    String number,
-  ) async {
+  Future<void> _makeEmergencyCall(BuildContext context, String number) async {
     // 확인 다이얼로그
     final confirmed = await showDialog<bool>(
       context: context,
@@ -301,9 +294,7 @@ class _EmergencyCard extends StatelessWidget {
 
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
@@ -395,7 +386,8 @@ class _LocationCardState extends State<_LocationCard> {
 
       if (mounted) {
         setState(() {
-          _locationText = '현재 위치: '
+          _locationText =
+              '현재 위치: '
               '${position.latitude.toStringAsFixed(4)}, '
               '${position.longitude.toStringAsFixed(4)}';
           _isLoading = false;
@@ -423,11 +415,7 @@ class _LocationCardState extends State<_LocationCard> {
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.my_location,
-            color: scheme.primary,
-            size: 20,
-          ),
+          Icon(Icons.my_location, color: scheme.primary, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: _isLoading

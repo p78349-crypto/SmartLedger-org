@@ -1,18 +1,18 @@
 import 'dart:async';
 
 /// Debounce 유틸리티
-/// 
+///
 /// 연속된 호출을 지연시켜 마지막 호출만 실행
-/// 
+///
 /// 사용 예시:
 /// ```dart
 /// final debouncer = Debouncer(delay: Duration(milliseconds: 300));
-/// 
+///
 /// // 연속 호출
 /// debouncer.run(() => print('1')); // 취소됨
 /// debouncer.run(() => print('2')); // 취소됨
 /// debouncer.run(() => print('3')); // 300ms 후 실행
-/// 
+///
 /// // 정리
 /// debouncer.dispose();
 /// ```
@@ -44,13 +44,13 @@ class Debouncer {
 }
 
 /// Throttle 유틸리티
-/// 
+///
 /// 일정 시간 동안 최대 한 번만 실행
-/// 
+///
 /// 사용 예시:
 /// ```dart
 /// final throttler = Throttler(delay: Duration(seconds: 1));
-/// 
+///
 /// // 빠른 연속 호출
 /// throttler.run(() => print('1')); // 즉시 실행
 /// throttler.run(() => print('2')); // 무시됨
@@ -68,9 +68,8 @@ class Throttler {
   /// 쓰로틀 실행 (즉시 실행 모드)
   void run(VoidCallback action) {
     final now = DateTime.now();
-    
-    if (_lastExecuted == null || 
-        now.difference(_lastExecuted!) >= delay) {
+
+    if (_lastExecuted == null || now.difference(_lastExecuted!) >= delay) {
       action();
       _lastExecuted = now;
     }
@@ -79,9 +78,8 @@ class Throttler {
   /// 쓰로틀 실행 (trailing 모드 - 마지막 호출도 실행)
   void runTrailing(VoidCallback action) {
     final now = DateTime.now();
-    
-    if (_lastExecuted == null || 
-        now.difference(_lastExecuted!) >= delay) {
+
+    if (_lastExecuted == null || now.difference(_lastExecuted!) >= delay) {
       action();
       _lastExecuted = now;
       _timer?.cancel();

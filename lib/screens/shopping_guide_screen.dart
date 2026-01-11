@@ -5,7 +5,7 @@ import '../services/user_pref_service.dart';
 import '../utils/currency_formatter.dart';
 
 /// 쇼핑 안내 화면
-/// 
+///
 /// 장바구니 항목을 통로별로 그룹화하고 최적 경로로 안내합니다.
 class ShoppingGuideScreen extends StatefulWidget {
   const ShoppingGuideScreen({
@@ -59,9 +59,9 @@ class _ShoppingGuideScreenState extends State<ShoppingGuideScreen> {
     _sortedLocations.sort((a, b) {
       if (a == '위치 미정') return 1; // 마지막으로
       if (b == '위치 미정') return -1;
-      return layoutService.getAisleOrder(a).compareTo(
-            layoutService.getAisleOrder(b),
-          );
+      return layoutService
+          .getAisleOrder(a)
+          .compareTo(layoutService.getAisleOrder(b));
     });
 
     setState(() {});
@@ -115,8 +115,7 @@ class _ShoppingGuideScreenState extends State<ShoppingGuideScreen> {
 
   int get _totalItems => _items.length;
   int get _completedItems => _items.where((i) => i.isChecked).length;
-  double get _progress =>
-      _totalItems > 0 ? _completedItems / _totalItems : 0.0;
+  double get _progress => _totalItems > 0 ? _completedItems / _totalItems : 0.0;
 
   String get _currentLocation {
     if (_sortedLocations.isEmpty) return '시작';
@@ -150,10 +149,10 @@ class _ShoppingGuideScreenState extends State<ShoppingGuideScreen> {
         children: [
           // 진행 상황 바
           _buildProgressBar(theme),
-          
+
           // 현재 위치 안내
           _buildCurrentLocationGuide(theme),
-          
+
           // 통로별 항목 리스트
           Expanded(
             child: _sortedLocations.isEmpty
@@ -171,11 +170,7 @@ class _ShoppingGuideScreenState extends State<ShoppingGuideScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest,
-        border: Border(
-          bottom: BorderSide(
-            color: theme.dividerColor,
-          ),
-        ),
+        border: Border(bottom: BorderSide(color: theme.dividerColor)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -227,11 +222,7 @@ class _ShoppingGuideScreenState extends State<ShoppingGuideScreen> {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         ),
-        border: Border(
-          bottom: BorderSide(
-            color: theme.dividerColor,
-          ),
-        ),
+        border: Border(bottom: BorderSide(color: theme.dividerColor)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -292,7 +283,7 @@ class _ShoppingGuideScreenState extends State<ShoppingGuideScreen> {
         final location = _sortedLocations[index];
         final items = _groupedItems[location] ?? [];
         final isCurrent = index == _currentLocationIndex;
-        
+
         return _buildLocationGroup(
           theme: theme,
           location: location,
@@ -386,7 +377,9 @@ class _ShoppingGuideScreenState extends State<ShoppingGuideScreen> {
         ),
       ),
       subtitle: item.quantity > 1
-          ? Text('${item.quantity}개 × ${CurrencyFormatter.format(item.unitPrice)}')
+          ? Text(
+              '${item.quantity}개 × ${CurrencyFormatter.format(item.unitPrice)}',
+            )
           : null,
       trailing: Text(
         CurrencyFormatter.format(total),
@@ -478,13 +471,9 @@ class _ShoppingGuideScreenState extends State<ShoppingGuideScreen> {
             _buildStatRow('남은 항목', '${_totalItems - _completedItems}개'),
             const Divider(),
             _buildStatRow('현재 위치', _currentLocation),
-            if (_nextLocation != null)
-              _buildStatRow('다음 위치', _nextLocation!),
+            if (_nextLocation != null) _buildStatRow('다음 위치', _nextLocation!),
             const Divider(),
-            _buildStatRow(
-              '진행률',
-              '${(_progress * 100).toStringAsFixed(1)}%',
-            ),
+            _buildStatRow('진행률', '${(_progress * 100).toStringAsFixed(1)}%'),
           ],
         ),
         actions: [
@@ -504,10 +493,7 @@ class _ShoppingGuideScreenState extends State<ShoppingGuideScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label),
-          Text(
-            value,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
         ],
       ),
     );

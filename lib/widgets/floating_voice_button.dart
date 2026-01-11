@@ -39,8 +39,8 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
   bool _speechAvailable = false;
   bool _isListening = false;
   bool _isProcessing = false;
-  bool _isSpeaking = false; 
-  bool _showResult = false; 
+  bool _isSpeaking = false;
+  bool _showResult = false;
   Timer? _silenceTimer; // 명시적 침묵 감지 타이머
   String _currentText = '';
   String _tempBuffer = ''; // 엔진 재시작 시 텍스트 보관용
@@ -53,9 +53,10 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
   // 지출 데이터 임시 저장 (대화형)
   String? _tempExpenseItem;
   String? _tempExpensePrice;
-  
+
   // 대화 단계 관리
-  String _currentStep = 'idle'; // idle, confirm_start, ask_item, confirm_item, ask_price, confirm_all
+  String _currentStep =
+      'idle'; // idle, confirm_start, ask_item, confirm_item, ask_price, confirm_all
 
   // 상시 대기 모드
   bool _isActiveMode = false;
@@ -96,16 +97,16 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
       }
     });
   }
-  
+
   Future<void> _initTts() async {
     await _tts.setLanguage('ko-KR');
-    await _tts.setSpeechRate(0.6); // 속도 (0.0 ~ 1.0)
+    await _tts.setSpeechRate(_settings.speechRate); // 설정값 사용
     await _tts.setVolume(1.0);
     await _tts.setPitch(1.0);
     // 말하기 끝날 때까지 기다리도록 설정
     await _tts.awaitSpeakCompletion(true);
   }
-  
+
   /// 음성으로 텍스트 읽어주기 (끝날 때까지 기다림)
   Future<void> _speak(String text) async {
     if (mounted) {
@@ -139,6 +140,10 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
       } else if (!_settings.isActiveListenEnabled && _isActiveMode) {
         _stopActiveMode();
       }
+
+      // Update TTS rate dynamically if changed
+      _tts.setSpeechRate(_settings.speechRate);
+
       setState(() {});
     }
   }
@@ -203,7 +208,8 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
           if (mounted) {
             String userMsg = '음성 인식 오류가 발생했습니다';
             // 오프라인 음성 팩 관련 구체적 안내
-            if (error.errorMsg.contains('error_network') || error.errorMsg.contains('7')) {
+            if (error.errorMsg.contains('error_network') ||
+                error.errorMsg.contains('7')) {
               userMsg = '오프라인 언어 팩(한국어)이 설치되어 있는지 확인해주세요.';
             } else if (error.errorMsg.contains('error_no_match')) {
               userMsg = '잘 듣지 못했어요. 다시 말씀해주세요.';
@@ -215,7 +221,7 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
               _soundLevel = 0;
             });
             _pulseController.stop();
-            
+
             if (_isActiveMode) {
               // 상시 대기 모드라면 잠시 후 다시 시도하게 함 (무한 루프 방지)
             } else {
@@ -231,7 +237,7 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
                 _soundLevel = 0;
               });
               _pulseController.stop();
-              
+
               // [핵심 로직] 엔진이 멈췄는데 아직 3.5초 침묵 타이머가 작동 중이라면,
               // 이는 시스템이 성급하게 종료한 것이므로 즉시 재시작하여 말을 끝까지 듣습니다.
               if (_isListening && _silenceTimer?.isActive == true) {
@@ -256,17 +262,17 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
     _tempExpenseItem = null;
     _tempExpensePrice = null;
     _currentStep = 'idle';
-    
+
     // 듣는 중이면 수동 종료
     if (_isListening) {
       _stopAndExit();
       return;
     }
-    
+
     // 대화 시작: 먼저 인사
     _startConversation();
   }
-  
+
   /// 대화 시작 - Google Assistant 스타일
   Future<void> _startConversation() async {
     setState(() {
@@ -274,26 +280,26 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
       _currentStep = 'confirm_start';
       _currentText = '무엇을 도와드릴까요?';
     });
-    
+
     await _speak('네, 무엇을 도와드릴까요?');
-    
+
     // TTS 종료 후 오디오 세션 전환을 위한 미세한 지연
     await Future.delayed(const Duration(milliseconds: 400));
-    
+
     setState(() {
       _isProcessing = false;
     });
-    
+
     _startListening();
   }
-  
+
   /// 완전 종료
   void _stopAndExit() {
     _silenceTimer?.cancel();
     _speech.stop();
     _pulseController.stop();
     _pulseController.reset();
-    
+
     setState(() {
       _isListening = false;
       _currentText = '';
@@ -305,11 +311,11 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
       _showResultMessage(false, '음성 인식을 사용할 수 없어요');
       return;
     }
-    
+
     setState(() {
       _isListening = true;
       if (!isRestart) {
-        _currentText = '말씀해 주세요...'; 
+        _currentText = '말씀해 주세요...';
         _tempBuffer = '';
       }
       _showResult = false;
@@ -317,7 +323,7 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
     });
 
     _pulseController.repeat(reverse: true);
-    
+
     try {
       if (_speech.isListening) {
         await _speech.stop();
@@ -327,11 +333,13 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
       await _speech.listen(
         onResult: (result) {
           if (!mounted) return;
-          
+
           final text = result.recognizedWords;
           // 재시작된 경우 이전 텍스트와 합쳐서 표시
-          final displayScore = _tempBuffer.isEmpty ? text : '$_tempBuffer $text';
-          
+          final displayScore = _tempBuffer.isEmpty
+              ? text
+              : '$_tempBuffer $text';
+
           setState(() {
             if (displayScore.isNotEmpty) {
               _currentText = displayScore;
@@ -340,10 +348,10 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
             }
           });
 
-          // 핵심: 시스템의 finalResult와 별개로, 
+          // 핵심: 시스템의 finalResult와 별개로,
           // 텍스트가 들어오면 타이머를 리셋하여 '진짜 침묵'을 감지합니다.
           _silenceTimer?.cancel();
-          
+
           if (text.isNotEmpty) {
             // 사용자가 말을 멈추고 3.5초가 지나면 "진짜 끝"으로 간주하고 처리 시작
             _silenceTimer = Timer(const Duration(milliseconds: 3500), () {
@@ -358,7 +366,7 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
           if (result.finalResult && text.isNotEmpty) {
             _silenceTimer?.cancel(); // 타이머 중복 방지
             debugPrint('[FloatingVoice] 시스템 최종 감지 완료: "$displayScore"');
-            
+
             // 시스템이 끝났다고 판단하면, 일단 버퍼에 저장해둡니다 (재시작 가능성 대비)
             _tempBuffer = displayScore;
 
@@ -377,8 +385,8 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
             });
           }
         },
-        listenFor: const Duration(seconds: 60), 
-        pauseFor: const Duration(seconds: 15), 
+        listenFor: const Duration(seconds: 60),
+        pauseFor: const Duration(seconds: 15),
         localeId: 'ko_KR',
         listenOptions: stt.SpeechListenOptions(
           onDevice: true, // 오프라인 인식 우선 사용
@@ -390,13 +398,13 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
       _showResultMessage(false, '음성 인식에 실패했어요');
     }
   }
-  
+
   /// 구글 어시스턴트 전용 지출 화면 열기 보장
   Future<void> _ensureQuickExpenseScreen() async {
     // 앱 전체의 Navigator 상태(appNavigatorKey)를 사용하여 현재 경로 확인
     bool alreadyOnScreen = false;
     final navState = appNavigatorKey.currentState;
-    
+
     if (navState != null) {
       navState.popUntil((route) {
         if (route.settings.name == AppRoutes.quickSimpleExpenseInput) {
@@ -420,11 +428,31 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
     _speech.stop();
     _pulseController.stop();
     _pulseController.reset();
-    
+
     final lowerText = text.toLowerCase().trim();
     // 긍정/부정 응답 정밀 감지
-    final isYes = _containsAny(lowerText, ['네', '응', '어', '그래', '좋아', '기록해', '맞아', '해줘', '저장', '기록', '확인']);
-    final isNo = _containsAny(lowerText, ['아니', '됐어', '취소', '그만', '안 해', '틀려', '아냐']);
+    final isYes = _containsAny(lowerText, [
+      '네',
+      '응',
+      '어',
+      '그래',
+      '좋아',
+      '기록해',
+      '맞아',
+      '해줘',
+      '저장',
+      '기록',
+      '확인',
+    ]);
+    final isNo = _containsAny(lowerText, [
+      '아니',
+      '됐어',
+      '취소',
+      '그만',
+      '안 해',
+      '틀려',
+      '아냐',
+    ]);
 
     // 단계별 구글 어시스턴트 로직
     switch (_currentStep) {
@@ -462,32 +490,28 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
       case 'ask_item':
         if (text.isNotEmpty) {
           _tempExpenseItem = text;
-          _currentStep = 'confirm_item';
+          // Skip explicit confirmation to speed up and reduce "chat history" in input field
+          _currentStep = 'ask_price';
           VoiceInputBridge.instance.sendInput(_tempExpenseItem!);
-          await _speak('$_tempExpenseItem(이)군요. 맞나요?');
+          // Immediately ask for price instead of verifying item first
+          await _speak('금액은 얼마인가요?');
           _startListening();
         }
         break;
 
+      /* 
+      // Skipped step
       case 'confirm_item':
-        if (isYes) {
-          _currentStep = 'ask_price';
-          await _speak('알겠습니다. 금액은 얼마인가요?');
-          _startListening();
-        } else if (isNo) {
-          _tempExpenseItem = null;
-          VoiceInputBridge.instance.sendInput('');
-          _currentStep = 'ask_item';
-          await _speak('죄송합니다. 품목을 다시 말씀해 주시겠어요?');
-          _startListening();
-        }
-        break;
+        ...
+      */
 
       case 'ask_price':
         if (text.isNotEmpty) {
           _tempExpensePrice = text;
           _currentStep = 'confirm_all';
-          final displayPrice = _tempExpensePrice!.contains('원') ? _tempExpensePrice! : '$_tempExpensePrice원';
+          final displayPrice = _tempExpensePrice!.contains('원')
+              ? _tempExpensePrice!
+              : '$_tempExpensePrice원';
           final combined = '$_tempExpenseItem $displayPrice';
           VoiceInputBridge.instance.sendInput(combined);
           await _speak('확인했습니다. $_tempExpenseItem, $displayPrice. 저장할까요?');
@@ -505,7 +529,7 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
         } else if (isNo) {
           await _speak('기록을 취소했습니다. 더 도와드릴 일이 있을까요?');
           _currentStep = 'idle';
-          _stopAndExit(); 
+          _stopAndExit();
         }
         break;
 
@@ -517,10 +541,12 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
   /// Google NLU (자연어 이해) 스타일 분석 - 인사 및 데이터 즉시 추출
   Future<void> _handleGoogleNlu(String text) async {
     final lowerText = text.toLowerCase();
-    
+
     // 1. Google 스타일의 인사 응답
     if (_containsAny(lowerText, ['안녕', '반가워', '누구니', '이름', '뭐해'])) {
-      await _speak('안녕하세요, 구글 어시스턴트 스타일의 가계부 비서입니다. 지출을 기록하거나 통계를 확인하는 걸 도와드릴 수 있어요.');
+      await _speak(
+        '안녕하세요, 구글 어시스턴트 스타일의 가계부 비서입니다. 지출을 기록하거나 통계를 확인하는 걸 도와드릴 수 있어요.',
+      );
       _startListening();
       return;
     }
@@ -531,9 +557,19 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
     _tempExpensePrice = parsed['price'];
 
     // 3. 지출/기록 의도 확인
-    final isExpenseIntent = _containsAny(lowerText, ['지출', '기록', '돈', '썼', '결제', '구매', '샀']);
-    
-    if (isExpenseIntent || _tempExpenseItem != null || _tempExpensePrice != null) {
+    final isExpenseIntent = _containsAny(lowerText, [
+      '지출',
+      '기록',
+      '돈',
+      '썼',
+      '결제',
+      '구매',
+      '샀',
+    ]);
+
+    if (isExpenseIntent ||
+        _tempExpenseItem != null ||
+        _tempExpensePrice != null) {
       // 품목이나 금액이 없이 "지출 입력할 거야" 수준의 의도만 있을 때
       if (_tempExpenseItem == null && _tempExpensePrice == null) {
         _currentStep = 'ask_open_expense';
@@ -547,7 +583,9 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
       if (_tempExpenseItem != null && _tempExpensePrice != null) {
         _currentStep = 'confirm_all';
         // 가격에 '원'이 이미 포함되어 있는지 확인하여 중복 방지
-        final displayPrice = _tempExpensePrice!.contains('원') ? _tempExpensePrice! : '$_tempExpensePrice원';
+        final displayPrice = _tempExpensePrice!.contains('원')
+            ? _tempExpensePrice!
+            : '$_tempExpensePrice원';
         final combined = '$_tempExpenseItem $displayPrice';
         VoiceInputBridge.instance.sendInput(combined);
         await _speak('확인했습니다. $_tempExpenseItem, $displayPrice 저장할까요?');
@@ -557,18 +595,20 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
         await _speak('네, $_tempExpenseItem(이)군요. 금액은 얼마인가요?');
       } else if (_tempExpensePrice != null) {
         _currentStep = 'ask_item';
-        final displayPrice = _tempExpensePrice!.contains('원') ? _tempExpensePrice! : '$_tempExpensePrice원';
+        final displayPrice = _tempExpensePrice!.contains('원')
+            ? _tempExpensePrice!
+            : '$_tempExpensePrice원';
         VoiceInputBridge.instance.sendInput(displayPrice);
         await _speak('$displayPrice 확인했습니다. 어떤 상품인가요?');
       } else {
         _currentStep = 'ask_item';
         await _speak('네, 지출 내역을 기록하겠습니다. 품목은 무엇인가요?');
       }
-      
+
       _startListening();
       return;
     }
-    
+
     // 수입 기록 의도
     if (_containsAny(lowerText, ['수입', '입금', '월급', '받았'])) {
       await _speak('알겠습니다. 수입 기록 화면을 열겠습니다.');
@@ -576,7 +616,7 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
       _stopAndExit(); // 목적지 이동 후 닫기
       return;
     }
-    
+
     // 조회 의도
     if (_containsAny(lowerText, ['얼마', '통계', '내역', '확인'])) {
       await _speak('네, 통계 화면을 열어 드릴게요.');
@@ -584,12 +624,12 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
       _stopAndExit(); // 목적지 이동 후 닫기
       return;
     }
-    
+
     // 이해 못함
     await _speak('죄송합니다. 잘 이해하지 못했어요. 지출 기록 또는 조회를 도와드릴 수 있습니다.');
     _startListening();
   }
-  
+
   bool _containsAny(String text, List<String> keywords) {
     return keywords.any((k) => text.contains(k));
   }
@@ -597,31 +637,34 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
   /// 간단한 한글 지출 텍스트 파서 - 정확도 향상 및 복합 명사 처리
   Map<String, String?> _parseExpense(String text) {
     // 1. 의도와 상관없는 불필요한 단어 제거
-    final cleanText = text.replaceAll(RegExp(r'(지출|기록|입력|저장|해줘|해|줘|좀|요|은|는|이|가|을|를)$'), '').trim();
-    
+    final cleanText = text
+        .replaceAll(RegExp(r'(지출|기록|입력|저장|해줘|해|줘|좀|요|은|는|이|가|을|를)$'), '')
+        .trim();
+
     // 2. 가격 패턴 추출 (단위: 십, 백, 천, 만 포함)
     // 3천5백원, 1만5000원 등의 복합 형태 대응
     final priceRegex = RegExp(r'(\d+[만천백십\d]*원?|[만천백십]+원?)');
     final matches = priceRegex.allMatches(cleanText).toList();
-    
+
     String? price;
     String? item;
-    
+
     if (matches.isNotEmpty) {
-      // 기본적으로 마지막 매치를 가격으로 보되, 
+      // 기본적으로 마지막 매치를 가격으로 보되,
       // '원' 단위나 '만/천' 단위가 포함된 것을 우선적으로 찾음 (수량 '1개' 등과 구분)
-      final bestMatch = matches.reversed.firstWhere(
-        (m) {
-          final mText = m.group(0) ?? '';
-          return mText.contains(RegExp(r'[원만천백십]')) || (int.tryParse(mText.replaceAll(',', '')) ?? 0) >= 100;
-        },
-        orElse: () => matches.last,
-      );
+      final bestMatch = matches.reversed.firstWhere((m) {
+        final mText = m.group(0) ?? '';
+        return mText.contains(RegExp(r'[원만천백십]')) ||
+            (int.tryParse(mText.replaceAll(',', '')) ?? 0) >= 100;
+      }, orElse: () => matches.last);
 
       price = bestMatch.group(0);
       // 복합 명사(사과만원) 처리를 위해 replaceFirst 사용
-      item = cleanText.replaceFirst(price!, '').trim().replaceAll(RegExp(r'\s+'), ' ');
-      
+      item = cleanText
+          .replaceFirst(price!, '')
+          .trim()
+          .replaceAll(RegExp(r'\s+'), ' ');
+
       if (item.isEmpty) item = null;
     } else {
       // 숫자가 없으면 전체를 품목 후보로 (단, 의도어만 있는 경우는 제외)
@@ -631,17 +674,17 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
         item = cleanText;
       }
     }
-    
-    return {
-      'item': item,
-      'price': price,
-    };
+
+    return {'item': item, 'price': price};
   }
-  
+
   /// 통계 화면으로 이동
   Future<void> _navigateToStats() async {
     final prefs = await SharedPreferences.getInstance();
-    final accountName = prefs.getString(PrefKeys.selectedAccount)?.trim() ?? AccountService().accounts.firstOrNull?.name ?? '';
+    final accountName =
+        prefs.getString(PrefKeys.selectedAccount)?.trim() ??
+        AccountService().accounts.firstOrNull?.name ??
+        '';
     if (mounted && accountName.isNotEmpty) {
       appNavigatorKey.currentState?.pushNamed(
         AppRoutes.periodStatsMonth,
@@ -649,12 +692,15 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
       );
     }
   }
-  
+
   /// 수입 입력 화면으로 이동
   Future<void> _navigateToIncomeInput() async {
     final prefs = await SharedPreferences.getInstance();
-    final accountName = prefs.getString(PrefKeys.selectedAccount)?.trim() ?? AccountService().accounts.firstOrNull?.name ?? '';
-    
+    final accountName =
+        prefs.getString(PrefKeys.selectedAccount)?.trim() ??
+        AccountService().accounts.firstOrNull?.name ??
+        '';
+
     if (mounted && accountName.isNotEmpty) {
       appNavigatorKey.currentState?.pushNamed(
         AppRoutes.transactionAddIncome,
@@ -662,18 +708,20 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
       );
     }
   }
-  
+
   /// 간편지출 화면 열고 음성 입력 대기 (대화형)
   Future<void> _goToQuickExpenseAndListen() async {
     // 계정 가져오기
     final prefs = await SharedPreferences.getInstance();
-    final accountName = prefs.getString(PrefKeys.selectedAccount)?.trim() ?? AccountService().accounts.firstOrNull?.name;
-    
+    final accountName =
+        prefs.getString(PrefKeys.selectedAccount)?.trim() ??
+        AccountService().accounts.firstOrNull?.name;
+
     if (accountName == null || accountName.isEmpty) {
       await _speak('계정을 먼저 생성해주세요');
       return;
     }
-    
+
     // 간편지출 화면으로 이동 (빈 상태)
     if (mounted) {
       appNavigatorKey.currentState?.pushNamed(
@@ -713,7 +761,7 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
     // 초기 위치: 화면 오른쪽 중간 (처음 실행 시)
     final buttonX = _buttonX ?? (screenSize.width - 56);
     final buttonY = _buttonY ?? (screenSize.height / 2 - 28);
-    
+
     final isAssistantActive = _isListening || _isProcessing || _isSpeaking;
 
     return Stack(
@@ -767,10 +815,14 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
             child: GestureDetector(
               onPanUpdate: (details) {
                 setState(() {
-                  _buttonX = (buttonX + details.delta.dx)
-                      .clamp(0.0, screenSize.width - 56);
-                  _buttonY = (buttonY + details.delta.dy)
-                      .clamp(0.0, screenSize.height - 56 - bottomPadding);
+                  _buttonX = (buttonX + details.delta.dx).clamp(
+                    0.0,
+                    screenSize.width - 56,
+                  );
+                  _buttonY = (buttonY + details.delta.dy).clamp(
+                    0.0,
+                    screenSize.height - 56 - bottomPadding,
+                  );
                 });
               },
               onPanEnd: (_) => _saveButtonPosition(),
@@ -787,7 +839,7 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
   Widget _buildGoogleStyleAssistantUI() {
     final theme = Theme.of(context);
     final bottomPadding = MediaQuery.of(context).padding.bottom;
-    
+
     return Container(
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
@@ -807,7 +859,7 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
           // 구글 컬러 웨이브/바
           _buildColorfulWaves(),
           const SizedBox(height: 20),
-          
+
           // 현재 텍스트 (사용자 입력 또는 비서 질문)
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
@@ -821,9 +873,9 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
               textAlign: TextAlign.center,
             ),
           ),
-          
+
           const SizedBox(height: 12),
-          
+
           // 진행 상태 안내
           Text(
             _isProcessing ? '생각 중...' : (_isSpeaking ? '알려드려요' : '듣고 있어요'),
@@ -833,7 +885,7 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
               fontWeight: FontWeight.bold,
             ),
           ),
-          
+
           if (_tempExpenseItem != null || _tempExpensePrice != null) ...[
             const SizedBox(height: 20),
             _buildExtractedDataChips(),
@@ -851,7 +903,7 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
       Colors.yellow[600]!,
       Colors.green[400]!,
     ];
-    
+
     return SizedBox(
       height: 30,
       child: Row(
@@ -860,7 +912,8 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
         children: List.generate(4, (index) {
           double level = 8.0;
           if (_isListening) {
-            level = (_soundLevel * (1.0 - (index * 0.1))).clamp(2.0, 10.0) * 2.5;
+            level =
+                (_soundLevel * (1.0 - (index * 0.1))).clamp(2.0, 10.0) * 2.5;
           } else if (_isSpeaking || _isProcessing) {
             // 말하거나 처리 중일 때는 일정한 속도로 물결침
             level = 8.0 + (5.0 * (1.0 + (index * 0.2)));
@@ -919,10 +972,7 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
         color: theme.colorScheme.tertiaryContainer,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 4,
-          ),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 4),
         ],
       ),
       child: Row(
@@ -1005,11 +1055,7 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
                 width: 2,
               ),
             ),
-            child: Icon(
-              buttonIcon,
-              color: iconColor,
-              size: 22,
-            ),
+            child: Icon(buttonIcon, color: iconColor, size: 22),
           ),
         ),
       ),

@@ -4,6 +4,7 @@ import '../models/asset.dart';
 import 'asset_detail_screen.dart';
 import 'asset_input_screen.dart';
 import '../services/asset_service.dart';
+import '../services/asset_security_service.dart';
 import '../utils/date_formatter.dart';
 import '../utils/dialog_utils.dart';
 import '../utils/debounce_utils.dart';
@@ -183,6 +184,38 @@ class _AssetListScreenState extends State<AssetListScreen> {
               subtitle: const Text('이동 기록 타임라인'),
               onTap: () async {
                 Navigator.pop(context);
+                final isRoot = widget.accountName.toLowerCase() == 'root';
+                final locked = isRoot
+                    ? false
+                    : await AssetSecurityService.isLocked(widget.accountName);
+                if (!rootContext.mounted) return;
+                if (locked) {
+                  final doAuth = await showDialog<bool>(
+                    context: rootContext,
+                    builder: (_) => AlertDialog(
+                      title: const Text('자산 보안 잠금'),
+                      content: const Text('이 자산은 잠겨 있습니다. 인증하여 열겠습니까?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(rootContext, false),
+                          child: const Text('취소'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(rootContext, true),
+                          child: const Text('인증하여 열기'),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (!rootContext.mounted) return;
+                  if (doAuth != true) return;
+                  final ok = await AssetSecurityService.authenticateAndUnlock(
+                    widget.accountName,
+                  );
+                  if (!rootContext.mounted) return;
+                  if (!ok) return;
+                }
+
                 await Navigator.push(
                   rootContext,
                   MaterialPageRoute(

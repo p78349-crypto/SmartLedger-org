@@ -326,6 +326,8 @@ class _BudgetStatusScreenState extends State<BudgetStatusScreen> {
     for (final tx in transactions) {
       if (tx.type == TransactionType.expense) {
         totalExpense += tx.amount;
+      } else if (tx.type == TransactionType.refund) {
+        totalExpense -= tx.amount;
       }
     }
 
@@ -351,6 +353,12 @@ class _BudgetStatusScreenState extends State<BudgetStatusScreen> {
             : Transaction.defaultMainCategory;
         categorySpending[category] =
             (categorySpending[category] ?? 0) + tx.amount;
+      } else if (tx.type == TransactionType.refund) {
+        final category = tx.mainCategory.isNotEmpty
+            ? tx.mainCategory
+            : Transaction.defaultMainCategory;
+        categorySpending[category] =
+            (categorySpending[category] ?? 0) - tx.amount;
       }
     }
 

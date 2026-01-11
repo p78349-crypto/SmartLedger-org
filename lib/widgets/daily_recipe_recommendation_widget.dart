@@ -57,9 +57,7 @@ class _DailyRecipeRecommendationWidgetState
       final allItems = FoodExpiryService.instance.items.value;
 
       if (mounted) {
-        final result = await DailyRecipeRecommendationUtils.build(
-          allItems,
-        );
+        final result = await DailyRecipeRecommendationUtils.build(allItems);
 
         setState(() {
           _expiringItems = result.expiringItems;
@@ -199,21 +197,21 @@ class _DailyRecipeRecommendationWidgetState
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: RecipeRecommendationStyleUtils
-                                .matchBadgeBackgroundColor(
-                              theme,
-                              _recommendedRecipe!.matchPercentage,
-                            ),
+                            color:
+                                RecipeRecommendationStyleUtils.matchBadgeBackgroundColor(
+                                  theme,
+                                  _recommendedRecipe!.matchPercentage,
+                                ),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
                             '${_recommendedRecipe!.matchPercentage}% 준비됨',
                             style: theme.textTheme.labelSmall?.copyWith(
-                              color: RecipeRecommendationStyleUtils
-                                  .matchBadgeForegroundColor(
-                                theme,
-                                _recommendedRecipe!.matchPercentage,
-                              ),
+                              color:
+                                  RecipeRecommendationStyleUtils.matchBadgeForegroundColor(
+                                    theme,
+                                    _recommendedRecipe!.matchPercentage,
+                                  ),
                               fontWeight: FontWeight.bold,
                             ),
                           ),

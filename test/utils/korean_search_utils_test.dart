@@ -4,10 +4,13 @@ import 'package:smart_ledger/utils/korean_search_utils.dart';
 void main() {
   group('KoreanSearchUtils', () {
     group('Korean 초성 matching', () {
-      test('extractChosung extracts initial consonants from Hangul syllables', () {
-        expect(KoreanSearchUtils.extractChosung('김치'), 'ㄱㅊ');
-        expect(KoreanSearchUtils.extractChosung('안녕'), 'ㅇㄴ');
-      });
+      test(
+        'extractChosung extracts initial consonants from Hangul syllables',
+        () {
+          expect(KoreanSearchUtils.extractChosung('김치'), 'ㄱㅊ');
+          expect(KoreanSearchUtils.extractChosung('안녕'), 'ㅇㄴ');
+        },
+      );
 
       test('matches supports 초성-only queries', () {
         expect(KoreanSearchUtils.matches('김치', 'ㄱㅊ'), isTrue);
@@ -59,8 +62,14 @@ void main() {
         // Multi-word - matches any word start
         expect(KoreanSearchUtils.matchesPrefix('Walmart Store', 'Wal'), isTrue);
         expect(KoreanSearchUtils.matchesPrefix('Walmart Store', 'Sto'), isTrue);
-        expect(KoreanSearchUtils.matchesPrefix('Emergency Room', 'Emer'), isTrue);
-        expect(KoreanSearchUtils.matchesPrefix('Emergency Room', 'Room'), isTrue);
+        expect(
+          KoreanSearchUtils.matchesPrefix('Emergency Room', 'Emer'),
+          isTrue,
+        );
+        expect(
+          KoreanSearchUtils.matchesPrefix('Emergency Room', 'Room'),
+          isTrue,
+        );
       });
 
       test('matches integrates prefix search', () {
@@ -77,12 +86,17 @@ void main() {
         expect(KoreanSearchUtils.isAcronymQuery('R&D'), isTrue);
         expect(KoreanSearchUtils.isAcronymQuery('fema'), isFalse); // lowercase
         expect(KoreanSearchUtils.isAcronymQuery('A'), isFalse); // too short
-        expect(KoreanSearchUtils.isAcronymQuery('TOOLONG'), isFalse); // > 6 chars
+        expect(
+          KoreanSearchUtils.isAcronymQuery('TOOLONG'),
+          isFalse,
+        ); // > 6 chars
       });
 
       test('extractAcronym builds acronym from text', () {
         expect(
-          KoreanSearchUtils.extractAcronym('Federal Emergency Management Agency'),
+          KoreanSearchUtils.extractAcronym(
+            'Federal Emergency Management Agency',
+          ),
           'fema',
         );
         expect(
@@ -105,7 +119,10 @@ void main() {
           isTrue,
         );
         expect(
-          KoreanSearchUtils.matchesAcronym('Emergency Operations Center', 'eoc'),
+          KoreanSearchUtils.matchesAcronym(
+            'Emergency Operations Center',
+            'eoc',
+          ),
           isTrue,
         );
 
@@ -123,10 +140,7 @@ void main() {
           ),
           isTrue,
         );
-        expect(
-          KoreanSearchUtils.matches('ATM withdrawal', 'ATM'),
-          isTrue,
-        );
+        expect(KoreanSearchUtils.matches('ATM withdrawal', 'ATM'), isTrue);
 
         // Dynamic acronym extraction
         expect(
@@ -202,12 +216,18 @@ void main() {
 
         // English style
         expect(KoreanSearchUtils.matches('Grocery Shopping', 'Groc'), isTrue);
-        expect(KoreanSearchUtils.matches('Credit Card Payment', 'cred'), isTrue);
+        expect(
+          KoreanSearchUtils.matches('Credit Card Payment', 'cred'),
+          isTrue,
+        );
 
         // Acronym style
         expect(KoreanSearchUtils.matches('ATM Fee', 'ATM'), isTrue);
         expect(
-          KoreanSearchUtils.matches('Individual Retirement Account contribution', 'IRA'),
+          KoreanSearchUtils.matches(
+            'Individual Retirement Account contribution',
+            'IRA',
+          ),
           isTrue,
         );
       });
@@ -249,10 +269,7 @@ void main() {
 
       group('4-mora contraction matching (4文字熟語)', () {
         test('スマホ matches スマートフォン', () {
-          expect(
-            MultilingualSearchUtils.matches('スマートフォンで決済', 'スマホ'),
-            isTrue,
-          );
+          expect(MultilingualSearchUtils.matches('スマートフォンで決済', 'スマホ'), isTrue);
           expect(
             MultilingualSearchUtils.matchesJapanese('スマートフォン', 'スマホ'),
             isTrue,
@@ -275,121 +292,76 @@ void main() {
 
         test('contraction works with hiragana input', () {
           // User types hiragana, text has katakana
-          expect(
-            MultilingualSearchUtils.matches('スマートフォン', 'すまほ'),
-            isTrue,
-          );
+          expect(MultilingualSearchUtils.matches('スマートフォン', 'すまほ'), isTrue);
         });
       });
 
       group('Government abbreviations (政府略語)', () {
         test('都庁 matches 東京都庁', () {
-          expect(
-            MultilingualSearchUtils.matches('東京都庁からのお知らせ', '都庁'),
-            isTrue,
-          );
+          expect(MultilingualSearchUtils.matches('東京都庁からのお知らせ', '都庁'), isTrue);
         });
 
         test('総務 matches 総務省', () {
-          expect(
-            MultilingualSearchUtils.matches('総務省の発表', '総務'),
-            isTrue,
-          );
+          expect(MultilingualSearchUtils.matches('総務省の発表', '総務'), isTrue);
         });
       });
 
       group('Emergency terms (緊急用語)', () {
         test('地震 matches with hiragana じしん', () {
-          expect(
-            MultilingualSearchUtils.matches('地震警報', 'じしん'),
-            isTrue,
-          );
+          expect(MultilingualSearchUtils.matches('地震警報', 'じしん'), isTrue);
         });
 
         test('避難所 matches with reading ひなんじょ', () {
-          expect(
-            MultilingualSearchUtils.matches('避難所の場所', 'ひなんじょ'),
-            isTrue,
-          );
+          expect(MultilingualSearchUtils.matches('避難所の場所', 'ひなんじょ'), isTrue);
         });
 
         test('津波 matches with reading つなみ', () {
-          expect(
-            MultilingualSearchUtils.matches('津波注意報', 'つなみ'),
-            isTrue,
-          );
+          expect(MultilingualSearchUtils.matches('津波注意報', 'つなみ'), isTrue);
         });
       });
 
       group('Hiragana prefix matching (読み検索)', () {
         test('じ prefix matches 地震 via reading', () {
-          expect(
-            MultilingualSearchUtils.matchesJapanese('地震', 'じ'),
-            isTrue,
-          );
+          expect(MultilingualSearchUtils.matchesJapanese('地震', 'じ'), isTrue);
         });
 
         test('ひな prefix matches 避難', () {
-          expect(
-            MultilingualSearchUtils.matchesJapanese('避難所', 'ひな'),
-            isTrue,
-          );
+          expect(MultilingualSearchUtils.matchesJapanese('避難所', 'ひな'), isTrue);
         });
       });
 
       group('Finance terms (金融用語)', () {
         test('クレカ matches クレジットカード', () {
-          expect(
-            MultilingualSearchUtils.matches('クレジットカード決済', 'クレカ'),
-            isTrue,
-          );
+          expect(MultilingualSearchUtils.matches('クレジットカード決済', 'クレカ'), isTrue);
         });
 
         test('ATM matches エーティーエム', () {
-          expect(
-            MultilingualSearchUtils.matches('ATMで引き出し', 'ATM'),
-            isTrue,
-          );
+          expect(MultilingualSearchUtils.matches('ATMで引き出し', 'ATM'), isTrue);
         });
 
         test('振込 matches with reading ふりこみ', () {
-          expect(
-            MultilingualSearchUtils.matches('振込手数料', 'ふりこみ'),
-            isTrue,
-          );
+          expect(MultilingualSearchUtils.matches('振込手数料', 'ふりこみ'), isTrue);
         });
       });
 
       group('Kana equivalence', () {
         test('hiragana query matches katakana text', () {
-          expect(
-            MultilingualSearchUtils.matches('カタカナ', 'かたかな'),
-            isTrue,
-          );
+          expect(MultilingualSearchUtils.matches('カタカナ', 'かたかな'), isTrue);
         });
 
         test('katakana query matches hiragana text', () {
-          expect(
-            MultilingualSearchUtils.matches('ひらがな', 'ヒラガナ'),
-            isTrue,
-          );
+          expect(MultilingualSearchUtils.matches('ひらがな', 'ヒラガナ'), isTrue);
         });
       });
     });
 
     group('Match scoring with Japanese', () {
       test('Japanese thesaurus match scores 75', () {
-        expect(
-          MultilingualSearchUtils.matchScore('スマートフォン', 'スマホ'),
-          75,
-        );
+        expect(MultilingualSearchUtils.matchScore('スマートフォン', 'スマホ'), 75);
       });
 
       test('Japanese kana prefix match scores 55', () {
-        expect(
-          MultilingualSearchUtils.matchScore('地震警報', 'じ'),
-          55,
-        );
+        expect(MultilingualSearchUtils.matchScore('地震警報', 'じ'), 55);
       });
     });
 
@@ -403,42 +375,47 @@ void main() {
       });
 
       test('Japanese contraction for スマホ', () {
-        expect(
-          MultilingualSearchUtils.matches('スマートフォン購入', 'スマホ'),
-          isTrue,
-        );
+        expect(MultilingualSearchUtils.matches('スマートフォン購入', 'スマホ'), isTrue);
       });
 
       test('All three languages in one search context', () {
         final items = [
-          '기상청 경보',      // Korean
-          'Hurricane Alert',  // English
-          '地震速報',         // Japanese
-          'FEMA Notice',      // English acronym
-          '避難所案内',       // Japanese
+          '기상청 경보', // Korean
+          'Hurricane Alert', // English
+          '地震速報', // Japanese
+          'FEMA Notice', // English acronym
+          '避難所案内', // Japanese
         ];
 
         // Korean 초성 search
         var results = MultilingualSearchUtils.sortByRelevance(
-          items, 'ㄱㅅㅊ', (i) => i,
+          items,
+          'ㄱㅅㅊ',
+          (i) => i,
         );
         expect(results.first, '기상청 경보');
 
         // English prefix search
         results = MultilingualSearchUtils.sortByRelevance(
-          items, 'Hur', (i) => i,
+          items,
+          'Hur',
+          (i) => i,
         );
         expect(results.first, 'Hurricane Alert');
 
         // Japanese reading search
         results = MultilingualSearchUtils.sortByRelevance(
-          items, 'じしん', (i) => i,
+          items,
+          'じしん',
+          (i) => i,
         );
         expect(results.first, '地震速報');
 
         // English acronym search
         results = MultilingualSearchUtils.sortByRelevance(
-          items, 'FEMA', (i) => i,
+          items,
+          'FEMA',
+          (i) => i,
         );
         expect(results.first, 'FEMA Notice');
       });
@@ -472,7 +449,10 @@ void main() {
 
         test('Samml matches Sammelstelle', () {
           expect(
-            MultilingualSearchUtils.matchesGermanCompound('Sammelstelle', 'samml'),
+            MultilingualSearchUtils.matchesGermanCompound(
+              'Sammelstelle',
+              'samml',
+            ),
             isTrue,
           );
         });
@@ -623,14 +603,13 @@ void main() {
             MultilingualSearchUtils.matches('Emergency Call 112', '112'),
             isTrue,
           );
-          expect(
-            MultilingualSearchUtils.matches('Notruf 112', '112'),
-            isTrue,
-          );
+          expect(MultilingualSearchUtils.matches('Notruf 112', '112'), isTrue);
         });
 
         test('getEmergencyCodeKeywords returns all languages', () {
-          final keywords = MultilingualSearchUtils.getEmergencyCodeKeywords('EMG_112');
+          final keywords = MultilingualSearchUtils.getEmergencyCodeKeywords(
+            'EMG_112',
+          );
           expect(keywords, contains('emergency'));
           expect(keywords, contains('notfall'));
           expect(keywords, contains('urgence'));
@@ -654,7 +633,7 @@ void main() {
             'Evak',
           );
           expect(score, 90); // Starts with match
-          
+
           // Test compound decomposition with non-prefix query
           final score2 = MultilingualSearchUtils.matchScore(
             'Sammelstelle Evakuierung',
@@ -681,7 +660,10 @@ void main() {
           );
           // German compound prefix match
           expect(
-            MultilingualSearchUtils.matchesEuropean('Feuerwehr Berlin', 'feuer'),
+            MultilingualSearchUtils.matchesEuropean(
+              'Feuerwehr Berlin',
+              'feuer',
+            ),
             isTrue,
           );
           // Article removal match
@@ -699,60 +681,76 @@ void main() {
     group('Global 4-language comparison (KR/US/JP/EU)', () {
       test('All four regions in one search context', () {
         final items = [
-          '기상청 경보',                    // Korean
-          'Hurricane Alert',                // English (US)
-          '地震速報',                       // Japanese
-          'Evakuierungssammelstelle',       // German (EU)
-          'Mairie de Paris',                // French (EU)
-          'FEMA Notice',                    // US Acronym
-          'Urgence médicale',               // French emergency
+          '기상청 경보', // Korean
+          'Hurricane Alert', // English (US)
+          '地震速報', // Japanese
+          'Evakuierungssammelstelle', // German (EU)
+          'Mairie de Paris', // French (EU)
+          'FEMA Notice', // US Acronym
+          'Urgence médicale', // French emergency
         ];
 
         // Korean 초성 search
         var results = MultilingualSearchUtils.sortByRelevance(
-          items, 'ㄱㅅㅊ', (i) => i,
+          items,
+          'ㄱㅅㅊ',
+          (i) => i,
         );
         expect(results.first, '기상청 경보');
 
         // English prefix search
         results = MultilingualSearchUtils.sortByRelevance(
-          items, 'Hur', (i) => i,
+          items,
+          'Hur',
+          (i) => i,
         );
         expect(results.first, 'Hurricane Alert');
 
         // Japanese reading search
         results = MultilingualSearchUtils.sortByRelevance(
-          items, 'じしん', (i) => i,
+          items,
+          'じしん',
+          (i) => i,
         );
         expect(results.first, '地震速報');
 
         // German compound search
         results = MultilingualSearchUtils.sortByRelevance(
-          items, 'Evak', (i) => i,
+          items,
+          'Evak',
+          (i) => i,
         );
         expect(results.first, 'Evakuierungssammelstelle');
 
         // French prefix search
         results = MultilingualSearchUtils.sortByRelevance(
-          items, 'Pari', (i) => i,
+          items,
+          'Pari',
+          (i) => i,
         );
         expect(results.first, 'Mairie de Paris');
 
         // French emergency prefix
         results = MultilingualSearchUtils.sortByRelevance(
-          items, 'Urgen', (i) => i,
+          items,
+          'Urgen',
+          (i) => i,
         );
         expect(results.first, 'Urgence médicale');
       });
 
       test('Security: public data only principle', () {
         // Low security level data should be accessible
-        final emergencyId = MultilingualSearchUtils.matchesGlobalEmergencyCode('notf');
+        final emergencyId = MultilingualSearchUtils.matchesGlobalEmergencyCode(
+          'notf',
+        );
         expect(emergencyId, isNotNull);
-        
+
         // Verify it's marked as low security
         // In real implementation, this would filter sensitive data
-        final keywords = MultilingualSearchUtils.getEmergencyCodeKeywords(emergencyId!);
+        final keywords = MultilingualSearchUtils.getEmergencyCodeKeywords(
+          emergencyId!,
+        );
         expect(keywords, isNotEmpty);
       });
     });

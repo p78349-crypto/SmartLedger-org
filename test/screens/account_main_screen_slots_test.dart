@@ -14,9 +14,7 @@ void main() {
   ) async {
     await tester.pumpWidget(
       const MaterialApp(
-        home: AccountMainScreen(
-          accountName: 'test_account_slots_removed',
-        ),
+        home: AccountMainScreen(accountName: 'test_account_slots_removed'),
       ),
     );
     await tester.pumpAndSettle();

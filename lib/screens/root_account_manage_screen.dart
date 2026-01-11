@@ -141,6 +141,18 @@ class _RootAccountManageScreenState extends State<RootAccountManageScreen> {
             : ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
+                  // CEO 대시보드 링크 (ROOT 전용)
+                  Card(
+                    child: ListTile(
+                      leading: const Icon(IconCatalog.insightsOutlined),
+                      title: const Text('CEO 비서 대시보드'),
+                      subtitle: const Text('전략 지표 및 복구 계획 보기'),
+                      onTap: () => Navigator.of(
+                        context,
+                      ).pushNamed(AppRoutes.ceoAssistant),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
                   const Text(
                     '계정을 삭제하면 해당 계정의 모든 데이터가 삭제됩니다.',
                     style: TextStyle(color: Colors.red),

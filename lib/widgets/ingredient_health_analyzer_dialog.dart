@@ -6,10 +6,7 @@ import '../utils/ingredient_health_score_utils.dart';
 class IngredientHealthAnalyzerDialog extends StatefulWidget {
   final List<String>? initialIngredients;
 
-  const IngredientHealthAnalyzerDialog({
-    super.key,
-    this.initialIngredients,
-  });
+  const IngredientHealthAnalyzerDialog({super.key, this.initialIngredients});
 
   @override
   State<IngredientHealthAnalyzerDialog> createState() =>
@@ -69,9 +66,7 @@ class _IngredientHealthAnalyzerDialogState
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         constraints: const BoxConstraints(maxWidth: 500, maxHeight: 700),
         child: Column(
@@ -102,10 +97,7 @@ class _IngredientHealthAnalyzerDialogState
                         ),
                         Text(
                           '영수증 재료를 입력하세요',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey,
-                          ),
+                          style: TextStyle(fontSize: 12, color: Colors.grey),
                         ),
                       ],
                     ),
@@ -176,18 +168,18 @@ class _IngredientHealthAnalyzerDialogState
                         children: _ingredients.asMap().entries.map((entry) {
                           final index = entry.key;
                           final ingredient = entry.value;
-                          final score =
-                              IngredientHealthScoreUtils.getScore(ingredient);
+                          final score = IngredientHealthScoreUtils.getScore(
+                            ingredient,
+                          );
 
                           return Chip(
                             label: Text(ingredient),
                             deleteIcon: const Icon(Icons.close, size: 16),
                             onDeleted: () => _removeIngredient(index),
-                            backgroundColor:
-                                _getScoreColor(score).withValues(alpha: 0.2),
-                            side: BorderSide(
-                              color: _getScoreColor(score),
-                            ),
+                            backgroundColor: _getScoreColor(
+                              score,
+                            ).withValues(alpha: 0.2),
+                            side: BorderSide(color: _getScoreColor(score)),
                             avatar: CircleAvatar(
                               backgroundColor: _getScoreColor(score),
                               child: Text(
@@ -217,8 +209,9 @@ class _IngredientHealthAnalyzerDialogState
                           gradient: LinearGradient(
                             colors: [
                               _getScoreColor(_analysis!.overallScore),
-                              _getScoreColor(_analysis!.overallScore)
-                                  .withValues(alpha: 0.7),
+                              _getScoreColor(
+                                _analysis!.overallScore,
+                              ).withValues(alpha: 0.7),
                             ],
                           ),
                           borderRadius: BorderRadius.circular(12),
@@ -277,7 +270,11 @@ class _IngredientHealthAnalyzerDialogState
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.info, color: Colors.blue, size: 20),
+                            const Icon(
+                              Icons.info,
+                              color: Colors.blue,
+                              size: 20,
+                            ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
@@ -352,9 +349,7 @@ class _IngredientHealthAnalyzerDialogState
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                border: Border(
-                  top: BorderSide(color: Colors.grey.shade300),
-                ),
+                border: Border(top: BorderSide(color: Colors.grey.shade300)),
               ),
               child: Row(
                 children: [
@@ -405,10 +400,7 @@ class _IngredientHealthAnalyzerDialogState
           Row(
             children: [
               Expanded(
-                child: Text(
-                  label,
-                  style: const TextStyle(fontSize: 12),
-                ),
+                child: Text(label, style: const TextStyle(fontSize: 12)),
               ),
               Text(
                 '$count개',
@@ -452,13 +444,7 @@ class _IngredientHealthAnalyzerDialogState
             ),
           ),
           const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11,
-              color: color,
-            ),
-          ),
+          Text(label, style: TextStyle(fontSize: 11, color: color)),
         ],
       ),
     );

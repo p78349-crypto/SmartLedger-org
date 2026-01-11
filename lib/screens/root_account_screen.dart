@@ -129,7 +129,9 @@ class RootAccountScreen extends StatelessWidget {
   }
 
   Widget _buildAccountToolbar(BuildContext context, ThemeData theme) {
-    final hasAccounts = overview?.accountSummaries.isNotEmpty ?? false;
+    final accounts = overview?.accountSummaries ?? [];
+    final canDelete = accounts.length > 1;
+
     final menuItems = <PopupMenuEntry<_AccountMenuAction>>[
       const PopupMenuItem(
         value: _AccountMenuAction.create,
@@ -139,7 +141,7 @@ class RootAccountScreen extends StatelessWidget {
       ),
       PopupMenuItem(
         value: _AccountMenuAction.delete,
-        enabled: hasAccounts,
+        enabled: canDelete,
         child: const Row(
           children: [
             Icon(IconCatalog.deleteOutline),
@@ -234,6 +236,11 @@ class RootAccountScreen extends StatelessWidget {
     final accounts = overview?.accountSummaries ?? [];
     if (accounts.isEmpty) {
       SnackbarUtils.showWarning(context, '삭제할 계정이 없습니다.');
+      return;
+    }
+
+    if (accounts.length <= 1) {
+      SnackbarUtils.showWarning(context, '최소 하나의 계정은 유지해야 합니다.');
       return;
     }
 
@@ -409,7 +416,18 @@ class RootAccountScreen extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('전체 요약', style: theme.textTheme.titleMedium),
+                Row(
+                  children: [
+                    Text('전체 요약', style: theme.textTheme.titleMedium),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(Icons.table_chart),
+                      tooltip: '통계표 보기',
+                      visualDensity: VisualDensity.compact,
+                      onPressed: () => _showStatsTable(context, data),
+                    ),
+                  ],
+                ),
                 Text(monthLabel, style: theme.textTheme.bodySmall),
               ],
             ),
@@ -721,6 +739,159 @@ class RootAccountScreen extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  void _showStatsTable(BuildContext context, RootFinancialOverview data) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        final theme = Theme.of(context);
+        return AlertDialog(
+          title: Row(
+            children: [
+              Icon(Icons.table_chart, color: theme.colorScheme.primary),
+              const SizedBox(width: 8),
+              const Text('통계표 (Statistics Table)'),
+            ],
+          ),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: SingleChildScrollView(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: DataTable(
+                  columns: const [
+                    DataColumn(label: Text('계정')),
+                    DataColumn(
+                      label: Text('자산', textAlign: TextAlign.right),
+                      numeric: true,
+                    ),
+                    DataColumn(
+                      label: Text('월 수입', textAlign: TextAlign.right),
+                      numeric: true,
+                    ),
+                    DataColumn(
+                      label: Text('월 지출', textAlign: TextAlign.right),
+                      numeric: true,
+                    ),
+                    DataColumn(
+                      label: Text('순이익', textAlign: TextAlign.right),
+                      numeric: true,
+                    ),
+                    DataColumn(
+                      label: Text('고정비', textAlign: TextAlign.right),
+                      numeric: true,
+                    ),
+                  ],
+                  rows: [
+                    ...data.accountSummaries.map(
+                      (s) => DataRow(
+                        cells: [
+                          DataCell(Text(s.accountName)),
+                          DataCell(
+                            Text(
+                              _formatCurrency(
+                                s.totalAssets,
+                              ).replaceAll('원', ''),
+                            ),
+                          ),
+                          DataCell(
+                            Text(
+                              _formatCurrency(
+                                s.monthlyIncome,
+                              ).replaceAll('원', ''),
+                            ),
+                          ),
+                          DataCell(
+                            Text(
+                              _formatCurrency(
+                                s.monthlyExpense,
+                              ).replaceAll('원', ''),
+                            ),
+                          ),
+                          DataCell(
+                            Text(
+                              _formatCurrency(
+                                s.monthlyNetCashFlow,
+                              ).replaceAll('원', ''),
+                              style: TextStyle(
+                                color: s.monthlyNetCashFlow >= 0
+                                    ? Colors.green
+                                    : Colors.red,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          DataCell(
+                            Text(
+                              _formatCurrency(
+                                s.totalFixedCosts,
+                              ).replaceAll('원', ''),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    DataRow(
+                      cells: [
+                        const DataCell(
+                          Text(
+                            '합계',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        DataCell(
+                          Text(
+                            _formatCurrency(data.totalAssets),
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        DataCell(
+                          Text(
+                            _formatCurrency(data.totalMonthlyIncome),
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        DataCell(
+                          Text(
+                            _formatCurrency(data.totalMonthlyExpense),
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        DataCell(
+                          Text(
+                            _formatCurrency(data.totalMonthlyNetCashFlow),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: data.totalMonthlyNetCashFlow >= 0
+                                  ? Colors.green
+                                  : Colors.red,
+                            ),
+                          ),
+                        ),
+                        DataCell(
+                          Text(
+                            _formatCurrency(data.totalFixedCosts),
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ],
+                      selected: true,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('닫기'),
+            ),
+          ],
+        );
+      },
     );
   }
 

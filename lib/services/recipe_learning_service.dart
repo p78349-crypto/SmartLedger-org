@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
 
 /// 사용자의 요리 패턴을 학습하는 서비스
-/// 
+///
 /// 학습 항목:
 /// 1. 자주 만드는 요리 (빈도 추적)
 /// 2. 선호하는 재료 조합
@@ -75,8 +75,9 @@ class RecipeLearningService {
     return data.map(
       (mealTime, recipes) => MapEntry(
         mealTime,
-        (recipes as Map<String, dynamic>)
-            .map((recipe, count) => MapEntry(recipe, count as int)),
+        (recipes as Map<String, dynamic>).map(
+          (recipe, count) => MapEntry(recipe, count as int),
+        ),
       ),
     );
   }
@@ -88,7 +89,7 @@ class RecipeLearningService {
   }
 
   /// 개인화된 요리 추천 가중치 계산
-  /// 
+  ///
   /// Returns: 각 레시피별 학습 기반 가중치 (높을수록 추천 우선순위 ↑)
   Future<Map<String, double>> getPersonalizedWeights(
     List<String> recipeNames,
@@ -103,10 +104,11 @@ class RecipeLearningService {
 
     for (final recipeName in recipeNames) {
       final frequency = recipeFreq[recipeName] ?? 0;
-      
+
       // 빈도 기반 가중치 (0.0 ~ 1.0)
       final frequencyWeight = totalRecipeCount > 0
-          ? (frequency / totalRecipeCount) * 2.0 // 최대 2배 가중치
+          ? (frequency / totalRecipeCount) *
+                2.0 // 최대 2배 가중치
           : 0.0;
 
       weights[recipeName] = 1.0 + frequencyWeight;
@@ -128,11 +130,9 @@ class RecipeLearningService {
 
     for (final recipeName in recipeNames) {
       final frequency = timePrefs[recipeName] ?? 0;
-      
+
       // 해당 시간대에 자주 먹었던 요리는 가중치 증가
-      final timeWeight = totalCount > 0
-          ? (frequency / totalCount) * 1.5
-          : 0.0;
+      final timeWeight = totalCount > 0 ? (frequency / totalCount) * 1.5 : 0.0;
 
       weights[recipeName] = 1.0 + timeWeight;
     }
@@ -158,8 +158,9 @@ class RecipeLearningService {
   ) async {
     final json = prefs.getString(_keyRecipeHistory);
     final Map<String, int> history = json != null
-        ? (jsonDecode(json) as Map<String, dynamic>)
-            .map((key, value) => MapEntry(key, value as int))
+        ? (jsonDecode(json) as Map<String, dynamic>).map(
+            (key, value) => MapEntry(key, value as int),
+          )
         : {};
 
     history[recipeName] = (history[recipeName] ?? 0) + 1;
@@ -173,8 +174,9 @@ class RecipeLearningService {
   ) async {
     final json = prefs.getString(_keyIngredientFrequency);
     final Map<String, int> frequency = json != null
-        ? (jsonDecode(json) as Map<String, dynamic>)
-            .map((key, value) => MapEntry(key, value as int))
+        ? (jsonDecode(json) as Map<String, dynamic>).map(
+            (key, value) => MapEntry(key, value as int),
+          )
         : {};
 
     for (final ingredient in ingredients) {
@@ -195,8 +197,9 @@ class RecipeLearningService {
         ? (jsonDecode(json) as Map<String, dynamic>).map(
             (key, value) => MapEntry(
               key,
-              (value as Map<String, dynamic>)
-                  .map((k, v) => MapEntry(k, v as int)),
+              (value as Map<String, dynamic>).map(
+                (k, v) => MapEntry(k, v as int),
+              ),
             ),
           )
         : {};
@@ -205,7 +208,8 @@ class RecipeLearningService {
       mealPrefs[mealTime] = {};
     }
 
-    mealPrefs[mealTime]![recipeName] = (mealPrefs[mealTime]![recipeName] ?? 0) + 1;
+    mealPrefs[mealTime]![recipeName] =
+        (mealPrefs[mealTime]![recipeName] ?? 0) + 1;
 
     await prefs.setString(_keyMealTimePreference, jsonEncode(mealPrefs));
   }
@@ -219,7 +223,8 @@ class RecipeLearningService {
 
     // 이동 평균으로 건강 선호도 계산 (healthScore를 0-1로 정규화)
     final normalizedHealth = (healthScore - 1) / 4.0; // 1-5 → 0-1
-    final newScore = (currentScore * totalRecipes + normalizedHealth) / (totalRecipes + 1);
+    final newScore =
+        (currentScore * totalRecipes + normalizedHealth) / (totalRecipes + 1);
 
     await prefs.setDouble(_keyHealthPreference, newScore);
   }
@@ -229,10 +234,7 @@ class RecipeLearningService {
     if (json == null) return 0;
 
     final Map<String, dynamic> history = jsonDecode(json);
-    return history.values.fold<int>(
-      0,
-      (sum, count) => sum + (count as int),
-    );
+    return history.values.fold<int>(0, (sum, count) => sum + (count as int));
   }
 
   /// 학습 통계 요약
@@ -245,17 +247,19 @@ class RecipeLearningService {
       0,
       (sum, count) => sum + count,
     );
-    final topRecipes = (recipeFreq.entries.toList()
-          ..sort((a, b) => b.value.compareTo(a.value)))
-        .take(5)
-        .map((e) => '${e.key} (${e.value}회)')
-        .toList();
+    final topRecipes =
+        (recipeFreq.entries.toList()
+              ..sort((a, b) => b.value.compareTo(a.value)))
+            .take(5)
+            .map((e) => '${e.key} (${e.value}회)')
+            .toList();
 
-    final topIngredients = (ingredientFreq.entries.toList()
-          ..sort((a, b) => b.value.compareTo(a.value)))
-        .take(5)
-        .map((e) => '${e.key} (${e.value}회)')
-        .toList();
+    final topIngredients =
+        (ingredientFreq.entries.toList()
+              ..sort((a, b) => b.value.compareTo(a.value)))
+            .take(5)
+            .map((e) => '${e.key} (${e.value}회)')
+            .toList();
 
     return LearningStats(
       totalRecipesCooked: totalRecipes,

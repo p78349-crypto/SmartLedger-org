@@ -22,10 +22,7 @@ void main() {
       _item('late', '늦음', now.add(const Duration(days: 10))),
     ];
 
-    final result = await DailyRecipeRecommendationUtils.build(
-      items,
-      now: now,
-    );
+    final result = await DailyRecipeRecommendationUtils.build(items, now: now);
 
     expect(result.expiringItems, isEmpty);
     expect(result.recommendedRecipe, isNull);

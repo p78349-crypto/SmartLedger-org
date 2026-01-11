@@ -17,10 +17,7 @@ import '../utils/weather_price_sensitivity.dart';
 class EvacuationRouteScreen extends StatefulWidget {
   final EvacuationPlan plan;
 
-  const EvacuationRouteScreen({
-    super.key,
-    required this.plan,
-  });
+  const EvacuationRouteScreen({super.key, required this.plan});
 
   @override
   State<EvacuationRouteScreen> createState() => _EvacuationRouteScreenState();
@@ -62,7 +59,9 @@ class _EvacuationRouteScreenState extends State<EvacuationRouteScreen> {
 
   void _subscribeWorkflow() {
     EvacuationWorkflowMonitor.instance.ensureMonitoring();
-    _workflowSubscription = EvacuationWorkflowMonitor.instance.events.listen((event) {
+    _workflowSubscription = EvacuationWorkflowMonitor.instance.events.listen((
+      event,
+    ) {
       if (!mounted) return;
       switch (event.type) {
         case EvacuationWorkflowEventType.healthChanged:
@@ -197,10 +196,7 @@ class _EvacuationRouteScreenState extends State<EvacuationRouteScreen> {
                 SizedBox(width: 8),
                 Text(
                   '현재 위치 기반 안내',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -223,7 +219,10 @@ class _EvacuationRouteScreenState extends State<EvacuationRouteScreen> {
                 children: [
                   Text(
                     _locationErrorMessage!,
-                    style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                      color: Colors.red,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   Wrap(
@@ -233,15 +232,21 @@ class _EvacuationRouteScreenState extends State<EvacuationRouteScreen> {
                         onPressed: _resolveLocation,
                         child: const Text('다시 시도'),
                       ),
-                      if (_locationErrorType == DeviceLocationErrorType.permissionDenied ||
-                          _locationErrorType == DeviceLocationErrorType.permissionDeniedForever)
+                      if (_locationErrorType ==
+                              DeviceLocationErrorType.permissionDenied ||
+                          _locationErrorType ==
+                              DeviceLocationErrorType.permissionDeniedForever)
                         TextButton(
-                          onPressed: DeviceLocationService.instance.openAppSettings,
+                          onPressed:
+                              DeviceLocationService.instance.openAppSettings,
                           child: const Text('권한 설정 열기'),
                         ),
-                      if (_locationErrorType == DeviceLocationErrorType.serviceDisabled)
+                      if (_locationErrorType ==
+                          DeviceLocationErrorType.serviceDisabled)
                         TextButton(
-                          onPressed: DeviceLocationService.instance.openLocationSettings,
+                          onPressed: DeviceLocationService
+                              .instance
+                              .openLocationSettings,
                           child: const Text('위치 서비스 켜기'),
                         ),
                     ],
@@ -276,7 +281,10 @@ class _EvacuationRouteScreenState extends State<EvacuationRouteScreen> {
       MapEntry('위치 서비스', snapshot.locationServiceEnabled),
       MapEntry('GPS 권한', snapshot.locationPermissionGranted),
     ];
-    final issues = entries.where((entry) => !entry.value).map((entry) => entry.key).toList();
+    final issues = entries
+        .where((entry) => !entry.value)
+        .map((entry) => entry.key)
+        .toList();
     final cardColor = snapshot.isOperational ? Colors.green : Colors.red;
 
     return Card(
@@ -400,29 +408,25 @@ class _EvacuationRouteScreenState extends State<EvacuationRouteScreen> {
                 SizedBox(width: 8),
                 Text(
                   '즉시 실행 체크리스트',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
             const SizedBox(height: 12),
-            ..._activePlan.recommendedActions.map((action) => Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('• ', style: TextStyle(fontSize: 16)),
-                      Expanded(
-                        child: Text(
-                          action,
-                          style: const TextStyle(fontSize: 14),
-                        ),
-                      ),
-                    ],
-                  ),
-                )),
+            ..._activePlan.recommendedActions.map(
+              (action) => Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('• ', style: TextStyle(fontSize: 16)),
+                    Expanded(
+                      child: Text(action, style: const TextStyle(fontSize: 14)),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -444,21 +448,20 @@ class _EvacuationRouteScreenState extends State<EvacuationRouteScreen> {
                 SizedBox(width: 8),
                 Text(
                   '중간 점검 사항',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
             const SizedBox(height: 12),
-            ..._activePlan.checkpoints.map((checkpoint) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Text(
-                    '✔ $checkpoint',
-                    style: const TextStyle(fontSize: 14),
-                  ),
-                )),
+            ..._activePlan.checkpoints.map(
+              (checkpoint) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text(
+                  '✔ $checkpoint',
+                  style: const TextStyle(fontSize: 14),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -475,10 +478,7 @@ class _EvacuationRouteScreenState extends State<EvacuationRouteScreen> {
             const SizedBox(width: 8),
             Text(
               '추천 대피 경로 (${_activePlan.routes.length}개)',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -490,12 +490,14 @@ class _EvacuationRouteScreenState extends State<EvacuationRouteScreen> {
 
   Widget _buildRouteCard(EvacuationRoute route) {
     final color = _safetyLevelColor(route.safetyLevel);
-    final distanceFromUser = _currentLocation == null ? null : _haversineDistance(
-      _currentLocation!.latitude,
-      _currentLocation!.longitude,
-      route.shelterLat,
-      route.shelterLon,
-    );
+    final distanceFromUser = _currentLocation == null
+        ? null
+        : _haversineDistance(
+            _currentLocation!.latitude,
+            _currentLocation!.longitude,
+            route.shelterLat,
+            route.shelterLon,
+          );
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -524,14 +526,20 @@ class _EvacuationRouteScreenState extends State<EvacuationRouteScreen> {
               children: [
                 Icon(Icons.directions_car, color: color, size: 18),
                 const SizedBox(width: 6),
-                Text('${route.routeType} • ${route.distanceKm.toStringAsFixed(1)}km • 약 ${route.estimatedMinutes}분'),
+                Text(
+                  '${route.routeType} • ${route.distanceKm.toStringAsFixed(1)}km • 약 ${route.estimatedMinutes}분',
+                ),
               ],
             ),
             if (distanceFromUser != null) ...[
               const SizedBox(height: 4),
               Row(
                 children: [
-                  const Icon(Icons.social_distance, size: 16, color: Colors.black54),
+                  const Icon(
+                    Icons.social_distance,
+                    size: 16,
+                    color: Colors.black54,
+                  ),
                   const SizedBox(width: 6),
                   Text(
                     '현재 위치에서 약 ${_formatDistance(distanceFromUser)}',
@@ -556,10 +564,12 @@ class _EvacuationRouteScreenState extends State<EvacuationRouteScreen> {
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 6),
-            ...route.steps.map((step) => Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Text(step, style: const TextStyle(fontSize: 13)),
-                )),
+            ...route.steps.map(
+              (step) => Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Text(step, style: const TextStyle(fontSize: 13)),
+              ),
+            ),
             const SizedBox(height: 12),
             Align(
               alignment: Alignment.centerRight,
@@ -607,7 +617,14 @@ class _EvacuationRouteScreenState extends State<EvacuationRouteScreen> {
         children: [
           Icon(ok ? Icons.check_circle : Icons.error, size: 14, color: color),
           const SizedBox(width: 6),
-          Text(label, style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w600)),
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ],
       ),
     );
@@ -663,8 +680,10 @@ class _EvacuationRouteScreenState extends State<EvacuationRouteScreen> {
 
   Future<void> _sharePlan(BuildContext context) async {
     final messenger = ScaffoldMessenger.of(context);
-    final conditionName = weatherConditionNames[_activePlan.condition] ?? '극한 날씨';
-    final deepLink = 'smartledger://weather/evacuation?condition=${_activePlan.condition.name}&location=${Uri.encodeComponent(_activePlan.location)}';
+    final conditionName =
+        weatherConditionNames[_activePlan.condition] ?? '극한 날씨';
+    final deepLink =
+        'smartledger://weather/evacuation?condition=${_activePlan.condition.name}&location=${Uri.encodeComponent(_activePlan.location)}';
     final buffer = StringBuffer()
       ..writeln('🚨 $conditionName 대비 안전 이동 경로')
       ..writeln('대상 지역: ${_activePlan.location}')
@@ -694,7 +713,9 @@ class _EvacuationRouteScreenState extends State<EvacuationRouteScreen> {
     buffer.writeln('📍 추천 경로 ${_activePlan.routes.length}개');
     for (final route in _activePlan.routes) {
       buffer
-        ..writeln('• ${route.name} (${route.routeType}, ${route.distanceKm.toStringAsFixed(1)}km / 약 ${route.estimatedMinutes}분)')
+        ..writeln(
+          '• ${route.name} (${route.routeType}, ${route.distanceKm.toStringAsFixed(1)}km / 약 ${route.estimatedMinutes}분)',
+        )
         ..writeln('  - 대피소: ${route.shelterName} (${route.shelterAddress})')
         ..writeln('  - 편의시설: ${route.amenities.join(', ')}');
 
@@ -716,15 +737,11 @@ class _EvacuationRouteScreenState extends State<EvacuationRouteScreen> {
     final subject = '안전 이동 경로 - ${_activePlan.location}';
 
     try {
-      await SharePlus.instance.share(
-        ShareParams(text: text, subject: subject),
-      );
+      await SharePlus.instance.share(ShareParams(text: text, subject: subject));
     } catch (error) {
       if (!mounted) return;
       messenger.showSnackBar(
-        SnackBar(
-          content: Text('공유 중 오류가 발생했습니다: $error'),
-        ),
+        SnackBar(content: Text('공유 중 오류가 발생했습니다: $error')),
       );
     }
   }
@@ -737,7 +754,8 @@ class _EvacuationRouteScreenState extends State<EvacuationRouteScreen> {
     });
 
     try {
-      final location = await DeviceLocationService.instance.getCurrentLocation();
+      final location = await DeviceLocationService.instance
+          .getCurrentLocation();
       if (!mounted) return;
       setState(() {
         _currentLocation = location;
@@ -830,8 +848,12 @@ class _EvacuationRouteScreenState extends State<EvacuationRouteScreen> {
     final dLat = _degToRad(endLat - startLat);
     final dLon = _degToRad(endLon - startLon);
 
-    final a = math.sin(dLat / 2) * math.sin(dLat / 2) +
-        math.cos(_degToRad(startLat)) * math.cos(_degToRad(endLat)) * math.sin(dLon / 2) * math.sin(dLon / 2);
+    final a =
+        math.sin(dLat / 2) * math.sin(dLat / 2) +
+        math.cos(_degToRad(startLat)) *
+            math.cos(_degToRad(endLat)) *
+            math.sin(dLon / 2) *
+            math.sin(dLon / 2);
     final c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
     return earthRadiusKm * c;
   }
@@ -853,16 +875,16 @@ class _EvacuationRouteScreenState extends State<EvacuationRouteScreen> {
     final uri = Uri.parse(buffer.toString());
     final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!launched && mounted) {
-      messenger.showSnackBar(
-        const SnackBar(content: Text('지도 앱을 열 수 없습니다.')),
-      );
+      messenger.showSnackBar(const SnackBar(content: Text('지도 앱을 열 수 없습니다.')));
     }
   }
 
   String _travelModeParam(String routeType) {
     final lower = routeType.toLowerCase();
     if (lower.contains('도보') || lower.contains('walk')) return 'walking';
-    if (lower.contains('대중교통') || lower.contains('지하철') || lower.contains('subway')) {
+    if (lower.contains('대중교통') ||
+        lower.contains('지하철') ||
+        lower.contains('subway')) {
       return 'transit';
     }
     return 'driving';

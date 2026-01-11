@@ -15,16 +15,14 @@ class RecipeHealthScoreWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ingredientNames =
-        recipe.ingredients.map((i) => i.name).toList();
-    final analysis =
-        IngredientHealthScoreUtils.analyzeIngredients(ingredientNames);
+    final ingredientNames = recipe.ingredients.map((i) => i.name).toList();
+    final analysis = IngredientHealthScoreUtils.analyzeIngredients(
+      ingredientNames,
+    );
 
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -37,10 +35,7 @@ class RecipeHealthScoreWidget extends StatelessWidget {
                 const SizedBox(width: 8),
                 const Text(
                   '건강 점수',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
                 _buildScoreBadge(analysis.overallScore),
@@ -52,7 +47,9 @@ class RecipeHealthScoreWidget extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: _getScoreColor(analysis.overallScore).withValues(alpha: 0.1),
+                color: _getScoreColor(
+                  analysis.overallScore,
+                ).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -79,10 +76,7 @@ class RecipeHealthScoreWidget extends StatelessWidget {
               // 재료별 점수
               const Text(
                 '재료별 건강도',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
 
@@ -152,9 +146,7 @@ class RecipeHealthScoreWidget extends StatelessWidget {
       decoration: BoxDecoration(
         color: _getScoreColor(score).withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: _getScoreColor(score).withValues(alpha: 0.5),
-        ),
+        border: Border.all(color: _getScoreColor(score).withValues(alpha: 0.5)),
       ),
       child: Text(
         IngredientHealthScoreUtils.getScoreLabel(score),
@@ -173,10 +165,7 @@ class RecipeHealthScoreWidget extends StatelessWidget {
       children: [
         const Text(
           '건강도 분포',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         if (analysis.veryHealthyCount > 0)
@@ -192,10 +181,7 @@ class RecipeHealthScoreWidget extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           '건강한 재료: ${(analysis.healthyRatio * 100).toInt()}%',
-          style: const TextStyle(
-            fontSize: 12,
-            color: Colors.grey,
-          ),
+          style: const TextStyle(fontSize: 12, color: Colors.grey),
         ),
       ],
     );
@@ -206,13 +192,7 @@ class RecipeHealthScoreWidget extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: color,
-            ),
-          ),
+          Text(label, style: TextStyle(fontSize: 12, color: color)),
           const Spacer(),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),

@@ -20,10 +20,9 @@ class AssistantLauncher {
   static Future<bool> openAppByPackage(String packageName) async {
     if (!Platform.isAndroid) return false;
     try {
-      final ok = await _channel.invokeMethod<bool>(
-        'openAppByPackage',
-        {'package': packageName},
-      );
+      final ok = await _channel.invokeMethod<bool>('openAppByPackage', {
+        'package': packageName,
+      });
       return ok == true;
     } catch (_) {
       return false;

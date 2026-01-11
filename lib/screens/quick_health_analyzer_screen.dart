@@ -54,8 +54,9 @@ class _QuickHealthAnalyzerScreenState extends State<QuickHealthAnalyzerScreen> {
     }
 
     setState(() {
-      _analysis =
-          IngredientHealthScoreUtils.analyzeIngredients(_selectedIngredients);
+      _analysis = IngredientHealthScoreUtils.analyzeIngredients(
+        _selectedIngredients,
+      );
     });
   }
 
@@ -105,15 +106,17 @@ class _QuickHealthAnalyzerScreenState extends State<QuickHealthAnalyzerScreen> {
                 gradient: LinearGradient(
                   colors: [
                     _getScoreColor(_analysis!.overallScore),
-                    _getScoreColor(_analysis!.overallScore)
-                        .withValues(alpha: 0.7),
+                    _getScoreColor(
+                      _analysis!.overallScore,
+                    ).withValues(alpha: 0.7),
                   ],
                 ),
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: _getScoreColor(_analysis!.overallScore)
-                        .withValues(alpha: 0.3),
+                    color: _getScoreColor(
+                      _analysis!.overallScore,
+                    ).withValues(alpha: 0.3),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   ),
@@ -121,18 +124,11 @@ class _QuickHealthAnalyzerScreenState extends State<QuickHealthAnalyzerScreen> {
               ),
               child: Column(
                 children: [
-                  const Icon(
-                    Icons.receipt_long,
-                    color: Colors.white,
-                    size: 32,
-                  ),
+                  const Icon(Icons.receipt_long, color: Colors.white, size: 32),
                   const SizedBox(height: 12),
                   const Text(
                     '영수증 건강 점수',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                    ),
+                    style: TextStyle(color: Colors.white, fontSize: 16),
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -157,10 +153,7 @@ class _QuickHealthAnalyzerScreenState extends State<QuickHealthAnalyzerScreen> {
                   Text(
                     _analysis!.summary,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                    ),
+                    style: const TextStyle(color: Colors.white, fontSize: 14),
                   ),
                 ],
               ),
@@ -226,20 +219,23 @@ class _QuickHealthAnalyzerScreenState extends State<QuickHealthAnalyzerScreen> {
                               _receiptIngredients.length) {
                             _selectedIngredients.clear();
                           } else {
-                            _selectedIngredients =
-                                List.from(_receiptIngredients);
+                            _selectedIngredients = List.from(
+                              _receiptIngredients,
+                            );
                           }
                         });
                         _analyzeIngredients();
                       },
                       icon: Icon(
-                        _selectedIngredients.length == _receiptIngredients.length
+                        _selectedIngredients.length ==
+                                _receiptIngredients.length
                             ? Icons.deselect
                             : Icons.select_all,
                         size: 16,
                       ),
                       label: Text(
-                        _selectedIngredients.length == _receiptIngredients.length
+                        _selectedIngredients.length ==
+                                _receiptIngredients.length
                             ? '전체 해제'
                             : '전체 선택',
                       ),
@@ -249,16 +245,13 @@ class _QuickHealthAnalyzerScreenState extends State<QuickHealthAnalyzerScreen> {
                 const SizedBox(height: 12),
                 ..._receiptIngredients.map((ingredient) {
                   final isSelected = _selectedIngredients.contains(ingredient);
-                  final score =
-                      IngredientHealthScoreUtils.getScore(ingredient);
+                  final score = IngredientHealthScoreUtils.getScore(ingredient);
                   final scoreColor = _getScoreColor(score);
 
                   return Card(
                     margin: const EdgeInsets.only(bottom: 8),
                     elevation: isSelected ? 2 : 0,
-                    color: isSelected
-                        ? null
-                        : Colors.grey.shade100,
+                    color: isSelected ? null : Colors.grey.shade100,
                     child: CheckboxListTile(
                       value: isSelected,
                       onChanged: (_) => _toggleIngredient(ingredient),
@@ -271,9 +264,7 @@ class _QuickHealthAnalyzerScreenState extends State<QuickHealthAnalyzerScreen> {
                                 fontWeight: isSelected
                                     ? FontWeight.w600
                                     : FontWeight.normal,
-                                color: isSelected
-                                    ? Colors.black
-                                    : Colors.grey,
+                                color: isSelected ? Colors.black : Colors.grey,
                               ),
                             ),
                           ),
@@ -285,9 +276,7 @@ class _QuickHealthAnalyzerScreenState extends State<QuickHealthAnalyzerScreen> {
                             decoration: BoxDecoration(
                               color: scoreColor.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: scoreColor,
-                              ),
+                              border: Border.all(color: scoreColor),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -303,9 +292,8 @@ class _QuickHealthAnalyzerScreenState extends State<QuickHealthAnalyzerScreen> {
                                 const SizedBox(width: 4),
                                 Text(
                                   IngredientHealthScoreUtils.getScoreLabel(
-                                          score)
-                                      .split(' ')
-                                      .first,
+                                    score,
+                                  ).split(' ').first,
                                   style: TextStyle(
                                     color: scoreColor,
                                     fontSize: 11,
@@ -321,7 +309,8 @@ class _QuickHealthAnalyzerScreenState extends State<QuickHealthAnalyzerScreen> {
                               padding: const EdgeInsets.only(top: 4),
                               child: Text(
                                 IngredientHealthScoreUtils.getScoreDescription(
-                                    score),
+                                  score,
+                                ),
                                 style: const TextStyle(fontSize: 11),
                               ),
                             )
@@ -343,7 +332,11 @@ class _QuickHealthAnalyzerScreenState extends State<QuickHealthAnalyzerScreen> {
   }
 
   Widget _buildStatCard(
-      String label, String value, IconData icon, Color color) {
+    String label,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -364,13 +357,7 @@ class _QuickHealthAnalyzerScreenState extends State<QuickHealthAnalyzerScreen> {
             ),
           ),
           const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11,
-              color: color,
-            ),
-          ),
+          Text(label, style: TextStyle(fontSize: 11, color: color)),
         ],
       ),
     );
@@ -397,7 +384,7 @@ class _QuickHealthAnalyzerScreenState extends State<QuickHealthAnalyzerScreen> {
   void _launchBookScanApp() {
     // TODO: 책스캔앱 URL Scheme 호출
     // bookscan://ocr?source=smartledger&type=receipt&return=healthAnalyzer
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -505,18 +492,12 @@ class _QuickHealthAnalyzerScreenState extends State<QuickHealthAnalyzerScreen> {
       children: [
         Text(
           title,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 14,
-          ),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
         ),
         const SizedBox(height: 4),
         Text(
           description,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey.shade700,
-          ),
+          style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
         ),
       ],
     );

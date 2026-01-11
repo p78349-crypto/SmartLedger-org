@@ -10,10 +10,7 @@ import '../widgets/weather_alert_widget.dart';
 class ShoppingListScreen extends StatefulWidget {
   final ShoppingListResult shoppingList;
 
-  const ShoppingListScreen({
-    super.key,
-    required this.shoppingList,
-  });
+  const ShoppingListScreen({super.key, required this.shoppingList});
 
   @override
   State<ShoppingListScreen> createState() => _ShoppingListScreenState();
@@ -43,18 +40,13 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                 if (_checkedItems.length == items.length) {
                   _checkedItems.clear();
                 } else {
-                  _checkedItems.addAll(
-                    List.generate(items.length, (i) => i),
-                  );
+                  _checkedItems.addAll(List.generate(items.length, (i) => i));
                 }
               });
             },
           ),
           // 공유
-          IconButton(
-            icon: const Icon(Icons.share),
-            onPressed: _shareList,
-          ),
+          IconButton(icon: const Icon(Icons.share), onPressed: _shareList),
         ],
       ),
       body: Column(
@@ -109,10 +101,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                 ),
                 Text(
                   forecast.preparationTiming,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: color,
-                  ),
+                  style: TextStyle(fontSize: 13, color: color),
                 ),
               ],
             ),
@@ -295,9 +284,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.blue,
-                      decoration: isChecked
-                          ? TextDecoration.lineThrough
-                          : null,
+                      decoration: isChecked ? TextDecoration.lineThrough : null,
                     ),
                   ),
                 ],
@@ -313,9 +300,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
-                    decoration: isChecked
-                        ? TextDecoration.lineThrough
-                        : null,
+                    decoration: isChecked ? TextDecoration.lineThrough : null,
                   ),
                 ),
               ],
@@ -358,10 +343,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
           children: [
             Text(
               '$checkedCount개 선택됨',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             ElevatedButton.icon(
               onPressed: checkedCount == totalCount

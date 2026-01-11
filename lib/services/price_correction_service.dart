@@ -33,7 +33,8 @@ class PriceCorrectionService {
         controller.add(initial);
 
         subscription = repo.events.listen((event) {
-          if (event.entry.storeId != baseline.storeId || event.entry.skuId != baseline.skuId) {
+          if (event.entry.storeId != baseline.storeId ||
+              event.entry.skuId != baseline.skuId) {
             return;
           }
           final recalculated = PriceCorrectionUtils.calculateEffectivePrice(

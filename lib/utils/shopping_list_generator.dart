@@ -12,10 +12,10 @@ import '../widgets/weather_alert_widget.dart';
 class WeatherForecast {
   final WeatherCondition condition;
   final DateTime forecastDate;
-  final int daysUntil;           // 며칠 후인지
+  final int daysUntil; // 며칠 후인지
   final double temperature;
   final String location;
-  final double confidence;       // 예보 신뢰도 (0.0~1.0)
+  final double confidence; // 예보 신뢰도 (0.0~1.0)
 
   const WeatherForecast({
     required this.condition,
@@ -32,10 +32,10 @@ class WeatherForecast {
   /// 긴급도 (1~5, 5가 가장 긴급)
   int get urgency {
     if (daysUntil <= 0) return 5; // 당일
-    if (daysUntil == 1) return 4;  // 내일
-    if (daysUntil == 2) return 3;  // 모레
-    if (daysUntil <= 4) return 2;  // 3~4일 후
-    return 1;                       // 5일 이상
+    if (daysUntil == 1) return 4; // 내일
+    if (daysUntil == 2) return 3; // 모레
+    if (daysUntil <= 4) return 2; // 3~4일 후
+    return 1; // 5일 이상
   }
 
   /// 대비 시작 권장 시점
@@ -54,10 +54,10 @@ class ShoppingListItem {
   final PrepCategory category;
   final int quantity;
   final String unit;
-  final String reason;           // 왜 필요한지
-  final double priority;         // 우선순위 (0.0~1.0)
-  final bool isUrgent;          // 긴급 품목 여부
-  final int estimatedPrice;     // 예상 가격 (원)
+  final String reason; // 왜 필요한지
+  final double priority; // 우선순위 (0.0~1.0)
+  final bool isUrgent; // 긴급 품목 여부
+  final int estimatedPrice; // 예상 가격 (원)
 
   const ShoppingListItem({
     required this.name,
@@ -78,9 +78,9 @@ class ShoppingListItem {
 class ShoppingListResult {
   final WeatherForecast forecast;
   final List<ShoppingListItem> items;
-  final String urgentMessage;    // 긴급 메시지
-  final int totalCost;           // 총 예상 비용
-  final int potentialSavings;    // 예상 절약액 (미리 사면 절약되는 금액)
+  final String urgentMessage; // 긴급 메시지
+  final int totalCost; // 총 예상 비용
+  final int potentialSavings; // 예상 절약액 (미리 사면 절약되는 금액)
 
   const ShoppingListResult({
     required this.forecast,
@@ -108,7 +108,7 @@ class ShoppingListResult {
 /// 품목별 예상 가격 데이터베이스 (원)
 const Map<String, int> itemPriceDatabase = {
   // 안전용품
-  '생수': 1000,      // 2리터 기준
+  '생수': 1000, // 2리터 기준
   '손전등': 15000,
   '건전지': 500,
   '핫팩': 300,
@@ -121,11 +121,10 @@ const Map<String, int> itemPriceDatabase = {
   '오이': 500,
   '토마토': 700,
   '사과': 1500,
-  '계란': 300,      // 개당
-  '돼지고기': 8000,  // kg당
-  '닭고기': 6000,   // 마리당
-  '고등어': 3000,   // 마리당
-
+  '계란': 300, // 개당
+  '돼지고기': 8000, // kg당
+  '닭고기': 6000, // 마리당
+  '고등어': 3000, // 마리당
   // 비축식품
   '라면': 800,
   '통조림': 2000,
@@ -146,7 +145,7 @@ class ShoppingListGenerator {
   static String formatPrice(num amount) => _priceFormat.format(amount);
 
   /// 날씨 예보 기반 쇼핑 리스트 생성
-  /// 
+  ///
   /// [forecast] 날씨 예보 데이터
   /// [familySize] 가족 구성원 수 (기본 2명)
   static ShoppingListResult generateShoppingList({
@@ -178,10 +177,10 @@ class ShoppingListGenerator {
       );
 
       // 긴급도 판단 (안전용품 + 신선식품은 긴급)
-      final isUrgent = urgency >= 3 && (
-        prep.category == PrepCategory.safety ||
-        prep.category == PrepCategory.freshFood
-      );
+      final isUrgent =
+          urgency >= 3 &&
+          (prep.category == PrepCategory.safety ||
+              prep.category == PrepCategory.freshFood);
 
       // 우선순위 계산
       final priority = _calculatePriority(
@@ -193,26 +192,25 @@ class ShoppingListGenerator {
       // 예상 가격
       final estimatedPrice = itemPriceDatabase[prep.name] ?? 5000;
 
-      items.add(ShoppingListItem(
-        name: prep.name,
-        category: prep.category,
-        quantity: adjustedQuantity,
-        unit: prep.unit,
-        reason: prep.reason,
-        priority: priority,
-        isUrgent: isUrgent,
-        estimatedPrice: estimatedPrice,
-      ));
+      items.add(
+        ShoppingListItem(
+          name: prep.name,
+          category: prep.category,
+          quantity: adjustedQuantity,
+          unit: prep.unit,
+          reason: prep.reason,
+          priority: priority,
+          isUrgent: isUrgent,
+          estimatedPrice: estimatedPrice,
+        ),
+      );
     }
 
     // 우선순위 기준 정렬
     items.sort((a, b) => b.priority.compareTo(a.priority));
 
     // 총 비용 계산
-    final totalCost = items.fold<int>(
-      0,
-      (sum, item) => sum + item.totalCost,
-    );
+    final totalCost = items.fold<int>(0, (sum, item) => sum + item.totalCost);
 
     // 예상 절약액 계산 (가격 변동 예측 기반)
     final potentialSavings = _calculatePotentialSavings(
@@ -319,7 +317,7 @@ class ShoppingListGenerator {
       final sensitivity = getWeatherSensitivityByItem(item.name);
       if (sensitivity != null) {
         final weatherSensitivity = sensitivity.sensitivity[condition] ?? 0.0;
-        
+
         // 양수(상승)일 때만 절약 가능
         if (weatherSensitivity > 0) {
           // 예상 상승률 (민감도 * 20%)
@@ -345,8 +343,8 @@ class ShoppingListGenerator {
     final daysText = forecast.daysUntil == 0
         ? '오늘'
         : forecast.daysUntil == 1
-            ? '내일'
-            : '${forecast.daysUntil}일 후';
+        ? '내일'
+        : '${forecast.daysUntil}일 후';
 
     if (forecast.urgency >= 4) {
       return '🚨 $weatherName $daysText 예상! $timing 장보기 필수! '
@@ -361,16 +359,14 @@ class ShoppingListGenerator {
   }
 
   /// 음성 비서용 쇼핑 리스트 요약
-  static String generateVoiceSummary({
-    required ShoppingListResult result,
-  }) {
+  static String generateVoiceSummary({required ShoppingListResult result}) {
     final forecast = result.forecast;
     final weatherName = weatherConditionNames[forecast.condition] ?? '극한 날씨';
     final daysText = forecast.daysUntil == 0
         ? '오늘'
         : forecast.daysUntil == 1
-            ? '내일'
-            : '${forecast.daysUntil}일 후';
+        ? '내일'
+        : '${forecast.daysUntil}일 후';
 
     final buffer = StringBuffer();
     buffer.write('$weatherName $daysText 예상됩니다. ');
@@ -388,7 +384,9 @@ class ShoppingListGenerator {
     buffer.write('예상 비용 ${_formatPrice(result.totalCost)}원');
 
     if (result.potentialSavings > 0) {
-      buffer.write('. 미리 사면 ${_formatPrice(result.potentialSavings)}원 절약 가능합니다');
+      buffer.write(
+        '. 미리 사면 ${_formatPrice(result.potentialSavings)}원 절약 가능합니다',
+      );
     }
 
     buffer.write('.');

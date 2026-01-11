@@ -15,8 +15,10 @@ import '../services/recipe_service.dart';
 import '../services/transaction_service.dart';
 import '../services/user_pref_service.dart';
 import '../services/category_keyword_service.dart';
+import '../services/smart_consuming_service.dart';
 import 'account_main_screen.dart';
 import 'transaction_add_screen.dart';
+import 'quick_simple_expense_input_screen.dart';
 import '../utils/currency_formatter.dart';
 
 /// 음성 제어 전용 대시보드 - 주방에서 손을 쓸 수 없는 상황을 위한 관제 센터
@@ -311,7 +313,7 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
       debugPrint('[Voice] → 장바구니 추가');
       return await _handleShoppingCartAdd(command);
     }
-    
+
     // 0-1.5. 재고/유통기한 리포트 (음성 응답)
     if (_isInventoryReportCommand(normalized)) {
       debugPrint('[Voice] → 재고/유통기한 리포트');
@@ -335,7 +337,7 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
       debugPrint('[Voice] → 폐기 기록');
       return await _handleWasteLog(command);
     }
-    
+
     // NEW 4. 월말 정산/마감
     if (_isMonthlyClosingCommand(normalized)) {
       debugPrint('[Voice] → 월말 정산');
@@ -404,7 +406,7 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
     // 1. Data Load
     await _loadBudgetData(); // Refreshes _todayBudget (monthly budget stored here usually?), wait. _loadBudgetData calcs *Daily*?
     // Let's re-fetch explicitly for Month context to be sure.
-    
+
     final budget = BudgetService().getBudget(_accountName);
     if (budget <= 0) {
       return VoiceCommandResult(
@@ -418,8 +420,8 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
     final now = DateTime.now();
     final history = TransactionService().getTransactions(_accountName);
     final monthSpent = history.fold(0.0, (sum, t) {
-      if (t.type == TransactionType.expense && 
-          t.date.year == now.year && 
+      if (t.type == TransactionType.expense &&
+          t.date.year == now.year &&
           t.date.month == now.month) {
         return sum + t.amount;
       }
@@ -428,16 +430,20 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
 
     final remaining = budget - monthSpent;
     final sb = StringBuffer();
-    
+
     // 2. Logic & Message
     if (remaining < 0) {
       // Over budget
       final over = remaining.abs();
       sb.write('이번 달은 설정한 예산보다 많이 사용하셨네요. 😥\n');
-      sb.write('총 ${CurrencyFormatter.format(over)} 초과되었습니다. 다음 달엔 조금 더 아껴볼까요?');
+      sb.write(
+        '총 ${CurrencyFormatter.format(over)} 초과되었습니다. 다음 달엔 조금 더 아껴볼까요?',
+      );
     } else {
       // Under budget
-      sb.write('축하해요! 이번 달 예산이 ${CurrencyFormatter.format(remaining)} 남았습니다. 🎉\n\n');
+      sb.write(
+        '축하해요! 이번 달 예산이 ${CurrencyFormatter.format(remaining)} 남았습니다. 🎉\n\n',
+      );
       sb.write('💡 남은 돈은 이렇게 할 수 있어요:\n');
       sb.write('1. 이월하기 (다음 달 지출 예산에 마음속으로 합산)\n');
       sb.write('2. 비상금이나 자산(현금)으로 보내기');
@@ -454,8 +460,14 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
   // ============ 명령어 감지 ============
 
   bool _isMonthlyClosingCommand(String cmd) {
-    return (cmd.contains('월말') || cmd.contains('이번 달') || cmd.contains('이번달')) && 
-           (cmd.contains('정산') || cmd.contains('마감') || cmd.contains('결산') || cmd.contains('어때') || cmd.contains('남았'));
+    return (cmd.contains('월말') ||
+            cmd.contains('이번 달') ||
+            cmd.contains('이번달')) &&
+        (cmd.contains('정산') ||
+            cmd.contains('마감') ||
+            cmd.contains('결산') ||
+            cmd.contains('어때') ||
+            cmd.contains('남았'));
   }
 
   bool _containsAmountHint(String cmd) {
@@ -502,12 +514,15 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
     if (!hasExpense) return false;
 
     final hasInput = cmd.contains('입력') || cmd.contains('입력창');
-    final hasOpen = cmd.contains('열어') ||
-      cmd.contains('열러') ||
-      cmd.contains('켜') ||
-      cmd.contains('띄워');
-    final hasMove = cmd.contains('가') || cmd.contains('이동') || cmd.contains('진입');
-    final hasRecord = cmd.contains('기록') || cmd.contains('저장') || cmd.contains('추가');
+    final hasOpen =
+        cmd.contains('열어') ||
+        cmd.contains('열러') ||
+        cmd.contains('켜') ||
+        cmd.contains('띄워');
+    final hasMove =
+        cmd.contains('가') || cmd.contains('이동') || cmd.contains('진입');
+    final hasRecord =
+        cmd.contains('기록') || cmd.contains('저장') || cmd.contains('추가');
 
     // e.g. "지출 입력 열어줘", "지출입력 열어", "지출 입력으로 이동"
     // Also: "지출 기록해", "지출 입력해", "지출 추가" (금액 없이 화면 열기)
@@ -526,12 +541,15 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
     if (!hasIncome) return false;
 
     final hasInput = cmd.contains('입력') || cmd.contains('입력창');
-    final hasOpen = cmd.contains('열어') ||
+    final hasOpen =
+        cmd.contains('열어') ||
         cmd.contains('열러') ||
         cmd.contains('켜') ||
         cmd.contains('띄워');
-    final hasMove = cmd.contains('가') || cmd.contains('이동') || cmd.contains('진입');
-    final hasRecord = cmd.contains('기록') || cmd.contains('저장') || cmd.contains('추가');
+    final hasMove =
+        cmd.contains('가') || cmd.contains('이동') || cmd.contains('진입');
+    final hasRecord =
+        cmd.contains('기록') || cmd.contains('저장') || cmd.contains('추가');
 
     // e.g. "수입 입력 열어줘", "수입입력", "수입 기록해", "월급 기록"
     if ((hasInput && (hasOpen || hasMove)) || cmd.contains('수입입력')) {
@@ -577,12 +595,16 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
 
   bool _isShoppingCartCommand(String cmd) {
     // 단순 조회/이동은 Navigation에서 처리하고, 여기서는 추가 Intent 분리
-    return _isShoppingCartAddCommand(cmd); 
+    return _isShoppingCartAddCommand(cmd);
   }
 
   bool _isShoppingCartAddCommand(String cmd) {
     return (cmd.contains('장바구니') || cmd.contains('쇼핑') || cmd.contains('사야')) &&
-           (cmd.contains('추가') || cmd.contains('담아') || cmd.contains('넣어') || cmd.contains('기록') || cmd.contains('해줘'));
+        (cmd.contains('추가') ||
+            cmd.contains('담아') ||
+            cmd.contains('넣어') ||
+            cmd.contains('기록') ||
+            cmd.contains('해줘'));
   }
 
   bool _isTodaySummaryCommand(String cmd) {
@@ -607,7 +629,7 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
     final isFood = cmd.contains('냉장고') || cmd.contains('식재료');
     final isOpen =
         cmd.contains('열어') || cmd.contains('가줘') || cmd.contains('보여줘');
-    
+
     if (isFood && isOpen) {
       return true;
     }
@@ -648,11 +670,13 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
 
   bool _isInventoryReportCommand(String cmd) {
     // "재고 알려줘", "남은 재료", "유통기한 알려줘" 등
-    final isQuery = cmd.contains('재고') ||
+    final isQuery =
+        cmd.contains('재고') ||
         cmd.contains('남은') ||
         cmd.contains('유통기한') ||
         cmd.contains('부족한');
-    final isAction = cmd.contains('알려줘') ||
+    final isAction =
+        cmd.contains('알려줘') ||
         cmd.contains('뭐야') ||
         cmd.contains('확인') ||
         cmd.contains('체크') ||
@@ -664,19 +688,21 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
   bool _isFixedCostBriefingCommand(String cmd) {
     final isFixed =
         (cmd.contains('고정') && (cmd.contains('지출') || cmd.contains('비용'))) ||
-            cmd.contains('공과금');
-    final isDue = (cmd.contains('낼 거') || cmd.contains('낼거')) &&
-        cmd.contains('남았');
+        cmd.contains('공과금');
+    final isDue =
+        (cmd.contains('낼 거') || cmd.contains('낼거')) && cmd.contains('남았');
     return isFixed || isDue;
   }
 
   bool _isSpendingAdviceCommand(String cmd) {
-    final isBuying = cmd.contains('사도') ||
+    final isBuying =
+        cmd.contains('사도') ||
         cmd.contains('써도') ||
         cmd.contains('지러도') ||
         cmd.contains('질러도') ||
         cmd.contains('살까');
-    final isAsking = cmd.contains('돼') ||
+    final isAsking =
+        cmd.contains('돼') ||
         cmd.contains('되') ||
         cmd.contains('될까') ||
         cmd.contains('까요');
@@ -684,11 +710,15 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
   }
 
   bool _isExceptionMarkingCommand(String cmd) {
-    return cmd.contains('예외') && (cmd.contains('해줘') || cmd.contains('처리') || cmd.contains('등록'));
+    return cmd.contains('예외') &&
+        (cmd.contains('해줘') || cmd.contains('처리') || cmd.contains('등록'));
   }
 
   bool _isWasteLogCommand(String cmd) {
-    return cmd.contains('버렸') || cmd.contains('상해서') || cmd.contains('상했') || cmd.contains('폐기');
+    return cmd.contains('버렸') ||
+        cmd.contains('상해서') ||
+        cmd.contains('상했') ||
+        cmd.contains('폐기');
   }
 
   // ============ 명령어 처리 ============
@@ -778,12 +808,12 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
     try {
       final history = TransactionService().getTransactions(_accountName);
       final search = description.replaceAll(' ', '').toLowerCase();
-      
+
       // 최신순 탐색
       for (int i = history.length - 1; i >= 0; i--) {
         final t = history[i];
         if (t.type != TransactionType.expense) continue;
-        
+
         // 설명이 비슷하면 해당 카테고리 채택
         final tDesc = t.description.replaceAll(' ', '').toLowerCase();
         if (tDesc == search || (search.length > 1 && tDesc.contains(search))) {
@@ -811,7 +841,7 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
     if (extractedAmount == null) {
       // Special case: "무지출" command usually has no amount.
       if (!command.contains('무지출')) {
-          return VoiceCommandResult(
+        return VoiceCommandResult(
           command: command,
           success: false,
           message: '금액을 인식하지 못했어요. "지출 5천원 커피 기록"처럼 말해주세요.',
@@ -821,7 +851,8 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
       // If 무지출, let amount be 0 (or bonus points will be added later)
     }
 
-    if (amount < 0) { // Allow 0 for non-spending record start
+    if (amount < 0) {
+      // Allow 0 for non-spending record start
       return VoiceCommandResult(
         command: command,
         success: false,
@@ -833,7 +864,10 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
     final description = _extractExpenseDescription(command);
 
     // [1억 프로젝트] 포인트 적립 감지
-    final isPointAccumulation = description.contains('포인트') || command.contains('적립') || description.contains('무지출');
+    final isPointAccumulation =
+        description.contains('포인트') ||
+        command.contains('적립') ||
+        description.contains('무지출');
     TransactionType type = TransactionType.expense; // 기본값
     String customFeedback = '';
 
@@ -844,34 +878,46 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
       type = TransactionType.income; // 포인트 적립은 수입으로 처리
       mainCategory = '기타수입'; // 혹은 '포인트'
       subCategory = '포인트적립';
-      
+
       // 누적 횟수 및 총액 체크 (1억 프로젝트)
       final history = TransactionService().getTransactions(_accountName);
-      final prevPoints = history.where((t) => 
-        (t.description.contains('포인트') || (t.subCategory ?? '').contains('포인트')) &&
-        t.type == TransactionType.income // 수입인 것만
+      final prevPoints = history.where(
+        (t) =>
+            (t.description.contains('포인트') ||
+                (t.subCategory ?? '').contains('포인트')) &&
+            t.type == TransactionType.income, // 수입인 것만
       );
 
       // [New Logic: Safety Net & Payback]
       double bonusPoints = 0;
       final now = DateTime.now();
-      
+
       // 1. Golden Time Bonus (Same day exceptional expense)
       final todayExpenses = history.where((t) {
         if (t.type != TransactionType.expense) return false;
-        if (t.date.year != now.year || t.date.month != now.month || t.date.day != now.day) return false;
-        
+        if (t.date.year != now.year ||
+            t.date.month != now.month ||
+            t.date.day != now.day) {
+          return false;
+        }
+
         final desc = t.description;
         // Check for exceptions
-        final isException = desc.contains('병원') || desc.contains('약국') || desc.contains('치료') || 
-                            desc.contains('축의금') || desc.contains('조의금') || desc.contains('수리') || 
-                            desc.contains('과태료');
+        final isException =
+            desc.contains('병원') ||
+            desc.contains('약국') ||
+            desc.contains('치료') ||
+            desc.contains('축의금') ||
+            desc.contains('조의금') ||
+            desc.contains('수리') ||
+            desc.contains('과태료');
         return isException;
       }).toList();
 
       if (todayExpenses.isNotEmpty && description.contains('무지출')) {
-         bonusPoints += 500; // Bonus for saving after shock
-         customFeedback += '\n\n🛡️ 갑작스러운 지출에 놀라셨죠? 그래도 다른 소비를 잘 참아내셨네요! 대견함의 의미로 보너스 포인트를 드립니다.';
+        bonusPoints += 500; // Bonus for saving after shock
+        customFeedback +=
+            '\n\n🛡️ 갑작스러운 지출에 놀라셨죠? 그래도 다른 소비를 잘 참아내셨네요! 대견함의 의미로 보너스 포인트를 드립니다.';
       }
 
       // 2. Payback (Recovery Points within 3 days)
@@ -879,26 +925,32 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
       final recentShock = history.where((t) {
         if (t.type != TransactionType.expense) return false;
         if (t.date.isBefore(threeDaysAgo)) return false;
-        
+
         final desc = t.description;
-        final isException = desc.contains('병원') || desc.contains('약국') || desc.contains('치료') || 
-                            desc.contains('축의금') || desc.contains('조의금') || desc.contains('수리') || 
-                            desc.contains('과태료');
+        final isException =
+            desc.contains('병원') ||
+            desc.contains('약국') ||
+            desc.contains('치료') ||
+            desc.contains('축의금') ||
+            desc.contains('조의금') ||
+            desc.contains('수리') ||
+            desc.contains('과태료');
         return isException;
       }).toList();
-      
+
       if (recentShock.isNotEmpty && description.contains('무지출')) {
-         bonusPoints += 300;
-         customFeedback += '\n\n🔄 지난번 갑작스러운 지출 이후 바로 허리띠를 졸라매셨군요! 회복 탄력성이 대단하십니다. "회복 포인트" 적립해 드려요!';
+        bonusPoints += 300;
+        customFeedback +=
+            '\n\n🔄 지난번 갑작스러운 지출 이후 바로 허리띠를 졸라매셨군요! 회복 탄력성이 대단하십니다. "회복 포인트" 적립해 드려요!';
       }
 
       // Apply Bonus
       amount += bonusPoints;
-      
+
       final pointCount = prevPoints.length;
       final prevTotal = prevPoints.fold(0.0, (sum, t) => sum + t.amount);
       final currentTotal = prevTotal + amount;
-      
+
       // [1억 프로젝트] 진행률 계산
       final double progressPercent = (currentTotal / 100000000.0) * 100;
       // 0.0001% 단위까지 표시 (작은 금액도 소중하니까요)
@@ -907,7 +959,8 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
       // 마일스톤 돌파 체크
       // 10만, 7만, 5만, 3만, 1만 순으로 체크 (높은 금액 우선)
       if (prevTotal < 100000 && currentTotal >= 100000) {
-        customFeedback = '\n🎉 대단해요! 드디어 10만원을 모으셨습니다!\n🏦 이제 예금 상품으로 돈을 불릴 차례예요. 1억 프로젝트의 첫 단계 달성을 축하드립니다!';
+        customFeedback =
+            '\n🎉 대단해요! 드디어 10만원을 모으셨습니다!\n🏦 이제 예금 상품으로 돈을 불릴 차례예요. 1억 프로젝트의 첫 단계 달성을 축하드립니다!';
       } else if (prevTotal < 70000 && currentTotal >= 70000) {
         customFeedback = '\n🔥 7만원 돌파! 이제 고지가 눈앞입니다. 조금만 더 힘내세요!';
       } else if (prevTotal < 50000 && currentTotal >= 50000) {
@@ -921,7 +974,8 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
         customFeedback = '\n🎉 첫 포인트 적립이네요! 포인트를 모아보세요. "1억 프로젝트"를 시작할 수 있습니다.';
       } else {
         // n회 적립 (일반)
-        customFeedback = '\n👍 ${pointCount + 1}번째 포인트 적립! 현재까지 총 ${CurrencyFormatter.format(currentTotal)} 모으셨어요.';
+        customFeedback =
+            '\n👍 ${pointCount + 1}번째 포인트 적립! 현재까지 총 ${CurrencyFormatter.format(currentTotal)} 모으셨어요.';
       }
 
       // 진행률 정보 추가 (모든 케이스에 적용)
@@ -929,22 +983,26 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
     }
 
     // 사용자 피드백을 위한 메시지 구성
-    String feedbackMsg = '🏪 $description ${CurrencyFormatter.format(amount)} 기록 완료!';
+    String feedbackMsg =
+        '🏪 $description ${CurrencyFormatter.format(amount)} 기록 완료!';
     if (customFeedback.isNotEmpty) {
       feedbackMsg += customFeedback;
     } else if (mainCategory != '미분류') {
       feedbackMsg += '\n분류: $mainCategory';
-      if (subCategory != null && subCategory.isNotEmpty) feedbackMsg += ' > $subCategory';
+      if (subCategory != null && subCategory.isNotEmpty) {
+        feedbackMsg += ' > $subCategory';
+      }
     } else {
       feedbackMsg += '\n(카테고리를 찾지 못해 "미분류"로 저장했습니다)';
     }
 
     if (type == TransactionType.income && isPointAccumulation) {
-       // 포인트 적립 성공 메시지를 덮어씁니다 (스크립트 요구사항 반)
-       feedbackMsg = '기록 완료했습니다. 첫 포인트가 적립되었네요! 이제 1억 프로젝트의 첫발을 떼셨습니다. 이 기세로 쭉 가보시죠!\n\n(텍스트) 🏪 $description ${CurrencyFormatter.format(amount)} 기록 완료!';
-       if (customFeedback.isNotEmpty) {
-          feedbackMsg += customFeedback;
-       }
+      // 포인트 적립 성공 메시지를 덮어씁니다 (스크립트 요구사항 반)
+      feedbackMsg =
+          '기록 완료했습니다. 첫 포인트가 적립되었네요! 이제 1억 프로젝트의 첫발을 떼셨습니다. 이 기세로 쭉 가보시죠!\n\n(텍스트) 🏪 $description ${CurrencyFormatter.format(amount)} 기록 완료!';
+      if (customFeedback.isNotEmpty) {
+        feedbackMsg += customFeedback;
+      }
     }
 
     // 거래 생성 및 저장
@@ -961,35 +1019,60 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
     // [음성 비서 잔소리 & 칭찬 & 위로 로직]
     if (type == TransactionType.expense) {
       bool isSpecialCase = false;
-      
+
       // 1. 의료비/병원비 (건강 우선)
-      if (description.contains('병원') || description.contains('약국') || description.contains('치료') || description.contains('진료') || 
-          description.contains('비타민') || (mainCategory.contains('건강') || mainCategory.contains('의료'))) {
-         isSpecialCase = true;
-         customFeedback += '\n\n💊 아이구, 어디 많이 아프신 건 아니죠? 건강을 잃으면 1억 프로젝트도 소용없어요. 약 잘 챙겨 드시고 오늘은 푹 쉬세요. 병원비 기록은 제가 알아서 잘 정리해둘게요. (포인트 연속 기록 보호됨)';
+      if (description.contains('병원') ||
+          description.contains('약국') ||
+          description.contains('치료') ||
+          description.contains('진료') ||
+          description.contains('비타민') ||
+          (mainCategory.contains('건강') || mainCategory.contains('의료'))) {
+        isSpecialCase = true;
+        customFeedback +=
+            '\n\n💊 아이구, 어디 많이 아프신 건 아니죠? 건강을 잃으면 1억 프로젝트도 소용없어요. 약 잘 챙겨 드시고 오늘은 푹 쉬세요. 병원비 기록은 제가 알아서 잘 정리해둘게요. (포인트 연속 기록 보호됨)';
       }
       // 2. 경조사비 (사람 우선)
-      else if (description.contains('축의금') || description.contains('조의금') || description.contains('부조금') || 
-               description.contains('결혼') || description.contains('장례') || description.contains('화환') || (mainCategory.contains('경조사'))) {
-         isSpecialCase = true;
-         customFeedback += '\n\n🤝 기쁜 소식이네요! 이런 소중한 지출은 1억 프로젝트 포인트 차감 대상에서 제외됩니다. 인맥이라는 더 큰 자산을 쌓으셨으니까요! (포인트 차감 면제)';
+      else if (description.contains('축의금') ||
+          description.contains('조의금') ||
+          description.contains('부조금') ||
+          description.contains('결혼') ||
+          description.contains('장례') ||
+          description.contains('화환') ||
+          (mainCategory.contains('경조사'))) {
+        isSpecialCase = true;
+        customFeedback +=
+            '\n\n🤝 기쁜 소식이네요! 이런 소중한 지출은 1억 프로젝트 포인트 차감 대상에서 제외됩니다. 인맥이라는 더 큰 자산을 쌓으셨으니까요! (포인트 차감 면제)';
       }
       // 3. 자기계발 (미래 투자)
-      else if (description.contains('도서') || description.contains('책') || description.contains('강의') || 
-               description.contains('수강') || description.contains('학원') || description.contains('공부')) {
-         isSpecialCase = true;
-         customFeedback += '\n\n📚 미래를 위한 투자는 언제나 옳습니다! 1억 프로젝트의 핵심은 결국 "나 자신"의 가치를 높이는 거니까요. 응원합니다!';
+      else if (description.contains('도서') ||
+          description.contains('책') ||
+          description.contains('강의') ||
+          description.contains('수강') ||
+          description.contains('학원') ||
+          description.contains('공부')) {
+        isSpecialCase = true;
+        customFeedback +=
+            '\n\n📚 미래를 위한 투자는 언제나 옳습니다! 1억 프로젝트의 핵심은 결국 "나 자신"의 가치를 높이는 거니까요. 응원합니다!';
       }
       // 4. 공과금/세금 (필수 지출)
-      else if (description.contains('공과금') || description.contains('세금') || description.contains('수도') || 
-               description.contains('전기') || description.contains('가스') || description.contains('관리비')) {
-         isSpecialCase = true;
-          customFeedback += '\n\n💡 숨만 쉬어도 나가는 돈이지만, 연체 없이 깔끔하게 처리하셨네요! 신용 점수도 자산입니다.';
+      else if (description.contains('공과금') ||
+          description.contains('세금') ||
+          description.contains('수도') ||
+          description.contains('전기') ||
+          description.contains('가스') ||
+          description.contains('관리비')) {
+        isSpecialCase = true;
+        customFeedback +=
+            '\n\n💡 숨만 쉬어도 나가는 돈이지만, 연체 없이 깔끔하게 처리하셨네요! 신용 점수도 자산입니다.';
       }
       // 5. 예기치 못한 수리/과태료 (위로)
-      else if (description.contains('수리') || description.contains('과태료') || description.contains('벌금') || description.contains('사고')) {
-         isSpecialCase = true;
-         customFeedback += '\n\n🛠 악! 정말 속상하시겠어요. 예상치 못한 복병이 나타났네요. 하지만 액땜했다고 생각해요! 제가 다음 달 예산 계획을 더 꼼꼼하게 짜서 1억 프로젝트에 차질 없게 도와드릴게요. (연속 기록 보호됨)';
+      else if (description.contains('수리') ||
+          description.contains('과태료') ||
+          description.contains('벌금') ||
+          description.contains('사고')) {
+        isSpecialCase = true;
+        customFeedback +=
+            '\n\n🛠 악! 정말 속상하시겠어요. 예상치 못한 복병이 나타났네요. 하지만 액땜했다고 생각해요! 제가 다음 달 예산 계획을 더 꼼꼼하게 짜서 1억 프로젝트에 차질 없게 도와드릴게요. (연속 기록 보호됨)';
       }
 
       // 일반적인 잔소리 로직 (특수 상황이 아닐 때만 발동)
@@ -1003,11 +1086,11 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
           }).toList();
 
           if (expiringFood.isNotEmpty) {
-             final msgs = [
-               '냉장고 속 우유가 자기 버려달라고 울고 있어요. 외식 말고 집밥으로 우유를 구출해 주세요!',
-               '냉장고에 재료가 가득한데 외식이라니요? 이건 냉장고에 대한 예의가 아니라고 생각합니다.'
-             ];
-             customFeedback += '\n\n😈 ${msgs[Random().nextInt(msgs.length)]}';
+            final msgs = [
+              '냉장고 속 우유가 자기 버려달라고 울고 있어요. 외식 말고 집밥으로 우유를 구출해 주세요!',
+              '냉장고에 재료가 가득한데 외식이라니요? 이건 냉장고에 대한 예의가 아니라고 생각합니다.',
+            ];
+            customFeedback += '\n\n😈 ${msgs[Random().nextInt(msgs.length)]}';
           }
         }
 
@@ -1017,52 +1100,56 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
           final history = TransactionService().getTransactions(_accountName);
           final now = DateTime.now();
           final thisMonthSpent = history.fold(0.0, (sum, t) {
-            if (t.type == TransactionType.expense && 
-                t.date.year == now.year && 
+            if (t.type == TransactionType.expense &&
+                t.date.year == now.year &&
                 t.date.month == now.month) {
               return sum + t.amount;
             }
             return sum;
           });
-          
+
           // 이번 거래 포함
-          final totalSpent = thisMonthSpent + amount; 
+          final totalSpent = thisMonthSpent + amount;
           final remaining = budget - totalSpent;
-          
+
           if (remaining < 0) {
-             final msgs = [
-               '비상! 현재 예산이 멸종 위기입니다. 이제부터는 숨만 쉬어도 예산 초과예요.',
-               '주인님, 우리 당분간은 편의점 앞도 지나가지 말기로 약속해요. 눈 감고 지나가세요!',
-               '1억 프로젝트가 지금 잠시 멈춤 상태입니다. 다시 엔진을 돌리려면 "무지출"이라는 기름이 필요해요.'
-             ];
-             customFeedback += '\n\n🚨 ${msgs[Random().nextInt(msgs.length)]}';
+            final msgs = [
+              '비상! 현재 예산이 멸종 위기입니다. 이제부터는 숨만 쉬어도 예산 초과예요.',
+              '주인님, 우리 당분간은 편의점 앞도 지나가지 말기로 약속해요. 눈 감고 지나가세요!',
+              '1억 프로젝트가 지금 잠시 멈춤 상태입니다. 다시 엔진을 돌리려면 "무지출"이라는 기름이 필요해요.',
+            ];
+            customFeedback += '\n\n🚨 ${msgs[Random().nextInt(msgs.length)]}';
           } else if (remaining < budget * 0.2) {
-             // 20% 미만 남았을 때 (Warning Phase)
-             final msgs = [
-               '주인님, 지금 지갑에 구멍 난 것 같아요! 1억 프로젝트가 1억 년 뒤로 밀리고 있습니다.',
-               "방금 지출로 이번 달 '치킨권'이 소멸되었습니다. 오늘 저녁은 냉장고 파먹기 어떠세요?",
-               '자산 그래프가 다이어트 중인가 봐요. 주인님 지갑은 홀쭉해지고 제 마음은 무거워지네요.'
-             ];
-             customFeedback += '\n\n⚠️ ${msgs[Random().nextInt(msgs.length)]}';
+            // 20% 미만 남았을 때 (Warning Phase)
+            final msgs = [
+              '주인님, 지금 지갑에 구멍 난 것 같아요! 1억 프로젝트가 1억 년 뒤로 밀리고 있습니다.',
+              "방금 지출로 이번 달 '치킨권'이 소멸되었습니다. 오늘 저녁은 냉장고 파먹기 어떠세요?",
+              '자산 그래프가 다이어트 중인가 봐요. 주인님 지갑은 홀쭉해지고 제 마음은 무거워지네요.',
+            ];
+            customFeedback += '\n\n⚠️ ${msgs[Random().nextInt(msgs.length)]}';
           } else {
-             // Budget is fine, but check impulse buying suspicion (High amount, non-fixed)
-             final isFixedCost = mainCategory.contains('고정') || mainCategory.contains('월세') || mainCategory.contains('공과금');
-             if (!isFixedCost && amount >= 30000) {
-               final msgs = [
-                 '이 물건, 정말 1억 프로젝트보다 중요한가요? 제 인공지능 회로로는 이해가 잘 안 되네요!',
-                 '지름신이 강림하셨군요. 하지만 그 신은 잔액을 책임져주지 않는다는 사실, 잊지 마세요.',
-                 "지금 지르시면 '오늘의 행복'은 얻겠지만, '내일의 통장'은 눈물을 흘릴 거예요."
-               ];
-               customFeedback += '\n\n🤔 ${msgs[Random().nextInt(msgs.length)]}';
-             }
+            // Budget is fine, but check impulse buying suspicion (High amount, non-fixed)
+            final isFixedCost =
+                mainCategory.contains('고정') ||
+                mainCategory.contains('월세') ||
+                mainCategory.contains('공과금');
+            if (!isFixedCost && amount >= 30000) {
+              final msgs = [
+                '이 물건, 정말 1억 프로젝트보다 중요한가요? 제 인공지능 회로로는 이해가 잘 안 되네요!',
+                '지름신이 강림하셨군요. 하지만 그 신은 잔액을 책임져주지 않는다는 사실, 잊지 마세요.',
+                "지금 지르시면 '오늘의 행복'은 얻겠지만, '내일의 통장'은 눈물을 흘릴 거예요.",
+              ];
+              customFeedback += '\n\n🤔 ${msgs[Random().nextInt(msgs.length)]}';
+            }
           }
         }
       }
     } else if (type == TransactionType.income && isPointAccumulation) {
-       // 칭찬 강화 (무지출 등 긍정적 상황 가정)
-       if (description.contains('무지출')) {
-          customFeedback += '\n\n🎉 와! 오늘 지갑을 한 번도 안 여셨네요? 1억 프로젝트에 한 걸음 더 가까워졌습니다. 포인트 쏴드릴게요!';
-       }
+      // 칭찬 강화 (무지출 등 긍정적 상황 가정)
+      if (description.contains('무지출')) {
+        customFeedback +=
+            '\n\n🎉 와! 오늘 지갑을 한 번도 안 여셨네요? 1억 프로젝트에 한 걸음 더 가까워졌습니다. 포인트 쏴드릴게요!';
+      }
     }
 
     await TransactionService().addTransaction(_accountName, transaction);
@@ -1104,7 +1191,8 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
       return VoiceCommandResult(
         command: command,
         success: true,
-        message: '유통기한 임박 식재료나 부족한 생필품이 없습니다.\n\n💡 사용기록하시면 외출해서도 냉장고 안을 볼 수 있습니다.',
+        message:
+            '유통기한 임박 식재료나 부족한 생필품이 없습니다.\n\n💡 사용기록하시면 외출해서도 냉장고 안을 볼 수 있습니다.',
         type: VoiceCommandType.query,
       );
     }
@@ -1156,8 +1244,7 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
     // 6: 설정 (7페이지)
 
     if (cmd.contains('1페이지') ||
-        (cmd.contains('대시보드') &&
-            (cmd.contains('가줘') || cmd.contains('이동')))) {
+        (cmd.contains('대시보드') && (cmd.contains('가줘') || cmd.contains('이동')))) {
       mainPageIndex = 0;
       screenName = '대시보드';
     } else if (cmd.contains('2페이지') ||
@@ -1166,9 +1253,7 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
         cmd.contains('지출')) {
       // "지출 통계" vs "지출(탭)" 구분 필요.
       // 만약 "지출"만 있고 "통계/현황/내역" 없으면 이동.
-      if (!(cmd.contains('통계') ||
-          cmd.contains('현황') ||
-          cmd.contains('내역'))) {
+      if (!(cmd.contains('통계') || cmd.contains('현황') || cmd.contains('내역'))) {
         mainPageIndex = 1;
         screenName = '요리/쇼핑/지출';
       }
@@ -1199,25 +1284,25 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
     }
 
     if (mainPageIndex != null) {
-       _suspendAutoListen = true;
-       if (_isListening) await _stopListening();
-       if (!mounted) return _buildClosedResult(cmd);
+      _suspendAutoListen = true;
+      if (_isListening) await _stopListening();
+      if (!mounted) return _buildClosedResult(cmd);
 
-       Navigator.of(context).push(
-         MaterialPageRoute(
-           builder: (_) => AccountMainScreen(
-             accountName: _accountName,
-             initialIndex: mainPageIndex!,
-           ),
-         ),
-       );
-       _suspendAutoListen = false;
-       return VoiceCommandResult(
-          command: cmd,
-          success: true,
-          message: '$screenName(으)로 이동합니다.',
-          type: VoiceCommandType.navigation,
-       );
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => AccountMainScreen(
+            accountName: _accountName,
+            initialIndex: mainPageIndex!,
+          ),
+        ),
+      );
+      _suspendAutoListen = false;
+      return VoiceCommandResult(
+        command: cmd,
+        success: true,
+        message: '$screenName(으)로 이동합니다.',
+        type: VoiceCommandType.navigation,
+      );
     }
 
     // --- OTHER ROUTES ---
@@ -1329,7 +1414,7 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
         .replaceAll('를', '')
         .replaceAll('좀', '')
         .trim();
-    
+
     if (itemName.isEmpty) {
       return VoiceCommandResult(
         command: command,
@@ -1341,11 +1426,11 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
 
     // 2-1. 중복 구매 방지 알림 (Inventory & Recent History Check)
     String warningMsg = '';
-    
+
     // (1) 현재 냉장고/팬트리 재고 확인
     final inventory = FoodExpiryService.instance.items.value;
     final consumables = ConsumableInventoryService.instance.items.value;
-    
+
     final inStock = inventory
         .where((i) => i.name.contains(itemName) || itemName.contains(i.name))
         .toList();
@@ -1358,10 +1443,10 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
       warningMsg =
           '⚠️ 냉장고에 이미 ${item.name} (${item.quantity}${item.unit}) 있습니다.';
     } else if (inConsumables.isNotEmpty) {
-       final item = inConsumables.first;
-       if (item.currentStock > item.threshold) {
-         warningMsg = '⚠️ 집에 이미 ${item.name} 재고가 넉넉합니다.';
-       }
+      final item = inConsumables.first;
+      if (item.currentStock > item.threshold) {
+        warningMsg = '⚠️ 집에 이미 ${item.name} 재고가 넉넉합니다.';
+      }
     }
 
     // (2) 재고에 없으면 최근 구매 이력 확인 (혹시 샀는데 등록 안 했을 수 있음)
@@ -1370,19 +1455,19 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
       // 최근 7일 이내 구매 내역 확인
       final recentThreshold = DateTime.now().subtract(const Duration(days: 7));
       final recentPurchase = history.where((t) {
-         if (t.type != TransactionType.expense) return false;
-         if (t.date.isBefore(recentThreshold)) return false;
-         return t.description.contains(itemName); 
+        if (t.type != TransactionType.expense) return false;
+        if (t.date.isBefore(recentThreshold)) return false;
+        return t.description.contains(itemName);
       }).toList();
 
       if (recentPurchase.isNotEmpty) {
-         // 가장 최근 것
-         recentPurchase.sort((a, b) => b.date.compareTo(a.date));
-         final last = recentPurchase.first;
-         final daysAgo = DateTime.now().difference(last.date).inDays;
-         final timeStr = daysAgo == 0 ? '오늘' : '$daysAgo일 전';
-         warningMsg =
-             '⚠️ $timeStr에 "${last.description}" 구매 기록이 있어요. 냉장고를 확인해보세요.';
+        // 가장 최근 것
+        recentPurchase.sort((a, b) => b.date.compareTo(a.date));
+        final last = recentPurchase.first;
+        final daysAgo = DateTime.now().difference(last.date).inDays;
+        final timeStr = daysAgo == 0 ? '오늘' : '$daysAgo일 전';
+        warningMsg =
+            '⚠️ $timeStr에 "${last.description}" 구매 기록이 있어요. 냉장고를 확인해보세요.';
       }
     }
 
@@ -1392,14 +1477,14 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
     );
     final isDuplicate = currentItems.any((i) => i.name == itemName);
     if (isDuplicate) {
-       return VoiceCommandResult(
+      return VoiceCommandResult(
         command: command,
         success: false,
         message: '이미 장바구니에 "$itemName"이(가) 있습니다.',
         type: VoiceCommandType.unknown,
       );
     }
-    
+
     // 새 아이템 생성
     final newItem = ShoppingCartItem(
       id: 'voice_${DateTime.now().millisecondsSinceEpoch}',
@@ -1420,55 +1505,58 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
       final relevantParams = history.where((t) {
         if (t.type != TransactionType.expense) return false;
         // 정확도 향상을 위해 상품명이 포함된 거래만 필터링
-        return t.description.contains(itemName); 
+        return t.description.contains(itemName);
       }).toList();
 
       if (relevantParams.isNotEmpty) {
         // 최근 3개월 데이터만 유효하다고 가정
-        final recentThreshold = DateTime.now().subtract(const Duration(days: 90));
+        final recentThreshold = DateTime.now().subtract(
+          const Duration(days: 90),
+        );
         final recent = relevantParams
             .where((t) => t.date.isAfter(recentThreshold))
             .toList();
-        
+
         if (recent.isNotEmpty) {
-           // 상점별 최저가 찾기
-           final Map<String, double> storeMinPrices = {};
-           
-           for (final t in recent) {
-             // 상점명 추출 시도 (store 필드가 없으면 description에서 유추하거나 메모 등 활용)
-             // 여기서는 description이나 store 필드를 가정. Transaction 모델에 store 필드가 있음.
-             final storeName = t.store ?? '알수없음';
-             if (storeName == '알수없음') {
-                // description에서 유추하는 간단한 로직 (e.g. "이마트 우유" -> "이마트")
-                // 혹은 나중에 StoreAliasService 등을 활용 가능
-                // 임시로 description 앞부분 등을 사용할 수도 있음.
-                // 여기서는 간단히 생략하거나, description 전체를 힌트로 삼긴 어려우므로 패스.
-             }
+          // 상점별 최저가 찾기
+          final Map<String, double> storeMinPrices = {};
 
-             if (storeName != '알수없음' && t.amount > 0) {
-               if (!storeMinPrices.containsKey(storeName) ||
-                   t.amount < storeMinPrices[storeName]!) {
-                 storeMinPrices[storeName] = t.amount;
-               }
-             }
-           }
+          for (final t in recent) {
+            // 상점명 추출 시도 (store 필드가 없으면 description에서 유추하거나 메모 등 활용)
+            // 여기서는 description이나 store 필드를 가정. Transaction 모델에 store 필드가 있음.
+            final storeName = t.store ?? '알수없음';
+            if (storeName == '알수없음') {
+              // description에서 유추하는 간단한 로직 (e.g. "이마트 우유" -> "이마트")
+              // 혹은 나중에 StoreAliasService 등을 활용 가능
+              // 임시로 description 앞부분 등을 사용할 수도 있음.
+              // 여기서는 간단히 생략하거나, description 전체를 힌트로 삼긴 어려우므로 패스.
+            }
 
-           if (storeMinPrices.isNotEmpty) {
-             // 전체 최저가 찾기
-             final bestEntry = storeMinPrices.entries
-                 .reduce((a, b) => a.value < b.value ? a : b);
-             final formattedPrice = CurrencyFormatter.format(bestEntry.value);
-             priceFeedback =
-                 '최근 ${bestEntry.key}에서 $formattedPrice에 가장 저렴하게 구매하셨네요.';
-           } else {
-             // 상점명은 모르지만 가격 이력은 있는 경우
-             // 가장 최근 가격 or 최저 가격 안내
-             final minPrice = recent
-                 .map((t) => t.amount)
-                 .reduce((a, b) => a < b ? a : b);
-             priceFeedback =
-                 '최근 최저가는 ${CurrencyFormatter.format(minPrice)}이었습니다.';
-           }
+            if (storeName != '알수없음' && t.amount > 0) {
+              if (!storeMinPrices.containsKey(storeName) ||
+                  t.amount < storeMinPrices[storeName]!) {
+                storeMinPrices[storeName] = t.amount;
+              }
+            }
+          }
+
+          if (storeMinPrices.isNotEmpty) {
+            // 전체 최저가 찾기
+            final bestEntry = storeMinPrices.entries.reduce(
+              (a, b) => a.value < b.value ? a : b,
+            );
+            final formattedPrice = CurrencyFormatter.format(bestEntry.value);
+            priceFeedback =
+                '최근 ${bestEntry.key}에서 $formattedPrice에 가장 저렴하게 구매하셨네요.';
+          } else {
+            // 상점명은 모르지만 가격 이력은 있는 경우
+            // 가장 최근 가격 or 최저 가격 안내
+            final minPrice = recent
+                .map((t) => t.amount)
+                .reduce((a, b) => a < b ? a : b);
+            priceFeedback =
+                '최근 최저가는 ${CurrencyFormatter.format(minPrice)}이었습니다.';
+          }
         }
       }
     } catch (e) {
@@ -1477,7 +1565,7 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
 
     final sb = StringBuffer();
     sb.write('$itemName, 장바구니에 담았습니다.');
-    
+
     if (warningMsg.isNotEmpty) {
       sb.write('\n$warningMsg'); // 중복 구매 경고 (최우선)
     } else if (priceFeedback.isNotEmpty) {
@@ -1574,24 +1662,51 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
     }
 
     final description = _extractExpenseDescription(command);
-    
-    // 카테고리 자동 유추 (학습 -> 사전 -> 미분류)
-    final (mainCategory, subCategory) = _inferCategory(description);
+    // Use QuickSimpleExpenseInputScreen with pre-filled line
+    final prefilledLine = '$description ${amount.toInt()}';
 
-    final template = Transaction(
-      id: 'template_expense_voice',
-      type: TransactionType.expense,
-      amount: amount,
-      date: DateTime.now(),
-      description: description,
-      mainCategory: mainCategory,
-      subCategory: subCategory,
+    _suspendAutoListen = true;
+    if (_isListening) await _stopListening();
+
+    if (!mounted) {
+      return VoiceCommandResult(
+        command: command,
+        success: false,
+        message: '화면이 종료되었습니다.',
+        type: VoiceCommandType.navigation,
+      );
+    }
+
+    await showModalBottomSheet<void>(
+      context: context,
+      useSafeArea: true,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (sheetContext) {
+        return SizedBox(
+          height: MediaQuery.sizeOf(sheetContext).height * 0.95,
+          child: QuickSimpleExpenseInputScreen(
+            accountName: _accountName,
+            initialDate: DateTime.now(),
+            initialLine: prefilledLine,
+          ),
+        );
+      },
     );
 
-    return _handleOpenExpenseInput(
-      initialTransaction: template,
-      treatAsNew: true,
-      openedFromCommand: command,
+    _suspendAutoListen = false;
+    if (_autoListenEnabled && mounted) {
+      Future.delayed(const Duration(milliseconds: 250), () {
+        if (!mounted) return;
+        if (!_isListening) _startListening();
+      });
+    }
+
+    return VoiceCommandResult(
+      command: command,
+      success: true,
+      message: '간편 지출 입력을 열었습니다. (내용 자동 입력됨)',
+      type: VoiceCommandType.navigation,
     );
   }
 
@@ -1660,11 +1775,13 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
   // --- Special Exception Handler ---
   Future<VoiceCommandResult> _handleExceptionMarking(String command) async {
     final history = TransactionService().getTransactions(_accountName);
-    
+
     // 1. Find target transaction
     Transaction? target;
-    
-    if (command.contains('방금') || command.contains('마지막') || command.contains('그거')) {
+
+    if (command.contains('방금') ||
+        command.contains('마지막') ||
+        command.contains('그거')) {
       // Last transaction
       if (history.isNotEmpty) {
         target = history.first; // history is sorted desc
@@ -1678,13 +1795,13 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
           .replaceAll('처리', '')
           .replaceAll('그거', '')
           .trim();
-      
+
       if (keyword.isNotEmpty) {
-         try {
-           target = history.firstWhere((t) => t.description.contains(keyword));
-         } catch (e) {
-           // Not found
-         }
+        try {
+          target = history.firstWhere((t) => t.description.contains(keyword));
+        } catch (e) {
+          // Not found
+        }
       } else {
         // Fallback to last if no keyword
         if (history.isNotEmpty) target = history.first;
@@ -1704,12 +1821,12 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
     // We append [예외] tag to description for simple persistence without schema change
     // Or we handle it via category logic update.
     // Let's use a Special Category "특별예산" or "예외지출".
-    
+
     final oldDesc = target.description;
     final newDesc = oldDesc.contains('[예외]') ? oldDesc : '$oldDesc [예외]';
     final oldMainCat = target.mainCategory;
     const newMainCat = '예외지출'; // Special Category
-    
+
     final updatedTransaction = Transaction(
       id: target.id,
       type: target.type,
@@ -1750,7 +1867,7 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
     // Load fixed costs
     await FixedCostService().loadFixedCosts();
     final costs = FixedCostService().getFixedCosts(_accountName);
-    
+
     final today = DateTime.now().day;
     final upcoming = costs.where((c) => (c.dueDay ?? 0) >= today).toList();
     upcoming.sort((a, b) => (a.dueDay ?? 0).compareTo(b.dueDay ?? 0));
@@ -1767,7 +1884,9 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
     } else {
       sb.write('네, ${upcoming.length}건의 고정 지출이 남아있어요.\n');
       for (final c in upcoming) {
-        sb.write('${c.dueDay}일 ${c.name} (${CurrencyFormatter.format(c.amount)})\n');
+        sb.write(
+          '${c.dueDay}일 ${c.name} (${CurrencyFormatter.format(c.amount)})\n',
+        );
       }
       sb.write('\n총 ${CurrencyFormatter.format(totalRemaining)}은 남겨두셔야 해요.');
     }
@@ -1785,69 +1904,30 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
     // 1. Parse amount request (e.g., "10만원")
     final amount = _extractKrwAmount(command);
     if (amount == null) {
-       return VoiceCommandResult(
+      return VoiceCommandResult(
         command: command,
         success: false,
         message: '얼마를 쓰시려는지 알 수 없어요. "10만원 사도 돼?" 처럼 물어봐주세요.',
         type: VoiceCommandType.query,
       );
     }
-    
-    // 2. Refresh Budget Data
-    await _loadBudgetData(); // updates _todayBudget, _todaySpent (for month logic, we need full month data)
 
-    // Re-calc month stats
-    final now = DateTime.now();
-    final budget = BudgetService().getBudget(_accountName);
-    if (budget <= 0) {
-       return VoiceCommandResult(
-        command: command,
-        success: false,
-        message: '예산이 설정되어 있지 않아요. 예산을 먼저 설정해주세요.',
-        type: VoiceCommandType.query,
-      );
-    }
+    // 2. Refresh Budget Data (Optional, but good for UI sync)
+    // await _loadBudgetData();
 
-    final history = TransactionService().getTransactions(_accountName);
-    final thisMonthSpent = history.fold(0.0, (sum, t) {
-      if (t.type == TransactionType.expense && 
-          t.date.year == now.year && 
-          t.date.month == now.month) {
-        return sum + t.amount;
-      }
-      return sum;
-    });
-
-    final remainingBefore = budget - thisMonthSpent;
-    final remainingAfter = remainingBefore - amount;
-    
-    final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
-    final daysLeft = daysInMonth - now.day + 1; // Include today? Or remaining days. Let's say remaining days inclusive.
-    
-    // Response Logic
-    final sb = StringBuffer();
-    
-    if (remainingAfter < 0) {
-      if (budget > 0) {
-         sb.write('⚠️ 예산 초과 경고 (남은 예산: ${CurrencyFormatter.format(remainingBefore)})\n\n');
-      }
-      sb.write('음... 제 계산으로는 지금 지르시면 이번 달 남은 기간 동안 강제로 단식하셔야 할 것 같아요. 1억 프로젝트가 1억 년 프로젝트가 되지 않게 한 번만 더 참아보시는 건 어떨까요?');
-    } else {
-      final dailyBudget = remainingAfter / daysLeft;
-      if (dailyBudget < 10000) {
-        sb.write('살 수는 있는데, 조금 위험해요. 🤔\n');
-        sb.write('남은 기간 동안 하루에 ${CurrencyFormatter.format(dailyBudget)}만 쓸 수 있어요.');
-      } else {
-        sb.write('네, 사셔도 돼요! 💸\n');
-        sb.write('그거 사도 이번 달 하루 평균 ${CurrencyFormatter.format(dailyBudget)}씩 여유 있어요.');
-      }
-    }
+    // 3. Use SmartConsumingService for analysis
+    final advice = await SmartConsumingService().analyzeSpending(
+      _accountName,
+      amount,
+    );
 
     return VoiceCommandResult(
       command: command,
-      success: true,
-      message: sb.toString(),
-      type: VoiceCommandType.query, // Advice
+      success:
+          true, // Always return success=true so it shows as a green/valid result (unless error)
+      message: '${advice.message}\n\n${advice.details}',
+      type: VoiceCommandType.query,
+      data: {'isResilience': advice.isResilience, 'canSpend': advice.canSpend},
     );
   }
 
@@ -1862,9 +1942,9 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
         .replaceAll('폐기', '')
         .replaceAll('썩어서', '')
         .trim();
-    
+
     if (itemName.isEmpty) {
-       return VoiceCommandResult(
+      return VoiceCommandResult(
         command: command,
         success: false,
         message: '무엇을 버리셨나요? "우유 버렸어" 처럼 말씀해주세요.',
@@ -1874,7 +1954,9 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
 
     // Find and Delete from Inventory
     final foodItems = FoodExpiryService.instance.items.value;
-    final target = foodItems.where((i) => i.name.contains(itemName) || itemName.contains(i.name)).toList();
+    final target = foodItems
+        .where((i) => i.name.contains(itemName) || itemName.contains(i.name))
+        .toList();
 
     if (target.isEmpty) {
       return VoiceCommandResult(
@@ -1892,7 +1974,8 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
 
     // Tip Logic (Advanced: Check past waste history)
     // For now, simple scripted advice
-    final tip = '아이고, 아까운 $itemName가 버려졌네요. 폐기 로그에 기록했습니다. 다음엔 유통기한 임박 알림을 더 크게 드릴게요! 장바구니에 다시 넣어둘까요?';
+    final tip =
+        '아이고, 아까운 $itemName가 버려졌네요. 폐기 로그에 기록했습니다. 다음엔 유통기한 임박 알림을 더 크게 드릴게요! 장바구니에 다시 넣어둘까요?';
 
     return VoiceCommandResult(
       command: command,
@@ -1968,9 +2051,13 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
         // 30일 이내 구매 내역만
         if (DateTime.now().difference(t.date).inDays > 30) return false;
         // 키워드 포함 여부
-        return keywords.any((k) => t.description.contains(k) || (t.store != null && t.store!.contains(k)));
+        return keywords.any(
+          (k) =>
+              t.description.contains(k) ||
+              (t.store != null && t.store!.contains(k)),
+        );
       }).toList();
-      
+
       // 최신순 정렬
       recentPurchase.sort((a, b) => b.date.compareTo(a.date));
 
@@ -1978,15 +2065,16 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
         final last = recentPurchase.first;
         final daysAgo = DateTime.now().difference(last.date).inDays;
         final timeStr = daysAgo == 0 ? '오늘' : '$daysAgo일 전';
-        
+
         return VoiceCommandResult(
           command: command,
           success: true,
-          message: '재고 목록엔 없지만, $timeStr에 "${last.description}" 구매하신 기록이 있어요. 아직 남아있을 수도 있겠네요!',
+          message:
+              '재고 목록엔 없지만, $timeStr에 "${last.description}" 구매하신 기록이 있어요. 아직 남아있을 수도 있겠네요!',
           type: VoiceCommandType.query,
         );
       }
-    } catch(e) {
+    } catch (e) {
       // ignore
     }
 
@@ -2031,22 +2119,25 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
     // 2. 레시피 매칭 (Recipe Service)
     await RecipeService.instance.load();
     final recipes = RecipeService.instance.recipes.value;
-    
+
     // 현재 보유 중인 모든 재료 이름 (Food Expiry + Consumables)
     final availableNames = foodItems.map((e) => e.name.trim()).toSet();
     // (Consumables are usually not food, but just in case user mixes them)
     // final consumableItems = ConsumableInventoryService.instance.items.value;
     // availableNames.addAll(consumableItems.map((e) => e.name.trim()));
 
-    final recommended = <Map<String, dynamic>>[]; // {recipe, missingCount, missingItems}
+    final recommended =
+        <Map<String, dynamic>>[]; // {recipe, missingCount, missingItems}
 
     for (final recipe in recipes) {
       int missingCount = 0;
       final missingItems = <String>[];
-      
+
       for (final ingredient in recipe.ingredients) {
         // Simple name match. In real app, fuzzy search is better
-        final hasItem = availableNames.any((n) => n.contains(ingredient.name) || ingredient.name.contains(n));
+        final hasItem = availableNames.any(
+          (n) => n.contains(ingredient.name) || ingredient.name.contains(n),
+        );
         if (!hasItem) {
           missingCount++;
           missingItems.add(ingredient.name);
@@ -2056,7 +2147,11 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
       if (missingCount == 0) {
         recommended.add({'recipe': recipe, 'missingCount': 0, 'missing': []});
       } else if (missingCount <= 2) {
-         recommended.add({'recipe': recipe, 'missingCount': missingCount, 'missing': missingItems});
+        recommended.add({
+          'recipe': recipe,
+          'missingCount': missingCount,
+          'missing': missingItems,
+        });
       }
     }
 
@@ -2069,7 +2164,7 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
 
     // Build Response
     final sb = StringBuffer();
-    
+
     // Step 1: Expiring Alert
     if (expiringFood.isNotEmpty) {
       final top = expiringFood.take(3).map((e) => e.name).join(', ');
@@ -2109,13 +2204,12 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
     return VoiceCommandResult(
       command: '메뉴 추천',
       success: false,
-      message: '잠시만요...', 
+      message: '잠시만요...',
       type: VoiceCommandType.unknown,
     );
   }
 
   // REMOVED DUPLICATE _handleShoppingCartAdd METHOD
-
 
   VoiceCommandResult _handleTodaySummary() {
     return VoiceCommandResult(
@@ -2496,21 +2590,21 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
             color: isLatest
                 ? color.withValues(alpha: 0.1 * _feedbackAnimation.value)
                 : (isException
-                    ? Colors.amber.withValues(alpha: 0.05)
-                    : colorScheme.surfaceContainerHighest),
+                      ? Colors.amber.withValues(alpha: 0.05)
+                      : colorScheme.surfaceContainerHighest),
             borderRadius: BorderRadius.circular(8),
             border: isException
                 ? Border.all(color: Colors.amber, width: 1.5)
                 : (isLatest
-                    ? Border.all(color: color.withValues(alpha: 0.5))
-                    : null),
+                      ? Border.all(color: color.withValues(alpha: 0.5))
+                      : null),
             boxShadow: (isException && isLatest)
                 ? [
                     BoxShadow(
                       color: Colors.amber.withValues(alpha: 0.3),
                       blurRadius: 8,
                       spreadRadius: 1,
-                    )
+                    ),
                   ]
                 : null,
           ),

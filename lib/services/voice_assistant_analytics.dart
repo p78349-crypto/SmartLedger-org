@@ -38,10 +38,7 @@ class VoiceAssistantAnalytics {
       final existing = prefs.getString(key);
       final stats = existing != null
           ? VoiceCommandStats.fromJson(jsonDecode(existing))
-          : VoiceCommandStats(
-              assistant: assistant,
-              route: route,
-            );
+          : VoiceCommandStats(assistant: assistant, route: route);
 
       // 통계 업데이트
       stats.totalCommands++;
@@ -50,8 +47,7 @@ class VoiceAssistantAnalytics {
       } else {
         stats.failureCount++;
         final reason = failureReason ?? 'unknown';
-        stats.failureReasons[reason] =
-            (stats.failureReasons[reason] ?? 0) + 1;
+        stats.failureReasons[reason] = (stats.failureReasons[reason] ?? 0) + 1;
       }
       stats.lastUsed = DateTime.now();
 
@@ -59,8 +55,10 @@ class VoiceAssistantAnalytics {
       await prefs.setString(key, jsonEncode(stats.toJson()));
 
       // 디버그 로그
-      debugPrint('VoiceAssistant: $assistant → $route ($intent) '
-          '${success ? "✓" : "✗${failureReason != null ? " ($failureReason)" : ""}"}');
+      debugPrint(
+        'VoiceAssistant: $assistant → $route ($intent) '
+        '${success ? "✓" : "✗${failureReason != null ? " ($failureReason)" : ""}"}',
+      );
     } catch (e) {
       debugPrint('VoiceAssistantAnalytics.logCommand error: $e');
     }
@@ -80,8 +78,10 @@ class VoiceAssistantAnalytics {
       final existing = prefs.getInt(key) ?? 0;
       await prefs.setInt(key, existing + 1);
 
-      debugPrint('VoiceAssistant Error: $errorType at $route '
-          '${assistant != null ? "($assistant)" : ""}');
+      debugPrint(
+        'VoiceAssistant Error: $errorType at $route '
+        '${assistant != null ? "($assistant)" : ""}',
+      );
     } catch (e) {
       debugPrint('VoiceAssistantAnalytics.logError error: $e');
     }
@@ -96,8 +96,10 @@ class VoiceAssistantAnalytics {
     try {
       if (rejected.isEmpty) return;
 
-      debugPrint('VoiceAssistant: Rejected params for $route: $rejected'
-          '${assistant != null ? " ($assistant)" : ""}');
+      debugPrint(
+        'VoiceAssistant: Rejected params for $route: $rejected'
+        '${assistant != null ? " ($assistant)" : ""}',
+      );
 
       // 간단한 카운터 (향후 Firebase Analytics 연동 시 확장)
       final prefs = await SharedPreferences.getInstance();
@@ -113,9 +115,9 @@ class VoiceAssistantAnalytics {
   static Future<List<VoiceCommandStats>> getStats() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final keys = prefs
-          .getKeys()
-          .where((k) => k.startsWith(_prefPrefix) && !k.contains('error'));
+      final keys = prefs.getKeys().where(
+        (k) => k.startsWith(_prefPrefix) && !k.contains('error'),
+      );
 
       final now = DateTime.now();
       final cutoff = now.subtract(const Duration(days: _maxRetentionDays));
@@ -192,22 +194,22 @@ class VoiceCommandStats {
     this.failureCount = 0,
     Map<String, int>? failureReasons,
     DateTime? lastUsed,
-  })  : failureReasons = failureReasons ?? {},
-        lastUsed = lastUsed ?? DateTime.now();
+  }) : failureReasons = failureReasons ?? {},
+       lastUsed = lastUsed ?? DateTime.now();
 
   /// 성공률 (0.0 ~ 1.0)
   double get successRate =>
       totalCommands == 0 ? 0 : successCount / totalCommands;
 
   Map<String, dynamic> toJson() => {
-        'assistant': assistant,
-        'route': route,
-        'totalCommands': totalCommands,
-        'successCount': successCount,
-        'failureCount': failureCount,
-        'failureReasons': failureReasons,
-        'lastUsed': lastUsed.toIso8601String(),
-      };
+    'assistant': assistant,
+    'route': route,
+    'totalCommands': totalCommands,
+    'successCount': successCount,
+    'failureCount': failureCount,
+    'failureReasons': failureReasons,
+    'lastUsed': lastUsed.toIso8601String(),
+  };
 
   factory VoiceCommandStats.fromJson(Map<String, dynamic> json) =>
       VoiceCommandStats(
@@ -216,13 +218,15 @@ class VoiceCommandStats {
         totalCommands: json['totalCommands'] as int? ?? 0,
         successCount: json['successCount'] as int? ?? 0,
         failureCount: json['failureCount'] as int? ?? 0,
-        failureReasons:
-            Map<String, int>.from(json['failureReasons'] as Map? ?? {}),
+        failureReasons: Map<String, int>.from(
+          json['failureReasons'] as Map? ?? {},
+        ),
         lastUsed: DateTime.parse(json['lastUsed'] as String),
       );
 
   @override
-  String toString() => 'VoiceCommandStats('
+  String toString() =>
+      'VoiceCommandStats('
       'assistant: $assistant, '
       'route: $route, '
       'total: $totalCommands, '

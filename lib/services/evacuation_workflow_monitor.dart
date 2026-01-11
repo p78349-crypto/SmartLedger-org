@@ -19,15 +19,13 @@ class EvacuationWorkflowHealthSnapshot {
     required this.checkedAt,
   });
 
-  bool get isGpsOperational => locationServiceEnabled && locationPermissionGranted;
+  bool get isGpsOperational =>
+      locationServiceEnabled && locationPermissionGranted;
 
   bool get isOperational => isGpsOperational && hasConnectivity;
 }
 
-enum EvacuationWorkflowEventType {
-  healthChanged,
-  alertUpdated,
-}
+enum EvacuationWorkflowEventType { healthChanged, alertUpdated }
 
 class EvacuationWorkflowEvent {
   final EvacuationWorkflowEventType type;
@@ -66,7 +64,8 @@ class EvacuationWorkflowEvent {
 class EvacuationWorkflowMonitor {
   EvacuationWorkflowMonitor._();
 
-  static final EvacuationWorkflowMonitor instance = EvacuationWorkflowMonitor._();
+  static final EvacuationWorkflowMonitor instance =
+      EvacuationWorkflowMonitor._();
 
   final _connectivity = Connectivity();
   final _controller = StreamController<EvacuationWorkflowEvent>.broadcast();
@@ -88,10 +87,15 @@ class EvacuationWorkflowMonitor {
       refreshHealth(triggeredByConnectivityChange: hasNetwork);
     });
     await refreshHealth();
-    _healthTimer = Timer.periodic(const Duration(seconds: 45), (_) => refreshHealth());
+    _healthTimer = Timer.periodic(
+      const Duration(seconds: 45),
+      (_) => refreshHealth(),
+    );
   }
 
-  Future<void> refreshHealth({bool triggeredByConnectivityChange = false}) async {
+  Future<void> refreshHealth({
+    bool triggeredByConnectivityChange = false,
+  }) async {
     if (_isCheckingHealth) return;
     _isCheckingHealth = true;
     try {
@@ -100,7 +104,8 @@ class EvacuationWorkflowMonitor {
 
       final serviceEnabled = await Geolocator.isLocationServiceEnabled();
       final permission = await Geolocator.checkPermission();
-      final permissionGranted = permission == LocationPermission.always ||
+      final permissionGranted =
+          permission == LocationPermission.always ||
           permission == LocationPermission.whileInUse;
 
       final snapshot = EvacuationWorkflowHealthSnapshot(
@@ -115,7 +120,8 @@ class EvacuationWorkflowMonitor {
       _controller.add(
         EvacuationWorkflowEvent.healthChanged(
           snapshot,
-            shouldRefreshLocation: shouldRefreshLocation ||
+          shouldRefreshLocation:
+              shouldRefreshLocation ||
               (triggeredByConnectivityChange && snapshot.hasConnectivity),
         ),
       );
@@ -126,9 +132,7 @@ class EvacuationWorkflowMonitor {
         locationPermissionGranted: false,
         checkedAt: DateTime.now(),
       );
-      _controller.add(
-        EvacuationWorkflowEvent.healthChanged(snapshot),
-      );
+      _controller.add(EvacuationWorkflowEvent.healthChanged(snapshot));
     }
     _isCheckingHealth = false;
   }
@@ -138,10 +142,13 @@ class EvacuationWorkflowMonitor {
     if (prev == null) {
       return next.isOperational;
     }
-    final permissionRecovered = !prev.locationPermissionGranted && next.locationPermissionGranted;
-    final serviceRecovered = !prev.locationServiceEnabled && next.locationServiceEnabled;
+    final permissionRecovered =
+        !prev.locationPermissionGranted && next.locationPermissionGranted;
+    final serviceRecovered =
+        !prev.locationServiceEnabled && next.locationServiceEnabled;
     final connectivityRecovered = !prev.hasConnectivity && next.hasConnectivity;
-    return (permissionRecovered || serviceRecovered || connectivityRecovered) && next.isOperational;
+    return (permissionRecovered || serviceRecovered || connectivityRecovered) &&
+        next.isOperational;
   }
 
   void emitAlertUpdate(EvacuationPlan plan) {

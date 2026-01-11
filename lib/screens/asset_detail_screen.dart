@@ -276,6 +276,8 @@ class _AssetDetailScreenState extends State<AssetDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  _buildPerformanceAnalysis(theme),
+                  const SizedBox(height: 24),
                   Text(
                     '자산 이동 흐름',
                     style: theme.textTheme.titleMedium?.copyWith(
@@ -649,6 +651,318 @@ class _AssetDetailScreenState extends State<AssetDetailScreen> {
     );
   }
 
+  /// 자산 성과/이력 분석 (New Feature)
+  /// - 예금: 납입액 vs 수령액 -> 이자 계산
+  /// - 투자: 총 매수 vs 총 매도 -> 수익률 계산
+  /// - 기록: 메모를 강조하여 전략 수립 보조
+  Widget _buildPerformanceAnalysis(ThemeData theme) {
+    final moves = AssetMoveService().getMovesForAsset(
+      widget.accountName,
+      widget.asset.id,
+    );
+
+    // 1. 데이터 집계
+    double totalIn = 0; // 총 투입 (매수/이체입금/예금납입)
+    double totalOut = 0; // 총 회수 (매도/이체출금/만기수령)
+
+    // 메모 기록 (전략 노트용)
+    final historyItems = <Map<String, dynamic>>[];
+
+    for (var m in moves) {
+      final isIn = m.toAssetId == widget.asset.id;
+      final isOut = m.fromAssetId == widget.asset.id;
+
+      if (isIn) totalIn += m.amount;
+      if (isOut) totalOut += m.amount;
+
+      historyItems.add({
+        'date': m.date,
+        'type': m.type.label,
+        'amount': m.amount,
+        'isIncome': isIn, // 나에게 들어온 것(자산 증가?) No.
+        // Asset 관점:
+        // - In: Cash -> Asset (Investment)
+        // - Out: Asset -> Cash (Realization)
+        'memo': m.memo,
+      });
+    }
+
+    // 현재 평가액 포함하여 총 가치 산정
+    final currentValue = _currentAsset.amount;
+
+    // 순수익 (실현 + 미실현)
+    // Profit = (Total Out + Current Value) - Total In
+    final netProfit = (totalOut + currentValue) - totalIn;
+    final returnRate = totalIn > 0 ? (netProfit / totalIn) * 100 : 0.0;
+
+    final isDeposit = widget.asset.category == AssetCategory.deposit;
+    // Removed unused isInvestment variable
+
+    // 표시 여부 결정 (거래 내역이 없으면 숨김)
+    if (moves.isEmpty) return const SizedBox.shrink();
+
+    final profitColor = netProfit > 0
+        ? Colors.green
+        : (netProfit < 0
+              ? theme.colorScheme.error
+              : theme.colorScheme.onSurface);
+    final profitSign = netProfit > 0 ? '+' : '';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(
+              isDeposit ? Icons.savings_outlined : Icons.show_chart,
+              color: theme.colorScheme.primary,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              isDeposit ? '예금/적금 성과 분석' : '투자 성과 리포트',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        // 성과 요약 카드
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainerHigh,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: theme.colorScheme.outlineVariant),
+          ),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildAnalysisItem(
+                    theme,
+                    isDeposit ? '총 납입원금' : '총 매수금액',
+                    totalIn,
+                  ),
+                  Container(
+                    width: 1,
+                    height: 40,
+                    color: theme.colorScheme.outlineVariant,
+                  ),
+                  _buildAnalysisItem(
+                    theme,
+                    isDeposit ? '총 수령액(+평가액)' : '총 매도액(+평가액)',
+                    totalOut + currentValue,
+                  ),
+                ],
+              ),
+              const Divider(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    '순수익 (ROI)',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        '$profitSign${CurrencyFormatter.format(netProfit)}',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: profitColor,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        '$profitSign${returnRate.toStringAsFixed(2)}%',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: profitColor,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              if (netProfit < 0) ...[
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.errorContainer.withValues(
+                      alpha: 0.2,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        size: 16,
+                        color: theme.colorScheme.error,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          '손실이 발생했습니다. 아래 기록의 메모를 확인하여 전략을 점검하세요.',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.error,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 24),
+        Text(
+          '히스토리 및 전략 노트',
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 8),
+        ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: historyItems.length,
+          separatorBuilder: (context, i) => const SizedBox(height: 8),
+          itemBuilder: (context, index) {
+            // 시간 역순 정렬
+            final item = historyItems[historyItems.length - 1 - index];
+            final date = item['date'] as DateTime;
+            final isAssetIn = item['isIncome'] as bool; // 자산으로 들어옴 (매수/납입)
+            // 통상: 매수는 지출(Red/Blue depends on culture). 매도는 수입.
+            // 여기서는 TransactionType이 없으므로 Context에 따름.
+            // 자산 관점: IN(증가), OUT(감소)
+            final amountColor = isAssetIn
+                ? theme.colorScheme.primary
+                : theme.colorScheme.error;
+            final prefix = isAssetIn ? '+ ' : '- ';
+
+            return Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: theme.colorScheme.outlineVariant.withValues(
+                    alpha: 0.5,
+                  ),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            DateFormatter.defaultDate.format(date),
+                            style: theme.textTheme.bodySmall,
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isAssetIn
+                                  ? theme.colorScheme.primaryContainer
+                                  : theme.colorScheme.errorContainer,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              isAssetIn
+                                  ? (isDeposit ? '납입' : '매수')
+                                  : (isDeposit ? '출금/만기' : '매도'),
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                fontSize: 10,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        '$prefix${CurrencyFormatter.format(item['amount'])}',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: amountColor,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (item['memo'] != null &&
+                      (item['memo'] as String).isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color:
+                            theme.colorScheme.surfaceContainerHighest, // 강조 배경
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: theme.colorScheme.outlineVariant.withValues(
+                            alpha: 0.3,
+                          ),
+                        ),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(Icons.edit_note, size: 16),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              item['memo'],
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAnalysisItem(ThemeData theme, String label, double value) {
+    return Column(
+      children: [
+        Text(
+          label,
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: theme.colorScheme.secondary,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          CurrencyFormatter.format(value),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+
   /// 자산 이동 흐름 경로를 시각화 (개선된 버전)
   Widget _buildAssetFlowPath(BuildContext context, ThemeData theme) {
     final assetService = AssetService();
@@ -695,12 +1009,14 @@ class _AssetDetailScreenState extends State<AssetDetailScreen> {
     for (int i = 0; i < assetMoves.length; i++) {
       final move = assetMoves[i];
 
-      // 이동 타입 추가
+      // 이동 타입 정보 (금액, 날짜 포함)
       pathItems.add({
         'emoji': _getMoveTypeEmoji(move.type),
         'name': move.type.label,
         'isMoveType': true,
         'date': move.date,
+        'amount': CurrencyFormatter.format(move.amount),
+        'dateLabel': DateFormatter.shortMonth.format(move.date),
       });
 
       // 대상 자산 추가
@@ -817,24 +1133,65 @@ class _AssetDetailScreenState extends State<AssetDetailScreen> {
     final isMoveType = item['isMoveType'] ?? false;
 
     if (isMoveType) {
-      // 이동 타입 표시 (작은 크기)
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.tertiaryContainer.withValues(alpha: 0.6),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: theme.colorScheme.tertiary.withValues(alpha: 0.3),
+      // 이동 타입 표시 (액션 노드)
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.tertiaryContainer,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: theme.colorScheme.tertiary.withValues(alpha: 0.3),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: theme.colorScheme.shadow.withValues(alpha: 0.1),
+                  blurRadius: 2,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(item['emoji'], style: const TextStyle(fontSize: 16)),
+                const SizedBox(width: 4),
+                Text(
+                  item['name'],
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.onTertiaryContainer,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-        child: Text(
-          item['emoji'],
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-        ),
+          if (item['amount'] != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              item['amount'],
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+          ],
+          if (item['dateLabel'] != null)
+            Text(
+              item['dateLabel'],
+              style: theme.textTheme.labelSmall?.copyWith(
+                fontSize: 9,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+        ],
       );
     }
 
-    // 자산 카테고리 표시 (큰 크기)
+    // 자산 카테고리 표시 (상태 노드)
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(

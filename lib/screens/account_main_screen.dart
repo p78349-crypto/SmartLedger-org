@@ -342,21 +342,21 @@ class _AccountMainScreenState extends State<AccountMainScreen>
     // Phase 1: Smart style horizontal main pages (icons-only).
     // Top banner removed: only render the PageView.
     return ListenableBuilder(
-        listenable: Listenable.merge([
-          BackgroundHelper.colorNotifier,
-          BackgroundHelper.typeNotifier,
-          BackgroundHelper.imagePathNotifier,
-          BackgroundHelper.blurNotifier,
-        ]),
-        builder: (context, _) {
-          final bgColor = BackgroundHelper.colorNotifier.value;
-          final bgType = BackgroundHelper.typeNotifier.value;
-          final bgImagePath = BackgroundHelper.imagePathNotifier.value;
-          final bgBlur = BackgroundHelper.blurNotifier.value;
+      listenable: Listenable.merge([
+        BackgroundHelper.colorNotifier,
+        BackgroundHelper.typeNotifier,
+        BackgroundHelper.imagePathNotifier,
+        BackgroundHelper.blurNotifier,
+      ]),
+      builder: (context, _) {
+        final bgColor = BackgroundHelper.colorNotifier.value;
+        final bgType = BackgroundHelper.typeNotifier.value;
+        final bgImagePath = BackgroundHelper.imagePathNotifier.value;
+        final bgBlur = BackgroundHelper.blurNotifier.value;
 
-          final presetId = AppThemeSeedController.instance.presetId.value;
-          final isLandscape =
-              MediaQuery.of(context).orientation == Orientation.landscape;
+        final presetId = AppThemeSeedController.instance.presetId.value;
+        final isLandscape =
+            MediaQuery.of(context).orientation == Orientation.landscape;
 
         // DEBUG: 화면 크기 출력 (프로토타입/개발 모드 전용, 출시 전 자동 제거됨)
         if (kDebugMode) {
@@ -537,8 +537,8 @@ class _AccountMainScreenState extends State<AccountMainScreen>
               ),
           ],
         );
-        },
-      );
+      },
+    );
   }
 }
 
@@ -910,7 +910,8 @@ class _IconGridPageState extends State<_IconGridPage> {
       if (!hasVoiceShortcuts) {
         const preferredIndex = 0;
         final preferredEmpty =
-            preferredIndex < validated.length && validated[preferredIndex].isEmpty;
+            preferredIndex < validated.length &&
+            validated[preferredIndex].isEmpty;
         if (preferredEmpty) {
           validated[preferredIndex] = _voiceShortcutsIconId;
           await UserPrefService.setPageIconSlots(
@@ -1023,7 +1024,6 @@ class _IconGridPageState extends State<_IconGridPage> {
       context,
     ).pushNamed(request.routeName, arguments: request.arguments);
   }
-
 
   @override
   Widget build(BuildContext context) {

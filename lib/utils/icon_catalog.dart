@@ -157,4 +157,6 @@ class IconCatalog {
   // New icons for utils (2026-01-08)
   static const IconData spending = Icons.trending_down;
   static const IconData ingredients = Icons.local_dining;
+  // Root/Statistics: overspending diagnosis indicator
+  static const IconData overspendingDiagnosis = Icons.analytics;
 }

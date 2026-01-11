@@ -37,10 +37,7 @@ class _VoiceAssistantSettingsScreenState
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('음성비서 설정'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('음성비서 설정'), centerTitle: true),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

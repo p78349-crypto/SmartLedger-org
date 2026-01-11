@@ -10,25 +10,25 @@
 
 /// 날씨 상태 열거형
 enum WeatherCondition {
-  sunny,        // 맑음
-  cloudy,       // 흐림
-  rainy,        // 비
-  heavyRain,    // 폭우/장마
-  snowy,        // 눈
-  typhoon,      // 태풍
-  coldWave,     // 한파 (-10도 이하)
-  heatWave,     // 폭염 (33도 이상)
+  sunny, // 맑음
+  cloudy, // 흐림
+  rainy, // 비
+  heavyRain, // 폭우/장마
+  snowy, // 눈
+  typhoon, // 태풍
+  coldWave, // 한파 (-10도 이하)
+  heatWave, // 폭염 (33도 이상)
 }
 
 /// 품목 카테고리
 enum PriceCategory {
-  vegetable,    // 채소류
-  fruit,        // 과일류
-  meat,         // 축산물
-  seafood,      // 수산물
-  grain,        // 곡물
-  dairy,        // 유제품
-  energy,       // 에너지(난방비 등)
+  vegetable, // 채소류
+  fruit, // 과일류
+  meat, // 축산물
+  seafood, // 수산물
+  grain, // 곡물
+  dairy, // 유제품
+  energy, // 에너지(난방비 등)
 }
 
 /// 날씨 민감도 데이터
@@ -81,8 +81,8 @@ final List<WeatherPriceSensitivity> weatherPriceSensitivityDatabase = [
       WeatherCondition.sunny: 0.0,
       WeatherCondition.rainy: 0.3,
       WeatherCondition.heavyRain: 0.9, // 장마철 큰 폭 상승
-      WeatherCondition.typhoon: 1.0,   // 태풍으로 공급 차질
-      WeatherCondition.coldWave: 0.6,  // 한파로 생육 저해
+      WeatherCondition.typhoon: 1.0, // 태풍으로 공급 차질
+      WeatherCondition.coldWave: 0.6, // 한파로 생육 저해
       WeatherCondition.heatWave: 0.4,
     },
     reason: '장마철/태풍: 밭 침수로 공급 감소, 한파: 생육 지연',
@@ -187,7 +187,7 @@ final List<WeatherPriceSensitivity> weatherPriceSensitivityDatabase = [
       WeatherCondition.sunny: -0.3, // 햇볕 많으면 당도 증가
       WeatherCondition.rainy: 0.2,
       WeatherCondition.heavyRain: 0.6,
-      WeatherCondition.typhoon: 1.0,   // 낙과로 큰 피해
+      WeatherCondition.typhoon: 1.0, // 낙과로 큰 피해
       WeatherCondition.coldWave: 0.4,
       WeatherCondition.heatWave: 0.5,
     },
@@ -225,7 +225,7 @@ final List<WeatherPriceSensitivity> weatherPriceSensitivityDatabase = [
       WeatherCondition.sunny: -0.2,
       WeatherCondition.rainy: 0.3,
       WeatherCondition.heavyRain: 0.6,
-      WeatherCondition.coldWave: 0.7,  // 한파에 약함
+      WeatherCondition.coldWave: 0.7, // 한파에 약함
       WeatherCondition.heatWave: 0.5,
     },
     reason: '한파: 생육 정지, 폭염: 수확량 감소',
@@ -251,8 +251,8 @@ final List<WeatherPriceSensitivity> weatherPriceSensitivityDatabase = [
       WeatherCondition.sunny: 0.0,
       WeatherCondition.rainy: 0.1,
       WeatherCondition.heavyRain: 0.3,
-      WeatherCondition.coldWave: 0.5,  // 난방비 증가
-      WeatherCondition.heatWave: 0.6,  // 폭염 스트레스
+      WeatherCondition.coldWave: 0.5, // 난방비 증가
+      WeatherCondition.heatWave: 0.6, // 폭염 스트레스
     },
     reason: '폭염: 가축 스트레스로 사육비 증가, 한파: 난방비',
   ),
@@ -275,8 +275,8 @@ final List<WeatherPriceSensitivity> weatherPriceSensitivityDatabase = [
       WeatherCondition.sunny: 0.0,
       WeatherCondition.rainy: 0.1,
       WeatherCondition.heavyRain: 0.3,
-      WeatherCondition.coldWave: 0.6,  // 난방비, 조류독감 위험
-      WeatherCondition.heatWave: 0.7,  // 폭염 폐사 위험
+      WeatherCondition.coldWave: 0.6, // 난방비, 조류독감 위험
+      WeatherCondition.heatWave: 0.7, // 폭염 폐사 위험
     },
     reason: '폭염: 폐사율 증가, 한파: 조류독감 발생 가능성',
   ),
@@ -287,8 +287,8 @@ final List<WeatherPriceSensitivity> weatherPriceSensitivityDatabase = [
       WeatherCondition.sunny: 0.0,
       WeatherCondition.rainy: 0.1,
       WeatherCondition.heavyRain: 0.2,
-      WeatherCondition.coldWave: 0.6,  // 조류독감 위험
-      WeatherCondition.heatWave: 0.5,  // 산란율 저하
+      WeatherCondition.coldWave: 0.6, // 조류독감 위험
+      WeatherCondition.heatWave: 0.5, // 산란율 저하
     },
     reason: '한파: 조류독감, 폭염: 산란율 저하',
   ),
@@ -301,7 +301,7 @@ final List<WeatherPriceSensitivity> weatherPriceSensitivityDatabase = [
       WeatherCondition.sunny: -0.2, // 출항 가능
       WeatherCondition.rainy: 0.3,
       WeatherCondition.heavyRain: 0.7, // 출항 불가
-      WeatherCondition.typhoon: 1.0,   // 조업 중단
+      WeatherCondition.typhoon: 1.0, // 조업 중단
       WeatherCondition.coldWave: 0.4,
     },
     reason: '태풍/폭우: 조업 중단으로 공급 감소',
@@ -339,7 +339,7 @@ final List<WeatherPriceSensitivity> weatherPriceSensitivityDatabase = [
       WeatherCondition.sunny: -0.2, // 수확기 맑으면 좋음
       WeatherCondition.rainy: 0.2,
       WeatherCondition.heavyRain: 0.6, // 수확기 장마
-      WeatherCondition.typhoon: 0.9,   // 도복 피해
+      WeatherCondition.typhoon: 0.9, // 도복 피해
       WeatherCondition.coldWave: 0.4,
       WeatherCondition.heatWave: 0.3,
     },
@@ -353,7 +353,7 @@ final List<WeatherPriceSensitivity> weatherPriceSensitivityDatabase = [
     sensitivity: {
       WeatherCondition.sunny: -0.2,
       WeatherCondition.rainy: 0.1,
-      WeatherCondition.coldWave: 1.0,  // 한파로 난방비 급증
+      WeatherCondition.coldWave: 1.0, // 한파로 난방비 급증
       WeatherCondition.snowy: 0.6,
     },
     reason: '한파: 난방 수요 급증으로 비용 상승',
@@ -363,8 +363,8 @@ final List<WeatherPriceSensitivity> weatherPriceSensitivityDatabase = [
     itemName: '전기요금',
     sensitivity: {
       WeatherCondition.sunny: 0.0,
-      WeatherCondition.coldWave: 0.7,  // 전기 난방
-      WeatherCondition.heatWave: 0.8,  // 에어컨 사용 증가
+      WeatherCondition.coldWave: 0.7, // 전기 난방
+      WeatherCondition.heatWave: 0.8, // 에어컨 사용 증가
     },
     reason: '한파/폭염: 냉난방 수요 증가',
   ),

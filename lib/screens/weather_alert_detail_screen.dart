@@ -9,10 +9,7 @@ import '../widgets/weather_alert_widget.dart';
 class WeatherAlertDetailScreen extends StatelessWidget {
   final WeatherData weather;
 
-  const WeatherAlertDetailScreen({
-    super.key,
-    required this.weather,
-  });
+  const WeatherAlertDetailScreen({super.key, required this.weather});
 
   @override
   Widget build(BuildContext context) {
@@ -24,9 +21,9 @@ class WeatherAlertDetailScreen extends StatelessWidget {
             icon: const Icon(Icons.share),
             onPressed: () {
               // 공유 기능 (향후 구현)
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('공유 기능 준비 중입니다')),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('공유 기능 준비 중입니다')));
             },
           ),
         ],
@@ -38,9 +35,7 @@ class WeatherAlertDetailScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 날씨 알림 위젯
-              WeatherAlertWidget(
-                weather: weather,
-              ),
+              WeatherAlertWidget(weather: weather),
               const SizedBox(height: 24),
 
               // 가격 변동 예측
@@ -82,10 +77,7 @@ class WeatherAlertDetailScreen extends StatelessWidget {
                 SizedBox(width: 8),
                 Text(
                   '가격 변동 예측',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -102,22 +94,28 @@ class WeatherAlertDetailScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              ...rising.map((p) => ListTile(
-                dense: true,
-                leading: const Icon(Icons.arrow_upward, color: Colors.red, size: 20),
-                title: Text(p.itemName),
-                trailing: Text(
-                  '+${p.predictedChange.toStringAsFixed(0)}%',
-                  style: const TextStyle(
+              ...rising.map(
+                (p) => ListTile(
+                  dense: true,
+                  leading: const Icon(
+                    Icons.arrow_upward,
                     color: Colors.red,
-                    fontWeight: FontWeight.bold,
+                    size: 20,
+                  ),
+                  title: Text(p.itemName),
+                  trailing: Text(
+                    '+${p.predictedChange.toStringAsFixed(0)}%',
+                    style: const TextStyle(
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  subtitle: Text(
+                    p.reason,
+                    style: const TextStyle(fontSize: 12),
                   ),
                 ),
-                subtitle: Text(
-                  p.reason,
-                  style: const TextStyle(fontSize: 12),
-                ),
-              )),
+              ),
               const SizedBox(height: 16),
             ],
 
@@ -132,22 +130,28 @@ class WeatherAlertDetailScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              ...falling.map((p) => ListTile(
-                dense: true,
-                leading: const Icon(Icons.arrow_downward, color: Colors.green, size: 20),
-                title: Text(p.itemName),
-                trailing: Text(
-                  '${p.predictedChange.toStringAsFixed(0)}%',
-                  style: const TextStyle(
+              ...falling.map(
+                (p) => ListTile(
+                  dense: true,
+                  leading: const Icon(
+                    Icons.arrow_downward,
                     color: Colors.green,
-                    fontWeight: FontWeight.bold,
+                    size: 20,
+                  ),
+                  title: Text(p.itemName),
+                  trailing: Text(
+                    '${p.predictedChange.toStringAsFixed(0)}%',
+                    style: const TextStyle(
+                      color: Colors.green,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  subtitle: Text(
+                    p.reason,
+                    style: const TextStyle(fontSize: 12),
                   ),
                 ),
-                subtitle: Text(
-                  p.reason,
-                  style: const TextStyle(fontSize: 12),
-                ),
-              )),
+              ),
             ],
           ],
         ),
@@ -169,10 +173,7 @@ class WeatherAlertDetailScreen extends StatelessWidget {
                 SizedBox(width: 8),
                 Text(
                   '음성 명령어',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -194,10 +195,7 @@ class WeatherAlertDetailScreen extends StatelessWidget {
         children: [
           const Icon(Icons.check_circle, color: Colors.green, size: 16),
           const SizedBox(width: 8),
-          Text(
-            command,
-            style: const TextStyle(fontSize: 14),
-          ),
+          Text(command, style: const TextStyle(fontSize: 14)),
         ],
       ),
     );

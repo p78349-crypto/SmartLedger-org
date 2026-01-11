@@ -5,6 +5,7 @@ import '../utils/date_formats.dart';
 import '../utils/refund_utils.dart';
 import '../utils/stats_calculator.dart';
 import '../utils/utils.dart';
+import 'category_stats_screen.dart';
 
 /// 월별 통계 화면 (단순화된 버전)
 ///
@@ -109,6 +110,78 @@ class _MonthlyStatsScreenState extends State<MonthlyStatsScreen> {
                 : _buildDailyList(dailyStats, theme),
           ),
         ],
+      ),
+      floatingActionButton: Transform.translate(
+        // Moved down slightly as requested
+        offset: const Offset(0, 5),
+        child: SizedBox(
+          width: 160,
+          height: 120,
+          child: Stack(
+            alignment: Alignment.bottomRight,
+            children: [
+              Positioned(
+                right: 0,
+                bottom: 0,
+                child: FloatingActionButton(
+                  heroTag: 'monthly_stats_trend',
+                  // Changed shape to Rounded Rectangle with border
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: const BorderSide(color: Colors.grey),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => CategoryStatsScreen(
+                          accountName: widget.accountName,
+                          initialDate: _currentMonth,
+                        ),
+                      ),
+                    );
+                  },
+                  backgroundColor: Colors.white,
+                  elevation: 4,
+                  child: Icon(
+                    Icons.trending_up,
+                    size: 24,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+              ),
+              Positioned(
+                right: 72,
+                bottom: 0,
+                child: FloatingActionButton(
+                  heroTag: 'monthly_stats_bar',
+                  // Changed shape to Rounded Rectangle with border
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: const BorderSide(color: Colors.grey),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => CategoryStatsScreen(
+                          accountName: widget.accountName,
+                          isSubCategory: true,
+                          initialDate: _currentMonth,
+                        ),
+                      ),
+                    );
+                  },
+                  backgroundColor: Colors.white,
+                  elevation: 4,
+                  child: Icon(
+                    Icons.bar_chart,
+                    size: 24,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

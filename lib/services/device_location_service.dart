@@ -5,10 +5,7 @@ class DeviceLocation {
   final double latitude;
   final double longitude;
 
-  const DeviceLocation({
-    required this.latitude,
-    required this.longitude,
-  });
+  const DeviceLocation({required this.latitude, required this.longitude});
 }
 
 /// 위치 관련 예외 유형

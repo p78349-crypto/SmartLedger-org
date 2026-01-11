@@ -8,6 +8,8 @@ import '../utils/localized_date_formatter.dart';
 import '../utils/number_formats.dart';
 import '../widgets/background_widget.dart';
 import '../utils/period_utils.dart' as period;
+import '../utils/misc_spending_utils.dart';
+import '../utils/icon_catalog.dart';
 
 class PeriodStatsScreen extends StatefulWidget {
   const PeriodStatsScreen({
@@ -265,6 +267,158 @@ class _PeriodStatsScreenState extends State<PeriodStatsScreen> {
     );
   }
 
+  Widget _buildMiscSpendingSummary(ThemeData theme, List<Transaction> all) {
+    // analyze last 1 month
+    final stats = MiscSpendingUtils.analyze(all, anchor: _anchorDay);
+    if (stats.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    // show top 3 misc categories as icon chips with monthly and annual projection
+    final top = stats.take(3).toList(growable: false);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '절약 포인트: 잡다한 지출',
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: top.map((s) {
+                    final label = s.subCategory.isEmpty
+                        ? s.mainCategory
+                        : '${s.mainCategory}·${s.subCategory}';
+                    final monthly = s.monthlyAmount;
+                    final annual = s.annualProjection;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: Column(
+                        children: [
+                          CircleAvatar(
+                            radius: 20,
+                            backgroundColor:
+                                theme.colorScheme.surfaceContainerHighest,
+                            child: Icon(
+                              s.icon,
+                              size: 20,
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          SizedBox(
+                            width: 100,
+                            child: Column(
+                              children: [
+                                Text(
+                                  label,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.textTheme.bodySmall,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '${NumberFormats.currency.format(monthly)}원/月',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                Text(
+                                  '연환산 ${NumberFormats.currency.format(annual)}원',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    fontSize: 11,
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _statIconCard({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    final theme = Theme.of(context);
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: theme.colorScheme.outline.withAlpha(60)),
+          ),
+          child: Column(
+            children: [
+              Icon(icon, size: 28, color: theme.colorScheme.primary),
+              const SizedBox(height: 6),
+              Text(
+                label,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showMiscPolicyDialog(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('절약 포인트 정책'),
+        content: const SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '• 기준: 최근 1개월 기준으로 거래 평균이 10,000원 미만이거나 거래 건수가 5건 이상인 카테고리를 "잡다한 지출"로 간주합니다.',
+              ),
+              SizedBox(height: 8),
+              Text('• 목적: 자주 발생하는 소액 지출을 시각화하여 사용자에게 절약 포인트로 인지시키기 위함입니다.'),
+              SizedBox(height: 8),
+              Text('• 설정: 임계값(평균 금액·건수)은 향후 사용자 설정으로 조정 가능합니다.'),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('닫기'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -274,7 +428,12 @@ class _PeriodStatsScreenState extends State<PeriodStatsScreen> {
     final range = _rangeForView();
     final filtered = _filterByRange(all, range);
 
-    final body = _buildExpenseCategoryAggregation(theme, filtered);
+    final body = Column(
+      children: [
+        _buildMiscSpendingSummary(theme, all),
+        Expanded(child: _buildExpenseCategoryAggregation(theme, filtered)),
+      ],
+    );
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
@@ -327,11 +486,40 @@ class _PeriodStatsScreenState extends State<PeriodStatsScreen> {
               ),
             ),
             const SizedBox(height: 8),
+            // Top small icons for quick access to two stats (accessibility)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Row(
+                children: [
+                  _statIconCard(
+                    icon: IconCatalog.autoGraph,
+                    label: '절약 포인트',
+                    onTap: () => _showMiscPolicyDialog(context),
+                  ),
+                  const SizedBox(width: 8),
+                  _statIconCard(
+                    icon: IconCatalog.barChart,
+                    label: '카테고리 분석',
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => CategoryStatsScreen(
+                          accountName: widget.accountName,
+                          initialDate: _anchorDay,
+                          periodType: widget.view,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
             Expanded(child: body),
           ],
         ),
         floatingActionButton: Transform.translate(
-          offset: const Offset(0, 45),
+          // Moved down slightly as requested
+          offset: const Offset(0, 5),
           child: SizedBox(
             width: 160,
             height: 120,
@@ -343,6 +531,11 @@ class _PeriodStatsScreenState extends State<PeriodStatsScreen> {
                   bottom: 0,
                   child: FloatingActionButton(
                     heroTag: 'period_stats_trend',
+                    // Changed shape to Rounded Rectangle with border
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: const BorderSide(color: Colors.grey),
+                    ),
                     onPressed: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
@@ -368,6 +561,11 @@ class _PeriodStatsScreenState extends State<PeriodStatsScreen> {
                   bottom: 0,
                   child: FloatingActionButton(
                     heroTag: 'period_stats_bar',
+                    // Changed shape to Rounded Rectangle with border
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: const BorderSide(color: Colors.grey),
+                    ),
                     onPressed: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(

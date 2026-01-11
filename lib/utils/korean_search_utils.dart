@@ -14,13 +14,47 @@ class MultilingualSearchUtils {
   // Korean Constants
   // ============================================================
   static const List<String> _chosung = <String>[
-    'ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ',
-    'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ',
+    'ㄱ',
+    'ㄲ',
+    'ㄴ',
+    'ㄷ',
+    'ㄸ',
+    'ㄹ',
+    'ㅁ',
+    'ㅂ',
+    'ㅃ',
+    'ㅅ',
+    'ㅆ',
+    'ㅇ',
+    'ㅈ',
+    'ㅉ',
+    'ㅊ',
+    'ㅋ',
+    'ㅌ',
+    'ㅍ',
+    'ㅎ',
   ];
 
   static const Set<String> _compatChosungSet = <String>{
-    'ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ',
-    'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ',
+    'ㄱ',
+    'ㄲ',
+    'ㄴ',
+    'ㄷ',
+    'ㄸ',
+    'ㄹ',
+    'ㅁ',
+    'ㅂ',
+    'ㅃ',
+    'ㅅ',
+    'ㅆ',
+    'ㅇ',
+    'ㅈ',
+    'ㅉ',
+    'ㅊ',
+    'ㅋ',
+    'ㅌ',
+    'ㅍ',
+    'ㅎ',
   };
 
   // ============================================================
@@ -42,7 +76,7 @@ class MultilingualSearchUtils {
     'ipo': 'initial public offering',
     'cfo': 'chief financial officer',
     'ceo': 'chief executive officer',
-    
+
     // Emergency & Government
     'fema': 'federal emergency management agency',
     'eoc': 'emergency operations center',
@@ -53,7 +87,7 @@ class MultilingualSearchUtils {
     'irs': 'internal revenue service',
     'ssn': 'social security number',
     'dmv': 'department of motor vehicles',
-    
+
     // Common Business
     'pos': 'point of sale',
     'crm': 'customer relationship management',
@@ -65,13 +99,13 @@ class MultilingualSearchUtils {
     'r&d': 'research and development',
     'b2b': 'business to business',
     'b2c': 'business to consumer',
-    
+
     // Shopping & Retail
     'bogo': 'buy one get one',
     'msrp': 'manufacturer suggested retail price',
     'upc': 'universal product code',
     'sku': 'stock keeping unit',
-    
+
     // Utilities & Bills
     'hvac': 'heating ventilation air conditioning',
     'led': 'light emitting diode',
@@ -84,79 +118,80 @@ class MultilingualSearchUtils {
   // ============================================================
   /// Japanese contraction mappings (略語 → 正式名称).
   /// Supports 4-mora contractions and common abbreviations.
-  static const Map<String, List<String>> _japaneseThesaurus = <String, List<String>>{
-    // Technology (テクノロジー)
-    'パソコン': ['パーソナルコンピュータ', 'パーソナルコンピューター', 'personal computer'],
-    'スマホ': ['スマートフォン', 'スマートホン', 'smartphone'],
-    'ガラケー': ['ガラパゴス携帯', 'ガラパゴスけいたい', 'feature phone'],
-    'アプリ': ['アプリケーション', 'application'],
-    'ネット': ['インターネット', 'internet'],
-    'メアド': ['メールアドレス', 'email address'],
-    'リモコン': ['リモートコントローラー', 'remote controller'],
-    'エアコン': ['エアコンディショナー', 'air conditioner'],
-    'デジカメ': ['デジタルカメラ', 'digital camera'],
-    'プリクラ': ['プリント倶楽部', 'print club'],
-    
-    // Places & Stores (場所・店舗)
-    'コンビニ': ['コンビニエンスストア', 'convenience store'],
-    'デパート': ['デパートメントストア', 'department store'],
-    'スーパー': ['スーパーマーケット', 'supermarket'],
-    'ファミレス': ['ファミリーレストラン', 'family restaurant'],
-    'ドラッグ': ['ドラッグストア', 'drug store'],
-    'カラオケ': ['空オーケストラ', 'karaoke'],
-    
-    // Government & Organizations (政府・組織)
-    '都庁': ['東京都庁', 'とうきょうとちょう', 'tokyo metropolitan government'],
-    '県庁': ['けんちょう', 'prefectural office'],
-    '市役所': ['しやくしょ', 'city hall'],
-    '区役所': ['くやくしょ', 'ward office'],
-    '総務': ['総務省', 'そうむしょう', 'ministry of internal affairs'],
-    '経産': ['経済産業省', 'けいざいさんぎょうしょう', 'ministry of economy'],
-    '国交': ['国土交通省', 'こくどこうつうしょう', 'ministry of land'],
-    '厚労': ['厚生労働省', 'こうせいろうどうしょう', 'ministry of health'],
-    '文科': ['文部科学省', 'もんぶかがくしょう', 'ministry of education'],
-    '警視庁': ['けいしちょう', 'metropolitan police'],
-    '消防': ['消防署', 'しょうぼうしょ', 'fire station'],
-    '自衛隊': ['じえいたい', 'self defense force'],
-    
-    // Emergency & Disaster (緊急・災害)
-    '地震': ['じしん', 'earthquake'],
-    '津波': ['つなみ', 'tsunami'],
-    '台風': ['たいふう', 'typhoon'],
-    '避難所': ['ひなんじょ', 'evacuation shelter'],
-    '避難': ['ひなん', 'evacuation'],
-    '救急': ['きゅうきゅう', 'emergency', 'ambulance'],
-    '救助': ['きゅうじょ', 'rescue'],
-    '防災': ['ぼうさい', 'disaster prevention'],
-    '緊急': ['きんきゅう', 'emergency'],
-    '警報': ['けいほう', 'warning', 'alert'],
-    '注意報': ['ちゅういほう', 'advisory'],
-    
-    // Transportation (交通)
-    '電車': ['でんしゃ', 'train'],
-    '新幹線': ['しんかんせん', 'shinkansen', 'bullet train'],
-    '地下鉄': ['ちかてつ', 'subway', 'metro'],
-    'バス停': ['バスてい', 'bus stop'],
-    '空港': ['くうこう', 'airport'],
-    '駅前': ['えきまえ', 'station front'],
-    
-    // Finance (金融)
-    '銀行': ['ぎんこう', 'bank'],
-    'ATM': ['エーティーエム', 'atm', 'automated teller machine'],
-    '振込': ['ふりこみ', 'bank transfer'],
-    '引落': ['ひきおとし', 'direct debit'],
-    '口座': ['こうざ', 'account'],
-    'クレカ': ['クレジットカード', 'credit card'],
-    '電子マネー': ['でんしまねー', 'electronic money'],
-    'ペイペイ': ['paypay'],
-    
-    // Media (メディア)
-    'NHK': ['日本放送協会', 'にほんほうそうきょうかい', 'nippon housou kyoukai'],
-    'テレビ': ['テレビジョン', 'television'],
-    'ラジオ': ['radio'],
-    '新聞': ['しんぶん', 'newspaper'],
-    'ニュース': ['news'],
-  };
+  static const Map<String, List<String>> _japaneseThesaurus =
+      <String, List<String>>{
+        // Technology (テクノロジー)
+        'パソコン': ['パーソナルコンピュータ', 'パーソナルコンピューター', 'personal computer'],
+        'スマホ': ['スマートフォン', 'スマートホン', 'smartphone'],
+        'ガラケー': ['ガラパゴス携帯', 'ガラパゴスけいたい', 'feature phone'],
+        'アプリ': ['アプリケーション', 'application'],
+        'ネット': ['インターネット', 'internet'],
+        'メアド': ['メールアドレス', 'email address'],
+        'リモコン': ['リモートコントローラー', 'remote controller'],
+        'エアコン': ['エアコンディショナー', 'air conditioner'],
+        'デジカメ': ['デジタルカメラ', 'digital camera'],
+        'プリクラ': ['プリント倶楽部', 'print club'],
+
+        // Places & Stores (場所・店舗)
+        'コンビニ': ['コンビニエンスストア', 'convenience store'],
+        'デパート': ['デパートメントストア', 'department store'],
+        'スーパー': ['スーパーマーケット', 'supermarket'],
+        'ファミレス': ['ファミリーレストラン', 'family restaurant'],
+        'ドラッグ': ['ドラッグストア', 'drug store'],
+        'カラオケ': ['空オーケストラ', 'karaoke'],
+
+        // Government & Organizations (政府・組織)
+        '都庁': ['東京都庁', 'とうきょうとちょう', 'tokyo metropolitan government'],
+        '県庁': ['けんちょう', 'prefectural office'],
+        '市役所': ['しやくしょ', 'city hall'],
+        '区役所': ['くやくしょ', 'ward office'],
+        '総務': ['総務省', 'そうむしょう', 'ministry of internal affairs'],
+        '経産': ['経済産業省', 'けいざいさんぎょうしょう', 'ministry of economy'],
+        '国交': ['国土交通省', 'こくどこうつうしょう', 'ministry of land'],
+        '厚労': ['厚生労働省', 'こうせいろうどうしょう', 'ministry of health'],
+        '文科': ['文部科学省', 'もんぶかがくしょう', 'ministry of education'],
+        '警視庁': ['けいしちょう', 'metropolitan police'],
+        '消防': ['消防署', 'しょうぼうしょ', 'fire station'],
+        '自衛隊': ['じえいたい', 'self defense force'],
+
+        // Emergency & Disaster (緊急・災害)
+        '地震': ['じしん', 'earthquake'],
+        '津波': ['つなみ', 'tsunami'],
+        '台風': ['たいふう', 'typhoon'],
+        '避難所': ['ひなんじょ', 'evacuation shelter'],
+        '避難': ['ひなん', 'evacuation'],
+        '救急': ['きゅうきゅう', 'emergency', 'ambulance'],
+        '救助': ['きゅうじょ', 'rescue'],
+        '防災': ['ぼうさい', 'disaster prevention'],
+        '緊急': ['きんきゅう', 'emergency'],
+        '警報': ['けいほう', 'warning', 'alert'],
+        '注意報': ['ちゅういほう', 'advisory'],
+
+        // Transportation (交通)
+        '電車': ['でんしゃ', 'train'],
+        '新幹線': ['しんかんせん', 'shinkansen', 'bullet train'],
+        '地下鉄': ['ちかてつ', 'subway', 'metro'],
+        'バス停': ['バスてい', 'bus stop'],
+        '空港': ['くうこう', 'airport'],
+        '駅前': ['えきまえ', 'station front'],
+
+        // Finance (金融)
+        '銀行': ['ぎんこう', 'bank'],
+        'ATM': ['エーティーエム', 'atm', 'automated teller machine'],
+        '振込': ['ふりこみ', 'bank transfer'],
+        '引落': ['ひきおとし', 'direct debit'],
+        '口座': ['こうざ', 'account'],
+        'クレカ': ['クレジットカード', 'credit card'],
+        '電子マネー': ['でんしまねー', 'electronic money'],
+        'ペイペイ': ['paypay'],
+
+        // Media (メディア)
+        'NHK': ['日本放送協会', 'にほんほうそうきょうかい', 'nippon housou kyoukai'],
+        'テレビ': ['テレビジョン', 'television'],
+        'ラジオ': ['radio'],
+        '新聞': ['しんぶん', 'newspaper'],
+        'ニュース': ['news'],
+      };
 
   /// Reverse lookup: full form → contracted form
   static Map<String, String>? _reverseJapaneseThesaurus;
@@ -178,22 +213,81 @@ class MultilingualSearchUtils {
   // Hiragana ↔ Katakana Conversion Tables
   // ============================================================
   static const Map<String, String> _hiraganaToKatakana = {
-    'あ': 'ア', 'い': 'イ', 'う': 'ウ', 'え': 'エ', 'お': 'オ',
-    'か': 'カ', 'き': 'キ', 'く': 'ク', 'け': 'ケ', 'こ': 'コ',
-    'さ': 'サ', 'し': 'シ', 'す': 'ス', 'せ': 'セ', 'そ': 'ソ',
-    'た': 'タ', 'ち': 'チ', 'つ': 'ツ', 'て': 'テ', 'と': 'ト',
-    'な': 'ナ', 'に': 'ニ', 'ぬ': 'ヌ', 'ね': 'ネ', 'の': 'ノ',
-    'は': 'ハ', 'ひ': 'ヒ', 'ふ': 'フ', 'へ': 'ヘ', 'ほ': 'ホ',
-    'ま': 'マ', 'み': 'ミ', 'む': 'ム', 'め': 'メ', 'も': 'モ',
-    'や': 'ヤ', 'ゆ': 'ユ', 'よ': 'ヨ',
-    'ら': 'ラ', 'り': 'リ', 'る': 'ル', 'れ': 'レ', 'ろ': 'ロ',
-    'わ': 'ワ', 'を': 'ヲ', 'ん': 'ン',
-    'が': 'ガ', 'ぎ': 'ギ', 'ぐ': 'グ', 'げ': 'ゲ', 'ご': 'ゴ',
-    'ざ': 'ザ', 'じ': 'ジ', 'ず': 'ズ', 'ぜ': 'ゼ', 'ぞ': 'ゾ',
-    'だ': 'ダ', 'ぢ': 'ヂ', 'づ': 'ヅ', 'で': 'デ', 'ど': 'ド',
-    'ば': 'バ', 'び': 'ビ', 'ぶ': 'ブ', 'べ': 'ベ', 'ぼ': 'ボ',
-    'ぱ': 'パ', 'ぴ': 'ピ', 'ぷ': 'プ', 'ぺ': 'ペ', 'ぽ': 'ポ',
-    'ゃ': 'ャ', 'ゅ': 'ュ', 'ょ': 'ョ', 'っ': 'ッ',
+    'あ': 'ア',
+    'い': 'イ',
+    'う': 'ウ',
+    'え': 'エ',
+    'お': 'オ',
+    'か': 'カ',
+    'き': 'キ',
+    'く': 'ク',
+    'け': 'ケ',
+    'こ': 'コ',
+    'さ': 'サ',
+    'し': 'シ',
+    'す': 'ス',
+    'せ': 'セ',
+    'そ': 'ソ',
+    'た': 'タ',
+    'ち': 'チ',
+    'つ': 'ツ',
+    'て': 'テ',
+    'と': 'ト',
+    'な': 'ナ',
+    'に': 'ニ',
+    'ぬ': 'ヌ',
+    'ね': 'ネ',
+    'の': 'ノ',
+    'は': 'ハ',
+    'ひ': 'ヒ',
+    'ふ': 'フ',
+    'へ': 'ヘ',
+    'ほ': 'ホ',
+    'ま': 'マ',
+    'み': 'ミ',
+    'む': 'ム',
+    'め': 'メ',
+    'も': 'モ',
+    'や': 'ヤ',
+    'ゆ': 'ユ',
+    'よ': 'ヨ',
+    'ら': 'ラ',
+    'り': 'リ',
+    'る': 'ル',
+    'れ': 'レ',
+    'ろ': 'ロ',
+    'わ': 'ワ',
+    'を': 'ヲ',
+    'ん': 'ン',
+    'が': 'ガ',
+    'ぎ': 'ギ',
+    'ぐ': 'グ',
+    'げ': 'ゲ',
+    'ご': 'ゴ',
+    'ざ': 'ザ',
+    'じ': 'ジ',
+    'ず': 'ズ',
+    'ぜ': 'ゼ',
+    'ぞ': 'ゾ',
+    'だ': 'ダ',
+    'ぢ': 'ヂ',
+    'づ': 'ヅ',
+    'で': 'デ',
+    'ど': 'ド',
+    'ば': 'バ',
+    'び': 'ビ',
+    'ぶ': 'ブ',
+    'べ': 'ベ',
+    'ぼ': 'ボ',
+    'ぱ': 'パ',
+    'ぴ': 'ピ',
+    'ぷ': 'プ',
+    'ぺ': 'ペ',
+    'ぽ': 'ポ',
+    'ゃ': 'ャ',
+    'ゅ': 'ュ',
+    'ょ': 'ョ',
+    'っ': 'ッ',
     'ー': 'ー',
   };
 
@@ -207,35 +301,35 @@ class MultilingualSearchUtils {
   // ============================================================
   // European Languages Support (🇪🇺 EU)
   // ============================================================
-  
+
   /// Articles and prepositions to remove for European languages.
   /// These are filtered out during search indexing.
   static const Map<String, Set<String>> _europeanStopWords = {
     // German (Deutsch)
     'de': {
-      'der', 'die', 'das', 'den', 'dem', 'des',  // Articles
-      'ein', 'eine', 'einer', 'einem', 'einen',   // Indefinite articles
+      'der', 'die', 'das', 'den', 'dem', 'des', // Articles
+      'ein', 'eine', 'einer', 'einem', 'einen', // Indefinite articles
       'und', 'oder', 'aber', 'für', 'mit', 'von', 'zu', 'bei', 'nach', 'aus',
-      'an', 'auf', 'in', 'im', 'am',  // Prepositions
+      'an', 'auf', 'in', 'im', 'am', // Prepositions
     },
     // French (Français)
     'fr': {
-      'le', 'la', 'les', 'l', 'un', 'une', 'des',  // Articles
-      'de', 'du', 'au', 'aux',  // Contracted articles
+      'le', 'la', 'les', 'l', 'un', 'une', 'des', // Articles
+      'de', 'du', 'au', 'aux', // Contracted articles
       'et', 'ou', 'mais', 'pour', 'avec', 'dans', 'sur', 'par', 'en',
-      'à', 'ce', 'cette', 'ces',  // Prepositions & demonstratives
+      'à', 'ce', 'cette', 'ces', // Prepositions & demonstratives
     },
     // Spanish (Español)
     'es': {
-      'el', 'la', 'los', 'las', 'un', 'una', 'unos', 'unas',  // Articles
-      'de', 'del', 'al',  // Contracted articles
+      'el', 'la', 'los', 'las', 'un', 'una', 'unos', 'unas', // Articles
+      'de', 'del', 'al', // Contracted articles
       'y', 'o', 'pero', 'para', 'con', 'en', 'por', 'sin',
-      'este', 'esta', 'estos', 'estas',  // Prepositions & demonstratives
+      'este', 'esta', 'estos', 'estas', // Prepositions & demonstratives
     },
     // Italian (Italiano)
     'it': {
-      'il', 'lo', 'la', 'i', 'gli', 'le', 'l',  // Articles
-      'un', 'uno', 'una',  // Indefinite articles
+      'il', 'lo', 'la', 'i', 'gli', 'le', 'l', // Articles
+      'un', 'uno', 'una', // Indefinite articles
       'di', 'del', 'dello', 'della', 'dei', 'degli', 'delle',
       'a', 'al', 'allo', 'alla', 'ai', 'agli', 'alle',
       'da', 'dal', 'dallo', 'dalla', 'dai', 'dagli', 'dalle',
@@ -244,14 +338,14 @@ class MultilingualSearchUtils {
     },
     // Portuguese (Português)
     'pt': {
-      'o', 'a', 'os', 'as', 'um', 'uma', 'uns', 'umas',  // Articles
-      'de', 'do', 'da', 'dos', 'das',  // Contracted
+      'o', 'a', 'os', 'as', 'um', 'uma', 'uns', 'umas', // Articles
+      'de', 'do', 'da', 'dos', 'das', // Contracted
       'em', 'no', 'na', 'nos', 'nas',
       'e', 'ou', 'mas', 'para', 'com', 'por', 'sem',
     },
     // Dutch (Nederlands)
     'nl': {
-      'de', 'het', 'een',  // Articles
+      'de', 'het', 'een', // Articles
       'van', 'voor', 'met', 'op', 'aan', 'in', 'naar', 'bij', 'tot',
       'en', 'of', 'maar',
     },
@@ -268,19 +362,19 @@ class MultilingualSearchUtils {
     'feuer': ['feuerwehr', 'feuerlöscher', 'feuermelder', 'feueralarm'],
     'rett': ['rettung', 'rettungsdienst', 'rettungswagen', 'rettungsstelle'],
     'krank': ['krankenhaus', 'krankenwagen', 'krankenkasse'],
-    
+
     // Government (Regierung)
     'rat': ['rathaus', 'ratsversammlung'],
     'bürger': ['bürgeramt', 'bürgerbüro', 'bürgermeister', 'bürgerdienst'],
     'finanz': ['finanzamt', 'finanzierung', 'finanzen'],
     'poliz': ['polizei', 'polizeiwache', 'polizeidienst'],
     'stadt': ['stadthaus', 'stadtverwaltung', 'stadtamt'],
-    
+
     // Transportation (Verkehr)
     'bahn': ['bahnhof', 'bahnsteig', 'bahnlinie', 'autobahn'],
     'flug': ['flughafen', 'flugzeug', 'fluglinie'],
     'haupt': ['hauptbahnhof', 'hauptstraße', 'hauptstadt'],
-    
+
     // Finance (Finanzen)
     'spar': ['sparkasse', 'sparbuch', 'sparplan'],
     'geld': ['geldautomat', 'geldwechsel', 'geldtransfer'],
@@ -309,7 +403,7 @@ class MultilingualSearchUtils {
     'bomberos': {'es': 'cuerpo bomberos'},
     'carabinieri': {'it': 'arma carabinieri'},
     'vigili': {'it': 'vigili del fuoco'},
-    
+
     // Government Abbreviations
     'mdp': {'fr': 'mairie de paris'},
     'bvg': {'de': 'berliner verkehrsbetriebe'},
@@ -318,7 +412,7 @@ class MultilingualSearchUtils {
     'renfe': {'es': 'red nacional ferrocarriles españoles'},
     'db': {'de': 'deutsche bahn'},
     'ns': {'nl': 'nederlandse spoorwegen'},
-    
+
     // Finance
     'bce': {
       'fr': 'banque centrale européenne',
@@ -333,16 +427,13 @@ class MultilingualSearchUtils {
       'de': 'internationale bankkontonummer',
       'fr': 'numéro compte bancaire international',
     },
-    'bic': {
-      'en': 'bank identifier code',
-      'de': 'bankidentifikationscode',
-    },
+    'bic': {'en': 'bank identifier code', 'de': 'bankidentifikationscode'},
     'sepa': {
       'en': 'single euro payments area',
       'de': 'einheitlicher euro zahlungsverkehrsraum',
       'fr': 'espace unique paiement euros',
     },
-    
+
     // Healthcare
     'nhs': {'en': 'national health service'},
     'aok': {'de': 'allgemeine ortskrankenkasse'},
@@ -416,7 +507,7 @@ class MultilingualSearchUtils {
   // ============================================================
   // Normalization & Detection
   // ============================================================
-  
+
   /// Returns a normalized string for matching (trim + lower-case).
   static String normalize(String input) => input.trim().toLowerCase();
 
@@ -494,7 +585,7 @@ class MultilingualSearchUtils {
   // ============================================================
   // Korean: 초성 Extraction
   // ============================================================
-  
+
   /// Extracts a 초성 string from Hangul syllables in [text].
   ///
   /// Non-Hangul characters are preserved as-is (lowercased by caller if desired).
@@ -517,7 +608,7 @@ class MultilingualSearchUtils {
   // ============================================================
   // English: Acronym Extraction
   // ============================================================
-  
+
   /// Extracts an acronym from multi-word English text.
   ///
   /// Takes the first letter of each word.
@@ -537,14 +628,27 @@ class MultilingualSearchUtils {
 
   /// Common stop words to skip in acronym extraction.
   static bool _isStopWord(String word) {
-    const stopWords = {'a', 'an', 'the', 'of', 'and', 'or', 'to', 'for', 'in', 'on', 'at', 'by'};
+    const stopWords = {
+      'a',
+      'an',
+      'the',
+      'of',
+      'and',
+      'or',
+      'to',
+      'for',
+      'in',
+      'on',
+      'at',
+      'by',
+    };
     return stopWords.contains(word.toLowerCase());
   }
 
   // ============================================================
   // Japanese: Kana Conversion & Thesaurus
   // ============================================================
-  
+
   /// Converts Hiragana to Katakana.
   static String hiraganaToKatakana(String text) {
     final buffer = StringBuffer();
@@ -578,13 +682,13 @@ class MultilingualSearchUtils {
     if (_japaneseThesaurus.containsKey(query)) {
       return _japaneseThesaurus[query];
     }
-    
+
     // Try with Katakana conversion
     final katakana = hiraganaToKatakana(query);
     if (_japaneseThesaurus.containsKey(katakana)) {
       return _japaneseThesaurus[katakana];
     }
-    
+
     // Try with Hiragana conversion
     final hiragana = katakanaToHiragana(query);
     for (final entry in _japaneseThesaurus.entries) {
@@ -592,7 +696,7 @@ class MultilingualSearchUtils {
         return entry.value;
       }
     }
-    
+
     return null;
   }
 
@@ -605,7 +709,7 @@ class MultilingualSearchUtils {
   // ============================================================
   // Matching Functions
   // ============================================================
-  
+
   /// Checks if [text] starts with [prefix] (case-insensitive).
   ///
   /// This is the English equivalent of 초성 matching.
@@ -707,9 +811,11 @@ class MultilingualSearchUtils {
     for (final entry in _japaneseThesaurus.entries) {
       // Check if query matches any full form
       for (final form in entry.value) {
-        if (qNorm == normalizeJapanese(form) || q.toLowerCase() == form.toLowerCase()) {
+        if (qNorm == normalizeJapanese(form) ||
+            q.toLowerCase() == form.toLowerCase()) {
           // Query is a full form, check if text has the contraction
-          if (t.contains(entry.key) || tNorm.contains(normalizeJapanese(entry.key))) {
+          if (t.contains(entry.key) ||
+              tNorm.contains(normalizeJapanese(entry.key))) {
             return true;
           }
         }
@@ -731,7 +837,8 @@ class MultilingualSearchUtils {
           }
         }
         // Also check the key itself
-        if (normalizeJapanese(entry.key).startsWith(qNorm) && t.contains(entry.key)) {
+        if (normalizeJapanese(entry.key).startsWith(qNorm) &&
+            t.contains(entry.key)) {
           return true;
         }
       }
@@ -747,16 +854,18 @@ class MultilingualSearchUtils {
   /// Detects if text contains European language characters (accented Latin).
   static bool containsEuropeanAccents(String text) {
     // Common European accented characters
-    return RegExp(r'[àáâãäåæçèéêëìíîïñòóôõöøùúûüýÿßœ]', caseSensitive: false)
-        .hasMatch(text);
+    return RegExp(
+      r'[àáâãäåæçèéêëìíîïñòóôõöøùúûüýÿßœ]',
+      caseSensitive: false,
+    ).hasMatch(text);
   }
 
   /// Removes articles and common prepositions from European text.
-  /// 
+  ///
   /// Example: "Mairie de Paris" → "Mairie Paris"
   static String removeEuropeanArticles(String text, {String? language}) {
     final result = normalize(text);
-    
+
     // Determine which stop words to use
     Set<String> stopWords;
     if (language != null && _europeanStopWords.containsKey(language)) {
@@ -765,38 +874,38 @@ class MultilingualSearchUtils {
       // Use all European stop words if language not specified
       stopWords = _europeanStopWords.values.expand((s) => s).toSet();
     }
-    
+
     // Split, filter, rejoin
     final words = result.split(RegExp(r'\s+'));
     final filtered = words.where((w) => !stopWords.contains(w)).toList();
-    
+
     return filtered.join(' ');
   }
 
   /// Decomposes a German compound word and extracts searchable components.
-  /// 
+  ///
   /// Example: "Evakuierungssammelstelle" → ["evak", "samml", "stelle"]
   static List<String> decomposeGermanCompound(String word) {
     final w = normalize(word);
     final components = <String>[];
-    
+
     // Check known prefixes
     for (final entry in _germanCompoundPrefixes.entries) {
       if (w.startsWith(entry.key) || w.contains(entry.key)) {
         components.add(entry.key);
       }
     }
-    
+
     // If no known components found, try syllable-based decomposition
     if (components.isEmpty && w.length > 6) {
       // Extract potential compound boundaries (common German patterns)
       final patterns = [
-        RegExp(r'(ungs?)(?=[a-zäöü])'),  // -ung(s)- boundary
-        RegExp(r'(heit|keit)(?=[a-zäöü])'),  // -heit/-keit boundary
-        RegExp(r'(schaft)(?=[a-zäöü])'),  // -schaft boundary
-        RegExp(r'(stelle|platz|haus|amt|hof)'),  // Common suffixes
+        RegExp(r'(ungs?)(?=[a-zäöü])'), // -ung(s)- boundary
+        RegExp(r'(heit|keit)(?=[a-zäöü])'), // -heit/-keit boundary
+        RegExp(r'(schaft)(?=[a-zäöü])'), // -schaft boundary
+        RegExp(r'(stelle|platz|haus|amt|hof)'), // Common suffixes
       ];
-      
+
       for (final pattern in patterns) {
         final match = pattern.firstMatch(w);
         if (match != null) {
@@ -807,7 +916,7 @@ class MultilingualSearchUtils {
         }
       }
     }
-    
+
     // Always include the first 4-5 characters as a prefix
     if (w.length >= 4) {
       final shortPrefix = w.substring(0, 4);
@@ -815,21 +924,21 @@ class MultilingualSearchUtils {
         components.insert(0, shortPrefix);
       }
     }
-    
+
     return components;
   }
 
   /// Checks if [text] matches a German compound word query.
-  /// 
+  ///
   /// Example: "Evak" matches "Evakuierungssammelstelle"
   static bool matchesGermanCompound(String text, String query) {
     final t = normalize(text);
     final q = normalize(query);
     if (q.isEmpty) return true;
-    
+
     // Direct match
     if (t.contains(q)) return true;
-    
+
     // Check compound decomposition
     final words = t.split(RegExp(r'\s+'));
     for (final word in words) {
@@ -843,31 +952,31 @@ class MultilingualSearchUtils {
           }
         }
       }
-      
+
       // Check if word starts with query (prefix matching)
       if (word.startsWith(q)) return true;
-      
+
       // Check decomposed components
       final components = decomposeGermanCompound(word);
       for (final comp in components) {
         if (comp.startsWith(q) || q.startsWith(comp)) return true;
       }
     }
-    
+
     return false;
   }
 
   /// Checks if [text] matches a European abbreviation/acronym.
-  /// 
+  ///
   /// Supports multilingual abbreviation lookup.
   static bool matchesEuropeanAbbreviation(String text, String query) {
     final t = normalize(text);
     final q = normalize(query);
     if (q.isEmpty) return true;
-    
+
     // Direct match
     if (t.contains(q)) return true;
-    
+
     // Check European abbreviations
     if (_europeanAbbreviations.containsKey(q)) {
       final expansions = _europeanAbbreviations[q]!;
@@ -878,7 +987,7 @@ class MultilingualSearchUtils {
         if (words.every(t.contains)) return true;
       }
     }
-    
+
     // Reverse lookup: check if text contains an abbreviation that matches query
     for (final entry in _europeanAbbreviations.entries) {
       for (final expansion in entry.value.values) {
@@ -887,17 +996,17 @@ class MultilingualSearchUtils {
         }
       }
     }
-    
+
     return false;
   }
 
   /// Checks if [query] matches a global emergency code.
-  /// 
+  ///
   /// Returns the matched global ID if found, null otherwise.
   static String? matchesGlobalEmergencyCode(String query) {
     final q = normalize(query);
     if (q.isEmpty) return null;
-    
+
     for (final entry in _globalEmergencyCodes.entries) {
       final keywords = entry.value['keywords'] as Map<String, List<String>>;
       for (final langKeywords in keywords.values) {
@@ -908,26 +1017,31 @@ class MultilingualSearchUtils {
         }
       }
     }
-    
+
     return null;
   }
 
   /// Gets all keywords for a global emergency code.
-  static List<String> getEmergencyCodeKeywords(String globalId, {String? language}) {
+  static List<String> getEmergencyCodeKeywords(
+    String globalId, {
+    String? language,
+  }) {
     if (!_globalEmergencyCodes.containsKey(globalId)) return [];
-    
-    final keywords = _globalEmergencyCodes[globalId]!['keywords'] as Map<String, List<String>>;
-    
+
+    final keywords =
+        _globalEmergencyCodes[globalId]!['keywords']
+            as Map<String, List<String>>;
+
     if (language != null && keywords.containsKey(language)) {
       return keywords[language]!;
     }
-    
+
     // Return all keywords if no language specified
     return keywords.values.expand((list) => list).toList();
   }
 
   /// Comprehensive European text matching.
-  /// 
+  ///
   /// Supports:
   /// - German compound word decomposition
   /// - French/Spanish/Italian article removal
@@ -937,20 +1051,20 @@ class MultilingualSearchUtils {
     final t = normalize(text);
     final q = normalize(query);
     if (q.isEmpty) return true;
-    
+
     // 1. Direct substring match
     if (t.contains(q)) return true;
-    
+
     // 2. Match with articles removed
     final tNoArticles = removeEuropeanArticles(text);
     if (tNoArticles.contains(q)) return true;
-    
+
     // 3. German compound matching
     if (matchesGermanCompound(t, q)) return true;
-    
+
     // 4. European abbreviation matching
     if (matchesEuropeanAbbreviation(t, q)) return true;
-    
+
     // 5. Global emergency code matching
     final emergencyId = matchesGlobalEmergencyCode(q);
     if (emergencyId != null) {
@@ -959,13 +1073,13 @@ class MultilingualSearchUtils {
         if (t.contains(keyword)) return true;
       }
     }
-    
+
     // 6. Prefix matching for any word
     final words = t.split(RegExp(r'\s+'));
     for (final word in words) {
       if (word.startsWith(q)) return true;
     }
-    
+
     return false;
   }
 
@@ -974,21 +1088,21 @@ class MultilingualSearchUtils {
   // ============================================================
 
   /// Flexible match supporting multiple languages and search styles:
-  /// 
+  ///
   /// **Korean (한국어):**
   /// - Normal substring match (case-insensitive)
   /// - 초성 matching: `ㄱㅊ` matches `김치`
-  /// 
+  ///
   /// **English:**
   /// - Prefix search: `Hur` matches `Hurricane`
   /// - Acronym matching: `FEMA` matches `Federal Emergency Management Agency`
   /// - Substring match (case-insensitive)
-  /// 
+  ///
   /// **Japanese (日本語):**
   /// - 4-mora contraction: `スマホ` matches `スマートフォン`
   /// - Kana prefix: `じ` matches `地震`
   /// - Hiragana ↔ Katakana equivalence
-  /// 
+  ///
   /// **European (🇪🇺 EU):**
   /// - German compound decomposition: `Evak` matches `Evakuierungssammelstelle`
   /// - Article removal: `Pari` matches `Mairie de Paris`
@@ -999,7 +1113,7 @@ class MultilingualSearchUtils {
     if (q.isEmpty) return true;
 
     final t = normalize(text);
-    
+
     // 1. Direct substring match (works for all languages)
     if (t.contains(q)) return true;
 
@@ -1032,7 +1146,7 @@ class MultilingualSearchUtils {
   }
 
   /// Enhanced search with ranking support.
-  /// 
+  ///
   /// Returns a score indicating match quality:
   /// - 100: Exact match
   /// - 90: Starts with query
@@ -1075,7 +1189,7 @@ class MultilingualSearchUtils {
       final fullForms = lookupJapaneseContraction(query);
       if (fullForms != null) {
         for (final form in fullForms) {
-          if (t.contains(form.toLowerCase()) || 
+          if (t.contains(form.toLowerCase()) ||
               normalizeJapanese(text).contains(normalizeJapanese(form))) {
             return 75;
           }
@@ -1098,7 +1212,7 @@ class MultilingualSearchUtils {
     }
 
     // Acronym match
-    if ((isAcronymQuery(query) || _commonAcronyms.containsKey(q)) && 
+    if ((isAcronymQuery(query) || _commonAcronyms.containsKey(q)) &&
         matchesAcronym(t, q)) {
       return 70;
     }
@@ -1129,7 +1243,7 @@ class MultilingualSearchUtils {
   }
 
   /// Sort a list of items by match relevance.
-  /// 
+  ///
   /// Higher scores appear first.
   static List<T> sortByRelevance<T>(
     List<T> items,
@@ -1138,11 +1252,14 @@ class MultilingualSearchUtils {
   ) {
     if (query.trim().isEmpty) return items;
 
-    final scored = items
-        .map((item) => MapEntry(item, matchScore(textExtractor(item), query)))
-        .where((entry) => entry.value > 0)
-        .toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
+    final scored =
+        items
+            .map(
+              (item) => MapEntry(item, matchScore(textExtractor(item), query)),
+            )
+            .where((entry) => entry.value > 0)
+            .toList()
+          ..sort((a, b) => b.value.compareTo(a.value));
 
     return scored.map((e) => e.key).toList();
   }

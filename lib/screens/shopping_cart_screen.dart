@@ -815,10 +815,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                     .take(15)
                     .map(
                       (loc) => ActionChip(
-                        label: Text(
-                          loc,
-                          style: const TextStyle(fontSize: 11),
-                        ),
+                        label: Text(loc, style: const TextStyle(fontSize: 11)),
                         onPressed: () {
                           controller.text = loc;
                         },
@@ -848,10 +845,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
     if (result == null) return;
 
     final now = DateTime.now();
-    final updated = item.copyWith(
-      storeLocation: result,
-      updatedAt: now,
-    );
+    final updated = item.copyWith(storeLocation: result, updatedAt: now);
     final next = _items.map((i) => i.id == item.id ? updated : i).toList();
     await _save(next);
 
@@ -867,7 +861,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
 
   Future<void> _startShoppingGuide() async {
     FocusScope.of(context).unfocus();
-    
+
     await Navigator.of(context).pushNamed(
       AppRoutes.shoppingGuide,
       arguments: ShoppingGuideArgs(
@@ -875,7 +869,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
         items: _items,
       ),
     );
-    
+
     // 가이드에서 돌아온 후 새로고침
     await _load();
   }

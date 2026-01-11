@@ -1,17 +1,17 @@
 /// 범용 메모리 캐시 유틸리티
-/// 
+///
 /// 사용 예시:
 /// ```dart
 /// final cache = SimpleCache<String, RecipeMatch>(
 ///   maxAge: Duration(minutes: 5),
 /// );
-/// 
+///
 /// // 저장
 /// cache.set('key1', recipeData);
-/// 
+///
 /// // 조회
 /// final data = cache.get('key1'); // null이면 만료됨
-/// 
+///
 /// // 무효화
 /// cache.clear();
 /// ```
@@ -19,16 +19,11 @@ class SimpleCache<K, V> {
   final Duration maxAge;
   final Map<K, _CacheEntry<V>> _storage = {};
 
-  SimpleCache({
-    required this.maxAge,
-  });
+  SimpleCache({required this.maxAge});
 
   /// 캐시에 값 저장
   void set(K key, V value) {
-    _storage[key] = _CacheEntry(
-      value: value,
-      timestamp: DateTime.now(),
-    );
+    _storage[key] = _CacheEntry(value: value, timestamp: DateTime.now());
   }
 
   /// 캐시에서 값 조회 (만료되었으면 null 반환)
@@ -71,10 +66,7 @@ class _CacheEntry<V> {
   final V value;
   final DateTime timestamp;
 
-  _CacheEntry({
-    required this.value,
-    required this.timestamp,
-  });
+  _CacheEntry({required this.value, required this.timestamp});
 
   bool isExpired(Duration maxAge) {
     return DateTime.now().difference(timestamp) >= maxAge;
@@ -82,12 +74,12 @@ class _CacheEntry<V> {
 }
 
 /// 단순 키-값 캐시 (싱글톤 패턴)
-/// 
+///
 /// 사용 예시:
 /// ```dart
 /// // 저장
 /// SingletonCache.instance.set('user_data', userData, maxAge: Duration(hours: 1));
-/// 
+///
 /// // 조회
 /// final data = SingletonCache.instance.get('user_data');
 /// ```
@@ -98,7 +90,11 @@ class SingletonCache {
   final Map<String, _TimedCacheEntry> _storage = {};
 
   /// 값 저장
-  void set(String key, dynamic value, {Duration maxAge = const Duration(minutes: 5)}) {
+  void set(
+    String key,
+    dynamic value, {
+    Duration maxAge = const Duration(minutes: 5),
+  }) {
     _storage[key] = _TimedCacheEntry(
       value: value,
       timestamp: DateTime.now(),

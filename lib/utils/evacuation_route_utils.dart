@@ -7,24 +7,19 @@ import 'weather_price_sensitivity.dart';
 import 'weather_utils.dart';
 
 /// 환경 유형 (도심/해안/기타)
-enum EvacuationEnvironment {
-  urban,
-  coastal,
-  inland,
-  unknown,
-}
+enum EvacuationEnvironment { urban, coastal, inland, unknown }
 
 /// 대피 권고 수준
 enum EvacuationAdviceLevel {
-  monitor,   // 상황 모니터링
-  prepare,   // 대비 단계 (짐 꾸리기, 차량 점검)
-  evacuate,  // 즉시 대피 권고
+  monitor, // 상황 모니터링
+  prepare, // 대비 단계 (짐 꾸리기, 차량 점검)
+  evacuate, // 즉시 대피 권고
 }
 
 /// 경로 안전 등급
 enum EvacuationSafetyLevel {
-  primary,    // 1순위 안전 경로 (정부 지정)
-  alternate,  // 우회 경로 (교통 혼잡 시)
+  primary, // 1순위 안전 경로 (정부 지정)
+  alternate, // 우회 경로 (교통 혼잡 시)
   lastResort, // 최후 수단 (위험 허용)
 }
 
@@ -63,12 +58,12 @@ class EvacuationPlan {
   final String location;
   final EvacuationAdviceLevel adviceLevel;
   final List<EvacuationRoute> routes;
-  final List<String> checkpoints;          // 중간 점검 사항
-  final List<String> recommendedActions;   // 행동 지침
-  final String safetyMessage;              // 핵심 경보 문구
+  final List<String> checkpoints; // 중간 점검 사항
+  final List<String> recommendedActions; // 행동 지침
+  final String safetyMessage; // 핵심 경보 문구
   final int familySize;
   final DateTime generatedAt;
-  final String? environmentAdvisory;       // 도심/해안 특화 안내
+  final String? environmentAdvisory; // 도심/해안 특화 안내
 
   const EvacuationPlan({
     required this.condition,
@@ -99,7 +94,8 @@ class _RegionEvacuationConfig {
 
 /// 기본 경로(전 지역 공통)
 List<EvacuationRoute> _defaultRoutes(WeatherCondition condition) {
-  if (condition == WeatherCondition.typhoon || condition == WeatherCondition.heavyRain) {
+  if (condition == WeatherCondition.typhoon ||
+      condition == WeatherCondition.heavyRain) {
     return const [
       EvacuationRoute(
         name: '주요 도로 → 고지대 시민센터',
@@ -138,7 +134,8 @@ List<EvacuationRoute> _defaultRoutes(WeatherCondition condition) {
     ];
   }
 
-  if (condition == WeatherCondition.snowy || condition == WeatherCondition.coldWave) {
+  if (condition == WeatherCondition.snowy ||
+      condition == WeatherCondition.coldWave) {
     return const [
       EvacuationRoute(
         name: '내부순환로 → 강남 안전센터',
@@ -429,7 +426,8 @@ class EvacuationRoutePlanner {
     final regionConfig = _regionConfigs[regionKey];
     final environment = _inferEnvironment(weather.location);
 
-    final routes = regionConfig?.routesByCondition[condition] ??
+    final routes =
+        regionConfig?.routesByCondition[condition] ??
         _customRoutesForEnvironment(condition, environment) ??
         _defaultRoutes(condition);
 
@@ -508,15 +506,9 @@ class EvacuationRoutePlanner {
           '차량 연료 3/4 이상 유지, 비상 식수 3일분 적재',
         ];
       case WeatherCondition.heavyRain:
-        return [
-          '저지대 침수 여부 확인 → 우회 경로 확보',
-          '하천 교량 접근 금지, 통제선 준수',
-        ];
+        return ['저지대 침수 여부 확인 → 우회 경로 확보', '하천 교량 접근 금지, 통제선 준수'];
       case WeatherCondition.snowy:
-        return [
-          '겨울용 타이어 또는 체인 장착 여부 확인',
-          '국도/고속도로 통제 공지 체크',
-        ];
+        return ['겨울용 타이어 또는 체인 장착 여부 확인', '국도/고속도로 통제 공지 체크'];
       default:
         return ['지역 재난 문자 수신 설정 확인'];
     }
@@ -542,18 +534,13 @@ class EvacuationRoutePlanner {
         }
         return [...base, ...extra];
       case WeatherCondition.heavyRain:
-        final extra = <String>[
-          '침수 예상 지역 지도 저장, 차량 이동 시 높이 30cm 이상 물길 진입 금지',
-        ];
+        final extra = <String>['침수 예상 지역 지도 저장, 차량 이동 시 높이 30cm 이상 물길 진입 금지'];
         if (environment == EvacuationEnvironment.urban) {
           extra.add('지상 도로 침수 시 건물 옥상/고지대 천공로(스카이워크)로 이동');
         }
         return [...base, ...extra];
       case WeatherCondition.snowy:
-        return [
-          ...base,
-          '방한 의류와 담요, 핫팩을 이동 가방에 패킹',
-        ];
+        return [...base, '방한 의류와 담요, 핫팩을 이동 가방에 패킹'];
       default:
         return base;
     }
@@ -565,16 +552,10 @@ class EvacuationRoutePlanner {
   ) {
     if (environment == EvacuationEnvironment.urban) {
       if (condition == WeatherCondition.typhoon) {
-        return [
-          '지하철 역사/지하 대피소 전광판으로 공식 안내 확인',
-          '지상 광고판, 유리창 인근 대기 금지',
-        ];
+        return ['지하철 역사/지하 대피소 전광판으로 공식 안내 확인', '지상 광고판, 유리창 인근 대기 금지'];
       }
       if (condition == WeatherCondition.heavyRain) {
-        return [
-          '지하차도·지하주차장 출입 통제 확인 후 이용 금지',
-          '옥상 출입문/비상계단 접근 가능 여부 사전 확인',
-        ];
+        return ['지하차도·지하주차장 출입 통제 확인 후 이용 금지', '옥상 출입문/비상계단 접근 가능 여부 사전 확인'];
       }
     }
 
@@ -608,8 +589,24 @@ class EvacuationRoutePlanner {
   static EvacuationEnvironment _inferEnvironment(String location) {
     final normalized = location.toLowerCase();
     const urbanKeywords = [
-      'seoul', '서울', 'busan', '부산', 'incheon', '인천', 'daejeon', '대전', 'daegu', '대구',
-      'new york', 'los angeles', 'tokyo', 'osaka', 'singapore', 'hong kong', 'bangkok', 'miami',
+      'seoul',
+      '서울',
+      'busan',
+      '부산',
+      'incheon',
+      '인천',
+      'daejeon',
+      '대전',
+      'daegu',
+      '대구',
+      'new york',
+      'los angeles',
+      'tokyo',
+      'osaka',
+      'singapore',
+      'hong kong',
+      'bangkok',
+      'miami',
     ];
     for (final keyword in urbanKeywords) {
       if (normalized.contains(keyword)) {
@@ -617,7 +614,15 @@ class EvacuationRoutePlanner {
       }
     }
 
-    const coastalKeywords = ['beach', 'bay', 'island', 'galveston', 'jeju', '부두', '포구'];
+    const coastalKeywords = [
+      'beach',
+      'bay',
+      'island',
+      'galveston',
+      'jeju',
+      '부두',
+      '포구',
+    ];
     for (final keyword in coastalKeywords) {
       if (normalized.contains(keyword)) {
         return EvacuationEnvironment.coastal;

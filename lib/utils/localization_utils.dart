@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
 /// 다국어 지원 유틸리티
-/// 
+///
 /// 사용 예시:
 /// ```dart
 /// // 번역 가져오기
 /// final text = LocalizationUtils.tr(context, 'hello');
-/// 
+///
 /// // 플레이스홀더 포함
 /// final text = LocalizationUtils.tr(context, 'welcome', args: {'name': '홍길동'});
-/// 
+///
 /// // 언어 코드 가져오기
 /// final lang = LocalizationUtils.getCurrentLanguage(context); // 'ko', 'en', 'ja'
 /// ```
@@ -94,11 +94,7 @@ class LocalizationUtils {
   }
 
   /// 복수형 처리
-  static String plural(
-    BuildContext context,
-    String key,
-    int count,
-  ) {
+  static String plural(BuildContext context, String key, int count) {
     final lang = getCurrentLanguage(context);
 
     if (lang == 'ko' || lang == 'ja') {
@@ -134,7 +130,7 @@ const Map<String, Map<String, String>> _translations = {
     'error': '오류',
     'loading': '로딩 중...',
     'no_data': '데이터가 없습니다',
-    
+
     // 거래
     'transaction': '거래',
     'expense': '지출',
@@ -146,14 +142,14 @@ const Map<String, Map<String, String>> _translations = {
     'category': '카테고리',
     'date': '날짜',
     'memo': '메모',
-    
+
     // 음성 명령
     'voice_command_expense': '지출 기록',
     'voice_command_income': '수입 기록',
     'voice_command_recipe': '요리 추천',
     'voice_command_shopping': '쇼핑 안내',
     'voice_command_receipt': '영수증 분석',
-    
+
     // 영수증
     'receipt': '영수증',
     'receipt_scan': '영수증 스캔',
@@ -161,14 +157,14 @@ const Map<String, Map<String, String>> _translations = {
     'health_score': '건강 점수',
     'store': '상점',
     'items': '항목',
-    
+
     // 요리
     'recipe': '레시피',
     'ingredients': '재료',
     'cooking': '요리',
     'expiring_soon': '유통기한 임박',
     'days_left': '{days}일 남음',
-    
+
     // 메시지
     'welcome': '환영합니다, {name}님!',
     'transaction_saved': '거래가 저장되었습니다',
@@ -191,7 +187,7 @@ const Map<String, Map<String, String>> _translations = {
     'error': 'Error',
     'loading': 'Loading...',
     'no_data': 'No data available',
-    
+
     // Transaction
     'transaction': 'Transaction',
     'expense': 'Expense',
@@ -203,14 +199,14 @@ const Map<String, Map<String, String>> _translations = {
     'category': 'Category',
     'date': 'Date',
     'memo': 'Memo',
-    
+
     // Voice commands
     'voice_command_expense': 'Record expense',
     'voice_command_income': 'Record income',
     'voice_command_recipe': 'Recommend recipe',
     'voice_command_shopping': 'Shopping guide',
     'voice_command_receipt': 'Analyze receipt',
-    
+
     // Receipt
     'receipt': 'Receipt',
     'receipt_scan': 'Scan receipt',
@@ -218,14 +214,14 @@ const Map<String, Map<String, String>> _translations = {
     'health_score': 'Health score',
     'store': 'Store',
     'items': 'Items',
-    
+
     // Recipe
     'recipe': 'Recipe',
     'ingredients': 'Ingredients',
     'cooking': 'Cooking',
     'expiring_soon': 'Expiring soon',
     'days_left': '{days} days left',
-    
+
     // Messages
     'welcome': 'Welcome, {name}!',
     'transaction_saved': 'Transaction saved',
@@ -248,7 +244,7 @@ const Map<String, Map<String, String>> _translations = {
     'error': 'エラー',
     'loading': '読み込み中...',
     'no_data': 'データがありません',
-    
+
     // 取引
     'transaction': '取引',
     'expense': '支出',
@@ -260,14 +256,14 @@ const Map<String, Map<String, String>> _translations = {
     'category': 'カテゴリ',
     'date': '日付',
     'memo': 'メモ',
-    
+
     // 音声コマンド
     'voice_command_expense': '支出を記録',
     'voice_command_income': '収入を記録',
     'voice_command_recipe': 'レシピを推薦',
     'voice_command_shopping': '買い物案内',
     'voice_command_receipt': 'レシート分析',
-    
+
     // レシート
     'receipt': 'レシート',
     'receipt_scan': 'レシートスキャン',
@@ -275,14 +271,14 @@ const Map<String, Map<String, String>> _translations = {
     'health_score': '健康スコア',
     'store': '店舗',
     'items': '項目',
-    
+
     // 料理
     'recipe': 'レシピ',
     'ingredients': '材料',
     'cooking': '料理',
     'expiring_soon': '期限切れ間近',
     'days_left': '残り{days}日',
-    
+
     // メッセージ
     'welcome': 'ようこそ、{name}さん！',
     'transaction_saved': '取引が保存されました',

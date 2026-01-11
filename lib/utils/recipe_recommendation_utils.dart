@@ -82,12 +82,12 @@ class RecipeRecommendationUtils {
     bool includeUserRecipes = true,
   }) async {
     final now = DateTime.now();
-    
+
     // 유통기한 임박 재료 식별 (3일 이내)
     final expiringItems = availableIngredients
         .where((item) => item.daysLeft(now) <= 3)
         .toSet();
-    
+
     final availableMap = <String, FoodExpiryItem>{};
     for (final item in availableIngredients) {
       availableMap[item.name.toLowerCase().trim()] = item;
@@ -111,7 +111,8 @@ class RecipeRecommendationUtils {
       );
 
       // 최소 50% 이상의 재료가 있으면 추천
-      final matchPercentage = (matchResult.matchCount / requiredIngredients.length * 100).toInt();
+      final matchPercentage =
+          (matchResult.matchCount / requiredIngredients.length * 100).toInt();
       if (matchPercentage >= 50) {
         recommendations[recipeName] = RecipeMatch(
           recipeName: recipeName,
@@ -127,10 +128,12 @@ class RecipeRecommendationUtils {
     // 2. 사용자가 만든 레시피 추가
     if (includeUserRecipes) {
       final userRecipes = RecipeService.instance.recipes.value;
-      
+
       for (final recipe in userRecipes) {
-        final requiredIngredients = recipe.ingredients.map((i) => i.name).toList();
-        
+        final requiredIngredients = recipe.ingredients
+            .map((i) => i.name)
+            .toList();
+
         if (requiredIngredients.isEmpty) continue;
 
         final matchResult = _matchIngredients(
@@ -139,7 +142,8 @@ class RecipeRecommendationUtils {
           expiringItems,
         );
 
-        final matchPercentage = (matchResult.matchCount / requiredIngredients.length * 100).toInt();
+        final matchPercentage =
+            (matchResult.matchCount / requiredIngredients.length * 100).toInt();
         if (matchPercentage >= 50) {
           recommendations[recipe.name] = RecipeMatch(
             recipeName: recipe.name,
@@ -158,13 +162,16 @@ class RecipeRecommendationUtils {
     final sortedEntries = recommendations.entries.toList(growable: false)
       ..sort((a, b) {
         if (prioritizeExpiring) {
-          final expiringCompare = b.value.expiringIngredientCount
-              .compareTo(a.value.expiringIngredientCount);
+          final expiringCompare = b.value.expiringIngredientCount.compareTo(
+            a.value.expiringIngredientCount,
+          );
           if (expiringCompare != 0) return expiringCompare;
         }
 
         if (prioritizeHealth) {
-          final healthCompare = b.value.healthScore.compareTo(a.value.healthScore);
+          final healthCompare = b.value.healthScore.compareTo(
+            a.value.healthScore,
+          );
           if (healthCompare != 0) return healthCompare;
         }
 
@@ -200,14 +207,14 @@ class RecipeRecommendationUtils {
   ) {
     int matchCount = 0;
     int expiringMatchCount = 0;
-    
+
     for (final required in requiredIngredients) {
       final normalized = required.toLowerCase().trim();
-      
+
       for (final entry in availableMap.entries) {
         final available = entry.key;
         final item = entry.value;
-        
+
         if (available.contains(normalized) || normalized.contains(available)) {
           matchCount++;
           if (expiringItems.contains(item)) {
@@ -243,10 +250,7 @@ class _MatchResult {
   final int matchCount;
   final int expiringMatchCount;
 
-  _MatchResult({
-    required this.matchCount,
-    required this.expiringMatchCount,
-  });
+  _MatchResult({required this.matchCount, required this.expiringMatchCount});
 }
 
 /// 요리 매칭 결과
@@ -271,29 +275,35 @@ class RecipeMatch {
 
   /// 유통기한 임박 재료 사용 여부
   bool get usesExpiringIngredients => expiringIngredientCount > 0;
-  
+
   /// 건강한 요리 여부 (점수 4 이상)
   bool get isHealthy => healthScore >= 4;
-  
+
   /// 매우 건강한 요리 여부 (점수 5)
   bool get isVeryHealthy => healthScore == 5;
 
   /// 건강 점수 텍스트
   String get healthLabel {
     switch (healthScore) {
-      case 5: return '💚 매우 건강';
-      case 4: return '💚 건강';
-      case 3: return '🟡 보통';
-      case 2: return '🟠 주의';
-      case 1: return '🔴 비건강';
-      default: return '🟡 보통';
+      case 5:
+        return '💚 매우 건강';
+      case 4:
+        return '💚 건강';
+      case 3:
+        return '🟡 보통';
+      case 2:
+        return '🟠 주의';
+      case 1:
+        return '🔴 비건강';
+      default:
+        return '🟡 보통';
     }
   }
 
   /// 사용자 친화적 메시지
   String get message {
     final parts = <String>[];
-    
+
     if (isUserRecipe) {
       parts.add('👤 내 레시피');
     }
@@ -301,13 +311,13 @@ class RecipeMatch {
     if (usesExpiringIngredients) {
       parts.add('⚠️ 유통기한 임박 재료 활용');
     }
-    
+
     if (isVeryHealthy) {
       parts.add('💚 매우 건강한 요리');
     } else if (isHealthy) {
       parts.add('💚 건강한 요리');
     }
-    
+
     if (matchPercentage == 100) {
       parts.add('모든 재료 준비됨');
     } else if (matchPercentage >= 80) {
@@ -317,7 +327,7 @@ class RecipeMatch {
     } else {
       parts.add('일부 재료 필요');
     }
-    
+
     return parts.join(' • ');
   }
 }

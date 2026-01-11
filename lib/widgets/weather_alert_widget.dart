@@ -21,9 +21,9 @@ bool isExtremeWeather(WeatherCondition condition) {
 
 /// 극한 날씨별 위험도
 enum WeatherRiskLevel {
-  low,      // 낮음
-  medium,   // 중간
-  high,     // 높음
+  low, // 낮음
+  medium, // 중간
+  high, // 높음
   critical, // 매우 높음 (대피 필요)
 }
 
@@ -33,13 +33,13 @@ WeatherRiskLevel getWeatherRiskLevel(WeatherCondition condition) {
     case WeatherCondition.typhoon:
       return WeatherRiskLevel.critical; // 태풍: 매우 위험
     case WeatherCondition.coldWave:
-      return WeatherRiskLevel.high;     // 한파: 높음
+      return WeatherRiskLevel.high; // 한파: 높음
     case WeatherCondition.heavyRain:
-      return WeatherRiskLevel.high;     // 폭우: 높음
+      return WeatherRiskLevel.high; // 폭우: 높음
     case WeatherCondition.heatWave:
-      return WeatherRiskLevel.medium;   // 폭염: 중간
+      return WeatherRiskLevel.medium; // 폭염: 중간
     case WeatherCondition.snowy:
-      return WeatherRiskLevel.medium;   // 폭설: 중간
+      return WeatherRiskLevel.medium; // 폭설: 중간
     default:
       return WeatherRiskLevel.low;
   }
@@ -47,12 +47,12 @@ WeatherRiskLevel getWeatherRiskLevel(WeatherCondition condition) {
 
 /// 대비 품목 카테고리
 enum PrepCategory {
-  safety,      // 안전용품
-  freshFood,   // 신선식품
-  storableFood,// 비축식품
-  medicine,    // 의약품
-  energy,      // 에너지
-  water,       // 물
+  safety, // 안전용품
+  freshFood, // 신선식품
+  storableFood, // 비축식품
+  medicine, // 의약품
+  energy, // 에너지
+  water, // 물
 }
 
 /// 대비 품목 추천
@@ -60,9 +60,9 @@ class PrepItem {
   final String name;
   final PrepCategory category;
   final String reason;
-  final int quantity;      // 권장 수량
-  final String unit;       // 단위 (개, 병, 리터)
-  final int daysNeeded;    // 며칠분
+  final int quantity; // 권장 수량
+  final String unit; // 단위 (개, 병, 리터)
+  final int daysNeeded; // 며칠분
 
   const PrepItem({
     required this.name,
@@ -340,7 +340,7 @@ final Map<WeatherCondition, List<PrepItem>> weatherPrepDatabase = {
 /// 날씨 알림 위젯
 class WeatherAlertWidget extends StatelessWidget {
   final WeatherData weather;
-  final bool showPrepList;  // 대비 품목 표시 여부
+  final bool showPrepList; // 대비 품목 표시 여부
 
   const WeatherAlertWidget({
     super.key,
@@ -352,7 +352,7 @@ class WeatherAlertWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final condition = weather.effectiveCondition;
     final isExtreme = isExtremeWeather(condition);
-    
+
     if (!isExtreme) {
       return const SizedBox.shrink(); // 극한 날씨 아니면 표시 안 함
     }
@@ -460,10 +460,7 @@ class WeatherAlertWidget extends StatelessWidget {
                   icon: const Icon(Icons.shopping_cart),
                   label: const Text(
                     '지금 장보러 가기',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _getRiskColor(riskLevel),
@@ -502,7 +499,7 @@ class WeatherAlertWidget extends StatelessWidget {
       ),
     );
   }
-  
+
   /// 쇼핑 리스트 화면으로 이동
   void _goToShoppingList(BuildContext context) {
     // WeatherData를 WeatherForecast로 변환
@@ -514,28 +511,24 @@ class WeatherAlertWidget extends StatelessWidget {
       location: weather.location,
       confidence: 0.9,
     );
-    
+
     // 쇼핑 리스트 생성
     final shoppingList = ShoppingListGenerator.generateShoppingList(
       forecast: forecast,
     );
-    
+
     // 화면 이동
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ShoppingListScreen(
-          shoppingList: shoppingList,
-        ),
+        builder: (context) => ShoppingListScreen(shoppingList: shoppingList),
       ),
     );
   }
 
   /// 안전 이동 경로 화면으로 이동
   void _goToEvacuationRoutes(BuildContext context) {
-    final plan = EvacuationRoutePlanner.generatePlan(
-      weather: weather,
-    );
+    final plan = EvacuationRoutePlanner.generatePlan(weather: weather);
 
     Navigator.push(
       context,
@@ -589,7 +582,9 @@ class WeatherAlertWidget extends StatelessWidget {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: _getCategoryColor(item.category).withValues(alpha: 0.2),
+                        color: _getCategoryColor(
+                          item.category,
+                        ).withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -615,10 +610,7 @@ class WeatherAlertWidget extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   item.reason,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey,
-                  ),
+                  style: const TextStyle(fontSize: 13, color: Colors.grey),
                 ),
               ],
             ),
@@ -771,17 +763,13 @@ class WeatherAlertBanner extends StatelessWidget {
   final WeatherData weather;
   final VoidCallback? onTap;
 
-  const WeatherAlertBanner({
-    super.key,
-    required this.weather,
-    this.onTap,
-  });
+  const WeatherAlertBanner({super.key, required this.weather, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final condition = weather.effectiveCondition;
     final isExtreme = isExtremeWeather(condition);
-    
+
     if (!isExtreme) {
       return const SizedBox.shrink();
     }
@@ -797,10 +785,7 @@ class WeatherAlertBanner extends StatelessWidget {
         decoration: BoxDecoration(
           color: _getRiskColor(riskLevel).withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: _getRiskColor(riskLevel),
-            width: 2,
-          ),
+          border: Border.all(color: _getRiskColor(riskLevel), width: 2),
         ),
         child: Row(
           children: [
@@ -830,10 +815,7 @@ class WeatherAlertBanner extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(
-              Icons.chevron_right,
-              color: _getRiskColor(riskLevel),
-            ),
+            Icon(Icons.chevron_right, color: _getRiskColor(riskLevel)),
           ],
         ),
       ),

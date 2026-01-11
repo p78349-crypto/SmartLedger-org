@@ -56,13 +56,19 @@ class _QuickSimpleExpenseInputScreenState
 
     // Listen for voice assistant input
     VoiceInputBridge.instance.pendingInput.addListener(_onVoiceInputReceived);
-    VoiceInputBridge.instance.requestSubmit.addListener(_onVoiceSubmitRequested);
+    VoiceInputBridge.instance.requestSubmit.addListener(
+      _onVoiceSubmitRequested,
+    );
   }
 
   @override
   void dispose() {
-    VoiceInputBridge.instance.pendingInput.removeListener(_onVoiceInputReceived);
-    VoiceInputBridge.instance.requestSubmit.removeListener(_onVoiceSubmitRequested);
+    VoiceInputBridge.instance.pendingInput.removeListener(
+      _onVoiceInputReceived,
+    );
+    VoiceInputBridge.instance.requestSubmit.removeListener(
+      _onVoiceSubmitRequested,
+    );
     _controller.dispose();
     super.dispose();
   }

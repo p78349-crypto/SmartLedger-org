@@ -33,22 +33,21 @@ class DailyRecipeRecommendationUtils {
     int expiringWindowDays,
   ) {
     if (items.isEmpty) return 'empty';
-    
+
     // 임박 재료만 추출 (캐시 키 최소화)
     final expiring = ExpiringIngredientsUtils.getExpiringWithinDays(
       items,
       days: expiringWindowDays,
     );
-    
+
     if (expiring.isEmpty) return 'no_expiring';
-    
+
     // 재료명과 만료일 조합으로 키 생성
     final keyParts = expiring.map((item) {
       final days = ExpiringIngredientsUtils.daysUntilExpiry(item);
       return '${item.name}:$days';
-    }).toList()
-      ..sort(); // 순서 무관하게 동일한 키 생성
-    
+    }).toList()..sort(); // 순서 무관하게 동일한 키 생성
+
     return keyParts.join('|');
   }
 
@@ -75,7 +74,7 @@ class DailyRecipeRecommendationUtils {
 
     // 캐시 키 생성
     final cacheKey = _generateCacheKey(allItems, expiringWindowDays);
-    
+
     // 조기 종료: 임박 재료 없음
     if (cacheKey == 'no_expiring' || cacheKey == 'empty') {
       return const DailyRecipeRecommendationResult(

@@ -3,7 +3,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// 긴급 버튼 위젯 - 가장 가까운 병원/긴급 서비스 안내
-/// 
+///
 /// 보안 원칙: 공공 데이터(병원 위치)만 노출, 개인 의료 기록은 절대 노출하지 않음
 class EmergencyButton extends StatelessWidget {
   const EmergencyButton({super.key});
@@ -21,10 +21,7 @@ class EmergencyButton extends StatelessWidget {
           child: Ink(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  Colors.red.shade600,
-                  Colors.red.shade800,
-                ],
+                colors: [Colors.red.shade600, Colors.red.shade800],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -92,7 +89,7 @@ class EmergencyButton extends StatelessWidget {
   /// 긴급 서비스 시트 표시
   Future<void> _showEmergencySheet(BuildContext context) async {
     final scheme = Theme.of(context).colorScheme;
-    
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -243,14 +240,14 @@ class EmergencyButton extends StatelessWidget {
   /// 가장 가까운 병원 찾기 (Google Maps로 연동)
   Future<void> _findNearestHospital(BuildContext context) async {
     Navigator.pop(context); // 시트 닫기
-    
+
     try {
       // 위치 권한 확인
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
       }
-      
+
       if (permission == LocationPermission.deniedForever ||
           permission == LocationPermission.denied) {
         if (context.mounted) {
@@ -258,7 +255,7 @@ class EmergencyButton extends StatelessWidget {
         }
         return;
       }
-      
+
       // 현재 위치 가져오기
       final position = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
@@ -266,12 +263,12 @@ class EmergencyButton extends StatelessWidget {
           timeLimit: Duration(seconds: 10),
         ),
       );
-      
+
       // Google Maps에서 근처 병원 검색
       final url = Uri.parse(
         'https://www.google.com/maps/search/hospital/@${position.latitude},${position.longitude},15z',
       );
-      
+
       if (await canLaunchUrl(url)) {
         await launchUrl(url, mode: LaunchMode.externalApplication);
       } else {
@@ -327,7 +324,7 @@ class EmergencyButton extends StatelessWidget {
         ],
       ),
     );
-    
+
     if (confirmed == true) {
       _makeEmergencyCall('119');
     }
@@ -389,10 +386,11 @@ class _PulsingIconState extends State<_PulsingIcon>
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     )..repeat(reverse: true);
-    
-    _animation = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+
+    _animation = Tween<double>(
+      begin: 0.8,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -408,11 +406,7 @@ class _PulsingIconState extends State<_PulsingIcon>
       builder: (context, child) {
         return Transform.scale(
           scale: _animation.value,
-          child: Icon(
-            widget.icon,
-            color: widget.color,
-            size: widget.size,
-          ),
+          child: Icon(widget.icon, color: widget.color, size: widget.size),
         );
       },
     );
@@ -438,15 +432,13 @@ class _EmergencyOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: scheme.outline.withValues(alpha: 0.2),
-        ),
+        side: BorderSide(color: scheme.outline.withValues(alpha: 0.2)),
       ),
       child: InkWell(
         onTap: onTap,
@@ -539,7 +531,8 @@ class _LocationCardState extends State<_LocationCard> {
 
       if (mounted) {
         setState(() {
-          _locationText = '현재 위치: ${position.latitude.toStringAsFixed(4)}, ${position.longitude.toStringAsFixed(4)}';
+          _locationText =
+              '현재 위치: ${position.latitude.toStringAsFixed(4)}, ${position.longitude.toStringAsFixed(4)}';
           _isLoading = false;
         });
       }
@@ -556,7 +549,7 @@ class _LocationCardState extends State<_LocationCard> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -565,11 +558,7 @@ class _LocationCardState extends State<_LocationCard> {
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.my_location,
-            color: scheme.primary,
-            size: 20,
-          ),
+          Icon(Icons.my_location, color: scheme.primary, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: _isLoading

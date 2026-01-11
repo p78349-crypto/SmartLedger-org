@@ -47,10 +47,10 @@ class WeatherData {
 class PricePrediction {
   final String itemName;
   final PriceCategory category;
-  final double sensitivity;        // -1.0 ~ +1.0
-  final double predictedChange;    // 예상 변동률 (%)
-  final String recommendation;     // 한국어 추천 메시지
-  final String reason;             // 변동 이유
+  final double sensitivity; // -1.0 ~ +1.0
+  final double predictedChange; // 예상 변동률 (%)
+  final String recommendation; // 한국어 추천 메시지
+  final String reason; // 변동 이유
   final WeatherCondition weatherCondition;
 
   const PricePrediction({
@@ -86,7 +86,7 @@ class WeatherUtils {
   );
 
   /// 날씨 데이터를 기반으로 품목별 가격 변동 예측
-  /// 
+  ///
   /// [weather] 현재 날씨 정보
   /// [items] 예측할 품목 목록 (null이면 전체)
   /// [minSensitivity] 최소 민감도 필터 (기본값: 0.3, 30% 이상만 반환)
@@ -96,7 +96,8 @@ class WeatherUtils {
     double minSensitivity = 0.3,
   }) {
     // 캐시 확인
-    final cacheKey = '${weather.effectiveCondition}_${items?.join(',') ?? 'all'}_$minSensitivity';
+    final cacheKey =
+        '${weather.effectiveCondition}_${items?.join(',') ?? 'all'}_$minSensitivity';
     final cached = _cache.get(cacheKey);
     if (cached != null) {
       return cached;
@@ -108,8 +109,8 @@ class WeatherUtils {
     // 대상 품목 필터링
     final targetItems = items != null
         ? weatherPriceSensitivityDatabase
-            .where((item) => items.contains(item.itemName))
-            .toList()
+              .where((item) => items.contains(item.itemName))
+              .toList()
         : weatherPriceSensitivityDatabase;
 
     for (final item in targetItems) {
@@ -128,15 +129,17 @@ class WeatherUtils {
         condition: condition,
       );
 
-      predictions.add(PricePrediction(
-        itemName: item.itemName,
-        category: item.category,
-        sensitivity: sensitivity,
-        predictedChange: predictedChange,
-        recommendation: recommendation,
-        reason: item.reason,
-        weatherCondition: condition,
-      ));
+      predictions.add(
+        PricePrediction(
+          itemName: item.itemName,
+          category: item.category,
+          sensitivity: sensitivity,
+          predictedChange: predictedChange,
+          recommendation: recommendation,
+          reason: item.reason,
+          weatherCondition: condition,
+        ),
+      );
     }
 
     // 민감도 절대값 기준 내림차순 정렬
@@ -174,7 +177,7 @@ class WeatherUtils {
   }
 
   /// 카테고리별 가격 변동 요약
-  /// 
+  ///
   /// 예: "채소류 평균 +15% 예상"
   static Map<PriceCategory, double> summarizeByCategory(
     List<PricePrediction> predictions,
@@ -193,7 +196,7 @@ class WeatherUtils {
   }
 
   /// 구매 추천 품목 (가격 하락 예상)
-  /// 
+  ///
   /// 지금 사면 저렴한 품목들
   static List<PricePrediction> getBuyRecommendations(
     List<PricePrediction> predictions, {
@@ -205,7 +208,7 @@ class WeatherUtils {
   }
 
   /// 구매 보류 추천 품목 (가격 상승 예상)
-  /// 
+  ///
   /// 지금 사면 비싼 품목들
   static List<PricePrediction> getAvoidRecommendations(
     List<PricePrediction> predictions, {
@@ -217,32 +220,37 @@ class WeatherUtils {
   }
 
   /// 음성 비서용 요약 메시지 생성
-  /// 
-  /// 예: "장마철입니다. 배추 가격이 18% 상승 예상됩니다. 
+  ///
+  /// 예: "장마철입니다. 배추 가격이 18% 상승 예상됩니다.
   ///      지금 사과는 가격이 6% 하락 예상이니 구매 적기입니다."
   static String generateVoiceSummary({
     required WeatherData weather,
     required List<PricePrediction> predictions,
     int maxItems = 3,
   }) {
-    final weatherName = weatherConditionNames[weather.effectiveCondition] ?? '현재 날씨';
+    final weatherName =
+        weatherConditionNames[weather.effectiveCondition] ?? '현재 날씨';
     final buffer = StringBuffer('$weatherName입니다. ');
 
     // 가격 상승 품목
     final rising = getAvoidRecommendations(predictions, limit: maxItems);
     if (rising.isNotEmpty) {
-      final risingText = rising.map((p) {
-        return '${p.itemName}은 ${p.predictedChange.toStringAsFixed(0)}% 상승 예상';
-      }).join(', ');
+      final risingText = rising
+          .map((p) {
+            return '${p.itemName}은 ${p.predictedChange.toStringAsFixed(0)}% 상승 예상';
+          })
+          .join(', ');
       buffer.write('$risingText입니다. ');
     }
 
     // 가격 하락 품목 (구매 추천)
     final falling = getBuyRecommendations(predictions, limit: maxItems);
     if (falling.isNotEmpty) {
-      final fallingText = falling.map((p) {
-        return '${p.itemName}은 ${p.predictedChange.abs().toStringAsFixed(0)}% 하락';
-      }).join(', ');
+      final fallingText = falling
+          .map((p) {
+            return '${p.itemName}은 ${p.predictedChange.abs().toStringAsFixed(0)}% 하락';
+          })
+          .join(', ');
       buffer.write('지금 $fallingText 예상이니 구매 적기입니다.');
     }
 
@@ -255,20 +263,28 @@ class WeatherUtils {
   }
 
   /// 날씨 조건 문자열을 열거형으로 변환
-  /// 
+  ///
   /// 음성 비서나 외부 API에서 받은 문자열을 파싱
   static WeatherCondition? parseWeatherCondition(String condition) {
     final normalized = condition.toLowerCase().trim();
 
-    if (normalized.contains('맑') || normalized == 'sunny' || normalized == 'clear') {
+    if (normalized.contains('맑') ||
+        normalized == 'sunny' ||
+        normalized == 'clear') {
       return WeatherCondition.sunny;
     } else if (normalized.contains('흐') || normalized == 'cloudy') {
       return WeatherCondition.cloudy;
-    } else if (normalized.contains('폭우') || normalized.contains('장마') || normalized == 'heavy_rain') {
+    } else if (normalized.contains('폭우') ||
+        normalized.contains('장마') ||
+        normalized == 'heavy_rain') {
       return WeatherCondition.heavyRain;
-    } else if (normalized.contains('비') || normalized == 'rainy' || normalized == 'rain') {
+    } else if (normalized.contains('비') ||
+        normalized == 'rainy' ||
+        normalized == 'rain') {
       return WeatherCondition.rainy;
-    } else if (normalized.contains('눈') || normalized == 'snowy' || normalized == 'snow') {
+    } else if (normalized.contains('눈') ||
+        normalized == 'snowy' ||
+        normalized == 'snow') {
       return WeatherCondition.snowy;
     } else if (normalized.contains('태풍') || normalized == 'typhoon') {
       return WeatherCondition.typhoon;

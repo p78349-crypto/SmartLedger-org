@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// 상품별 마지막 위치를 학습하고 제안하는 서비스
-/// 
+///
 /// 사용자가 장바구니에 상품을 추가할 때 이전에 기록한 위치를 제안하여
 /// 마트 내에서 상품을 더 쉽게 찾을 수 있도록 지원합니다.
 class ProductLocationService {
@@ -12,15 +12,14 @@ class ProductLocationService {
   static const String _keyPrefix = 'product_location_v1_';
 
   /// 계정별 상품 위치 맵 키
-  String _locationMapKey(String accountName) =>
-      '$_keyPrefix${accountName}_map';
+  String _locationMapKey(String accountName) => '$_keyPrefix${accountName}_map';
 
   /// 상품명을 정규화 (대소문자, 공백 무시)
   String _normalizeProductName(String name) =>
       name.trim().toLowerCase().replaceAll(RegExp(r'\s+'), '');
 
   /// 상품의 마지막 위치를 저장
-  /// 
+  ///
   /// [accountName] - 계정명
   /// [productName] - 상품명
   /// [location] - 위치 (예: "3번 통로", "냉장고", "1층 입구")
@@ -34,7 +33,7 @@ class ProductLocationService {
 
     final prefs = await SharedPreferences.getInstance();
     final key = _locationMapKey(accountName);
-    
+
     // 기존 맵 로드
     final raw = prefs.getString(key);
     Map<String, dynamic> map = {};
@@ -65,7 +64,7 @@ class ProductLocationService {
         final bTime = (b.value as Map)['updatedAt'] as String? ?? '';
         return aTime.compareTo(bTime);
       });
-      
+
       // 최근 500개만 유지
       map = Map.fromEntries(entries.skip(entries.length - 500));
     }
@@ -74,10 +73,10 @@ class ProductLocationService {
   }
 
   /// 상품의 마지막 위치를 조회
-  /// 
+  ///
   /// [accountName] - 계정명
   /// [productName] - 상품명
-  /// 
+  ///
   /// Returns: 저장된 위치 문자열, 없으면 null
   Future<String?> getLocation({
     required String accountName,
@@ -89,16 +88,16 @@ class ProductLocationService {
     final prefs = await SharedPreferences.getInstance();
     final key = _locationMapKey(accountName);
     final raw = prefs.getString(key);
-    
+
     if (raw == null || raw.isEmpty) return null;
 
     try {
       final decoded = jsonDecode(raw);
       if (decoded is! Map<String, dynamic>) return null;
-      
+
       final entry = decoded[normalized];
       if (entry is! Map) return null;
-      
+
       return (entry['location'] as String?)?.trim();
     } catch (_) {
       return null;
@@ -106,7 +105,7 @@ class ProductLocationService {
   }
 
   /// 모든 저장된 위치 정보 조회 (디버깅용)
-  /// 
+  ///
   /// Returns: Map<상품명, 위치>
   Future<Map<String, String>> getAllLocations({
     required String accountName,
@@ -114,24 +113,25 @@ class ProductLocationService {
     final prefs = await SharedPreferences.getInstance();
     final key = _locationMapKey(accountName);
     final raw = prefs.getString(key);
-    
+
     if (raw == null || raw.isEmpty) return {};
 
     try {
       final decoded = jsonDecode(raw);
       if (decoded is! Map<String, dynamic>) return {};
-      
+
       final result = <String, String>{};
       decoded.forEach((normalizedName, value) {
         if (value is Map) {
-          final originalName = (value['originalName'] as String?) ?? normalizedName;
+          final originalName =
+              (value['originalName'] as String?) ?? normalizedName;
           final location = (value['location'] as String?) ?? '';
           if (location.isNotEmpty) {
             result[originalName] = location;
           }
         }
       });
-      
+
       return result;
     } catch (_) {
       return {};
@@ -149,13 +149,13 @@ class ProductLocationService {
     final prefs = await SharedPreferences.getInstance();
     final key = _locationMapKey(accountName);
     final raw = prefs.getString(key);
-    
+
     if (raw == null || raw.isEmpty) return;
 
     try {
       final decoded = jsonDecode(raw);
       if (decoded is! Map<String, dynamic>) return;
-      
+
       decoded.remove(normalized);
       await prefs.setString(key, jsonEncode(decoded));
     } catch (_) {

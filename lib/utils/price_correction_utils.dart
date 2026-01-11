@@ -21,7 +21,9 @@ class PriceCorrectionResult {
   double get userDeltaPercent {
     final baselinePrice = baselineEntry.effectiveUnitPrice;
     if (baselinePrice == 0) return 0;
-    return ((referenceEntry.effectiveUnitPrice - baselinePrice) / baselinePrice) * 100;
+    return ((referenceEntry.effectiveUnitPrice - baselinePrice) /
+            baselinePrice) *
+        100;
   }
 
   /// 날씨 보정까지 포함한 최종 변동률 (baseline 대비)
@@ -86,7 +88,8 @@ class PriceCorrectionUtils {
     );
 
     final referenceEntry = _pickReferenceEntry(baseline, recentEntries);
-    final weatherAdjustedPrice = weatherAdjustment?.apply(referenceEntry.effectiveUnitPrice) ??
+    final weatherAdjustedPrice =
+        weatherAdjustment?.apply(referenceEntry.effectiveUnitPrice) ??
         referenceEntry.effectiveUnitPrice;
 
     return PriceCorrectionResult(
@@ -108,7 +111,9 @@ class PriceCorrectionUtils {
 
     // 우선순위: 사용자 > 크라우드 > 공시 + 최신성
     recentEntries.sort((a, b) {
-      final sourceScore = _priorityValue(b.source).compareTo(_priorityValue(a.source));
+      final sourceScore = _priorityValue(
+        b.source,
+      ).compareTo(_priorityValue(a.source));
       if (sourceScore != 0) return sourceScore;
       return b.capturedAt.compareTo(a.capturedAt);
     });
@@ -148,7 +153,9 @@ class PriceCorrectionUtils {
     final delta = refPrice - baselinePrice;
 
     if (result.usedUserContribution) {
-      buffer.writeln('실방문 최신가 ${_formatWon(refPrice)} (${_formatDelta(delta)})');
+      buffer.writeln(
+        '실방문 최신가 ${_formatWon(refPrice)} (${_formatDelta(delta)})',
+      );
     } else {
       buffer.writeln('공시가 기준 ${_formatWon(refPrice)}');
     }
@@ -156,7 +163,9 @@ class PriceCorrectionUtils {
     final weatherAdjustment = result.weatherAdjustment;
     if (weatherAdjustment != null && weatherAdjustment.multiplier != 1.0) {
       final weatherDelta = result.finalUnitPrice - refPrice;
-      buffer.writeln('날씨 영향: ${weatherAdjustment.reason} (${_formatDelta(weatherDelta)})');
+      buffer.writeln(
+        '날씨 영향: ${weatherAdjustment.reason} (${_formatDelta(weatherDelta)})',
+      );
     }
 
     buffer.writeln('최종 추정가: ${_formatWon(result.finalUnitPrice)}');

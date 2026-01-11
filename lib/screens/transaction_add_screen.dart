@@ -2081,9 +2081,10 @@ class _NO1FormState extends State<NO1Form> {
 
     return [
       _buildDescriptionInput(
-        labelText: '반품 내역',
+        labelText: '반품 내역 (지출 내역에서 선택)',
         emptyMessage: '반품 내역을 입력하세요.',
         enableHistory: true,
+        customHistoryAction: _showExpenseHistoryPicker,
         onFieldSubmitted: (_) => _storeFocusNode.requestFocus(),
       ),
       SizedBox(height: spacing),
@@ -2453,6 +2454,7 @@ class _NO1FormState extends State<NO1Form> {
     required String emptyMessage,
     required bool enableHistory,
     ValueChanged<String>? onFieldSubmitted,
+    VoidCallback? customHistoryAction,
   }) {
     return KeyedSubtree(
       key: const Key('tx_desc'),
@@ -2481,7 +2483,7 @@ class _NO1FormState extends State<NO1Form> {
               onPressed: _showHealthAnalysis,
               padding: EdgeInsets.zero,
             ),
-            if (enableHistory)
+            if (enableHistory || customHistoryAction != null)
               IconButton(
                 tooltip: '입력내용 불러오기',
                 icon: Icon(
@@ -2489,25 +2491,73 @@ class _NO1FormState extends State<NO1Form> {
                   size: 20,
                   color: Theme.of(context).iconTheme.color,
                 ),
-                onPressed: () => _showRecentInputPicker(
-                  context: context,
-                  items: _recentDescriptions,
-                  onSelected: (v) {
-                    _descController.text = v;
-                    _descController.selection = TextSelection.fromPosition(
-                      TextPosition(offset: v.length),
-                    );
-                    _handleDescriptionChanged(v);
-                    setState(() {});
-                  },
-                  title: '상품명 입력내용 불러오기',
-                ),
+                onPressed:
+                    customHistoryAction ??
+                    () => _showRecentInputPicker(
+                      context: context,
+                      items: _recentDescriptions,
+                      onSelected: (v) {
+                        _descController.text = v;
+                        _descController.selection = TextSelection.fromPosition(
+                          TextPosition(offset: v.length),
+                        );
+                        _handleDescriptionChanged(v);
+                        setState(() {});
+                      },
+                      title: '상품명 입력내용 불러오기',
+                    ),
                 padding: EdgeInsets.zero,
               ),
           ],
         ),
       ),
     );
+  }
+
+  void _showExpenseHistoryPicker() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      showDragHandle: true,
+      builder: (context) {
+        return _ExpenseHistoryPicker(
+          accountName: widget.accountName,
+          onSelected: (tx) {
+            Navigator.pop(context);
+            _fillRefundFromTransaction(tx);
+          },
+        );
+      },
+    );
+  }
+
+  void _fillRefundFromTransaction(Transaction tx) {
+    setState(() {
+      _descController.text = tx.description;
+      _storeController.text = tx.store ?? '';
+      _paymentController.text = tx.paymentMethod;
+
+      final amt = CurrencyFormatter.format(
+        tx.amount,
+        showUnit: false,
+      ).replaceAll(',', '');
+      _amountController.text = amt;
+
+      if (CategoryDefinitions.mainCategories.contains(tx.mainCategory)) {
+        _selectedMainCategory = tx.mainCategory;
+      }
+
+      _handleDescriptionChanged(tx.description);
+
+      // 반품 내역 메모 자동 완성 (구매 시점 정보 포함)
+      final originalDate = DateFormatter.defaultDate.format(tx.date);
+      _memoController.text = '원구매일: $originalDate | 지출예산 복구';
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _amountFocusNode.requestFocus();
+    });
   }
 
   String? _validatePositiveAmount(String? value, String errorMessage) {
@@ -2541,20 +2591,17 @@ class _NO1FormState extends State<NO1Form> {
 
     final result = await showDialog<IngredientAnalysis>(
       context: context,
-      builder: (context) => IngredientHealthAnalyzerDialog(
-        initialIngredients: ingredients,
-      ),
+      builder: (context) =>
+          IngredientHealthAnalyzerDialog(initialIngredients: ingredients),
     );
 
     if (result != null && mounted) {
       final score = result.overallScore;
       final label = IngredientHealthScoreUtils.getScoreLabel(score);
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            '건강 점수: $score점 ($label)\n${result.summary}',
-          ),
+          content: Text('건강 점수: $score점 ($label)\n${result.summary}'),
           backgroundColor: _getScoreColor(score),
         ),
       );
@@ -2563,17 +2610,148 @@ class _NO1FormState extends State<NO1Form> {
 
   Color _getScoreColor(int score) {
     switch (score) {
-      case 5: return Colors.green;
-      case 4: return Colors.lightGreen;
-      case 3: return Colors.orange;
-      case 2: return Colors.deepOrange;
-      case 1: return Colors.red;
-      default: return Colors.grey;
+      case 5:
+        return Colors.green;
+      case 4:
+        return Colors.lightGreen;
+      case 3:
+        return Colors.orange;
+      case 2:
+        return Colors.deepOrange;
+      case 1:
+        return Colors.red;
+      default:
+        return Colors.grey;
     }
   }
 
   /// 거래 저장 후 계속 입력 (Shift+Enter)
   Future<void> _saveAndContinue() async {
     await _saveTransaction();
+  }
+}
+
+class _ExpenseHistoryPicker extends StatefulWidget {
+  final String accountName;
+  final ValueChanged<Transaction> onSelected;
+
+  const _ExpenseHistoryPicker({
+    required this.accountName,
+    required this.onSelected,
+  });
+
+  @override
+  State<_ExpenseHistoryPicker> createState() => _ExpenseHistoryPickerState();
+}
+
+class _ExpenseHistoryPickerState extends State<_ExpenseHistoryPicker> {
+  final _searchController = TextEditingController();
+  List<Transaction> _allExpenses = [];
+  List<Transaction> _filteredExpenses = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadExpenses();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadExpenses() async {
+    final service = TransactionService();
+    await service.loadTransactions();
+    final all = service.getTransactions(widget.accountName);
+
+    final expenses =
+        all.where((tx) => tx.type == TransactionType.expense).toList()
+          ..sort((a, b) => b.date.compareTo(a.date));
+
+    if (mounted) {
+      setState(() {
+        _allExpenses = expenses;
+        _filteredExpenses = expenses;
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _filter(String query) {
+    if (query.isEmpty) {
+      setState(() => _filteredExpenses = _allExpenses);
+      return;
+    }
+    final lower = query.toLowerCase();
+    setState(() {
+      _filteredExpenses = _allExpenses.where((tx) {
+        return tx.description.toLowerCase().contains(lower) ||
+            (tx.store != null && tx.store!.toLowerCase().contains(lower)) ||
+            tx.amount.toString().contains(lower);
+      }).toList();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DraggableScrollableSheet(
+      initialChildSize: 0.9,
+      minChildSize: 0.5,
+      maxChildSize: 0.95,
+      expand: false,
+      builder: (context, scrollController) {
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                '지출 내역에서 불러오기',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: TextField(
+                controller: _searchController,
+                decoration: const InputDecoration(
+                  labelText: '검색 (상품명, 가게, 금액)',
+                  prefixIcon: Icon(Icons.search),
+                  border: OutlineInputBorder(),
+                ),
+                onChanged: _filter,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Expanded(
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _filteredExpenses.isEmpty
+                  ? const Center(child: Text('검색 결과가 없습니다.'))
+                  : ListView.builder(
+                      controller: scrollController,
+                      itemCount: _filteredExpenses.length,
+                      itemBuilder: (context, index) {
+                        final tx = _filteredExpenses[index];
+                        return ListTile(
+                          title: Text(tx.description),
+                          subtitle: Text(
+                            '${DateFormatter.defaultDate.format(tx.date)} | ${tx.store ?? ""}',
+                          ),
+                          trailing: Text(
+                            CurrencyFormatter.format(tx.amount),
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          onTap: () => widget.onSelected(tx),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        );
+      },
+    );
   }
 }

@@ -879,13 +879,20 @@ class _FoodExpiryMainScreenState extends State<FoodExpiryMainScreen> {
   /// 절약 통계 화면으로 빠르게 이동할 수 있는 FAB
   Widget _buildSavingsStatsButton(BuildContext context) {
     final theme = Theme.of(context);
-    return FloatingActionButton(
-      heroTag: 'savings_stats',
-      onPressed: () => setState(() => _currentIndex = 3),
-      backgroundColor: theme.colorScheme.tertiaryContainer,
-      foregroundColor: theme.colorScheme.onTertiaryContainer,
-      tooltip: '절약 통계 보기',
-      child: const Icon(IconCatalog.savings),
+    return Transform.translate(
+      offset: const Offset(0, 5),
+      child: FloatingActionButton(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Colors.grey),
+        ),
+        heroTag: 'savings_stats',
+        onPressed: () => setState(() => _currentIndex = 3),
+        backgroundColor: theme.colorScheme.tertiaryContainer,
+        foregroundColor: theme.colorScheme.onTertiaryContainer,
+        tooltip: '절약 통계 보기',
+        child: const Icon(IconCatalog.savings),
+      ),
     );
   }
 
@@ -2985,7 +2992,7 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
           if (matchedItems.isNotEmpty) {
             final item = matchedItems.first; // FIFO: 유통기한 가장 빠른 것
             _usageMap[item.id] = ingredient.quantity;
-            
+
             final daysLeft = item.daysLeft(now);
             final info = {
               'name': item.name,
@@ -2993,7 +3000,7 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
               'daysLeft': daysLeft,
               'isExpiring': daysLeft <= 3,
             };
-            
+
             if (daysLeft <= 3) {
               expiringIngredients.add(info);
             } else {
@@ -3024,10 +3031,10 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
     List<String> missing,
   ) async {
     final recipeName = recipe.name;
-    
+
     // 건강 점수 계산 (기본 레시피에서 가져오거나 추정)
     final healthScore = _estimateHealthScore(recipe, expiring.length);
-    
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -3036,10 +3043,7 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
             const Icon(Icons.restaurant_menu, size: 24),
             const SizedBox(width: 8),
             Expanded(
-              child: Text(
-                recipeName,
-                style: const TextStyle(fontSize: 18),
-              ),
+              child: Text(recipeName, style: const TextStyle(fontSize: 18)),
             ),
           ],
         ),
@@ -3052,7 +3056,11 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
               if (expiring.isNotEmpty) ...[
                 Row(
                   children: [
-                    Icon(Icons.warning_amber, color: Colors.orange.shade700, size: 20),
+                    Icon(
+                      Icons.warning_amber,
+                      color: Colors.orange.shade700,
+                      size: 20,
+                    ),
                     const SizedBox(width: 6),
                     Text(
                       '빨리 먹어야 할 재료 (${expiring.length}개)',
@@ -3069,24 +3077,28 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
                   decoration: BoxDecoration(
                     color: Colors.orange.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+                    border: Border.all(
+                      color: Colors.orange.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: expiring.map((ing) {
                       final daysLeft = ing['daysLeft'] as int;
-                      final daysText = daysLeft == 0 
-                          ? '오늘까지' 
-                          : daysLeft < 0 
-                              ? '${-daysLeft}일 지남' 
-                              : '$daysLeft일 남음';
+                      final daysText = daysLeft == 0
+                          ? '오늘까지'
+                          : daysLeft < 0
+                          ? '${-daysLeft}일 지남'
+                          : '$daysLeft일 남음';
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 4),
                         child: Row(
                           children: [
                             Text(
                               '⚠️ ${ing['name']}',
-                              style: const TextStyle(fontWeight: FontWeight.w600),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                             const Spacer(),
                             Text(
@@ -3104,12 +3116,16 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
                 ),
                 const SizedBox(height: 16),
               ],
-              
+
               // 사용 가능한 재료
               if (available.isNotEmpty) ...[
                 Row(
                   children: [
-                    Icon(Icons.check_circle, color: Colors.green.shade700, size: 20),
+                    Icon(
+                      Icons.check_circle,
+                      color: Colors.green.shade700,
+                      size: 20,
+                    ),
                     const SizedBox(width: 6),
                     Text(
                       '사용 가능한 재료 (${available.length}개)',
@@ -3123,7 +3139,9 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
                   decoration: BoxDecoration(
                     color: Colors.green.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.green.withValues(alpha: 0.2)),
+                    border: Border.all(
+                      color: Colors.green.withValues(alpha: 0.2),
+                    ),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -3135,7 +3153,9 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
                           children: [
                             Text(
                               '✅ ${ing['name']}',
-                              style: const TextStyle(fontWeight: FontWeight.w500),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                             const Spacer(),
                             Text(
@@ -3150,12 +3170,16 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
                 ),
                 const SizedBox(height: 16),
               ],
-              
+
               // 부족한 재료
               if (missing.isNotEmpty) ...[
                 Row(
                   children: [
-                    Icon(Icons.shopping_cart, color: Colors.red.shade700, size: 20),
+                    Icon(
+                      Icons.shopping_cart,
+                      color: Colors.red.shade700,
+                      size: 20,
+                    ),
                     const SizedBox(width: 6),
                     Text(
                       '구매 필요 (${missing.length}개)',
@@ -3172,7 +3196,9 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
                   decoration: BoxDecoration(
                     color: Colors.red.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.red.withValues(alpha: 0.2)),
+                    border: Border.all(
+                      color: Colors.red.withValues(alpha: 0.2),
+                    ),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -3181,9 +3207,11 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 4),
                         child: Row(
                           children: [
-                            Icon(Icons.remove_circle_outline, 
-                                 size: 16, 
-                                 color: Colors.red.shade700),
+                            Icon(
+                              Icons.remove_circle_outline,
+                              size: 16,
+                              color: Colors.red.shade700,
+                            ),
                             const SizedBox(width: 8),
                             Text(
                               name,
@@ -3208,7 +3236,7 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
                   ),
                 ),
               ],
-              
+
               // 요약
               const SizedBox(height: 16),
               Container(
@@ -3249,7 +3277,7 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            expiring.isNotEmpty 
+                            expiring.isNotEmpty
                                 ? '유통기한 임박 재료를 먼저 사용하세요!'
                                 : '재료가 모두 준비됐습니다!',
                             style: const TextStyle(fontSize: 13),
@@ -3289,7 +3317,7 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
     // 사용자가 "그것 좋겠다!" 선택 시 학습 기록
     if (confirmed == true && mounted) {
       await _recordRecipeLearning(recipe, healthScore, expiring.isNotEmpty);
-      
+
       // 학습 완료 메시지 + 건강 점수 알림
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -3326,25 +3354,31 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
       '스파게티': 3,
       '계란프라이': 3,
     };
-    
+
     int baseScore = healthScores[recipe.name] ?? 3;
-    
+
     // 유통기한 임박 재료 사용 시 보너스 (+1)
     if (expiringCount > 0 && baseScore < 5) {
       baseScore += 1;
     }
-    
+
     return baseScore;
   }
 
   String _getHealthScoreLabel(int score) {
     switch (score) {
-      case 5: return '💚 매우 건강한 선택입니다!';
-      case 4: return '💚 건강한 요리예요!';
-      case 3: return '🟡 보통 수준의 요리입니다';
-      case 2: return '🟠 가끔 드세요';
-      case 1: return '🔴 자주 드시지 마세요';
-      default: return '🟡 보통 수준의 요리입니다';
+      case 5:
+        return '💚 매우 건강한 선택입니다!';
+      case 4:
+        return '💚 건강한 요리예요!';
+      case 3:
+        return '🟡 보통 수준의 요리입니다';
+      case 2:
+        return '🟠 가끔 드세요';
+      case 1:
+        return '🔴 자주 드시지 마세요';
+      default:
+        return '🟡 보통 수준의 요리입니다';
     }
   }
 
@@ -3378,12 +3412,14 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
       mealTime: mealTime,
     );
 
-    debugPrint('Recipe learning recorded: ${recipe.name} (health: $healthScore)');
+    debugPrint(
+      'Recipe learning recorded: ${recipe.name} (health: $healthScore)',
+    );
   }
 
   Future<void> _showLearningStats() async {
     final stats = await RecipeLearningService.instance.getStats();
-    
+
     if (!mounted) return;
 
     showDialog(
@@ -3403,29 +3439,33 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
             children: [
               _buildStatRow('총 요리 횟수', '${stats.totalRecipesCooked}회'),
               const SizedBox(height: 16),
-              
+
               const Text(
                 '자주 만드는 요리',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              ...stats.topRecipes.map((r) => Padding(
-                padding: const EdgeInsets.only(left: 8, bottom: 4),
-                child: Text('• $r'),
-              )),
+              ...stats.topRecipes.map(
+                (r) => Padding(
+                  padding: const EdgeInsets.only(left: 8, bottom: 4),
+                  child: Text('• $r'),
+                ),
+              ),
               const SizedBox(height: 16),
-              
+
               const Text(
                 '자주 쓰는 재료',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              ...stats.topIngredients.map((i) => Padding(
-                padding: const EdgeInsets.only(left: 8, bottom: 4),
-                child: Text('• $i'),
-              )),
+              ...stats.topIngredients.map(
+                (i) => Padding(
+                  padding: const EdgeInsets.only(left: 8, bottom: 4),
+                  child: Text('• $i'),
+                ),
+              ),
               const SizedBox(height: 16),
-              
+
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
@@ -3455,13 +3495,10 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              
+
               const Text(
                 '💡 사용할수록 더 똑똑한 추천을 받을 수 있어요!',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontStyle: FontStyle.italic,
-                ),
+                style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
               ),
             ],
           ),
@@ -3483,10 +3520,7 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
         Text(label),
         Text(
           value,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
       ],
     );
@@ -3498,7 +3532,10 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
       builder: (ctx) => AlertDialog(
         title: Row(
           children: [
-            Icon(Icons.shopping_cart, color: Theme.of(context).colorScheme.primary),
+            Icon(
+              Icons.shopping_cart,
+              color: Theme.of(context).colorScheme.primary,
+            ),
             const SizedBox(width: 8),
             const Text('부족한 재료'),
           ],
@@ -3530,9 +3567,11 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 4),
                         child: Row(
                           children: [
-                            Icon(Icons.remove_circle_outline, 
-                                 size: 16, 
-                                 color: Colors.orange.shade700),
+                            Icon(
+                              Icons.remove_circle_outline,
+                              size: 16,
+                              color: Colors.orange.shade700,
+                            ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(

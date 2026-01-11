@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import '../models/asset.dart';
 import '../services/asset_service.dart';
+import '../services/asset_move_service.dart';
+import '../services/transaction_service.dart';
+import '../services/monthly_agg_cache_service.dart';
 import '../utils/number_formats.dart';
+import '../utils/icon_catalog.dart';
 
 class AssetCategoryStats {
   final AssetCategory category;
@@ -37,6 +41,60 @@ class _AssetAllocationScreenState extends State<AssetAllocationScreen> {
   void initState() {
     super.initState();
     _loadAssets();
+  }
+
+  Widget _diagChip(String label, String value, {IconData? icon}) {
+    return Chip(
+      label: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: 18, color: Colors.black54),
+            const SizedBox(width: 8),
+          ],
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(fontSize: 12, color: Colors.black54),
+              ),
+              Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<Map<String, dynamic>> _buildRootDiagnostics() async {
+    // For root, aggregate across all accounts
+    final allAccountNames = AssetService().getTrackedAccountNames();
+    final assets = <Asset>[];
+    final moves = <dynamic>[];
+    for (final acct in allAccountNames) {
+      assets.addAll(AssetService().getAssets(acct));
+      moves.addAll(AssetMoveService().getMoves(acct));
+    }
+    final txs = TransactionService().getAllTransactions();
+    String aggStatus = 'unknown';
+    try {
+      final cache = await MonthlyAggCacheService().load(widget.accountName);
+      final months = cache.months.keys.toList();
+      aggStatus = months.isEmpty ? 'empty' : '${months.length} months';
+    } catch (_) {
+      aggStatus = 'error';
+    }
+
+    final total = assets.fold<double>(0, (s, a) => s + a.amount);
+    return {
+      'assetCount': assets.length,
+      'assetTotal': total,
+      'moveCount': moves.length,
+      'txCount': txs.length,
+      'aggStatus': aggStatus,
+    };
   }
 
   void _loadAssets() {
@@ -92,6 +150,8 @@ class _AssetAllocationScreenState extends State<AssetAllocationScreen> {
 
     final scheme = Theme.of(context).colorScheme;
 
+    final isRoot = widget.accountName.toLowerCase() == 'root';
+
     return Scaffold(
       appBar: AppBar(title: const Text('자산 배분 분석')),
       body: SingleChildScrollView(
@@ -133,6 +193,71 @@ class _AssetAllocationScreenState extends State<AssetAllocationScreen> {
               ),
             ),
             const SizedBox(height: 24),
+
+            if (isRoot) ...[
+              Card(
+                elevation: 2,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: FutureBuilder<Map<String, dynamic>>(
+                    future: _buildRootDiagnostics(),
+                    builder: (context, snap) {
+                      if (!snap.hasData) {
+                        return const SizedBox(
+                          height: 48,
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
+                      final data = snap.data!;
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '루트 전용 통계',
+                            style: Theme.of(context).textTheme.titleSmall
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 12,
+                            runSpacing: 8,
+                            children: [
+                              _diagChip(
+                                '총 자산',
+                                '${data['assetCount'] ?? 0}',
+                                icon: IconCatalog.accountBalanceWallet,
+                              ),
+                              _diagChip(
+                                '자산합계',
+                                '₩${NumberFormats.currency.format((data['assetTotal'] ?? 0).toInt())}',
+                                icon: IconCatalog.attachMoney,
+                              ),
+                              _diagChip(
+                                '이동 기록',
+                                '${data['moveCount'] ?? 0}',
+                                icon: IconCatalog.history,
+                              ),
+                              _diagChip(
+                                '트랜잭션',
+                                '${data['txCount'] ?? 0}',
+                                icon: IconCatalog.receiptLong,
+                              ),
+                              _diagChip(
+                                '월별 집계(최근)',
+                                '${data['aggStatus'] ?? 'N/A'}',
+                                icon: IconCatalog.calendarViewMonth,
+                              ),
+                            ],
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+            ],
 
             // 카테고리별 배분
             Text(

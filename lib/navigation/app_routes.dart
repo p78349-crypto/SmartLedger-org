@@ -112,6 +112,12 @@ class AppRoutes {
   static const rootScreenSaverSettings = '/root/screen-saver-settings';
   static const rootScreenSaverExposureSettings =
       '/root/screen-saver-exposure-settings';
+  // CEO assistant routes
+  static const ceoAssistant = '/root/ceo/assistant';
+  static const ceoExceptionDetails = '/root/ceo/exception-details';
+  static const ceoRecoveryPlan = '/root/ceo/recovery-plan';
+  static const ceoRoiDetail = '/root/ceo/roi-detail';
+  static const ceoMonthlyDefenseReport = '/root/ceo/monthly-defense-report';
 }
 
 class AccountArgs {
@@ -305,10 +311,7 @@ class ShoppingCartArgs {
 }
 
 class ShoppingGuideArgs {
-  const ShoppingGuideArgs({
-    required this.accountName,
-    required this.items,
-  });
+  const ShoppingGuideArgs({required this.accountName, required this.items});
   final String accountName;
   final List<ShoppingCartItem> items;
 }

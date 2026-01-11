@@ -102,6 +102,17 @@ class PrefKeys {
   static const String currency = 'currency';
   static const String language = 'language';
   static const String theme = 'theme';
+  // ROI UI defaults for CEO dashboard
+  static const String roiDefaultPeriod =
+      'roi_default_period'; // values: '3','6','12','custom'
+  static const String roiLookaheadMonths = 'roi_lookahead_months';
+  // Policy storage: holds and blocking rules
+  static const String policyHolds = 'policy_holds'; // JSON list of holds
+  static const String policyBlockingRules =
+      'policy_blocking_rules'; // JSON list of blocking rules
+  // TTS settings
+  static const String ttsSpeechRate = 'tts_speech_rate';
+  static const String ttsPitch = 'tts_pitch';
   static const String themePresetId = 'theme_preset_id_v1';
   // Icon background preset id (separate from wallpaper)
   static const String themeIconBgPresetId = 'theme_icon_bg_preset_id_v1';
@@ -138,6 +149,14 @@ class PrefKeys {
 
   // Security / authentication
   static const String biometricAuthEnabled = 'biometric_auth_enabled';
+
+  /// Privacy: whether to mask sensitive fields in UI.
+  static const String privacyMaskSensitive = 'privacy_mask_sensitive_v1';
+
+  /// Asset security: per-account lock flag key prefix.
+  ///
+  /// Used as: `${assetLockPrefix}_<accountName>`
+  static const String assetLockPrefix = 'asset_lock_v1';
 
   /// Asset auth session expiry timestamp (millisecondsSinceEpoch).
   ///
@@ -415,6 +434,8 @@ class PrefKeys {
     screenSaverShowRecent,
     screenSaverShowAssetFlow,
     themeWallpaperSyncScreenSaver,
+    roiDefaultPeriod,
+    roiLookaheadMonths,
   ];
 
   /// Get a list of all backup-related keys

@@ -58,6 +58,11 @@ import '../screens/root_screen_saver_exposure_settings_screen.dart';
 import '../screens/root_screen_saver_settings_screen.dart';
 import '../screens/root_search_screen.dart';
 import '../screens/root_transaction_manager_screen.dart';
+import '../screens/ceo_assistant_dashboard.dart';
+import '../screens/ceo_exception_details_screen.dart';
+import '../screens/ceo_monthly_defense_report_screen.dart';
+import '../screens/ceo_recovery_plan_screen.dart';
+import '../screens/ceo_roi_detail_screen.dart';
 import '../screens/savings_plan_list_screen.dart';
 import '../screens/settings_screen.dart';
 import '../screens/shopping_cart_screen.dart';
@@ -611,10 +616,8 @@ class AppRouter {
         final a = args as ShoppingGuideArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => ShoppingGuideScreen(
-            accountName: a.accountName,
-            items: a.items,
-          ),
+          builder: (_) =>
+              ShoppingGuideScreen(accountName: a.accountName, items: a.items),
         );
 
       case AppRoutes.householdConsumables:
@@ -804,6 +807,55 @@ class AppRouter {
         return MaterialPageRoute(
           settings: settings,
           builder: (_) => const RootScreenSaverExposureSettingsScreen(),
+        );
+
+      case AppRoutes.ceoAssistant:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const RootAuthGate(
+            child: CEOAssistantDashboard(accountName: 'root'),
+          ),
+        );
+
+      case AppRoutes.ceoExceptionDetails:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const RootAuthGate(
+            child: CEOExceptionDetailsScreen(accountName: 'root'),
+          ),
+        );
+
+      case AppRoutes.ceoRoiDetail:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) {
+            final now = DateTime.now();
+            final start = DateTime(now.year, now.month - 11);
+            final end = DateTime(now.year, now.month + 1);
+            return RootAuthGate(
+              child: CEORoiDetailScreen(
+                accountName: 'root',
+                start: start,
+                end: end,
+              ),
+            );
+          },
+        );
+
+      case AppRoutes.ceoMonthlyDefenseReport:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const RootAuthGate(
+            child: CEOMonthlyDefenseReportScreen(accountName: 'root'),
+          ),
+        );
+
+      case AppRoutes.ceoRecoveryPlan:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const RootAuthGate(
+            child: CEORecoveryPlanScreen(accountName: 'root'),
+          ),
         );
     }
 

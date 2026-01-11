@@ -144,7 +144,7 @@ class _SavingsPlanSearchScreenState extends State<SavingsPlanSearchScreen> {
     }
 
     return plans.where((plan) {
-      return KoreanSearchUtils.matches(plan.name, query);
+      return MultilingualSearchUtils.matches(plan.name, query);
     }).toList();
   }
 

@@ -125,8 +125,8 @@ class _AssetListScreenState extends State<AssetListScreen> {
     }
 
     return assets.where((asset) {
-      return KoreanSearchUtils.matches(asset.name, query) ||
-          KoreanSearchUtils.matches(asset.memo, query);
+      return MultilingualSearchUtils.matches(asset.name, query) ||
+          MultilingualSearchUtils.matches(asset.memo, query);
     }).toList();
   }
 

@@ -134,9 +134,9 @@ class _RecipePickerDialogState extends State<_RecipePickerDialog> {
 
       if (_searchQuery.isEmpty) return true;
       final query = _searchQuery;
-      final matchesName = KoreanSearchUtils.matches(r.name, query);
+      final matchesName = MultilingualSearchUtils.matches(r.name, query);
       final matchesIngredient = r.ingredients.any(
-        (ing) => KoreanSearchUtils.matches(ing.name, query),
+        (ing) => MultilingualSearchUtils.matches(ing.name, query),
       );
       return matchesName || matchesIngredient;
     }).toList();
@@ -643,7 +643,7 @@ class _IngredientUpsertDialogState extends State<_IngredientUpsertDialog> {
     }
     setState(() {
       _suggestions = _allPossibleNames
-          .where((name) => KoreanSearchUtils.matches(name, query))
+          .where((name) => MultilingualSearchUtils.matches(name, query))
           .take(5)
           .toList();
     });

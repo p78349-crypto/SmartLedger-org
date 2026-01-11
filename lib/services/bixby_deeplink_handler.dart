@@ -10,7 +10,9 @@ class BixbyDeepLinkHandler {
 
   /// Example URI: smartledger://visit_price_form?storeId=lotte_jamsil&skuId=onion_001&price=2100&quantity=1&discount=onePlusOne
   Future<bool> handleUri(BuildContext context, Uri uri) async {
-    if (uri.host != 'visit_price_form' && uri.path != '/visit_price_form') return false;
+    if (uri.host != 'visit_price_form' && uri.path != '/visit_price_form') {
+      return false;
+    }
 
     final params = uri.queryParameters;
     final storeId = params['storeId'];

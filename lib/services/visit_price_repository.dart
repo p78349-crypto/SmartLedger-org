@@ -81,7 +81,9 @@ class VisitPriceRepository {
   String _composeKey(String storeId, String skuId) => '${storeId}_#$skuId';
 
   int _prioritySort(VisitPriceEntry a, VisitPriceEntry b) {
-    final priority = _priorityScore(b.source).compareTo(_priorityScore(a.source));
+    final priority = _priorityScore(
+      b.source,
+    ).compareTo(_priorityScore(a.source));
     if (priority != 0) return priority;
     return b.capturedAt.compareTo(a.capturedAt);
   }

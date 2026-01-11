@@ -2,14 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'app_routes.dart';
 
 /// 딥링크 파라미터 타입 정의
-enum ParamType {
-  string,
-  integer,
-  double_,
-  date,
-  boolean,
-  enum_,
-}
+enum ParamType { string, integer, double_, date, boolean, enum_ }
 
 /// 개별 파라미터 검증 스펙
 @immutable
@@ -34,10 +27,7 @@ class ValidationResult {
   final Map<String, String> validated;
   final List<String> rejected;
 
-  const ValidationResult({
-    required this.validated,
-    required this.rejected,
-  });
+  const ValidationResult({required this.validated, required this.rejected});
 
   bool get isValid => rejected.isEmpty;
 }
@@ -77,11 +67,7 @@ class RouteParamValidator {
         type: ParamType.double_,
         maxLength: 10,
       ),
-      const RouteParamSpec(
-        name: 'qty',
-        type: ParamType.double_,
-        maxLength: 10,
-      ),
+      const RouteParamSpec(name: 'qty', type: ParamType.double_, maxLength: 10),
       // 단위
       RouteParamSpec(
         name: 'unit',
@@ -106,11 +92,7 @@ class RouteParamValidator {
         type: ParamType.date,
         maxLength: 30,
       ),
-      const RouteParamSpec(
-        name: 'expiry',
-        type: ParamType.date,
-        maxLength: 30,
-      ),
+      const RouteParamSpec(name: 'expiry', type: ParamType.date, maxLength: 30),
       // 보관 위치
       const RouteParamSpec(
         name: 'location',
@@ -455,10 +437,7 @@ class RouteParamValidator {
   /// [params] - 검증할 파라미터
   ///
   /// Returns: ValidationResult (validated, rejected)
-  static ValidationResult validate(
-    String route,
-    Map<String, String> params,
-  ) {
+  static ValidationResult validate(String route, Map<String, String> params) {
     final specs = routeSpecs[route];
     if (specs == null) {
       return ValidationResult(
@@ -482,8 +461,10 @@ class RouteParamValidator {
 
       // 길이 검증
       if (value.length > spec.maxLength) {
-        debugPrint('RouteParamValidator: Rejected ${entry.key} - '
-            'too long (${value.length} > ${spec.maxLength})');
+        debugPrint(
+          'RouteParamValidator: Rejected ${entry.key} - '
+          'too long (${value.length} > ${spec.maxLength})',
+        );
         rejected.add(entry.key);
         continue;
       }
@@ -515,7 +496,8 @@ class RouteParamValidator {
 
         case ParamType.date:
           // ISO-8601 또는 기본 날짜 형식
-          isValid = DateTime.tryParse(value) != null ||
+          isValid =
+              DateTime.tryParse(value) != null ||
               RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(value);
           if (!isValid) {
             debugPrint(
@@ -534,8 +516,10 @@ class RouteParamValidator {
         case ParamType.enum_:
           isValid = spec.allowedValues!.contains(value);
           if (!isValid) {
-            debugPrint('RouteParamValidator: Rejected ${entry.key} - '
-                'not in allowed values: $value');
+            debugPrint(
+              'RouteParamValidator: Rejected ${entry.key} - '
+              'not in allowed values: $value',
+            );
           }
 
         case ParamType.string:
@@ -544,8 +528,10 @@ class RouteParamValidator {
             final pattern = spec.allowedPattern;
             isValid = pattern is RegExp && pattern.hasMatch(value);
             if (!isValid) {
-              debugPrint('RouteParamValidator: Rejected ${entry.key} - '
-                  'pattern mismatch');
+              debugPrint(
+                'RouteParamValidator: Rejected ${entry.key} - '
+                'pattern mismatch',
+              );
             }
           } else {
             isValid = true;
@@ -554,8 +540,10 @@ class RouteParamValidator {
           // 추가 보안 검증 (SQL Injection, XSS)
           if (isValid) {
             if (_containsSqlKeywords(value)) {
-              debugPrint('RouteParamValidator: Rejected ${entry.key} - '
-                  'SQL injection attempt');
+              debugPrint(
+                'RouteParamValidator: Rejected ${entry.key} - '
+                'SQL injection attempt',
+              );
               isValid = false;
             } else if (_containsHtmlTags(value)) {
               debugPrint(
@@ -573,10 +561,7 @@ class RouteParamValidator {
       }
     }
 
-    return ValidationResult(
-      validated: validated,
-      rejected: rejected,
-    );
+    return ValidationResult(validated: validated, rejected: rejected);
   }
 
   /// SQL 키워드 포함 여부 검사

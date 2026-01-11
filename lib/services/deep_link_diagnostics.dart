@@ -63,18 +63,19 @@ class DeepLinkDiagnosticsEntry {
   });
 
   Map<String, dynamic> toJson() => {
-        'uri': uri,
-        'receivedAt': receivedAt.toIso8601String(),
-        'parsed': parsed,
-        if (actionSummary != null) 'actionSummary': actionSummary,
-        if (failureReason != null) 'failureReason': failureReason,
-        if (source != null) 'source': source,
-      };
+    'uri': uri,
+    'receivedAt': receivedAt.toIso8601String(),
+    'parsed': parsed,
+    if (actionSummary != null) 'actionSummary': actionSummary,
+    if (failureReason != null) 'failureReason': failureReason,
+    if (source != null) 'source': source,
+  };
 
   static DeepLinkDiagnosticsEntry fromJson(Map<String, dynamic> json) {
     return DeepLinkDiagnosticsEntry(
       uri: (json['uri'] ?? '') as String,
-      receivedAt: DateTime.tryParse((json['receivedAt'] ?? '') as String) ??
+      receivedAt:
+          DateTime.tryParse((json['receivedAt'] ?? '') as String) ??
           DateTime.fromMillisecondsSinceEpoch(0),
       parsed: (json['parsed'] ?? false) as bool,
       actionSummary: json['actionSummary'] as String?,

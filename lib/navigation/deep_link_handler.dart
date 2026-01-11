@@ -109,7 +109,8 @@ class DeepLinkHandler {
         errorType: 'ROUTE_NOT_ALLOWED',
         route: action.routeName,
         assistant: _detectAssistant(action.params),
-        message: '음성비서로는 해당 화면을 열 수 없습니다.\n'
+        message:
+            '음성비서로는 해당 화면을 열 수 없습니다.\n'
             '앱에서 직접 열어주세요.\n'
             '(${action.routeName})',
       );
@@ -766,12 +767,14 @@ class DeepLinkHandler {
       builder: (ctx) => AlertDialog(
         title: Text(title),
         content: Text(message),
-        actions: actions ?? [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('확인'),
-          ),
-        ],
+        actions:
+            actions ??
+            [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('확인'),
+              ),
+            ],
       ),
     );
   }
@@ -782,8 +785,8 @@ class DeepLinkHandler {
   ) {
     // 파라미터 검증
     final validationResult = RouteParamValidator.validate(
-      action.isIncome 
-          ? AppRoutes.transactionAddIncome 
+      action.isIncome
+          ? AppRoutes.transactionAddIncome
           : AppRoutes.transactionAdd,
       action.toParams(),
     );
@@ -792,8 +795,8 @@ class DeepLinkHandler {
       _logAndShowError(
         navigator: navigator,
         errorType: 'INVALID_PARAMS',
-        route: action.isIncome 
-            ? AppRoutes.transactionAddIncome 
+        route: action.isIncome
+            ? AppRoutes.transactionAddIncome
             : AppRoutes.transactionAdd,
         assistant: _detectAssistant(action.toParams()),
         rejectedParams: validationResult.rejected,
@@ -811,8 +814,8 @@ class DeepLinkHandler {
       _logAndShowError(
         navigator: navigator,
         errorType: 'ACCOUNT_REQUIRED',
-        route: action.isIncome 
-            ? AppRoutes.transactionAddIncome 
+        route: action.isIncome
+            ? AppRoutes.transactionAddIncome
             : AppRoutes.transactionAdd,
         assistant: _detectAssistant(action.toParams()),
       );
@@ -985,8 +988,8 @@ class DeepLinkHandler {
       // 성공 로깅
       VoiceAssistantAnalytics.logCommand(
         assistant: _detectAssistant(action.toParams()),
-        route: action.isIncome 
-            ? AppRoutes.transactionAddIncome 
+        route: action.isIncome
+            ? AppRoutes.transactionAddIncome
             : AppRoutes.transactionAdd,
         intent: 'transaction_add',
         success: true,
@@ -999,8 +1002,8 @@ class DeepLinkHandler {
     // 성공 로깅 (Preview 모드)
     VoiceAssistantAnalytics.logCommand(
       assistant: _detectAssistant(action.toParams()),
-      route: action.isIncome 
-          ? AppRoutes.transactionAddIncome 
+      route: action.isIncome
+          ? AppRoutes.transactionAddIncome
           : AppRoutes.transactionAdd,
       intent: 'transaction_add',
       success: true,
@@ -1009,7 +1012,10 @@ class DeepLinkHandler {
     openScreen(autoSubmit: false);
   }
 
-  void _handleAddToCart(NavigatorState navigator, AddToCartAction action) async {
+  void _handleAddToCart(
+    NavigatorState navigator,
+    AddToCartAction action,
+  ) async {
     // 현재 계정 조회
     final accountService = AccountService();
     await accountService.loadAccounts();
@@ -1226,7 +1232,10 @@ class DeepLinkHandler {
   }
 
   /// 요리 추천 - 빅스비로 "요리 뭐로 하지?" 또는 "점심 뭐 먹지?"
-  void _handleRecipeRecommend(NavigatorState navigator, RecipeRecommendAction action) async {
+  void _handleRecipeRecommend(
+    NavigatorState navigator,
+    RecipeRecommendAction action,
+  ) async {
     // 현재 계정 조회
     final accountService = AccountService();
     await accountService.loadAccounts();
@@ -1249,10 +1258,10 @@ class DeepLinkHandler {
 
     final accountName = accounts.first.name;
     await UserPrefService.setLastAccountName(accountName);
-    
+
     // 끼니별 메시지
     final mealLabel = _getMealLabel(action.mealType);
-    
+
     // 성공 로깅
     VoiceAssistantAnalytics.logCommand(
       assistant: 'Bixby',
@@ -1276,33 +1285,35 @@ class DeepLinkHandler {
         String message;
         if (action.prioritizeExpiring) {
           // 유통기한 임박 재료 우선 모드
-          message = '⚠️ 유통기한 임박 재료 활용 요리!\n'
-                   '🕒 빨리 소진해야 할 재료 우선 사용\n'
-                   '✅ 현재 재고로 만들 수 있는 레시피\n'
-                   '📝 부족한 재료는 장바구니에 추가';
-        } else if (action.ingredients != null && action.ingredients!.isNotEmpty) {
+          message =
+              '⚠️ 유통기한 임박 재료 활용 요리!\n'
+              '🕒 빨리 소진해야 할 재료 우선 사용\n'
+              '✅ 현재 재고로 만들 수 있는 레시피\n'
+              '📝 부족한 재료는 장바구니에 추가';
+        } else if (action.ingredients != null &&
+            action.ingredients!.isNotEmpty) {
           final ingredientsText = action.ingredients!.join(', ');
-          message = '💡 $ingredientsText 사용 가능한 $mealLabel 추천!\n'
-                   '✅ 현재 재고로 만들 수 있는 레시피\n'
-                   '📝 부족한 재료는 장바구니에 자동 추가';
+          message =
+              '💡 $ingredientsText 사용 가능한 $mealLabel 추천!\n'
+              '✅ 현재 재고로 만들 수 있는 레시피\n'
+              '📝 부족한 재료는 장바구니에 자동 추가';
         } else if (action.mealType != null) {
-          message = '💡 $mealLabel 추천!\n'
-                   '✅ 냉장고 재료로 만들 수 있는 요리\n'
-                   '📝 부족한 재료는 장바구니에 추가 가능';
+          message =
+              '💡 $mealLabel 추천!\n'
+              '✅ 냉장고 재료로 만들 수 있는 요리\n'
+              '📝 부족한 재료는 장바구니에 추가 가능';
         } else {
-          message = '💡 냉장고 재료로 만들 수 있는 요리 추천!\n'
-                   '✅ 유통기한 임박 재료 우선 사용\n'
-                   '📝 부족한 재료는 장바구니에 자동 추가';
+          message =
+              '💡 냉장고 재료로 만들 수 있는 요리 추천!\n'
+              '✅ 유통기한 임박 재료 우선 사용\n'
+              '📝 부족한 재료는 장바구니에 자동 추가';
         }
-        
+
         ScaffoldMessenger.of(navigator.context).showSnackBar(
           SnackBar(
             content: Text(message),
             behavior: SnackBarBehavior.floating,
-            action: SnackBarAction(
-              label: '확인',
-              onPressed: () {},
-            ),
+            action: SnackBarAction(label: '확인', onPressed: () {}),
           ),
         );
       }
@@ -1310,7 +1321,10 @@ class DeepLinkHandler {
   }
 
   /// 영수증 건강도 분석 - 빅스비로 "영수증 건강도 분석"
-  void _handleReceiptAnalyze(NavigatorState navigator, ReceiptAnalyzeAction action) async {
+  void _handleReceiptAnalyze(
+    NavigatorState navigator,
+    ReceiptAnalyzeAction action,
+  ) async {
     // 성공 로깅
     VoiceAssistantAnalytics.logCommand(
       assistant: 'Bixby',
@@ -1327,17 +1341,19 @@ class DeepLinkHandler {
       if (navigator.mounted) {
         String message;
         if (action.ingredients != null && action.ingredients!.isNotEmpty) {
-          message = '✅ 입력한 재료의 건강도를 분석합니다\n'
-                   '💚 5점: 매우 건강 (채소, 버섯)\n'
-                   '🟡 3점: 보통 (닭고기, 쌀)\n'
-                   '🔴 1점: 비건강 (튀김, 가공식품)';
+          message =
+              '✅ 입력한 재료의 건강도를 분석합니다\n'
+              '💚 5점: 매우 건강 (채소, 버섯)\n'
+              '🟡 3점: 보통 (닭고기, 쌀)\n'
+              '🔴 1점: 비건강 (튀김, 가공식품)';
         } else {
-          message = '📋 영수증 재료를 입력하세요\n'
-                   '✅ 체크박스로 간편하게 선택\n'
-                   '💚 실시간 건강 점수 계산\n'
-                   '📊 건강한 재료 비율 통계';
+          message =
+              '📋 영수증 재료를 입력하세요\n'
+              '✅ 체크박스로 간편하게 선택\n'
+              '💚 실시간 건강 점수 계산\n'
+              '📊 건강한 재료 비율 통계';
         }
-        
+
         ScaffoldMessenger.of(navigator.context).showSnackBar(
           SnackBar(
             content: Text(message),
@@ -1720,15 +1736,12 @@ class DeepLinkHandler {
       final title = errorType == 'ROUTE_NOT_ALLOWED'
           ? '보안 안내'
           : errorType == 'ACCOUNT_REQUIRED'
-              ? '계정이 필요합니다'
-              : errorType == 'INVALID_PARAMS'
-                  ? '잘못된 명령입니다'
-                  : '오류';
+          ? '계정이 필요합니다'
+          : errorType == 'INVALID_PARAMS'
+          ? '잘못된 명령입니다'
+          : '오류';
 
-      return _ErrorMessage(
-        title: title,
-        body: customMessage,
-      );
+      return _ErrorMessage(title: title, body: customMessage);
     }
 
     switch (errorType) {
@@ -1775,10 +1788,7 @@ class _ErrorMessage {
   final String title;
   final String body;
 
-  const _ErrorMessage({
-    required this.title,
-    required this.body,
-  });
+  const _ErrorMessage({required this.title, required this.body});
 }
 
 /// Quick Stock Use 화면 인자

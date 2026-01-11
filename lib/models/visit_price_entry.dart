@@ -7,11 +7,7 @@ import 'package:uuid/uuid.dart';
 
 /// 가격 데이터 출처 우선순위
 /// [userReceipt] > [crowdContribution] > [officialBaseline]
-enum VisitPriceSource {
-  userReceipt,
-  crowdContribution,
-  officialBaseline,
-}
+enum VisitPriceSource { userReceipt, crowdContribution, officialBaseline }
 
 /// 할인 맥락 정보 (1+1, 반값, 마감 세일 등)
 class DiscountContext {
@@ -28,23 +24,16 @@ class DiscountContext {
   });
 
   factory DiscountContext.none() => const DiscountContext(
-        type: DiscountType.none,
-        multiplier: 1.0,
-        label: '정상가',
-      );
+    type: DiscountType.none,
+    multiplier: 1.0,
+    label: '정상가',
+  );
 
   bool get isExpired => expiresAt != null && DateTime.now().isAfter(expiresAt!);
 }
 
 /// 할인 유형
-enum DiscountType {
-  none,
-  onePlusOne,
-  clearance,
-  timeSale,
-  coupon,
-  custom,
-}
+enum DiscountType { none, onePlusOne, clearance, timeSale, coupon, custom }
 
 /// 실방문 가격 엔트리 (단가 기준)
 class VisitPriceEntry {
@@ -113,7 +102,8 @@ class VisitPriceEntry {
   double get effectiveUnitPrice => unitPrice * discount.multiplier;
 
   /// 데이터 최신성 비교
-  bool isNewerThan(VisitPriceEntry other) => capturedAt.isAfter(other.capturedAt);
+  bool isNewerThan(VisitPriceEntry other) =>
+      capturedAt.isAfter(other.capturedAt);
 
   VisitPriceEntry copyWith({
     double? unitPrice,

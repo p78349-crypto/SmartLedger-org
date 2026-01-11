@@ -98,9 +98,7 @@ class _VisitPriceFormScreenState extends State<VisitPriceFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('실방문 가격 신고'),
-      ),
+      appBar: AppBar(title: const Text('실방문 가격 신고')),
       body: Form(
         key: _formKey,
         child: SingleChildScrollView(
@@ -225,7 +223,9 @@ class _VisitPriceFormScreenState extends State<VisitPriceFormScreen> {
             ),
             const SizedBox(width: 8),
             IconButton(
-              icon: Icon(_isListeningFor('skuName') ? Icons.mic : Icons.mic_none),
+              icon: Icon(
+                _isListeningFor('skuName') ? Icons.mic : Icons.mic_none,
+              ),
               onPressed: () => _toggleListening('skuName'),
             ),
           ],
@@ -393,7 +393,10 @@ class _VisitPriceFormScreenState extends State<VisitPriceFormScreen> {
     if (_speechInitAttempted) return _speechAvailable;
     _speechInitAttempted = true;
     try {
-      _speechAvailable = await _speech.initialize(onStatus: _onSpeechStatus, onError: _onSpeechError);
+      _speechAvailable = await _speech.initialize(
+        onStatus: _onSpeechStatus,
+        onError: _onSpeechError,
+      );
     } catch (e) {
       _speechAvailable = false;
     }
@@ -413,7 +416,9 @@ class _VisitPriceFormScreenState extends State<VisitPriceFormScreen> {
     final ready = await _ensureSpeechReady();
     if (!mounted) return;
     if (!ready) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('음성 인식 준비 실패')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('음성 인식 준비 실패')));
       return;
     }
 
@@ -424,14 +429,16 @@ class _VisitPriceFormScreenState extends State<VisitPriceFormScreen> {
     }
 
     setState(() => _currentListeningTarget = target);
-    await _speech.listen(onResult: (result) {
-      if (!result.finalResult) return;
-      final text = result.recognizedWords;
-      _applyRecognizedText(target, text);
-      _speech.stop();
-      if (!mounted) return;
-      setState(() => _currentListeningTarget = '');
-    });
+    await _speech.listen(
+      onResult: (result) {
+        if (!result.finalResult) return;
+        final text = result.recognizedWords;
+        _applyRecognizedText(target, text);
+        _speech.stop();
+        if (!mounted) return;
+        setState(() => _currentListeningTarget = '');
+      },
+    );
   }
 
   void _applyRecognizedText(String target, String text) {
@@ -477,7 +484,10 @@ class _VisitPriceFormScreenState extends State<VisitPriceFormScreen> {
             ? const SizedBox(
                 width: 16,
                 height: 16,
-                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
               )
             : const Icon(Icons.done),
         label: Text(_isSubmitting ? '등록 중...' : '실방문 가격 등록'),
@@ -510,8 +520,12 @@ class _VisitPriceFormScreenState extends State<VisitPriceFormScreen> {
     final price = double.parse(_priceController.text.replaceAll(',', ''));
     final quantity = int.parse(_quantityController.text);
     final discount = _buildDiscountContext();
-    final note = _noteController.text.trim().isEmpty ? null : _noteController.text.trim();
-    final evidenceUri = _evidenceController.text.trim().isEmpty ? null : _evidenceController.text.trim();
+    final note = _noteController.text.trim().isEmpty
+        ? null
+        : _noteController.text.trim();
+    final evidenceUri = _evidenceController.text.trim().isEmpty
+        ? null
+        : _evidenceController.text.trim();
 
     setState(() {
       _isSubmitting = true;
@@ -533,17 +547,15 @@ class _VisitPriceFormScreenState extends State<VisitPriceFormScreen> {
       await VisitPriceRepository.instance.addUserEntry(entry);
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(_buildSuccessMessage(entry)),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(_buildSuccessMessage(entry))));
       Navigator.of(context).pop(VisitPriceFormResult(entry: entry));
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('가격 등록 중 오류가 발생했습니다: $error')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('가격 등록 중 오류가 발생했습니다: $error')));
     } finally {
       if (mounted) {
         setState(() {
@@ -587,7 +599,8 @@ class _VisitPriceFormScreenState extends State<VisitPriceFormScreen> {
           expiresAt: expiresAt,
         );
       case DiscountType.custom:
-        final multiplier = double.tryParse(_customDiscountController.text) ?? 1.0;
+        final multiplier =
+            double.tryParse(_customDiscountController.text) ?? 1.0;
         return DiscountContext(
           type: DiscountType.custom,
           multiplier: multiplier,

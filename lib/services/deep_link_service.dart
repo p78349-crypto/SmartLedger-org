@@ -30,7 +30,7 @@ import 'deep_link_diagnostics.dart';
 ///   (저녁 요리 추천, 특정 재료 사용)
 /// - `smartledger://receipt/analyze` (영수증 건강도 분석)
 /// - `smartledger://receipt/analyze?ingredients=양배추,닭고기,우유`
-/// 
+///
 /// 책스캔앱 OCR 연계:
 /// - `smartledger://transaction/add?amount=45800&store=이마트&items=양배추,닭고기,우유&source=ocr`
 ///   (책스캔앱에서 OCR 처리 후 SmartLedger로 데이터 반환)
@@ -198,9 +198,12 @@ class DeepLinkService {
           // 요리 추천
           final mealType = params['meal']; // breakfast, lunch, dinner
           final ingredientsStr = params['ingredients']; // comma-separated
-          final ingredients = ingredientsStr?.split(',').map((e) => e.trim()).toList();
+          final ingredients = ingredientsStr
+              ?.split(',')
+              .map((e) => e.trim())
+              .toList();
           final prioritizeExpiring = params['expiring'] == 'true'; // 유통기한 임박 우선
-          
+
           return DeepLinkAction.recommendRecipe(
             mealType: mealType,
             ingredients: ingredients,
@@ -213,8 +216,11 @@ class DeepLinkService {
         if (pathSegments.isNotEmpty && pathSegments.first == 'analyze') {
           // 영수증 건강도 분석
           final ingredientsStr = params['ingredients']; // comma-separated
-          final ingredients = ingredientsStr?.split(',').map((e) => e.trim()).toList();
-          
+          final ingredients = ingredientsStr
+              ?.split(',')
+              .map((e) => e.trim())
+              .toList();
+
           return DeepLinkAction.analyzeReceipt(ingredients: ingredients);
         }
         break;
@@ -344,9 +350,8 @@ sealed class DeepLinkAction {
     List<String>? ingredients,
   }) = RecipeRecommendAction;
 
-  const factory DeepLinkAction.analyzeReceipt({
-    List<String>? ingredients,
-  }) = ReceiptAnalyzeAction;
+  const factory DeepLinkAction.analyzeReceipt({List<String>? ingredients}) =
+      ReceiptAnalyzeAction;
 
   const factory DeepLinkAction.openRoute({
     required String routeName,
@@ -618,6 +623,7 @@ class RecipeRecommendAction extends DeepLinkAction {
   /// 끼니 유형: breakfast, lunch, dinner
   final String? mealType;
   final List<String>? ingredients;
+
   /// 유통기한 임박 재료 우선 사용
   final bool prioritizeExpiring;
 

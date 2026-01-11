@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:image/image.dart' as img;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -72,7 +73,9 @@ Future<void> pruneCache({
       if (now.difference(stat.modified).inSeconds > maxAgeSeconds) {
         try {
           f.deleteSync();
-        } catch (_) {}
+        } catch (e) {
+          debugPrint('Cache file delete (age) failed: $e');
+        }
         continue;
       }
       files.add(f);
@@ -89,7 +92,9 @@ Future<void> pruneCache({
     final f = files.removeAt(0);
     try {
       f.deleteSync();
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('Cache file delete (max files) failed: $e');
+    }
   }
 
   // Enforce total size
@@ -102,6 +107,8 @@ Future<void> pruneCache({
     try {
       total -= f.statSync().size;
       f.deleteSync();
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('Cache file delete (size) failed: $e');
+    }
   }
 }

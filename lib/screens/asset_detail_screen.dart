@@ -377,7 +377,9 @@ class _AssetDetailScreenState extends State<AssetDetailScreen> {
           targetAssetName = assets
               .firstWhere((asset) => asset.id == move.toAssetId)
               .name;
-        } catch (_) {}
+        } catch (e) {
+          debugPrint('Asset lookup failed for toAssetId: $e');
+        }
       }
       targetAssetName ??= move.toCategoryName ?? '알 수 없음';
     } else {
@@ -385,7 +387,9 @@ class _AssetDetailScreenState extends State<AssetDetailScreen> {
         targetAssetName = assets
             .firstWhere((asset) => asset.id == move.fromAssetId)
             .name;
-      } catch (_) {}
+      } catch (e) {
+        debugPrint('Asset lookup failed for fromAssetId: $e');
+      }
       targetAssetName ??= move.toCategoryName ?? '알 수 없음';
     }
 

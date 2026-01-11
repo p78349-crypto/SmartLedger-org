@@ -949,14 +949,18 @@ class _TransactionAddDetailedFormState
         'addToShoppingList': _addToShoppingList,
       };
       await prefs.setString(_draftKey(), jsonEncode(draft));
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('Draft save failed: $e');
+    }
   }
 
   Future<void> _clearDraft() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_draftKey());
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('Draft clear failed: $e');
+    }
   }
 
   Future<void> _loadDraftIfRecent() async {
@@ -999,18 +1003,24 @@ class _TransactionAddDetailedFormState
             (e) => e.name == (decoded['type'] ?? ''),
             orElse: () => _selectedType,
           );
-        } catch (_) {}
+        } catch (e) {
+          debugPrint('TransactionType parse failed: $e');
+        }
         try {
           _savingsAllocation = SavingsAllocation.values.firstWhere(
             (e) => e.name == (decoded['savingsAllocation'] ?? ''),
             orElse: () => _savingsAllocation,
           );
-        } catch (_) {}
+        } catch (e) {
+          debugPrint('SavingsAllocation parse failed: $e');
+        }
         try {
           _transactionDate = DateTime.parse(
             decoded['date'] ?? _transactionDate.toIso8601String(),
           );
-        } catch (_) {}
+        } catch (e) {
+          debugPrint('Date parse failed: $e');
+        }
         _selectedMainCategory =
             decoded['mainCategory'] ?? _selectedMainCategory;
         _selectedSubCategory = decoded['subCategory'];
@@ -1021,12 +1031,16 @@ class _TransactionAddDetailedFormState
         if (decoded['expiry'] != null) {
           try {
             _expiryDate = DateTime.parse(decoded['expiry']);
-          } catch (_) {}
+          } catch (e) {
+            debugPrint('Expiry date parse failed: $e');
+          }
         }
         _addToShoppingList = decoded['addToShoppingList'] ?? _addToShoppingList;
       });
       _updateAmount();
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('Draft load failed: $e');
+    }
   }
 
   void _captureInitialSnapshotIfNeeded() {

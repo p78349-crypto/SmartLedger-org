@@ -512,14 +512,17 @@ Future<pw.Font?> _loadKoreanFont() async {
   try {
     final data = await rootBundle.load('assets/fonts/NotoSansKR-Regular.ttf');
     return pw.Font.ttf(data);
-  } catch (_) {
+  } catch (e) {
+    debugPrint('Font bundle load failed: $e');
     try {
       final file = File('assets/fonts/NotoSansKR-Regular.ttf');
       if (file.existsSync()) {
         final bytes = file.readAsBytesSync();
         return pw.Font.ttf(ByteData.view(bytes.buffer));
       }
-    } catch (_) {}
+    } catch (e2) {
+      debugPrint('Font file fallback failed: $e2');
+    }
   }
   return null;
 }
@@ -527,10 +530,12 @@ Future<pw.Font?> _loadKoreanFont() async {
 Future<Directory> _resolveWritableDirectory() async {
   try {
     return await getTemporaryDirectory();
-  } catch (_) {
+  } catch (e) {
+    debugPrint('getTemporaryDirectory failed: $e');
     try {
       return await getApplicationDocumentsDirectory();
-    } catch (_) {
+    } catch (e2) {
+      debugPrint('getApplicationDocumentsDirectory failed: $e2');
       return Directory.systemTemp;
     }
   }

@@ -57,6 +57,8 @@ dependencies:
   excel: ^4.0.6
   csv: ^6.0.0
   path_provider: ^2.1.5
+  pdf: ^3.8.1
+  printing: ^5.10.0
   path: ^1.9.0
   drift: ^2.9.0
   drift_flutter: ^0.2.7
@@ -127,6 +129,7 @@ flutter:
     - assets/images/wallpapers/purple_pink.png
     - assets/images/wallpapers/warm_orange.png
     - assets/images/wallpapers/neutral_dark.png
+    - assets/fonts/NotoSansKR-Regular.ttf
 
   # To add custom fonts to your application, add a fonts section here,
   # To add custom fonts to your application, add a fonts section here,

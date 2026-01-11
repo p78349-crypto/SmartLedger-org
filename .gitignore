@@ -67,3 +67,6 @@ long_lines_lib.txt
 
 # Ignore repository backups created by scripts
 backups/
+
+# Temporary font artifacts
+assets/fonts/_tmp_*

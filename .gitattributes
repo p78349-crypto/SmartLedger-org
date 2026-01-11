@@ -6,3 +6,12 @@ linux/flutter/generated_plugin_registrant.h text eol=lf
 linux/flutter/generated_plugins.cmake text eol=lf
 macos/Flutter/GeneratedPluginRegistrant.swift text eol=lf
 windows/flutter/generated_plugins.cmake text eol=lf
+windows/flutter/generated_plugin_registrant.cc text eol=lf
+
+# Prevent Windows CRLF churn on key Dart sources
+lib/screens/refund_transactions_screen.dart text eol=lf
+
+# Font assets
+assets/fonts/**/*.ttf binary
+assets/fonts/**/*.txt text eol=lf
+assets/fonts/**/*.md text eol=lf

@@ -4,7 +4,8 @@ class Account {
   final double carryoverAmount; // 이월된 남은 돈
   final double overdraftAmount; // 예산 초과분 (미래에서 끌어온 돈)
   final DateTime? lastCarryoverDate; // 마지막 이월 날짜
-  // TODO: 거래, 통계, 자산, 고정비용, 백업 등 데이터 필드 추가
+  // NOTE: 거래/통계/자산/고정비용/백업 데이터는 별도 서비스에서 관리
+  //       (TransactionService, AssetService, FixedCostService, BackupService 참조)
 
   Account({
     required this.name,

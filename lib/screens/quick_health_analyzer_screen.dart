@@ -382,8 +382,9 @@ class _QuickHealthAnalyzerScreenState extends State<QuickHealthAnalyzerScreen> {
 
   /// 책스캔앱 OCR 연계 호출
   void _launchBookScanApp() {
-    // TODO: 책스캔앱 URL Scheme 호출
-    // bookscan://ocr?source=smartledger&type=receipt&return=healthAnalyzer
+    // FUTURE: 책스캔앱 URL Scheme 연동 (앱 설치 시)
+    // 예: url_launcher로 'bookscan://ocr?source=smartledger&type=receipt&return=healthAnalyzer' 호출
+    // 현재는 안내 다이얼로그만 표시
 
     showDialog(
       context: context,

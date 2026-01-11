@@ -21,9 +21,10 @@ class AssetSecurityService {
   }
 
   /// Placeholder: call to perform authentication and unlock. Returns true if unlocked.
-  /// Currently simply sets unlocked; replace with biometric/PIN flow as needed.
+  /// FUTURE: Replace with biometric (local_auth) or PIN verification.
+  /// See user_pin_service.dart for PIN implementation reference.
   static Future<bool> authenticateAndUnlock(String accountName) async {
-    // TODO: integrate real auth. For now, clear lock.
+    // 현재는 바로 잠금 해제; 실제 인증 로직은 추후 추가
     await setLocked(accountName, false);
     return true;
   }

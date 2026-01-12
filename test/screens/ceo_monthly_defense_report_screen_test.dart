@@ -6,7 +6,7 @@ void main() {
   group('CEOMonthlyDefenseReportScreen', () {
     testWidgets('renders with required accountName', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             body: CEOMonthlyDefenseReportScreen(accountName: 'TestAccount'),
           ),
@@ -19,7 +19,7 @@ void main() {
 
     testWidgets('widget creates without errors', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             body: CEOMonthlyDefenseReportScreen(accountName: 'TestAccount'),
           ),
@@ -38,7 +38,7 @@ void main() {
 
     testWidgets('shows loading indicator initially', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             body: CEOMonthlyDefenseReportScreen(accountName: 'TestAccount'),
           ),

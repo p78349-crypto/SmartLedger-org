@@ -1,5 +1,5 @@
 /// Chart utility classes and functions for reusable chart components
-library;
+library chart_utils;
 
 import 'dart:math' show pow, log;
 import 'package:flutter/material.dart';

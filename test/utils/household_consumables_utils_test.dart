@@ -5,7 +5,7 @@ import 'package:smart_ledger/utils/household_consumables_utils.dart';
 void main() {
   group('HouseholdConsumablesUtils', () {
     test('defaultItems has expected structure', () {
-      final items = HouseholdConsumablesUtils.defaultItems;
+      const items = HouseholdConsumablesUtils.defaultItems;
       expect(items, isNotEmpty);
 
       final first = items.first;
@@ -17,7 +17,7 @@ void main() {
     });
 
     test('defaultItems contain a known entry (toilet paper)', () {
-      final items = HouseholdConsumablesUtils.defaultItems;
+      const items = HouseholdConsumablesUtils.defaultItems;
       final tp = items.where((e) => e.detailCategory == '두루마리 휴지').toList();
       expect(tp.length, 1);
       expect(tp.single.icon, Icons.layers);

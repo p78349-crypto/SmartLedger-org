@@ -1,3 +1,5 @@
+library background_settings_screen;
+
 import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
@@ -7,6 +9,9 @@ import '../services/background_service.dart';
 import '../theme/app_theme_seed_controller.dart';
 import '../widgets/background_widget.dart';
 import '../widgets/special_backgrounds.dart';
+
+part 'background_settings_screen_helpers.dart';
+part 'background_settings_screen_color_picker.dart';
 
 class BackgroundSettingsScreen extends StatefulWidget {
   const BackgroundSettingsScreen({super.key});
@@ -41,111 +46,6 @@ class _BackgroundSettingsScreenState extends State<BackgroundSettingsScreen> {
       _backgroundBlur = blur;
       _backgroundColor = _hexToColor(colorHex);
     });
-  }
-
-  Color _hexToColor(String hexString) {
-    final buffer = StringBuffer();
-    final hex = hexString.replaceFirst('#', '');
-
-    if (hex.length == 6) {
-      buffer.write('ff');
-      buffer.write(hex);
-    } else if (hex.length == 8) {
-      buffer.write(hex);
-    } else {
-      return Colors.white;
-    }
-
-    final value = int.tryParse(buffer.toString(), radix: 16);
-    return Color(value ?? 0xffffffff);
-  }
-
-  String _colorToHex(Color color) {
-    final hex = color.toARGB32().toRadixString(16).padLeft(8, '0');
-    return '#${hex.substring(2)}';
-  }
-
-  Future<void> _pickImage() async {
-    // Check permissions first
-    final photosStatus = await Permission.photos.status;
-    final storageStatus = await Permission.storage.status;
-
-    if (!photosStatus.isGranted && !storageStatus.isGranted) {
-      final result = await [Permission.photos, Permission.storage].request();
-      if (result[Permission.photos] != PermissionStatus.granted &&
-          result[Permission.storage] != PermissionStatus.granted) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('이미지를 선택하려면 저장소 권한이 필요합니다.')),
-          );
-        }
-        return;
-      }
-    }
-
-    final XFile? image = await _imagePicker.pickImage(
-      source: ImageSource.gallery,
-    );
-    if (image != null) {
-      await BackgroundService.setBackgroundImagePath(image.path);
-      await BackgroundService.setBackgroundType('image');
-      await BackgroundHelper.refreshAll();
-      if (mounted) {
-        _loadSettings();
-      }
-    }
-  }
-
-  Future<void> _pickImageFromCamera() async {
-    // Camera permission check
-    final cameraStatus = await Permission.camera.status;
-    if (!cameraStatus.isGranted) {
-      final result = await Permission.camera.request();
-      if (!result.isGranted) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('카메라를 사용하려면 카메라 권한이 필요합니다.')),
-          );
-        }
-        return;
-      }
-    }
-
-    final XFile? image = await _imagePicker.pickImage(
-      source: ImageSource.camera,
-    );
-    if (image != null) {
-      await BackgroundService.setBackgroundImagePath(image.path);
-      await BackgroundService.setBackgroundType('image');
-      await BackgroundHelper.refreshAll();
-      if (mounted) {
-        _loadSettings();
-      }
-    }
-  }
-
-  Future<void> _changeBackgroundColor() async {
-    final result = await showDialog<Color>(
-      context: context,
-      builder: (context) => _ColorPickerDialog(initialColor: _backgroundColor),
-    );
-    if (result != null) {
-      final hexColor = _colorToHex(result);
-      await BackgroundService.setBackgroundColor(hexColor);
-      await BackgroundService.setBackgroundType('color');
-      await BackgroundHelper.refreshColor();
-      if (mounted) {
-        _loadSettings();
-      }
-    }
-  }
-
-  Future<void> _resetBackground() async {
-    await BackgroundService.reset();
-    await BackgroundHelper.refreshColor();
-    if (mounted) {
-      _loadSettings();
-    }
   }
 
   @override
@@ -360,106 +260,6 @@ class _BackgroundSettingsScreenState extends State<BackgroundSettingsScreen> {
           ),
         );
       },
-    );
-  }
-}
-
-class _ColorPickerDialog extends StatefulWidget {
-  final Color initialColor;
-
-  const _ColorPickerDialog({required this.initialColor});
-
-  @override
-  State<_ColorPickerDialog> createState() => _ColorPickerDialogState();
-}
-
-class _ColorPickerDialogState extends State<_ColorPickerDialog> {
-  late Color _selectedColor;
-  late HSVColor _hsv;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedColor = widget.initialColor;
-    _hsv = HSVColor.fromColor(_selectedColor);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('색상 선택'),
-      content: SizedBox(
-        width: 300,
-        height: 300,
-        child: Column(
-          children: [
-            Expanded(
-              child: GestureDetector(
-                onPanUpdate: (details) {
-                  setState(() {
-                    _hsv = _hsv.withSaturation(
-                      (details.localPosition.dx / 300).clamp(0, 1),
-                    );
-                    _hsv = _hsv.withValue(
-                      1 - (details.localPosition.dy / 250).clamp(0, 1),
-                    );
-                    _selectedColor = _hsv.toColor();
-                  });
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        HSVColor.fromAHSV(1, _hsv.hue, 0, 1).toColor(),
-                        HSVColor.fromAHSV(1, _hsv.hue, 1, 1).toColor(),
-                        HSVColor.fromAHSV(1, _hsv.hue, 1, 0).toColor(),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: Slider(
-                    value: _hsv.hue,
-                    max: 360,
-                    onChanged: (value) {
-                      setState(() {
-                        _hsv = _hsv.withHue(value);
-                        _selectedColor = _hsv.toColor();
-                      });
-                    },
-                  ),
-                ),
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: _selectedColor,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('취소'),
-        ),
-        FilledButton(
-          onPressed: () => Navigator.pop(context, _selectedColor),
-          child: const Text('적용'),
-        ),
-      ],
     );
   }
 }

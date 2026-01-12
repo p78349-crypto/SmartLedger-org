@@ -37,13 +37,8 @@ class _IngredientsRecommendationWidgetState
   Future<void> _loadRecommendations() async {
     try {
       final items = FoodExpiryService.instance.items.value;
-
       await RecipeKnowledgeService.instance.loadData();
-
-      // 금주 활용할 식재료
       final thisWeek = IngredientsRecommendationUtils.getThisWeekItems(items);
-
-      // 가격 효율성 기반 추천
       final optimized =
           IngredientsRecommendationUtils.getOptimizedRecommendations(
             thisWeek,
@@ -89,7 +84,6 @@ class _IngredientsRecommendationWidgetState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 헤더
           Padding(
             padding: const EdgeInsets.all(12),
             child: Row(
@@ -110,8 +104,6 @@ class _IngredientsRecommendationWidgetState
             ),
           ),
           const Divider(height: 1),
-
-          // 추천 식재료 리스트
           ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -132,7 +124,6 @@ class _IngredientsRecommendationWidgetState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 식재료 이름 및 가격
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -186,10 +177,7 @@ class _IngredientsRecommendationWidgetState
                         ),
                       ],
                     ),
-
                     const SizedBox(height: 8),
-
-                    // 추천 메시지
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 10,
@@ -203,8 +191,6 @@ class _IngredientsRecommendationWidgetState
                       ),
                       child: Text(message, style: theme.textTheme.labelMedium),
                     ),
-
-                    // 수량 정보
                     const SizedBox(height: 8),
                     Text(
                       '보유량: ${item.quantity} ${item.unit}',
@@ -219,8 +205,6 @@ class _IngredientsRecommendationWidgetState
           ),
 
           const Divider(height: 1),
-
-          // 영양 정보 팁
           if (_nutritionAdvice != null)
             Padding(
               padding: const EdgeInsets.all(12),
@@ -250,8 +234,6 @@ class _IngredientsRecommendationWidgetState
                 ),
               ),
             ),
-
-          // 주재료 추천
           if (_missingMain != null && _missingMain!.isNotEmpty) ...[
             const Divider(height: 1),
             Padding(

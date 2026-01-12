@@ -5,10 +5,10 @@ import 'package:smart_ledger/utils/weather_price_prediction_utils.dart';
 
 void main() {
   test('getSeason classifies months correctly', () {
-    expect(WeatherPricePredictionUtils.getSeason(DateTime(2026, 3, 1)), Season.spring);
-    expect(WeatherPricePredictionUtils.getSeason(DateTime(2026, 6, 1)), Season.summer);
-    expect(WeatherPricePredictionUtils.getSeason(DateTime(2026, 9, 1)), Season.autumn);
-    expect(WeatherPricePredictionUtils.getSeason(DateTime(2026, 12, 1)), Season.winter);
+    expect(WeatherPricePredictionUtils.getSeason(DateTime(2026, 3)), Season.spring);
+    expect(WeatherPricePredictionUtils.getSeason(DateTime(2026, 6)), Season.summer);
+    expect(WeatherPricePredictionUtils.getSeason(DateTime(2026, 9)), Season.autumn);
+    expect(WeatherPricePredictionUtils.getSeason(DateTime(2026, 12)), Season.winter);
   });
 
   test('predictPrice returns a prediction when enough transaction data exists', () {

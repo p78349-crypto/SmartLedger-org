@@ -202,7 +202,7 @@ void main() {
             type: TransactionType.expense,
             description: 'test',
             amount: 10000,
-            date: now.subtract(Duration(days: 15)),
+            date: now.subtract(const Duration(days: 15)),
             cardChargedAmount: 7000,
           ),
         ];

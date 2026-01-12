@@ -2738,7 +2738,8 @@ class _ExpenseHistoryPickerState extends State<_ExpenseHistoryPicker> {
                         return ListTile(
                           title: Text(tx.description),
                           subtitle: Text(
-                            '${DateFormatter.defaultDate.format(tx.date)} | ${tx.store ?? ""}',
+                            '${DateFormatter.defaultDate.format(tx.date)} | '
+                            '${tx.store ?? ""}',
                           ),
                           trailing: Text(
                             CurrencyFormatter.format(tx.amount),

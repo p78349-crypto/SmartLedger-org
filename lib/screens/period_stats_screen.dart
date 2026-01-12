@@ -400,7 +400,8 @@ class _PeriodStatsScreenState extends State<PeriodStatsScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '• 기준: 최근 1개월 기준으로 거래 평균이 10,000원 미만이거나 거래 건수가 5건 이상인 카테고리를 "잡다한 지출"로 간주합니다.',
+                '• 기준: 최근 1개월 기준으로 거래 평균이 10,000원 미만이거나 거래 건수가 5건 이상인 카테고리를 '
+                '"잡다한 지출"로 간주합니다.',
               ),
               SizedBox(height: 8),
               Text('• 목적: 자주 발생하는 소액 지출을 시각화하여 사용자에게 절약 포인트로 인지시키기 위함입니다.'),

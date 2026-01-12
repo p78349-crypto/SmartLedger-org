@@ -20,7 +20,7 @@ void main() {
       weather: weather,
       cartItems: [
         CartItem(id: 'c1', name: '우유', quantity: '2', estimatedPrice: '2500', isChecked: true),
-        CartItem(id: 'c2', name: '빵', quantity: '1', estimatedPrice: '3000', isChecked: false),
+        CartItem(id: 'c2', name: '빵', estimatedPrice: '3000'),
       ],
       transactions: [
         Transaction(

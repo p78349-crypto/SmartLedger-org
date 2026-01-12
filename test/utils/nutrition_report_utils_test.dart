@@ -12,7 +12,7 @@ void main() {
     });
 
     test('buildFromRawText extracts items, merges ranges, and detects cola 2L', () {
-      final raw = '사과(1000-1200원) 우유 2500~3000원 사과 900~1100원 콜라 2L 2500원';
+      const raw = '사과(1000-1200원) 우유 2500~3000원 사과 900~1100원 콜라 2L 2500원';
       final report = NutritionReportUtils.buildFromRawText(raw);
 
       expect(report.items, isNotEmpty);
@@ -28,7 +28,7 @@ void main() {
     });
 
     test('buildFromRawText sorts items by mid price (desc)', () {
-      final raw = 'A 100~100원 B 1000~1000원 C 500~500원';
+      const raw = 'A 100~100원 B 1000~1000원 C 500~500원';
       final report = NutritionReportUtils.buildFromRawText(raw);
       expect(report.items.first.name, 'B');
       expect(report.items.last.name, 'A');

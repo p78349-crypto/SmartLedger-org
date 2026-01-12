@@ -6,7 +6,7 @@ void main() {
     late SimpleCache<String, int> cache;
 
     setUp(() {
-      cache = SimpleCache<String, int>(maxAge: Duration(seconds: 1));
+      cache = SimpleCache<String, int>(maxAge: const Duration(seconds: 1));
     });
 
     test('stores and retrieves value', () {
@@ -26,7 +26,7 @@ void main() {
 
     test('returns null for expired entry', () async {
       final shortCache = SimpleCache<String, int>(
-        maxAge: Duration(milliseconds: 50),
+        maxAge: const Duration(milliseconds: 50),
       );
       shortCache.set('key1', 100);
 
@@ -34,7 +34,7 @@ void main() {
       expect(shortCache.get('key1'), 100);
 
       // 만료 대기
-      await Future.delayed(Duration(milliseconds: 60));
+      await Future.delayed(const Duration(milliseconds: 60));
 
       // 만료 후
       expect(shortCache.get('key1'), isNull);
@@ -62,11 +62,11 @@ void main() {
 
     test('cleanup removes expired entries', () async {
       final shortCache = SimpleCache<String, int>(
-        maxAge: Duration(milliseconds: 50),
+        maxAge: const Duration(milliseconds: 50),
       );
       shortCache.set('key1', 100);
 
-      await Future.delayed(Duration(milliseconds: 60));
+      await Future.delayed(const Duration(milliseconds: 60));
 
       shortCache.set('key2', 200); // 새로운 항목
 
@@ -96,21 +96,21 @@ void main() {
 
   group('SimpleCache with different types', () {
     test('works with String values', () {
-      final cache = SimpleCache<String, String>(maxAge: Duration(minutes: 5));
+      final cache = SimpleCache<String, String>(maxAge: const Duration(minutes: 5));
       cache.set('greeting', 'hello');
       expect(cache.get('greeting'), 'hello');
     });
 
     test('works with List values', () {
       final cache = SimpleCache<String, List<int>>(
-        maxAge: Duration(minutes: 5),
+        maxAge: const Duration(minutes: 5),
       );
       cache.set('numbers', [1, 2, 3]);
       expect(cache.get('numbers'), [1, 2, 3]);
     });
 
     test('works with int keys', () {
-      final cache = SimpleCache<int, String>(maxAge: Duration(minutes: 5));
+      final cache = SimpleCache<int, String>(maxAge: const Duration(minutes: 5));
       cache.set(1, 'one');
       cache.set(2, 'two');
       expect(cache.get(1), 'one');

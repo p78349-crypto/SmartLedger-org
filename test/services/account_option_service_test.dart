@@ -13,7 +13,6 @@ void main() {
         final result = await AccountOptionService.getOption(
           'test_account',
           'show_chart',
-          defaultValue: true,
         );
         expect(result, isTrue);
       });

@@ -917,7 +917,8 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
       if (todayExpenses.isNotEmpty && description.contains('무지출')) {
         bonusPoints += 500; // Bonus for saving after shock
         customFeedback +=
-            '\n\n🛡️ 갑작스러운 지출에 놀라셨죠? 그래도 다른 소비를 잘 참아내셨네요! 대견함의 의미로 보너스 포인트를 드립니다.';
+            '\n\n🛡️ 갑작스러운 지출에 놀라셨죠? 그래도 다른 소비를 잘 참아내셨네요! '
+            '대견함의 의미로 보너스 포인트를 드립니다.';
       }
 
       // 2. Payback (Recovery Points within 3 days)
@@ -941,7 +942,8 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
       if (recentShock.isNotEmpty && description.contains('무지출')) {
         bonusPoints += 300;
         customFeedback +=
-            '\n\n🔄 지난번 갑작스러운 지출 이후 바로 허리띠를 졸라매셨군요! 회복 탄력성이 대단하십니다. "회복 포인트" 적립해 드려요!';
+            '\n\n🔄 지난번 갑작스러운 지출 이후 바로 허리띠를 졸라매셨군요! 회복 탄력성이 대단하십니다. '
+            '"회복 포인트" 적립해 드려요!';
       }
 
       // Apply Bonus
@@ -960,7 +962,8 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
       // 10만, 7만, 5만, 3만, 1만 순으로 체크 (높은 금액 우선)
       if (prevTotal < 100000 && currentTotal >= 100000) {
         customFeedback =
-            '\n🎉 대단해요! 드디어 10만원을 모으셨습니다!\n🏦 이제 예금 상품으로 돈을 불릴 차례예요. 1억 프로젝트의 첫 단계 달성을 축하드립니다!';
+            '\n🎉 대단해요! 드디어 10만원을 모으셨습니다!\n'
+            '🏦 이제 예금 상품으로 돈을 불릴 차례예요. 1억 프로젝트의 첫 단계 달성을 축하드립니다!';
       } else if (prevTotal < 70000 && currentTotal >= 70000) {
         customFeedback = '\n🔥 7만원 돌파! 이제 고지가 눈앞입니다. 조금만 더 힘내세요!';
       } else if (prevTotal < 50000 && currentTotal >= 50000) {
@@ -975,7 +978,8 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
       } else {
         // n회 적립 (일반)
         customFeedback =
-            '\n👍 ${pointCount + 1}번째 포인트 적립! 현재까지 총 ${CurrencyFormatter.format(currentTotal)} 모으셨어요.';
+            '\n👍 ${pointCount + 1}번째 포인트 적립! 현재까지 총 ${CurrencyFormatter.format(currentTotal)} '
+            '모으셨어요.';
       }
 
       // 진행률 정보 추가 (모든 케이스에 적용)
@@ -999,10 +1003,8 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
     if (type == TransactionType.income && isPointAccumulation) {
       // 포인트 적립 성공 메시지를 덮어씁니다 (스크립트 요구사항 반)
       feedbackMsg =
-          '기록 완료했습니다. 첫 포인트가 적립되었네요! 이제 1억 프로젝트의 첫발을 떼셨습니다. 이 기세로 쭉 가보시죠!\n\n(텍스트) 🏪 $description ${CurrencyFormatter.format(amount)} 기록 완료!';
-      if (customFeedback.isNotEmpty) {
-        feedbackMsg += customFeedback;
-      }
+            '기록 완료했습니다. 첫 포인트가 적립되었네요! 이제 1억 프로젝트의 첫발을 떼셨습니다. 이 기세로 쭉 가보시죠!\n'
+            '\n(텍스트) 🏪 $description ${CurrencyFormatter.format(amount)} 기록 완료!';
     }
 
     // 거래 생성 및 저장
@@ -1029,7 +1031,8 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
           (mainCategory.contains('건강') || mainCategory.contains('의료'))) {
         isSpecialCase = true;
         customFeedback +=
-            '\n\n💊 아이구, 어디 많이 아프신 건 아니죠? 건강을 잃으면 1억 프로젝트도 소용없어요. 약 잘 챙겨 드시고 오늘은 푹 쉬세요. 병원비 기록은 제가 알아서 잘 정리해둘게요. (포인트 연속 기록 보호됨)';
+            '\n\n💊 아이구, 어디 많이 아프신 건 아니죠? 건강을 잃으면 1억 프로젝트도 소용없어요. 약 잘 챙겨 드시고 오늘은 푹 쉬세요. '
+            '병원비 기록은 제가 알아서 잘 정리해둘게요. (포인트 연속 기록 보호됨)';
       }
       // 2. 경조사비 (사람 우선)
       else if (description.contains('축의금') ||

@@ -7,21 +7,15 @@ void main() {
     FoodExpiryItem item(String name) => FoodExpiryItem(
           id: 'id_$name',
           name: name,
-          memo: '',
-          createdAt: DateTime(2026, 1, 1),
-          purchaseDate: DateTime(2026, 1, 1),
+          createdAt: DateTime(2026),
+          purchaseDate: DateTime(2026),
           expiryDate: DateTime(2026, 1, 10),
-          quantity: 1.0,
-          unit: '개',
-          location: '냉장',
           category: '테스트',
-          supplier: '',
         );
 
     test('generate3DayMealPlan returns 3 days with non-empty meals', () {
       final plans = MealPlanGeneratorUtils.generate3DayMealPlan(
         [item('계란'), item('두부')],
-        preference: '한식 중심',
       );
 
       expect(plans.length, 3);

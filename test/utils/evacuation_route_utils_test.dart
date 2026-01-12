@@ -10,7 +10,7 @@ void main() {
         condition: WeatherCondition.typhoon,
         temperature: 26,
         humidity: 85,
-        timestamp: DateTime(2026, 1, 1),
+        timestamp: DateTime(2026),
         location: 'Miami Beach',
       );
 
@@ -33,7 +33,7 @@ void main() {
         condition: WeatherCondition.snowy,
         temperature: -1,
         humidity: 60,
-        timestamp: DateTime(2026, 1, 1),
+        timestamp: DateTime(2026),
         location: 'UnknownTown',
       );
 

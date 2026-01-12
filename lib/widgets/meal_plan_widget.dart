@@ -15,7 +15,7 @@ class MealPlanWidget extends StatefulWidget {
 class _MealPlanWidgetState extends State<MealPlanWidget>
     with FoodExpiryItemsAutoRefreshMixin {
   List<DayMealPlan>? _mealPlans;
-  String _selectedPeriod = '3일'; // 3일 또는 1주일
+  String _selectedPeriod = '3일';
   bool _isLoading = true;
   String _mealPreference = '한식 중심';
 
@@ -90,7 +90,6 @@ class _MealPlanWidgetState extends State<MealPlanWidget>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 헤더
           Padding(
             padding: const EdgeInsets.all(12),
             child: Row(
@@ -112,7 +111,6 @@ class _MealPlanWidgetState extends State<MealPlanWidget>
                     ),
                   ],
                 ),
-                // 기간 선택 버튼
                 Row(
                   children: [
                     _buildPeriodButton('3일', theme),
@@ -124,8 +122,6 @@ class _MealPlanWidgetState extends State<MealPlanWidget>
             ),
           ),
           const Divider(height: 1),
-
-          // 요약 정보
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: Container(
@@ -139,8 +135,6 @@ class _MealPlanWidgetState extends State<MealPlanWidget>
               child: Text(summary, style: theme.textTheme.labelMedium),
             ),
           ),
-
-          // 식단 목록
           ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),

@@ -26,7 +26,6 @@ void main() {
             id: '2',
             recipeName: '양파요리',
             usageDate: challengeDate,
-            isFromExistingInventory: false, // not from inventory
             totalUsedPrice: 500,
           ),
         ];
@@ -70,7 +69,6 @@ void main() {
             id: '1',
             recipeName: '우유요리',
             usageDate: DateTime.now(),
-            isFromExistingInventory: false,
             totalUsedPrice: 2000,
             memo: '유통기한 임박 사용',
           ),

@@ -9,7 +9,7 @@ void main() {
         condition: WeatherCondition.sunny,
         temperature: -10,
         humidity: 50,
-        timestamp: DateTime(2026, 1, 1),
+        timestamp: DateTime(2026),
         location: 'Seoul',
       );
       expect(cold.isColdWave, isTrue);
@@ -19,7 +19,7 @@ void main() {
         condition: WeatherCondition.rainy,
         temperature: 33,
         humidity: 50,
-        timestamp: DateTime(2026, 1, 1),
+        timestamp: DateTime(2026),
         location: 'Seoul',
       );
       expect(hot.isHeatWave, isTrue);
@@ -29,7 +29,7 @@ void main() {
         condition: WeatherCondition.cloudy,
         temperature: 20,
         humidity: 50,
-        timestamp: DateTime(2026, 1, 1),
+        timestamp: DateTime(2026),
         location: 'Seoul',
       );
       expect(normal.isColdWave, isFalse);
@@ -39,9 +39,7 @@ void main() {
   });
 
   group('WeatherUtils', () {
-    setUp(() {
-      WeatherUtils.clearCache();
-    });
+    setUp(WeatherUtils.clearCache);
 
     test('parseWeatherCondition recognizes Korean/English inputs', () {
       expect(WeatherUtils.parseWeatherCondition('맑음'), WeatherCondition.sunny);
@@ -76,7 +74,7 @@ void main() {
         condition: WeatherCondition.typhoon,
         temperature: 25,
         humidity: 80,
-        timestamp: DateTime(2026, 1, 1),
+        timestamp: DateTime(2026),
         location: 'Seoul',
       );
 
@@ -104,7 +102,7 @@ void main() {
         condition: WeatherCondition.sunny,
         temperature: 20,
         humidity: 30,
-        timestamp: DateTime(2026, 1, 1),
+        timestamp: DateTime(2026),
         location: 'Seoul',
       );
 

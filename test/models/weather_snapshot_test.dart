@@ -60,7 +60,7 @@ void main() {
       });
 
       test('includes all set fields', () {
-        final snapshot = WeatherSnapshot(
+        const snapshot = WeatherSnapshot(
           condition: 'sunny',
           tempC: 20.0,
           humidityPct: 50,

@@ -150,7 +150,7 @@ void main() {
   group('LoadingCardListSkeleton', () {
     testWidgets('renders default item count', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             body: SizedBox(
               height: 400,
@@ -166,7 +166,7 @@ void main() {
 
     testWidgets('renders custom item count', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             body: SizedBox(
               height: 400,

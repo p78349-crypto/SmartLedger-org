@@ -3,7 +3,7 @@
 /// 2단계: 쇼핑 (품목 체크)
 /// 3단계: 기록 (가계부 저장)
 
-library;
+library shopping_workflow_utils;
 
 enum ShoppingMode { planning, shopping, recording }
 

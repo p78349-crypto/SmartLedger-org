@@ -65,14 +65,14 @@ void main() {
       test('shortAnimationDuration is 200ms', () {
         expect(
           AppConstants.shortAnimationDuration,
-          Duration(milliseconds: 200),
+          const Duration(milliseconds: 200),
         );
       });
 
       test('mediumAnimationDuration is 300ms', () {
         expect(
           AppConstants.mediumAnimationDuration,
-          Duration(milliseconds: 300),
+          const Duration(milliseconds: 300),
         );
       });
     });

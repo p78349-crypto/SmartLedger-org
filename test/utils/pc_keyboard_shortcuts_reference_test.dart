@@ -1,3 +1,5 @@
+// ignore_for_file: unused_import
+
 import 'package:flutter_test/flutter_test.dart';
 
 // This file is documentation-only; the test ensures it stays compilable.

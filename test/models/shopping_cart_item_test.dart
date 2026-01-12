@@ -32,7 +32,6 @@ void main() {
         unitsPerBundle: 30,
         memo: '유정란',
         storeLocation: '냉장 코너',
-        isPlanned: true,
         isChecked: true,
         createdAt: now,
         updatedAt: now,
@@ -53,7 +52,6 @@ void main() {
         final original = ShoppingCartItem(
           id: 'item-1',
           name: '우유',
-          quantity: 1,
           createdAt: now,
           updatedAt: now,
         );

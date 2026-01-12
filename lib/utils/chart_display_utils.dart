@@ -1,5 +1,5 @@
 /// 차트 디스플레이 유틸리티 - 공용 `ChartDisplayType` 재사용
-library;
+library chart_display_utils;
 
 import 'chart_utils.dart';
 

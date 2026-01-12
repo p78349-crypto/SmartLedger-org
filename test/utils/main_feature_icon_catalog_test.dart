@@ -28,7 +28,7 @@ void main() {
           ],
           home: Builder(
             builder: (context) {
-              koLabel = icon.labelFor(context, bilingualInKorean: true);
+              koLabel = icon.labelFor(context);
               koOnly = icon.labelFor(context, bilingualInKorean: false);
               return const SizedBox.shrink();
             },

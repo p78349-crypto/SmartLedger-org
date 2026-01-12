@@ -794,7 +794,8 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                                                   .trim(),
                                         memo: memoController.text.isEmpty
                                             ? autoMemo
-                                            : '${memoController.text}\n원구매일: $origDate, 원결제수단: ${tx.paymentMethod}',
+                                            : '${memoController.text}\n원구매일: $origDate, '
+                                              '원결제수단: ${tx.paymentMethod}',
                                         store: tx.store,
                                         isRefund: true,
                                         originalTransactionId: tx.id,
@@ -848,7 +849,8 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                                                   .trim(),
                                         memo: memoController.text.isEmpty
                                             ? autoMemo
-                                            : '${memoController.text}\n원구매일: $origDate2, 원결제수단: ${tx.paymentMethod}',
+                                            : '${memoController.text}\n원구매일: $origDate2, '
+                                              '원결제수단: ${tx.paymentMethod}',
                                         savingsAllocation: allocation,
                                         isRefund: true,
                                         originalTransactionId: tx.id,

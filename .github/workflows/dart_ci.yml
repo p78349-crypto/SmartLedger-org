@@ -1,4 +1,4 @@
-name: Dart CI
+name: Dart Lint & Metrics
 
 on:
   push:
@@ -7,51 +7,98 @@ on:
     branches: [ main ]
 
 jobs:
-  analyze:
+  lint-linux:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Dart
-        uses: dart-lang/setup-dart@v1
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
-          sdk: stable
+          flutter-version: '3.24.0'
+          channel: stable
       - name: Install dependencies
-        run: dart pub get
+        run: flutter pub get
       - name: Check format
         run: dart format --output=none --set-exit-if-changed lib test
-      - name: Static analysis
-        run: dart analyze
-      - name: dart_code_metrics (Linux)
+      - name: Run analyzer
+        run: flutter analyze
+      - name: Check Dart line length (<= 80)
+        shell: bash
+        run: |
+          set -euo pipefail
+          find lib test \
+            -type f \
+            -name '*.dart' \
+            ! -name '*.g.dart' \
+            ! -name '*.freezed.dart' \
+            -print0 \
+            | xargs -0 awk 'length($0) > 80 {printf "%s:%d:%d\n", FILENAME, NR, length($0); exit 1}'
+      - name: Check Dart file length (<= 300)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from __future__ import annotations
+
+          from pathlib import Path
+          import sys
+
+          roots = [Path('lib'), Path('test')]
+          dart_files: list[Path] = []
+          for root in roots:
+            if not root.exists():
+              continue
+            for path in root.rglob('*.dart'):
+              name = path.name
+              if name.endswith('.g.dart') or name.endswith('.freezed.dart'):
+                continue
+              dart_files.append(path)
+
+          violations: list[tuple[int, str]] = []
+          for path in dart_files:
+            try:
+              line_count = path.read_text(encoding='utf-8', errors='ignore').count('\n') + 1
+            except Exception:
+              continue
+            if line_count > 300:
+              violations.append((line_count, str(path)))
+
+          violations.sort(reverse=True)
+          if violations:
+            for count, path in violations:
+              print(f'{path}: {count} lines')
+            sys.exit(1)
+          print('OK: no Dart files > 300 lines')
+          PY
+      - name: dart_code_metrics
         run: |
           dart pub global activate dart_code_metrics
           dart pub global run dart_code_metrics:metrics analyze lib test --reporter=console
-      - name: Scan long lines (Linux)
-        run: |
-          # Report long lines in lib/ (informational)
-          grep -nE '.{81}' -R --exclude-dir=backups lib || true
 
-  windows-checks:
+  lint-windows:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Dart
-        uses: dart-lang/setup-dart@v1
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
-          sdk: stable
+          flutter-version: '3.24.0'
+          channel: stable
       - name: Install dependencies
-        run: dart pub get
+        run: flutter pub get
       - name: Check format
         shell: pwsh
         run: dart format --output=none --set-exit-if-changed lib test
       - name: Static analysis
-        run: dart analyze
-      - name: dart_code_metrics (Windows)
+        run: flutter analyze
+      - name: Check Dart line length (<= 80)
+        shell: pwsh
+        run: pwsh -NoProfile -ExecutionPolicy Bypass -File .\scripts\scan_long_lines.ps1
+      - name: Check Dart file length (<= 300)
+        shell: pwsh
+        run: pwsh -NoProfile -ExecutionPolicy Bypass -File .\scripts\scan_large_dart_files.ps1
+      - name: dart_code_metrics
         shell: pwsh
         run: |
           dart pub global activate dart_code_metrics
           dart pub global run dart_code_metrics:metrics analyze lib test --reporter=console
-      - name: Scan long lines (PowerShell)
-        shell: pwsh
-        run: |
-          Write-Host 'Running PowerShell line-length check'
-          pwsh -NoProfile -ExecutionPolicy Bypass -File .\scripts\scan_long_lines.ps1 || exit 0

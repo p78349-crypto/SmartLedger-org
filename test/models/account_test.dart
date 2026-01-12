@@ -17,12 +17,12 @@ void main() {
       final account = Account(name: '테스트');
       final after = DateTime.now();
 
-      expect(account.createdAt.isAfter(before.subtract(Duration(seconds: 1))), isTrue);
-      expect(account.createdAt.isBefore(after.add(Duration(seconds: 1))), isTrue);
+      expect(account.createdAt.isAfter(before.subtract(const Duration(seconds: 1))), isTrue);
+      expect(account.createdAt.isBefore(after.add(const Duration(seconds: 1))), isTrue);
     });
 
     test('creates with all fields', () {
-      final createdAt = DateTime(2026, 1, 1);
+      final createdAt = DateTime(2026);
       final lastCarryover = DateTime(2026, 1, 10);
       
       final account = Account(
@@ -118,7 +118,7 @@ void main() {
     test('serialization roundtrip preserves data', () {
       final original = Account(
         name: '왕복테스트',
-        createdAt: DateTime(2026, 1, 1),
+        createdAt: DateTime(2026),
         carryoverAmount: 123456,
         overdraftAmount: 7890,
         lastCarryoverDate: DateTime(2026, 1, 10),

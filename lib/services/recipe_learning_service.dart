@@ -3,13 +3,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
 
 /// 사용자의 요리 패턴을 학습하는 서비스
-///
-/// 학습 항목:
-/// 1. 자주 만드는 요리 (빈도 추적)
-/// 2. 선호하는 재료 조합
-/// 3. 시간대별 선호 요리 (아침/점심/저녁)
-/// 4. 계절별 선호도
-/// 5. 건강 우선도 (건강한 요리 선택 빈도)
 class RecipeLearningService {
   RecipeLearningService._();
   static final RecipeLearningService instance = RecipeLearningService._();

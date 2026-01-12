@@ -1,18 +1,6 @@
 import 'package:flutter/material.dart';
 
 /// 다국어 지원 유틸리티
-///
-/// 사용 예시:
-/// ```dart
-/// // 번역 가져오기
-/// final text = LocalizationUtils.tr(context, 'hello');
-///
-/// // 플레이스홀더 포함
-/// final text = LocalizationUtils.tr(context, 'welcome', args: {'name': '홍길동'});
-///
-/// // 언어 코드 가져오기
-/// final lang = LocalizationUtils.getCurrentLanguage(context); // 'ko', 'en', 'ja'
-/// ```
 class LocalizationUtils {
   LocalizationUtils._();
 
@@ -111,7 +99,6 @@ class LocalizationUtils {
   }
 }
 
-/// 번역 데이터 (예시)
 const Map<String, Map<String, String>> _translations = {
   'ko': {
     // 공통
@@ -286,7 +273,6 @@ const Map<String, Map<String, String>> _translations = {
   },
 };
 
-/// 간단한 확장 메서드
 extension LocalizationExtension on BuildContext {
   /// 번역 가져오기
   String tr(String key, {Map<String, String>? args}) {

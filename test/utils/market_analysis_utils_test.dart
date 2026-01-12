@@ -37,7 +37,7 @@ void main() {
       final t1 = tx(
         id: '1',
         type: TransactionType.expense,
-        date: DateTime(2026, 1, 1),
+        date: DateTime(2026),
         description: '사과',
         amount: -3000,
         unitPrice: 1000,
@@ -45,7 +45,7 @@ void main() {
       final t2 = tx(
         id: '2',
         type: TransactionType.expense,
-        date: DateTime(2026, 2, 1),
+        date: DateTime(2026, 2),
         description: '사과',
         amount: -2400,
         unitPrice: 800,
@@ -55,7 +55,7 @@ void main() {
       expect(stats.minPrice, 800);
       expect(stats.maxPrice, 1000);
       expect(stats.averagePrice, 900);
-      expect(stats.cheapestDate, DateTime(2026, 2, 1));
+      expect(stats.cheapestDate, DateTime(2026, 2));
       expect(stats.priceRange, 200);
       expect(stats.volatilityPercent, closeTo((200 / 900) * 100, 0.0001));
     });
@@ -65,7 +65,7 @@ void main() {
         tx(
           id: '1',
           type: TransactionType.expense,
-          date: DateTime(2026, 1, 1),
+          date: DateTime(2026),
           description: 'A',
           amount: -1,
           unitPrice: 1,
@@ -99,7 +99,6 @@ void main() {
           description: 'A',
           amount: -100,
           unitPrice: 1,
-          mainCategory: '식비',
         ),
         tx(
           id: '2',
@@ -113,7 +112,7 @@ void main() {
         tx(
           id: '3',
           type: TransactionType.savings,
-          date: DateTime(2026, 2, 1),
+          date: DateTime(2026, 2),
           description: 'Save',
           amount: -200,
           unitPrice: 0,
@@ -136,7 +135,7 @@ void main() {
         tx(
           id: '1',
           type: TransactionType.expense,
-          date: DateTime(2026, 1, 1),
+          date: DateTime(2026),
           description: '사과',
           amount: -1,
           unitPrice: 1000,
@@ -152,7 +151,7 @@ void main() {
         tx(
           id: '3',
           type: TransactionType.expense,
-          date: DateTime(2026, 2, 1),
+          date: DateTime(2026, 2),
           description: '사과',
           amount: -1,
           unitPrice: 800,
@@ -172,11 +171,10 @@ void main() {
         tx(
           id: '1',
           type: TransactionType.expense,
-          date: DateTime(2026, 1, 1),
+          date: DateTime(2026),
           description: '사과',
           amount: -1000,
           unitPrice: 1000,
-          mainCategory: '식비',
         ),
         tx(
           id: '2',
@@ -185,7 +183,6 @@ void main() {
           description: '사과',
           amount: -1000,
           unitPrice: 1000,
-          mainCategory: '식비',
         ),
         tx(
           id: '3',
@@ -194,7 +191,6 @@ void main() {
           description: '우유',
           amount: -500,
           unitPrice: 500,
-          mainCategory: '식비',
         ),
       ]);
 

@@ -1,12 +1,8 @@
 import '../models/food_expiry_item.dart';
 import '../services/recipe_service.dart';
 
-/// 사용 가능한 식재료 기반 요리 추천
 class RecipeRecommendationUtils {
   RecipeRecommendationUtils._();
-
-  /// 기본 요리 목록 (사용자 패턴 학습 전 기본값)
-  /// healthScore: 1(저) ~ 5(매우 건강) - 영양 균형, 칼로리, 조리법 기준
   static const List<Map<String, dynamic>> defaultRecipes = [
     {
       'name': '계란프라이',
@@ -70,11 +66,6 @@ class RecipeRecommendationUtils {
     },
   ];
 
-  /// 주어진 식재료로 만들 수 있는 요리 추천
-  /// 유통기한 3일 이내 재료를 포함한 레시피를 최우선 추천
-  /// prioritizeHealth=true면 건강한 요리를 우선 추천
-  /// includeUserRecipes=true면 사용자가 만든 레시피도 포함
-  /// Returns: (추천 요리명, 필요한 재료 수, 충분한 재료 수)
   static Future<Map<String, RecipeMatch>> getRecommendedRecipes(
     List<FoodExpiryItem> availableIngredients, {
     bool prioritizeExpiring = true,
@@ -82,8 +73,6 @@ class RecipeRecommendationUtils {
     bool includeUserRecipes = true,
   }) async {
     final now = DateTime.now();
-
-    // 유통기한 임박 재료 식별 (3일 이내)
     final expiringItems = availableIngredients
         .where((item) => item.daysLeft(now) <= 3)
         .toSet();
@@ -94,8 +83,6 @@ class RecipeRecommendationUtils {
     }
 
     final recommendations = <String, RecipeMatch>{};
-
-    // 1. 기본 요리 목록에서 추천
     for (final recipeData in defaultRecipes) {
       final recipeName = recipeData['name'] as String;
       final requiredIngredients = (recipeData['ingredients'] as List)
@@ -109,8 +96,6 @@ class RecipeRecommendationUtils {
         availableMap,
         expiringItems,
       );
-
-      // 최소 50% 이상의 재료가 있으면 추천
       final matchPercentage =
           (matchResult.matchCount / requiredIngredients.length * 100).toInt();
       if (matchPercentage >= 50) {
@@ -124,8 +109,6 @@ class RecipeRecommendationUtils {
         );
       }
     }
-
-    // 2. 사용자가 만든 레시피 추가
     if (includeUserRecipes) {
       final userRecipes = RecipeService.instance.recipes.value;
 
@@ -152,13 +135,11 @@ class RecipeRecommendationUtils {
             matchPercentage: matchPercentage,
             expiringIngredientCount: matchResult.expiringMatchCount,
             healthScore: recipe.healthScore,
-            isUserRecipe: true, // 사용자 레시피 표시
+            isUserRecipe: true,
           );
         }
       }
     }
-
-    // 정렬: 유통기한 임박 재료 사용 개수 → 건강 점수 → 매칭 비율 순
     final sortedEntries = recommendations.entries.toList(growable: false)
       ..sort((a, b) {
         if (prioritizeExpiring) {
@@ -181,8 +162,6 @@ class RecipeRecommendationUtils {
     return Map<String, RecipeMatch>.fromEntries(sortedEntries);
   }
 
-  /// 상위 N개 추천 요리 반환
-  /// includeUserRecipes=true면 사용자가 만든 레시피도 포함
   static Future<List<RecipeMatch>> getTopRecommendations(
     List<FoodExpiryItem> availableIngredients, {
     int limit = 3,
@@ -196,7 +175,6 @@ class RecipeRecommendationUtils {
       prioritizeHealth: prioritizeHealth,
       includeUserRecipes: includeUserRecipes,
     );
-
     return recommendations.values.take(limit).toList(growable: false);
   }
 
@@ -230,8 +208,6 @@ class RecipeRecommendationUtils {
       expiringMatchCount: expiringMatchCount,
     );
   }
-
-  /// 추천 메시지 생성
   static String generateRecommendationMessage(
     List<FoodExpiryItem> expiringItems,
     RecipeMatch recipe,
@@ -240,12 +216,10 @@ class RecipeRecommendationUtils {
         .take(3)
         .map((item) => item.name)
         .join(', ');
-
     return '$ingredientList 같은 식재료를\n활용해서 ${recipe.recipeName}을(를)\n만들어보세요! 🍳';
   }
 }
 
-/// 재료 매칭 결과
 class _MatchResult {
   final int matchCount;
   final int expiringMatchCount;
@@ -253,7 +227,6 @@ class _MatchResult {
   _MatchResult({required this.matchCount, required this.expiringMatchCount});
 }
 
-/// 요리 매칭 결과
 class RecipeMatch {
   final String recipeName;
   final int requiredCount; // 필요한 총 재료 수
@@ -273,16 +246,10 @@ class RecipeMatch {
     this.isUserRecipe = false,
   });
 
-  /// 유통기한 임박 재료 사용 여부
   bool get usesExpiringIngredients => expiringIngredientCount > 0;
-
-  /// 건강한 요리 여부 (점수 4 이상)
   bool get isHealthy => healthScore >= 4;
-
-  /// 매우 건강한 요리 여부 (점수 5)
   bool get isVeryHealthy => healthScore == 5;
 
-  /// 건강 점수 텍스트
   String get healthLabel {
     switch (healthScore) {
       case 5:
@@ -300,7 +267,6 @@ class RecipeMatch {
     }
   }
 
-  /// 사용자 친화적 메시지
   String get message {
     final parts = <String>[];
 

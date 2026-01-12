@@ -6,7 +6,7 @@ void main() {
   group('ColorUtils', () {
     group('withOpacity', () {
       test('applies opacity to color', () {
-        final color = Colors.red;
+        const color = Colors.red;
         final result = ColorUtils.withOpacity(color, 0.5);
         expect(result.a, closeTo(0.5, 0.01));
       });
@@ -22,7 +22,7 @@ void main() {
 
     group('adjustBrightness', () {
       test('darkens color with factor < 1', () {
-        final original = Colors.blue;
+        const original = Colors.blue;
         final darker = ColorUtils.adjustBrightness(original, 0.5);
 
         final originalHsl = HSLColor.fromColor(original);
@@ -32,7 +32,7 @@ void main() {
       });
 
       test('lightens color with factor > 1', () {
-        final original = Colors.blue;
+        const original = Colors.blue;
         final lighter = ColorUtils.adjustBrightness(original, 1.5);
 
         final originalHsl = HSLColor.fromColor(original);
@@ -42,7 +42,7 @@ void main() {
       });
 
       test('clamps lightness to valid range', () {
-        final original = Colors.white;
+        const original = Colors.white;
         final result = ColorUtils.adjustBrightness(original, 2.0);
 
         final resultHsl = HSLColor.fromColor(result);
@@ -52,7 +52,7 @@ void main() {
 
     group('darken', () {
       test('makes color darker', () {
-        final original = Colors.green;
+        const original = Colors.green;
         final darkened = ColorUtils.darken(original, 0.2);
 
         final originalHsl = HSLColor.fromColor(original);
@@ -62,7 +62,7 @@ void main() {
       });
 
       test('uses default amount of 0.1', () {
-        final original = Colors.blue;
+        const original = Colors.blue;
         final darkened = ColorUtils.darken(original);
 
         final originalHsl = HSLColor.fromColor(original);
@@ -74,7 +74,7 @@ void main() {
 
     group('lighten', () {
       test('makes color lighter', () {
-        final original = Colors.purple;
+        const original = Colors.purple;
         final lightened = ColorUtils.lighten(original, 0.2);
 
         final originalHsl = HSLColor.fromColor(original);
@@ -84,7 +84,7 @@ void main() {
       });
 
       test('uses default amount of 0.1', () {
-        final original = Colors.red;
+        const original = Colors.red;
         final lightened = ColorUtils.lighten(original);
 
         final originalHsl = HSLColor.fromColor(original);

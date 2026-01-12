@@ -42,7 +42,6 @@ void main() {
             id: '1',
             type: TransactionType.expense,
             amount: 10000,
-            memo: '', // empty memo
           ),
         ];
 

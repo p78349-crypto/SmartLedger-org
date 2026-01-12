@@ -6,7 +6,7 @@ void main() {
   group('IngredientsRecommendationUtils', () {
     group('nutritionCategories', () {
       test('contains expected categories', () {
-        final categories = IngredientsRecommendationUtils.nutritionCategories;
+        const categories = IngredientsRecommendationUtils.nutritionCategories;
         expect(categories.containsKey('단백질'), true);
         expect(categories.containsKey('탄수화물'), true);
         expect(categories.containsKey('채소'), true);

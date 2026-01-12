@@ -73,7 +73,7 @@ void main() {
 
     group('without allowNegative', () {
       setUp(() {
-        formatter = CurrencyInputFormatter(allowNegative: false);
+        formatter = CurrencyInputFormatter();
       });
 
       test('removes negative sign', () {

@@ -49,7 +49,6 @@ void main() {
       final chips = MemoSuggestionUtils.suggestChips(
         transactions: transactions,
         currentMemo: 'MegaMart / something',
-        maxChips: 5,
       );
 
       expect(chips, isNotEmpty);
@@ -64,7 +63,7 @@ void main() {
     });
 
     test('scanStartForNow subtracts 183 days', () {
-      final now = DateTime(2026, 1, 1);
+      final now = DateTime(2026);
       final start = MemoSuggestionUtils.scanStartForNow(now);
       expect(now.difference(start).inDays, 183);
     });

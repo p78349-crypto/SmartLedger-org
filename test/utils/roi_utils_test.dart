@@ -32,8 +32,8 @@ void main() {
       test('returns 0 totals for empty list', () {
         final result = RoiUtils.computeOverallRoi(
           [],
-          start: DateTime(2026, 1, 1),
-          end: DateTime(2026, 2, 1),
+          start: DateTime(2026),
+          end: DateTime(2026, 2),
         );
 
         expect(result['totalSpent'], 0.0);
@@ -59,8 +59,8 @@ void main() {
 
         final result = RoiUtils.computeOverallRoi(
           txs,
-          start: DateTime(2026, 1, 1),
-          end: DateTime(2026, 2, 1),
+          start: DateTime(2026),
+          end: DateTime(2026, 2),
         );
 
         expect(result['totalSpent'], 15000.0);
@@ -78,14 +78,14 @@ void main() {
             id: '2',
             type: TransactionType.expense,
             amount: 5000,
-            date: DateTime(2026, 3, 1), // outside range
+            date: DateTime(2026, 3), // outside range
           ),
         ];
 
         final result = RoiUtils.computeOverallRoi(
           txs,
-          start: DateTime(2026, 1, 1),
-          end: DateTime(2026, 2, 1),
+          start: DateTime(2026),
+          end: DateTime(2026, 2),
         );
 
         expect(result['totalSpent'], 10000.0);
@@ -103,15 +103,15 @@ void main() {
             id: 'inc1',
             type: TransactionType.income,
             amount: 5000,
-            date: DateTime(2026, 2, 1),
+            date: DateTime(2026, 2),
             originalTransactionId: 'exp1',
           ),
         ];
 
         final result = RoiUtils.computeOverallRoi(
           txs,
-          start: DateTime(2026, 1, 1),
-          end: DateTime(2026, 2, 1),
+          start: DateTime(2026),
+          end: DateTime(2026, 2),
         );
 
         expect(result['totalSpent'], 10000.0);
@@ -138,9 +138,8 @@ void main() {
 
         final result = RoiUtils.computeOverallRoi(
           txs,
-          start: DateTime(2026, 1, 1),
-          end: DateTime(2026, 2, 1),
-          matchByStore: true,
+          start: DateTime(2026),
+          end: DateTime(2026, 2),
         );
 
         expect(result['totalReturn'], closeTo(1800, 1)); // weight 0.9
@@ -166,9 +165,8 @@ void main() {
 
         final result = RoiUtils.computeOverallRoi(
           txs,
-          start: DateTime(2026, 1, 1),
-          end: DateTime(2026, 2, 1),
-          matchBySupplier: true,
+          start: DateTime(2026),
+          end: DateTime(2026, 2),
         );
 
         expect(result['totalReturn'], closeTo(1600, 1)); // weight 0.8
@@ -186,15 +184,15 @@ void main() {
             id: 'inc1',
             type: TransactionType.income,
             amount: 12000,
-            date: DateTime(2026, 2, 1),
+            date: DateTime(2026, 2),
             originalTransactionId: 'exp1',
           ),
         ];
 
         final result = RoiUtils.computeOverallRoi(
           txs,
-          start: DateTime(2026, 1, 1),
-          end: DateTime(2026, 2, 1),
+          start: DateTime(2026),
+          end: DateTime(2026, 2),
         );
 
         // ROI = (12000 - 10000) / 10000 = 0.2 = 20%
@@ -214,15 +212,15 @@ void main() {
             id: 'inc1',
             type: TransactionType.income,
             amount: 5000,
-            date: DateTime(2026, 2, 1),
+            date: DateTime(2026, 2),
             originalTransactionId: 'exp1',
           ),
         ];
 
         final result = RoiUtils.computeOverallRoi(
           txs,
-          start: DateTime(2026, 1, 1),
-          end: DateTime(2026, 2, 1),
+          start: DateTime(2026),
+          end: DateTime(2026, 2),
         );
 
         final byCategory = result['byCategory'] as Map<String, dynamic>;
@@ -241,16 +239,15 @@ void main() {
             id: 'inc1',
             type: TransactionType.income,
             amount: 5000,
-            date: DateTime(2026, 6, 1), // 5 months later
+            date: DateTime(2026, 6), // 5 months later
             originalTransactionId: 'exp1',
           ),
         ];
 
         final result = RoiUtils.computeOverallRoi(
           txs,
-          start: DateTime(2026, 1, 1),
-          end: DateTime(2026, 2, 1),
-          lookaheadMonths: 3, // Only look 3 months ahead
+          start: DateTime(2026),
+          end: DateTime(2026, 2),
         );
 
         // Income should not be matched (beyond lookahead)

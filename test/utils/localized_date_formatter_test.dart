@@ -5,8 +5,8 @@ import 'package:smart_ledger/utils/localized_date_formatter.dart';
 
 void main() {
   setUpAll(() async {
-    await initializeDateFormatting('ko_KR', null);
-    await initializeDateFormatting('en_US', null);
+    await initializeDateFormatting('ko_KR');
+    await initializeDateFormatting('en_US');
   });
   group('LocalizedDateFormatter', () {
     testWidgets('yM formats date with locale', (tester) async {

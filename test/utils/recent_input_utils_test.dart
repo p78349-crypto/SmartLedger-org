@@ -34,7 +34,6 @@ void main() {
               items: const ['A', 'B'],
               label: '최근',
               onSelected: (v) => selected = v,
-              maxChips: 10,
             ),
           ),
         ),

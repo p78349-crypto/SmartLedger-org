@@ -5,7 +5,7 @@ import '../models/transaction.dart';
 import '../theme/app_colors.dart';
 import '../utils/icon_catalog.dart';
 import '../utils/number_formats.dart';
-import '../utils/utils.dart';
+import '../utils/currency_formatter.dart';
 
 class RootSummaryData {
   const RootSummaryData({
@@ -67,12 +67,9 @@ class RootSummaryCard extends StatelessWidget {
     final theme = Theme.of(context);
     final currencyFormat = NumberFormats.custom('#,###');
 
-    Color netColor() {
-      if (data.netDisplay >= 0) {
-        return theme.colorScheme.primary;
-      }
-      return theme.colorScheme.error;
-    }
+    final netColor = data.netDisplay >= 0
+        ? theme.colorScheme.primary
+        : theme.colorScheme.error;
 
     Color incomeColor() => theme.colorScheme.primary;
     Color expenseColor() => theme.colorScheme.error;
@@ -125,7 +122,7 @@ class RootSummaryCard extends StatelessWidget {
                 _SummaryItem(
                   label: '남은 돈',
                   value: CurrencyFormatter.formatSigned(data.remainingAmount),
-                  color: netColor(),
+                  color: netColor,
                 ),
               ],
             ),

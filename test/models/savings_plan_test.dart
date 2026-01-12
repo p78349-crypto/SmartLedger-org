@@ -8,11 +8,11 @@ void main() {
         id: 'plan-1',
         name: '비상금 적금',
         monthlyAmount: 500000,
-        startDate: DateTime(2026, 1, 1),
+        startDate: DateTime(2026),
         termMonths: 12,
         interestRate: 0.035,
         paidMonths: [1, 2, 3],
-        createdAt: DateTime(2026, 1, 1),
+        createdAt: DateTime(2026),
       );
 
       expect(plan.id, 'plan-1');
@@ -31,11 +31,11 @@ void main() {
         bankName: '국민은행',
         name: '주택청약',
         monthlyAmount: 100000,
-        startDate: DateTime(2026, 1, 1),
+        startDate: DateTime(2026),
         termMonths: 24,
         interestRate: 0.025,
         paidMonths: [],
-        createdAt: DateTime(2026, 1, 1),
+        createdAt: DateTime(2026),
         autoDeposit: false,
       );
 
@@ -49,11 +49,11 @@ void main() {
           id: 'plan-1',
           name: '적금',
           monthlyAmount: 500000,
-          startDate: DateTime(2026, 1, 1),
+          startDate: DateTime(2026),
           termMonths: 12,
           interestRate: 0.035,
           paidMonths: [1],
-          createdAt: DateTime(2026, 1, 1),
+          createdAt: DateTime(2026),
         );
 
         final updated = original.copyWith(
@@ -72,11 +72,11 @@ void main() {
           bankName: '신한은행',
           name: '적금',
           monthlyAmount: 500000,
-          startDate: DateTime(2026, 1, 1),
+          startDate: DateTime(2026),
           termMonths: 12,
           interestRate: 0.035,
           paidMonths: [1],
-          createdAt: DateTime(2026, 1, 1),
+          createdAt: DateTime(2026),
         );
 
         final updated = original.copyWith(name: '정기적금');
@@ -136,12 +136,11 @@ void main() {
           bankName: 'KB',
           name: '적금',
           monthlyAmount: 500000,
-          startDate: DateTime(2026, 1, 1),
+          startDate: DateTime(2026),
           termMonths: 12,
           interestRate: 0.035,
           paidMonths: [1, 2],
-          createdAt: DateTime(2026, 1, 1),
-          autoDeposit: true,
+          createdAt: DateTime(2026),
         );
 
         final json = plan.toJson();

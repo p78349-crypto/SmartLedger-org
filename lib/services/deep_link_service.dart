@@ -32,7 +32,8 @@ import 'deep_link_diagnostics.dart';
 /// - `smartledger://receipt/analyze?ingredients=양배추,닭고기,우유`
 ///
 /// 책스캔앱 OCR 연계:
-/// - `smartledger://transaction/add?amount=45800&store=이마트&items=양배추,닭고기,우유&source=ocr`
+/// - `smartledger://transaction/add?amount=45800&store=이마트&items=양배추,닭고기,우유`
+///   `&source=ocr`
 ///   (책스캔앱에서 OCR 처리 후 SmartLedger로 데이터 반환)
 ///   (특정 재료 건강도 분석)
 /// - `smartledger://stock/check?product=팽이버섯` (재고 조회)

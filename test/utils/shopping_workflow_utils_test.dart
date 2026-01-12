@@ -32,7 +32,7 @@ void main() {
     test('getCheckedItems filters only checked', () {
       final items = [
         CartItem(id: '1', name: 'A', isChecked: true),
-        CartItem(id: '2', name: 'B', isChecked: false),
+        CartItem(id: '2', name: 'B'),
       ];
       final checked = ShoppingWorkflowUtils.getCheckedItems(items);
       expect(checked.map((e) => e.id).toList(), ['1']);
@@ -75,7 +75,7 @@ void main() {
     test('completeWorkflow removes checked items', () {
       final items = [
         CartItem(id: '1', name: 'A', isChecked: true),
-        CartItem(id: '2', name: 'B', isChecked: false),
+        CartItem(id: '2', name: 'B'),
       ];
       ShoppingWorkflowUtils.completeWorkflow(items);
       expect(items.map((e) => e.id).toList(), ['2']);

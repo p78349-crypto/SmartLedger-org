@@ -24,7 +24,7 @@ void main() {
     });
 
     test('categoryOptions contains expected main categories', () {
-      final options = CategoryDefinitions.categoryOptions;
+      const options = CategoryDefinitions.categoryOptions;
       expect(options.containsKey('식품·음료비'), true);
       expect(options.containsKey('식비'), true);
       expect(options.containsKey('주거비'), true);

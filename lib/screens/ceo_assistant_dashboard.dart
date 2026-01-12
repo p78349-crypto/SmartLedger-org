@@ -83,21 +83,24 @@ class CEOAssistantDashboard extends StatelessWidget {
                     context,
                     title: '총 자산',
                     value:
-                        '₩${NumberFormats.currency.format(totalAssets.toInt())}',
+                        '₩'
+                        '${NumberFormats.currency.format(totalAssets.toInt())}',
                     icon: Icons.account_balance_wallet,
                   ),
                   _metricCard(
                     context,
                     title: '최근 월 수입',
                     value:
-                        '₩${NumberFormats.currency.format(lastMonthIncome.toInt())}',
+                        '₩'
+                        '${NumberFormats.currency.format(lastMonthIncome.toInt())}',
                     icon: Icons.trending_up,
                   ),
                   _metricCard(
                     context,
                     title: '최근 월 지출',
                     value:
-                        '₩${NumberFormats.currency.format(lastMonthExpense.toInt())}',
+                        '₩'
+                        '${NumberFormats.currency.format(lastMonthExpense.toInt())}',
                     icon: Icons.trending_down,
                   ),
                 ],

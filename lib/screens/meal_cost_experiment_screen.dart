@@ -1,9 +1,13 @@
+library meal_cost_experiment_screen;
+
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
 import '../services/savings_statistics_service.dart';
 import '../utils/currency_formatter.dart';
+
+part 'meal_cost_experiment_screen_items.dart';
 
 class MealCostExperimentScreen extends StatefulWidget {
   const MealCostExperimentScreen({super.key});
@@ -249,108 +253,10 @@ class _MealCostExperimentScreenState extends State<MealCostExperimentScreen> {
             },
           ),
           const SizedBox(height: 12),
-          FilledButton(onPressed: _save, child: const Text('저장 (소비 기록에 추가)')),
-        ],
-      ),
-    );
-  }
-}
-
-class _MealItemInput {
-  final nameController = TextEditingController();
-  final gramsController = TextEditingController();
-  final priceController = TextEditingController();
-
-  void dispose() {
-    nameController.dispose();
-    gramsController.dispose();
-    priceController.dispose();
-  }
-
-  String get name => nameController.text;
-
-  double get gramsValue {
-    final raw = gramsController.text.trim();
-    final v = double.tryParse(raw);
-    return (v ?? 0.0).clamp(0.0, double.infinity);
-  }
-
-  String get gramsLabel {
-    final g = gramsValue;
-    if (g <= 0) return '';
-    final isInt = g == g.toInt();
-    return isInt ? '${g.toInt()}g' : '${g.toStringAsFixed(1)}g';
-  }
-
-  double get priceValue {
-    final raw = priceController.text.trim().replaceAll(',', '');
-    final v = double.tryParse(raw);
-    return (v ?? 0.0).clamp(0.0, double.infinity);
-  }
-}
-
-class _MealItemRow extends StatelessWidget {
-  final _MealItemInput input;
-  final VoidCallback? onRemove;
-  final VoidCallback onChanged;
-
-  const _MealItemRow({
-    required this.input,
-    required this.onRemove,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 5,
-            child: TextField(
-              controller: input.nameController,
-              decoration: const InputDecoration(
-                labelText: '품목',
-                border: OutlineInputBorder(),
-              ),
-              onChanged: (_) => onChanged(),
-            ),
+          FilledButton(
+            onPressed: _save,
+            child: const Text('저장 (소비 기록에 추가)'),
           ),
-          const SizedBox(width: 8),
-          Expanded(
-            flex: 3,
-            child: TextField(
-              controller: input.gramsController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'g',
-                border: OutlineInputBorder(),
-              ),
-              onChanged: (_) => onChanged(),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            flex: 3,
-            child: TextField(
-              controller: input.priceController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: '원',
-                border: OutlineInputBorder(),
-              ),
-              onChanged: (_) => onChanged(),
-            ),
-          ),
-          if (onRemove != null) ...[
-            const SizedBox(width: 8),
-            IconButton(
-              onPressed: onRemove,
-              icon: const Icon(Icons.close),
-              tooltip: '삭제',
-            ),
-          ],
         ],
       ),
     );

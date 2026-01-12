@@ -55,7 +55,8 @@ class CEORecoveryPlanScreen extends StatelessWidget {
                   child: ListTile(
                     title: const Text('1) 비용 우선순위 조정'),
                     subtitle: Text(
-                      '비핵심 지출을 3개월간 30% 감축 — 예상 절감: ₩${NumberFormats.currency.format(suggestedCut)} (월)',
+                      '비핵심 지출을 3개월간 30% 감축 — 예상 절감: '
+                      '₩${NumberFormats.currency.format(suggestedCut)} (월)',
                     ),
                   ),
                 ),

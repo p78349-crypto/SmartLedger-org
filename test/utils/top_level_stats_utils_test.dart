@@ -24,15 +24,15 @@ void main() {
         topFixedCosts: <RootFixedCostEntry>[],
       );
 
-      final ctx = RootDashboardContext(
-        accounts: const [],
-        transactionsByAccount: const {},
-        transactionAccountMap: const {},
-        allTransactions: const <Transaction>[],
+      const ctx = RootDashboardContext(
+        accounts: [],
+        transactionsByAccount: {},
+        transactionAccountMap: {},
+        allTransactions: <Transaction>[],
         summaryData: summary,
-        allFixedCosts: const <RootFixedCostEntry>[],
-        orphanAccountNames: const [],
-        trackedAccountNames: const [],
+        allFixedCosts: <RootFixedCostEntry>[],
+        orphanAccountNames: [],
+        trackedAccountNames: [],
       );
 
       expect(ctx.accounts, isEmpty);

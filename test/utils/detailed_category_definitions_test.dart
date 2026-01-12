@@ -12,7 +12,7 @@ void main() {
     });
 
     test('categoryOptions contains expected main categories', () {
-      final options = DetailedCategoryDefinitions.categoryOptions;
+      const options = DetailedCategoryDefinitions.categoryOptions;
       expect(options.containsKey('식품·음료비'), true);
       expect(options.containsKey('주거비'), true);
       expect(options.containsKey('교통비'), true);

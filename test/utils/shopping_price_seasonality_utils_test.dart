@@ -31,7 +31,7 @@ void main() {
       final now = DateTime(2026, 1, 15);
       final result = ShoppingPriceSeasonalityUtils.cheapestMonthLastYear(
         transactions: [
-          tx(id: '1', date: DateTime(2026, 1, 1), description: '사과', unitPrice: 1000),
+          tx(id: '1', date: DateTime(2026), description: '사과', unitPrice: 1000),
         ],
         itemName: '사과',
         now: now,
@@ -45,13 +45,13 @@ void main() {
       // Ensure >= 6 samples total and >=2 per candidate month.
       final transactions = <Transaction>[
         // March (median 900)
-        tx(id: 'm1', date: DateTime(2026, 3, 1), description: '사과', unitPrice: 800),
+        tx(id: 'm1', date: DateTime(2026, 3), description: '사과', unitPrice: 800),
         tx(id: 'm2', date: DateTime(2026, 3, 2), description: '사과', unitPrice: 1000),
         // May (median 1200)
-        tx(id: 'y1', date: DateTime(2026, 5, 1), description: '사과', unitPrice: 1100),
+        tx(id: 'y1', date: DateTime(2026, 5), description: '사과', unitPrice: 1100),
         tx(id: 'y2', date: DateTime(2026, 5, 2), description: '사과', unitPrice: 1300),
         // November (median 1500)
-        tx(id: 'n1', date: DateTime(2026, 11, 1), description: '사과', unitPrice: 1400),
+        tx(id: 'n1', date: DateTime(2026, 11), description: '사과', unitPrice: 1400),
         tx(id: 'n2', date: DateTime(2026, 11, 2), description: '사과', unitPrice: 1600),
         // Noise: other item / wrong category
         tx(id: 'o1', date: DateTime(2026, 3, 3), description: '바나나', unitPrice: 100),

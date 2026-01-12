@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
@@ -130,15 +129,6 @@ class AppDatabase extends _$AppDatabase {
       );
     },
     onUpgrade: (migrator, from, to) async {
-      // NOTE: Keep migrations additive and stepwise.
-      // Example pattern:
-      // if (from < 2) {
-      //   await migrator.addColumn(dbTransactions, dbTransactions.newCol);
-      // }
-      // if (from < 3) {
-      //   await migrator.createTable(dbNewTable);
-      // }
-
       // FTS is a cache. For schema changes, we can safely drop and recreate.
       if (from < 3) {
         await customStatement('DROP TABLE IF EXISTS tx_fts');

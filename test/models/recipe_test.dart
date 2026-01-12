@@ -93,7 +93,6 @@ void main() {
       final recipe = Recipe(
         id: 'recipe-3',
         name: '된장찌개',
-        cuisine: '한식',
         ingredients: [
           RecipeIngredient(name: '된장', quantity: 30, unit: 'g'),
           RecipeIngredient(name: '두부', quantity: 0.5, unit: '모'),
@@ -150,7 +149,6 @@ void main() {
       final original = Recipe(
         id: 'recipe-6',
         name: '불고기',
-        cuisine: '한식',
         ingredients: [
           RecipeIngredient(name: '소고기', quantity: 300, unit: 'g'),
           RecipeIngredient(name: '배', quantity: 0.5, unit: '개'),

@@ -35,8 +35,6 @@ void main() {
 
       final learned = ShoppingRepurchaseLearningUtils.learnMinDaysByNameKey(
         list,
-        minClampDays: 2,
-        maxClampDays: 45,
       );
       expect(learned['milk'], 2);
 
@@ -46,15 +44,13 @@ void main() {
       ];
       final learned2 = ShoppingRepurchaseLearningUtils.learnMinDaysByNameKey(
         far,
-        minClampDays: 2,
-        maxClampDays: 45,
       );
       expect(learned2['rice'], 45);
     });
 
     test('learnMinDaysByNameKey ignores items with insufficient samples', () {
       final learned = ShoppingRepurchaseLearningUtils.learnMinDaysByNameKey([
-        tx('only-once', DateTime(2026, 1, 1)),
+        tx('only-once', DateTime(2026)),
       ]);
       expect(learned, isEmpty);
     });

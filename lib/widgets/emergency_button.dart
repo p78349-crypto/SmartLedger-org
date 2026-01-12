@@ -266,7 +266,8 @@ class EmergencyButton extends StatelessWidget {
 
       // Google Maps에서 근처 병원 검색
       final url = Uri.parse(
-        'https://www.google.com/maps/search/hospital/@${position.latitude},${position.longitude},15z',
+        'https://www.google.com/maps/search/hospital/@'
+        '${position.latitude},${position.longitude},15z',
       );
 
       if (await canLaunchUrl(url)) {
@@ -532,7 +533,8 @@ class _LocationCardState extends State<_LocationCard> {
       if (mounted) {
         setState(() {
           _locationText =
-              '현재 위치: ${position.latitude.toStringAsFixed(4)}, ${position.longitude.toStringAsFixed(4)}';
+              '현재 위치: ${position.latitude.toStringAsFixed(4)}, '
+              '${position.longitude.toStringAsFixed(4)}';
           _isLoading = false;
         });
       }

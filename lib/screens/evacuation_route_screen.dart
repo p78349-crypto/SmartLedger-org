@@ -152,7 +152,10 @@ class _EvacuationRouteScreenState extends State<EvacuationRouteScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              '대상 지역: ${_activePlan.location}\n예상 날씨: ${weatherConditionNames[_activePlan.condition] ?? '극한 날씨'}\n가족 인원: ${_activePlan.familySize}명\n생성 시각: ${_activePlan.generatedAt.toLocal()}',
+              '대상 지역: ${_activePlan.location}\n'
+              '예상 날씨: ${weatherConditionNames[_activePlan.condition] ?? '극한 날씨'}\n'
+              '가족 인원: ${_activePlan.familySize}명\n'
+              '생성 시각: ${_activePlan.generatedAt.toLocal()}',
               style: const TextStyle(fontSize: 13, color: Colors.black54),
             ),
             if (_isUserInSafeArea) ...[

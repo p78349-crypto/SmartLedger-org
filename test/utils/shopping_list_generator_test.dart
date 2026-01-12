@@ -8,7 +8,7 @@ void main() {
     test('returns empty list when weather is not extreme', () {
       final forecast = WeatherForecast(
         condition: WeatherCondition.sunny,
-        forecastDate: DateTime(2026, 1, 1),
+        forecastDate: DateTime(2026),
         daysUntil: 1,
         temperature: 10,
         location: 'Seoul',
@@ -17,7 +17,6 @@ void main() {
 
       final result = ShoppingListGenerator.generateShoppingList(
         forecast: forecast,
-        familySize: 2,
       );
 
       expect(result.items, isEmpty);
@@ -29,7 +28,7 @@ void main() {
     test('generates items and adjusts quantities by family size', () {
       final forecast = WeatherForecast(
         condition: WeatherCondition.typhoon,
-        forecastDate: DateTime(2026, 1, 1),
+        forecastDate: DateTime(2026),
         daysUntil: 1,
         temperature: 20,
         location: 'Busan',

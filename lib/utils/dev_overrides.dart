@@ -10,9 +10,10 @@
 /// `flutter run --dart-define=SL_DEV_BYPASS_SECURITY=true`
 ///
 /// **DO NOT** ship with this enabled.
+library dev_overrides;
 import 'package:flutter/foundation.dart' show kReleaseMode;
 
 const bool kDevBypassSecurity =
 	kReleaseMode
 		? false
-		: bool.fromEnvironment('SL_DEV_BYPASS_SECURITY', defaultValue: false);
+		: bool.fromEnvironment('SL_DEV_BYPASS_SECURITY');

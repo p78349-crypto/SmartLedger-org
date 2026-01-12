@@ -38,8 +38,8 @@ void main() {
 
     test('aggregates single category', () {
       final txs = [
-        createTx(id: '1', amount: 10000, mainCategory: '식비'),
-        createTx(id: '2', amount: 20000, mainCategory: '식비'),
+        createTx(id: '1', amount: 10000),
+        createTx(id: '2', amount: 20000),
       ];
 
       analysis.ingest(txs);
@@ -52,7 +52,7 @@ void main() {
 
     test('separates different main categories', () {
       final txs = [
-        createTx(id: '1', amount: 10000, mainCategory: '식비'),
+        createTx(id: '1', amount: 10000),
         createTx(id: '2', amount: 5000, mainCategory: '교통'),
       ];
 
@@ -69,13 +69,11 @@ void main() {
         createTx(
           id: '1',
           amount: 10000,
-          mainCategory: '식비',
           subCategory: '외식',
         ),
         createTx(
           id: '2',
           amount: 5000,
-          mainCategory: '식비',
           subCategory: '장보기',
         ),
       ];
@@ -119,7 +117,7 @@ void main() {
     });
 
     test('clears previous data on new ingest', () {
-      analysis.ingest([createTx(id: '1', amount: 10000, mainCategory: '식비')]);
+      analysis.ingest([createTx(id: '1', amount: 10000)]);
       analysis.ingest([createTx(id: '2', amount: 5000, mainCategory: '교통')]);
 
       final result = analysis.result();

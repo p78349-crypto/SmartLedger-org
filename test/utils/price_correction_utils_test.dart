@@ -13,7 +13,7 @@ void main() {
         unitPrice: 1234,
         currency: 'KRW',
         source: VisitPriceSource.officialBaseline,
-        capturedAt: DateTime(2026, 1, 1),
+        capturedAt: DateTime(2026),
       );
 
       final result = PriceCorrectionUtils.calculateEffectivePrice(
@@ -35,8 +35,8 @@ void main() {
     });
 
     test('picks highest-priority non-expired entry and applies weather', () async {
-      final skuId = 'sku_test_priority_weather';
-      final storeId = 'store_test_priority_weather';
+      const skuId = 'sku_test_priority_weather';
+      const storeId = 'store_test_priority_weather';
 
       final baseline = VisitPriceEntry.create(
         skuId: skuId,
@@ -45,7 +45,7 @@ void main() {
         unitPrice: 1000,
         currency: 'KRW',
         source: VisitPriceSource.officialBaseline,
-        capturedAt: DateTime(2026, 1, 1),
+        capturedAt: DateTime(2026),
       );
 
       // Highest priority but expired discount -> should be skipped.
@@ -55,7 +55,6 @@ void main() {
         regionCode: 'KR-11',
         unitPrice: 1500,
         currency: 'KRW',
-        source: VisitPriceSource.userReceipt,
         discount: DiscountContext(
           type: DiscountType.timeSale,
           multiplier: 0.5,

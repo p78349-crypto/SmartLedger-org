@@ -85,7 +85,7 @@ void main() {
 
         final result = SpendingAnalysisUtils.getTopSpendingItems(
           transactions: txs,
-          startDate: DateTime(2026, 1, 1),
+          startDate: DateTime(2026),
           endDate: DateTime(2026, 1, 31),
         );
 
@@ -140,13 +140,12 @@ void main() {
     group('detectRecurringPatterns', () {
       test('returns empty for insufficient occurrences', () {
         final txs = [
-          createExpense(id: '1', amount: 5000, date: DateTime(2026, 1, 1), description: '커피'),
+          createExpense(id: '1', amount: 5000, date: DateTime(2026), description: '커피'),
           createExpense(id: '2', amount: 5000, date: DateTime(2026, 1, 8), description: '커피'),
         ];
 
         final result = SpendingAnalysisUtils.detectRecurringPatterns(
           transactions: txs,
-          minOccurrences: 3,
         );
 
         expect(result, isEmpty);
@@ -154,7 +153,7 @@ void main() {
 
       test('detects recurring pattern', () {
         final txs = [
-          createExpense(id: '1', amount: 5000, date: DateTime(2026, 1, 1), description: '커피'),
+          createExpense(id: '1', amount: 5000, date: DateTime(2026), description: '커피'),
           createExpense(id: '2', amount: 5000, date: DateTime(2026, 1, 8), description: '커피'),
           createExpense(id: '3', amount: 5000, date: DateTime(2026, 1, 15), description: '커피'),
           createExpense(id: '4', amount: 5000, date: DateTime(2026, 1, 22), description: '커피'),
@@ -162,7 +161,6 @@ void main() {
 
         final result = SpendingAnalysisUtils.detectRecurringPatterns(
           transactions: txs,
-          minOccurrences: 3,
         );
 
         expect(result.isNotEmpty, isTrue);
@@ -171,15 +169,13 @@ void main() {
 
       test('excludes patterns with long intervals', () {
         final txs = [
-          createExpense(id: '1', amount: 5000, date: DateTime(2026, 1, 1), description: '커피'),
-          createExpense(id: '2', amount: 5000, date: DateTime(2026, 3, 1), description: '커피'),
-          createExpense(id: '3', amount: 5000, date: DateTime(2026, 5, 1), description: '커피'),
+          createExpense(id: '1', amount: 5000, date: DateTime(2026), description: '커피'),
+          createExpense(id: '2', amount: 5000, date: DateTime(2026, 3), description: '커피'),
+          createExpense(id: '3', amount: 5000, date: DateTime(2026, 5), description: '커피'),
         ];
 
         final result = SpendingAnalysisUtils.detectRecurringPatterns(
           transactions: txs,
-          minOccurrences: 3,
-          maxIntervalDays: 45,
         );
 
         expect(result, isEmpty);
@@ -196,8 +192,8 @@ void main() {
         avgAmount: 1000,
         percentage: 10,
         transactions: [
-          createExpense(id: '1', amount: 6000, date: DateTime(2026, 1, 1)),
-          createExpense(id: '2', amount: 6000, date: DateTime(2026, 2, 1)),
+          createExpense(id: '1', amount: 6000, date: DateTime(2026)),
+          createExpense(id: '2', amount: 6000, date: DateTime(2026, 2)),
         ],
       );
 
@@ -212,7 +208,7 @@ void main() {
         avgAmount: 1000,
         frequency: 4,
         avgInterval: 7,
-        purchaseDates: [DateTime(2026, 1, 1), DateTime(2026, 1, 8)],
+        purchaseDates: [DateTime(2026), DateTime(2026, 1, 8)],
       );
 
       expect(pattern.predictionConfidence, 0);

@@ -1,19 +1,46 @@
-try { Set-Location (git rev-parse --show-toplevel) } catch { }
-$files = Get-ChildItem -Path .\lib -Recurse -Filter '*.dart' -File -ErrorAction SilentlyContinue
-$out = @()
-$found = $false
-foreach ($f in $files) {
-  $lines = Get-Content -LiteralPath $f.FullName -ErrorAction SilentlyContinue
-  for ($i=0; $i -lt $lines.Count; $i++) {
-    $line = $lines[$i].ToString().TrimEnd("`r")
-    if ($line.Length -gt 80) { $out += "$($f.FullName):$($i+1):$($line.Length)"; $found = $true }
+$repoRoot = $null
+try {
+  $repoRoot = (git rev-parse --show-toplevel).Trim()
+} catch {
+  $repoRoot = Split-Path -Parent $PSScriptRoot
+}
+
+try { Set-Location $repoRoot } catch { }
+
+$roots = @('.\lib', '.\test')
+$files = foreach ($root in $roots) {
+  if (Test-Path $root) {
+    Get-ChildItem -Path $root -Recurse -Filter '*.dart' -File -ErrorAction SilentlyContinue
   }
 }
-if ($out.Count -eq 0) {
-  Write-Host 'NO_LONG_LINES'
-  exit 0
-} else {
-  $out | ForEach-Object { Write-Host $_ }
-  Write-Host 'LONG_LINES_FOUND'
-  exit 1
+
+$files = $files | Where-Object { $_.Name -notmatch '\.(g|freezed)\.dart$' }
+
+$out = @()
+foreach ($f in $files) {
+  $lineNo = 0
+  Get-Content -LiteralPath $f.FullName -ErrorAction SilentlyContinue | ForEach-Object {
+    $lineNo++
+    $line = $_.ToString().TrimEnd("`r")
+    if ($line.Length -le 80) { return }
+
+    $rel = $f.FullName
+    try {
+      if ($repoRoot) {
+        $rel = [System.IO.Path]::GetRelativePath($repoRoot, $f.FullName)
+      }
+    } catch {
+    }
+    $rel = $rel -replace '\\', '/'
+    $out += "${rel}:${lineNo}:$($line.Length)"
+  }
 }
+
+if ($out.Count -eq 0) {
+  Write-Output 'OK: no lines > 80 chars'
+  exit 0
+}
+
+$out | ForEach-Object { Write-Output $_ }
+Write-Output 'ERROR: lines > 80 chars found'
+exit 1

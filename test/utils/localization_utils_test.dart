@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_ledger/utils/localization_utils.dart';
 
 void main() {
-  Widget _buildWithLocale(Locale locale, Widget child) {
+  Widget buildWithLocale(Locale locale, Widget child) {
     return MaterialApp(
       locale: locale,
       supportedLocales: const [
@@ -27,7 +27,7 @@ void main() {
       late String code;
 
       await tester.pumpWidget(
-        _buildWithLocale(
+        buildWithLocale(
           const Locale('ja'),
           Builder(
             builder: (context) {
@@ -45,7 +45,7 @@ void main() {
       late String ok;
 
       await tester.pumpWidget(
-        _buildWithLocale(
+        buildWithLocale(
           const Locale('en'),
           Builder(
             builder: (context) {
@@ -63,7 +63,7 @@ void main() {
       late String welcome;
 
       await tester.pumpWidget(
-        _buildWithLocale(
+        buildWithLocale(
           const Locale('ko'),
           Builder(
             builder: (context) {
@@ -87,7 +87,7 @@ void main() {
       late String ok;
 
       await tester.pumpWidget(
-        _buildWithLocale(
+        buildWithLocale(
           const Locale('fr'),
           Builder(
             builder: (context) {
@@ -107,7 +107,7 @@ void main() {
       late String ko;
 
       await tester.pumpWidget(
-        _buildWithLocale(
+        buildWithLocale(
           const Locale('en'),
           Builder(
             builder: (context) {
@@ -119,7 +119,7 @@ void main() {
       );
 
       await tester.pumpWidget(
-        _buildWithLocale(
+        buildWithLocale(
           const Locale('ja'),
           Builder(
             builder: (context) {
@@ -131,7 +131,7 @@ void main() {
       );
 
       await tester.pumpWidget(
-        _buildWithLocale(
+        buildWithLocale(
           const Locale('ko'),
           Builder(
             builder: (context) {
@@ -151,7 +151,7 @@ void main() {
       late String value;
 
       await tester.pumpWidget(
-        _buildWithLocale(
+        buildWithLocale(
           const Locale('en'),
           Builder(
             builder: (context) {
@@ -174,7 +174,7 @@ void main() {
       late String ja;
 
       await tester.pumpWidget(
-        _buildWithLocale(
+        buildWithLocale(
           const Locale('ko'),
           Builder(
             builder: (context) {
@@ -186,7 +186,7 @@ void main() {
       );
 
       await tester.pumpWidget(
-        _buildWithLocale(
+        buildWithLocale(
           const Locale('ja'),
           Builder(
             builder: (context) {
@@ -209,7 +209,7 @@ void main() {
       late bool isEnglish;
 
       await tester.pumpWidget(
-        _buildWithLocale(
+        buildWithLocale(
           const Locale('en'),
           Builder(
             builder: (context) {
@@ -233,7 +233,7 @@ void main() {
       late String value;
 
       await tester.pumpWidget(
-        _buildWithLocale(
+        buildWithLocale(
           const Locale('ko'),
           Builder(
             builder: (context) {

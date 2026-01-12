@@ -39,13 +39,12 @@ void main() {
           createExpense(
             id: '2',
             amount: 5000,
-            date: DateTime(2025, 12, 1), // outside 1-month lookback
+            date: DateTime(2025, 12), // outside 1-month lookback
           ),
         ];
 
         final result = MiscSpendingUtils.analyze(
           txs,
-          lookbackMonths: 1,
           anchor: now,
         );
 
@@ -67,7 +66,6 @@ void main() {
 
         final result = MiscSpendingUtils.analyze(
           txs,
-          lookbackMonths: 1,
           anchor: now,
         );
 
@@ -90,7 +88,6 @@ void main() {
 
         final result = MiscSpendingUtils.analyze(
           txs,
-          lookbackMonths: 1,
           anchor: now,
         );
 
@@ -148,7 +145,6 @@ void main() {
 
         final result = MiscSpendingUtils.analyze(
           txs,
-          lookbackMonths: 1,
           anchor: now,
         );
 
@@ -182,7 +178,6 @@ void main() {
 
         final result = MiscSpendingUtils.analyze(
           txs,
-          lookbackMonths: 1,
           anchor: now,
         );
 
@@ -204,7 +199,6 @@ void main() {
 
         final result = MiscSpendingUtils.analyze(
           txs,
-          lookbackMonths: 1,
           anchor: now,
         );
 

@@ -106,22 +106,26 @@ class _MonthlyProfitReportScreenState extends State<MonthlyProfitReportScreen> {
                             DataCell(Text(ym)),
                             DataCell(
                               Text(
-                                '₩${NumberFormats.currency.format(income.toInt())}',
+                                '₩'
+                                '${NumberFormats.currency.format(income.toInt())}',
                               ),
                             ),
                             DataCell(
                               Text(
-                                '₩${NumberFormats.currency.format(expense.toInt())}',
+                                '₩'
+                                '${NumberFormats.currency.format(expense.toInt())}',
                               ),
                             ),
                             DataCell(
                               Text(
-                                '₩${NumberFormats.currency.format(refund.toInt())}',
+                                '₩'
+                                '${NumberFormats.currency.format(refund.toInt())}',
                               ),
                             ),
                             DataCell(
                               Text(
-                                '₩${NumberFormats.currency.format(net.toInt())}',
+                                '₩'
+                                '${NumberFormats.currency.format(net.toInt())}',
                               ),
                             ),
                           ],

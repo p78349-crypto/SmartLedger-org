@@ -16,14 +16,14 @@ void main() {
       test('month returns current month range', () {
         final range =
             PeriodUtils.getPeriodRange(PeriodType.month, baseDate: baseDate);
-        expect(range.start, DateTime(2026, 3, 1));
+        expect(range.start, DateTime(2026, 3));
         expect(range.end, DateTime(2026, 3, 31));
       });
 
       test('quarter returns Q1 for March', () {
         final range =
             PeriodUtils.getPeriodRange(PeriodType.quarter, baseDate: baseDate);
-        expect(range.start, DateTime(2026, 1, 1));
+        expect(range.start, DateTime(2026));
         expect(range.end, DateTime(2026, 3, 31));
       });
 
@@ -31,14 +31,14 @@ void main() {
         final aprilDate = DateTime(2026, 4, 15);
         final range =
             PeriodUtils.getPeriodRange(PeriodType.quarter, baseDate: aprilDate);
-        expect(range.start, DateTime(2026, 4, 1));
+        expect(range.start, DateTime(2026, 4));
         expect(range.end, DateTime(2026, 6, 30));
       });
 
       test('halfYear returns H1 for March', () {
         final range =
             PeriodUtils.getPeriodRange(PeriodType.halfYear, baseDate: baseDate);
-        expect(range.start, DateTime(2026, 1, 1));
+        expect(range.start, DateTime(2026));
         expect(range.end, DateTime(2026, 6, 30));
       });
 
@@ -46,21 +46,21 @@ void main() {
         final septDate = DateTime(2026, 9, 15);
         final range =
             PeriodUtils.getPeriodRange(PeriodType.halfYear, baseDate: septDate);
-        expect(range.start, DateTime(2026, 7, 1));
+        expect(range.start, DateTime(2026, 7));
         expect(range.end, DateTime(2026, 12, 31));
       });
 
       test('year returns full year range', () {
         final range =
             PeriodUtils.getPeriodRange(PeriodType.year, baseDate: baseDate);
-        expect(range.start, DateTime(2026, 1, 1));
+        expect(range.start, DateTime(2026));
         expect(range.end, DateTime(2026, 12, 31));
       });
 
       test('decade returns 10 year range', () {
         final range =
             PeriodUtils.getPeriodRange(PeriodType.decade, baseDate: baseDate);
-        expect(range.start, DateTime(2020, 1, 1));
+        expect(range.start, DateTime(2020));
         expect(range.end, DateTime(2029, 12, 31));
       });
     });
@@ -88,7 +88,7 @@ void main() {
   group('DateTimeRange', () {
     test('contains returns true for date within range', () {
       final range = DateTimeRange(
-        start: DateTime(2026, 1, 1),
+        start: DateTime(2026),
         end: DateTime(2026, 12, 31),
       );
       expect(range.contains(DateTime(2026, 6, 15)), isTrue);
@@ -96,15 +96,15 @@ void main() {
 
     test('contains returns true for start date', () {
       final range = DateTimeRange(
-        start: DateTime(2026, 1, 1),
+        start: DateTime(2026),
         end: DateTime(2026, 12, 31),
       );
-      expect(range.contains(DateTime(2026, 1, 1)), isTrue);
+      expect(range.contains(DateTime(2026)), isTrue);
     });
 
     test('contains returns true for end date', () {
       final range = DateTimeRange(
-        start: DateTime(2026, 1, 1),
+        start: DateTime(2026),
         end: DateTime(2026, 12, 31),
       );
       expect(range.contains(DateTime(2026, 12, 31)), isTrue);
@@ -112,7 +112,7 @@ void main() {
 
     test('contains returns false for date before range', () {
       final range = DateTimeRange(
-        start: DateTime(2026, 1, 1),
+        start: DateTime(2026),
         end: DateTime(2026, 12, 31),
       );
       expect(range.contains(DateTime(2025, 12, 31)), isFalse);
@@ -120,10 +120,10 @@ void main() {
 
     test('contains returns false for date after range', () {
       final range = DateTimeRange(
-        start: DateTime(2026, 1, 1),
+        start: DateTime(2026),
         end: DateTime(2026, 12, 31),
       );
-      expect(range.contains(DateTime(2027, 1, 1)), isFalse);
+      expect(range.contains(DateTime(2027)), isFalse);
     });
   });
 }

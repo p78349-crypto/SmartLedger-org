@@ -130,7 +130,9 @@ class CEORoiDetailScreen extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    '카테고리별 지출 대비 수익 (${start.year}-${start.month.toString().padLeft(2, '0')} ~ ${end.year}-${(end.month - 1).toString().padLeft(2, '0')}, lookahead $lookaheadMonths개월)',
+                    '카테고리별 지출 대비 수익 ('
+                    '${start.year}-${start.month.toString().padLeft(2, '0')} ~ ${end.year}-${(end.month - 1).toString().padLeft(2, '0')}, '
+                    'lookahead $lookaheadMonths개월)',
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -220,7 +222,8 @@ class CEORoiDetailScreen extends StatelessWidget {
       final dir = await getApplicationDocumentsDirectory();
       final stamp = DateTime.now().toIso8601String().replaceAll(':', '-');
       final path =
-          '${dir.path}/ceo_roi_detail_${start.year}${start.month.toString().padLeft(2, '0')}_to_${end.year}${end.month.toString().padLeft(2, '0')}_la${lookaheadMonths}_$stamp.csv';
+          '${dir.path}/ceo_roi_detail_${start.year}${start.month.toString().padLeft(2, '0')}_to_'
+          '${end.year}${end.month.toString().padLeft(2, '0')}_la${lookaheadMonths}_$stamp.csv';
       await File(path).writeAsString(csv);
       await SharePlus.instance.share(
         ShareParams(text: 'CEO ROI 상세 CSV', files: [XFile(path)]),

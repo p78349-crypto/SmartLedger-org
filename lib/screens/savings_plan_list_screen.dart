@@ -94,7 +94,6 @@ class _SavingsPlanListScreenState extends State<SavingsPlanListScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
     return Scaffold(
       appBar: AppBar(
         title: Text(

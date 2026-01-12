@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../models/transaction.dart';
 import 'icon_catalog.dart';
 
-/// 통계 화면 뷰 타입
 enum StatsView {
   month,
   quarter,
@@ -16,7 +15,6 @@ enum StatsView {
   refundDetail,
 }
 
-/// 통계 화면 상태 관리 유틸리티
 class StatsViewUtils {
   StatsViewUtils._();
 
@@ -117,7 +115,6 @@ class StatsViewUtils {
       .map((v) => _meta[v]!)
       .toList(growable: false);
 
-  // ---- Range presets (chips: 1/3/6/12 months + 10 years) ----
   static const List<StatsRangePreset> rangePresets = [
     StatsRangePreset(id: 'range_1m', label: '1m', icon: IconCatalog.looksOne),
     StatsRangePreset(id: 'range_3m', label: '3m', icon: IconCatalog.looks3),
@@ -134,7 +131,6 @@ class StatsViewUtils {
     ),
   ];
 
-  // ---- Quick toggles (chips: transactions, decade view, fixed cost) ----
   static const List<StatsQuickToggle> quickToggles = [
     StatsQuickToggle(
       id: 'toggle_transactions',
@@ -153,7 +149,6 @@ class StatsViewUtils {
     ),
   ];
 
-  // ---- Category analysis chips (expense / income / savings) ----
   static const List<CategoryFilterChip> categoryFilters = [
     CategoryFilterChip(
       id: 'category_expense',
@@ -172,8 +167,6 @@ class StatsViewUtils {
     ),
   ];
 
-  // ---- Decade analysis filters
-  // (Year / Quarter / Category 10y trend / Monthly avg) ----
   static const List<DecadeAnalysisFilter> decadeAnalysisFilters = [
     DecadeAnalysisFilter(
       id: 'decade_year_compare',
@@ -197,8 +190,6 @@ class StatsViewUtils {
     ),
   ];
 
-  // ---- Chart extension options
-  // (Fullscreen / Export / Detail / Comparison / Zoom) ----
   static const List<ChartExtensionOption> chartExtensionOptions = [
     ChartExtensionOption(
       id: 'chart_fullscreen',
@@ -233,7 +224,6 @@ class StatsViewUtils {
   ];
 }
 
-/// 카테고리 분석 토글(지출/수입/예금) 메타 정보
 class CategoryFilterChip {
   final String id;
   final String label;
@@ -246,7 +236,6 @@ class CategoryFilterChip {
   });
 }
 
-/// 연대통계 분석 필터 메타 정보 (연도비교/분기추세/카테고리10년/월평균)
 class DecadeAnalysisFilter {
   final String id;
   final String label;
@@ -259,7 +248,6 @@ class DecadeAnalysisFilter {
   });
 }
 
-/// 차트 확장 옵션 메타 정보 (전체화면/내보내기/상세/비교/확대)
 class ChartExtensionOption {
   final String id;
   final String label;
@@ -272,7 +260,6 @@ class ChartExtensionOption {
   });
 }
 
-/// 그래프/뷰 메타 정보
 class StatsViewMeta {
   final String id;
   final String label;
@@ -285,7 +272,6 @@ class StatsViewMeta {
   });
 }
 
-/// 범위 프리셋 메타 정보
 class StatsRangePreset {
   final String id;
   final String label;
@@ -298,7 +284,6 @@ class StatsRangePreset {
   });
 }
 
-/// 빠른 토글 메타 정보 (거래/10년/고정비 등)
 class StatsQuickToggle {
   final String id;
   final String label;

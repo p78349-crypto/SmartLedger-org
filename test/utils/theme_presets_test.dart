@@ -16,7 +16,7 @@ void main() {
     });
 
     test('toJson/fromJson round trip preserves fields', () {
-      final original = ThemeVariant.miMidnight;
+      const original = ThemeVariant.miMidnight;
       final json = original.toJson();
       final restored = ThemeVariant.fromJson(json);
 

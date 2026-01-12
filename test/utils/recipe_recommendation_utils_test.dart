@@ -28,8 +28,6 @@ void main() {
       final map = await RecipeRecommendationUtils.getRecommendedRecipes(
         available,
         includeUserRecipes: false,
-        prioritizeExpiring: true,
-        prioritizeHealth: true,
       );
 
       // 계란프라이 requires ['계란','버터','소금'] => 2/3 => 66%
@@ -44,19 +42,17 @@ void main() {
       final now = DateTime(2026, 1, 10);
       final available = [
         item('계란', now: now, daysUntilExpiry: 1), // expiring
-        item('소금', now: now, daysUntilExpiry: 10),
+        item('소금', now: now),
         item('두부', now: now, daysUntilExpiry: 1), // expiring
-        item('간장', now: now, daysUntilExpiry: 10),
-        item('마늘', now: now, daysUntilExpiry: 10),
-        item('파', now: now, daysUntilExpiry: 10),
+        item('간장', now: now),
+        item('마늘', now: now),
+        item('파', now: now),
       ];
 
       final list = await RecipeRecommendationUtils.getTopRecommendations(
         available,
         limit: 5,
         includeUserRecipes: false,
-        prioritizeExpiring: true,
-        prioritizeHealth: true,
       );
 
       expect(list, isNotEmpty);

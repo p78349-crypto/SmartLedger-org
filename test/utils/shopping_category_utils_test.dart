@@ -9,8 +9,8 @@ void main() {
     ShoppingCartItem item(String name) => ShoppingCartItem(
           id: 'id',
           name: name,
-          createdAt: DateTime(2026, 1, 1),
-          updatedAt: DateTime(2026, 1, 1),
+          createdAt: DateTime(2026),
+          updatedAt: DateTime(2026),
         );
 
     test('normalizeHintKey trims/lowercases/removes spaces', () {

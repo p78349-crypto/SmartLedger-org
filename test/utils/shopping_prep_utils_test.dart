@@ -7,8 +7,8 @@ void main() {
     ShoppingCartItem item(String id, String name) => ShoppingCartItem(
           id: id,
           name: name,
-          createdAt: DateTime(2026, 1, 1),
-          updatedAt: DateTime(2026, 1, 1),
+          createdAt: DateTime(2026),
+          updatedAt: DateTime(2026),
         );
 
     test('normalizeName trims/lowercases/removes spaces', () {

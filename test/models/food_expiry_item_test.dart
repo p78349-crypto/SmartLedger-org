@@ -7,9 +7,9 @@ void main() {
       final item = FoodExpiryItem(
         id: 'food-1',
         name: '우유',
-        purchaseDate: DateTime(2026, 1, 1),
+        purchaseDate: DateTime(2026),
         expiryDate: DateTime(2026, 1, 10),
-        createdAt: DateTime(2026, 1, 1),
+        createdAt: DateTime(2026),
       );
 
       expect(item.id, 'food-1');
@@ -34,7 +34,7 @@ void main() {
         location: '냉동',
         price: 15000,
         supplier: '이마트',
-        healthTags: ['단백질'],
+        healthTags: const ['단백질'],
       );
 
       expect(item.memo, '삼겹살');
@@ -52,9 +52,9 @@ void main() {
         final item = FoodExpiryItem(
           id: 'food-1',
           name: '우유',
-          purchaseDate: DateTime(2026, 1, 1),
+          purchaseDate: DateTime(2026),
           expiryDate: DateTime(2026, 1, 10),
-          createdAt: DateTime(2026, 1, 1),
+          createdAt: DateTime(2026),
         );
 
         final now = DateTime(2026, 1, 5);
@@ -65,9 +65,9 @@ void main() {
         final item = FoodExpiryItem(
           id: 'food-1',
           name: '우유',
-          purchaseDate: DateTime(2026, 1, 1),
+          purchaseDate: DateTime(2026),
           expiryDate: DateTime(2026, 1, 5),
-          createdAt: DateTime(2026, 1, 1),
+          createdAt: DateTime(2026),
         );
 
         final now = DateTime(2026, 1, 5);
@@ -78,9 +78,9 @@ void main() {
         final item = FoodExpiryItem(
           id: 'food-1',
           name: '우유',
-          purchaseDate: DateTime(2026, 1, 1),
+          purchaseDate: DateTime(2026),
           expiryDate: DateTime(2026, 1, 5),
-          createdAt: DateTime(2026, 1, 1),
+          createdAt: DateTime(2026),
         );
 
         final now = DateTime(2026, 1, 8);
@@ -93,16 +93,14 @@ void main() {
         final item = FoodExpiryItem(
           id: 'food-1',
           name: '계란',
-          purchaseDate: DateTime(2026, 1, 1),
+          purchaseDate: DateTime(2026),
           expiryDate: DateTime(2026, 1, 20),
-          createdAt: DateTime(2026, 1, 1),
+          createdAt: DateTime(2026),
           quantity: 30,
-          unit: '개',
           category: '유제품',
-          location: '냉장',
           price: 8000,
           supplier: '농협',
-          healthTags: ['단백질', '콜레스테롤'],
+          healthTags: const ['단백질', '콜레스테롤'],
         );
 
         final json = item.toJson();
@@ -151,9 +149,9 @@ void main() {
         final original = FoodExpiryItem(
           id: 'food-1',
           name: '우유',
-          purchaseDate: DateTime(2026, 1, 1),
+          purchaseDate: DateTime(2026),
           expiryDate: DateTime(2026, 1, 10),
-          createdAt: DateTime(2026, 1, 1),
+          createdAt: DateTime(2026),
         );
 
         final updated = original.copyWith(

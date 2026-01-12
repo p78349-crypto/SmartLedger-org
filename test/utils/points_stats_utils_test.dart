@@ -147,7 +147,7 @@ void main() {
 
         final result = PointsStatsUtils.sumByCategory(
           txs,
-          start: DateTime(2026, 1, 1),
+          start: DateTime(2026),
           end: DateTime(2026, 1, 31),
         );
 
@@ -166,7 +166,7 @@ void main() {
 
         final result = PointsStatsUtils.sumByCategory(
           txs,
-          start: DateTime(2026, 1, 1),
+          start: DateTime(2026),
           end: DateTime(2026, 1, 31),
         );
 

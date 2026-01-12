@@ -8,8 +8,8 @@ void main() {
   testWidgets('addCheckedItemsToLedgerBulk shows snack when nothing checked', (tester) async {
     final now = DateTime(2026, 1, 11);
     final items = <ShoppingCartItem>[
-      ShoppingCartItem(id: 'i1', name: '물', isChecked: false, createdAt: now, updatedAt: now),
-      ShoppingCartItem(id: 'i2', name: '빵', isChecked: false, createdAt: now, updatedAt: now),
+      ShoppingCartItem(id: 'i1', name: '물', createdAt: now, updatedAt: now),
+      ShoppingCartItem(id: 'i2', name: '빵', createdAt: now, updatedAt: now),
     ];
 
     await tester.pumpWidget(

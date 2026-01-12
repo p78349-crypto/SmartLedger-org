@@ -25,7 +25,7 @@ void main() {
     });
 
     test('categoryOptions contains expected main categories', () {
-      final options = IncomeCategoryDefinitions.categoryOptions;
+      const options = IncomeCategoryDefinitions.categoryOptions;
       expect(options.containsKey('주수입'), true);
       expect(options.containsKey('사업소득'), true);
       expect(options.containsKey('부수입'), true);

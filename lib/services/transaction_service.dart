@@ -1,17 +1,22 @@
+library transaction_service;
+
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../database/database_provider.dart';
 import '../models/transaction.dart';
+import '../utils/pref_keys.dart';
+import '../utils/store_memo_utils.dart';
 import 'monthly_agg_cache_service.dart';
 import 'transaction_benefit_monthly_agg_service.dart';
 import 'transaction_db_migration_service.dart';
 import 'transaction_db_store.dart';
 import 'transaction_fts_index_service.dart';
 import 'trash_service.dart';
-import '../utils/pref_keys.dart';
-import '../utils/store_memo_utils.dart';
+
+part 'transaction_service_storage.dart';
 
 class TransactionService {
   static final TransactionService _instance = TransactionService._internal();
@@ -269,129 +274,5 @@ class TransactionService {
           (t) => t.isRefund && t.originalTransactionId == originalTransactionId,
         )
         .toList();
-  }
-
-  Future<void> _doLoad() async {
-    final prefs = await SharedPreferences.getInstance();
-    final backend = (prefs.getString(PrefKeys.txStorageBackendV1) ?? _backendDb)
-        .trim()
-        .toLowerCase();
-
-    // Default to DB for new builds; keep legacy data for rollback.
-    if ((prefs.getString(PrefKeys.txStorageBackendV1) ?? '').trim().isEmpty) {
-      await prefs.setString(PrefKeys.txStorageBackendV1, _backendDb);
-    }
-
-    if (backend == _backendDb) {
-      // One-time migration from legacy SharedPreferences JSON.
-      try {
-        await TransactionDbMigrationService().ensureMigratedFromPrefs();
-      } catch (_) {
-        // Migration failures should not prevent app from starting.
-      }
-
-      // Load from DB into memory cache for backward-compatible APIs.
-      _accountTransactions.clear();
-      final accounts = await DatabaseProvider.instance.database
-          .getAllAccounts();
-      for (final account in accounts) {
-        final name = account.name;
-        final txs = await _dbStore.getAllTransactionsForAccount(name);
-        _accountTransactions[name] = txs;
-      }
-
-      _initialized = true;
-      _loading = null;
-      return;
-    }
-
-    final raw = prefs.getString(_prefsKey);
-    final alreadyMigrated = prefs.getBool(_storeMigrationFlagKey) ?? false;
-
-    var needsPersist = false;
-    if (raw != null && raw.isNotEmpty) {
-      try {
-        final Map<String, dynamic> data =
-            jsonDecode(raw) as Map<String, dynamic>;
-        _accountTransactions
-          ..clear()
-          ..addAll(
-            data.map(
-              (key, value) => MapEntry(
-                key,
-                (value as List<dynamic>).map((item) {
-                  final tx = Transaction.fromJson(item as Map<String, dynamic>);
-                  if (alreadyMigrated) {
-                    return tx;
-                  }
-                  final store = tx.store?.trim() ?? '';
-                  if (store.isNotEmpty) return tx;
-                  final extracted = StoreMemoUtils.extractStoreKey(tx.memo);
-                  if (extracted == null || extracted.trim().isEmpty) {
-                    return tx;
-                  }
-                  needsPersist = true;
-                  return tx.copyWith(store: extracted.trim());
-                }).toList(),
-              ),
-            ),
-          );
-      } catch (_) {
-        _accountTransactions.clear();
-      }
-    }
-
-    if (!alreadyMigrated) {
-      await prefs.setBool(_storeMigrationFlagKey, true);
-    }
-
-    if (needsPersist) {
-      await _persistInternal();
-    }
-
-    _initialized = true;
-    _loading = null;
-  }
-
-  Future<void> _persist({Future<void> Function(String backend)? dbUpsert}) {
-    final scheduled = _persistChain.then(
-      (_) => _persistInternal(dbUpsert: dbUpsert),
-    );
-    _persistChain = scheduled.then<void>(
-      (_) {},
-      onError: (error, stackTrace) {
-        _persistChain = Future.value();
-        return Future<void>.error(error, stackTrace);
-      },
-    );
-    return scheduled;
-  }
-
-  Future<void> _persistInternal({
-    Future<void> Function(String backend)? dbUpsert,
-  }) async {
-    final prefs = await SharedPreferences.getInstance();
-
-    final backend = (prefs.getString(PrefKeys.txStorageBackendV1) ?? _backendDb)
-        .trim()
-        .toLowerCase();
-
-    if (backend == _backendDb) {
-      if (dbUpsert != null) {
-        await dbUpsert(backend);
-      }
-
-      // Stamp for cache/index invalidation.
-      await TransactionFtsIndexService.bumpTransactionsPersistStamp();
-      return;
-    }
-
-    final data = _accountTransactions.map(
-      (key, value) => MapEntry(key, value.map((t) => t.toJson()).toList()),
-    );
-    await prefs.setString(_prefsKey, jsonEncode(data));
-
-    // Stamp for cache/index invalidation.
-    await TransactionFtsIndexService.bumpTransactionsPersistStamp();
   }
 }

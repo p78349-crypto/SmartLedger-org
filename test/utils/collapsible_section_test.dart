@@ -86,7 +86,7 @@ void main() {
           home: Scaffold(
             body: CollapsibleSection(
               title: '섹션',
-              children: [Text('Child')],
+              children: [const Text('Child')],
             ),
           ),
         ),
@@ -102,7 +102,7 @@ void main() {
             body: CollapsibleSection(
               title: '섹션',
               initiallyExpanded: false,
-              children: [Text('Child')],
+              children: [const Text('Child')],
             ),
           ),
         ),
@@ -117,7 +117,7 @@ void main() {
           home: Scaffold(
             body: CollapsibleSection(
               title: '섹션',
-              children: [Text('Child')],
+              children: [const Text('Child')],
             ),
           ),
         ),

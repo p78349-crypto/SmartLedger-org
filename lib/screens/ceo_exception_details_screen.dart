@@ -153,7 +153,7 @@ class CEOExceptionDetailsScreen extends StatelessWidget {
                               t.memo.isNotEmpty ? t.memo : (t.store ?? ''),
                             ),
                             subtitle: Text(
-                              '${DateFormats.yMd.format(t.date)}',
+                              DateFormats.yMd.format(t.date),
                             ),
                             trailing: Text('₩$amtStr'),
                           );

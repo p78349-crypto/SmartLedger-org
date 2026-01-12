@@ -1030,11 +1030,11 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
           description.contains('비타민') ||
           (mainCategory.contains('건강') || mainCategory.contains('의료'))) {
         isSpecialCase = true;
-        final _hospitalMsgPart1 = '\n\n💊 아이구, 어디 많이 아프신 건 아니죠? 건강을 잃으면 1억 프로젝트도 소용없어요.';
-        final _hospitalMsgPart2 = '약 잘 챙겨 드시고 오늘은 푹 쉬세요.';
-        final _hospitalMsgPart3 = '병원비 기록은 제가 알아서 잘 정리해둘게요. (포인트 연속 기록 보호됨)';
-        final _hospitalMsg = '$_hospitalMsgPart1\n$_hospitalMsgPart2\n$_hospitalMsgPart3';
-        customFeedback += _hospitalMsg;
+        const hospitalMsgPart1 = '\n\n💊 아이구, 어디 많이 아프신 건 아니죠? 건강을 잃으면 1억 프로젝트도 소용없어요.';
+        const hospitalMsgPart2 = '약 잘 챙겨 드시고 오늘은 푹 쉬세요.';
+        const hospitalMsgPart3 = '병원비 기록은 제가 알아서 잘 정리해둘게요. (포인트 연속 기록 보호됨)';
+        const hospitalMsg = '$hospitalMsgPart1\n$hospitalMsgPart2\n$hospitalMsgPart3';
+        customFeedback += hospitalMsg;
       }
       // 2. 경조사비 (사람 우선)
       else if (description.contains('축의금') ||

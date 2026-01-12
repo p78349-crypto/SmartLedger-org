@@ -825,8 +825,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                                           .format(tx.date);
                                       final refundNote = '$refundAmountText2원 → $selectedAccount';
                                       final refundDetails = '\n원구매일: $origDate2, 원결제수단: ${tx.paymentMethod}';
-                                      final autoMemo = '${tx.description} '
-                                          '$refundQuantity개 환불받음 ' + refundNote + refundDetails;
+                                      final autoMemo = '${tx.description} $refundQuantity개 환불받음 $refundNote$refundDetails';
                                       final refundTx = Transaction(
                                         id: DateTime.now()
                                             .millisecondsSinceEpoch

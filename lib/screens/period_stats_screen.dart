@@ -251,7 +251,7 @@ class _PeriodStatsScreenState extends State<PeriodStatsScreen> {
             style: theme.textTheme.bodyMedium,
           ),
           subtitle: Text(
-            '${count}건',
+            '$count건',
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -332,20 +332,20 @@ class _PeriodStatsScreenState extends State<PeriodStatsScreen> {
                                   final annualStr = NumberFormats.currency.format(annual);
                                   return Column(
                                     children: [
-                                    Text(
-                                      '${monthlyStr}원',
-                                      style: theme.textTheme.bodySmall?.copyWith(
-                                        fontWeight: FontWeight.w600,
+                                      Text(
+                                        '$monthlyStr원',
+                                        style: theme.textTheme.bodySmall?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                       ),
-                                    ),
-                                    Text(
-                                      '연환산 ${annualStr}원',
-                                      style: theme.textTheme.bodySmall?.copyWith(
-                                        fontSize: 11,
-                                        color: theme.colorScheme.onSurfaceVariant,
+                                      Text(
+                                        '연환산 $annualStr원',
+                                        style: theme.textTheme.bodySmall?.copyWith(
+                                          fontSize: 11,
+                                          color: theme.colorScheme.onSurfaceVariant,
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
                                   );
                                 }),
                               ],

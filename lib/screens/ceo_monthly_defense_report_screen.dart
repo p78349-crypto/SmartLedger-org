@@ -400,7 +400,8 @@ String buildDefenseReportText(
   buffer.writeln('[TOP SECRET] 월간 자산 방어 전투 보고서');
   buffer.writeln('${now.year}년 ${now.month}월 작전 상황 요약');
   buffer.writeln(
-    '총 자산: ${currency.format(totalAssets)} (목표 대비 ${progressPct.toStringAsFixed(1)}%)',
+    '총 자산: ${currency.format(totalAssets)} '
+    '(목표 대비 ${progressPct.toStringAsFixed(1)}%)',
   );
   buffer.writeln('이번 달 작전 잔여 예산: ${currency.format(budgetRemaining)}');
   buffer.writeln();
@@ -564,7 +565,8 @@ Future<File> _writeBinaryFile(
 }
 
 String _fileStem(DateTime now) =>
-    'monthly_defense_report_${now.year}_${now.month.toString().padLeft(2, '0')}';
+    'monthly_defense_report_${now.year}_'
+ '${now.month.toString().padLeft(2, '0')}';
 
 Future<Map<String, String>> generateMonthlyDefenseReportFiles(
   String accountName, {

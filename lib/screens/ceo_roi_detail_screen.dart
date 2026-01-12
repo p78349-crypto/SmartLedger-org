@@ -129,12 +129,24 @@ class CEORoiDetailScreen extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: Text(
-                    '카테고리별 지출 대비 수익 ('
-                    '${start.year}-${start.month.toString().padLeft(2, '0')} ~ ${end.year}-${(end.month - 1).toString().padLeft(2, '0')}, '
-                    'lookahead $lookaheadMonths개월)',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
+                  child: () {
+                    final startMonth = start.month.toString()
+                        .padLeft(2, '0');
+                    final endMonth = (end.month - 1).toString()
+                        .padLeft(2, '0');
+                    final startRange = '${start.year}-$startMonth';
+                    final endRange = '${end.year}-$endMonth';
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '카테고리별 지출 대비 수익 ($startRange ~ $endRange)',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Text('lookahead $lookaheadMonths개월'),
+                      ],
+                    );
+                  }(),
                 ),
                 IconButton(
                   icon: const Icon(IconCatalog.download),
@@ -221,9 +233,11 @@ class CEORoiDetailScreen extends StatelessWidget {
     try {
       final dir = await getApplicationDocumentsDirectory();
       final stamp = DateTime.now().toIso8601String().replaceAll(':', '-');
-      final path =
-          '${dir.path}/ceo_roi_detail_${start.year}${start.month.toString().padLeft(2, '0')}_to_'
-          '${end.year}${end.month.toString().padLeft(2, '0')}_la${lookaheadMonths}_$stamp.csv';
+      final monthFromMonth = start.month.toString().padLeft(2, '0');
+      final monthFrom = '${start.year}$monthFromMonth';
+      final monthToMonth = end.month.toString().padLeft(2, '0');
+      final monthTo = '${end.year}$monthToMonth';
+      final path = '${dir.path}/ceo_roi_detail_${monthFrom}_to_${monthTo}_la${lookaheadMonths}_$stamp.csv';
       await File(path).writeAsString(csv);
       await SharePlus.instance.share(
         ShareParams(text: 'CEO ROI 상세 CSV', files: [XFile(path)]),

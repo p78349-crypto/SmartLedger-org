@@ -101,33 +101,17 @@ class _MonthlyProfitReportScreenState extends State<MonthlyProfitReportScreen> {
                         final expense = bucket.expenseAggAmount;
                         final refund = bucket.refundAmount;
                         final net = income - expense;
+                        final incomeStr = NumberFormats.currency.format(income.toInt());
+                        final expenseStr = NumberFormats.currency.format(expense.toInt());
+                        final refundStr = NumberFormats.currency.format(refund.toInt());
+                        final netStr = NumberFormats.currency.format(net.toInt());
                         return DataRow(
                           cells: [
                             DataCell(Text(ym)),
-                            DataCell(
-                              Text(
-                                '₩'
-                                '${NumberFormats.currency.format(income.toInt())}',
-                              ),
-                            ),
-                            DataCell(
-                              Text(
-                                '₩'
-                                '${NumberFormats.currency.format(expense.toInt())}',
-                              ),
-                            ),
-                            DataCell(
-                              Text(
-                                '₩'
-                                '${NumberFormats.currency.format(refund.toInt())}',
-                              ),
-                            ),
-                            DataCell(
-                              Text(
-                                '₩'
-                                '${NumberFormats.currency.format(net.toInt())}',
-                              ),
-                            ),
+                            DataCell(Text('₩$incomeStr')),
+                            DataCell(Text('₩$expenseStr')),
+                            DataCell(Text('₩$refundStr')),
+                            DataCell(Text('₩$netStr')),
                           ],
                         );
                       }).toList(),

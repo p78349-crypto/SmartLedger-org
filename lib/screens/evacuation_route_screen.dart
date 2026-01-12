@@ -151,13 +151,19 @@ class _EvacuationRouteScreenState extends State<EvacuationRouteScreen> {
               style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
-            Text(
-              '대상 지역: ${_activePlan.location}\n'
-              '예상 날씨: ${weatherConditionNames[_activePlan.condition] ?? '극한 날씨'}\n'
-              '가족 인원: ${_activePlan.familySize}명\n'
-              '생성 시각: ${_activePlan.generatedAt.toLocal()}',
-              style: const TextStyle(fontSize: 13, color: Colors.black54),
-            ),
+            () {
+              final locationStr = _activePlan.location;
+              final cond = _activePlan.condition;
+              final weatherStr = weatherConditionNames[cond] ?? '극한 날씨';
+              final details = '대상 지역: $locationStr\n'
+                  '예상 날씨: $weatherStr\n'
+                  '가족 인원: ${_activePlan.familySize}명\n'
+                  '생성 시각: ${_activePlan.generatedAt.toLocal()}';
+              return Text(
+                details,
+                style: const TextStyle(fontSize: 13, color: Colors.black54),
+              );
+            }(),
             if (_isUserInSafeArea) ...[
               const SizedBox(height: 12),
               Container(
@@ -355,7 +361,8 @@ class _EvacuationRouteScreenState extends State<EvacuationRouteScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '위치 좌표: ${location.latitude.toStringAsFixed(4)}, ${location.longitude.toStringAsFixed(4)}',
+          '위치 좌표: ${location.latitude.toStringAsFixed(4)}, '
+          '${location.longitude.toStringAsFixed(4)}',
           style: const TextStyle(fontSize: 13, color: Colors.black54),
         ),
         const SizedBox(height: 8),
@@ -530,7 +537,8 @@ class _EvacuationRouteScreenState extends State<EvacuationRouteScreen> {
                 Icon(Icons.directions_car, color: color, size: 18),
                 const SizedBox(width: 6),
                 Text(
-                  '${route.routeType} • ${route.distanceKm.toStringAsFixed(1)}km • 약 ${route.estimatedMinutes}분',
+                  '${route.routeType} • ${route.distanceKm.toStringAsFixed(1)}km • '
+                  '약 ${route.estimatedMinutes}분',
                 ),
               ],
             ),
@@ -686,7 +694,8 @@ class _EvacuationRouteScreenState extends State<EvacuationRouteScreen> {
     final conditionName =
         weatherConditionNames[_activePlan.condition] ?? '극한 날씨';
     final deepLink =
-        'smartledger://weather/evacuation?condition=${_activePlan.condition.name}&location=${Uri.encodeComponent(_activePlan.location)}';
+        'smartledger://weather/evacuation?condition=${_activePlan.condition.name}&'
+        'location=${Uri.encodeComponent(_activePlan.location)}';
     final buffer = StringBuffer()
       ..writeln('🚨 $conditionName 대비 안전 이동 경로')
       ..writeln('대상 지역: ${_activePlan.location}')
@@ -717,7 +726,8 @@ class _EvacuationRouteScreenState extends State<EvacuationRouteScreen> {
     for (final route in _activePlan.routes) {
       buffer
         ..writeln(
-          '• ${route.name} (${route.routeType}, ${route.distanceKm.toStringAsFixed(1)}km / 약 ${route.estimatedMinutes}분)',
+          '• ${route.name} (${route.routeType}, ${route.distanceKm.toStringAsFixed(1)}km / '
+'약 ${route.estimatedMinutes}분)',
         )
         ..writeln('  - 대피소: ${route.shelterName} (${route.shelterAddress})')
         ..writeln('  - 편의시설: ${route.amenities.join(', ')}');

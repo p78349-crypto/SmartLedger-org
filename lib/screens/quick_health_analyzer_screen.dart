@@ -442,7 +442,13 @@ class _QuickHealthAnalyzerScreenState extends State<QuickHealthAnalyzerScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '분석 완료: ${result.overallScore}점 (${IngredientHealthScoreUtils.getScoreLabel(result.overallScore)})',
+            () {
+              final scoreLabel = IngredientHealthScoreUtils
+          .getScoreLabel(
+            result.overallScore,
+          );
+              return '분석 완료: ${result.overallScore}점 ($scoreLabel)';
+            }(),
           ),
           backgroundColor: _getScoreColor(result.overallScore),
         ),

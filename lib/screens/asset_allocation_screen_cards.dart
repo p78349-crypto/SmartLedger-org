@@ -128,8 +128,9 @@ extension _AssetAllocationCards on _AssetAllocationScreenState {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: stats.assets.map((asset) {
-                  final assetPercent =
-                      _totalAmount > 0 ? (asset.amount / _totalAmount) * 100 : 0;
+                  final assetPercent = _totalAmount > 0
+                      ? (asset.amount / _totalAmount) * 100
+                      : 0;
                   final formattedAssetAmount = NumberFormats.currency.format(
                     asset.amount.toInt(),
                   );

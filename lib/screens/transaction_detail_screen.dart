@@ -771,8 +771,9 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                                       final autoMemo =
                                           '${tx.description} '
                                           '$refundQuantity개 환불받음 '
-                                          '$refundAmountText원 → 지출예산\n'
-                                          '원구매일: $origDate, 원결제수단: ${tx.paymentMethod}';
+                                          '$refundAmountText원 → 지출예산\n';
+                                      final memoSuffix = '\n원구매일: $origDate, '
+                               '원결제수단: ${tx.paymentMethod}';
                                       final refundTx = Transaction(
                                         id: DateTime.now()
                                             .millisecondsSinceEpoch
@@ -794,8 +795,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                                                   .trim(),
                                         memo: memoController.text.isEmpty
                                             ? autoMemo
-                                            : '${memoController.text}\n원구매일: $origDate, '
-                                              '원결제수단: ${tx.paymentMethod}',
+                                            : '${memoController.text}$memoSuffix',
                                         store: tx.store,
                                         isRefund: true,
                                         originalTransactionId: tx.id,
@@ -823,11 +823,10 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                                       final origDate2 = DateFormatter
                                           .defaultDate
                                           .format(tx.date);
-                                      final autoMemo =
-                                          '${tx.description} '
-                                          '$refundQuantity개 환불받음 '
-                                          '$refundAmountText2원 → $selectedAccount\n'
-                                          '원구매일: $origDate2, 원결제수단: ${tx.paymentMethod}';
+                                      final refundNote = '$refundAmountText2원 → $selectedAccount';
+                                      final refundDetails = '\n원구매일: $origDate2, 원결제수단: ${tx.paymentMethod}';
+                                      final autoMemo = '${tx.description} '
+                                          '$refundQuantity개 환불받음 ' + refundNote + refundDetails;
                                       final refundTx = Transaction(
                                         id: DateTime.now()
                                             .millisecondsSinceEpoch

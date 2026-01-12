@@ -36,17 +36,30 @@ class CEORecoveryPlanScreen extends StatelessWidget {
           final suggestedCut = (avgExpense * 0.3).toInt();
           final suggestedNoSpendSavings = (avgExpense * 0.1).toInt();
 
+          final recentExpenseStr = NumberFormats.currency
+              .format(
+                recent.expenseAggAmount.toInt(),
+              );
+          final avgExpenseStr = NumberFormats.currency
+              .format(
+                avgExpense.toInt(),
+              );
+          final suggestedNoSpendSavingsStr = NumberFormats.currency
+              .format(
+                suggestedNoSpendSavings,
+              );
+
           return Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '최근 월 지출: ₩${NumberFormats.currency.format(recent.expenseAggAmount.toInt())}',
+                  '최근 월 지출: ₩$recentExpenseStr',
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '평균 월 지출: ₩${NumberFormats.currency.format(avgExpense.toInt())}',
+                  '평균 월 지출: ₩$avgExpenseStr',
                 ),
                 const SizedBox(height: 12),
                 const Text('권장 복구 계획'),
@@ -71,9 +84,7 @@ class CEORecoveryPlanScreen extends StatelessWidget {
                 Card(
                   child: ListTile(
                     title: const Text('3) 무지출 캠페인'),
-                    subtitle: Text(
-                      '무지출 데이 4회 도입으로 예상 절감: ₩${NumberFormats.currency.format(suggestedNoSpendSavings)} (월)',
-                    ),
+                    subtitle: Text('무지출 데이 4회 도입으로 예상 절감: ₩$suggestedNoSpendSavingsStr (월)'),
                   ),
                 ),
                 const SizedBox(height: 12),

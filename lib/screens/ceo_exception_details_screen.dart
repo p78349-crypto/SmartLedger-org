@@ -4,6 +4,7 @@ import '../models/transaction.dart';
 import '../services/monthly_agg_cache_service.dart';
 import '../services/transaction_service.dart';
 import '../utils/number_formats.dart';
+import '../utils/date_formats.dart';
 
 class CEOExceptionDetailsScreen extends StatelessWidget {
   final String accountName;
@@ -101,17 +102,22 @@ class CEOExceptionDetailsScreen extends StatelessWidget {
                   subtitle: Text('${list.length}건'),
                   children: list
                       .map(
-                        (t) => ListTile(
-                          title: Text(
-                            t.memo.isNotEmpty ? t.memo : (t.store ?? ''),
-                          ),
-                          subtitle: Text(
-                            '${t.mainCategory} ${t.subCategory ?? ''}'.trim(),
-                          ),
-                          trailing: Text(
-                            '₩${NumberFormats.currency.format(t.amount.abs().toInt())}',
-                          ),
-                        ),
+                        (t) => () {
+                          final amtStr = NumberFormats
+                              .currency
+                              .format(
+                                t.amount.abs().toInt(),
+                              );
+                          return ListTile(
+                            title: Text(
+                              t.memo.isNotEmpty ? t.memo : (t.store ?? ''),
+                            ),
+                            subtitle: Text(
+                              '${t.mainCategory} ${t.subCategory ?? ''}'.trim(),
+                            ),
+                            trailing: Text('₩$amtStr'),
+                          );
+                        }(),
                       )
                       .toList(),
                 );
@@ -136,17 +142,22 @@ class CEOExceptionDetailsScreen extends StatelessWidget {
                   subtitle: Text('${list.length}건'),
                   children: list
                       .map(
-                        (t) => ListTile(
-                          title: Text(
-                            t.memo.isNotEmpty ? t.memo : (t.store ?? ''),
-                          ),
-                          subtitle: Text(
-                            '${DateTime(t.date.year, t.date.month, t.date.day)}',
-                          ),
-                          trailing: Text(
-                            '₩${NumberFormats.currency.format(t.amount.abs().toInt())}',
-                          ),
-                        ),
+                        (t) => () {
+                          final amtStr = NumberFormats
+                              .currency
+                              .format(
+                                t.amount.abs().toInt(),
+                              );
+                          return ListTile(
+                            title: Text(
+                              t.memo.isNotEmpty ? t.memo : (t.store ?? ''),
+                            ),
+                            subtitle: Text(
+                              '${DateFormats.yMd.format(t.date)}',
+                            ),
+                            trailing: Text('₩$amtStr'),
+                          );
+                        }(),
                       )
                       .toList(),
                 );

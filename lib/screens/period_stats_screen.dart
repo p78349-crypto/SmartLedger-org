@@ -251,7 +251,7 @@ class _PeriodStatsScreenState extends State<PeriodStatsScreen> {
             style: theme.textTheme.bodyMedium,
           ),
           subtitle: Text(
-            '$count건',
+            '${count}건',
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -327,19 +327,27 @@ class _PeriodStatsScreenState extends State<PeriodStatsScreen> {
                                   style: theme.textTheme.bodySmall,
                                 ),
                                 const SizedBox(height: 4),
-                                Text(
-                                  '${NumberFormats.currency.format(monthly)}원/月',
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                Text(
-                                  '연환산 ${NumberFormats.currency.format(annual)}원',
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    fontSize: 11,
-                                    color: theme.colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
+                                Builder(builder: (context) {
+                                  final monthlyStr = NumberFormats.currency.format(monthly);
+                                  final annualStr = NumberFormats.currency.format(annual);
+                                  return Column(
+                                    children: [
+                                    Text(
+                                      '${monthlyStr}원',
+                                      style: theme.textTheme.bodySmall?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    Text(
+                                      '연환산 ${annualStr}원',
+                                      style: theme.textTheme.bodySmall?.copyWith(
+                                        fontSize: 11,
+                                        color: theme.colorScheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                  ],
+                                  );
+                                }),
                               ],
                             ),
                           ),

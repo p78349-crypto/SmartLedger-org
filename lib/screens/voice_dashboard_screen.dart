@@ -1030,9 +1030,11 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
           description.contains('비타민') ||
           (mainCategory.contains('건강') || mainCategory.contains('의료'))) {
         isSpecialCase = true;
-        customFeedback +=
-            '\n\n💊 아이구, 어디 많이 아프신 건 아니죠? 건강을 잃으면 1억 프로젝트도 소용없어요. 약 잘 챙겨 드시고 오늘은 푹 쉬세요. '
-            '병원비 기록은 제가 알아서 잘 정리해둘게요. (포인트 연속 기록 보호됨)';
+        final _hospitalMsgPart1 = '\n\n💊 아이구, 어디 많이 아프신 건 아니죠? 건강을 잃으면 1억 프로젝트도 소용없어요.';
+        final _hospitalMsgPart2 = '약 잘 챙겨 드시고 오늘은 푹 쉬세요.';
+        final _hospitalMsgPart3 = '병원비 기록은 제가 알아서 잘 정리해둘게요. (포인트 연속 기록 보호됨)';
+        final _hospitalMsg = '$_hospitalMsgPart1\n$_hospitalMsgPart2\n$_hospitalMsgPart3';
+        customFeedback += _hospitalMsg;
       }
       // 2. 경조사비 (사람 우선)
       else if (description.contains('축의금') ||
@@ -1044,7 +1046,8 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
           (mainCategory.contains('경조사'))) {
         isSpecialCase = true;
         customFeedback +=
-            '\n\n🤝 기쁜 소식이네요! 이런 소중한 지출은 1억 프로젝트 포인트 차감 대상에서 제외됩니다. 인맥이라는 더 큰 자산을 쌓으셨으니까요! (포인트 차감 면제)';
+            '\n\n🤝 기쁜 소식이네요! 이런 소중한 지출은 1억 프로젝트 포인트 차감 대상에서 제외됩니다. '
+            '인맥이라는 더 큰 자산을 쌓으셨으니까요! (포인트 차감 면제)';
       }
       // 3. 자기계발 (미래 투자)
       else if (description.contains('도서') ||
@@ -1055,7 +1058,8 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
           description.contains('공부')) {
         isSpecialCase = true;
         customFeedback +=
-            '\n\n📚 미래를 위한 투자는 언제나 옳습니다! 1억 프로젝트의 핵심은 결국 "나 자신"의 가치를 높이는 거니까요. 응원합니다!';
+            '\n\n📚 미래를 위한 투자는 언제나 옳습니다! 1억 프로젝트의 핵심은 결국 "나 자신"의 가치를 높이는 거니까요. '
+            '응원합니다!';
       }
       // 4. 공과금/세금 (필수 지출)
       else if (description.contains('공과금') ||
@@ -1075,7 +1079,8 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
           description.contains('사고')) {
         isSpecialCase = true;
         customFeedback +=
-            '\n\n🛠 악! 정말 속상하시겠어요. 예상치 못한 복병이 나타났네요. 하지만 액땜했다고 생각해요! 제가 다음 달 예산 계획을 더 꼼꼼하게 짜서 1억 프로젝트에 차질 없게 도와드릴게요. (연속 기록 보호됨)';
+            '\n\n🛠 악! 정말 속상하시겠어요. 예상치 못한 복병이 나타났네요. 하지만 액땜했다고 생각해요! '
+            '제가 다음 달 예산 계획을 더 꼼꼼하게 짜서 1억 프로젝트에 차질 없게 도와드릴게요. (연속 기록 보호됨)';
       }
 
       // 일반적인 잔소리 로직 (특수 상황이 아닐 때만 발동)

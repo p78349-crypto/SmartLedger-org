@@ -95,7 +95,7 @@ class AppColors {
     Color(0xFFCF8066), // 클레이
   ];
 
-  // Page 2: 수입 (Fresh Greens)
+  // Page 2: 지출입력 (Fresh Greens)
   static const List<Color> page2IconColors = [
     Color(0xFF4CAF50), // 그린
     Color(0xFF66BB6A), // 라이트 그린

@@ -93,13 +93,11 @@ class _PermissionGateScreenState extends State<PermissionGateScreen>
   }
 
   Future<void> _requestPermissions() async {
+    // 필수 권한만 요청 (저장소, 알림)
     await [
       Permission.photos,
       Permission.storage,
       Permission.notification,
-      Permission.camera,
-      Permission.location,
-      Permission.microphone,
     ].request();
     _checkAndProceed();
   }
@@ -126,7 +124,7 @@ class _PermissionGateScreenState extends State<PermissionGateScreen>
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    '필수 권한 안내',
+                    '필수 권한만 허용해 주세요',
                     style: theme.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -134,7 +132,7 @@ class _PermissionGateScreenState extends State<PermissionGateScreen>
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    '앱의 테마, 배경화면 설정 및 알림 기능을 정상적으로 사용하기 위해 필수 권한 허용이 필요합니다.',
+                    '기본 기능 사용을 위해 저장소와 알림 권한만 허용해 주세요.\n기타 권한은 관련 기능 사용 시 개별적으로 요청됩니다.',
                     style: theme.textTheme.bodyLarge,
                     textAlign: TextAlign.center,
                   ),
@@ -159,33 +157,24 @@ class _PermissionGateScreenState extends State<PermissionGateScreen>
                   ),
                   const Divider(height: 48),
                   Text(
-                    '아래 권한은 특정 기능 사용 시 요청됩니다.',
+                    '아래 권한은 관련 기능 사용 시 자동으로 요청됩니다',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    '• 카메라: 영수증 촬영 시\n'
+                    '• 위치: 날씨 정보 확인 시\n'
+                    '• 마이크: 음성 입력 사용 시',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
+                    textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 16),
-                  _PermissionItem(
-                    icon: Icons.camera_alt_outlined,
-                    title: '카메라 (선택)',
-                    description: '배경 이미지 촬영 및 영수증 인식을 위해 필요합니다.',
-                    isGranted: _cameraStatus.isGranted,
-                  ),
-                  const SizedBox(height: 16),
-                  _PermissionItem(
-                    icon: Icons.location_on_outlined,
-                    title: '위치 (선택)',
-                    description: '거래 장소 자동 기록 및 날씨 정보를 위해 필요합니다.',
-                    isGranted: _locationStatus.isGranted,
-                  ),
-                  const SizedBox(height: 16),
-                  _PermissionItem(
-                    icon: Icons.mic_none_outlined,
-                    title: '마이크 (선택)',
-                    description: '음성 인식을 통한 간편 거래 입력을 위해 필요합니다.',
-                    isGranted: _microphoneStatus.isGranted,
-                  ),
-                  const SizedBox(height: 48),
+                  const SizedBox(height: 32),
                   if (_isChecking)
                     const CircularProgressIndicator()
                   else ...[
@@ -194,39 +183,29 @@ class _PermissionGateScreenState extends State<PermissionGateScreen>
                       child: FilledButton.icon(
                         onPressed: _requestPermissions,
                         icon: const Icon(Icons.check_circle_outline),
-                        label: const Text('권한 허용하기'),
+                        label: const Text('필수 권한만 허용하고 시작'),
                         style: FilledButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
                       ),
                     ),
                     const SizedBox(height: 12),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const TextButton(
-                          onPressed: openAppSettings,
-                          child: Text('시스템 설정'),
+                    TextButton(
+                      onPressed: () async {
+                        final prefs = await SharedPreferences.getInstance();
+                        await prefs.setBool(
+                          PrefKeys.permissionGateBypassed,
+                          true,
+                        );
+                        widget.onGranted();
+                      },
+                      child: Text(
+                        '모든 권한 나중에 설정 (일부 기능 제한)',
+                        style: TextStyle(
+                          color: theme.colorScheme.onSurfaceVariant
+                              .withValues(alpha: 0.7),
                         ),
-                        const SizedBox(width: 8),
-                        TextButton(
-                          onPressed: () async {
-                            final prefs = await SharedPreferences.getInstance();
-                            await prefs.setBool(
-                              PrefKeys.permissionGateBypassed,
-                              true,
-                            );
-                            widget.onGranted();
-                          },
-                          child: Text(
-                            '나중에 설정 (일부 기능 제한)',
-                            style: TextStyle(
-                              color: theme.colorScheme.onSurfaceVariant
-                                  .withValues(alpha: 0.6),
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ],
                 ],

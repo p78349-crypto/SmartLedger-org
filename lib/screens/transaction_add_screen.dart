@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/asset.dart';
 import '../models/category_hint.dart';
 import '../models/transaction.dart';
+import '../navigation/app_routes_args.dart';
 import 'income_split_screen.dart';
 // import 'package:smart_ledger/screens/nutrition_report_screen.dart';
 // Preserved but disabled per request.
@@ -62,6 +63,8 @@ class TransactionAddScreen extends StatefulWidget {
   final bool closeAfterSave;
   final bool autoSubmit;
   final bool openReceiptScannerOnStart;
+  final String? initialPaymentMethod;
+  final String? initialMemo;
   const TransactionAddScreen({
     super.key,
     required this.accountName,
@@ -72,6 +75,8 @@ class TransactionAddScreen extends StatefulWidget {
     this.closeAfterSave = false,
     this.autoSubmit = false,
     this.openReceiptScannerOnStart = false,
+    this.initialPaymentMethod,
+    this.initialMemo,
   });
 
   @override
@@ -116,9 +121,16 @@ class _TransactionAddScreenState extends State<TransactionAddScreen> {
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) return;
         final navigator = Navigator.of(context);
-        final didSave = _formStateKey.currentState?.didSave ?? false;
+        final formState = _formStateKey.currentState;
+        final didSave = formState?.didSave ?? false;
         if (didSave) {
-          navigator.pop(true);
+          navigator.pop(TransactionAddResult(
+            saved: true,
+            paymentMethod: formState?.lastPaymentMethod,
+            memo: formState?.lastMemo,
+            mainCategory: formState?.lastMainCategory,
+            subCategory: formState?.lastSubCategory,
+          ));
         } else {
           navigator.pop();
         }
@@ -237,6 +249,8 @@ class _TransactionAddScreenState extends State<TransactionAddScreen> {
                       treatAsNew: widget.treatAsNew,
                       closeAfterSave: widget.closeAfterSave,
                       titlePrefix: isLandscape ? titlePrefix : null,
+                      initialPaymentMethod: widget.initialPaymentMethod,
+                      initialMemo: widget.initialMemo,
                     ),
                   ),
                 ),
@@ -292,6 +306,8 @@ class NO1Form extends StatefulWidget {
   final bool treatAsNew;
   final bool closeAfterSave;
   final String? titlePrefix;
+  final String? initialPaymentMethod;
+  final String? initialMemo;
   const NO1Form({
     super.key,
     required this.accountName,
@@ -301,6 +317,8 @@ class NO1Form extends StatefulWidget {
     this.treatAsNew = false,
     this.closeAfterSave = false,
     this.titlePrefix,
+    this.initialPaymentMethod,
+    this.initialMemo,
   });
 
   @override
@@ -347,6 +365,8 @@ class _NO1FormState extends State<NO1Form> {
   final FocusNode _amountFocusNode = FocusNode();
   final FocusNode _storeFocusNode = FocusNode();
   final FocusNode _memoFocusNode = FocusNode();
+  bool _paymentFirstFocus = true;
+  bool _memoFirstFocus = true;
   final FocusNode _calculatedAmountFocusNode = FocusNode(
     canRequestFocus: false,
     skipTraversal: true,
@@ -367,6 +387,12 @@ class _NO1FormState extends State<NO1Form> {
   bool _installedHardwareKeyboardHandler = false;
 
   bool get didSave => _didSaveAtLeastOnce;
+
+  /// 연속 입력 시 이전 값 유지를 위한 getter
+  String get lastPaymentMethod => _paymentController.text;
+  String get lastMemo => _memoController.text;
+  String get lastMainCategory => _selectedMainCategory;
+  String? get lastSubCategory => _selectedSubCategory;
 
   Future<void> triggerAutoSubmit() async {
     await _saveTransaction(skipConfirm: true);
@@ -633,7 +659,16 @@ class _NO1FormState extends State<NO1Form> {
             initial.savingsAllocation ?? SavingsAllocation.assetIncrease;
       }
       _selectedMainCategory = initial.mainCategory;
-      _selectedSubCategory = null;
+      _selectedSubCategory = initial.subCategory;
+      
+      // 연속 입력 시 이전 결제수단/메모 우선 적용 (bulk flow에서 전달된 값)
+      if (widget.initialPaymentMethod != null &&
+          widget.initialPaymentMethod!.isNotEmpty) {
+        _paymentController.text = widget.initialPaymentMethod!;
+      }
+      if (widget.initialMemo != null && widget.initialMemo!.isNotEmpty) {
+        _memoController.text = widget.initialMemo!;
+      }
     } else {
       _qtyController.text = '1';
     }
@@ -662,25 +697,43 @@ class _NO1FormState extends State<NO1Form> {
     _unitPriceController.addListener(_updateAmount);
     if (initial == null) {
       _updateAmount();
+      // 연속 입력 시 이전 결제수단/메모 유지
+      if (widget.initialPaymentMethod != null &&
+          widget.initialPaymentMethod!.isNotEmpty) {
+        _paymentController.text = widget.initialPaymentMethod!;
+      }
+      if (widget.initialMemo != null && widget.initialMemo!.isNotEmpty) {
+        _memoController.text = widget.initialMemo!;
+      }
     }
 
-    // 결제수단/메모 입력란 포커스 이동 시 전체 선택
+    // 결제수단/메모 입력란 첫 포커스 시 전체 선택
     _paymentFocusNode.addListener(() {
-      if (_paymentFocusNode.hasFocus) {
-        final text = _paymentController.text;
-        _paymentController.selection = TextSelection(
-          baseOffset: 0,
-          extentOffset: text.length,
-        );
+      if (_paymentFocusNode.hasFocus && _paymentFirstFocus) {
+        _paymentFirstFocus = false;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (_paymentFocusNode.hasFocus) {
+            final text = _paymentController.text;
+            _paymentController.selection = TextSelection(
+              baseOffset: 0,
+              extentOffset: text.length,
+            );
+          }
+        });
       }
     });
     _memoFocusNode.addListener(() {
-      if (_memoFocusNode.hasFocus) {
-        final text = _memoController.text;
-        _memoController.selection = TextSelection(
-          baseOffset: 0,
-          extentOffset: text.length,
-        );
+      if (_memoFocusNode.hasFocus && _memoFirstFocus) {
+        _memoFirstFocus = false;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (_memoFocusNode.hasFocus) {
+            final text = _memoController.text;
+            _memoController.selection = TextSelection(
+              baseOffset: 0,
+              extentOffset: text.length,
+            );
+          }
+        });
       }
     });
 
@@ -758,10 +811,15 @@ class _NO1FormState extends State<NO1Form> {
     });
 
     if (_recentInputsAutofillEnabled) {
-      if (_paymentController.text.isEmpty && payments.isNotEmpty) {
+      // 사용자가 현재 입력 중이면 autofill 하지 않음
+      if (_paymentController.text.isEmpty && 
+          payments.isNotEmpty && 
+          !_paymentFocusNode.hasFocus) {
         _paymentController.text = payments.first;
       }
-      if (_memoController.text.isEmpty && memos.isNotEmpty) {
+      if (_memoController.text.isEmpty && 
+          memos.isNotEmpty && 
+          !_memoFocusNode.hasFocus) {
         _memoController.text = memos.first;
       }
     }
@@ -1466,12 +1524,28 @@ class _NO1FormState extends State<NO1Form> {
 
       if (existing != null) {
         Future.delayed(const Duration(milliseconds: 500), () {
-          if (mounted) navigator.pop(true);
+          if (mounted) {
+            navigator.pop(TransactionAddResult(
+              saved: true,
+              paymentMethod: _paymentController.text,
+              memo: _memoController.text,
+              mainCategory: _selectedMainCategory,
+              subCategory: _selectedSubCategory,
+            ));
+          }
         });
       } else {
         if (widget.closeAfterSave) {
           Future.delayed(const Duration(milliseconds: 200), () {
-            if (mounted) navigator.pop(true);
+            if (mounted) {
+              navigator.pop(TransactionAddResult(
+                saved: true,
+                paymentMethod: _paymentController.text,
+                memo: _memoController.text,
+                mainCategory: _selectedMainCategory,
+                subCategory: _selectedSubCategory,
+              ));
+            }
           });
           return;
         }

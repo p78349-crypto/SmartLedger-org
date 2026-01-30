@@ -90,6 +90,12 @@ Future<void> _addCheckedItemsToLedgerBulk({
   }
 
   var currentItems = items;
+  // 연속 입력 시 이전 결제수단/메모/카테고리 유지를 위한 변수
+  String? lastPaymentMethod;
+  String? lastMemo;
+  String? lastMainCategory;
+  String? lastSubCategory;
+  
   for (var index = 0; index < selected.length; index++) {
     if (!context.mounted) return;
     final item = selected[index];
@@ -100,6 +106,10 @@ Future<void> _addCheckedItemsToLedgerBulk({
       item,
       learnedHints: categoryHints,
     );
+
+    // 첫 번째 아이템은 추천 카테고리, 이후는 이전 선택값 유지
+    final useMainCategory = lastMainCategory ?? suggested.mainCategory;
+    final useSubCategory = lastSubCategory ?? suggested.subCategory;
 
     final result = await navigator.pushNamed(
       AppRoutes.transactionAdd,
@@ -114,19 +124,33 @@ Future<void> _addCheckedItemsToLedgerBulk({
           date: DateTime.now(),
           quantity: qty,
           unitPrice: unit,
-          mainCategory: suggested.mainCategory,
-          subCategory: suggested.subCategory,
+          mainCategory: useMainCategory,
+          subCategory: useSubCategory,
           detailCategory: suggested.detailCategory,
         ),
         treatAsNew: true,
+        // 이전 입력의 결제수단/메모 유지
+        initialPaymentMethod: lastPaymentMethod,
+        initialMemo: lastMemo,
       ),
     );
 
     if (!context.mounted) return;
 
-    final savedBool = result is bool ? result : null;
-    if (savedBool != true) {
+    // TransactionAddResult 또는 bool 처리
+    final TransactionAddResult? addResult = result is TransactionAddResult ? result : null;
+    final bool saved = addResult?.saved ?? (result is bool && result);
+    
+    if (!saved) {
       break;
+    }
+    
+    // 다음 아이템을 위해 결제수단/메모/카테고리 저장
+    if (addResult != null) {
+      lastPaymentMethod = addResult.paymentMethod;
+      lastMemo = addResult.memo;
+      lastMainCategory = addResult.mainCategory;
+      lastSubCategory = addResult.subCategory;
     }
 
     final at = DateTime.now();

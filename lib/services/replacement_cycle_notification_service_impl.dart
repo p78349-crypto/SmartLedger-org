@@ -268,6 +268,8 @@ class ReplacementCycleNotificationService {
         tzNotify,
         details,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
       );
 
       scheduledIds.add(id);

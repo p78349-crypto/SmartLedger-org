@@ -268,6 +268,8 @@ class StockDepletionNotificationService {
         tz.TZDateTime.from(notifyAt, tz.local),
         _details(),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
         payload: payload,
       );
     } on PlatformException catch (e) {
@@ -279,6 +281,8 @@ class StockDepletionNotificationService {
           tz.TZDateTime.from(notifyAt, tz.local),
           _details(),
           androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.absoluteTime,
           payload: payload,
         );
       } else {

@@ -12,7 +12,7 @@
 ```
 1. HouseholdConsumablesScreen
    └─ 10개 카테고리 그리드 UI
-      ├─ 탭 → TransactionAdd (거래 입력/구입 기록)
+      ├─ 탭 → TransactionAdd (지출입력/구입 기록)
       └─ 문제: 사용량 차감 기능 없음
 
 2. ConsumableInventoryScreen
@@ -43,7 +43,7 @@
 ┌──────────────────────┐
 │ 두루마리 휴지        │
 ├──────────────────────┤
-│ [🛒 구입 입력]       │ ← 거래 입력 화면
+│ [🛍 구입 입력]       │ ← 지출입력 화면
 │ [📉 사용량 입력]     │ ← 사용 팝업
 │ [📦 재고 관리]       │ ← 재고 관리 화면
 └──────────────────────┘
@@ -80,7 +80,7 @@ void _onItemTap(BuildContext context, HouseholdConsumableItem item) {
 생활용품 화면
 
 짧은 탭 (일반 탭):
-  → 최근 입력 방식 [거래 입력/사용 입력] 기억
+  → 최근 입력 방식 [지출입력/사용 입력] 기억
   → 같은 방식으로 진행
 
 길게 누르기 (Long Press):
@@ -199,7 +199,7 @@ void _showActionModal(BuildContext context, HouseholdConsumableItem item) {
           ListTile(
             leading: const Icon(Icons.shopping_cart),
             title: const Text('🛒 구입 기록'),
-            subtitle: const Text('거래 입력 화면'),
+            subtitle: const Text('지출입력 화면'),
             onTap: () {
               Navigator.pop(ctx);
               _goToPurchaseInput(item);
@@ -266,7 +266,7 @@ void _showActionModal(BuildContext context, HouseholdConsumableItem item) {
 ├─────────────────────────────────┤
 │ ┌─────────────────────────────┐ │
 │ │ 🛒  구입 기록               │ │
-│ │ 거래 입력 화면으로 이동      │ │
+│ │ 지출입력 화면으로 이동      │ │
 │ └─────────────────────────────┘ │
 │                                 │
 │ ┌─────────────────────────────┐ │

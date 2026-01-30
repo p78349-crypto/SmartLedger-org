@@ -51,6 +51,10 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
   final Map<String, FocusNode> _bundleSizeFocusNodes = {};
   final Map<String, FocusNode> _memoFocusNodes = {};
 
+  final Map<String, bool> _qtyFirstFocus = {};
+  final Map<String, bool> _unitPriceFirstFocus = {};
+  final Map<String, bool> _bundleSizeFirstFocus = {};
+
   String _unitPriceTextForInlineEditor(double unitPrice) {
     if (unitPrice <= 0) return '';
     return unitPrice == unitPrice.roundToDouble()
@@ -198,7 +202,8 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
     }
 
     for (final item in next) {
-      final qtyText = (item.bundleCount < 0 ? 0 : item.bundleCount).toString();
+      final qtyVal = item.bundleCount < 0 ? 0 : item.bundleCount;
+      final qtyText = qtyVal == 0 ? '' : qtyVal.toString();
       final qtyC = _qtyControllers[item.id];
       if (qtyC == null) {
         _qtyControllers[item.id] = TextEditingController(text: qtyText);
@@ -211,23 +216,29 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
 
       _qtyFocusNodes.putIfAbsent(item.id, () {
         final node = FocusNode();
+        _qtyFirstFocus[item.id] = true;
         node.addListener(() {
-          if (node.hasFocus) {
-            final c = _qtyControllers[item.id];
-            if (c != null) {
-              c.selection = TextSelection(
-                baseOffset: 0,
-                extentOffset: c.text.length,
-              );
-            }
+          if (node.hasFocus && (_qtyFirstFocus[item.id] ?? false)) {
+            _qtyFirstFocus[item.id] = false;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (node.hasFocus) {
+                final c = _qtyControllers[item.id];
+                if (c != null) {
+                  c.selection = TextSelection(
+                    baseOffset: 0,
+                    extentOffset: c.text.length,
+                  );
+                }
+              }
+            });
           }
           if (mounted) setState(() {});
         });
         return node;
       });
 
-      final perBundleText = (item.unitsPerBundle < 0 ? 0 : item.unitsPerBundle)
-          .toString();
+      final perBundleVal = item.unitsPerBundle < 0 ? 0 : item.unitsPerBundle;
+      final perBundleText = perBundleVal == 0 ? '' : perBundleVal.toString();
       final perBundleController = _bundleSizeControllers[item.id];
       if (perBundleController == null) {
         _bundleSizeControllers[item.id] = TextEditingController(
@@ -242,15 +253,21 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
 
       _bundleSizeFocusNodes.putIfAbsent(item.id, () {
         final node = FocusNode();
+        _bundleSizeFirstFocus[item.id] = true;
         node.addListener(() {
-          if (node.hasFocus) {
-            final c = _bundleSizeControllers[item.id];
-            if (c != null) {
-              c.selection = TextSelection(
-                baseOffset: 0,
-                extentOffset: c.text.length,
-              );
-            }
+          if (node.hasFocus && (_bundleSizeFirstFocus[item.id] ?? false)) {
+            _bundleSizeFirstFocus[item.id] = false;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (node.hasFocus) {
+                final c = _bundleSizeControllers[item.id];
+                if (c != null) {
+                  c.selection = TextSelection(
+                    baseOffset: 0,
+                    extentOffset: c.text.length,
+                  );
+                }
+              }
+            });
           }
           if (mounted) setState(() {});
         });
@@ -270,15 +287,21 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
 
       _unitPriceFocusNodes.putIfAbsent(item.id, () {
         final node = FocusNode();
+        _unitPriceFirstFocus[item.id] = true;
         node.addListener(() {
-          if (node.hasFocus) {
-            final c = _unitPriceControllers[item.id];
-            if (c != null) {
-              c.selection = TextSelection(
-                baseOffset: 0,
-                extentOffset: c.text.length,
-              );
-            }
+          if (node.hasFocus && (_unitPriceFirstFocus[item.id] ?? false)) {
+            _unitPriceFirstFocus[item.id] = false;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (node.hasFocus) {
+                final c = _unitPriceControllers[item.id];
+                if (c != null) {
+                  c.selection = TextSelection(
+                    baseOffset: 0,
+                    extentOffset: c.text.length,
+                  );
+                }
+              }
+            });
           }
           if (mounted) setState(() {});
         });
@@ -495,7 +518,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
           ),
           const SizedBox(width: 12),
           SizedBox(
-            width: 100,
+            width: 140,
             height: _inlineFieldHeight,
             child: TextField(
               key: ValueKey('sc_price_${item.id}'),
@@ -505,7 +528,9 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                 decimal: true,
               ),
               textInputAction: TextInputAction.next,
-              style: theme.textTheme.bodySmall,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
               decoration: _inlineFieldDecoration(theme, '가격'),
               onChanged: (_) => _previewInlineEdits(item),
               onSubmitted: (_) => _applyInlineEdits(item),
@@ -577,7 +602,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                 decoration: BoxDecoration(
                   color: item.storeLocation.isEmpty
-                      ? Colors.grey.shade200
+                      ? theme.colorScheme.surfaceContainerHighest
                       : theme.colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -588,7 +613,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                       Icons.location_on,
                       size: 16,
                       color: item.storeLocation.isEmpty
-                          ? Colors.grey.shade600
+                          ? theme.colorScheme.onSurfaceVariant
                           : theme.colorScheme.primary,
                     ),
                     if (item.storeLocation.isNotEmpty) ...[
@@ -702,12 +727,23 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                   ),
                 ),
               ),
-              FilledButton.tonal(
+              FilledButton(
                 onPressed: checkedCount > 0 ? _openTransactionAdd : null,
                 style: FilledButton.styleFrom(
+                  backgroundColor: theme.colorScheme.primary,
+                  foregroundColor: theme.colorScheme.onPrimary,
+                  disabledBackgroundColor: theme.colorScheme.surfaceContainerHighest,
+                  disabledForegroundColor: theme.colorScheme.onSurfaceVariant,
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
+                    horizontal: 20,
+                    vertical: 10,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: const BorderSide(
+                      color: Colors.brown,
+                      width: 2,
+                    ),
                   ),
                   visualDensity: VisualDensity.compact,
                 ),
@@ -976,11 +1012,12 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                           // temporarily go out-of-sync (e.g. fast rebuilds).
                           _qtyControllers.putIfAbsent(
                             item.id,
-                            () => TextEditingController(
-                              text:
-                                  (item.bundleCount < 0 ? 0 : item.bundleCount)
-                                      .toString(),
-                            ),
+                            () {
+                              final val = item.bundleCount < 0 ? 0 : item.bundleCount;
+                              return TextEditingController(
+                                text: val == 0 ? '' : val.toString(),
+                              );
+                            },
                           );
                           _unitPriceControllers.putIfAbsent(
                             item.id,
@@ -992,13 +1029,12 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                           );
                           _bundleSizeControllers.putIfAbsent(
                             item.id,
-                            () => TextEditingController(
-                              text:
-                                  (item.unitsPerBundle < 0
-                                          ? 0
-                                          : item.unitsPerBundle)
-                                      .toString(),
-                            ),
+                            () {
+                              final val = item.unitsPerBundle < 0 ? 0 : item.unitsPerBundle;
+                              return TextEditingController(
+                                text: val == 0 ? '' : val.toString(),
+                              );
+                            },
                           );
                           _memoControllers.putIfAbsent(
                             item.id,
@@ -1113,116 +1149,250 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                                             Row(
                                               children: [
                                                 SizedBox(
-                                                  width: 100,
-                                                  height: _inlineFieldHeight,
-                                                  child: TextField(
-                                                    key: ValueKey(
-                                                      'sc_price_${item.id}',
-                                                    ),
-                                                    controller: unitController,
-                                                    focusNode: unitFocusNode,
-                                                    keyboardType:
-                                                        unitKeyboardType,
-                                                    textInputAction:
-                                                        TextInputAction.next,
-                                                    style: theme
-                                                        .textTheme
-                                                        .bodySmall,
-                                                    decoration:
-                                                        _inlineFieldDecoration(
-                                                          theme,
-                                                          '가격',
+                                                  width: 140,
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment.start,
+                                                    children: [
+                                                      Text(
+                                                        '가격',
+                                                        style: theme
+                                                            .textTheme
+                                                            .labelSmall
+                                                            ?.copyWith(
+                                                              color: theme
+                                                                  .colorScheme
+                                                                  .onSurfaceVariant,
+                                                              fontWeight:
+                                                                  FontWeight.w600,
+                                                            ),
+                                                      ),
+                                                      const SizedBox(height: 4),
+                                                      SizedBox(
+                                                        height:
+                                                            _inlineFieldHeight,
+                                                        child: TextField(
+                                                          key: ValueKey(
+                                                            'sc_price_${item.id}',
+                                                          ),
+                                                          controller:
+                                                              unitController,
+                                                          focusNode:
+                                                              unitFocusNode,
+                                                          keyboardType:
+                                                              unitKeyboardType,
+                                                          textInputAction:
+                                                              TextInputAction
+                                                                  .next,
+                                                          style: theme
+                                                              .textTheme
+                                                              .bodyMedium
+                                                              ?.copyWith(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                              ),
+                                                          decoration:
+                                                              _inlineFieldDecoration(
+                                                                theme,
+                                                                '',
+                                                              ),
+                                                          onChanged: (_) =>
+                                                              _previewInlineEdits(
+                                                                item,
+                                                              ),
+                                                          onTapOutside: (_) {
+                                                            FocusScope.of(
+                                                              context,
+                                                            ).unfocus();
+                                                            _applyInlineEdits(
+                                                              item,
+                                                            );
+                                                          },
+                                                          onSubmitted: (_) {
+                                                            _applyInlineEdits(
+                                                              item,
+                                                            );
+                                                            // 가격 → 수량으로 이동
+                                                            qtyFocusNode
+                                                                .requestFocus();
+                                                          },
+                                                          onEditingComplete: () {
+                                                            _applyInlineEdits(
+                                                              item,
+                                                            );
+                                                            qtyFocusNode
+                                                                .requestFocus();
+                                                          },
                                                         ),
-                                                    onChanged: (_) =>
-                                                        _previewInlineEdits(
-                                                          item,
-                                                        ),
-                                                    onTapOutside: (_) {
-                                                      FocusScope.of(
-                                                        context,
-                                                      ).unfocus();
-                                                      _applyInlineEdits(item);
-                                                    },
-                                                    onSubmitted: (_) =>
-                                                        _applyInlineEdits(item),
-                                                    onEditingComplete: () =>
-                                                        _applyInlineEdits(item),
+                                                      ),
+                                                    ],
                                                   ),
                                                 ),
                                                 const SizedBox(width: 8),
                                                 SizedBox(
                                                   width: 56,
-                                                  height: _inlineFieldHeight,
-                                                  child: TextField(
-                                                    key: ValueKey(
-                                                      'sc_qty_${item.id}',
-                                                    ),
-                                                    controller: qtyController,
-                                                    focusNode: qtyFocusNode,
-                                                    textAlign: TextAlign.center,
-                                                    keyboardType:
-                                                        TextInputType.number,
-                                                    textInputAction:
-                                                        TextInputAction.next,
-                                                    style: theme
-                                                        .textTheme
-                                                        .bodySmall
-                                                        ?.copyWith(
-                                                          fontWeight:
-                                                              FontWeight.bold,
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment.center,
+                                                    children: [
+                                                      Text(
+                                                        '수량',
+                                                        style: theme
+                                                            .textTheme
+                                                            .labelSmall
+                                                            ?.copyWith(
+                                                              color: theme
+                                                                  .colorScheme
+                                                                  .onSurfaceVariant,
+                                                              fontWeight:
+                                                                  FontWeight.w600,
+                                                            ),
+                                                      ),
+                                                      const SizedBox(height: 4),
+                                                      SizedBox(
+                                                        height:
+                                                            _inlineFieldHeight,
+                                                        child: TextField(
+                                                          key: ValueKey(
+                                                            'sc_qty_${item.id}',
+                                                          ),
+                                                          controller:
+                                                              qtyController,
+                                                          focusNode:
+                                                              qtyFocusNode,
+                                                          textAlign:
+                                                              TextAlign.center,
+                                                          keyboardType:
+                                                              TextInputType
+                                                                  .number,
+                                                          textInputAction:
+                                                              TextInputAction
+                                                                  .next,
+                                                          style: theme
+                                                              .textTheme
+                                                              .bodySmall
+                                                              ?.copyWith(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                              ),
+                                                          decoration:
+                                                              _inlineFieldDecoration(
+                                                                theme,
+                                                                '',
+                                                              ),
+                                                          onChanged: (_) =>
+                                                              _previewInlineEdits(
+                                                                item,
+                                                              ),
+                                                          onSubmitted: (_) {
+                                                            _applyInlineEdits(
+                                                              item,
+                                                            );
+                                                            // 수량 → 개수로 이동
+                                                            bundleSizeFocusNode
+                                                                .requestFocus();
+                                                          },
+                                                          onEditingComplete: () {
+                                                            _applyInlineEdits(
+                                                              item,
+                                                            );
+                                                            bundleSizeFocusNode
+                                                                .requestFocus();
+                                                          },
                                                         ),
-                                                    decoration:
-                                                        _inlineFieldDecoration(
-                                                          theme,
-                                                          '수량',
-                                                        ),
-                                                    onChanged: (_) =>
-                                                        _previewInlineEdits(
-                                                          item,
-                                                        ),
-                                                    onSubmitted: (_) =>
-                                                        _applyInlineEdits(item),
-                                                    onEditingComplete: () =>
-                                                        _applyInlineEdits(item),
+                                                      ),
+                                                    ],
                                                   ),
                                                 ),
                                                 const SizedBox(width: 8),
                                                 SizedBox(
                                                   width: 56,
-                                                  height: _inlineFieldHeight,
-                                                  child: TextField(
-                                                    key: ValueKey(
-                                                      'sc_units_${item.id}',
-                                                    ),
-                                                    controller:
-                                                        bundleSizeController,
-                                                    focusNode:
-                                                        bundleSizeFocusNode,
-                                                    textAlign: TextAlign.center,
-                                                    keyboardType:
-                                                        TextInputType.number,
-                                                    textInputAction:
-                                                        TextInputAction.done,
-                                                    style: theme
-                                                        .textTheme
-                                                        .bodySmall
-                                                        ?.copyWith(
-                                                          fontWeight:
-                                                              FontWeight.bold,
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment.center,
+                                                    children: [
+                                                      Text(
+                                                        '개수',
+                                                        style: theme
+                                                            .textTheme
+                                                            .labelSmall
+                                                            ?.copyWith(
+                                                              color: theme
+                                                                  .colorScheme
+                                                                  .onSurfaceVariant,
+                                                              fontWeight:
+                                                                  FontWeight.w600,
+                                                            ),
+                                                      ),
+                                                      const SizedBox(height: 4),
+                                                      SizedBox(
+                                                        height:
+                                                            _inlineFieldHeight,
+                                                        child: TextField(
+                                                          key: ValueKey(
+                                                            'sc_units_${item.id}',
+                                                          ),
+                                                          controller:
+                                                              bundleSizeController,
+                                                          focusNode:
+                                                              bundleSizeFocusNode,
+                                                          textAlign:
+                                                              TextAlign.center,
+                                                          keyboardType:
+                                                              TextInputType
+                                                                  .number,
+                                                          textInputAction:
+                                                              TextInputAction
+                                                                  .done,
+                                                          style: theme
+                                                              .textTheme
+                                                              .bodySmall
+                                                              ?.copyWith(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                              ),
+                                                          decoration:
+                                                              _inlineFieldDecoration(
+                                                                theme,
+                                                                '',
+                                                              ),
+                                                          onChanged: (_) =>
+                                                              _previewInlineEdits(
+                                                                item,
+                                                              ),
+                                                          onSubmitted: (_) {
+                                                            _applyInlineEdits(
+                                                              item,
+                                                            );
+                                                            // 개수 → 다음 아이템의 가격으로 이동
+                                                            if (index + 1 <
+                                                                ordered
+                                                                    .length) {
+                                                              final nextItem =
+                                                                  ordered[
+                                                                      index +
+                                                                          1];
+                                                              _unitPriceFocusNodes[
+                                                                      nextItem
+                                                                          .id]
+                                                                  ?.requestFocus();
+                                                            } else {
+                                                              FocusScope.of(
+                                                                context,
+                                                              ).unfocus();
+                                                            }
+                                                          },
+                                                          onEditingComplete:
+                                                              () =>
+                                                                  _applyInlineEdits(
+                                                                    item,
+                                                                  ),
                                                         ),
-                                                    decoration:
-                                                        _inlineFieldDecoration(
-                                                          theme,
-                                                          '개수',
-                                                        ),
-                                                    onChanged: (_) =>
-                                                        _previewInlineEdits(
-                                                          item,
-                                                        ),
-                                                    onSubmitted: (_) =>
-                                                        _applyInlineEdits(item),
-                                                    onEditingComplete: () =>
-                                                        _applyInlineEdits(item),
+                                                      ),
+                                                    ],
                                                   ),
                                                 ),
                                               ],

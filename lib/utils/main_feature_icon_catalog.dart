@@ -102,8 +102,8 @@ class MainFeatureIconCatalog {
       items: [
         MainFeatureIcon(
           id: 'transactionAdd',
-          label: '거래 입력',
-          labelEn: 'Add Transaction',
+          label: '지출입력',
+          labelEn: 'Add Expense',
           icon: IconCatalog.payments,
           routeName: AppRoutes.transactionAdd,
         ),

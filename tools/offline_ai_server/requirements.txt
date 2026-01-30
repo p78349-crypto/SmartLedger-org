@@ -1,0 +1,6 @@
+fastapi
+uvicorn[standard]
+python-dateutil
+pydantic
+# Optional: a real NLU like rasa-lite (replace with real package when integrating)
+# rasa-lite

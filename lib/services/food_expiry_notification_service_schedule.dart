@@ -53,6 +53,8 @@ Future<int> _foodExpiryRescheduleAll(
         tz.TZDateTime.from(notifyAt, tz.local),
         self._details(),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
         payload: payload,
       );
     } on PlatformException catch (e) {
@@ -66,6 +68,8 @@ Future<int> _foodExpiryRescheduleAll(
           tz.TZDateTime.from(notifyAt, tz.local),
           self._details(),
           androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.absoluteTime,
           payload: payload,
         );
       } else {

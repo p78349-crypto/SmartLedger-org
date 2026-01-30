@@ -85,7 +85,7 @@ HomeTabScreen의 `_buildScreens()` 기준.
 
 ## 5) 거래 탭(AccountHomeScreen)에서의 이동
 
-- FAB(+) → 거래 입력: `AppRoutes.transactionAdd`
+- FAB(+) → 지출입력: `AppRoutes.transactionAdd`
   - 인자: `TransactionAddArgs(accountName)`
 
 ---

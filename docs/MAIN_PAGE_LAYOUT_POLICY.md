@@ -8,7 +8,7 @@ This document defines the page identity and icon distribution for the main Smart
 | UI Page | Code Index | Identity (한글) | Identity (EN) | Item Count | Status |
 |---------|----------|----------|----------|-----------|--------|
 | 1 | pages[0] | 대시보드 | Dashboard | 0 (dynamic) | Reserved |
-| 2 | pages[1] | 거래 | Transactions | 5 | Active |
+| 2 | pages[1] | 지출입력 | Expense Input | 5 | Active |
 | 3 | pages[2] | 수입 | Income | 4 | Active |
 | 4 | pages[3] | 통계 | Statistics | 12 | Active |
 | 5 | pages[4] | 자산 | Assets | 5 | Active |
@@ -30,10 +30,10 @@ This document defines the page identity and icon distribution for the main Smart
 - **Item Count**: 0 (dynamic)
 - **Status**: Reserved for home page
 
-### Page 1: Transactions (거래)
-- **Purpose**: Transaction entry and management
+### Page 1: Expense Input (지출입력)
+- **Purpose**: Expense entry and management
 - **Items**:
-  - `transactionAdd` - 거래 입력 (Add Transaction)
+  - `transactionAdd` - 지출 입력 (Add Expense)
   - `quick_simple_expense_input` - 간편 지출(1줄) (Quick Expense)
   - `shopping_prep` - 쇼핑준비 (Shopping Prep)
   - `shopping_cart` - 장바구니 (Cart)

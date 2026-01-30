@@ -423,7 +423,7 @@ class _ShoppingPointsInputScreenState extends State<ShoppingPointsInputScreen> {
                 padding: const EdgeInsets.all(24),
                 child: Text(
                   '쇼핑 후 포인트를 사후 입력할 수 있어요.\n'
-                  '장바구니에서 “체크 항목 거래 입력”을 마치면 목록이 쌓입니다.',
+                  '장바구니에서 "체크 항목 지출입력"을 마치면 목록이 쌓입니다.',
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,

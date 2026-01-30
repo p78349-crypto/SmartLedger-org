@@ -239,36 +239,27 @@ class _ApplicationSettingsScreenState extends State<ApplicationSettingsScreen>
     final photosStatus = await Permission.photos.status;
     final storageStatus = await Permission.storage.status;
     final notificationStatus = await Permission.notification.status;
-    final cameraStatus = await Permission.camera.status;
-    final locationStatus = await Permission.location.status;
-    final microphoneStatus = await Permission.microphone.status;
 
     if (mounted) {
       setState(() {
-        // We consider permissions "granted" if all essential permissions
-        // are granted
+        // 필수 권한(저장소, 알림)만 체크
         _hasPermissions =
             (photosStatus.isGranted ||
                 storageStatus.isGranted ||
                 photosStatus.isLimited) &&
             (notificationStatus.isGranted ||
-                notificationStatus.isProvisional) &&
-            cameraStatus.isGranted &&
-            locationStatus.isGranted &&
-            microphoneStatus.isGranted;
+                notificationStatus.isProvisional);
         _isChecking = false;
       });
     }
   }
 
   Future<void> _requestPermissions() async {
+    // 필수 권한만 요청
     await [
       Permission.photos,
       Permission.storage,
       Permission.notification,
-      Permission.camera,
-      Permission.location,
-      Permission.microphone,
     ].request();
 
     _checkPermissions();
@@ -907,8 +898,8 @@ class _ApplicationSettingsScreenState extends State<ApplicationSettingsScreen>
                             const SizedBox(width: 16),
                             Expanded(
                               child: Text(
-                                '앱의 모든 기능을 사용하려면 저장소, 알림, 카메라, '
-                                '위치, 마이크 권한이 필요합니다.',
+                                '기본 기능 사용을 위해 저장소와 알림 권한이 필요합니다.\n'
+                                '기타 권한(카메라/위치/마이크)은 관련 기능 사용 시 요청됩니다.',
                                 style: theme.textTheme.bodyMedium?.copyWith(
                                   color: scheme.onErrorContainer,
                                   fontWeight: FontWeight.bold,
@@ -923,7 +914,7 @@ class _ApplicationSettingsScreenState extends State<ApplicationSettingsScreen>
                           child: FilledButton.icon(
                             onPressed: _requestPermissions,
                             icon: const Icon(Icons.security),
-                            label: const Text('권한 허용하기'),
+                            label: const Text('필수 권한 허용하기'),
                             style: FilledButton.styleFrom(
                               backgroundColor: scheme.error,
                               foregroundColor: scheme.onError,
@@ -984,7 +975,7 @@ class _ApplicationSettingsScreenState extends State<ApplicationSettingsScreen>
                   context,
                   icon: Icons.admin_panel_settings_outlined,
                   title: '기기 앱 설정 열기',
-                  subtitle: '권한(알림/파일 등)은 기기 설정에서 변경합니다.',
+                  subtitle: '추가 권한(카메라/위치/마이크)은 기기 설정에서 변경할 수 있습니다.',
                   onTap: () async {
                     await openAppSettings();
                   },

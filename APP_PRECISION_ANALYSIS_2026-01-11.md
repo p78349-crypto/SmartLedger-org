@@ -31,7 +31,7 @@
 | 계정 메인 | `account_main_screen.dart` | 메인 대시보드, 아이콘 그리드 |
 | 계정 홈 | `account_home_screen.dart` | 계정별 홈 화면 |
 | 거래 추가 | `transaction_add_screen.dart` | 수입/지출 입력 |
-| 거래 상세 입력 | `transaction_add_detailed_screen.dart` | 상세 거래 입력 |
+| 상세 지출입력 | `transaction_add_detailed_screen.dart` | 상세 지출입력 |
 | 거래 상세 | `transaction_detail_screen.dart` | 거래 내역 상세 보기 |
 | 일별 거래 | `daily_transactions_screen.dart` | 일별 거래 목록 |
 | 환불 거래 | `refund_transactions_screen.dart` | 환불 내역 관리 |

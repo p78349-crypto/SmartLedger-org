@@ -141,6 +141,12 @@ class _SettingsRoutes {
           builder: (_) => const FileViewerScreen(),
         );
 
+      case AppRoutes.gemmaApiTest:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const GemmaApiTestScreen(),
+        );
+
       default:
         return null;
     }

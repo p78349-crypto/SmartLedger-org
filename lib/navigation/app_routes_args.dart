@@ -81,6 +81,22 @@ class AccountSelectArgs {
   final List<String> accounts;
 }
 
+/// 지출입력 저장 후 반환되는 결과 (연속 입력 시 이전 값 유지에 사용)
+class TransactionAddResult {
+  const TransactionAddResult({
+    required this.saved,
+    this.paymentMethod,
+    this.memo,
+    this.mainCategory,
+    this.subCategory,
+  });
+  final bool saved;
+  final String? paymentMethod;
+  final String? memo;
+  final String? mainCategory;
+  final String? subCategory;
+}
+
 class TransactionAddArgs {
   const TransactionAddArgs({
     required this.accountName,
@@ -91,6 +107,8 @@ class TransactionAddArgs {
     this.closeAfterSave = false,
     this.autoSubmit = false,
     this.openReceiptScannerOnStart = false,
+    this.initialPaymentMethod,
+    this.initialMemo,
   });
   final String accountName;
   final Object? initialTransaction;
@@ -105,6 +123,12 @@ class TransactionAddArgs {
   ///
   /// Note: This flag itself should never cause state-changing behavior.
   final bool openReceiptScannerOnStart;
+
+  /// 연속 입력 시 이전에 입력한 결제수단 (유지용)
+  final String? initialPaymentMethod;
+
+  /// 연속 입력 시 이전에 입력한 메모 (유지용)
+  final String? initialMemo;
 }
 
 class TransactionDetailArgs {

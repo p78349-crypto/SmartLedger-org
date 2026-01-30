@@ -28,9 +28,13 @@ class MainActivity : FlutterActivity() {
 
     private var deepLinkChannel: MethodChannel? = null
     private var initialDeepLink: String? = null
+    private var aiCoreMethodChannel: AICoreMethodChannel? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+
+        // AICore (MediaPipe LLM Inference) 통합
+        aiCoreMethodChannel = AICoreMethodChannel(applicationContext, flutterEngine)
 
         // Deep Link Channel for App Actions / Bixby / Voice Assistants
         deepLinkChannel = MethodChannel(

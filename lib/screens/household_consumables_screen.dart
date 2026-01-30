@@ -128,7 +128,7 @@ class HouseholdConsumablesScreen extends StatelessWidget {
                 color: Theme.of(context).colorScheme.primary,
               ),
               title: const Text('🛒 구입 기록'),
-              subtitle: const Text('거래 입력 화면'),
+              subtitle: const Text('지출입력 화면'),
               onTap: () {
                 Navigator.pop(ctx);
                 _goToPurchaseInput(context, item);

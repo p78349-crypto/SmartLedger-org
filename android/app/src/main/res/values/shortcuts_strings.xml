@@ -2,9 +2,9 @@
 <resources>
     <!-- Static Shortcut Labels -->
     <string name="shortcut_add_expense_short">지출 추가</string>
-    <string name="shortcut_add_expense_long">새 지출 거래 입력</string>
-    <string name="shortcut_add_income_short">수입 추가</string>
-    <string name="shortcut_add_income_long">새 수입 거래 입력</string>
+    <string name="shortcut_add_expense_long">새 지출입력</string>
+    <string name="shortcut_add_income_short">수입</string>
+    <string name="shortcut_add_income_long">새 수입 입력</string>
     <string name="shortcut_dashboard_short">대시보드</string>
     <string name="shortcut_dashboard_long">대시보드 열기</string>
     

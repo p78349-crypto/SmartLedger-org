@@ -33,7 +33,7 @@
 
 ## 🔄 지출입력 프로세스 (3가지 경로)
 
-### 경로 1️⃣: 단건 거래 입력 (행 버튼)
+### 경로 1️⃣: 단건 지출입력 (행 버튼)
 
 ```
 ShoppingCartScreen
@@ -53,7 +53,7 @@ ShoppingCartQuickTransactionScreen
 
 ---
 
-### 경로 2️⃣: 일괄 거래 입력 (체크 항목 - 순차)
+### 경로 2️⃣: 일괄 지출입력 (체크 항목 - 순차)
 
 ```
 ShoppingCartScreen

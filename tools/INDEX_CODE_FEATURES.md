@@ -173,7 +173,7 @@
   - `Navigator.of(context).pushNamed(AppRoutes.assetTab, arguments: AccountArgs(accountName: accountName));`
 - 메인 진입(초기 탭 선택 포함)
   - `Navigator.of(context).pushNamed(AppRoutes.accountMain, arguments: AccountMainArgs(accountName: accountName, initialIndex: 0));`
-- 거래 입력(편집 모드 포함)
+- 지출입력(편집 모드 포함)
   - `Navigator.of(context).pushNamed(AppRoutes.transactionAdd, arguments: TransactionAddArgs(accountName: accountName, initialTransaction: tx));`
 - 상세내역(타입 선택)
   - `Navigator.of(context).pushNamed(AppRoutes.transactionDetail, arguments: TransactionDetailArgs(accountName: accountName, initialType: TransactionType.expense));`
@@ -265,7 +265,7 @@
 
 | id | label | icon | route | arguments(Args) | 비고 |
 |---|---|---|---|---|---|
-| transaction_add | 거래 입력 | Icons.edit | AppRoutes.transactionAdd | TransactionAddArgs(accountName) |  |
+| transaction_add | 지출입력 | Icons.edit | AppRoutes.transactionAdd | TransactionAddArgs(accountName) |  |
 | emergency_fund | 비상금 | Icons.health_and_safety_outlined | AppRoutes.emergencyFund | AccountArgs(accountName) |  |
 | transaction_history | 거래 내역 | Icons.receipt_long_outlined | AppRoutes.dailyTransactions | DailyTransactionsArgs(accountName, initialDay: now) |  |
 | search | 검색 | Icons.search | - | - | onInvoke: null (UI 내부 동작/미구현) |
@@ -374,7 +374,7 @@
 → 화면 렌더: `AccountMainScreen` (빈 화면)
 → (END)
 
-## 3-2) (LEGACY / REMOVED) 메인 → Smart Ledger 퀵액션 → 거래 입력 (END)
+## 3-2) (LEGACY / REMOVED) 메인 → Smart Ledger 퀴액션 → 지출입력 (END)
 
 `QuickActionsScreen`
 → `SmartQuickActionsView`
@@ -560,12 +560,12 @@
 | 2025-12-22 | Policy: 예약 모듈 아이콘 자동 재배치 | 예약(통계/자산/ROOT/설정) 아이콘이 다른 페이지 슬롯에 남아있을 수 있음 | AccountMainScreen 진입 시 예약 모듈 아이콘을 정책 페이지로 best-effort 이동. 단, 자산/수입 아이콘은 자산 잠금(암호/생체) ON + (허용 옵션/세션 unlock로 bypass 없음)일 때만 강제 이동(그 외에는 사용자 배치 유지). 빈 슬롯 우선, 가득 차면 드롭 없음 | Why=정책 위반 배치 자동 정리(사용자 혼란 감소) + 자산 잠금 조건 존중; Risk=Low(조건 충족 시에만 이동, full이면 유지); Verify=flutter analyze --no-fatal-infos; Files=lib/screens/account_main_screen.dart, tools/INDEX_CODE_FEATURES.md |
 | 2025-12-22 | Docs: 예약 페이지(4~10) 정책 기록 | 정책이 코드에만 산재(account_main/icon_management) | tools/INDEX_CHILD.md에 4~10 페이지 예약 정책(통계/자산/ROOT/설정)과 0-based 인덱스 매핑을 명시 | Why=페이지 정책(4~10) 빠른 확인/검색; Verify=Validate INDEX format (PowerShell); Files=tools/INDEX_CHILD.md, tools/INDEX_CODE_FEATURES.md |
 | 2025-12-21 | SCRATCHPAD 설계 기반 Smart Ledger 유틸리티 생성 | 없음 (설계만 존재) | 4가지 유틸리티 추가: WeatherCaptureUtils (날씨 수집), ShoppingWorkflowUtils (쇼핑 3단계), MarketAnalysisUtils (분석/통계), SmartLedgerIntegrationUtils (통합). lib/utils/에 저장 | Why=재사용 가능한 모듈화 + 향후 기능 확장 기반; Verify=flutter test (100 passed); Files=lib/utils/weather_capture_utils.dart, lib/utils/shopping_workflow_utils.dart, lib/utils/market_analysis_utils.dart, lib/utils/smart_ledger_integration_utils.dart |
-| 2025-12-21 | 거래 입력: 날씨 기능 완전 제거 | 거래 추가 화면에 날씨 입력(자동/수동) + 저장 포함 | 날씨 관련 UI, 상태 변수, OpenWeather API 통합, 자동 날씨 버튼, 저장 시 weather 필드 등 모두 제거. 단순화 | Why=복잡도 감소 + 화면 단순화; Verify=flutter analyze; Tests=flutter test (100 passed); Files=lib/screens/transaction_add_screen.dart |
-| 2025-12-21 | 거래 입력 UX: 날씨·저장 버튼 정리 + 쇼핑 화면 타이틀 간소화 | 날씨(선택) 텍스트 + 자동 날씨 버튼(상단). 저장 버튼 아이콘=영수증. 쇼핑 화면 AppBar에 계정명+모드 표시(2줄). 자동 날씨 아이콘 없음(또는 상단에만 있음) | 날씨(선택) 텍스트 제거. 자동 날씨 아이콘(위치 표시)을 카테고리 섹션 아래·저장 버튼 위로 이동(보기모드 아이콘만). 저장 버튼 아이콘="+" 기호(추가 의미 강화) + 색상 진하게(alpha=220). 쇼핑준비/장바구니 화면의 AppBar는 모드명만 표시(계정명 숨김, 기본 타이틀 크기). 쇼핑 준비 모드에서만 쇼핑 준비 버튼 노출(장바구니 모드에서는 숨김). 거래 추가 폼 ListView bottom padding 추가(SafeArea height 계산) | Why=화면 노이즈 감소(텍스트 제거) + 버튼 배치 명확화(하단으로 이동) + 아이콘 의도 강화(+ 기호) + 모드 표시 간소화(모드명만) + 오조작 방지(쇼핑준비 모드 경계); Verify=flutter analyze; Tests=flutter test; Files=lib/screens/transaction_add_screen.dart, lib/screens/shopping_cart_screen.dart |
-| 2025-12-21 | 거래 입력: 자동 날씨 버튼(왼쪽) 추가 | 지출 입력 시 날씨는 수동 선택/기온 수동 입력만 가능 | 거래 추가 화면(지출)에 `자동 날씨` 버튼을 왼쪽에 추가하여 위치 권한 → OpenWeatherMap 조회 → 날씨/기온 자동 채움. `OPENWEATHER_API_KEY`는 `--dart-define`로 주입. Android 위치 권한 및 geolocator 의존성 추가 | Why=입력 편의/데이터 품질 향상; Risk=API 키/위치 권한 필요; Verify=flutter analyze; Tests=flutter test; Files=lib/screens/transaction_add_screen.dart, android/app/src/main/AndroidManifest.xml, pubspec.yaml |
-| 2025-12-21 | 거래: 날씨 스냅샷 확장(예측/알림 기반) | `weather`는 condition/tempC/source만 저장 | WeatherSnapshot에 capturedAt/대략 lat-lon/feelsLikeC/humidityPct/windSpeedMs/precipitation1hMm를 optional로 추가하고, 자동 날씨(OpenWeatherMap)에서 값 채워 저장 | Why=가격 변동폭/상승 감지 분석에 필요한 기상 변수 확보; Verify=flutter analyze; Tests=flutter test; Files=lib/models/weather_snapshot.dart, lib/screens/transaction_add_screen.dart |
+| 2025-12-21 | 지출입력: 날씨 기능 완전 제거 | 지출 추가 화면에 날씨 입력(자동/수동) + 저장 포함 | 날씨 관련 UI, 상태 변수, OpenWeather API 통합, 자동 날씨 버튼, 저장 시 weather 필드 등 모두 제거. 단순화 | Why=복잡도 감소 + 화면 단순화; Verify=flutter analyze; Tests=flutter test (100 passed); Files=lib/screens/transaction_add_screen.dart |
+| 2025-12-21 | 지출입력 UX: 날씨·저장 버튼 정리 + 쇼핑 화면 타이틀 간소화 | 날씨(선택) 텍스트 + 자동 날씨 버튼(상단). 저장 버튼 아이콘=영수증. 쇼핑 화면 AppBar에 계정명+모드 표시(2줄). 자동 날씨 아이콘 없음(또는 상단에만 있음) | 날씨(선택) 텍스트 제거. 자동 날씨 아이콘(위치 표시)을 카테고리 섹션 아래·저장 버튼 위로 이동(보기모드 아이콘만). 저장 버튼 아이콘="+" 기호(추가 의미 강화) + 색상 진하게(alpha=220). 쇼핑준비/장바구니 화면의 AppBar는 모드명만 표시(계정명 숨김, 기본 타이틀 크기). 쇼핑 준비 모드에서만 쇼핑 준비 버튼 노출(장바구니 모드에서는 숨김). 지출 추가 폼 ListView bottom padding 추가(SafeArea height 계산) | Why=화면 노이즈 감소(텍스트 제거) + 버튼 배치 명확화(하단으로 이동) + 아이콘 의도 강화(+ 기호) + 모드 표시 간소화(모드명만) + 오조작 방지(쇼핑준비 모드 경계); Verify=flutter analyze; Tests=flutter test; Files=lib/screens/transaction_add_screen.dart, lib/screens/shopping_cart_screen.dart |
+| 2025-12-21 | 지출입력: 자동 날씨 버튼(왼쪽) 추가 | 지출 입력 시 날씨는 수동 선택/기온 수동 입력만 가능 | 지출 추가 화면(지출)에 `자동 날씨` 버튼을 왼쪽에 추가하여 위치 권한 → OpenWeatherMap 조회 → 날씨/기온 자동 채움. `OPENWEATHER_API_KEY`는 `--dart-define`로 주입. Android 위치 권한 및 geolocator 의존성 추가 | Why=입력 편의/데이터 품질 향상; Risk=API 키/위치 권한 필요; Verify=flutter analyze; Tests=flutter test; Files=lib/screens/transaction_add_screen.dart, android/app/src/main/AndroidManifest.xml, pubspec.yaml |
+| 2025-12-21 | 지출: 날씨 스냅샷 확장(예측/알림 기반) | `weather`는 condition/tempC/source만 저장 | WeatherSnapshot에 capturedAt/대략 lat-lon/feelsLikeC/humidityPct/windSpeedMs/precipitation1hMm를 optional로 추가하고, 자동 날씨(OpenWeatherMap)에서 값 채워 저장 | Why=가격 변동폭/상승 감지 분석에 필요한 기상 변수 확보; Verify=flutter analyze; Tests=flutter test; Files=lib/models/weather_snapshot.dart, lib/screens/transaction_add_screen.dart |
 | 2025-12-21 | (DUPLICATE) 거래: 날씨 스냅샷 확장(예측/알림 기반) | - | - | Duplicate row kept for history (see previous row). |
-| 2025-12-21 | 거래: 가격 상승 감지 알림(+10%) | 저장 시 가격 상승 경고 없음 | 지출 저장 시 동일 품목(설명 기준) 최근 20건 단가 중앙값 대비 +10% AND +100원 이상 상승이면 저장 전 확인 다이얼로그 표시(취소/계속 저장) | Why=사용자에게 즉시 ‘가격 상승’ 정보 제공; Verify=flutter analyze; Tests=flutter test; Files=lib/screens/transaction_add_screen.dart |
+| 2025-12-21 | 지출: 가격 상승 감지 알림(+10%) | 저장 시 가격 상승 경고 없음 | 지출 저장 시 동일 품목(설명 기준) 최근 20건 단가 중앙값 대비 +10% AND +100원 이상 상승이면 저장 전 확인 다이얼로그 표시(취소/계속 저장) | Why=사용자에게 즉시 '가격 상승' 정보 제공; Verify=flutter analyze; Tests=flutter test; Files=lib/screens/transaction_add_screen.dart |
 | 2025-12-21 | 메인: 편집모드 드래그는 현재 페이지에서만 + 배너 자동 추적 | 아이콘 이동(편집) 중 드래그/스와이프가 겹치면 옆 페이지로 넘어가 아이콘이 다른 페이지로 이동하는 듯한 오조작 발생. 상단 배너는 페이지 이동 시 현재 탭이 화면 밖에 있을 수 있음 | 편집모드 진입 시 현재 페이지의 `PageView` 스와이프를 잠금하여 아이콘 이동은 “해당 페이지 안에서만” 수행. 배너는 번호만 표시하며, 페이지 이동 시 현재 탭이 보이도록 자동 스크롤(ensureVisible) | Why=오조작(페이지 넘어감) 방지 + 현재 위치 가시성 개선; Verify=flutter analyze; Tests=flutter test; Files=lib/screens/account_main_screen.dart, lib/widgets/page_banner_bar.dart |
 | 2025-12-21 | 메인: 15페이지까지 이동 가능(불일치 수정) | AccountMainScreen의 `_pageCount`가 8로 고정되어 9페이지 이상으로 이동 불가. (prefs/아이콘 카탈로그는 15페이지 기준) | AccountMainScreen의 페이지 수를 `MainFeatureIconCatalog.pageCount(15)`로 정렬하고, 저장된 pageNames 길이가 다르면 15개로 자동 보정(기존 이름 유지 + 부족분 기본값 채움) | Why=메인/아이콘관리/저장소(pageCount=15) 정합성 확보; Risk=Low(페이지 수 증가); Verify=flutter analyze; Tests=flutter test; Files=lib/screens/account_main_screen.dart |
 | 2025-12-21 | 거래: 가격정보와 함께 날씨 스냅샷 저장(선택) | 거래 JSON에 날씨 필드 없음 | Transaction에 `weather`(condition/tempC/source) 옵션 필드 추가 + 거래 추가 화면(지출)에 날씨/기온 입력 추가 | Why=가격/소비 패턴과 날씨 상관 분석 기반 마련; Verify=Quality Gate (analyze + test + INDEX); Files=lib/models/weather_snapshot.dart, lib/models/transaction.dart, lib/screens/transaction_add_screen.dart |

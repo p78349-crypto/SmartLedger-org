@@ -73,4 +73,12 @@ flutter {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+    
+    // MediaPipe LLM Inference API (온디바이스 AI)
+    // 공식 문서: https://ai.google.dev/edge/mediapipe/solutions/genai/llm_inference/android
+    implementation("com.google.mediapipe:tasks-genai:0.10.14")
+    
+    // Kotlin Coroutines (비동기 처리)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
 }
+

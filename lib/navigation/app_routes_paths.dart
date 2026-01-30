@@ -118,4 +118,13 @@ class AppRoutes {
   static const ceoRecoveryPlan = '/root/ceo/recovery-plan';
   static const ceoRoiDetail = '/root/ceo/roi-detail';
   static const ceoMonthlyDefenseReport = '/root/ceo/monthly-defense-report';
+
+  // Gemma API test
+  static const gemmaApiTest = '/dev/gemma-api-test';
+
+  // Gemini Nano voice input
+  static const geminiVoiceInput = '/transaction/gemini-voice-input';
+  
+  // Smart voice command (앱 통합 제어)
+  static const smartVoiceCommand = '/smart/voice-command';
 }

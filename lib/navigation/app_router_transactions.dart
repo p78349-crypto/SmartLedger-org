@@ -21,6 +21,8 @@ class _TransactionRoutes {
             closeAfterSave: a.closeAfterSave,
             autoSubmit: a.autoSubmit,
             openReceiptScannerOnStart: a.openReceiptScannerOnStart,
+            initialPaymentMethod: a.initialPaymentMethod,
+            initialMemo: a.initialMemo,
           ),
         );
 
@@ -54,6 +56,8 @@ class _TransactionRoutes {
             closeAfterSave: a.closeAfterSave,
             autoSubmit: a.autoSubmit,
             openReceiptScannerOnStart: a.openReceiptScannerOnStart,
+            initialPaymentMethod: a.initialPaymentMethod,
+            initialMemo: a.initialMemo,
           ),
         );
 
@@ -157,8 +161,27 @@ class _TransactionRoutes {
           builder: (_) => BackupScreen(accountName: a.accountName),
         );
 
+      case AppRoutes.geminiVoiceInput:
+        final a = args as AccountArgs;
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => GeminiVoiceInputScreen(
+            accountName: a.accountName,
+          ),
+        );
+
+      case AppRoutes.smartVoiceCommand:
+        final a = args as AccountArgs;
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => SmartVoiceCommandScreen(
+            accountName: a.accountName,
+          ),
+        );
+
       default:
         return null;
     }
   }
 }
+

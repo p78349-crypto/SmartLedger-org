@@ -1870,7 +1870,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                   onPressed: (!widget.openPrepOnStart && checkedCount > 0)
                       ? _addCheckedItemsToLedgerBulk
                       : null,
-                  child: Text('체크 항목 거래 입력 ($checkedCount)'),
+                  child: Text('체크 항목 지출입력 ($checkedCount)'),
                 ),
               ),
             ],

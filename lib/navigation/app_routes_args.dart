@@ -225,6 +225,29 @@ class QuickStockUseArgs {
   final String? initialProductName;
 }
 
+/// 장바구니 → 지출입력 후 포인트/할인 입력 화면 Args
+class ShoppingPointsInputArgs {
+  const ShoppingPointsInputArgs({
+    required this.accountName,
+    this.lastPaymentMethod,
+    this.lastMemo,
+    this.totalAmount,
+    this.chargedAmount,
+    this.itemCount,
+  });
+  final String accountName;
+  /// 지출입력에서 마지막으로 사용한 결제수단
+  final String? lastPaymentMethod;
+  /// 지출입력에서 마지막으로 사용한 메모(매장명)
+  final String? lastMemo;
+  /// 전체 상품 합계 금액
+  final double? totalAmount;
+  /// 카드 결제 금액
+  final double? chargedAmount;
+  /// 입력한 아이템 개수
+  final int? itemCount;
+}
+
 class TopLevelStatsDetailArgs {
   const TopLevelStatsDetailArgs({required this.dashboard});
   final dynamic dashboard;

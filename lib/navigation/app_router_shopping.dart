@@ -104,11 +104,16 @@ class _ShoppingRoutes {
         );
 
       case AppRoutes.shoppingPointsInput:
-        final a = args as AccountArgs;
+        final a = args as ShoppingPointsInputArgs;
         return MaterialPageRoute(
           settings: settings,
           builder: (_) => ShoppingPointsInputScreen(
             accountName: a.accountName,
+            lastPaymentMethod: a.lastPaymentMethod,
+            lastMemo: a.lastMemo,
+            totalAmount: a.totalAmount,
+            chargedAmount: a.chargedAmount,
+            itemCount: a.itemCount,
           ),
         );
 

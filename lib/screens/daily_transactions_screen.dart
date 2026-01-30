@@ -67,13 +67,20 @@ class _DailyTransactionsScreenState extends State<DailyTransactionsScreen> {
           action: SnackBarAction(
             label: wantsPoints ? '포인트 입력' : '기록',
             onPressed: () {
-              final route = wantsPoints
-                  ? AppRoutes.shoppingPointsInput
-                  : AppRoutes.microSavings;
-              Navigator.of(context).pushNamed(
-                route,
-                arguments: AccountArgs(accountName: widget.accountName),
-              );
+              messenger.hideCurrentSnackBar(); // 이동 전 SnackBar 숨김
+              if (wantsPoints) {
+                Navigator.of(context).pushNamed(
+                  AppRoutes.shoppingPointsInput,
+                  arguments: ShoppingPointsInputArgs(
+                    accountName: widget.accountName,
+                  ),
+                );
+              } else {
+                Navigator.of(context).pushNamed(
+                  AppRoutes.microSavings,
+                  arguments: AccountArgs(accountName: widget.accountName),
+                );
+              }
             },
           ),
         ),
@@ -219,7 +226,9 @@ class _DailyTransactionsScreenState extends State<DailyTransactionsScreen> {
                 onPressed: () {
                   Navigator.of(context).pushNamed(
                     AppRoutes.shoppingPointsInput,
-                    arguments: AccountArgs(accountName: widget.accountName),
+                    arguments: ShoppingPointsInputArgs(
+                      accountName: widget.accountName,
+                    ),
                   );
                 },
                 style: FilledButton.styleFrom(

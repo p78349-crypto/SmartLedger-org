@@ -16,6 +16,7 @@ import '../services/asset_service.dart';
 import '../services/category_usage_service.dart';
 import '../services/consumable_inventory_service.dart';
 import '../services/food_expiry_service.dart';
+import '../services/last_input_service.dart';
 import '../services/recent_input_service.dart';
 import '../services/transaction_service.dart';
 import '../services/user_pref_service.dart';
@@ -697,13 +698,18 @@ class _NO1FormState extends State<NO1Form> {
     _unitPriceController.addListener(_updateAmount);
     if (initial == null) {
       _updateAmount();
-      // 연속 입력 시 이전 결제수단/메모 유지
+      // 연속 입력 시 이전 결제수단/메모 유지 (Args 우선, 없으면 LastInputService)
       if (widget.initialPaymentMethod != null &&
           widget.initialPaymentMethod!.isNotEmpty) {
         _paymentController.text = widget.initialPaymentMethod!;
       }
       if (widget.initialMemo != null && widget.initialMemo!.isNotEmpty) {
         _memoController.text = widget.initialMemo!;
+      }
+      // Args가 없으면 LastInputService에서 마지막 입력값 로드
+      if ((widget.initialPaymentMethod == null || widget.initialPaymentMethod!.isEmpty) ||
+          (widget.initialMemo == null || widget.initialMemo!.isEmpty)) {
+        unawaited(_loadLastInputFromService());
       }
     }
 
@@ -739,6 +745,26 @@ class _NO1FormState extends State<NO1Form> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _captureInitialSnapshotIfNeeded();
+    });
+  }
+
+  /// LastInputService에서 마지막 입력값 로드 (결제수단/메모만)
+  Future<void> _loadLastInputFromService() async {
+    final lastInput = await LastInputService.instance.getLastTransaction(widget.accountName);
+    if (!mounted || lastInput == null) return;
+    
+    setState(() {
+      // Args로 전달된 값이 없는 경우에만 LastInputService 값 사용
+      if (_paymentController.text.isEmpty && 
+          lastInput.paymentMethod != null && 
+          lastInput.paymentMethod!.isNotEmpty) {
+        _paymentController.text = lastInput.paymentMethod!;
+      }
+      if (_memoController.text.isEmpty && 
+          lastInput.memo != null && 
+          lastInput.memo!.isNotEmpty) {
+        _memoController.text = lastInput.memo!;
+      }
     });
   }
 
@@ -1520,6 +1546,32 @@ class _NO1FormState extends State<NO1Form> {
           unitPrice: unit,
           purchaseDate: _transactionDate,
         );
+      }
+
+      // 마지막 입력값 중앙 저장소에 저장 (다른 화면에서 참조용)
+      unawaited(LastInputService.instance.saveTransaction(
+        accountName: widget.accountName,
+        description: desc,
+        amount: amount,
+        unitPrice: unit,
+        quantity: qty,
+        paymentMethod: _paymentController.text,
+        memo: _memoController.text,
+        mainCategory: _selectedMainCategory,
+        subCategory: _selectedSubCategory,
+        date: _transactionDate,
+      ));
+
+      // 쇼핑 세션 업데이트 (장바구니→지출입력→포인트 흐름용)
+      if (isExpense) {
+        unawaited(LastInputService.instance.updateShoppingSessionFromTransaction(
+          accountName: widget.accountName,
+          paymentMethod: _paymentController.text,
+          memo: _memoController.text,
+          mainCategory: _selectedMainCategory,
+          subCategory: _selectedSubCategory,
+          amount: amount,
+        ));
       }
 
       if (existing != null) {

@@ -152,6 +152,13 @@ class IconLaunchUtils {
       );
     }
 
+    if (routeName == AppRoutes.shoppingPointsInput) {
+      return IconLaunchRequest(
+        routeName: routeName,
+        arguments: ShoppingPointsInputArgs(accountName: accountName),
+      );
+    }
+
     final args = noArgsRoutes.contains(routeName)
         ? null
         : AccountArgs(accountName: accountName);

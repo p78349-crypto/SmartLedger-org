@@ -14,7 +14,9 @@ class _CapturingNavigatorObserver extends NavigatorObserver {
 
 void main() {
   group('MemoSearchUtils', () {
-    testWidgets('openMemoOnlySearch pushes a MaterialPageRoute', (tester) async {
+    testWidgets('openMemoOnlySearch pushes a MaterialPageRoute', (
+      tester,
+    ) async {
       final navigatorKey = GlobalKey<NavigatorState>();
       final observer = _CapturingNavigatorObserver();
 

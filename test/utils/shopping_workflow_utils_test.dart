@@ -41,10 +41,23 @@ void main() {
     test('calculateTotal parses qty/price with fallbacks', () {
       final items = [
         CartItem(id: '1', name: 'A', quantity: '2', estimatedPrice: '1000'),
-        CartItem(id: '2', name: 'B', quantity: 'x', estimatedPrice: '500'), // qty fallback 1
-        CartItem(id: '3', name: 'C', quantity: '3', estimatedPrice: 'y'), // price fallback 0
+        CartItem(
+          id: '2',
+          name: 'B',
+          quantity: 'x',
+          estimatedPrice: '500',
+        ), // qty fallback 1
+        CartItem(
+          id: '3',
+          name: 'C',
+          quantity: '3',
+          estimatedPrice: 'y',
+        ), // price fallback 0
       ];
-      expect(ShoppingWorkflowUtils.calculateTotal(items), 2 * 1000 + 1 * 500 + 3 * 0);
+      expect(
+        ShoppingWorkflowUtils.calculateTotal(items),
+        2 * 1000 + 1 * 500 + 3 * 0,
+      );
     });
 
     test('getNextMode follows workflow rules', () {
@@ -53,10 +66,9 @@ void main() {
         ShoppingMode.planning,
       );
       expect(
-        ShoppingWorkflowUtils.getNextMode(
-          ShoppingMode.planning,
-          [CartItem(id: '1', name: 'A')],
-        ),
+        ShoppingWorkflowUtils.getNextMode(ShoppingMode.planning, [
+          CartItem(id: '1', name: 'A'),
+        ]),
         ShoppingMode.shopping,
       );
 

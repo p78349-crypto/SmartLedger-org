@@ -28,10 +28,10 @@ void main() {
 
       // 위젯 생성 확인
       expect(find.byType(CEOMonthlyDefenseReportScreen), findsOneWidget);
-      
+
       // 몇 프레임 진행
       await tester.pump(const Duration(milliseconds: 100));
-      
+
       // 여전히 위젯 존재
       expect(find.byType(CEOMonthlyDefenseReportScreen), findsOneWidget);
     });

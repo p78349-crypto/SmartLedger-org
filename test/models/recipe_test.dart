@@ -4,11 +4,7 @@ import 'package:smart_ledger/models/recipe.dart';
 void main() {
   group('RecipeIngredient', () {
     test('creates with required fields', () {
-      final ingredient = RecipeIngredient(
-        name: '당근',
-        quantity: 100,
-        unit: 'g',
-      );
+      final ingredient = RecipeIngredient(name: '당근', quantity: 100, unit: 'g');
 
       expect(ingredient.name, '당근');
       expect(ingredient.quantity, 100);
@@ -16,11 +12,7 @@ void main() {
     });
 
     test('toJson serializes correctly', () {
-      final ingredient = RecipeIngredient(
-        name: '양파',
-        quantity: 1.5,
-        unit: '개',
-      );
+      final ingredient = RecipeIngredient(name: '양파', quantity: 1.5, unit: '개');
 
       final json = ingredient.toJson();
 
@@ -30,11 +22,7 @@ void main() {
     });
 
     test('fromJson parses correctly', () {
-      final json = {
-        'name': '마늘',
-        'quantity': 3.0,
-        'unit': '쪽',
-      };
+      final json = {'name': '마늘', 'quantity': 3.0, 'unit': '쪽'};
 
       final ingredient = RecipeIngredient.fromJson(json);
 
@@ -79,9 +67,7 @@ void main() {
         id: 'recipe-2',
         name: '스파게티',
         cuisine: '양식',
-        ingredients: [
-          RecipeIngredient(name: '파스타면', quantity: 100, unit: 'g'),
-        ],
+        ingredients: [RecipeIngredient(name: '파스타면', quantity: 100, unit: 'g')],
         healthScore: 2,
       );
 
@@ -166,7 +152,10 @@ void main() {
       expect(restored.healthScore, original.healthScore);
       expect(restored.ingredients.length, original.ingredients.length);
       expect(restored.ingredients[0].name, original.ingredients[0].name);
-      expect(restored.ingredients[0].quantity, original.ingredients[0].quantity);
+      expect(
+        restored.ingredients[0].quantity,
+        original.ingredients[0].quantity,
+      );
     });
   });
 }

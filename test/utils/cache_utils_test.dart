@@ -96,7 +96,9 @@ void main() {
 
   group('SimpleCache with different types', () {
     test('works with String values', () {
-      final cache = SimpleCache<String, String>(maxAge: const Duration(minutes: 5));
+      final cache = SimpleCache<String, String>(
+        maxAge: const Duration(minutes: 5),
+      );
       cache.set('greeting', 'hello');
       expect(cache.get('greeting'), 'hello');
     });
@@ -110,7 +112,9 @@ void main() {
     });
 
     test('works with int keys', () {
-      final cache = SimpleCache<int, String>(maxAge: const Duration(minutes: 5));
+      final cache = SimpleCache<int, String>(
+        maxAge: const Duration(minutes: 5),
+      );
       cache.set(1, 'one');
       cache.set(2, 'two');
       expect(cache.get(1), 'one');

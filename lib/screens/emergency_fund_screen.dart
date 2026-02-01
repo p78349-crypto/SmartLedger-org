@@ -186,7 +186,7 @@ class _EmergencyFundScreenState extends State<EmergencyFundScreen> {
                     title: hasQuery ? '검색 결과가 없습니다' : '비상금 거래 내역이 없습니다',
                     message: hasQuery
                         ? '검색어를 바꾸거나 초기화하세요.'
-                        : '+ 버튼을 눌러 입출금을 기록하세요.',
+                        : '+ 버튼을 눌러 입출금을 추가하세요.',
                     secondaryLabel: hasQuery ? '검색 초기화' : null,
                     onSecondary: hasQuery
                         ? () {

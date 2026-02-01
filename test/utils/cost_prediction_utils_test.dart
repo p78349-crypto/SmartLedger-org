@@ -42,9 +42,10 @@ void main() {
           prices: [5000],
           expiryDate: DateTime(now.year, now.month + 1),
         );
-        final result = CostPredictionUtils.getCurrentMonthTotalCost(
-          [...thisMonth, ...nextMonth],
-        );
+        final result = CostPredictionUtils.getCurrentMonthTotalCost([
+          ...thisMonth,
+          ...nextMonth,
+        ]);
         expect(result, 1000); // 이번 달 항목만
       });
     });
@@ -168,13 +169,19 @@ void main() {
 
     group('getCategorySpendingAdvice', () {
       test('returns no data message for empty map', () {
-        final result = CostPredictionUtils.getCategorySpendingAdvice({}, 100000);
+        final result = CostPredictionUtils.getCategorySpendingAdvice(
+          {},
+          100000,
+        );
         expect(result, contains('데이터가 없습니다'));
       });
 
       test('identifies top spending category', () {
         final spending = {'과일': 30000.0, '채소': 20000.0};
-        final result = CostPredictionUtils.getCategorySpendingAdvice(spending, 100000);
+        final result = CostPredictionUtils.getCategorySpendingAdvice(
+          spending,
+          100000,
+        );
         expect(result, contains('과일'));
       });
     });
@@ -182,7 +189,10 @@ void main() {
     group('getAffordableAlternatives', () {
       test('filters items under threshold', () {
         final items = createItems(prices: [1000, 3000, 5000]);
-        final result = CostPredictionUtils.getAffordableAlternatives(items, 3000);
+        final result = CostPredictionUtils.getAffordableAlternatives(
+          items,
+          3000,
+        );
 
         expect(result.length, 2);
         expect(result.first.price, 1000); // 정렬됨
@@ -190,7 +200,10 @@ void main() {
 
       test('returns empty list when no affordable items', () {
         final items = createItems(prices: [5000, 6000]);
-        final result = CostPredictionUtils.getAffordableAlternatives(items, 1000);
+        final result = CostPredictionUtils.getAffordableAlternatives(
+          items,
+          1000,
+        );
         expect(result, isEmpty);
       });
     });
@@ -198,7 +211,10 @@ void main() {
     group('calculatePotentialSavings', () {
       test('calculates savings potential', () {
         final items = createItems(prices: [3000, 4000, 5000]); // 총 12,000원
-        final result = CostPredictionUtils.calculatePotentialSavings(items, 2000);
+        final result = CostPredictionUtils.calculatePotentialSavings(
+          items,
+          2000,
+        );
         // 현재 12,000 - (3개 * 2000) = 12,000 - 6,000 = 6,000원 절약 가능
         expect(result, 6000);
       });

@@ -46,10 +46,7 @@ void main() {
   group('BenefitAggregationUtils', () {
     group('memo tags', () {
       test('skippedSpendMemoTag is correct', () {
-        expect(
-          BenefitAggregationUtils.skippedSpendMemoTag,
-          '#참은소비',
-        );
+        expect(BenefitAggregationUtils.skippedSpendMemoTag, '#참은소비');
       });
 
       test('savedPointsMemoTag is correct', () {
@@ -63,11 +60,7 @@ void main() {
 
     group('isSkippedSpendRecord', () {
       test('returns true for valid skipped spend', () {
-        final tx = createSavings(
-          id: '1',
-          amount: 10000,
-          memo: '커피 #참은소비',
-        );
+        final tx = createSavings(id: '1', amount: 10000, memo: '커피 #참은소비');
         expect(BenefitAggregationUtils.isSkippedSpendRecord(tx), isTrue);
       });
 
@@ -128,11 +121,7 @@ void main() {
       });
 
       test('calculates benefit from memo', () {
-        final tx = createExpense(
-          id: '1',
-          amount: 10000,
-          memo: '혜택:카드=2000',
-        );
+        final tx = createExpense(id: '1', amount: 10000, memo: '혜택:카드=2000');
         expect(BenefitAggregationUtils.benefitOf(tx), 2000);
       });
 

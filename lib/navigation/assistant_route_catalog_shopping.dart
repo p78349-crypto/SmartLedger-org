@@ -29,23 +29,20 @@ final Map<String, AssistantRouteSpec> _shoppingSpecs = {
   AppRoutes.microSavings: AssistantRouteSpec(
     routeName: AppRoutes.microSavings,
     requiresAccount: true,
-    buildArgs: (accountName) => AccountArgs(
-      accountName: _accountNameOrDefault(accountName),
-    ),
+    buildArgs: (accountName) =>
+        AccountArgs(accountName: _accountNameOrDefault(accountName)),
   ),
   AppRoutes.savingsPlanList: AssistantRouteSpec(
     routeName: AppRoutes.savingsPlanList,
     requiresAccount: true,
-    buildArgs: (accountName) => AccountArgs(
-      accountName: _accountNameOrDefault(accountName),
-    ),
+    buildArgs: (accountName) =>
+        AccountArgs(accountName: _accountNameOrDefault(accountName)),
   ),
   AppRoutes.shoppingCart: AssistantRouteSpec(
     routeName: AppRoutes.shoppingCart,
     requiresAccount: true,
-    buildArgs: (accountName) => ShoppingCartArgs(
-      accountName: _accountNameOrDefault(accountName),
-    ),
+    buildArgs: (accountName) =>
+        ShoppingCartArgs(accountName: _accountNameOrDefault(accountName)),
   ),
   AppRoutes.shoppingPrep: AssistantRouteSpec(
     routeName: AppRoutes.shoppingPrep,
@@ -58,37 +55,32 @@ final Map<String, AssistantRouteSpec> _shoppingSpecs = {
   AppRoutes.shoppingPointsInput: AssistantRouteSpec(
     routeName: AppRoutes.shoppingPointsInput,
     requiresAccount: true,
-    buildArgs: (accountName) => AccountArgs(
-      accountName: _accountNameOrDefault(accountName),
-    ),
+    buildArgs: (accountName) =>
+        AccountArgs(accountName: _accountNameOrDefault(accountName)),
   ),
   AppRoutes.householdConsumables: AssistantRouteSpec(
     routeName: AppRoutes.householdConsumables,
     requiresAccount: true,
-    buildArgs: (accountName) => AccountArgs(
-      accountName: _accountNameOrDefault(accountName),
-    ),
+    buildArgs: (accountName) =>
+        AccountArgs(accountName: _accountNameOrDefault(accountName)),
   ),
   AppRoutes.consumableInventory: AssistantRouteSpec(
     routeName: AppRoutes.consumableInventory,
     requiresAccount: true,
-    buildArgs: (accountName) => AccountArgs(
-      accountName: _accountNameOrDefault(accountName),
-    ),
+    buildArgs: (accountName) =>
+        AccountArgs(accountName: _accountNameOrDefault(accountName)),
   ),
   AppRoutes.quickStockUse: AssistantRouteSpec(
     routeName: AppRoutes.quickStockUse,
     requiresAccount: true,
-    buildArgs: (accountName) => QuickStockUseArgs(
-      accountName: _accountNameOrDefault(accountName),
-    ),
+    buildArgs: (accountName) =>
+        QuickStockUseArgs(accountName: _accountNameOrDefault(accountName)),
   ),
   AppRoutes.calendar: AssistantRouteSpec(
     routeName: AppRoutes.calendar,
     requiresAccount: true,
-    buildArgs: (accountName) => AccountArgs(
-      accountName: _accountNameOrDefault(accountName),
-    ),
+    buildArgs: (accountName) =>
+        AccountArgs(accountName: _accountNameOrDefault(accountName)),
   ),
 };
 

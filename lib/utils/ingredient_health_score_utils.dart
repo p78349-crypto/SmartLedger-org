@@ -110,6 +110,7 @@ class IngredientHealthScoreUtils {
   static bool _isMushroom(String name) {
     return name.contains('버섯');
   }
+
   static bool _isSeafood(String name) {
     return name.contains('생선') ||
         name.contains('어') ||
@@ -122,16 +123,13 @@ class IngredientHealthScoreUtils {
   static bool _isChicken(String name) {
     return name.contains('닭') || name.contains('치킨');
   }
+
   static bool _isPork(String name) {
-    return name.contains('돼지') ||
-        name.contains('삼겹') ||
-        name.contains('목살');
+    return name.contains('돼지') || name.contains('삼겹') || name.contains('목살');
   }
 
   static bool _isFried(String name) {
-    return name.contains('튀김') ||
-        name.contains('후라이드') ||
-        name.contains('치킨');
+    return name.contains('튀김') || name.contains('후라이드') || name.contains('치킨');
   }
 
   static bool _isProcessed(String name) {

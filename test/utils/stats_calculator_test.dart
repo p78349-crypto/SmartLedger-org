@@ -26,21 +26,47 @@ void main() {
     group('filterByType', () {
       test('filters expenses only', () {
         final txs = [
-          createTransaction(id: '1', type: TransactionType.expense, amount: 1000, date: DateTime(2026)),
-          createTransaction(id: '2', type: TransactionType.income, amount: 2000, date: DateTime(2026)),
-          createTransaction(id: '3', type: TransactionType.expense, amount: 3000, date: DateTime(2026)),
+          createTransaction(
+            id: '1',
+            type: TransactionType.expense,
+            amount: 1000,
+            date: DateTime(2026),
+          ),
+          createTransaction(
+            id: '2',
+            type: TransactionType.income,
+            amount: 2000,
+            date: DateTime(2026),
+          ),
+          createTransaction(
+            id: '3',
+            type: TransactionType.expense,
+            amount: 3000,
+            date: DateTime(2026),
+          ),
         ];
 
-        final result = StatsCalculator.filterByType(txs, TransactionType.expense);
+        final result = StatsCalculator.filterByType(
+          txs,
+          TransactionType.expense,
+        );
         expect(result.length, 2);
       });
 
       test('returns empty for no matches', () {
         final txs = [
-          createTransaction(id: '1', type: TransactionType.income, amount: 1000, date: DateTime(2026)),
+          createTransaction(
+            id: '1',
+            type: TransactionType.income,
+            amount: 1000,
+            date: DateTime(2026),
+          ),
         ];
 
-        final result = StatsCalculator.filterByType(txs, TransactionType.expense);
+        final result = StatsCalculator.filterByType(
+          txs,
+          TransactionType.expense,
+        );
         expect(result, isEmpty);
       });
     });
@@ -48,8 +74,18 @@ void main() {
     group('filterByMonth', () {
       test('filters transactions by month', () {
         final txs = [
-          createTransaction(id: '1', type: TransactionType.expense, amount: 1000, date: DateTime(2026, 1, 15)),
-          createTransaction(id: '2', type: TransactionType.expense, amount: 2000, date: DateTime(2026, 2, 15)),
+          createTransaction(
+            id: '1',
+            type: TransactionType.expense,
+            amount: 1000,
+            date: DateTime(2026, 1, 15),
+          ),
+          createTransaction(
+            id: '2',
+            type: TransactionType.expense,
+            amount: 2000,
+            date: DateTime(2026, 2, 15),
+          ),
         ];
 
         final result = StatsCalculator.filterByMonth(txs, DateTime(2026));
@@ -61,9 +97,24 @@ void main() {
     group('filterByRange', () {
       test('filters transactions within range', () {
         final txs = [
-          createTransaction(id: '1', type: TransactionType.expense, amount: 1000, date: DateTime(2026, 1, 5)),
-          createTransaction(id: '2', type: TransactionType.expense, amount: 2000, date: DateTime(2026, 1, 15)),
-          createTransaction(id: '3', type: TransactionType.expense, amount: 3000, date: DateTime(2026, 1, 25)),
+          createTransaction(
+            id: '1',
+            type: TransactionType.expense,
+            amount: 1000,
+            date: DateTime(2026, 1, 5),
+          ),
+          createTransaction(
+            id: '2',
+            type: TransactionType.expense,
+            amount: 2000,
+            date: DateTime(2026, 1, 15),
+          ),
+          createTransaction(
+            id: '3',
+            type: TransactionType.expense,
+            amount: 3000,
+            date: DateTime(2026, 1, 25),
+          ),
         ];
 
         final result = StatsCalculator.filterByRange(
@@ -77,8 +128,18 @@ void main() {
 
       test('includes boundary dates', () {
         final txs = [
-          createTransaction(id: '1', type: TransactionType.expense, amount: 1000, date: DateTime(2026, 1, 10)),
-          createTransaction(id: '2', type: TransactionType.expense, amount: 2000, date: DateTime(2026, 1, 20)),
+          createTransaction(
+            id: '1',
+            type: TransactionType.expense,
+            amount: 1000,
+            date: DateTime(2026, 1, 10),
+          ),
+          createTransaction(
+            id: '2',
+            type: TransactionType.expense,
+            amount: 2000,
+            date: DateTime(2026, 1, 20),
+          ),
         ];
 
         final result = StatsCalculator.filterByRange(
@@ -93,12 +154,34 @@ void main() {
     group('filterByCategory', () {
       test('filters by category and type', () {
         final txs = [
-          createTransaction(id: '1', type: TransactionType.expense, amount: 1000, date: DateTime(2026), mainCategory: '식비'),
-          createTransaction(id: '2', type: TransactionType.expense, amount: 2000, date: DateTime(2026), mainCategory: '교통'),
-          createTransaction(id: '3', type: TransactionType.income, amount: 3000, date: DateTime(2026), mainCategory: '식비'),
+          createTransaction(
+            id: '1',
+            type: TransactionType.expense,
+            amount: 1000,
+            date: DateTime(2026),
+            mainCategory: '식비',
+          ),
+          createTransaction(
+            id: '2',
+            type: TransactionType.expense,
+            amount: 2000,
+            date: DateTime(2026),
+            mainCategory: '교통',
+          ),
+          createTransaction(
+            id: '3',
+            type: TransactionType.income,
+            amount: 3000,
+            date: DateTime(2026),
+            mainCategory: '식비',
+          ),
         ];
 
-        final result = StatsCalculator.filterByCategory(txs, '식비', TransactionType.expense);
+        final result = StatsCalculator.filterByCategory(
+          txs,
+          '식비',
+          TransactionType.expense,
+        );
         expect(result.length, 1);
         expect(result.first.id, '1');
       });
@@ -107,9 +190,24 @@ void main() {
     group('calculateTotal', () {
       test('sums all amounts', () {
         final txs = [
-          createTransaction(id: '1', type: TransactionType.expense, amount: 1000, date: DateTime(2026)),
-          createTransaction(id: '2', type: TransactionType.expense, amount: 2000, date: DateTime(2026)),
-          createTransaction(id: '3', type: TransactionType.expense, amount: 3000, date: DateTime(2026)),
+          createTransaction(
+            id: '1',
+            type: TransactionType.expense,
+            amount: 1000,
+            date: DateTime(2026),
+          ),
+          createTransaction(
+            id: '2',
+            type: TransactionType.expense,
+            amount: 2000,
+            date: DateTime(2026),
+          ),
+          createTransaction(
+            id: '3',
+            type: TransactionType.expense,
+            amount: 3000,
+            date: DateTime(2026),
+          ),
         ];
 
         expect(StatsCalculator.calculateTotal(txs), 6000);
@@ -123,12 +221,30 @@ void main() {
     group('calculateMonthlyStats', () {
       test('groups by month', () {
         final txs = [
-          createTransaction(id: '1', type: TransactionType.expense, amount: 1000, date: DateTime(2026, 1, 15)),
-          createTransaction(id: '2', type: TransactionType.expense, amount: 2000, date: DateTime(2026, 1, 20)),
-          createTransaction(id: '3', type: TransactionType.expense, amount: 3000, date: DateTime(2026, 2, 15)),
+          createTransaction(
+            id: '1',
+            type: TransactionType.expense,
+            amount: 1000,
+            date: DateTime(2026, 1, 15),
+          ),
+          createTransaction(
+            id: '2',
+            type: TransactionType.expense,
+            amount: 2000,
+            date: DateTime(2026, 1, 20),
+          ),
+          createTransaction(
+            id: '3',
+            type: TransactionType.expense,
+            amount: 3000,
+            date: DateTime(2026, 2, 15),
+          ),
         ];
 
-        final result = StatsCalculator.calculateMonthlyStats(txs, TransactionType.expense);
+        final result = StatsCalculator.calculateMonthlyStats(
+          txs,
+          TransactionType.expense,
+        );
         expect(result.length, 2);
         expect(result[0].total, 3000); // January
         expect(result[0].count, 2);
@@ -138,11 +254,24 @@ void main() {
 
       test('sorts by month ascending', () {
         final txs = [
-          createTransaction(id: '1', type: TransactionType.expense, amount: 1000, date: DateTime(2026, 3)),
-          createTransaction(id: '2', type: TransactionType.expense, amount: 2000, date: DateTime(2026)),
+          createTransaction(
+            id: '1',
+            type: TransactionType.expense,
+            amount: 1000,
+            date: DateTime(2026, 3),
+          ),
+          createTransaction(
+            id: '2',
+            type: TransactionType.expense,
+            amount: 2000,
+            date: DateTime(2026),
+          ),
         ];
 
-        final result = StatsCalculator.calculateMonthlyStats(txs, TransactionType.expense);
+        final result = StatsCalculator.calculateMonthlyStats(
+          txs,
+          TransactionType.expense,
+        );
         expect(result[0].month.month, 1);
         expect(result[1].month.month, 3);
       });
@@ -151,33 +280,84 @@ void main() {
     group('calculateCategoryStats', () {
       test('groups by category', () {
         final txs = [
-          createTransaction(id: '1', type: TransactionType.expense, amount: 1000, date: DateTime(2026), mainCategory: '식비'),
-          createTransaction(id: '2', type: TransactionType.expense, amount: 2000, date: DateTime(2026), mainCategory: '식비'),
-          createTransaction(id: '3', type: TransactionType.expense, amount: 3000, date: DateTime(2026), mainCategory: '교통'),
+          createTransaction(
+            id: '1',
+            type: TransactionType.expense,
+            amount: 1000,
+            date: DateTime(2026),
+            mainCategory: '식비',
+          ),
+          createTransaction(
+            id: '2',
+            type: TransactionType.expense,
+            amount: 2000,
+            date: DateTime(2026),
+            mainCategory: '식비',
+          ),
+          createTransaction(
+            id: '3',
+            type: TransactionType.expense,
+            amount: 3000,
+            date: DateTime(2026),
+            mainCategory: '교통',
+          ),
         ];
 
-        final result = StatsCalculator.calculateCategoryStats(txs, TransactionType.expense);
+        final result = StatsCalculator.calculateCategoryStats(
+          txs,
+          TransactionType.expense,
+        );
         expect(result.length, 2);
       });
 
       test('calculates percentage', () {
         final txs = [
-          createTransaction(id: '1', type: TransactionType.expense, amount: 500, date: DateTime(2026), mainCategory: '식비'),
-          createTransaction(id: '2', type: TransactionType.expense, amount: 500, date: DateTime(2026), mainCategory: '교통'),
+          createTransaction(
+            id: '1',
+            type: TransactionType.expense,
+            amount: 500,
+            date: DateTime(2026),
+            mainCategory: '식비',
+          ),
+          createTransaction(
+            id: '2',
+            type: TransactionType.expense,
+            amount: 500,
+            date: DateTime(2026),
+            mainCategory: '교통',
+          ),
         ];
 
-        final result = StatsCalculator.calculateCategoryStats(txs, TransactionType.expense);
+        final result = StatsCalculator.calculateCategoryStats(
+          txs,
+          TransactionType.expense,
+        );
         expect(result[0].percentage, 50);
         expect(result[1].percentage, 50);
       });
 
       test('sorts by total descending', () {
         final txs = [
-          createTransaction(id: '1', type: TransactionType.expense, amount: 1000, date: DateTime(2026), mainCategory: '식비'),
-          createTransaction(id: '2', type: TransactionType.expense, amount: 3000, date: DateTime(2026), mainCategory: '교통'),
+          createTransaction(
+            id: '1',
+            type: TransactionType.expense,
+            amount: 1000,
+            date: DateTime(2026),
+            mainCategory: '식비',
+          ),
+          createTransaction(
+            id: '2',
+            type: TransactionType.expense,
+            amount: 3000,
+            date: DateTime(2026),
+            mainCategory: '교통',
+          ),
         ];
 
-        final result = StatsCalculator.calculateCategoryStats(txs, TransactionType.expense);
+        final result = StatsCalculator.calculateCategoryStats(
+          txs,
+          TransactionType.expense,
+        );
         expect(result[0].category, '교통');
         expect(result[1].category, '식비');
       });
@@ -186,11 +366,26 @@ void main() {
     group('calculateSubCategoryStats', () {
       test('groups by sub category', () {
         final txs = [
-          createTransaction(id: '1', type: TransactionType.expense, amount: 1000, date: DateTime(2026), subCategory: '카페'),
-          createTransaction(id: '2', type: TransactionType.expense, amount: 2000, date: DateTime(2026), subCategory: '식당'),
+          createTransaction(
+            id: '1',
+            type: TransactionType.expense,
+            amount: 1000,
+            date: DateTime(2026),
+            subCategory: '카페',
+          ),
+          createTransaction(
+            id: '2',
+            type: TransactionType.expense,
+            amount: 2000,
+            date: DateTime(2026),
+            subCategory: '식당',
+          ),
         ];
 
-        final result = StatsCalculator.calculateSubCategoryStats(txs, TransactionType.expense);
+        final result = StatsCalculator.calculateSubCategoryStats(
+          txs,
+          TransactionType.expense,
+        );
         expect(result.length, 2);
       });
     });

@@ -49,37 +49,61 @@ void main() {
       });
 
       test('includes catCard', () {
-        expect(PointsStatsUtils.categories.contains(PointsStatsUtils.catCard), isTrue);
+        expect(
+          PointsStatsUtils.categories.contains(PointsStatsUtils.catCard),
+          isTrue,
+        );
       });
 
       test('includes catOther', () {
-        expect(PointsStatsUtils.categories.contains(PointsStatsUtils.catOther), isTrue);
+        expect(
+          PointsStatsUtils.categories.contains(PointsStatsUtils.catOther),
+          isTrue,
+        );
       });
     });
 
     group('normalizeCategoryKey', () {
       test('returns catOther for empty', () {
-        expect(PointsStatsUtils.normalizeCategoryKey(''), PointsStatsUtils.catOther);
+        expect(
+          PointsStatsUtils.normalizeCategoryKey(''),
+          PointsStatsUtils.catOther,
+        );
       });
 
       test('normalizes 카드 to catCard', () {
-        expect(PointsStatsUtils.normalizeCategoryKey('신한카드'), PointsStatsUtils.catCard);
+        expect(
+          PointsStatsUtils.normalizeCategoryKey('신한카드'),
+          PointsStatsUtils.catCard,
+        );
       });
 
       test('normalizes 마트 to catSupplier', () {
-        expect(PointsStatsUtils.normalizeCategoryKey('이마트'), PointsStatsUtils.catSupplier);
+        expect(
+          PointsStatsUtils.normalizeCategoryKey('이마트'),
+          PointsStatsUtils.catSupplier,
+        );
       });
 
       test('normalizes 쇼핑 to catSupplier', () {
-        expect(PointsStatsUtils.normalizeCategoryKey('온라인쇼핑'), PointsStatsUtils.catSupplier);
+        expect(
+          PointsStatsUtils.normalizeCategoryKey('온라인쇼핑'),
+          PointsStatsUtils.catSupplier,
+        );
       });
 
       test('normalizes 편의점 to catConvenience', () {
-        expect(PointsStatsUtils.normalizeCategoryKey('편의점'), PointsStatsUtils.catConvenience);
+        expect(
+          PointsStatsUtils.normalizeCategoryKey('편의점'),
+          PointsStatsUtils.catConvenience,
+        );
       });
 
       test('returns catOther for unknown', () {
-        expect(PointsStatsUtils.normalizeCategoryKey('unknown'), PointsStatsUtils.catOther);
+        expect(
+          PointsStatsUtils.normalizeCategoryKey('unknown'),
+          PointsStatsUtils.catOther,
+        );
       });
     });
 
@@ -203,9 +227,7 @@ void main() {
       });
 
       test('returns empty for zero total', () {
-        final byCategory = {
-          PointsStatsUtils.catCard: 0.0,
-        };
+        final byCategory = {PointsStatsUtils.catCard: 0.0};
         expect(PointsStatsUtils.ratios(byCategory), isEmpty);
       });
     });
@@ -227,7 +249,10 @@ void main() {
 
         // Daily total: 2000/10 = 200
         // Projected total: 200 * 30 = 6000
-        expect(result.values.fold<double>(0, (a, b) => a + b), closeTo(6000, 1));
+        expect(
+          result.values.fold<double>(0, (a, b) => a + b),
+          closeTo(6000, 1),
+        );
       });
 
       test('returns zeros for invalid lookback', () {

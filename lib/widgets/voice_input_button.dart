@@ -5,7 +5,11 @@ class VoiceInputButton extends StatefulWidget {
   final OfflineAiService aiService;
   final void Function(Map<String, dynamic> parsed) onConfirmed;
 
-  const VoiceInputButton({super.key, required this.aiService, required this.onConfirmed});
+  const VoiceInputButton({
+    super.key,
+    required this.aiService,
+    required this.onConfirmed,
+  });
 
   @override
   State<VoiceInputButton> createState() => _VoiceInputButtonState();
@@ -21,8 +25,15 @@ class _VoiceInputButtonState extends State<VoiceInputButton> {
       context: context,
       builder: (c) => AlertDialog(
         title: const Text('음성 입력 시뮬레이션'),
-        content: const TextField(decoration: InputDecoration(hintText: '예: 점심 12000원')),
-        actions: [TextButton(onPressed: () => Navigator.pop(c), child: const Text('취소'))],
+        content: const TextField(
+          decoration: InputDecoration(hintText: '예: 점심 12000원'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(c),
+            child: const Text('취소'),
+          ),
+        ],
       ),
     );
     if (!mounted || t == null || t.isEmpty) return;
@@ -36,7 +47,16 @@ class _VoiceInputButtonState extends State<VoiceInputButton> {
         builder: (c) => AlertDialog(
           title: const Text('검증'),
           content: Text('인식결과: ${r.intent}\n${r.entities}'),
-          actions: [TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('취소')), TextButton(onPressed: () => Navigator.pop(c, true), child: const Text('저장'))],
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(c, false),
+              child: const Text('취소'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(c, true),
+              child: const Text('저장'),
+            ),
+          ],
         ),
       );
       if (!mounted) return;
@@ -45,7 +65,9 @@ class _VoiceInputButtonState extends State<VoiceInputButton> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('AI 분석 실패: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('AI 분석 실패: $e')));
       }
     } finally {
       if (mounted) {

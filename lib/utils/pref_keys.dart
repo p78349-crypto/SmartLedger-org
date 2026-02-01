@@ -144,8 +144,8 @@ class PrefKeys {
   static const String backupEncryptionEnabled = 'backup_encryption_enabled';
   static const String backupTwoFactorEnabled = 'backup_two_factor_enabled';
   static const String backupRegisteredEmail = 'backup_registered_email';
-    static const String privacyPolicyConsentChoice =
-            'privacy_policy_consent_choice';
+  static const String privacyPolicyConsentChoice =
+      'privacy_policy_consent_choice';
 
   // Debug/logging
   static const String debugMode = 'debug_mode';

@@ -118,8 +118,8 @@ class TransactionAddArgs {
   final bool closeAfterSave;
   final bool autoSubmit;
 
-  /// If true, the transaction input screen should prompt/start the receipt scan
-  /// flow right after the first frame.
+  /// If true, the transaction input screen should prompt/start the receipt
+  /// scan flow right after the first frame.
   ///
   /// Note: This flag itself should never cause state-changing behavior.
   final bool openReceiptScannerOnStart;
@@ -236,14 +236,19 @@ class ShoppingPointsInputArgs {
     this.itemCount,
   });
   final String accountName;
+
   /// 지출입력에서 마지막으로 사용한 결제수단
   final String? lastPaymentMethod;
+
   /// 지출입력에서 마지막으로 사용한 메모(매장명)
   final String? lastMemo;
+
   /// 전체 상품 합계 금액
   final double? totalAmount;
+
   /// 카드 결제 금액
   final double? chargedAmount;
+
   /// 입력한 아이템 개수
   final int? itemCount;
 }
@@ -251,4 +256,37 @@ class ShoppingPointsInputArgs {
 class TopLevelStatsDetailArgs {
   const TopLevelStatsDetailArgs({required this.dashboard});
   final dynamic dashboard;
+}
+
+/// 레시피 관리 화면 Args
+class RecipeManagementArgs {
+  const RecipeManagementArgs({
+    required this.accountName,
+    this.initialTabIndex = 0,
+  });
+  final String accountName;
+
+  /// 0: 내 레시피, 1: 추천 레시피
+  final int initialTabIndex;
+}
+
+/// 레시피 편집 화면 Args
+class RecipeEditArgs {
+  const RecipeEditArgs({
+    required this.accountName,
+    this.recipe,
+    this.isNewFromRecommended = false,
+  });
+
+  final String accountName;
+  final dynamic recipe; // Recipe 타입
+  final bool isNewFromRecommended;
+}
+
+/// 레시피 → 장바구니 전송 Args
+class RecipeToCartArgs {
+  const RecipeToCartArgs({required this.accountName, required this.recipe});
+
+  final String accountName;
+  final dynamic recipe; // Recipe 타입
 }

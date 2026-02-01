@@ -36,10 +36,7 @@ extension _AssetSimpleInputScreenUi on _AssetSimpleInputScreenState {
                             prefixIcon: Icon(Icons.category),
                           ),
                           items: const [
-                            DropdownMenuItem(
-                              value: '현금',
-                              child: Text('현금'),
-                            ),
+                            DropdownMenuItem(value: '현금', child: Text('현금')),
                             DropdownMenuItem(
                               value: '예금/적금',
                               child: Text('예금/적금'),
@@ -65,9 +62,7 @@ extension _AssetSimpleInputScreenUi on _AssetSimpleInputScreenState {
                           hint: '예: 시중은행 입출금통장',
                           prefixIcon: const Icon(Icons.label),
                           validator: (v) {
-                            return v == null || v.isEmpty
-                                ? '자산명을 입력하세요'
-                                : null;
+                            return v == null || v.isEmpty ? '자산명을 입력하세요' : null;
                           },
                         ),
                         const SizedBox(height: 12),
@@ -128,9 +123,7 @@ extension _AssetSimpleInputScreenUi on _AssetSimpleInputScreenState {
                             icon: const Icon(Icons.save),
                             label: const Text('자산 저장'),
                             style: FilledButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 16,
-                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
                             ),
                           ),
                         ),
@@ -157,10 +150,7 @@ extension _AssetSimpleInputScreenUi on _AssetSimpleInputScreenState {
                         final a = assets[idx];
                         final theme = Theme.of(context);
                         return ListTile(
-                          title: Text(
-                            a.name,
-                            style: theme.textTheme.bodyLarge,
-                          ),
+                          title: Text(a.name, style: theme.textTheme.bodyLarge),
                           trailing: Text(
                             '${a.amount.toStringAsFixed(0)}원',
                             style: theme.textTheme.bodyLarge?.copyWith(
@@ -181,8 +171,9 @@ extension _AssetSimpleInputScreenUi on _AssetSimpleInputScreenState {
 
   Widget _buildSectionHeader(String title) {
     final theme = Theme.of(context);
-    final dividerColor = theme.colorScheme.outlineVariant
-        .withValues(alpha: 0.3);
+    final dividerColor = theme.colorScheme.outlineVariant.withValues(
+      alpha: 0.3,
+    );
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(4, 24, 4, 12),

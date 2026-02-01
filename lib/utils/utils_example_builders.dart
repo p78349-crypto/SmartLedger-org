@@ -20,9 +20,7 @@ Widget buildDateFormatterExamples() {
   final monthStartStr = DateFormatter.formatDate(
     DateFormatter.getMonthStart(now),
   );
-  final monthEndStr = DateFormatter.formatDate(
-    DateFormatter.getMonthEnd(now),
-  );
+  final monthEndStr = DateFormatter.formatDate(DateFormatter.getMonthEnd(now));
 
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
@@ -30,9 +28,7 @@ Widget buildDateFormatterExamples() {
       Text('현재 날짜: ${DateFormatter.formatDate(now)}'),
       Text('현재 날짜+시간: ${DateFormatter.formatDateTime(now)}'),
       Text('월 라벨: ${DateFormatter.formatMonthLabel(now)}'),
-      Text(
-        '파일명용: ${DateFormatter.formatForFileName(now, includeTime: true)}',
-      ),
+      Text('파일명용: ${DateFormatter.formatForFileName(now, includeTime: true)}'),
       Text('월 시작일: $monthStartStr'),
       Text('월 마지막일: $monthEndStr'),
     ],

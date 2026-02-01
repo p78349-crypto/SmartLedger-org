@@ -19,10 +19,7 @@ extension _AssetAllocationLogic on _AssetAllocationScreenState {
                 style: const TextStyle(fontSize: 12, color: Colors.black54),
               ),
               const SizedBox(height: 2),
-              Text(
-                value,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
+              Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
             ],
           ),
         ],
@@ -72,8 +69,9 @@ extension _AssetAllocationLogic on _AssetAllocationScreenState {
     }
 
     for (final category in AssetCategory.values) {
-      final categoryAssets =
-          _assets.where((asset) => asset.category == category).toList();
+      final categoryAssets = _assets
+          .where((asset) => asset.category == category)
+          .toList();
       if (categoryAssets.isEmpty) {
         continue;
       }
@@ -90,8 +88,7 @@ extension _AssetAllocationLogic on _AssetAllocationScreenState {
         assets: categoryAssets,
         totalAmount: totalAmount,
         totalTarget: totalTarget,
-        actualRatio:
-            _totalAmount > 0 ? (totalAmount / _totalAmount) * 100 : 0,
+        actualRatio: _totalAmount > 0 ? (totalAmount / _totalAmount) * 100 : 0,
       );
     }
   }
@@ -122,9 +119,9 @@ extension _AssetAllocationLogic on _AssetAllocationScreenState {
                 child: Text(
                   isOver
                       ? '${stats.category.label}이(가) 목표보다 '
-                          '${difference.abs().toStringAsFixed(1)}% 많습니다'
+                            '${difference.abs().toStringAsFixed(1)}% 많습니다'
                       : '${stats.category.label}을(를) '
-                          '${difference.abs().toStringAsFixed(1)}% 늘려야 합니다',
+                            '${difference.abs().toStringAsFixed(1)}% 늘려야 합니다',
                   style: const TextStyle(fontSize: 13),
                 ),
               ),

@@ -208,6 +208,7 @@ class RecipeRecommendationUtils {
       expiringMatchCount: expiringMatchCount,
     );
   }
+
   static String generateRecommendationMessage(
     List<FoodExpiryItem> expiringItems,
     RecipeMatch recipe,

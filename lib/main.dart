@@ -29,7 +29,9 @@ import 'theme/app_theme_mode_controller.dart';
 import 'theme/app_theme_seed_controller.dart';
 import 'utils/app_locale_controller.dart';
 import 'utils/currency_formatter.dart';
+import 'utils/constants.dart';
 import 'utils/main_feature_icon_catalog.dart';
+import 'config/feature_flags.dart';
 import 'utils/main_page_migration.dart';
 import 'widgets/background_widget.dart';
 import 'widgets/floating_voice_button.dart';
@@ -218,9 +220,7 @@ class MyApp extends StatelessWidget {
             );
             return MediaQuery(
               data: mediaQuery.copyWith(textScaler: textScaler),
-              child: FloatingVoiceButton(
-                child: child ?? const SizedBox.shrink(),
-              ),
+              child: child ?? const SizedBox.shrink(),
             );
           },
           home: minimalUi ? const _MinimalBootScreen() : const LaunchScreen(),
@@ -232,9 +232,20 @@ class MyApp extends StatelessWidget {
     // MultiProvider asserts when the provider list is empty.
     // Keep this guard so tests/builds don't crash when no providers are used.
     final providers = <SingleChildWidget>[];
-    if (providers.isEmpty) return app;
+    if (providers.isEmpty) {
+      final runtimeVoiceEnabled = VoiceAssistantSettings.instance.enabled;
+      return (AppConstants.voiceInputEnabled &&
+              (kEnableVoice || runtimeVoiceEnabled))
+          ? FloatingVoiceButton(child: app)
+          : app;
+    }
 
-    return MultiProvider(providers: providers, child: app);
+    final wrapped = MultiProvider(providers: providers, child: app);
+    final runtimeVoiceEnabled = VoiceAssistantSettings.instance.enabled;
+    return (AppConstants.voiceInputEnabled &&
+            (kEnableVoice || runtimeVoiceEnabled))
+        ? FloatingVoiceButton(child: wrapped)
+        : wrapped;
   }
 }
 

@@ -35,6 +35,7 @@ class AppConstants {
   static const double defaultPadding = 16.0;
   static const double defaultBorderRadius = 8.0;
   static const double cardElevation = 2.0;
+  static const bool voiceInputEnabled = false;
 
   // 애니메이션 지속시간
   static const Duration shortAnimationDuration = Duration(milliseconds: 200);

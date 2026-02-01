@@ -101,10 +101,18 @@ class _MonthlyProfitReportScreenState extends State<MonthlyProfitReportScreen> {
                         final expense = bucket.expenseAggAmount;
                         final refund = bucket.refundAmount;
                         final net = income - expense;
-                        final incomeStr = NumberFormats.currency.format(income.toInt());
-                        final expenseStr = NumberFormats.currency.format(expense.toInt());
-                        final refundStr = NumberFormats.currency.format(refund.toInt());
-                        final netStr = NumberFormats.currency.format(net.toInt());
+                        final incomeStr = NumberFormats.currency.format(
+                          income.toInt(),
+                        );
+                        final expenseStr = NumberFormats.currency.format(
+                          expense.toInt(),
+                        );
+                        final refundStr = NumberFormats.currency.format(
+                          refund.toInt(),
+                        );
+                        final netStr = NumberFormats.currency.format(
+                          net.toInt(),
+                        );
                         return DataRow(
                           cells: [
                             DataCell(Text(ym)),

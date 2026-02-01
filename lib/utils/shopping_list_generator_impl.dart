@@ -214,8 +214,8 @@ class ShoppingListGenerator {
     final daysText = forecast.daysUntil == 0
         ? '오늘'
         : forecast.daysUntil == 1
-            ? '내일'
-            : '${forecast.daysUntil}일 후';
+        ? '내일'
+        : '${forecast.daysUntil}일 후';
 
     if (forecast.urgency >= 4) {
       return '🚨 $weatherName $daysText 예상! $timing 장보기 필수! '
@@ -238,8 +238,8 @@ class ShoppingListGenerator {
     final daysText = forecast.daysUntil == 0
         ? '오늘'
         : forecast.daysUntil == 1
-            ? '내일'
-            : '${forecast.daysUntil}일 후';
+        ? '내일'
+        : '${forecast.daysUntil}일 후';
 
     final buffer = StringBuffer();
     buffer.write('$weatherName $daysText 예상됩니다. ');

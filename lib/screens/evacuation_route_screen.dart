@@ -155,7 +155,8 @@ class _EvacuationRouteScreenState extends State<EvacuationRouteScreen> {
               final locationStr = _activePlan.location;
               final cond = _activePlan.condition;
               final weatherStr = weatherConditionNames[cond] ?? '극한 날씨';
-              final details = '대상 지역: $locationStr\n'
+              final details =
+                  '대상 지역: $locationStr\n'
                   '예상 날씨: $weatherStr\n'
                   '가족 인원: ${_activePlan.familySize}명\n'
                   '생성 시각: ${_activePlan.generatedAt.toLocal()}';
@@ -727,7 +728,7 @@ class _EvacuationRouteScreenState extends State<EvacuationRouteScreen> {
       buffer
         ..writeln(
           '• ${route.name} (${route.routeType}, ${route.distanceKm.toStringAsFixed(1)}km / '
-'약 ${route.estimatedMinutes}분)',
+          '약 ${route.estimatedMinutes}분)',
         )
         ..writeln('  - 대피소: ${route.shelterName} (${route.shelterAddress})')
         ..writeln('  - 편의시설: ${route.amenities.join(', ')}');

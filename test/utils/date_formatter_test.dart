@@ -15,7 +15,10 @@ void main() {
       });
 
       test('dateTimeSeconds formats as yyyy-MM-dd HH:mm:ss', () {
-        expect(DateFormatter.dateTimeSeconds.format(testDate), '2026-01-11 14:30:45');
+        expect(
+          DateFormatter.dateTimeSeconds.format(testDate),
+          '2026-01-11 14:30:45',
+        );
       });
 
       test('monthLabel formats as yyyy년 M월', () {
@@ -51,7 +54,10 @@ void main() {
       });
 
       test('fileNameDateTime formats as yyyyMMdd_HHmmss', () {
-        expect(DateFormatter.fileNameDateTime.format(testDate), '20260111_143045');
+        expect(
+          DateFormatter.fileNameDateTime.format(testDate),
+          '20260111_143045',
+        );
       });
 
       test('mmdd formats as MM/dd', () {

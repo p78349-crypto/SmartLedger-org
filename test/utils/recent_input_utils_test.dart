@@ -25,7 +25,9 @@ void main() {
       expect(find.byType(SizedBox), findsOneWidget);
     });
 
-    testWidgets('buildHistoryChips builds chips and calls onSelected', (tester) async {
+    testWidgets('buildHistoryChips builds chips and calls onSelected', (
+      tester,
+    ) async {
       String? selected;
       await tester.pumpWidget(
         MaterialApp(

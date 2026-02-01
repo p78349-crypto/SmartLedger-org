@@ -30,13 +30,17 @@ void main() {
       });
 
       test('parses multiple benefits comma separated', () {
-        final result = BenefitMemoUtils.parseBenefitByType('혜택:카드=1200, 배송=3000');
+        final result = BenefitMemoUtils.parseBenefitByType(
+          '혜택:카드=1200, 배송=3000',
+        );
         expect(result['카드'], 1200);
         expect(result['배송'], 3000);
       });
 
       test('parses multiple benefits space separated', () {
-        final result = BenefitMemoUtils.parseBenefitByType('혜택: 카드:1200 배송:3000');
+        final result = BenefitMemoUtils.parseBenefitByType(
+          '혜택: 카드:1200 배송:3000',
+        );
         expect(result['카드'], 1200);
         expect(result['배송'], 3000);
       });
@@ -54,7 +58,9 @@ void main() {
       });
 
       test('handles benefit anywhere in memo', () {
-        final result = BenefitMemoUtils.parseBenefitByType('좋은 가게. 혜택:카드=500. 다음에 또 오자');
+        final result = BenefitMemoUtils.parseBenefitByType(
+          '좋은 가게. 혜택:카드=500. 다음에 또 오자',
+        );
         expect(result, {'카드': 500});
       });
 
@@ -124,7 +130,9 @@ void main() {
       });
 
       test('decodes valid JSON', () {
-        final result = BenefitMemoUtils.decodeBenefitJson('{"카드":1200,"배송":3000}');
+        final result = BenefitMemoUtils.decodeBenefitJson(
+          '{"카드":1200,"배송":3000}',
+        );
         expect(result['카드'], 1200);
         expect(result['배송'], 3000);
       });
@@ -135,7 +143,9 @@ void main() {
       });
 
       test('filters out zero and negative', () {
-        final result = BenefitMemoUtils.decodeBenefitJson('{"카드":1000,"할인":0,"환불":-500}');
+        final result = BenefitMemoUtils.decodeBenefitJson(
+          '{"카드":1000,"할인":0,"환불":-500}',
+        );
         expect(result, {'카드': 1000});
       });
     });

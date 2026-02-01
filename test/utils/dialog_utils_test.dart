@@ -4,7 +4,9 @@ import 'package:smart_ledger/utils/dialog_utils.dart';
 
 void main() {
   group('DialogUtils', () {
-    testWidgets('showConfirmDialog returns true when confirmed', (tester) async {
+    testWidgets('showConfirmDialog returns true when confirmed', (
+      tester,
+    ) async {
       bool? result;
 
       await tester.pumpWidget(

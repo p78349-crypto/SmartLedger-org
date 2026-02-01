@@ -19,9 +19,6 @@ class _PermissionGateScreenState extends State<PermissionGateScreen>
   PermissionStatus _photosStatus = PermissionStatus.denied;
   PermissionStatus _storageStatus = PermissionStatus.denied;
   PermissionStatus _notificationStatus = PermissionStatus.denied;
-  PermissionStatus _cameraStatus = PermissionStatus.denied;
-  PermissionStatus _locationStatus = PermissionStatus.denied;
-  PermissionStatus _microphoneStatus = PermissionStatus.denied;
 
   @override
   void initState() {
@@ -51,9 +48,6 @@ class _PermissionGateScreenState extends State<PermissionGateScreen>
       _photosStatus = await Permission.photos.status;
       _storageStatus = await Permission.storage.status;
       _notificationStatus = await Permission.notification.status;
-      _cameraStatus = await Permission.camera.status;
-      _locationStatus = await Permission.location.status;
-      _microphoneStatus = await Permission.microphone.status;
 
       debugPrint(
         '[PermissionGate] Photos: $_photosStatus, Storage: $_storageStatus, '
@@ -202,8 +196,9 @@ class _PermissionGateScreenState extends State<PermissionGateScreen>
                       child: Text(
                         '모든 권한 나중에 설정 (일부 기능 제한)',
                         style: TextStyle(
-                          color: theme.colorScheme.onSurfaceVariant
-                              .withValues(alpha: 0.7),
+                          color: theme.colorScheme.onSurfaceVariant.withValues(
+                            alpha: 0.7,
+                          ),
                         ),
                       ),
                     ),

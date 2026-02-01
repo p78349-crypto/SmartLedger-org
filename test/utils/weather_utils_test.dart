@@ -43,14 +43,38 @@ void main() {
 
     test('parseWeatherCondition recognizes Korean/English inputs', () {
       expect(WeatherUtils.parseWeatherCondition('맑음'), WeatherCondition.sunny);
-      expect(WeatherUtils.parseWeatherCondition('clear'), WeatherCondition.sunny);
-      expect(WeatherUtils.parseWeatherCondition('cloudy'), WeatherCondition.cloudy);
-      expect(WeatherUtils.parseWeatherCondition('폭우'), WeatherCondition.heavyRain);
-      expect(WeatherUtils.parseWeatherCondition('rain'), WeatherCondition.rainy);
-      expect(WeatherUtils.parseWeatherCondition('snow'), WeatherCondition.snowy);
-      expect(WeatherUtils.parseWeatherCondition('typhoon'), WeatherCondition.typhoon);
-      expect(WeatherUtils.parseWeatherCondition('cold_wave'), WeatherCondition.coldWave);
-      expect(WeatherUtils.parseWeatherCondition('heat_wave'), WeatherCondition.heatWave);
+      expect(
+        WeatherUtils.parseWeatherCondition('clear'),
+        WeatherCondition.sunny,
+      );
+      expect(
+        WeatherUtils.parseWeatherCondition('cloudy'),
+        WeatherCondition.cloudy,
+      );
+      expect(
+        WeatherUtils.parseWeatherCondition('폭우'),
+        WeatherCondition.heavyRain,
+      );
+      expect(
+        WeatherUtils.parseWeatherCondition('rain'),
+        WeatherCondition.rainy,
+      );
+      expect(
+        WeatherUtils.parseWeatherCondition('snow'),
+        WeatherCondition.snowy,
+      );
+      expect(
+        WeatherUtils.parseWeatherCondition('typhoon'),
+        WeatherCondition.typhoon,
+      );
+      expect(
+        WeatherUtils.parseWeatherCondition('cold_wave'),
+        WeatherCondition.coldWave,
+      );
+      expect(
+        WeatherUtils.parseWeatherCondition('heat_wave'),
+        WeatherCondition.heatWave,
+      );
       expect(WeatherUtils.parseWeatherCondition('unknown'), isNull);
     });
 
@@ -84,7 +108,10 @@ void main() {
         minSensitivity: 0.0,
       );
       expect(first, isNotEmpty);
-      expect(first.every((p) => p.itemName == '배추' || p.itemName == '사과'), isTrue);
+      expect(
+        first.every((p) => p.itemName == '배추' || p.itemName == '사과'),
+        isTrue,
+      );
       expect(first.first.recommendation, contains(first.first.itemName));
 
       final second = WeatherUtils.predictPriceChanges(
@@ -119,10 +146,7 @@ void main() {
 
       expect(summary, contains('맑음'));
       // Summary should mention at least one predicted item.
-      expect(
-        predictions.any((p) => summary.contains(p.itemName)),
-        isTrue,
-      );
+      expect(predictions.any((p) => summary.contains(p.itemName)), isTrue);
     });
   });
 }

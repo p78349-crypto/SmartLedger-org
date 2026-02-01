@@ -485,7 +485,7 @@ class _WeatherManualInputScreenState extends State<WeatherManualInputScreen> {
               SizedBox(height: 16),
               Text('입력 팁', style: TextStyle(fontWeight: FontWeight.bold)),
               SizedBox(height: 8),
-              Text('• 장보기 전/후에 날씨를 기록하세요'),
+              Text('• 장보기 전/후에 날씨를 입력하세요'),
               Text('• 기온/습도는 선택 입력입니다'),
               Text('• 최대 1년치 데이터가 저장됩니다'),
             ],

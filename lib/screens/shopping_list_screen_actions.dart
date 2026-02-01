@@ -20,11 +20,7 @@ extension ShoppingListScreenActions on _ShoppingListScreenState {
     buffer.writeln('총 $count개 품목, 예상 비용: $cost원');
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          '공유 기능 준비 중입니다\n\n${buffer.toString()}',
-        ),
-      ),
+      SnackBar(content: Text('공유 기능 준비 중입니다\n\n${buffer.toString()}')),
     );
   }
 
@@ -32,14 +28,14 @@ extension ShoppingListScreenActions on _ShoppingListScreenState {
     showDialog(
       context: context,
       builder: (context) {
-        final isTyphoon = widget.shoppingList.forecast.condition ==
-            WeatherCondition.typhoon;
+        final isTyphoon =
+            widget.shoppingList.forecast.condition == WeatherCondition.typhoon;
         final conditionLabel = isTyphoon ? '태풍' : '극한 날씨';
 
         final savings = widget.shoppingList.potentialSavings;
         final savingsText = savings > 0
             ? '약 ${ShoppingListGenerator.formatPrice(savings)}원을 '
-                '절약하셨습니다.'
+                  '절약하셨습니다.'
             : '';
 
         return AlertDialog(

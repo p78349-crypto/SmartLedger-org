@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 /// Gemma 2 2B Budget Specialist API 서비스
-/// 
+///
 /// 로컬에서 실행 중인 Gemma API 서버와 통신하여
 /// 영수증 텍스트를 구조화된 데이터로 변환합니다.
 class GemmaApiService {
@@ -22,9 +22,7 @@ class GemmaApiService {
   Future<bool> checkHealth() async {
     try {
       final response = await http
-          .get(
-            Uri.parse('$_apiUrl/health'),
-          )
+          .get(Uri.parse('$_apiUrl/health'))
           .timeout(_healthCheckTimeout);
 
       _isServerHealthy = response.statusCode == 200;
@@ -46,12 +44,13 @@ class GemmaApiService {
   }
 
   /// 영수증 정보 추출
-  /// 
+  ///
   /// [receiptText]: OCR로 추출된 영수증 텍스트
-  /// 
+  ///
   /// Returns: 구조화된 영수증 데이터 또는 null
   Future<ReceiptExtractionResult?> extractReceiptInfo(
-      String receiptText) async {
+    String receiptText,
+  ) async {
     try {
       final response = await http
           .post(
@@ -86,9 +85,7 @@ class GemmaApiService {
   Future<Map<String, dynamic>?> testSampleReceipt() async {
     try {
       final response = await http
-          .get(
-            Uri.parse('$_apiUrl/test'),
-          )
+          .get(Uri.parse('$_apiUrl/test'))
           .timeout(_extractTimeout);
 
       if (response.statusCode == 200) {
@@ -153,11 +150,11 @@ class ReceiptExtractionResult {
   }
 
   Map<String, dynamic> toJson() => {
-        'store_name': storeName,
-        'date': date?.toIso8601String(),
-        'items': items.map((item) => item.toJson()).toList(),
-        'total_amount': totalAmount,
-      };
+    'store_name': storeName,
+    'date': date?.toIso8601String(),
+    'items': items.map((item) => item.toJson()).toList(),
+    'total_amount': totalAmount,
+  };
 
   static double? _parseDouble(dynamic value) {
     if (value == null) return null;
@@ -192,11 +189,11 @@ class ReceiptItem {
   }
 
   Map<String, dynamic> toJson() => {
-        'name': name,
-        'quantity': quantity,
-        'unit_price': unitPrice,
-        'total_price': totalPrice,
-      };
+    'name': name,
+    'quantity': quantity,
+    'unit_price': unitPrice,
+    'total_price': totalPrice,
+  };
 
   static int? _parseInt(dynamic value) {
     if (value == null) return null;

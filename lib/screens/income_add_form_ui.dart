@@ -130,16 +130,9 @@ extension _IncomeAddFormUi on _IncomeAddFormState {
                   setState(() => _memoController.text = value);
                 },
                 itemBuilder: (context) {
-                  return _recentMemos
-                      .map(
-                        (memo) {
-                          return PopupMenuItem(
-                            value: memo,
-                            child: Text(memo),
-                          );
-                        },
-                      )
-                      .toList();
+                  return _recentMemos.map((memo) {
+                    return PopupMenuItem(value: memo, child: Text(memo));
+                  }).toList();
                 },
               ),
       ),

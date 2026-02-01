@@ -31,11 +31,7 @@ void main() {
       test('filters by date range', () {
         final now = DateTime(2026, 1, 31);
         final txs = [
-          createExpense(
-            id: '1',
-            amount: 5000,
-            date: DateTime(2026, 1, 15),
-          ),
+          createExpense(id: '1', amount: 5000, date: DateTime(2026, 1, 15)),
           createExpense(
             id: '2',
             amount: 5000,
@@ -43,10 +39,7 @@ void main() {
           ),
         ];
 
-        final result = MiscSpendingUtils.analyze(
-          txs,
-          anchor: now,
-        );
+        final result = MiscSpendingUtils.analyze(txs, anchor: now);
 
         // Only January transaction should be counted
         expect(result.isNotEmpty, isTrue);
@@ -64,10 +57,7 @@ void main() {
           ),
         ];
 
-        final result = MiscSpendingUtils.analyze(
-          txs,
-          anchor: now,
-        );
+        final result = MiscSpendingUtils.analyze(txs, anchor: now);
 
         expect(result.length, 1);
         expect(result.first.mainCategory, '간식');
@@ -86,10 +76,7 @@ void main() {
           ),
         );
 
-        final result = MiscSpendingUtils.analyze(
-          txs,
-          anchor: now,
-        );
+        final result = MiscSpendingUtils.analyze(txs, anchor: now);
 
         // Should be flagged as misc due to count >= 5
         expect(result.any((s) => s.mainCategory == '커피'), isTrue);
@@ -143,10 +130,7 @@ void main() {
           ),
         ];
 
-        final result = MiscSpendingUtils.analyze(
-          txs,
-          anchor: now,
-        );
+        final result = MiscSpendingUtils.analyze(txs, anchor: now);
 
         expect(result.length, 2);
         expect(
@@ -176,10 +160,7 @@ void main() {
           ),
         ];
 
-        final result = MiscSpendingUtils.analyze(
-          txs,
-          anchor: now,
-        );
+        final result = MiscSpendingUtils.analyze(txs, anchor: now);
 
         expect(result.first.mainCategory, '간식B');
         expect(result.last.mainCategory, '간식A');
@@ -197,10 +178,7 @@ void main() {
           ),
         ];
 
-        final result = MiscSpendingUtils.analyze(
-          txs,
-          anchor: now,
-        );
+        final result = MiscSpendingUtils.analyze(txs, anchor: now);
 
         expect(result, isEmpty);
       });

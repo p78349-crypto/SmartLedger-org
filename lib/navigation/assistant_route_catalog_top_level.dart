@@ -56,7 +56,5 @@ final Map<String, AssistantRouteSpec> _topLevelSpecs = {
 Object? _returnNull(String? _) => null;
 
 String _accountNameOrDefault(String? accountName) {
-  return accountName ??
-      AssistantRouteCatalog.resolveDefaultAccountName() ??
-      '';
+  return accountName ?? AssistantRouteCatalog.resolveDefaultAccountName() ?? '';
 }

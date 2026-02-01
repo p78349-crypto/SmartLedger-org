@@ -2,35 +2,33 @@ import 'package:flutter/material.dart';
 import 'package:smart_ledger/services/smart_app_controller.dart';
 
 /// 통합 음성 명령 화면
-/// 
-/// "편의점 우유 3000원 기록하고 쿠팡에서 우유 검색"
-/// → 가계부 기록 + 쿠팡 앱 자동 실행
+///
+/// "편의점 우유 3000원 입력하고 쿠팡에서 우유 검색"
+/// → 가계부 입력 + 쿠팡 앱 자동 실행
 class SmartVoiceCommandScreen extends StatefulWidget {
   final String accountName;
-  
-  const SmartVoiceCommandScreen({
-    super.key,
-    required this.accountName,
-  });
+
+  const SmartVoiceCommandScreen({super.key, required this.accountName});
 
   @override
-  State<SmartVoiceCommandScreen> createState() => _SmartVoiceCommandScreenState();
+  State<SmartVoiceCommandScreen> createState() =>
+      _SmartVoiceCommandScreenState();
 }
 
 class _SmartVoiceCommandScreenState extends State<SmartVoiceCommandScreen> {
   final SmartAppController _controller = SmartAppController();
   final TextEditingController _textController = TextEditingController();
-  
+
   bool _isProcessing = false;
   Map<String, dynamic>? _result;
-  
+
   final List<String> _quickCommands = [
-    '편의점 우유 3000원 기록하고 쿠팡에서 우유 검색',
+    '편의점 우유 3000원 입력하고 쿠팡에서 우유 검색',
     '배민에서 치킨 주문',
     '카카오맵으로 강남역 가는 길',
-    '사과 5000원 기록',
+    '사과 5000원 입력',
   ];
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,16 +61,13 @@ class _SmartVoiceCommandScreenState extends State<SmartVoiceCommandScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '가계부 기록 + 쇼핑앱/배달앱 자동 실행',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade700,
-                  ),
+                  '가계부 입력 + 쇼핑앱/배달앱 자동 실행',
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
                 ),
               ],
             ),
           ),
-          
+
           // 입력 영역
           Padding(
             padding: const EdgeInsets.all(16),
@@ -82,7 +77,7 @@ class _SmartVoiceCommandScreenState extends State<SmartVoiceCommandScreen> {
                   controller: _textController,
                   maxLines: 3,
                   decoration: InputDecoration(
-                    hintText: '명령을 입력하세요\n예: "편의점 우유 3000원 기록하고 쿠팡에서 우유 검색"',
+                    hintText: '명령을 입력하세요\n예: "편의점 우유 3000원 입력하고 쿠팡에서 우유 검색"',
                     border: const OutlineInputBorder(),
                     suffixIcon: IconButton(
                       icon: const Icon(Icons.send),
@@ -112,7 +107,7 @@ class _SmartVoiceCommandScreenState extends State<SmartVoiceCommandScreen> {
               ],
             ),
           ),
-          
+
           // 빠른 명령
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -121,10 +116,7 @@ class _SmartVoiceCommandScreenState extends State<SmartVoiceCommandScreen> {
               children: [
                 const Text(
                   '빠른 명령',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 Wrap(
@@ -132,10 +124,7 @@ class _SmartVoiceCommandScreenState extends State<SmartVoiceCommandScreen> {
                   runSpacing: 8,
                   children: _quickCommands.map((cmd) {
                     return ActionChip(
-                      label: Text(
-                        cmd,
-                        style: const TextStyle(fontSize: 12),
-                      ),
+                      label: Text(cmd, style: const TextStyle(fontSize: 12)),
                       onPressed: () {
                         _textController.text = cmd;
                         _processCommand();
@@ -146,9 +135,9 @@ class _SmartVoiceCommandScreenState extends State<SmartVoiceCommandScreen> {
               ],
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // 결과 표시
           if (_result != null)
             Expanded(
@@ -207,50 +196,58 @@ class _SmartVoiceCommandScreenState extends State<SmartVoiceCommandScreen> {
       ),
     );
   }
-  
+
   List<Widget> _buildResultDetails() {
     final results = _result!['results'] as Map<String, dynamic>? ?? {};
     final widgets = <Widget>[];
-    
+
     if (results.containsKey('record')) {
-      widgets.add(_buildResultItem(
-        icon: Icons.save,
-        title: '가계부 기록',
-        subtitle: results['record'] == true ? '✅ 저장 완료' : '❌ 저장 실패',
-        color: Colors.blue,
-      ));
+      widgets.add(
+        _buildResultItem(
+          icon: Icons.save,
+          title: '가계부 입력',
+          subtitle: results['record'] == true ? '✅ 저장 완료' : '❌ 저장 실패',
+          color: Colors.blue,
+        ),
+      );
     }
-    
+
     if (results.containsKey('shopping')) {
-      widgets.add(_buildResultItem(
-        icon: Icons.shopping_cart,
-        title: '쇼핑앱 실행',
-        subtitle: results['shopping'] == true ? '✅ 앱 실행됨' : '❌ 실행 실패',
-        color: Colors.orange,
-      ));
+      widgets.add(
+        _buildResultItem(
+          icon: Icons.shopping_cart,
+          title: '쇼핑앱 실행',
+          subtitle: results['shopping'] == true ? '✅ 앱 실행됨' : '❌ 실행 실패',
+          color: Colors.orange,
+        ),
+      );
     }
-    
+
     if (results.containsKey('delivery')) {
-      widgets.add(_buildResultItem(
-        icon: Icons.delivery_dining,
-        title: '배달앱 실행',
-        subtitle: results['delivery'] == true ? '✅ 앱 실행됨' : '❌ 실행 실패',
-        color: Colors.purple,
-      ));
+      widgets.add(
+        _buildResultItem(
+          icon: Icons.delivery_dining,
+          title: '배달앱 실행',
+          subtitle: results['delivery'] == true ? '✅ 앱 실행됨' : '❌ 실행 실패',
+          color: Colors.purple,
+        ),
+      );
     }
-    
+
     if (results.containsKey('navigation')) {
-      widgets.add(_buildResultItem(
-        icon: Icons.map,
-        title: '지도앱 실행',
-        subtitle: results['navigation'] == true ? '✅ 앱 실행됨' : '❌ 실행 실패',
-        color: Colors.green,
-      ));
+      widgets.add(
+        _buildResultItem(
+          icon: Icons.map,
+          title: '지도앱 실행',
+          subtitle: results['navigation'] == true ? '✅ 앱 실행됨' : '❌ 실행 실패',
+          color: Colors.green,
+        ),
+      );
     }
-    
+
     return widgets;
   }
-  
+
   Widget _buildResultItem({
     required IconData icon,
     required String title,
@@ -276,16 +273,11 @@ class _SmartVoiceCommandScreenState extends State<SmartVoiceCommandScreen> {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 Text(
                   subtitle,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade700,
-                  ),
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
                 ),
               ],
             ),
@@ -294,27 +286,27 @@ class _SmartVoiceCommandScreenState extends State<SmartVoiceCommandScreen> {
       ),
     );
   }
-  
+
   Future<void> _processCommand() async {
     final command = _textController.text.trim();
     if (command.isEmpty) return;
-    
+
     setState(() {
       _isProcessing = true;
       _result = null;
     });
-    
+
     try {
       final result = await _controller.processCommand(
         command,
         widget.accountName,
       );
-      
+
       setState(() {
         _result = result;
         _isProcessing = false;
       });
-      
+
       if (!result.containsKey('error')) {
         _textController.clear();
       }
@@ -325,7 +317,7 @@ class _SmartVoiceCommandScreenState extends State<SmartVoiceCommandScreen> {
       });
     }
   }
-  
+
   @override
   void dispose() {
     _textController.dispose();

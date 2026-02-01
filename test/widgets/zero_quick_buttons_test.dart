@@ -17,9 +17,7 @@ void main() {
     testWidgets('renders three buttons', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: ZeroQuickButtons(controller: controller),
-          ),
+          home: Scaffold(body: ZeroQuickButtons(controller: controller)),
         ),
       );
 
@@ -33,9 +31,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: ZeroQuickButtons(controller: controller),
-          ),
+          home: Scaffold(body: ZeroQuickButtons(controller: controller)),
         ),
       );
 
@@ -50,9 +46,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: ZeroQuickButtons(controller: controller),
-          ),
+          home: Scaffold(body: ZeroQuickButtons(controller: controller)),
         ),
       );
 
@@ -67,9 +61,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: ZeroQuickButtons(controller: controller),
-          ),
+          home: Scaffold(body: ZeroQuickButtons(controller: controller)),
         ),
       );
 
@@ -82,9 +74,7 @@ void main() {
     testWidgets('works with empty initial text', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: ZeroQuickButtons(controller: controller),
-          ),
+          home: Scaffold(body: ZeroQuickButtons(controller: controller)),
         ),
       );
 
@@ -114,7 +104,9 @@ void main() {
       expect(callbackCalled, isTrue);
     });
 
-    testWidgets('formats with thousands separator when enabled', (tester) async {
+    testWidgets('formats with thousands separator when enabled', (
+      tester,
+    ) async {
       controller.text = '123';
 
       await tester.pumpWidget(
@@ -139,9 +131,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: ZeroQuickButtons(controller: controller),
-          ),
+          home: Scaffold(body: ZeroQuickButtons(controller: controller)),
         ),
       );
 

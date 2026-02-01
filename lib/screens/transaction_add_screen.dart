@@ -38,8 +38,8 @@ import '../utils/ingredient_health_score_utils.dart';
 
 // 최근 결제수단/메모 저장 키 및 최대 개수
 const String _recentDescriptionsKey = 'recent_descriptions';
-const String _recentPaymentsKey = 'recent_payments';
-const String _recentMemosKey = 'recent_memos';
+const String _recentPaymentsStorageBaseKey = 'recent_payments';
+const String _recentMemosStorageBaseKey = 'recent_memos';
 const int _defaultMaxRecentInputs = 30;
 const String _lastCategoryMainKeyPrefix = 'last_category_main';
 const String _lastCategorySubKeyPrefix = 'last_category_sub';
@@ -125,13 +125,15 @@ class _TransactionAddScreenState extends State<TransactionAddScreen> {
         final formState = _formStateKey.currentState;
         final didSave = formState?.didSave ?? false;
         if (didSave) {
-          navigator.pop(TransactionAddResult(
-            saved: true,
-            paymentMethod: formState?.lastPaymentMethod,
-            memo: formState?.lastMemo,
-            mainCategory: formState?.lastMainCategory,
-            subCategory: formState?.lastSubCategory,
-          ));
+          navigator.pop(
+            TransactionAddResult(
+              saved: true,
+              paymentMethod: formState?.lastPaymentMethod,
+              memo: formState?.lastMemo,
+              mainCategory: formState?.lastMainCategory,
+              subCategory: formState?.lastSubCategory,
+            ),
+          );
         } else {
           navigator.pop();
         }
@@ -330,6 +332,21 @@ class _NO1FormState extends State<NO1Form> {
   List<String> _recentDescriptions = [];
   List<String> _recentPayments = [];
   List<String> _recentMemos = [];
+
+  String get _recentPaymentsKey {
+    // 수입 입력이면 별도 키 사용
+    if (widget.initialTransaction?.type == TransactionType.income) {
+      return 'recent_payments_income_input_${widget.accountName}';
+    }
+    return _recentPaymentsStorageBaseKey;
+  }
+
+  String get _recentMemosKey {
+    if (widget.initialTransaction?.type == TransactionType.income) {
+      return 'recent_memos_income_input_${widget.accountName}';
+    }
+    return _recentMemosStorageBaseKey;
+  }
 
   Map<String, CategoryHint> _shoppingCategoryHintsNormalized = const {};
   bool _shoppingCategoryHintsLoaded = false;
@@ -661,7 +678,7 @@ class _NO1FormState extends State<NO1Form> {
       }
       _selectedMainCategory = initial.mainCategory;
       _selectedSubCategory = initial.subCategory;
-      
+
       // 연속 입력 시 이전 결제수단/메모 우선 적용 (bulk flow에서 전달된 값)
       if (widget.initialPaymentMethod != null &&
           widget.initialPaymentMethod!.isNotEmpty) {
@@ -707,7 +724,8 @@ class _NO1FormState extends State<NO1Form> {
         _memoController.text = widget.initialMemo!;
       }
       // Args가 없으면 LastInputService에서 마지막 입력값 로드
-      if ((widget.initialPaymentMethod == null || widget.initialPaymentMethod!.isEmpty) ||
+      if ((widget.initialPaymentMethod == null ||
+              widget.initialPaymentMethod!.isEmpty) ||
           (widget.initialMemo == null || widget.initialMemo!.isEmpty)) {
         unawaited(_loadLastInputFromService());
       }
@@ -750,18 +768,20 @@ class _NO1FormState extends State<NO1Form> {
 
   /// LastInputService에서 마지막 입력값 로드 (결제수단/메모만)
   Future<void> _loadLastInputFromService() async {
-    final lastInput = await LastInputService.instance.getLastTransaction(widget.accountName);
+    final lastInput = await LastInputService.instance.getLastTransaction(
+      widget.accountName,
+    );
     if (!mounted || lastInput == null) return;
-    
+
     setState(() {
       // Args로 전달된 값이 없는 경우에만 LastInputService 값 사용
-      if (_paymentController.text.isEmpty && 
-          lastInput.paymentMethod != null && 
+      if (_paymentController.text.isEmpty &&
+          lastInput.paymentMethod != null &&
           lastInput.paymentMethod!.isNotEmpty) {
         _paymentController.text = lastInput.paymentMethod!;
       }
-      if (_memoController.text.isEmpty && 
-          lastInput.memo != null && 
+      if (_memoController.text.isEmpty &&
+          lastInput.memo != null &&
           lastInput.memo!.isNotEmpty) {
         _memoController.text = lastInput.memo!;
       }
@@ -838,13 +858,13 @@ class _NO1FormState extends State<NO1Form> {
 
     if (_recentInputsAutofillEnabled) {
       // 사용자가 현재 입력 중이면 autofill 하지 않음
-      if (_paymentController.text.isEmpty && 
-          payments.isNotEmpty && 
+      if (_paymentController.text.isEmpty &&
+          payments.isNotEmpty &&
           !_paymentFocusNode.hasFocus) {
         _paymentController.text = payments.first;
       }
-      if (_memoController.text.isEmpty && 
-          memos.isNotEmpty && 
+      if (_memoController.text.isEmpty &&
+          memos.isNotEmpty &&
           !_memoFocusNode.hasFocus) {
         _memoController.text = memos.first;
       }
@@ -1549,54 +1569,62 @@ class _NO1FormState extends State<NO1Form> {
       }
 
       // 마지막 입력값 중앙 저장소에 저장 (다른 화면에서 참조용)
-      unawaited(LastInputService.instance.saveTransaction(
-        accountName: widget.accountName,
-        description: desc,
-        amount: amount,
-        unitPrice: unit,
-        quantity: qty,
-        paymentMethod: _paymentController.text,
-        memo: _memoController.text,
-        mainCategory: _selectedMainCategory,
-        subCategory: _selectedSubCategory,
-        date: _transactionDate,
-      ));
-
-      // 쇼핑 세션 업데이트 (장바구니→지출입력→포인트 흐름용)
-      if (isExpense) {
-        unawaited(LastInputService.instance.updateShoppingSessionFromTransaction(
+      unawaited(
+        LastInputService.instance.saveTransaction(
           accountName: widget.accountName,
+          description: desc,
+          amount: amount,
+          unitPrice: unit,
+          quantity: qty,
           paymentMethod: _paymentController.text,
           memo: _memoController.text,
           mainCategory: _selectedMainCategory,
           subCategory: _selectedSubCategory,
-          amount: amount,
-        ));
+          date: _transactionDate,
+        ),
+      );
+
+      // 쇼핑 세션 업데이트 (장바구니→지출입력→포인트 흐름용)
+      if (isExpense) {
+        unawaited(
+          LastInputService.instance.updateShoppingSessionFromTransaction(
+            accountName: widget.accountName,
+            paymentMethod: _paymentController.text,
+            memo: _memoController.text,
+            mainCategory: _selectedMainCategory,
+            subCategory: _selectedSubCategory,
+            amount: amount,
+          ),
+        );
       }
 
       if (existing != null) {
         Future.delayed(const Duration(milliseconds: 500), () {
           if (mounted) {
-            navigator.pop(TransactionAddResult(
-              saved: true,
-              paymentMethod: _paymentController.text,
-              memo: _memoController.text,
-              mainCategory: _selectedMainCategory,
-              subCategory: _selectedSubCategory,
-            ));
+            navigator.pop(
+              TransactionAddResult(
+                saved: true,
+                paymentMethod: _paymentController.text,
+                memo: _memoController.text,
+                mainCategory: _selectedMainCategory,
+                subCategory: _selectedSubCategory,
+              ),
+            );
           }
         });
       } else {
         if (widget.closeAfterSave) {
           Future.delayed(const Duration(milliseconds: 200), () {
             if (mounted) {
-              navigator.pop(TransactionAddResult(
-                saved: true,
-                paymentMethod: _paymentController.text,
-                memo: _memoController.text,
-                mainCategory: _selectedMainCategory,
-                subCategory: _selectedSubCategory,
-              ));
+              navigator.pop(
+                TransactionAddResult(
+                  saved: true,
+                  paymentMethod: _paymentController.text,
+                  memo: _memoController.text,
+                  mainCategory: _selectedMainCategory,
+                  subCategory: _selectedSubCategory,
+                ),
+              );
             }
           });
           return;

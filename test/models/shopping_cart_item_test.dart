@@ -56,10 +56,7 @@ void main() {
           updatedAt: now,
         );
 
-        final updated = original.copyWith(
-          quantity: 3,
-          isChecked: true,
-        );
+        final updated = original.copyWith(quantity: 3, isChecked: true);
 
         expect(updated.id, 'item-1');
         expect(updated.name, '우유');

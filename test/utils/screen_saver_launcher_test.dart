@@ -5,7 +5,9 @@ import 'package:smart_ledger/utils/screen_saver_launcher.dart';
 import 'package:smart_ledger/widgets/in_app_screen_saver.dart';
 
 void main() {
-  testWidgets('ScreenSaverLauncher.show displays InAppScreenSaver dialog', (tester) async {
+  testWidgets('ScreenSaverLauncher.show displays InAppScreenSaver dialog', (
+    tester,
+  ) async {
     await initializeDateFormatting('ko_KR');
 
     await tester.pumpWidget(

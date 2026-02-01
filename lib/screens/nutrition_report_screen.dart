@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'ingredient_search_list_screen.dart';
-import '../services/food_expiry_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../navigation/app_routes.dart';
 import '../services/recipe_knowledge_service.dart';
 import '../services/user_pref_service.dart';
 import '../utils/debounce_utils.dart';
@@ -58,119 +58,6 @@ class _NutritionReportScreenState extends State<NutritionReportScreen> {
         _foodSearchController.text = last;
       });
     }
-  }
-
-  void _showInventoryBasedRecipes() {
-    final inventory = FoodExpiryService.instance.items.value;
-    final matches = RecipeKnowledgeService.instance.findRecipesByInventory(
-      inventory,
-    );
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      builder: (context) {
-        if (matches.isEmpty) {
-          return const SizedBox(
-            height: 200,
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.kitchen_outlined, size: 48, color: Colors.grey),
-                  SizedBox(height: 16),
-                  Text('현재 재고로 만들 수 있는 추천 요리가 없습니다.'),
-                  SizedBox(height: 8),
-                  Text('재고를 추가하거나 다른 요리를 찾아보세요.'),
-                ],
-              ),
-            ),
-          );
-        }
-        return DraggableScrollableSheet(
-          minChildSize: 0.4,
-          maxChildSize: 0.9,
-          builder: (context, scrollController) {
-            return ListView.builder(
-              controller: scrollController,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              itemCount: matches.length + 1,
-              itemBuilder: (context, index) {
-                if (index == 0) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: Text(
-                      '냉장고 파먹기 추천 (${matches.length}건)',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  );
-                }
-                final recipe = matches[index - 1];
-
-                // Calculate missing ingredients
-                final missingIngredients = <String>[];
-                for (final pairing in recipe.pairings) {
-                  bool hasIt = false;
-                  for (final item in inventory) {
-                    if (item.name.contains(pairing.ingredient) ||
-                        pairing.ingredient.contains(item.name)) {
-                      hasIt = true;
-                      break;
-                    }
-                  }
-                  if (!hasIt) {
-                    missingIngredients.add(pairing.ingredient);
-                  }
-                }
-
-                String subtitleText = '주재료 보유 중';
-                if (missingIngredients.isNotEmpty) {
-                  final missingStr = missingIngredients.take(3).join(', ');
-                  final ellipsis = missingIngredients.length > 3 ? '...' : '';
-                  subtitleText = '부족한 재료: $missingStr$ellipsis';
-                } else if (recipe.pairings.isNotEmpty) {
-                  subtitleText = '주재료 및 짝꿍 재료 모두 보유!';
-                }
-
-                return Card(
-                  margin: const EdgeInsets.symmetric(vertical: 4),
-                  child: ListTile(
-                    leading: const Icon(
-                      Icons.restaurant_menu,
-                      color: Colors.orange,
-                    ),
-                    title: Text(
-                      recipe.primaryName,
-                      style: const TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    subtitle: Text(
-                      subtitleText,
-                      style: TextStyle(
-                        color: missingIngredients.isNotEmpty
-                            ? Colors.red[300]
-                            : Colors.green[600],
-                        fontSize: 12,
-                      ),
-                    ),
-                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                    onTap: () {
-                      Navigator.pop(context);
-                      setState(() {
-                        _foodQuery = recipe.primaryName;
-                        _foodSearchController.text = recipe.primaryName;
-                      });
-                    },
-                  ),
-                );
-              },
-            );
-          },
-        );
-      },
-    );
   }
 
   Future<void> _loadHistory() async {
@@ -462,91 +349,84 @@ class _NutritionReportScreenState extends State<NutritionReportScreen> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            FloatingActionButton.extended(
-              heroTag: 'cook_inventory',
-              onPressed: _showInventoryBasedRecipes,
-              backgroundColor: theme.colorScheme.secondaryContainer,
-              foregroundColor: theme.colorScheme.onSecondaryContainer,
-              icon: const Icon(Icons.kitchen),
-              label: const Text('재고로 요리'),
-            ),
-            FloatingActionButton.extended(
-              heroTag: 'check_cart',
-              onPressed: () {
-                final ingredients = _buildInventoryCheckIngredients();
-                final desserts = _buildDessertIngredients();
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => IngredientSearchListScreen(
-                      customIngredients: ingredients,
-                      dessertIngredients: desserts,
-                    ),
+            SizedBox(
+              height: 40,
+              child: FilledButton.tonal(
+                onPressed: () async {
+                  final navigator = Navigator.of(context);
+                  final prefs = await SharedPreferences.getInstance();
+                  final accountName =
+                      prefs.getString('selected_account')?.trim() ?? 'A';
+                  if (!mounted) return;
+                  navigator.pushNamed(
+                    AppRoutes.recipeManagement,
+                    arguments: RecipeManagementArgs(accountName: accountName),
+                  );
+                },
+                style: FilledButton.styleFrom(
+                  backgroundColor: theme.colorScheme.tertiaryContainer,
+                  foregroundColor: theme.colorScheme.onTertiaryContainer,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(color: Colors.pink.shade300),
                   ),
-                );
-              },
-              icon: const Icon(Icons.playlist_add_check),
-              label: const Text('재고 확인 및 담기'),
+                ),
+                child: const Text('나의레시피', style: TextStyle(fontSize: 13)),
+              ),
+            ),
+            SizedBox(
+              height: 40,
+              child: FilledButton.tonal(
+                onPressed: () async {
+                  final navigator = Navigator.of(context);
+                  final prefs = await SharedPreferences.getInstance();
+                  final accountName =
+                      prefs.getString('selected_account')?.trim() ?? 'A';
+                  if (!mounted) return;
+                  navigator.pushNamed(
+                    AppRoutes.recipeManagement,
+                    arguments: RecipeManagementArgs(
+                      accountName: accountName,
+                      initialTabIndex: 1,
+                    ),
+                  );
+                },
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(color: Colors.pink.shade300),
+                  ),
+                ),
+                child: const Text('레시피추천', style: TextStyle(fontSize: 13)),
+              ),
+            ),
+            SizedBox(
+              height: 40,
+              child: FilledButton.tonal(
+                onPressed: () =>
+                    Navigator.of(context).pushNamed(AppRoutes.foodExpiry),
+                style: FilledButton.styleFrom(
+                  backgroundColor: theme.colorScheme.secondaryContainer,
+                  foregroundColor: theme.colorScheme.onSecondaryContainer,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(color: Colors.pink.shade300),
+                  ),
+                ),
+                child: const Text('재고확인', style: TextStyle(fontSize: 13)),
+              ),
             ),
           ],
         ),
       ),
     );
-  }
-
-  List<String> _buildDessertIngredients() {
-    return [
-      '카카오 분말(100% 무가당)',
-      '아몬드 분말(100% 무가당)',
-      '우유',
-      '플레인 요구르트',
-      '냉동 바나나',
-      '베리류(블루베리/딸기)',
-    ];
-  }
-
-  List<String> _buildInventoryCheckIngredients() {
-    final seen = <String>{};
-    final out = <String>[];
-
-    void addOne(String name) {
-      final trimmed = name.trim();
-      if (trimmed.isEmpty) return;
-      final key = trimmed.toLowerCase();
-      if (seen.add(key)) out.add(trimmed);
-    }
-
-    void addMany(Iterable<String> names) {
-      for (final n in names) {
-        addOne(n);
-      }
-    }
-
-    // 1) 화면 상단 집계/리포트 기반(기존)
-    addMany(_report.items.map((e) => e.name));
-
-    // 2) 요리 준비 가이드에 표시된 “모든 재료” - 사용자 요청으로 제외 (검색 된 결과만 포함)
-    // addMany(_CookingPreparationGuide.extractIngredientNames());
-
-    // 3) 검색 식재료 기준 추천 재료(페어링 + 추천 수량)
-    final query = _foodQuery.trim();
-    final entry = query.isEmpty ? null : NutritionFoodKnowledge.lookup(query);
-    if (entry != null) {
-      addMany(entry.pairings.map((p) => p.ingredient));
-
-      // 추천 재료량(예시)에 있는 항목들도 추가
-      // 예: "양파 1개", "닭고기(적은 것) 1마리" 등
-      // 문구 그대로 추가하여 수량 정보도 함께 장바구니에 담기도록 함
-      addMany(entry.quantitySuggestions);
-    }
-
-    // 4) 저렴/실용 추천 재료(추가 카드) - 사용자 요청으로 제외 (식재료 추천만 포함)
-    // addMany(_ExtraRecommendations.recommendationIngredientNames);
-
-    return out;
   }
 }
 

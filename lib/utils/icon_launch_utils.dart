@@ -159,6 +159,13 @@ class IconLaunchUtils {
       );
     }
 
+    if (routeName == AppRoutes.recipeManagement) {
+      return IconLaunchRequest(
+        routeName: routeName,
+        arguments: RecipeManagementArgs(accountName: accountName),
+      );
+    }
+
     final args = noArgsRoutes.contains(routeName)
         ? null
         : AccountArgs(accountName: accountName);

@@ -68,8 +68,10 @@ void main() {
 
     group('formatWithDecimals', () {
       test('includes decimal places', () {
-        final result =
-            CurrencyFormatter.formatWithDecimals(1234.56, showUnit: false);
+        final result = CurrencyFormatter.formatWithDecimals(
+          1234.56,
+          showUnit: false,
+        );
         expect(result, contains('1'));
         expect(result, contains('56'));
       });

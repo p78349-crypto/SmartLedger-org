@@ -844,7 +844,7 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
         return VoiceCommandResult(
           command: command,
           success: false,
-          message: '금액을 인식하지 못했어요. "지출 5천원 커피 기록"처럼 말해주세요.',
+          message: '금액을 인식하지 못했어요. "지출 5천원 커피 입력"처럼 말해주세요.',
           type: VoiceCommandType.expense,
         );
       }
@@ -988,7 +988,7 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
 
     // 사용자 피드백을 위한 메시지 구성
     String feedbackMsg =
-        '🏪 $description ${CurrencyFormatter.format(amount)} 기록 완료!';
+        '🏪 $description ${CurrencyFormatter.format(amount)} 저장 완료!';
     if (customFeedback.isNotEmpty) {
       feedbackMsg += customFeedback;
     } else if (mainCategory != '미분류') {
@@ -1003,8 +1003,8 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
     if (type == TransactionType.income && isPointAccumulation) {
       // 포인트 적립 성공 메시지를 덮어씁니다 (스크립트 요구사항 반)
       feedbackMsg =
-            '기록 완료했습니다. 첫 포인트가 적립되었네요! 이제 1억 프로젝트의 첫발을 떼셨습니다. 이 기세로 쭉 가보시죠!\n'
-            '\n(텍스트) 🏪 $description ${CurrencyFormatter.format(amount)} 기록 완료!';
+          '저장 완료했습니다. 첫 포인트가 적립되었네요! 이제 1억 프로젝트의 첫발을 떼셨습니다. 이 기세로 쭉 가보시죠!\n'
+          '\n(텍스트) 🏪 $description ${CurrencyFormatter.format(amount)} 저장 완료!';
     }
 
     // 거래 생성 및 저장
@@ -1030,10 +1030,12 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
           description.contains('비타민') ||
           (mainCategory.contains('건강') || mainCategory.contains('의료'))) {
         isSpecialCase = true;
-        const hospitalMsgPart1 = '\n\n💊 아이구, 어디 많이 아프신 건 아니죠? 건강을 잃으면 1억 프로젝트도 소용없어요.';
+        const hospitalMsgPart1 =
+            '\n\n💊 아이구, 어디 많이 아프신 건 아니죠? 건강을 잃으면 1억 프로젝트도 소용없어요.';
         const hospitalMsgPart2 = '약 잘 챙겨 드시고 오늘은 푹 쉬세요.';
-        const hospitalMsgPart3 = '병원비 기록은 제가 알아서 잘 정리해둘게요. (포인트 연속 기록 보호됨)';
-        const hospitalMsg = '$hospitalMsgPart1\n$hospitalMsgPart2\n$hospitalMsgPart3';
+        const hospitalMsgPart3 = '병원비 내역은 제가 알아서 잘 정리해둘게요. (포인트 연속 보호됨)';
+        const hospitalMsg =
+            '$hospitalMsgPart1\n$hospitalMsgPart2\n$hospitalMsgPart3';
         customFeedback += hospitalMsg;
       }
       // 2. 경조사비 (사람 우선)
@@ -1080,7 +1082,7 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
         isSpecialCase = true;
         customFeedback +=
             '\n\n🛠 악! 정말 속상하시겠어요. 예상치 못한 복병이 나타났네요. 하지만 액땜했다고 생각해요! '
-            '제가 다음 달 예산 계획을 더 꼼꼼하게 짜서 1억 프로젝트에 차질 없게 도와드릴게요. (연속 기록 보호됨)';
+            '제가 다음 달 예산 계획을 더 꼼꼼하게 짜서 1억 프로젝트에 차질 없게 도와드릴게요. (연속 보호됨)';
       }
 
       // 일반적인 잔소리 로직 (특수 상황이 아닐 때만 발동)
@@ -1200,7 +1202,7 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
         command: command,
         success: true,
         message:
-            '유통기한 임박 식재료나 부족한 생필품이 없습니다.\n\n💡 사용기록하시면 외출해서도 냉장고 안을 볼 수 있습니다.',
+            '유통기한 임박 식재료나 부족한 생필품이 없습니다.\n\n💡 사용내역을 입력하시면 외출해서도 냉장고 안을 볼 수 있습니다.',
         type: VoiceCommandType.query,
       );
     }
@@ -1226,7 +1228,7 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
     // 팁 추가 (사용자 안내)
     // 매번 말하면 귀찮을 수 있으니 30% 확률 또는 특정 조건에서 추가하는 것이 좋으나
     // 요청사항 준수를 위해 메시지 끝에 추가합니다.
-    sb.write('\n\n💡 사용기록하시면 외출해서도 냉장고 안을 볼 수 있습니다.');
+    sb.write('\n\n💡 사용내역을 입력하시면 외출해서도 냉장고 안을 볼 수 있습니다.');
 
     return VoiceCommandResult(
       command: command,
@@ -1475,7 +1477,7 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
         final daysAgo = DateTime.now().difference(last.date).inDays;
         final timeStr = daysAgo == 0 ? '오늘' : '$daysAgo일 전';
         warningMsg =
-            '⚠️ $timeStr에 "${last.description}" 구매 기록이 있어요. 냉장고를 확인해보세요.';
+            '⚠️ $timeStr에 "${last.description}" 구매 내역이 있어요. 냉장고를 확인해보세요.';
       }
     }
 
@@ -1858,7 +1860,7 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
     } else if (oldDesc.contains('축의금') || oldDesc.contains('조의금')) {
       feedback = '이해했습니다. 소중한 경조사비는 이번 달 예산 관리에서 따로 분리해둘게요. 인맥 자산 +1 하셨네요!';
     } else {
-      feedback = '네, 방금 기록한 항목을 "특별 지출"로 전환했습니다. 포인트는 깎이지 않으니 안심하세요!';
+      feedback = '네, 방금 입력한 항목을 "특별 지출"로 전환했습니다. 포인트는 깎이지 않으니 안심하세요!';
     }
 
     return VoiceCommandResult(
@@ -1983,12 +1985,12 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
     // Tip Logic (Advanced: Check past waste history)
     // For now, simple scripted advice
     final tip =
-        '아이고, 아까운 $itemName가 버려졌네요. 폐기 로그에 기록했습니다. 다음엔 유통기한 임박 알림을 더 크게 드릴게요! 장바구니에 다시 넣어둘까요?';
+        '아이고, 아까운 $itemName가 버려졌네요. 폐기 로그에 저장했습니다. 다음엔 유통기한 임박 알림을 더 크게 드릴게요! 장바구니에 다시 넣어둘까요?';
 
     return VoiceCommandResult(
       command: command,
       success: true,
-      message: '🥛 폐기 로그 기록: $itemName (유통기한 경과)\n\n$tip',
+      message: '🥛 폐기 로그 저장: $itemName (유통기한 경과)\n\n$tip',
       type: VoiceCommandType.expense, // Using expensetype as it's a loss
     );
   }
@@ -2021,9 +2023,9 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
         command: command,
         success: true,
         message:
-            '현재 $count개의 재료가 기록되어 있어요. '
+            '현재 $count개의 재료가 등록되어 있어요. '
             '${expiringSoon > 0 ? '$expiringSoon개는 곧 유통기한이에요.' : ''}\n\n'
-            '💡 기록된 재고가 실제와 다를 수 있어요. 가계부 내역도 함께 참고하세요.', // 유저 요청 반영: 정확성 한계 안내
+            '💡 등록된 재고가 실제와 다를 수 있어요. 가계부 내역도 함께 참고하세요.', // 유저 요청 반영: 정확성 한계 안내
         type: VoiceCommandType.query,
       );
     }
@@ -2078,7 +2080,7 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
           command: command,
           success: true,
           message:
-              '재고 목록엔 없지만, $timeStr에 "${last.description}" 구매하신 기록이 있어요. 아직 남아있을 수도 있겠네요!',
+              '재고 목록엔 없지만, $timeStr에 "${last.description}" 구매하신 내역이 있어요. 아직 남아있을 수도 있겠네요!',
           type: VoiceCommandType.query,
         );
       }
@@ -2089,7 +2091,7 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
     return VoiceCommandResult(
       command: command,
       success: true,
-      message: '해당 재료를 찾지 못했어요. 구매하신 지 오래되었거나 기록이 없을 수 있어요.',
+      message: '해당 재료를 찾지 못했어요. 구매하신 지 오래되었거나 내역이 없을 수 있어요.',
       type: VoiceCommandType.query,
     );
   }
@@ -2653,16 +2655,16 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
       level: '초급',
       levelEmoji: '🌱',
       levelColorValue: 0xFF4CAF50, // Colors.green
-      title: '기본 지출 기록',
+      title: '기본 지출 입력',
       description: '간단한 금액부터 시작해보세요!',
-      examples: ['"지출 3,000원 기록해줘"', '"5천원 썼어"', '"점심 만원"'],
-      tip: '금액만 말해도 자동으로 기록됩니다',
+      examples: ['"지출 3,000원 입력해줘"', '"5천원 썼어"', '"점심 만원"'],
+      tip: '금액만 말해도 자동으로 저장됩니다',
     ),
     _VoiceGuideData(
       level: '중급',
       levelEmoji: '🌿',
       levelColorValue: 0xFFFF9800, // Colors.orange
-      title: '재료와 함께 기록',
+      title: '재료와 함께 입력',
       description: '무엇을 샀는지도 말해보세요!',
       examples: ['"팽이버섯 1봉 썼어"', '"달걀 한판 6천원"', '"양파 2개 천원"'],
       tip: '재료 이름을 말하면 식비로 자동 분류!',
@@ -2954,8 +2956,8 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
                         color: Colors.green,
                         items: const [
                           _GuideItem(
-                            command: '지출 3,000원 기록해줘',
-                            description: '가장 기본적인 지출 기록',
+                            command: '지출 3,000원 입력해줘',
+                            description: '가장 기본적인 지출 입력',
                             category: '기타',
                           ),
                           _GuideItem(

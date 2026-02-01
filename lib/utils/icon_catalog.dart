@@ -81,6 +81,8 @@ class IconCatalog {
   static const IconData lock = Icons.lock;
   static const IconData lockOpen = Icons.lock_open;
   static const IconData inventory2 = Icons.inventory_2;
+  static const IconData inventory = Icons.inventory;
+  static const IconData shoppingBasket = Icons.shopping_basket;
 
   static const IconData insightsOutlined = Icons.insights_outlined;
   static const IconData infoOutline = Icons.info_outline;
@@ -127,6 +129,7 @@ class IconCatalog {
   static const IconData cardGiftcard = Icons.card_giftcard;
   static const IconData arrowDownward = Icons.arrow_downward;
   static const IconData inboxOutlined = Icons.inbox_outlined;
+  static const IconData foodBank = Icons.food_bank;
   static const IconData visibilityOffOutlined = Icons.visibility_off_outlined;
   static const IconData calendarTodayOutlined = Icons.calendar_today_outlined;
   static const IconData check = Icons.check;

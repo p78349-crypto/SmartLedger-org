@@ -5,8 +5,10 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import '../models/transaction.dart';
 import '../services/income_split_service.dart';
+import '../services/account_service.dart';
 import '../services/transaction_service.dart';
 import '../utils/utils.dart';
+import '../utils/category_definitions.dart';
 
 class IncomeSplitStatusScreen extends StatefulWidget {
   final String accountName;
@@ -19,6 +21,189 @@ class IncomeSplitStatusScreen extends StatefulWidget {
 }
 
 class _IncomeSplitStatusScreenState extends State<IncomeSplitStatusScreen> {
+  // In-memory subcategory allocations: {mainCategory: {subCategory: { 'amount': double, 'targetAccount': String? }}}
+  final Map<String, Map<String, dynamic>> _subcategoryAllocations = {};
+
+  void _openSubcategoryModal(String mainCategory) async {
+    final subcategories =
+        _subcategoryAllocations[mainCategory]?.keys.toList() ?? [];
+    final controllers = <String, TextEditingController>{};
+    final selectedTargets = <String, String?>{};
+    final accounts = AccountService().accounts.map((a) => a.name).toList();
+    for (final sub in subcategories) {
+      final entry = _subcategoryAllocations[mainCategory]![sub];
+      controllers[sub] = TextEditingController(
+        text: entry != null && entry['amount'] != null
+            ? entry['amount'].toString()
+            : '',
+      );
+      selectedTargets[sub] = entry != null
+          ? (entry['targetAccount'] as String?)
+          : null;
+    }
+    // Allow adding new subcategory
+    String newSubcategory = '';
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            top: 24,
+            bottom: 16 + MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: StatefulBuilder(
+            builder: (context, setSheetState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '$mainCategory 소분류 배분',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  ...controllers.entries.map((entry) {
+                    final sub = entry.key;
+                    return Row(
+                      children: [
+                        Expanded(child: Text(sub)),
+                        SizedBox(
+                          width: 110,
+                          child: TextField(
+                            controller: entry.value,
+                            keyboardType: TextInputType.number,
+                            decoration: const InputDecoration(suffixText: '원'),
+                            onChanged: (val) {
+                              setSheetState(() {});
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        SizedBox(
+                          width: 140,
+                          child: DropdownButtonFormField<String?>(
+                            initialValue: selectedTargets[sub],
+                            items: [
+                              const DropdownMenuItem<String?>(
+                                child: Text('대상계좌 없음'),
+                              ),
+                              ...accounts.map(
+                                (a) => DropdownMenuItem<String?>(
+                                  value: a,
+                                  child: Text(a),
+                                ),
+                              ),
+                            ],
+                            onChanged: (val) {
+                              setSheetState(() {
+                                selectedTargets[sub] = val;
+                              });
+                            },
+                            decoration: const InputDecoration(
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 6,
+                              ),
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete, size: 18),
+                          onPressed: () {
+                            setSheetState(() {
+                              controllers.remove(entry.key);
+                              selectedTargets.remove(entry.key);
+                            });
+                          },
+                        ),
+                      ],
+                    );
+                  }),
+                  const Divider(),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          decoration: const InputDecoration(hintText: '새 소분류명'),
+                          onChanged: (val) {
+                            newSubcategory = val;
+                          },
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.add),
+                        onPressed: () {
+                          if (newSubcategory.trim().isEmpty) return;
+                          setSheetState(() {
+                            controllers[newSubcategory] =
+                                TextEditingController();
+                            newSubcategory = '';
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () async {
+                          // Save subcategory allocations with target accounts
+                          final updated = <String, Map<String, dynamic>>{};
+                          controllers.forEach((k, v) {
+                            final val = double.tryParse(
+                              v.text.replaceAll(',', ''),
+                            );
+                            if (val != null && val > 0) {
+                              updated[k] = {
+                                'amount': val,
+                                'targetAccount': selectedTargets[k],
+                              };
+                            }
+                          });
+                          setState(() {
+                            _subcategoryAllocations[mainCategory] = updated;
+                          });
+                          Navigator.of(context).pop();
+
+                          // Persist allocations to service for this account (don't create asset moves when just saving allocations)
+                          final existing = IncomeSplitService().getSplit(
+                            widget.accountName,
+                          );
+                          await IncomeSplitService().setSplit(
+                            accountName: widget.accountName,
+                            incomeItems:
+                                existing?.incomeItems ?? <IncomeItem>[],
+                            savingsAmount: existing?.savingsAmount ?? 0,
+                            budgetAmount: existing?.budgetAmount ?? 0,
+                            emergencyAmount: existing?.emergencyAmount ?? 0,
+                            assetTransferAmount:
+                                existing?.assetTransferAmount ?? 0,
+                            categoryBudgets: existing?.categoryBudgets ?? {},
+                            subcategoryAllocations: _subcategoryAllocations,
+                            createAssetMoves: false,
+                          );
+                        },
+                        child: const Text('저장'),
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
   late final StreamSubscription<void> _splitSub;
 
   @override
@@ -27,6 +212,16 @@ class _IncomeSplitStatusScreenState extends State<IncomeSplitStatusScreen> {
     _splitSub = IncomeSplitService().onChange.listen((_) {
       if (mounted) setState(() {});
     });
+
+    // Initialize in-memory subcategory allocations from persisted split (if any)
+    final existing = IncomeSplitService().getSplit(widget.accountName);
+    if (existing != null && existing.subcategoryAllocations.isNotEmpty) {
+      _subcategoryAllocations.addAll(
+        existing.subcategoryAllocations.map(
+          (k, v) => MapEntry(k, Map<String, dynamic>.from(v)),
+        ),
+      );
+    }
   }
 
   @override
@@ -400,6 +595,36 @@ class _IncomeSplitStatusScreenState extends State<IncomeSplitStatusScreen> {
       totalExpense,
     ).where((entry) => entry.planned > 0).toList();
 
+    // Append expense main categories (대분류) to overview using
+    // planned amounts from split.categoryBudgets and actuals from
+    // transactions of this account.
+    final transactions = TransactionService().getTransactions(
+      widget.accountName,
+    );
+    final Map<String, double> expenseActuals = {};
+    for (final tx in transactions) {
+      if (tx.type == TransactionType.expense) {
+        expenseActuals[tx.mainCategory] =
+            (expenseActuals[tx.mainCategory] ?? 0) + tx.amount.abs();
+      }
+    }
+
+    for (final category in CategoryDefinitions.mainCategories) {
+      final planned = split.categoryBudgets[category] ?? 0;
+      final actual = expenseActuals[category] ?? 0;
+      if (planned > 0 || actual > 0) {
+        data.add(
+          _SplitAllocationData(
+            label: category,
+            planned: planned,
+            actual: actual,
+            color: scheme.onSurfaceVariant,
+            description: '지출 카테고리',
+          ),
+        );
+      }
+    }
+
     if (data.isEmpty) {
       return const Center(
         child: Padding(
@@ -531,6 +756,67 @@ class _IncomeSplitStatusScreenState extends State<IncomeSplitStatusScreen> {
                               color: scheme.onSurfaceVariant,
                             ),
                           ),
+                      ],
+                    ),
+                    // 소분류 배분 표시
+                    if (_subcategoryAllocations[entry.label]?.isNotEmpty ==
+                        true) ...[
+                      const SizedBox(height: 6),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 24.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: _subcategoryAllocations[entry.label]!
+                              .entries
+                              .map((e) {
+                                final info = e.value as Map<String, dynamic>?;
+                                final amt =
+                                    info != null && info['amount'] != null
+                                    ? (info['amount'] as num).toDouble()
+                                    : 0.0;
+                                return Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.subdirectory_arrow_right,
+                                      size: 16,
+                                      color: Colors.grey,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Expanded(
+                                      child: Text(
+                                        e.key,
+                                        style: const TextStyle(fontSize: 13),
+                                      ),
+                                    ),
+                                    Text(
+                                      '${amt.toStringAsFixed(0)}원',
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              })
+                              .toList(),
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: () => _openSubcategoryModal(entry.label),
+                          icon: const Icon(Icons.list),
+                          label: const Text('소분류 관리'),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                            textStyle: const TextStyle(fontSize: 13),
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 6),

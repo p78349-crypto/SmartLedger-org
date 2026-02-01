@@ -170,4 +170,3 @@ class _ShoppingGuideScreenState extends State<ShoppingGuideScreen> {
     );
   }
 }
-

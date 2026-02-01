@@ -14,12 +14,18 @@ void main() {
         location: 'Miami Beach',
       );
 
-      final plan = EvacuationRoutePlanner.generatePlan(weather: weather, familySize: 3);
+      final plan = EvacuationRoutePlanner.generatePlan(
+        weather: weather,
+        familySize: 3,
+      );
 
       expect(plan.condition, WeatherCondition.typhoon);
       expect(plan.adviceLevel, EvacuationAdviceLevel.evacuate);
       expect(plan.routes, isNotEmpty);
-      expect(plan.routes.any((r) => r.shelterAddress.contains('Miami')), isTrue);
+      expect(
+        plan.routes.any((r) => r.shelterAddress.contains('Miami')),
+        isTrue,
+      );
       expect(plan.familySize, 3);
       expect(plan.safetyMessage, contains('대피 권고'));
 
@@ -28,19 +34,22 @@ void main() {
       expect(plan.environmentAdvisory, contains('도심'));
     });
 
-    test('generatePlan falls back to default routes when region not detected', () {
-      final weather = WeatherData(
-        condition: WeatherCondition.snowy,
-        temperature: -1,
-        humidity: 60,
-        timestamp: DateTime(2026),
-        location: 'UnknownTown',
-      );
+    test(
+      'generatePlan falls back to default routes when region not detected',
+      () {
+        final weather = WeatherData(
+          condition: WeatherCondition.snowy,
+          temperature: -1,
+          humidity: 60,
+          timestamp: DateTime(2026),
+          location: 'UnknownTown',
+        );
 
-      final plan = EvacuationRoutePlanner.generatePlan(weather: weather);
-      expect(plan.routes, isNotEmpty);
-      expect(plan.routes.first.safetyLevel, EvacuationSafetyLevel.primary);
-      expect(plan.checkpoints, isNotEmpty);
-    });
+        final plan = EvacuationRoutePlanner.generatePlan(weather: weather);
+        expect(plan.routes, isNotEmpty);
+        expect(plan.routes.first.safetyLevel, EvacuationSafetyLevel.primary);
+        expect(plan.checkpoints, isNotEmpty);
+      },
+    );
   });
 }

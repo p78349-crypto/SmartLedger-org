@@ -66,10 +66,7 @@ class _MartCommonInfoDialogState extends State<_MartCommonInfoDialog> {
                   .take(3)
                   .map(
                     (s) => ActionChip(
-                      label: Text(
-                        s,
-                        style: const TextStyle(fontSize: 11),
-                      ),
+                      label: Text(s, style: const TextStyle(fontSize: 11)),
                       onPressed: () =>
                           setState(() => _storeController.text = s),
                     ),
@@ -91,10 +88,7 @@ class _MartCommonInfoDialogState extends State<_MartCommonInfoDialog> {
                   .take(3)
                   .map(
                     (p) => ActionChip(
-                      label: Text(
-                        p,
-                        style: const TextStyle(fontSize: 11),
-                      ),
+                      label: Text(p, style: const TextStyle(fontSize: 11)),
                       onPressed: () =>
                           setState(() => _paymentController.text = p),
                     ),
@@ -110,9 +104,7 @@ class _MartCommonInfoDialogState extends State<_MartCommonInfoDialog> {
                 final picked = await showDatePicker(
                   context: context,
                   initialDate: _date,
-                  firstDate: DateTime.now().subtract(
-                    const Duration(days: 365),
-                  ),
+                  firstDate: DateTime.now().subtract(const Duration(days: 365)),
                   lastDate: DateTime.now().add(const Duration(days: 30)),
                 );
                 if (picked != null) setState(() => _date = picked);

@@ -3,8 +3,12 @@ import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../models/consumable_inventory_item.dart';
 import '../services/consumable_inventory_service.dart';
 import '../services/user_pref_service.dart';
+import '../services/aicore_gemini_service.dart';
 import '../utils/quick_stock_use_utils.dart';
+import '../navigation/app_routes_paths.dart';
+import '../navigation/app_routes_args.dart' as route_args;
 import '../navigation/deep_link_handler.dart';
+import '../utils/constants.dart';
 
 /// 식료품/생활용품 사용기록 화면
 ///
@@ -79,6 +83,7 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
   final _nameController = TextEditingController();
   final _amountController = TextEditingController(text: '1');
   final FocusNode _entButtonFocus = FocusNode();
+  final AICoreGeminiService _aicore = AICoreGeminiService();
 
   // 음성 인식
   final stt.SpeechToText _speech = stt.SpeechToText();
@@ -127,7 +132,9 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
     _nameController.addListener(_onNameChanged);
     _amountController.addListener(_onAmountChanged);
     _loadShoppingHistoryNames();
-    _initSpeech();
+    if (AppConstants.voiceInputEnabled) {
+      _initSpeech();
+    }
 
     // 초기 상품명 설정 (딥링크/음성 어시스턴트에서 전달된 경우)
     if (widget.initialProductName != null &&
@@ -177,38 +184,73 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
     }
   }
 
-  /// 음성 입력 처리 - "팽이버섯 1봉" → 상품명/수량 자동 매핑
-  void _processVoiceInput(String text) {
-    final parsed = _parseVoiceCommand(text);
-    if (parsed != null) {
-      // 상품명 설정
-      _nameController.text = parsed.productName;
-      _onNameChanged();
+  /// 음성 입력 처리 - Gemini Nano 우선 사용, 정규식 대체
+  void _processVoiceInput(String text) async {
+    bool nanoProcessed = false;
 
-      // 약간의 지연 후 수량 설정 (상품 선택 완료 대기)
-      Future.delayed(const Duration(milliseconds: 100), () {
-        if (mounted) {
-          _amountController.text = parsed.amount.toString();
-          // ENT 버튼으로 포커스 이동
-          _entButtonFocus.requestFocus();
+    // 1. Gemini Nano 파싱 시도 (온디바이스 전용)
+    try {
+      if (await _aicore.isAvailable()) {
+        final result = await _aicore.processVoiceInput(text);
+        if (result.containsKey('items')) {
+          final items = result['items'] as List;
+          if (items.isNotEmpty) {
+            final first = items[0] as Map<String, dynamic>;
+            final name = first['name']?.toString();
+            final qty =
+                (first['qty'] as num?)?.toDouble() ??
+                (first['total'] as num?)?.toDouble() ??
+                1.0;
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                '🎤 "${parsed.productName}" '
-                '${parsed.amount}${parsed.unit ?? '개'} 입력됨',
-              ),
-              backgroundColor: Colors.green,
-              duration: const Duration(seconds: 2),
-            ),
-          );
+            if (name != null && name.isNotEmpty && mounted) {
+              _applyVoiceResult(name, qty);
+              nanoProcessed = true;
+              debugPrint('[Nano] 재고 파싱 성공: $name $qty');
+            }
+          }
         }
-      });
-    } else {
+      }
+    } catch (e) {
+      debugPrint('[Nano] 재고 파싱 오류: $e');
+    }
+
+    if (nanoProcessed) return;
+
+    // 2. Fallback: 기존 정규식 파싱
+    final parsed = _parseVoiceCommand(text);
+    if (parsed != null && mounted) {
+      _applyVoiceResult(
+        parsed.productName,
+        parsed.amount.toDouble(),
+        unit: parsed.unit,
+      );
+    } else if (mounted) {
       // 파싱 실패 시 원본 텍스트를 상품명에 입력
       _nameController.text = text;
       _onNameChanged();
     }
+  }
+
+  void _applyVoiceResult(String name, double amount, {String? unit}) {
+    // 상품명 설정
+    _nameController.text = name;
+    _onNameChanged();
+
+    // 약간의 지연 후 수량 설정 (상품 선택 완료 대기)
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (!mounted) return;
+      _amountController.text = _formatQty(amount);
+      // ENT 버튼으로 포커스 이동
+      _entButtonFocus.requestFocus();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('🎤 "$name" ${_formatQty(amount)}${unit ?? '개'} 입력됨'),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    });
   }
 
   /// 음성 명령 파싱: "팽이버섯 1봉", "달걀 한판", "양파 2개"
@@ -642,53 +684,6 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
       return '$cheon,${remainder.toString().padLeft(3, '0')}';
     }
     return price.toString();
-  }
-
-  // 현재 재고량 기반 동적 빠른 선택 버튼 생성
-  List<Widget> _buildQuickButtons() {
-    if (_selectedItem == null) {
-      const defaults = [1, 2, 5, 10];
-      return [
-        for (final value in defaults)
-          _QuickButton(
-            label: value.toString(),
-            onTap: () => _amountController.text = value.toString(),
-          ),
-      ];
-    }
-
-    final currentStock = _selectedItem!.currentStock;
-    final List<double> buttonValues = [];
-
-    // 재고의 25%, 50%, 75%, 100% 계산
-    if (currentStock > 0) {
-      final step25 = (currentStock / 4).floorToDouble();
-      final step50 = (currentStock / 2).floorToDouble();
-      final step75 = ((currentStock * 3) / 4).floorToDouble();
-
-      if (step25 > 0) buttonValues.add(step25);
-      if (step50 > 0 && step50 != step25) buttonValues.add(step50);
-      if (step75 > 0 && step75 != step50) buttonValues.add(step75);
-      buttonValues.add(currentStock); // 100%
-    }
-
-    // 중복 제거 및 정렬
-    final uniqueValues = buttonValues.toSet().toList()..sort();
-
-    return [
-      for (final value in uniqueValues)
-        _QuickButton(
-          label: _formatQty(value),
-          onTap: () => _amountController.text = _formatQty(value),
-          isHighRisk: value >= (currentStock * 0.6), // 60% 이상 사용
-        ),
-      if (_selectedItem != null && _selectedItem!.bundleSize > 1)
-        _QuickButton(
-          label: '묶음',
-          onTap: () => _amountController.text = _selectedItem!.bundleSize
-              .toStringAsFixed(0),
-        ),
-    ];
   }
 
   Widget _buildPrimaryActionRow() {
@@ -1246,76 +1241,96 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // 음성 입력 + 안내 카드
-          Card(
-            color: colorScheme.secondaryContainer,
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                children: [
-                  const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.bolt, color: Colors.orange),
-                      SizedBox(width: 8),
-                      Text(
-                        '상품명 입력 → 사용량 입력 → ENT',
-                        style: TextStyle(fontWeight: FontWeight.w500),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  // 음성 입력 버튼
-                  InkWell(
-                    onTap: _isListening ? _stopListening : _startListening,
-                    borderRadius: BorderRadius.circular(24),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: _isListening ? Colors.red : colorScheme.primary,
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            _isListening ? Icons.stop : Icons.mic,
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            _isListening
-                                ? '듣는 중... "$_recognizedText"'
-                                : '🎤 음성으로 입력하기',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
+          if (AppConstants.voiceInputEnabled)
+            Card(
+              color: colorScheme.secondaryContainer,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  children: [
+                    const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.bolt, color: Colors.orange),
+                        SizedBox(width: 8),
+                        Text(
+                          '상품명 입력 → 사용량 입력 → ENT',
+                          style: TextStyle(fontWeight: FontWeight.w500),
+                        ),
+                      ],
                     ),
-                  ),
-                  if (_speechAvailable) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      '예: "팽이버섯 1봉", "달걀 한판"',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: colorScheme.onSecondaryContainer.withValues(
-                          alpha: 0.7,
+                    const SizedBox(height: 8),
+                    // 음성 입력 버튼
+                    InkWell(
+                      onTap: _isListening ? _stopListening : _startListening,
+                      borderRadius: BorderRadius.circular(24),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _isListening
+                              ? Colors.red
+                              : colorScheme.primary,
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              _isListening ? Icons.stop : Icons.mic,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              _isListening
+                                  ? '듣는 중... "$_recognizedText"'
+                                  : '🎤 음성으로 입력하기',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
+                    if (_speechAvailable) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        '예: "팽이버섯 1봉", "달걀 한판"',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: colorScheme.onSecondaryContainer.withValues(
+                            alpha: 0.7,
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
-                ],
+                ),
+              ),
+            )
+          else
+            Card(
+              color: colorScheme.secondaryContainer,
+              child: const Padding(
+                padding: EdgeInsets.all(12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.bolt, color: Colors.orange),
+                    SizedBox(width: 8),
+                    Text(
+                      '상품명 입력 → 사용량 입력 → ENT',
+                      style: TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
           const SizedBox(height: 16),
 
           // 상품명 입력
@@ -1374,10 +1389,13 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
 
           const SizedBox(height: 16),
 
-          // 사용량 입력 + 빠른 선택
+          _buildPrimaryActionRow(),
+
+          const SizedBox(height: 16),
+
+          // 사용량 입력 + 장바구니 버튼
           Builder(
             builder: (context) {
-              final quickButtons = _buildQuickButtons();
               // 상품별 단위 자동 설정
               final productUnit = _getProductUnit(
                 _selectedItem?.name ?? _nameController.text,
@@ -1417,35 +1435,17 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
                       const SizedBox(width: 12),
                       SizedBox(
                         width: 108,
-                        child: Column(
-                          children: [
-                            const Text(
-                              '빠른 선택',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black87,
+                        height: 56,
+                        child: FilledButton(
+                          onPressed: () {
+                            Navigator.of(context).pushNamed(
+                              AppRoutes.shoppingCart,
+                              arguments: route_args.ShoppingCartArgs(
+                                accountName: widget.accountName,
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 2,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                border: Border.all(color: Colors.grey.shade400),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Wrap(
-                                alignment: WrapAlignment.center,
-                                spacing: 4,
-                                runSpacing: 4,
-                                children: quickButtons,
-                              ),
-                            ),
-                          ],
+                            );
+                          },
+                          child: const Text('장바구니'),
                         ),
                       ),
                     ],
@@ -1459,10 +1459,6 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
               );
             },
           ),
-
-          const SizedBox(height: 16),
-
-          _buildPrimaryActionRow(),
 
           if (_selectedItem != null) ...[
             const SizedBox(height: 16),
@@ -1759,57 +1755,6 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
             ),
           ],
         ],
-      ),
-    );
-  }
-}
-
-class _QuickButton extends StatelessWidget {
-  final String label;
-  final VoidCallback onTap;
-  final bool isHighRisk;
-
-  const _QuickButton({
-    required this.label,
-    required this.onTap,
-    this.isHighRisk = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final baseBorderColor = Colors.grey.shade600;
-    final borderRadius = BorderRadius.circular(12);
-    final textColor = isHighRisk ? Colors.red.shade700 : Colors.black87;
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: borderRadius,
-      child: Container(
-        constraints: const BoxConstraints(
-          minWidth: 38,
-          minHeight: 38,
-          maxWidth: 38,
-          maxHeight: 38,
-        ),
-        padding: EdgeInsets.zero,
-        decoration: BoxDecoration(
-          color: isHighRisk ? Colors.red.shade50 : Colors.white,
-          border: Border.all(
-            color: isHighRisk ? Colors.red.shade600 : baseBorderColor,
-          ),
-          borderRadius: BorderRadius.circular(7),
-        ),
-        child: Center(
-          child: Text(
-            label,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-              color: textColor,
-            ),
-          ),
-        ),
       ),
     );
   }

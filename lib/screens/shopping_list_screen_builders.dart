@@ -110,9 +110,7 @@ extension ShoppingListScreenBuilders on _ShoppingListScreenState {
                         style: TextStyle(fontSize: 13, color: Colors.grey),
                       ),
                       Text(
-                        '${ShoppingListGenerator.formatPrice(
-                          result.potentialSavings,
-                        )}원',
+                        '${ShoppingListGenerator.formatPrice(result.potentialSavings)}원',
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -208,8 +206,7 @@ extension ShoppingListScreenBuilders on _ShoppingListScreenState {
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.blue,
-                      decoration:
-                          isChecked ? TextDecoration.lineThrough : null,
+                      decoration: isChecked ? TextDecoration.lineThrough : null,
                     ),
                   ),
                 ],
@@ -265,10 +262,7 @@ extension ShoppingListScreenBuilders on _ShoppingListScreenState {
           children: [
             Text(
               '$checkedCount개 선택됨',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             ElevatedButton.icon(
               onPressed: checkedCount == totalCount

@@ -101,7 +101,7 @@ class _AssetMoveDialogState extends State<AssetMoveDialog> {
     // 메모 필수 입력 검증
     final memo = _memoController.text.trim();
     if (memo.isEmpty) {
-      SnackbarUtils.showError(context, '메모는 필수입니다 (판단 사유를 기록해주세요)');
+      SnackbarUtils.showError(context, '메모는 필수입니다 (판단 사유를 입력해주세요)');
       return;
     }
     if (memo.length < 5) {

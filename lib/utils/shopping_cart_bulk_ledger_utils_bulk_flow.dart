@@ -7,15 +7,14 @@ Future<void> _addCheckedItemsToLedgerBulk({
   required Map<String, CategoryHint> categoryHints,
   required Future<void> Function(List<ShoppingCartItem> next) saveItems,
   required Future<void> Function() reload,
+  bool useDetailedMode = false,
 }) async {
   final messenger = ScaffoldMessenger.of(context);
   final navigator = Navigator.of(context);
 
   final selected = items.where((i) => i.isChecked).toList();
   if (selected.isEmpty) {
-    messenger.showSnackBar(
-      const SnackBar(content: Text('체크된 항목이 없습니다.')),
-    );
+    messenger.showSnackBar(const SnackBar(content: Text('체크된 항목이 없습니다.')));
     return;
   }
 
@@ -33,8 +32,15 @@ Future<void> _addCheckedItemsToLedgerBulk({
 
     final baseNow = DateTime.now();
 
+    debugPrint(
+      '[ShoppingCartBulkLedgerUtils] 단일 항목 선택: '
+      'name=${item.name}, qty=$qty, unit=$unit, total=$total',
+    );
+
     final saved = await navigator.pushNamed(
-      AppRoutes.transactionAdd,
+      useDetailedMode
+          ? AppRoutes.transactionAddDetailed
+          : AppRoutes.transactionAdd,
       arguments: TransactionAddArgs(
         accountName: accountName,
         closeAfterSave: true,
@@ -95,7 +101,7 @@ Future<void> _addCheckedItemsToLedgerBulk({
   String? lastMemo;
   String? lastMainCategory;
   String? lastSubCategory;
-  
+
   for (var index = 0; index < selected.length; index++) {
     if (!context.mounted) return;
     final item = selected[index];
@@ -112,7 +118,9 @@ Future<void> _addCheckedItemsToLedgerBulk({
     final useSubCategory = lastSubCategory ?? suggested.subCategory;
 
     final result = await navigator.pushNamed(
-      AppRoutes.transactionAdd,
+      useDetailedMode
+          ? AppRoutes.transactionAddDetailed
+          : AppRoutes.transactionAdd,
       arguments: TransactionAddArgs(
         accountName: accountName,
         closeAfterSave: true,
@@ -138,13 +146,15 @@ Future<void> _addCheckedItemsToLedgerBulk({
     if (!context.mounted) return;
 
     // TransactionAddResult 또는 bool 처리
-    final TransactionAddResult? addResult = result is TransactionAddResult ? result : null;
+    final TransactionAddResult? addResult = result is TransactionAddResult
+        ? result
+        : null;
     final bool saved = addResult?.saved ?? (result is bool && result);
-    
+
     if (!saved) {
       break;
     }
-    
+
     // 다음 아이템을 위해 결제수단/메모/카테고리 저장
     if (addResult != null) {
       lastPaymentMethod = addResult.paymentMethod;
@@ -184,14 +194,21 @@ Future<void> _addCheckedItemsToLedgerBulk({
       await reload();
       if (!context.mounted) return;
 
+      // 일일지출내역 표시 후 포인트 입력 화면으로 이동
       await navigator.pushNamed(
         AppRoutes.dailyTransactions,
         arguments: DailyTransactionsArgs(
           accountName: accountName,
           initialDay: DateTime.now(),
           savedCount: selected.length,
-          showShoppingPointsInputCta: true,
         ),
+      );
+      if (!context.mounted) return;
+
+      // 포인트 입력 화면 표시 (사용자가 수동 종료)
+      await navigator.pushNamed(
+        AppRoutes.shoppingPointsInput,
+        arguments: ShoppingPointsInputArgs(accountName: accountName),
       );
       return;
     }

@@ -47,9 +47,7 @@ Future<void> _createAssetMovesForIncomeDistribution({
   // 1. 저축 자산으로 이동
   if (savingsAmount > 0) {
     final Asset savingsAsset = assets.firstWhere(
-      (a) =>
-          a.category == AssetCategory.deposit &&
-          a.name.contains('저축'),
+      (a) => a.category == AssetCategory.deposit && a.name.contains('저축'),
       orElse: () => Asset(
         id: '${now.microsecondsSinceEpoch}_savings',
         name: '$dateLabel 저축',
@@ -82,9 +80,7 @@ Future<void> _createAssetMovesForIncomeDistribution({
   // 2. 예산 자산으로 이동
   if (budgetAmount > 0) {
     final Asset budgetAsset = assets.firstWhere(
-      (a) =>
-          a.category == AssetCategory.cash &&
-          a.name.contains('예산'),
+      (a) => a.category == AssetCategory.cash && a.name.contains('예산'),
       orElse: () => Asset(
         id: '${now.microsecondsSinceEpoch}_budget',
         name: '$dateLabel 예산',
@@ -116,9 +112,7 @@ Future<void> _createAssetMovesForIncomeDistribution({
   // 3. 비상금 자산으로 이동
   if (emergencyAmount > 0) {
     final Asset emergencyAsset = assets.firstWhere(
-      (a) =>
-          a.category == AssetCategory.deposit &&
-          a.name.contains('비상금'),
+      (a) => a.category == AssetCategory.deposit && a.name.contains('비상금'),
       orElse: () => Asset(
         id: '${now.microsecondsSinceEpoch}_emergency',
         name: '$dateLabel 비상금',

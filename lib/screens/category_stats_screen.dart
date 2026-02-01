@@ -181,4 +181,3 @@ class _CategoryStatsScreenState extends State<CategoryStatsScreen> {
     );
   }
 }
-

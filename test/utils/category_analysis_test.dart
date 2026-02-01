@@ -66,16 +66,8 @@ void main() {
 
     test('separates sub categories with dot notation', () {
       final txs = [
-        createTx(
-          id: '1',
-          amount: 10000,
-          subCategory: '외식',
-        ),
-        createTx(
-          id: '2',
-          amount: 5000,
-          subCategory: '장보기',
-        ),
+        createTx(id: '1', amount: 10000, subCategory: '외식'),
+        createTx(id: '2', amount: 5000, subCategory: '장보기'),
       ];
 
       analysis.ingest(txs);

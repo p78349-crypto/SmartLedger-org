@@ -28,20 +28,26 @@ void main() {
 
     group('calculateProfitLossRate', () {
       test('calculates profit rate correctly', () {
-        final result =
-            ProfitLossCalculator.calculateProfitLossRate(150.0, 100.0);
+        final result = ProfitLossCalculator.calculateProfitLossRate(
+          150.0,
+          100.0,
+        );
         expect(result, 50.0); // 50% 이익
       });
 
       test('calculates loss rate correctly', () {
-        final result =
-            ProfitLossCalculator.calculateProfitLossRate(75.0, 100.0);
+        final result = ProfitLossCalculator.calculateProfitLossRate(
+          75.0,
+          100.0,
+        );
         expect(result, -25.0); // 25% 손실
       });
 
       test('returns 0 when costBasis is null', () {
-        final result =
-            ProfitLossCalculator.calculateProfitLossRate(100.0, null);
+        final result = ProfitLossCalculator.calculateProfitLossRate(
+          100.0,
+          null,
+        );
         expect(result, 0.0);
       });
 

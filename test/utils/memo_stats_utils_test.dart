@@ -199,11 +199,7 @@ void main() {
 
   group('MemoStatEntry', () {
     test('has correct properties', () {
-      const entry = MemoStatEntry(
-        memo: 'test',
-        totalAmount: 10000,
-        count: 5,
-      );
+      const entry = MemoStatEntry(memo: 'test', totalAmount: 10000, count: 5);
 
       expect(entry.memo, 'test');
       expect(entry.totalAmount, 10000);

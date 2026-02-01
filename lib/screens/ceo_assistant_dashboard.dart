@@ -72,18 +72,15 @@ class CEOAssistantDashboard extends StatelessWidget {
             }
           }
 
-          final totalAssetsStr = NumberFormats.currency
-              .format(
-                totalAssets.toInt(),
-              );
-          final lastMonthIncomeStr = NumberFormats.currency
-              .format(
-                lastMonthIncome.toInt(),
-              );
-          final lastMonthExpenseStr = NumberFormats.currency
-              .format(
-                lastMonthExpense.toInt(),
-              );
+          final totalAssetsStr = NumberFormats.currency.format(
+            totalAssets.toInt(),
+          );
+          final lastMonthIncomeStr = NumberFormats.currency.format(
+            lastMonthIncome.toInt(),
+          );
+          final lastMonthExpenseStr = NumberFormats.currency.format(
+            lastMonthExpense.toInt(),
+          );
 
           return ListView(
             padding: const EdgeInsets.all(16),
@@ -95,22 +92,19 @@ class CEOAssistantDashboard extends StatelessWidget {
                   _metricCard(
                     context,
                     title: '총 자산',
-                    value:
-                        '₩$totalAssetsStr',
+                    value: '₩$totalAssetsStr',
                     icon: Icons.account_balance_wallet,
                   ),
                   _metricCard(
                     context,
                     title: '최근 월 수입',
-                    value:
-                        '₩$lastMonthIncomeStr',
+                    value: '₩$lastMonthIncomeStr',
                     icon: Icons.trending_up,
                   ),
                   _metricCard(
                     context,
                     title: '최근 월 지출',
-                    value:
-                        '₩$lastMonthExpenseStr',
+                    value: '₩$lastMonthExpenseStr',
                     icon: Icons.trending_down,
                   ),
                 ],

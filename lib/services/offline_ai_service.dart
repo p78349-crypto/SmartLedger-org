@@ -8,7 +8,10 @@ class AnalyzeResult {
   AnalyzeResult({required this.intent, required this.entities});
 
   factory AnalyzeResult.fromJson(Map<String, dynamic> j) {
-    return AnalyzeResult(intent: j['intent'] as String, entities: Map<String, dynamic>.from(j['entities'] ?? {}));
+    return AnalyzeResult(
+      intent: j['intent'] as String,
+      entities: Map<String, dynamic>.from(j['entities'] ?? {}),
+    );
   }
 }
 
@@ -19,7 +22,11 @@ class OfflineAiService {
 
   Future<AnalyzeResult> analyzeText(String text) async {
     final uri = Uri.parse('$baseUrl/analyze');
-    final res = await http.post(uri, body: jsonEncode({'text': text}), headers: {'Content-Type': 'application/json'});
+    final res = await http.post(
+      uri,
+      body: jsonEncode({'text': text}),
+      headers: {'Content-Type': 'application/json'},
+    );
     if (res.statusCode != 200) {
       throw Exception('AI analyze failed: ${res.statusCode}');
     }

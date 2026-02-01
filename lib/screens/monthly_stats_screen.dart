@@ -191,4 +191,3 @@ class _MonthlyStatsScreenState extends State<MonthlyStatsScreen> {
     );
   }
 }
-

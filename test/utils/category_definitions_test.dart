@@ -18,7 +18,8 @@ void main() {
 
     test('default category has empty subcategory list', () {
       expect(
-        CategoryDefinitions.categoryOptions[CategoryDefinitions.defaultCategory],
+        CategoryDefinitions.categoryOptions[CategoryDefinitions
+            .defaultCategory],
         isEmpty,
       );
     });

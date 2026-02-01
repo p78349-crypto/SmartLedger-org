@@ -17,14 +17,20 @@ void main() {
       final account = Account(name: '테스트');
       final after = DateTime.now();
 
-      expect(account.createdAt.isAfter(before.subtract(const Duration(seconds: 1))), isTrue);
-      expect(account.createdAt.isBefore(after.add(const Duration(seconds: 1))), isTrue);
+      expect(
+        account.createdAt.isAfter(before.subtract(const Duration(seconds: 1))),
+        isTrue,
+      );
+      expect(
+        account.createdAt.isBefore(after.add(const Duration(seconds: 1))),
+        isTrue,
+      );
     });
 
     test('creates with all fields', () {
       final createdAt = DateTime(2026);
       final lastCarryover = DateTime(2026, 1, 10);
-      
+
       final account = Account(
         name: '가계부',
         createdAt: createdAt,
@@ -42,7 +48,7 @@ void main() {
       test('serializes all fields', () {
         final createdAt = DateTime(2026, 1, 5);
         final lastCarryover = DateTime(2026, 1, 10);
-        
+
         final account = Account(
           name: '계좌',
           createdAt: createdAt,
@@ -89,9 +95,7 @@ void main() {
       });
 
       test('handles missing optional fields', () {
-        final json = {
-          'name': '최소계좌',
-        };
+        final json = {'name': '최소계좌'};
 
         final account = Account.fromJson(json);
 

@@ -130,10 +130,8 @@ class CEORoiDetailScreen extends StatelessWidget {
               children: [
                 Expanded(
                   child: () {
-                    final startMonth = start.month.toString()
-                        .padLeft(2, '0');
-                    final endMonth = (end.month - 1).toString()
-                        .padLeft(2, '0');
+                    final startMonth = start.month.toString().padLeft(2, '0');
+                    final endMonth = (end.month - 1).toString().padLeft(2, '0');
                     final startRange = '${start.year}-$startMonth';
                     final endRange = '${end.year}-$endMonth';
                     return Column(
@@ -237,7 +235,8 @@ class CEORoiDetailScreen extends StatelessWidget {
       final monthFrom = '${start.year}$monthFromMonth';
       final monthToMonth = end.month.toString().padLeft(2, '0');
       final monthTo = '${end.year}$monthToMonth';
-      final path = '${dir.path}/ceo_roi_detail_${monthFrom}_to_${monthTo}_la${lookaheadMonths}_$stamp.csv';
+      final path =
+          '${dir.path}/ceo_roi_detail_${monthFrom}_to_${monthTo}_la${lookaheadMonths}_$stamp.csv';
       await File(path).writeAsString(csv);
       await SharePlus.instance.share(
         ShareParams(text: 'CEO ROI 상세 CSV', files: [XFile(path)]),

@@ -18,9 +18,7 @@ Widget buildValidatorsExamples(BuildContext context) {
       Text('양수 검증: ${Validators.positiveNumber("1000") ?? "✓ 유효"}'),
       Text('양수 검증 (0): ${Validators.positiveNumber("0") ?? "✓ 유효"}'),
       Text('계정명 검증: ${Validators.accountName("내 계정") ?? "✓ 유효"}'),
-      Text(
-        '이메일 검증: ${Validators.email("test@example.com") ?? "✓ 유효"}',
-      ),
+      Text('이메일 검증: ${Validators.email("test@example.com") ?? "✓ 유효"}'),
       _vSpace8,
       ElevatedButton(
         onPressed: () {

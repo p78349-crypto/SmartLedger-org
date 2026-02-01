@@ -136,9 +136,9 @@ class _StoreProductStatsScreenState extends State<StoreProductStatsScreen> {
             ? const Center(child: CircularProgressIndicator())
             : ListView(
                 padding: const EdgeInsets.all(16),
-                  children: [_buildStoreProductStats(theme)],
+                children: [_buildStoreProductStats(theme)],
               ),
       ),
     );
   }
-  }
+}

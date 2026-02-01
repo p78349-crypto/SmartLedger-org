@@ -41,11 +41,7 @@ void main() {
 
   group('Asset', () {
     test('creates with required fields', () {
-      final asset = Asset(
-        id: 'asset-1',
-        name: '삼성전자',
-        amount: 1000000,
-      );
+      final asset = Asset(id: 'asset-1', name: '삼성전자', amount: 1000000);
 
       expect(asset.id, 'asset-1');
       expect(asset.name, '삼성전자');
@@ -83,16 +79,9 @@ void main() {
     });
 
     test('copyWith updates specified fields', () {
-      final original = Asset(
-        id: 'asset-1',
-        name: '삼성전자',
-        amount: 1000000,
-      );
+      final original = Asset(id: 'asset-1', name: '삼성전자', amount: 1000000);
 
-      final updated = original.copyWith(
-        name: 'SK하이닉스',
-        amount: 2000000,
-      );
+      final updated = original.copyWith(name: 'SK하이닉스', amount: 2000000);
 
       expect(updated.id, 'asset-1'); // 변경 안됨
       expect(updated.name, 'SK하이닉스');

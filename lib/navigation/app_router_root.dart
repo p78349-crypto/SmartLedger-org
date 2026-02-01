@@ -23,9 +23,7 @@ class _RootRoutes {
       case AppRoutes.rootAccountManage:
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => const RootAuthGate(
-            child: RootAccountManageScreen(),
-          ),
+          builder: (_) => const RootAuthGate(child: RootAccountManageScreen()),
         );
 
       case AppRoutes.rootMonthEnd:

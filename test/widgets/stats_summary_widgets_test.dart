@@ -25,9 +25,7 @@ void main() {
     testWidgets('uses GridView.count', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: StatsSummaryGrid(children: [Container()]),
-          ),
+          home: Scaffold(body: StatsSummaryGrid(children: [Container()])),
         ),
       );
 

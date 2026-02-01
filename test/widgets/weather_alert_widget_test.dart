@@ -39,23 +39,38 @@ void main() {
 
   group('getWeatherRiskLevel', () {
     test('typhoon is critical', () {
-      expect(getWeatherRiskLevel(WeatherCondition.typhoon), WeatherRiskLevel.critical);
+      expect(
+        getWeatherRiskLevel(WeatherCondition.typhoon),
+        WeatherRiskLevel.critical,
+      );
     });
 
     test('coldWave is high', () {
-      expect(getWeatherRiskLevel(WeatherCondition.coldWave), WeatherRiskLevel.high);
+      expect(
+        getWeatherRiskLevel(WeatherCondition.coldWave),
+        WeatherRiskLevel.high,
+      );
     });
 
     test('heavyRain is high', () {
-      expect(getWeatherRiskLevel(WeatherCondition.heavyRain), WeatherRiskLevel.high);
+      expect(
+        getWeatherRiskLevel(WeatherCondition.heavyRain),
+        WeatherRiskLevel.high,
+      );
     });
 
     test('heatWave is medium', () {
-      expect(getWeatherRiskLevel(WeatherCondition.heatWave), WeatherRiskLevel.medium);
+      expect(
+        getWeatherRiskLevel(WeatherCondition.heatWave),
+        WeatherRiskLevel.medium,
+      );
     });
 
     test('snowy is medium', () {
-      expect(getWeatherRiskLevel(WeatherCondition.snowy), WeatherRiskLevel.medium);
+      expect(
+        getWeatherRiskLevel(WeatherCondition.snowy),
+        WeatherRiskLevel.medium,
+      );
     });
 
     test('sunny is low', () {
@@ -63,7 +78,10 @@ void main() {
     });
 
     test('cloudy is low', () {
-      expect(getWeatherRiskLevel(WeatherCondition.cloudy), WeatherRiskLevel.low);
+      expect(
+        getWeatherRiskLevel(WeatherCondition.cloudy),
+        WeatherRiskLevel.low,
+      );
     });
   });
 

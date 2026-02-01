@@ -59,25 +59,29 @@ extension _FixedCostStatsScreenList on _FixedCostStatsScreenState {
       const SizedBox(height: 24),
       Text('항목별 고정비', style: theme.textTheme.titleLarge),
       const SizedBox(height: 12),
-      ..._sortedCosts.map(
-        (cost) {
-          final percentage =
-              _monthlyTotal > 0 ? (cost.amount / _monthlyTotal * 100) : 0.0;
-          final meta = _fixedCostMeta(cost);
-          final yearlyLabel =
-              '연간: -${_currencyFormat.format(cost.amount * 12)}원';
+      ..._sortedCosts.map((cost) {
+        final percentage = _monthlyTotal > 0
+            ? (cost.amount / _monthlyTotal * 100)
+            : 0.0;
+        final meta = _fixedCostMeta(cost);
+        final yearlyLabel = '연간: -${_currencyFormat.format(cost.amount * 12)}원';
 
-          return Card(
-            margin: const EdgeInsets.only(bottom: 12),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: isLandscape
-                  ? _buildLandscapeRow(theme, cost, meta)
-                  : _buildPortraitCard(theme, cost, meta, percentage, yearlyLabel),
-            ),
-          );
-        },
-      ),
+        return Card(
+          margin: const EdgeInsets.only(bottom: 12),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: isLandscape
+                ? _buildLandscapeRow(theme, cost, meta)
+                : _buildPortraitCard(
+                    theme,
+                    cost,
+                    meta,
+                    percentage,
+                    yearlyLabel,
+                  ),
+          ),
+        );
+      }),
     ];
   }
 

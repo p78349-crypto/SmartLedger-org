@@ -11,9 +11,9 @@
 ///
 /// **DO NOT** ship with this enabled.
 library dev_overrides;
+
 import 'package:flutter/foundation.dart' show kReleaseMode;
 
-const bool kDevBypassSecurity =
-	kReleaseMode
-		? false
-		: bool.fromEnvironment('SL_DEV_BYPASS_SECURITY');
+const bool kDevBypassSecurity = kReleaseMode
+    ? false
+    : bool.fromEnvironment('SL_DEV_BYPASS_SECURITY');

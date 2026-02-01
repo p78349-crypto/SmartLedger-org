@@ -4,9 +4,9 @@ import 'gemma_api_service.dart';
 import 'gemini_ai_service.dart';
 
 /// 영수증 처리 통합 서비스
-/// 
+///
 /// Gemma API와 Gemini API를 조합하여 최적의 결과를 제공합니다.
-/// 
+///
 /// 처리 순서:
 /// 1. Gemma API 시도 (로컬, 빠름, 정확함)
 /// 2. 실패 시 Gemini API 폴백 (클라우드, 느림)
@@ -20,10 +20,10 @@ class ReceiptProcessingService {
   final GeminiAiService _geminiService = GeminiAiService.instance;
 
   /// 영수증 텍스트 처리
-  /// 
+  ///
   /// [ocrText]: OCR로 추출된 원본 텍스트
   /// [forceGemini]: true면 Gemma 건너뛰고 Gemini 사용
-  /// 
+  ///
   /// Returns: (성공 여부, 결과, 사용된 모델)
   Future<ReceiptProcessingResult> processReceipt({
     required String ocrText,
@@ -65,7 +65,8 @@ class ReceiptProcessingService {
 
       try {
         // Gemini에게 구조화 요청
-        final prompt = '''
+        final prompt =
+            '''
 다음 영수증 텍스트를 분석하여 JSON 형식으로 상품 정보를 추출해주세요.
 
 영수증 텍스트:

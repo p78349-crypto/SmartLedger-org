@@ -41,10 +41,7 @@ void main() {
       });
 
       test('handles mixed content', () {
-        expect(
-          ProductNameUtils.normalizeKey('서울 우유 (1L) - 대용량'),
-          '서울우유대용량',
-        );
+        expect(ProductNameUtils.normalizeKey('서울 우유 (1L) - 대용량'), '서울우유대용량');
       });
 
       test('trims whitespace', () {

@@ -5,7 +5,10 @@ void main() {
   group('ShoppingCategoryRules', () {
     test('groups are ordered and non-empty', () {
       expect(ShoppingCategoryRules.groups, isNotEmpty);
-      expect(ShoppingCategoryRules.groups.first, ShoppingCategoryRules.groceryKeywords);
+      expect(
+        ShoppingCategoryRules.groups.first,
+        ShoppingCategoryRules.groceryKeywords,
+      );
     });
 
     test('known keyword maps to expected category pair', () {

@@ -47,16 +47,19 @@ void main() {
       expect(tx.type, TransactionType.income);
     });
 
-    test('buildRequest falls back to AccountArgs when route expects account', () {
-      final req = IconLaunchUtils.buildRequest(
-        routeName: AppRoutes.accountMain,
-        accountName: accountName,
-      );
+    test(
+      'buildRequest falls back to AccountArgs when route expects account',
+      () {
+        final req = IconLaunchUtils.buildRequest(
+          routeName: AppRoutes.accountMain,
+          accountName: accountName,
+        );
 
-      expect(req, isNotNull);
-      expect(req!.arguments, isA<AccountArgs>());
-      final args = req.arguments as AccountArgs;
-      expect(args.accountName, accountName);
-    });
+        expect(req, isNotNull);
+        expect(req!.arguments, isA<AccountArgs>());
+        final args = req.arguments as AccountArgs;
+        expect(args.accountName, accountName);
+      },
+    );
   });
 }

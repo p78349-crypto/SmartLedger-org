@@ -15,9 +15,7 @@ extension _HomeTabMenus on _HomeTabScreenState {
           setState(() {
             _currentIndex = 1;
             _screens[1] = AccountStatsScreen(
-              key: ValueKey(
-                'stats-${widget.accountName}-decade',
-              ),
+              key: ValueKey('stats-${widget.accountName}-decade'),
               accountName: widget.accountName,
               embed: true,
               initialView: 'decade',
@@ -43,11 +41,7 @@ extension _HomeTabMenus on _HomeTabScreenState {
             children: [
               const Icon(IconCatalog.dateRange, size: 20),
               const SizedBox(width: 8),
-              Text(
-                period.PeriodUtils.getPeriodLabel(
-                  period.PeriodType.decade,
-                ),
-              ),
+              Text(period.PeriodUtils.getPeriodLabel(period.PeriodType.decade)),
             ],
           ),
         ),
@@ -175,11 +169,7 @@ extension _HomeTabMenus on _HomeTabScreenState {
               value: 'transaction_details',
               child: Row(
                 children: [
-                  Icon(
-                    IconCatalog.listAlt,
-                    size: 20,
-                    color: Colors.deepPurple,
-                  ),
+                  Icon(IconCatalog.listAlt, size: 20, color: Colors.deepPurple),
                   SizedBox(width: 8),
                   Text(StatsLabels.expenseDetails),
                 ],
@@ -264,19 +254,15 @@ extension _HomeTabMenus on _HomeTabScreenState {
   }
 
   void _openCarryoverDialog() {
-    final accounts = AccountService().getAccountByName(
-      widget.accountName,
-    );
+    final accounts = AccountService().getAccountByName(widget.accountName);
     if (accounts == null || !mounted) {
       return;
     }
 
     showDialog(
       context: context,
-      builder: (context) => MonthEndCarryoverDialog(
-        account: accounts,
-        onSaved: () {},
-      ),
+      builder: (context) =>
+          MonthEndCarryoverDialog(account: accounts, onSaved: () {}),
     );
   }
 }

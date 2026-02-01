@@ -31,9 +31,7 @@ extension _IncomeAddFormOptions on _IncomeAddFormState {
         border: OutlineInputBorder(),
       ),
       items: _IncomeAddFormState._paymentOptions
-          .map(
-            (value) => DropdownMenuItem(value: value, child: Text(value)),
-          )
+          .map((value) => DropdownMenuItem(value: value, child: Text(value)))
           .toList(),
       onChanged: (v) {
         if (v == null) return;
@@ -72,9 +70,7 @@ extension _IncomeAddFormOptions on _IncomeAddFormState {
         border: OutlineInputBorder(),
       ),
       items: _IncomeAddFormState._taxStatusOptions
-          .map(
-            (value) => DropdownMenuItem(value: value, child: Text(value)),
-          )
+          .map((value) => DropdownMenuItem(value: value, child: Text(value)))
           .toList(),
       onChanged: (v) {
         if (v == null) return;
@@ -148,10 +144,7 @@ extension _IncomeAddFormOptions on _IncomeAddFormState {
         if (v.trim().isEmpty) return;
         setState(() {
           _tags.addAll(
-            v
-                .split(',')
-                .map((e) => e.trim())
-                .where((e) => e.isNotEmpty),
+            v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty),
           );
           _tagController.clear();
         });
@@ -164,10 +157,7 @@ extension _IncomeAddFormOptions on _IncomeAddFormState {
     if (input.isEmpty) return;
     setState(() {
       _tags.addAll(
-        input
-            .split(',')
-            .map((e) => e.trim())
-            .where((e) => e.isNotEmpty),
+        input.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty),
       );
       _tagController.clear();
     });

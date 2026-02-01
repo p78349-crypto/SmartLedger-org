@@ -57,7 +57,8 @@ void main() {
       });
 
       test('scores are between 1 and 5', () {
-        for (final score in IngredientHealthScoreUtils.ingredientScores.values) {
+        for (final score
+            in IngredientHealthScoreUtils.ingredientScores.values) {
           expect(score, greaterThanOrEqualTo(1));
           expect(score, lessThanOrEqualTo(5));
         }

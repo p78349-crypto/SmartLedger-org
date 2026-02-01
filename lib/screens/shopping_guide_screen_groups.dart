@@ -36,9 +36,7 @@ extension _ShoppingGuideGroups on _ShoppingGuideScreenState {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       elevation: isCurrent ? 4 : 1,
-      color: isCurrent
-          ? colors.primaryContainer.withValues(alpha: 0.3)
-          : null,
+      color: isCurrent ? colors.primaryContainer.withValues(alpha: 0.3) : null,
       child: ExpansionTile(
         initiallyExpanded: isCurrent,
         leading: CircleAvatar(
@@ -59,8 +57,7 @@ extension _ShoppingGuideGroups on _ShoppingGuideScreenState {
               child: Text(
                 location,
                 style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight:
-                      isCurrent ? FontWeight.bold : FontWeight.normal,
+                  fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
                   color: isCurrent ? colors.primary : null,
                 ),
               ),
@@ -83,9 +80,7 @@ extension _ShoppingGuideGroups on _ShoppingGuideScreenState {
             ),
           ],
         ),
-        children: items
-            .map((item) => _buildItemTile(theme, item))
-            .toList(),
+        children: items.map((item) => _buildItemTile(theme, item)).toList(),
       ),
     );
   }

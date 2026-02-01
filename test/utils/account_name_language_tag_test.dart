@@ -35,8 +35,10 @@ void main() {
     group('applyForcedSuffix', () {
       test('appends suffix to base name', () {
         const locale = Locale('en');
-        final result =
-            AccountNameLanguageTag.applyForcedSuffix('My Account', locale);
+        final result = AccountNameLanguageTag.applyForcedSuffix(
+          'My Account',
+          locale,
+        );
         expect(result, 'My Account EN');
       });
 
@@ -54,29 +56,34 @@ void main() {
 
       test('trims whitespace from base name', () {
         const locale = Locale('ko');
-        final result =
-            AccountNameLanguageTag.applyForcedSuffix('  내 계좌  ', locale);
+        final result = AccountNameLanguageTag.applyForcedSuffix(
+          '  내 계좌  ',
+          locale,
+        );
         expect(result, '내 계좌 KR');
       });
 
       test('does not duplicate suffix if already present', () {
         const locale = Locale('en');
-        final result =
-            AccountNameLanguageTag.applyForcedSuffix('My Account EN', locale);
+        final result = AccountNameLanguageTag.applyForcedSuffix(
+          'My Account EN',
+          locale,
+        );
         expect(result, 'My Account EN');
       });
 
       test('handles case-insensitive suffix check', () {
         const locale = Locale('en');
-        final result =
-            AccountNameLanguageTag.applyForcedSuffix('My Account en', locale);
+        final result = AccountNameLanguageTag.applyForcedSuffix(
+          'My Account en',
+          locale,
+        );
         expect(result, 'My Account en');
       });
 
       test('appends JP suffix for Japanese locale', () {
         const locale = Locale('ja');
-        final result =
-            AccountNameLanguageTag.applyForcedSuffix('口座', locale);
+        final result = AccountNameLanguageTag.applyForcedSuffix('口座', locale);
         expect(result, '口座 JP');
       });
     });

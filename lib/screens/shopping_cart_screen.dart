@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../models/category_hint.dart';
+import '../models/shopping_cart_history_entry.dart';
 import '../models/shopping_cart_item.dart';
 import '../navigation/app_routes.dart';
+import '../services/food_expiry_service.dart';
 import '../services/product_location_service.dart';
 import '../services/user_pref_service.dart';
 import '../utils/currency_formatter.dart';
@@ -327,13 +329,14 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
               e.name.trim().toLowerCase() == initItem.name.trim().toLowerCase(),
         );
         if (!exists) {
-          items.add(initItem);
+          items.insert(0, initItem);
         }
       }
       // Save merged list back to prefs
+      final limited = items.take(30).toList();
       await UserPrefService.setShoppingCartItems(
         accountName: widget.accountName,
-        items: items,
+        items: limited,
       );
     }
 
@@ -352,11 +355,236 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
   }
 
   Future<void> _save(List<ShoppingCartItem> next) async {
-    setState(() => _items = next);
-    _syncInlineControllers(next);
+    // 30건으로 제한 (최근 등록 순)
+    final limited = next.take(30).toList();
+    setState(() => _items = limited);
+    _syncInlineControllers(limited);
     await UserPrefService.setShoppingCartItems(
       accountName: widget.accountName,
-      items: next,
+      items: limited,
+    );
+  }
+
+  String _formatDateLabel(DateTime dt) {
+    final y = dt.year.toString().padLeft(4, '0');
+    final m = dt.month.toString().padLeft(2, '0');
+    final d = dt.day.toString().padLeft(2, '0');
+    return '$y-$m-$d';
+  }
+
+  void _navigateToDetailedInput() {
+    Navigator.of(context).pushNamed(
+      AppRoutes.transactionAddDetailed,
+      arguments: TransactionAddArgs(accountName: widget.accountName),
+    );
+  }
+
+  Future<void> _openRecentPurchasePicker() async {
+    final history = await UserPrefService.getShoppingCartHistory(
+      accountName: widget.accountName,
+      limit: 500,
+    );
+
+    if (!mounted) return;
+
+    final cutoff = DateTime.now().subtract(const Duration(days: 10));
+    final recent = history.where((e) => e.at.isAfter(cutoff)).toList();
+    if (recent.isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('최근 10일 구매 내역이 없습니다.')));
+      return;
+    }
+
+    recent.sort((a, b) => b.at.compareTo(a.at));
+    final selected = <String, bool>{};
+
+    // 날짜별 그룹화
+    final grouped = <String, List<ShoppingCartHistoryEntry>>{};
+    for (final entry in recent) {
+      final dateKey = _formatDateLabel(entry.at);
+      grouped.putIfAbsent(dateKey, () => []).add(entry);
+    }
+    final sortedDates = grouped.keys.toList()..sort((a, b) => b.compareTo(a));
+
+    final picked = await showModalBottomSheet<List<ShoppingCartHistoryEntry>>(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.7,
+          minChildSize: 0.4,
+          maxChildSize: 0.9,
+          expand: false,
+          builder: (ctx, controller) {
+            return StatefulBuilder(
+              builder: (ctx, setSheetState) {
+                final selectedCount = selected.values.where((v) => v).length;
+                return Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                      child: Row(
+                        children: [
+                          const Text(
+                            '최근 10일 구매 리스트',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const Spacer(),
+                          Text('$selectedCount개 선택'),
+                        ],
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    Expanded(
+                      child: ListView.builder(
+                        controller: controller,
+                        itemCount: sortedDates.length,
+                        itemBuilder: (ctx, dateIndex) {
+                          final dateStr = sortedDates[dateIndex];
+                          final dateItems = grouped[dateStr]!;
+                          final allChecked = dateItems.every(
+                            (e) => selected[e.id] == true,
+                          );
+
+                          return Card(
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            child: ExpansionTile(
+                              initiallyExpanded: true,
+                              title: Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          dateStr,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        Text(
+                                          '${dateItems.length}개 항목',
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  TextButton.icon(
+                                    onPressed: () {
+                                      setSheetState(() {
+                                        for (final entry in dateItems) {
+                                          selected[entry.id] = !allChecked;
+                                        }
+                                      });
+                                    },
+                                    icon: Icon(
+                                      allChecked
+                                          ? Icons.check_box
+                                          : Icons.check_box_outline_blank,
+                                      size: 20,
+                                    ),
+                                    label: Text(allChecked ? '선택해제' : '전체선택'),
+                                    style: TextButton.styleFrom(
+                                      visualDensity: VisualDensity.compact,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              children: dateItems.map((entry) {
+                                final isChecked = selected[entry.id] ?? false;
+                                final qtyLabel = '${entry.quantity}개';
+                                final priceLabel = CurrencyFormatter.format(
+                                  entry.unitPrice,
+                                );
+                                return CheckboxListTile(
+                                  value: isChecked,
+                                  onChanged: (v) {
+                                    setSheetState(() {
+                                      selected[entry.id] = v ?? false;
+                                    });
+                                  },
+                                  title: Text(entry.name),
+                                  subtitle: Text('$qtyLabel · $priceLabel'),
+                                  dense: true,
+                                );
+                              }).toList(),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () => Navigator.pop(ctx),
+                              child: const Text('취소'),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: FilledButton(
+                              onPressed: selectedCount == 0
+                                  ? null
+                                  : () {
+                                      final picked = recent
+                                          .where((e) => selected[e.id] == true)
+                                          .toList();
+                                      Navigator.pop(ctx, picked);
+                                    },
+                              child: const Text('장바구니 추가'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+
+    if (!mounted) return;
+    if (picked == null || picked.isEmpty) return;
+
+    final now = DateTime.now();
+    final nextItems = List<ShoppingCartItem>.from(_items);
+
+    for (var i = 0; i < picked.length; i++) {
+      final entry = picked[i];
+      final item = ShoppingCartItem(
+        id: 'shop_${now.microsecondsSinceEpoch}_$i',
+        name: entry.name,
+        quantity: entry.quantity <= 0 ? 1 : entry.quantity,
+        unitPrice: entry.unitPrice,
+        createdAt: now,
+        updatedAt: now,
+      );
+      nextItems.insert(0, item);
+    }
+
+    await _save(nextItems);
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('${picked.length}개 항목을 장바구니에 추가했습니다.')),
     );
   }
 
@@ -451,10 +679,20 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
+            style: TextButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
             child: const Text('취소'),
           ),
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
+            style: FilledButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
             child: const Text('삭제'),
           ),
         ],
@@ -578,15 +816,36 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
             ),
           ),
           const SizedBox(width: 8),
-          Expanded(
-            flex: 3,
-            child: TextField(
-              controller: memoController,
-              focusNode: memoFocusNode,
-              style: theme.textTheme.bodySmall,
-              decoration: _inlineFieldDecoration(theme, '메모'),
-              onChanged: (_) => _previewInlineEdits(item),
-              onEditingComplete: () => _applyInlineEdits(item),
+          // 재고수량 표시
+          SizedBox(
+            width: 60,
+            height: _inlineFieldHeight,
+            child: Container(
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: Colors.teal.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.teal, width: 1.5),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    '재고',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      fontSize: 8,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  Text(
+                    _getStockQuantity(item.name),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.secondary,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           const SizedBox(width: 8),
@@ -677,6 +936,8 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
   }
 
   Future<void> _openTransactionAdd() async {
+    await _flushInlineEdits();
+    if (!mounted) return;
     await ShoppingCartBulkLedgerUtils.addCheckedItemsToLedgerBulk(
       context: context,
       accountName: widget.accountName,
@@ -685,6 +946,54 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
       saveItems: _save,
       reload: _load,
     );
+  }
+
+  Future<void> _flushInlineEdits() async {
+    bool changed = false;
+    final next = _items
+        .map((item) {
+          final bundleRaw = _qtyControllers[item.id]?.text.trim() ?? '';
+          final perBundleRaw =
+              _bundleSizeControllers[item.id]?.text.trim() ?? '';
+          final unitRaw = _unitPriceControllers[item.id]?.text.trim() ?? '';
+          final memoRaw = _memoControllers[item.id]?.text.trim() ?? item.memo;
+
+          final parsedBundle = int.tryParse(bundleRaw);
+          final parsedPerBundle = int.tryParse(perBundleRaw);
+          final parsedUnit = CurrencyFormatter.parse(unitRaw);
+
+          final nextBundle = (parsedBundle == null)
+              ? item.bundleCount
+              : (parsedBundle < 0 ? 0 : parsedBundle);
+          final nextPerBundle = (parsedPerBundle == null)
+              ? item.unitsPerBundle
+              : (parsedPerBundle < 0 ? 0 : parsedPerBundle);
+          final nextQty = nextBundle * nextPerBundle;
+          final nextUnit = (parsedUnit == null) ? item.unitPrice : parsedUnit;
+          final nextMemo = memoRaw;
+
+          if (nextBundle == item.bundleCount &&
+              nextPerBundle == item.unitsPerBundle &&
+              nextUnit == item.unitPrice &&
+              nextMemo == item.memo) {
+            return item;
+          }
+
+          changed = true;
+          return item.copyWith(
+            bundleCount: nextBundle,
+            unitsPerBundle: nextPerBundle,
+            quantity: nextQty,
+            unitPrice: nextUnit,
+            memo: nextMemo,
+            updatedAt: DateTime.now(),
+          );
+        })
+        .toList(growable: false);
+
+    if (changed) {
+      await _save(next);
+    }
   }
 
   Widget _buildCheckedSummaryBar({
@@ -705,45 +1014,69 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
       top: false,
       child: Material(
         color: theme.colorScheme.surface,
-        elevation: 4,
+        elevation: 8,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
           ),
         ),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
           child: Row(
             children: [
-              Text('체크 항목', style: theme.textTheme.bodyMedium),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  CurrencyFormatter.format(checkedTotal),
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.primary,
+              // 레시피 메뉴로 돌아가기 버튼
+              IconButton(
+                onPressed: () => Navigator.pushNamed(
+                  context,
+                  AppRoutes.recipeManagement,
+                  arguments: RecipeManagementArgs(
+                    accountName: widget.accountName,
+                  ),
+                ),
+                icon: const Icon(Icons.restaurant_menu),
+                tooltip: '레시피 메뉴',
+                style: IconButton.styleFrom(
+                  backgroundColor: theme.colorScheme.tertiaryContainer,
+                  foregroundColor: theme.colorScheme.onTertiaryContainer,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
               ),
+              const SizedBox(width: 8),
+              Padding(
+                padding: const EdgeInsets.only(left: 40),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('체크 항목', style: theme.textTheme.labelSmall),
+                    Text(
+                      CurrencyFormatter.format(checkedTotal),
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Spacer(),
               FilledButton(
                 onPressed: checkedCount > 0 ? _openTransactionAdd : null,
                 style: FilledButton.styleFrom(
                   backgroundColor: theme.colorScheme.primary,
                   foregroundColor: theme.colorScheme.onPrimary,
-                  disabledBackgroundColor: theme.colorScheme.surfaceContainerHighest,
+                  disabledBackgroundColor:
+                      theme.colorScheme.surfaceContainerHighest,
                   disabledForegroundColor: theme.colorScheme.onSurfaceVariant,
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 10,
+                    horizontal: 16,
+                    vertical: 12,
                   ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
-                    side: const BorderSide(
-                      color: Colors.brown,
-                      width: 2,
-                    ),
                   ),
                   visualDensity: VisualDensity.compact,
                 ),
@@ -813,6 +1146,26 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
     );
   }
 
+  /// 재고에서 해당 품목의 수량을 가져옴
+  String _getStockQuantity(String itemName) {
+    final inventory = FoodExpiryService.instance.items.value;
+    final trimmedName = itemName.trim().toLowerCase();
+
+    for (final item in inventory) {
+      final stockName = item.name.trim().toLowerCase();
+      if (stockName == trimmedName ||
+          stockName.contains(trimmedName) ||
+          trimmedName.contains(stockName)) {
+        // 정수일 경우 소수점 없이 표시
+        if (item.quantity == item.quantity.toInt()) {
+          return '${item.quantity.toInt()}';
+        }
+        return '${item.quantity}';
+      }
+    }
+    return '-';
+  }
+
   Future<void> _editItemLocation(ShoppingCartItem item) async {
     FocusScope.of(context).unfocus();
 
@@ -865,12 +1218,22 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
+            style: TextButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
             child: const Text('취소'),
           ),
           FilledButton(
             onPressed: () {
               Navigator.of(dialogContext).pop(controller.text.trim());
             },
+            style: FilledButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
             child: const Text('저장'),
           ),
         ],
@@ -895,21 +1258,6 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
     }
   }
 
-  Future<void> _startShoppingGuide() async {
-    FocusScope.of(context).unfocus();
-
-    await Navigator.of(context).pushNamed(
-      AppRoutes.shoppingGuide,
-      arguments: ShoppingGuideArgs(
-        accountName: widget.accountName,
-        items: _items,
-      ),
-    );
-
-    // 가이드에서 돌아온 후 새로고침
-    await _load();
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -926,24 +1274,48 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
       appBar: AppBar(
         title: Text(isPrep ? '쇼핑준비' : '장바구니'),
         actions: [
-          if (!isPrep && _items.isNotEmpty)
-            IconButton(
-              tooltip: '쇼핑 안내 시작',
-              onPressed: _startShoppingGuide,
-              icon: const Icon(Icons.map),
+          if (!isPrep)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Center(
+                child: GestureDetector(
+                  onTap: _isLoading ? null : _navigateToDetailedInput,
+                  child: Container(
+                    width: 50,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.pink.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.pink, width: 2),
+                    ),
+                    child: const Center(
+                      child: Icon(
+                        Icons.arrow_forward,
+                        color: Colors.pink,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ),
           IconButton(
             tooltip: '초기화',
             onPressed: _isLoading ? null : _confirmResetAll,
             icon: const Icon(Icons.restart_alt),
           ),
+          if (!isPrep)
+            TextButton(
+              onPressed: _isLoading ? null : _openRecentPurchasePicker,
+              child: const Text('최근 구매'),
+            ),
         ],
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(isPortrait ? 72 : 56),
           child: Padding(
             padding: isPortrait
-                ? const EdgeInsets.fromLTRB(16, 6, 10, 10)
-                : const EdgeInsets.fromLTRB(16, 6, 10, 6),
+                ? const EdgeInsets.fromLTRB(56, 6, 10, 10)
+                : const EdgeInsets.fromLTRB(56, 6, 10, 6),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -965,6 +1337,11 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                   height: isPortrait ? nameFieldHeight : 44,
                   child: FilledButton(
                     onPressed: () => _addItem(keepKeyboardOpen: true),
+                    style: FilledButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
                     child: const Text('추가'),
                   ),
                 ),
@@ -1010,15 +1387,14 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
 
                           // Ensure inline editors exist even if controllers
                           // temporarily go out-of-sync (e.g. fast rebuilds).
-                          _qtyControllers.putIfAbsent(
-                            item.id,
-                            () {
-                              final val = item.bundleCount < 0 ? 0 : item.bundleCount;
-                              return TextEditingController(
-                                text: val == 0 ? '' : val.toString(),
-                              );
-                            },
-                          );
+                          _qtyControllers.putIfAbsent(item.id, () {
+                            final val = item.bundleCount < 0
+                                ? 0
+                                : item.bundleCount;
+                            return TextEditingController(
+                              text: val == 0 ? '' : val.toString(),
+                            );
+                          });
                           _unitPriceControllers.putIfAbsent(
                             item.id,
                             () => TextEditingController(
@@ -1027,15 +1403,14 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                               ),
                             ),
                           );
-                          _bundleSizeControllers.putIfAbsent(
-                            item.id,
-                            () {
-                              final val = item.unitsPerBundle < 0 ? 0 : item.unitsPerBundle;
-                              return TextEditingController(
-                                text: val == 0 ? '' : val.toString(),
-                              );
-                            },
-                          );
+                          _bundleSizeControllers.putIfAbsent(item.id, () {
+                            final val = item.unitsPerBundle < 0
+                                ? 0
+                                : item.unitsPerBundle;
+                            return TextEditingController(
+                              text: val == 0 ? '' : val.toString(),
+                            );
+                          });
                           _memoControllers.putIfAbsent(
                             item.id,
                             () => TextEditingController(text: item.memo),
@@ -1152,7 +1527,8 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                                                   width: 140,
                                                   child: Column(
                                                     crossAxisAlignment:
-                                                        CrossAxisAlignment.start,
+                                                        CrossAxisAlignment
+                                                            .start,
                                                     children: [
                                                       Text(
                                                         '가격',
@@ -1164,7 +1540,8 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                                                                   .colorScheme
                                                                   .onSurfaceVariant,
                                                               fontWeight:
-                                                                  FontWeight.w600,
+                                                                  FontWeight
+                                                                      .w600,
                                                             ),
                                                       ),
                                                       const SizedBox(height: 4),
@@ -1233,8 +1610,6 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                                                 SizedBox(
                                                   width: 56,
                                                   child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment.center,
                                                     children: [
                                                       Text(
                                                         '수량',
@@ -1246,7 +1621,8 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                                                                   .colorScheme
                                                                   .onSurfaceVariant,
                                                               fontWeight:
-                                                                  FontWeight.w600,
+                                                                  FontWeight
+                                                                      .w600,
                                                             ),
                                                       ),
                                                       const SizedBox(height: 4),
@@ -1310,8 +1686,6 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                                                 SizedBox(
                                                   width: 56,
                                                   child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment.center,
                                                     children: [
                                                       Text(
                                                         '개수',
@@ -1323,7 +1697,8 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                                                                   .colorScheme
                                                                   .onSurfaceVariant,
                                                               fontWeight:
-                                                                  FontWeight.w600,
+                                                                  FontWeight
+                                                                      .w600,
                                                             ),
                                                       ),
                                                       const SizedBox(height: 4),
@@ -1372,12 +1747,10 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                                                                 ordered
                                                                     .length) {
                                                               final nextItem =
-                                                                  ordered[
-                                                                      index +
-                                                                          1];
-                                                              _unitPriceFocusNodes[
-                                                                      nextItem
-                                                                          .id]
+                                                                  ordered[index +
+                                                                      1];
+                                                              _unitPriceFocusNodes[nextItem
+                                                                      .id]
                                                                   ?.requestFocus();
                                                             } else {
                                                               FocusScope.of(
@@ -1385,11 +1758,70 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                                                               ).unfocus();
                                                             }
                                                           },
-                                                          onEditingComplete:
-                                                              () =>
-                                                                  _applyInlineEdits(
-                                                                    item,
-                                                                  ),
+                                                          onEditingComplete: () =>
+                                                              _applyInlineEdits(
+                                                                item,
+                                                              ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                // 재고수량 표시
+                                                const SizedBox(width: 8),
+                                                SizedBox(
+                                                  width: 50,
+                                                  child: Column(
+                                                    children: [
+                                                      Text(
+                                                        '재고',
+                                                        style: theme
+                                                            .textTheme
+                                                            .labelSmall
+                                                            ?.copyWith(
+                                                              color: theme
+                                                                  .colorScheme
+                                                                  .onSurfaceVariant,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600,
+                                                            ),
+                                                      ),
+                                                      const SizedBox(height: 4),
+                                                      Container(
+                                                        height:
+                                                            _inlineFieldHeight,
+                                                        alignment:
+                                                            Alignment.center,
+                                                        decoration: BoxDecoration(
+                                                          color: Colors.teal
+                                                              .withValues(
+                                                                alpha: 0.08,
+                                                              ),
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                8,
+                                                              ),
+                                                          border: Border.all(
+                                                            color: Colors.teal,
+                                                            width: 1.5,
+                                                          ),
+                                                        ),
+                                                        child: Text(
+                                                          _getStockQuantity(
+                                                            item.name,
+                                                          ),
+                                                          style: theme
+                                                              .textTheme
+                                                              .bodySmall
+                                                              ?.copyWith(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                color: theme
+                                                                    .colorScheme
+                                                                    .secondary,
+                                                              ),
                                                         ),
                                                       ),
                                                     ],

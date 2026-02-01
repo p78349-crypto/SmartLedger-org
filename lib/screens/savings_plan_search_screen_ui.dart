@@ -8,9 +8,7 @@ extension _SavingsPlanSearchScreenUi on _SavingsPlanSearchScreenState {
     final scheme = theme.colorScheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('${widget.accountName} - 예금 목록'),
-      ),
+      appBar: AppBar(title: Text('${widget.accountName} - 예금 목록')),
       body: Column(
         children: [
           _buildHeader(theme, scheme),
@@ -75,9 +73,7 @@ extension _SavingsPlanSearchScreenUi on _SavingsPlanSearchScreenState {
 
   Widget _buildPlansList(List<SavingsPlan> filteredPlans, ColorScheme scheme) {
     if (filteredPlans.isEmpty) {
-      return const Center(
-        child: Text('예금 계획이 없습니다.', style: TextStyle()),
-      );
+      return const Center(child: Text('예금 계획이 없습니다.', style: TextStyle()));
     }
 
     return ListView.separated(
@@ -137,27 +133,17 @@ extension _SavingsPlanSearchScreenUi on _SavingsPlanSearchScreenState {
               const SizedBox(height: 4),
               Text(
                 '만기일: $maturityStr',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: scheme.onSurfaceVariant,
-                ),
+                style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant),
               ),
               if (plan.autoDeposit) ...[
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    Icon(
-                      Icons.check_circle,
-                      size: 14,
-                      color: scheme.primary,
-                    ),
+                    Icon(Icons.check_circle, size: 14, color: scheme.primary),
                     const SizedBox(width: 4),
                     Text(
                       '자동이체',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: scheme.primary,
-                      ),
+                      style: TextStyle(fontSize: 12, color: scheme.primary),
                     ),
                   ],
                 ),
@@ -185,18 +171,12 @@ extension _SavingsPlanSearchScreenUi on _SavingsPlanSearchScreenState {
         Expanded(
           child: Text(
             plan.name,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
         ),
         Text(
           '${plan.paidCount}/${plan.termMonths}회',
-          style: TextStyle(
-            color: scheme.onSurfaceVariant,
-            fontSize: 14,
-          ),
+          style: TextStyle(color: scheme.onSurfaceVariant, fontSize: 14),
         ),
       ],
     );

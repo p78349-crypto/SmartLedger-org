@@ -8,9 +8,15 @@ import 'transaction_add_screen.dart';
 // import 'package:smart_ledger/screens/nutrition_report_screen.dart';
 // // disabled: feature connections removed
 import '../services/transaction_service.dart';
+import '../services/user_pref_service.dart';
 import '../theme/app_colors.dart';
 import '../utils/date_formatter.dart';
 import '../utils/icon_catalog.dart';
+import '../models/shopping_cart_item.dart';
+
+// Linter: avoid redundant argument value warnings in this UI file are non-actionable
+// in some styleFrom uses (intentional explicit paddings); suppress the lint here.
+// ignore_for_file: avoid_redundant_argument_values
 import '../utils/number_formats.dart';
 import '../utils/refund_utils.dart';
 
@@ -59,30 +65,21 @@ class _DailyTransactionsScreenState extends State<DailyTransactionsScreen> {
       final wantsPoints = widget.showShoppingPointsInputCta;
       messenger.showSnackBar(
         SnackBar(
-          content: Text(
-            wantsPoints
-                ? '저장 완료: $count건 · 포인트도 기록해두세요'
-                : '저장 완료: $count건 · 할인/절약도 기록해두세요',
-          ),
-          action: SnackBarAction(
-            label: wantsPoints ? '포인트 입력' : '기록',
-            onPressed: () {
-              messenger.hideCurrentSnackBar(); // 이동 전 SnackBar 숨김
-              if (wantsPoints) {
-                Navigator.of(context).pushNamed(
-                  AppRoutes.shoppingPointsInput,
-                  arguments: ShoppingPointsInputArgs(
-                    accountName: widget.accountName,
-                  ),
-                );
-              } else {
-                Navigator.of(context).pushNamed(
-                  AppRoutes.microSavings,
-                  arguments: AccountArgs(accountName: widget.accountName),
-                );
-              }
-            },
-          ),
+          content: Text('저장 완료: $count건'),
+          action: wantsPoints
+              ? SnackBarAction(
+                  label: '포인트 입력',
+                  onPressed: () {
+                    messenger.hideCurrentSnackBar(); // 이동 전 SnackBar 숨김
+                    Navigator.of(context).pushNamed(
+                      AppRoutes.shoppingPointsInput,
+                      arguments: ShoppingPointsInputArgs(
+                        accountName: widget.accountName,
+                      ),
+                    );
+                  },
+                )
+              : null,
         ),
       );
     });
@@ -135,6 +132,11 @@ class _DailyTransactionsScreenState extends State<DailyTransactionsScreen> {
               onTap: () => Navigator.pop(context, 'edit'),
             ),
             ListTile(
+              leading: const Icon(IconCatalog.shoppingCart),
+              title: const Text('장바구니 추가'),
+              onTap: () => Navigator.pop(context, 'add_to_cart'),
+            ),
+            ListTile(
               leading: const Icon(IconCatalog.delete, color: Colors.red),
               title: const Text('삭제'),
               onTap: () => Navigator.pop(context, 'delete'),
@@ -159,6 +161,9 @@ class _DailyTransactionsScreenState extends State<DailyTransactionsScreen> {
           ),
         );
         await _loadData();
+        break;
+      case 'add_to_cart':
+        await _addTransactionToCart(tx);
         break;
       case 'delete':
         final confirm = await showDialog<bool>(
@@ -190,8 +195,41 @@ class _DailyTransactionsScreenState extends State<DailyTransactionsScreen> {
     }
   }
 
+  Future<void> _addTransactionToCart(Transaction tx) async {
+    final name = tx.description.trim();
+    if (name.isEmpty) return;
+
+    final qty = tx.quantity > 0 ? tx.quantity : 1;
+    final unitPrice = tx.unitPrice > 0 ? tx.unitPrice : (tx.amount.abs() / qty);
+    final now = DateTime.now();
+
+    final newItem = ShoppingCartItem(
+      id: 'cart_${now.microsecondsSinceEpoch}',
+      name: name,
+      quantity: qty,
+      unitPrice: unitPrice.isNaN || unitPrice.isInfinite ? 0 : unitPrice,
+      unitLabel: tx.unit ?? '',
+      memo: tx.store ?? tx.memo,
+      createdAt: now,
+      updatedAt: now,
+    );
+
+    final existing = await UserPrefService.getShoppingCartItems(
+      accountName: widget.accountName,
+    );
+    final next = [newItem, ...existing];
+    await UserPrefService.setShoppingCartItems(
+      accountName: widget.accountName,
+      items: next.take(30).toList(growable: false),
+    );
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('장바구니에 추가했습니다.')));
+  }
+
   Widget _buildBottomActionBar(ThemeData theme) {
-    final showCountInputCta = widget.showShoppingPointsInputCta;
     return SafeArea(
       top: false,
       child: Material(
@@ -201,61 +239,101 @@ class _DailyTransactionsScreenState extends State<DailyTransactionsScreen> {
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
           child: Row(
             children: [
-              if (showCountInputCta) ...[
-                FilledButton.tonal(
+              Expanded(
+                child: FilledButton.tonal(
+                  onPressed: () {
+                    // 개수 입력 -> 상세 지출입력 화면으로 이동 (빠른 접근)
+                    Navigator.of(context).pushNamed(
+                      AppRoutes.transactionAddDetailed,
+                      arguments: AccountArgs(accountName: widget.accountName),
+                    );
+                  },
+                  // padding intentionally specified for visual balance
+                  style: FilledButton.styleFrom(
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 6,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(color: Colors.pink.shade200, width: 1.0),
+                    ),
+                  ),
+                  child: const FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      '개수 입력',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      softWrap: false,
+                      style: TextStyle(fontSize: 12),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: FilledButton.tonal(
                   onPressed: () {
                     Navigator.of(context).pushNamed(
-                      AppRoutes.shoppingCart,
-                      arguments: ShoppingCartArgs(
+                      AppRoutes.shoppingPointsInput,
+                      arguments: ShoppingPointsInputArgs(
                         accountName: widget.accountName,
                       ),
+                    );
+                  },
+                  // padding intentionally specified for visual balance
+                  style: FilledButton.styleFrom(
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 6,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(color: Colors.pink.shade200, width: 1.0),
+                    ),
+                  ),
+                  child: const FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      '포인트 입력',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      softWrap: false,
+                      style: TextStyle(fontSize: 12),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: FilledButton.tonal(
+                  onPressed: () {
+                    Navigator.of(context).pushNamed(
+                      AppRoutes.foodExpiry,
+                      arguments: const FoodExpiryArgs(openUpsertOnStart: true),
                     );
                   },
                   style: FilledButton.styleFrom(
                     visualDensity: VisualDensity.compact,
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
+                      horizontal: 6,
+                      vertical: 6,
                     ),
                   ),
-                  child: const Text('개수 입력'),
-                ),
-                const SizedBox(width: 10),
-              ],
-              FilledButton.tonal(
-                onPressed: () {
-                  Navigator.of(context).pushNamed(
-                    AppRoutes.shoppingPointsInput,
-                    arguments: ShoppingPointsInputArgs(
-                      accountName: widget.accountName,
+                  child: const FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      '식료품/생활용품 등록',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      softWrap: false,
+                      style: TextStyle(fontSize: 12),
                     ),
-                  );
-                },
-                style: FilledButton.styleFrom(
-                  visualDensity: VisualDensity.compact,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
                   ),
                 ),
-                child: const Text('포인트 입력'),
-              ),
-              const Spacer(),
-              FilledButton.tonal(
-                onPressed: () {
-                  Navigator.of(context).pushNamed(
-                    AppRoutes.foodExpiry,
-                    arguments: const FoodExpiryArgs(openUpsertOnStart: true),
-                  );
-                },
-                style: FilledButton.styleFrom(
-                  visualDensity: VisualDensity.compact,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                ),
-                child: const Text('우리집 식재료/생활용품 등록'),
               ),
             ],
           ),

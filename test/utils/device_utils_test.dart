@@ -22,8 +22,8 @@ void main() {
     for (final c in channels) {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(c, (call) async {
-        throw PlatformException(code: 'unavailable');
-      });
+            throw PlatformException(code: 'unavailable');
+          });
     }
 
     expect(await isAndroidSdkAtLeast(1), isFalse);

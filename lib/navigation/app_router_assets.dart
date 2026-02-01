@@ -82,9 +82,7 @@ class _AssetRoutes {
         return MaterialPageRoute(
           settings: settings,
           builder: (_) => AssetRouteAuthGate(
-            child: OneHundredMillionProjectScreen(
-              accountName: a.accountName,
-            ),
+            child: OneHundredMillionProjectScreen(accountName: a.accountName),
           ),
         );
 
@@ -106,9 +104,7 @@ class _AssetRoutes {
         final a = args as AccountArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => SavingsPlanListScreen(
-            accountName: a.accountName,
-          ),
+          builder: (_) => SavingsPlanListScreen(accountName: a.accountName),
         );
 
       default:

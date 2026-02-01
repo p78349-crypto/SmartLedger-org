@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../services/account_service.dart';
+import '../navigation/app_routes.dart';
 import '../services/budget_service.dart';
 import '../services/income_split_service.dart';
 import '../utils/category_definitions.dart';
@@ -639,6 +640,48 @@ class _IncomeSplitScreenState extends State<IncomeSplitScreen> {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Scaffold(
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.of(context).pushNamed(
+                    AppRoutes.incomeSplitStatus,
+                    arguments: {'accountName': _targetAccount},
+                  );
+                },
+                icon: const Icon(Icons.payments_outlined),
+                label: const Text('수입배분 상세'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  backgroundColor: Colors.blueAccent,
+                  foregroundColor: Colors.white,
+                  textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/asset/dashboard');
+                },
+                icon: const Icon(Icons.account_balance_wallet),
+                label: const Text('자산'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  backgroundColor: Colors.teal,
+                  foregroundColor: Colors.white,
+                  textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
       appBar: AppBar(
         title: const Text('수입 배분 설정'),
         actions: [
@@ -774,16 +817,6 @@ class _IncomeSplitScreenState extends State<IncomeSplitScreen> {
                   ),
                 ),
               ),
-            const SizedBox(height: 12),
-            OutlinedButton.icon(
-              onPressed: _openIncomeAllocationSheet,
-              icon: const Icon(Icons.payments_outlined),
-              label: const Text('수입 항목 배분'),
-            ),
-            if (_incomeAllocations.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              _buildIncomeAllocationCard(),
-            ],
             const SizedBox(height: 16),
             const Divider(),
             const SizedBox(height: 8),
@@ -818,15 +851,6 @@ class _IncomeSplitScreenState extends State<IncomeSplitScreen> {
               prefixIcon: const Icon(Icons.shopping_cart),
             ),
             const SizedBox(height: 12),
-            OutlinedButton.icon(
-              onPressed: _openCategoryBudgetSheet,
-              icon: const Icon(Icons.tune),
-              label: const Text('카테고리별 예산 배분 옵션'),
-            ),
-            if (_categoryBudgets.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              _buildCategoryBudgetCard(),
-            ],
             const SizedBox(height: 12),
             SmartInputField(
               label: '🚨 비상금',
@@ -939,7 +963,75 @@ class _IncomeSplitScreenState extends State<IncomeSplitScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      '지출 카테고리 배분',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    OutlinedButton.icon(
+                      onPressed: _openCategoryBudgetSheet,
+                      icon: const Icon(Icons.tune),
+                      label: const Text('카테고리 편집'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                if (_categoryBudgets.isEmpty)
+                  Text(
+                    '지출 예산을 카테고리별로 나누면 수입 배분 상세 화면에서 계획 대비 사용량을 바로 확인할 수 있어요.',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  )
+                else
+                  _buildCategoryBudgetCard(),
+              ],
+            ),
+            const SizedBox(height: 24),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      '수입 항목 배분',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    OutlinedButton.icon(
+                      onPressed: _openIncomeAllocationSheet,
+                      icon: const Icon(Icons.segment),
+                      label: const Text('수입 항목 편집'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                if (_incomeAllocations.isEmpty)
+                  Text(
+                    '급여, 부수입 등을 나누어 입력하면 수입 배분 현황에서 항목별 기여도를 확인할 수 있습니다.',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  )
+                else
+                  _buildIncomeAllocationCard(),
+              ],
+            ),
+            const SizedBox(height: 24),
           ],
         ),
       ),

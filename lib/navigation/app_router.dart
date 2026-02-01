@@ -42,6 +42,7 @@ import '../screens/icon_management_asset_screen.dart';
 import '../screens/icon_management_root_screen.dart';
 import '../screens/icon_management_screen.dart';
 import '../screens/income_split_screen.dart';
+import '../screens/income_split_status_screen.dart';
 import '../screens/language_settings_screen.dart';
 import '../screens/launch_screen.dart';
 import '../screens/micro_savings_nudge_screen.dart';
@@ -74,6 +75,9 @@ import '../screens/shopping_cart_screen.dart';
 import '../screens/shopping_guide_screen.dart';
 import '../screens/shopping_cheapest_month_screen.dart';
 import '../screens/shopping_points_input_screen.dart';
+import '../screens/recipe_management_screen.dart';
+import '../screens/recipe_edit_screen.dart';
+import '../screens/recipe_to_cart_screen.dart';
 import '../screens/spending_analysis_screen.dart';
 import '../screens/store_merge_screen.dart';
 import '../screens/theme_settings_screen.dart';
@@ -87,6 +91,7 @@ import '../screens/trash_screen.dart';
 import '../screens/voice_shortcuts_screen.dart';
 import '../screens/voice_assistant_settings_screen.dart';
 import '../screens/voice_dashboard_screen.dart';
+import '../utils/constants.dart';
 import '../widgets/asset_route_auth_gate.dart';
 import '../widgets/root_auth_gate.dart';
 import '../widgets/user_account_auth_gate.dart';
@@ -117,5 +122,32 @@ class AppRouter {
         _ShoppingRoutes.resolve(settings, name, args) ??
         _AssetRoutes.resolve(settings, name, args) ??
         _RootRoutes.resolve(settings, name, args);
+  }
+}
+
+Route<dynamic> _voiceDisabledRoute(RouteSettings settings) {
+  return MaterialPageRoute(
+    settings: settings,
+    builder: (_) => const _VoiceDisabledScreen(),
+  );
+}
+
+class _VoiceDisabledScreen extends StatelessWidget {
+  const _VoiceDisabledScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('음성 입력')),
+      body: const Center(
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: Text(
+            '음성 입력 기능은 규제 이슈로 현재 비활성화되어 있습니다.',
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ),
+    );
   }
 }

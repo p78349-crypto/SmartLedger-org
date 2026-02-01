@@ -79,6 +79,7 @@ class IncomeSplitService {
     required double emergencyAmount,
     double assetTransferAmount = 0,
     Map<String, double> categoryBudgets = const {},
+    Map<String, Map<String, dynamic>> subcategoryAllocations = const {},
     bool persistToStorage = true,
     bool createAssetMoves = true,
   }) async {
@@ -90,6 +91,7 @@ class IncomeSplitService {
       emergencyAmount: emergencyAmount,
       assetTransferAmount: assetTransferAmount,
       categoryBudgets: categoryBudgets,
+      subcategoryAllocations: subcategoryAllocations,
     );
 
     if (persistToStorage) {
@@ -157,6 +159,9 @@ class IncomeSplitService {
       emergencyAmount: split.emergencyAmount,
       assetTransferAmount: split.assetTransferAmount,
       categoryBudgets: Map<String, double>.from(split.categoryBudgets),
+      subcategoryAllocations: split.subcategoryAllocations.map(
+        (k, v) => MapEntry(k, Map<String, dynamic>.from(v)),
+      ),
     );
     await saveSplits();
     _changes.add(null);

@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// 마지막 입력값 중앙 저장소
-/// 
+///
 /// 각 화면에서 입력한 값을 저장하고, 다른 화면에서 필요할 때 가져갈 수 있음.
 /// Args로 직접 전달하지 않아도 되므로 화면 간 결합도 감소.
-/// 
+///
 /// 사용 예시:
 /// ```dart
 /// // 저장 (지출입력 화면에서)
@@ -14,7 +14,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 ///   memo: '하나로마트',
 ///   amount: 15000,
 /// );
-/// 
+///
 /// // 읽기 (포인트입력 화면에서)
 /// final lastInput = await LastInputService.instance.getLastTransaction();
 /// print(lastInput.paymentMethod); // 농협체크카드
@@ -24,9 +24,9 @@ class LastInputService {
   static final LastInputService instance = LastInputService._();
 
   static const String _keyPrefix = 'last_input_';
-  
+
   // ========== 지출입력 관련 ==========
-  
+
   /// 마지막 지출입력 정보 저장
   Future<void> saveTransaction({
     required String accountName,
@@ -54,7 +54,10 @@ class LastInputService {
       'date': date?.toIso8601String(),
       'savedAt': DateTime.now().toIso8601String(),
     };
-    await prefs.setString('${_keyPrefix}transaction_$accountName', jsonEncode(data));
+    await prefs.setString(
+      '${_keyPrefix}transaction_$accountName',
+      jsonEncode(data),
+    );
   }
 
   /// 마지막 지출입력 정보 가져오기
@@ -62,7 +65,7 @@ class LastInputService {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString('${_keyPrefix}transaction_$accountName');
     if (raw == null) return null;
-    
+
     try {
       final data = jsonDecode(raw) as Map<String, dynamic>;
       return LastTransactionInput.fromJson(data);
@@ -72,7 +75,7 @@ class LastInputService {
   }
 
   // ========== 쇼핑 세션 관련 ==========
-  
+
   /// 쇼핑 세션 정보 저장 (장바구니 → 지출입력 → 포인트 흐름)
   Future<void> saveShoppingSession({
     required String accountName,
@@ -96,7 +99,10 @@ class LastInputService {
       'subCategory': subCategory,
       'savedAt': DateTime.now().toIso8601String(),
     };
-    await prefs.setString('${_keyPrefix}shopping_$accountName', jsonEncode(data));
+    await prefs.setString(
+      '${_keyPrefix}shopping_$accountName',
+      jsonEncode(data),
+    );
   }
 
   /// 쇼핑 세션 정보 가져오기
@@ -104,7 +110,7 @@ class LastInputService {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString('${_keyPrefix}shopping_$accountName');
     if (raw == null) return null;
-    
+
     try {
       final data = jsonDecode(raw) as Map<String, dynamic>;
       return LastShoppingSession.fromJson(data);
@@ -123,7 +129,7 @@ class LastInputService {
     required double amount,
   }) async {
     final existing = await getShoppingSession(accountName);
-    
+
     await saveShoppingSession(
       accountName: accountName,
       paymentMethod: paymentMethod ?? existing?.paymentMethod,
@@ -180,19 +186,27 @@ class LastInputService {
 
   /// 마지막 카테고리 저장
   Future<void> saveLastCategory(
-    String accountName, 
-    String mainCategory, 
+    String accountName,
+    String mainCategory,
     String? subCategory,
   ) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('${_keyPrefix}category_main_$accountName', mainCategory);
+    await prefs.setString(
+      '${_keyPrefix}category_main_$accountName',
+      mainCategory,
+    );
     if (subCategory != null) {
-      await prefs.setString('${_keyPrefix}category_sub_$accountName', subCategory);
+      await prefs.setString(
+        '${_keyPrefix}category_sub_$accountName',
+        subCategory,
+      );
     }
   }
 
   /// 마지막 카테고리 가져오기
-  Future<({String? main, String? sub})> getLastCategory(String accountName) async {
+  Future<({String? main, String? sub})> getLastCategory(
+    String accountName,
+  ) async {
     final prefs = await SharedPreferences.getInstance();
     return (
       main: prefs.getString('${_keyPrefix}category_main_$accountName'),
@@ -201,7 +215,7 @@ class LastInputService {
   }
 
   // ========== 전체 초기화 ==========
-  
+
   /// 특정 계정의 모든 마지막 입력값 초기화
   Future<void> clearAll(String accountName) async {
     final prefs = await SharedPreferences.getInstance();
@@ -253,8 +267,11 @@ class LastTransactionInput {
       memo: json['memo'] as String?,
       mainCategory: json['mainCategory'] as String?,
       subCategory: json['subCategory'] as String?,
-      date: json['date'] != null ? DateTime.tryParse(json['date'] as String) : null,
-      savedAt: DateTime.tryParse(json['savedAt'] as String? ?? '') ?? DateTime.now(),
+      date: json['date'] != null
+          ? DateTime.tryParse(json['date'] as String)
+          : null,
+      savedAt:
+          DateTime.tryParse(json['savedAt'] as String? ?? '') ?? DateTime.now(),
     );
   }
 }
@@ -293,7 +310,8 @@ class LastShoppingSession {
       itemCount: json['itemCount'] as int?,
       mainCategory: json['mainCategory'] as String?,
       subCategory: json['subCategory'] as String?,
-      savedAt: DateTime.tryParse(json['savedAt'] as String? ?? '') ?? DateTime.now(),
+      savedAt:
+          DateTime.tryParse(json['savedAt'] as String? ?? '') ?? DateTime.now(),
     );
   }
 }

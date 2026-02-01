@@ -11,11 +11,7 @@ class ActivityHouseholdEstimatorService {
       windowDays: 10,
       maxWindowDays: 365,
       indicators: <ActivityIndicatorItem>[
-        ActivityIndicatorItem(
-          name: '달걀',
-          unit: '개',
-          perPersonPerDay: 0.5,
-        ),
+        ActivityIndicatorItem(name: '달걀', unit: '개', perPersonPerDay: 0.5),
       ],
     );
   }
@@ -51,7 +47,9 @@ class ActivityHouseholdEstimatorService {
         enabled: enabled,
         windowDays: normalizedWindow,
         maxWindowDays: normalizedMaxWindow,
-        indicators: indicators.isEmpty ? defaultSettings().indicators : indicators,
+        indicators: indicators.isEmpty
+            ? defaultSettings().indicators
+            : indicators,
       );
     } catch (_) {
       return defaultSettings();
@@ -215,8 +213,8 @@ class ActivityHouseholdEstimatorService {
     if (shortEstimate == null || baselineEstimate == null) return null;
     if (baselineEstimate.estimatedPeople <= 0) return null;
 
-    final ratio = shortEstimate.estimatedPeople /
-        baselineEstimate.estimatedPeople;
+    final ratio =
+        shortEstimate.estimatedPeople / baselineEstimate.estimatedPeople;
     if (!ratio.isFinite || ratio <= 0) return null;
 
     return ActivityHouseholdTrendComparison(

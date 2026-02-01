@@ -34,9 +34,7 @@ extension _HomeTabNavigation on _HomeTabScreenState {
 
   Widget _createStatsScreen() {
     return AccountStatsScreen(
-      key: ValueKey(
-        'stats-${widget.accountName}-$_statsRefreshToken',
-      ),
+      key: ValueKey('stats-${widget.accountName}-$_statsRefreshToken'),
       accountName: widget.accountName,
       embed: true,
     );
@@ -47,12 +45,10 @@ extension _HomeTabNavigation on _HomeTabScreenState {
     _screens[1] = _createStatsScreen();
   }
 
-  Future<void> _switchAccount(
-    String selected, {
-    int? initialIndex,
-  }) async {
+  Future<void> _switchAccount(String selected, {int? initialIndex}) async {
     final navigator = Navigator.of(context);
-    final rawIndex = initialIndex ??
+    final rawIndex =
+        initialIndex ??
         (_currentIndex >= _HomeTabScreenState._tabTitles.length - 1
             ? 0
             : _currentIndex);
@@ -60,8 +56,8 @@ extension _HomeTabNavigation on _HomeTabScreenState {
     final targetIndex = rawIndex < 0
         ? 0
         : rawIndex > maxUserTabIndex
-            ? maxUserTabIndex
-            : rawIndex;
+        ? maxUserTabIndex
+        : rawIndex;
 
     await UserMainActions.persistAccountSelection(context, selected);
     if (!mounted) return;

@@ -15,14 +15,8 @@ void main() {
 
   test('getWeatherIcon and color return expected values', () {
     expect(WeatherCaptureUtils.getWeatherIcon('맑음'), isA<IconData>());
-    expect(
-      WeatherCaptureUtils.getWeatherColor('맑음'),
-      Colors.orange.shade300,
-    );
-    expect(
-      WeatherCaptureUtils.getWeatherColor('비'),
-      Colors.blue.shade300,
-    );
+    expect(WeatherCaptureUtils.getWeatherColor('맑음'), Colors.orange.shade300);
+    expect(WeatherCaptureUtils.getWeatherColor('비'), Colors.blue.shade300);
   });
 
   test('captureWeather completes and returns a snapshot', () {

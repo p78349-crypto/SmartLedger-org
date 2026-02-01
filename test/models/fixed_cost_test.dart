@@ -4,11 +4,7 @@ import 'package:smart_ledger/models/fixed_cost.dart';
 void main() {
   group('FixedCost', () {
     test('creates with required fields', () {
-      final cost = FixedCost(
-        id: 'cost-1',
-        name: '월세',
-        amount: 500000,
-      );
+      final cost = FixedCost(id: 'cost-1', name: '월세', amount: 500000);
 
       expect(cost.id, 'cost-1');
       expect(cost.name, '월세');
@@ -57,10 +53,7 @@ void main() {
       });
 
       test('handles missing optional fields', () {
-        final json = {
-          'name': '보험료',
-          'amount': 100000,
-        };
+        final json = {'name': '보험료', 'amount': 100000};
 
         final cost = FixedCost.fromJson(json);
 
@@ -72,10 +65,7 @@ void main() {
       });
 
       test('generates legacy ID when id is missing', () {
-        final json = {
-          'name': '월세',
-          'amount': 500000,
-        };
+        final json = {'name': '월세', 'amount': 500000};
 
         final cost = FixedCost.fromJson(json);
 
@@ -83,11 +73,7 @@ void main() {
       });
 
       test('uses default paymentMethod when missing', () {
-        final json = {
-          'id': 'cost-1',
-          'name': '관리비',
-          'amount': 150000,
-        };
+        final json = {'id': 'cost-1', 'name': '관리비', 'amount': 150000};
 
         final cost = FixedCost.fromJson(json);
         expect(cost.paymentMethod, '현금');

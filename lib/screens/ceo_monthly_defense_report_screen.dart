@@ -566,7 +566,7 @@ Future<File> _writeBinaryFile(
 
 String _fileStem(DateTime now) =>
     'monthly_defense_report_${now.year}_'
- '${now.month.toString().padLeft(2, '0')}';
+    '${now.month.toString().padLeft(2, '0')}';
 
 Future<Map<String, String>> generateMonthlyDefenseReportFiles(
   String accountName, {

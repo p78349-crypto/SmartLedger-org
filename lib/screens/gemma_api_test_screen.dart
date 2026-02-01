@@ -92,9 +92,7 @@ class _GemmaApiTestScreenState extends State<GemmaApiTestScreen> {
           context: context,
           builder: (ctx) => AlertDialog(
             title: const Text('샘플 테스트 결과'),
-            content: SingleChildScrollView(
-              child: Text(result.toString()),
-            ),
+            content: SingleChildScrollView(child: Text(result.toString())),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx),
@@ -182,9 +180,7 @@ class _GemmaApiTestScreenState extends State<GemmaApiTestScreen> {
                         label: const Text('샘플 로드'),
                       ),
                       ElevatedButton.icon(
-                        onPressed: _isProcessing
-                            ? null
-                            : _processReceipt,
+                        onPressed: _isProcessing ? null : _processReceipt,
                         icon: const Icon(Icons.smart_toy),
                         label: const Text('Gemma 추출'),
                       ),
@@ -214,10 +210,7 @@ class _GemmaApiTestScreenState extends State<GemmaApiTestScreen> {
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
-                  Expanded(
-                    flex: 3,
-                    child: _buildResultView(),
-                  ),
+                  Expanded(flex: 3, child: _buildResultView()),
                 ],
               ),
             ),
@@ -263,10 +256,7 @@ class _GemmaApiTestScreenState extends State<GemmaApiTestScreen> {
           Expanded(
             child: Text(
               statusText,
-              style: TextStyle(
-                color: statusColor,
-                fontWeight: FontWeight.w500,
-              ),
+              style: TextStyle(color: statusColor, fontWeight: FontWeight.w500),
             ),
           ),
           if (_gemmaService.lastHealthCheck != null)
@@ -345,7 +335,8 @@ class _GemmaApiTestScreenState extends State<GemmaApiTestScreen> {
                   icon: const Icon(Icons.copy, size: 18),
                   onPressed: () {
                     Clipboard.setData(
-                        ClipboardData(text: data.toJson().toString()));
+                      ClipboardData(text: data.toJson().toString()),
+                    );
                     _showSnackBar('결과 복사됨', isError: false);
                   },
                   tooltip: '결과 복사',
@@ -391,16 +382,10 @@ class _GemmaApiTestScreenState extends State<GemmaApiTestScreen> {
   Widget _buildInfoRow(String label, String value) {
     return Row(
       children: [
-        Text(
-          label,
-          style: const TextStyle(fontWeight: FontWeight.w500),
-        ),
+        Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
         const SizedBox(width: 8),
         Expanded(
-          child: Text(
-            value,
-            style: const TextStyle(color: Colors.black87),
-          ),
+          child: Text(value, style: const TextStyle(color: Colors.black87)),
         ),
       ],
     );
@@ -416,10 +401,7 @@ class _GemmaApiTestScreenState extends State<GemmaApiTestScreen> {
           children: [
             Text(
               item.name,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             ),
             const SizedBox(height: 4),
             Row(
@@ -446,7 +428,9 @@ class _GemmaApiTestScreenState extends State<GemmaApiTestScreen> {
   }
 
   String _formatMoney(double amount) {
-    return amount.toStringAsFixed(0).replaceAllMapped(
+    return amount
+        .toStringAsFixed(0)
+        .replaceAllMapped(
           RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
           (match) => '${match[1]},',
         );

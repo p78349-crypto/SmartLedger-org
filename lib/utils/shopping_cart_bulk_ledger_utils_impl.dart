@@ -17,10 +17,20 @@ Future<bool> _confirmClearRemainingAfterShopping({
       actions: [
         TextButton(
           onPressed: () => Navigator.of(dialogContext).pop(false),
+          style: TextButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
           child: const Text('유지'),
         ),
         FilledButton(
           onPressed: () => Navigator.of(dialogContext).pop(true),
+          style: FilledButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
           child: const Text('삭제'),
         ),
       ],
@@ -40,6 +50,7 @@ class ShoppingCartBulkLedgerUtils {
     required Map<String, CategoryHint> categoryHints,
     required Future<void> Function(List<ShoppingCartItem> next) saveItems,
     required Future<void> Function() reload,
+    bool useDetailedMode = false,
   }) async {
     await _addCheckedItemsToLedgerBulk(
       context: context,
@@ -48,6 +59,7 @@ class ShoppingCartBulkLedgerUtils {
       categoryHints: categoryHints,
       saveItems: saveItems,
       reload: reload,
+      useDetailedMode: useDetailedMode,
     );
   }
 

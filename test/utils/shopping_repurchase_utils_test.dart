@@ -14,7 +14,10 @@ void main() {
     test('minDaysFor prefers learned value when available', () {
       final learned = {'apple': 9};
       expect(
-        ShoppingRepurchaseUtils.minDaysFor(name: ' Apple ', learnedMinDaysByKey: learned),
+        ShoppingRepurchaseUtils.minDaysFor(
+          name: ' Apple ',
+          learnedMinDaysByKey: learned,
+        ),
         9,
       );
     });
@@ -25,7 +28,10 @@ void main() {
       final keyword = entry.key;
       final expected = entry.value;
 
-      expect(ShoppingRepurchaseUtils.minDaysForName('xx $keyword yy'), expected);
+      expect(
+        ShoppingRepurchaseUtils.minDaysForName('xx $keyword yy'),
+        expected,
+      );
     });
 
     test('isDue compares day difference against minDays', () {

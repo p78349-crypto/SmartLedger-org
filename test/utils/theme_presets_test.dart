@@ -5,7 +5,10 @@ import 'package:smart_ledger/utils/theme_presets.dart';
 void main() {
   group('ThemeVariant', () {
     test('byId returns variant when present and null when missing', () {
-      expect(ThemeVariant.byId(ThemeVariant.flSoftPink.id), ThemeVariant.flSoftPink);
+      expect(
+        ThemeVariant.byId(ThemeVariant.flSoftPink.id),
+        ThemeVariant.flSoftPink,
+      );
       expect(ThemeVariant.byId('does_not_exist'), isNull);
       expect(ThemeVariant.byId(null), isNull);
     });

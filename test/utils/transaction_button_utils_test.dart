@@ -14,15 +14,18 @@ void main() {
       expect(r, 'range');
     });
 
-    test('handleGraphToggle falls back to monthView when selectedRangeView is null', () {
-      final r = TransactionButtonUtils.handleGraphToggle<String>(
-        isSelected: true,
-        selectedRangeView: null,
-        monthView: 'month',
-        chartView: 'chart',
-      );
-      expect(r, 'month');
-    });
+    test(
+      'handleGraphToggle falls back to monthView when selectedRangeView is null',
+      () {
+        final r = TransactionButtonUtils.handleGraphToggle<String>(
+          isSelected: true,
+          selectedRangeView: null,
+          monthView: 'month',
+          chartView: 'chart',
+        );
+        expect(r, 'month');
+      },
+    );
 
     test('handleGraphToggle returns chartView when not selected', () {
       final r = TransactionButtonUtils.handleGraphToggle<String>(
@@ -35,7 +38,10 @@ void main() {
     });
 
     test('handleTransactionTypeToggle sets index/month and toggles state', () {
-      final typeOrder = <TransactionType>[TransactionType.expense, TransactionType.income];
+      final typeOrder = <TransactionType>[
+        TransactionType.expense,
+        TransactionType.income,
+      ];
 
       int? setIndex;
       DateTime? setMonth;

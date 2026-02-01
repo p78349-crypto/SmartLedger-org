@@ -71,6 +71,7 @@ class AppRoutes {
   static const weatherManualInput = '/weather/manual-input';
   static const microSavings = '/nudges/micro-savings';
   static const incomeSplit = '/income/split';
+  static const incomeSplitStatus = '/income/split-status';
   static const foodExpiry = '/food/expiry';
   static const foodCookingStart = '/food/cooking-start';
   static const healthAnalyzer = '/food/health-analyzer';
@@ -85,6 +86,11 @@ class AppRoutes {
   static const quickStockUse = '/household/quick-stock-use';
 
   static const shoppingPointsInput = '/shopping/points-input';
+
+  // 레시피 관리
+  static const recipeManagement = '/recipe/management';
+  static const recipeEdit = '/recipe/edit';
+  static const recipeToCart = '/recipe/to-cart';
 
   static const shoppingCheapestMonth = '/stats/shopping/cheapest-month';
 
@@ -124,7 +130,7 @@ class AppRoutes {
 
   // Gemini Nano voice input
   static const geminiVoiceInput = '/transaction/gemini-voice-input';
-  
+
   // Smart voice command (앱 통합 제어)
   static const smartVoiceCommand = '/smart/voice-command';
 }

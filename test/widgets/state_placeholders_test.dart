@@ -7,9 +7,7 @@ void main() {
     testWidgets('displays title', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: EmptyState(title: 'No items found'),
-          ),
+          home: Scaffold(body: EmptyState(title: 'No items found')),
         ),
       );
 
@@ -34,9 +32,7 @@ void main() {
     testWidgets('displays icon', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: EmptyState(title: 'Empty'),
-          ),
+          home: Scaffold(body: EmptyState(title: 'Empty')),
         ),
       );
 
@@ -89,11 +85,7 @@ void main() {
   group('ErrorState', () {
     testWidgets('displays default error title', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: ErrorState(),
-          ),
-        ),
+        const MaterialApp(home: Scaffold(body: ErrorState())),
       );
 
       expect(find.text('오류가 발생했습니다'), findsOneWidget);
@@ -121,10 +113,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: ErrorState(
-              title: 'Error',
-              onRetry: () => retried = true,
-            ),
+            body: ErrorState(title: 'Error', onRetry: () => retried = true),
           ),
         ),
       );
@@ -137,9 +126,7 @@ void main() {
     testWidgets('hides retry button when no callback', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: ErrorState(title: 'Error'),
-          ),
+          home: Scaffold(body: ErrorState(title: 'Error')),
         ),
       );
 
@@ -152,10 +139,7 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: SizedBox(
-              height: 400,
-              child: LoadingCardListSkeleton(),
-            ),
+            body: SizedBox(height: 400, child: LoadingCardListSkeleton()),
           ),
         ),
       );

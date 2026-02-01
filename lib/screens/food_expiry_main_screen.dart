@@ -21,6 +21,7 @@ import '../services/health_guardrail_service.dart';
 import '../services/replacement_cycle_notification_service.dart';
 import '../services/savings_statistics_service.dart';
 import '../utils/currency_formatter.dart';
+import '../utils/constants.dart';
 import '../utils/icon_catalog.dart';
 import '../utils/interaction_blockers.dart';
 import '../utils/debounce_utils.dart';
@@ -167,7 +168,7 @@ class _RecipePickerDialogState extends State<_RecipePickerDialog> {
             TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: '레시피 또는 우리집 식재료 검색',
+                hintText: '레시피 또는 식료품/생활용품 검색',
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: _searchQuery.isNotEmpty
                     ? IconButton(
@@ -494,7 +495,7 @@ class _RecipeUpsertDialogState extends State<_RecipeUpsertDialog> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('우리집 식재료 목록'),
+                const Text('식료품/생활용품 목록'),
                 Row(
                   children: [
                     IconButton(
@@ -505,7 +506,7 @@ class _RecipeUpsertDialogState extends State<_RecipeUpsertDialog> {
                     IconButton(
                       onPressed: _addIngredient,
                       icon: const Icon(Icons.add),
-                      tooltip: '우리집 식재료 직접 추가',
+                      tooltip: '식료품/생활용품 직접 추가',
                     ),
                   ],
                 ),
@@ -661,7 +662,7 @@ class _IngredientUpsertDialogState extends State<_IngredientUpsertDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('우리집 식재료/생활용품 추가'),
+      title: const Text('식료품/생활용품 추가'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -1816,8 +1817,8 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
                   children: [
                     Text(
                       widget.existing == null
-                          ? '우리집 식재료/생활용품 등록'
-                          : '우리집 식재료/생활용품 정보 수정',
+                          ? '식료품/생활용품 등록'
+                          : '식료품/생활용품 정보 수정',
                       style: theme.textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.w900,
                         letterSpacing: 0.5,
@@ -1864,21 +1865,23 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  IconButton.outlined(
-                    onPressed: _toggleVoiceInput,
-                    icon: Icon(
-                      _isVoiceListening
-                          ? IconCatalog.stopCircle
-                          : IconCatalog.mic,
-                    ),
-                    tooltip: _isVoiceListening ? '음성 입력 중지' : '음성 입력',
-                    style: OutlinedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                  if (AppConstants.voiceInputEnabled) ...[
+                    IconButton.outlined(
+                      onPressed: _toggleVoiceInput,
+                      icon: Icon(
+                        _isVoiceListening
+                            ? IconCatalog.stopCircle
+                            : IconCatalog.mic,
+                      ),
+                      tooltip: _isVoiceListening ? '음성 입력 중지' : '음성 입력',
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
+                    const SizedBox(width: 8),
+                  ],
                   IconButton.outlined(
                     onPressed: _showHistoryPicker,
                     icon: const Icon(IconCatalog.history),
@@ -3661,16 +3664,13 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     // 모드에 따라 다른 타이틀 및 아이콘
-    final appBarTitle = widget.autoUsageMode ? '유통기한 관리' : '우리집 식재료';
-    final appBarIcon = widget.autoUsageMode
-        ? const Icon(Icons.soup_kitchen)
-        : const Icon(Icons.inventory_2);
+    final appBarTitle = widget.autoUsageMode ? '유통기한 관리' : '식료품/생활용품';
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
         leading: IconButton(
-          icon: appBarIcon,
-          onPressed: null, // 장식용 아이콘
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(appBarTitle),
         actions: [
@@ -3733,7 +3733,7 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
           if (items.isEmpty && missingIngredients.isEmpty) {
             final emptyMsg = widget.autoUsageMode
                 ? '등록된 유통기한 항목이 없습니다.\n하단 버튼으로 추가하세요.'
-                : '등록된 우리집 식재료가 없습니다.\n하단 버튼으로 품목을 추가하세요.';
+                : '등록된 식료품/생활용품이 없습니다.\n하단 버튼으로 품목을 추가하세요.';
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(24),
@@ -4012,7 +4012,7 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            '부족한 우리집 식재료 (${missingIngredients.length})',
+                            '부족한 식료품/생활용품 (${missingIngredients.length})',
                             style: theme.textTheme.titleSmall?.copyWith(
                               color: theme.colorScheme.error,
                               fontWeight: FontWeight.bold,
@@ -4035,7 +4035,7 @@ class _FoodExpiryItemsScreenState extends State<_FoodExpiryItemsScreen> {
                         ],
                       ),
                       const SizedBox(height: 4),
-                      const Text('우리집 식재료 목록'),
+                      const Text('식료품/생활용품 목록'),
                       Wrap(
                         spacing: 8,
                         children: missingIngredients

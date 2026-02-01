@@ -83,32 +83,34 @@ class _ShoppingPointsInputScreenState extends State<ShoppingPointsInputScreen> {
 
   Future<void> _load() async {
     setState(() => _loading = true);
-    
+
     try {
       // 1. 중앙 저장소에서 쇼핑 세션 정보 가져오기 (우선)
       final session = await LastInputService.instance.getShoppingSession(
         widget.accountName,
       );
-      
+
       // 2. 드래프트 목록 로드
       final drafts = await UserPrefService.getShoppingPointsDrafts(
         accountName: widget.accountName,
       );
       // toList()로 mutable list 생성 후 정렬
-      final sortedDrafts = drafts.toList()..sort((a, b) => b.at.compareTo(a.at));
+      final sortedDrafts = drafts.toList()
+        ..sort((a, b) => b.at.compareTo(a.at));
 
       if (!mounted) return;
-      
+
       // 3. 세션 데이터 또는 widget 파라미터로 폼 초기화
       // 우선순위: 세션 > widget 파라미터 > 빈 값
-      final paymentMethod = session?.paymentMethod ?? widget.lastPaymentMethod ?? '';
+      final paymentMethod =
+          session?.paymentMethod ?? widget.lastPaymentMethod ?? '';
       final storeName = session?.storeName ?? widget.lastMemo ?? '';
       final totalAmount = session?.totalAmount ?? widget.totalAmount;
       final chargedAmount = session?.chargedAmount ?? widget.chargedAmount;
-      
+
       _paymentMethodController.text = paymentMethod;
       _martNameController.text = storeName;
-      
+
       if (totalAmount != null && totalAmount > 0) {
         _totalAmountController.text = CurrencyFormatter.format(
           totalAmount,
@@ -163,12 +165,10 @@ class _ShoppingPointsInputScreenState extends State<ShoppingPointsInputScreen> {
         '합계:${CurrencyFormatter.format(_totalAmount)}',
         if (_chargedAmount > 0)
           '카드결제:${CurrencyFormatter.format(_chargedAmount)}',
-        if (_cardPoint > 0)
-          '카드포인트:${CurrencyFormatter.format(_cardPoint)}',
+        if (_cardPoint > 0) '카드포인트:${CurrencyFormatter.format(_cardPoint)}',
         if (_martDiscount > 0)
           '마트할인:${CurrencyFormatter.format(_martDiscount)}',
-        if (_memoController.text.trim().isNotEmpty)
-          _memoController.text.trim(),
+        if (_memoController.text.trim().isNotEmpty) _memoController.text.trim(),
       ];
 
       final tx = Transaction(
@@ -449,7 +449,7 @@ class _ShoppingPointsInputScreenState extends State<ShoppingPointsInputScreen> {
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: _drafts.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 8),
+                      separatorBuilder: (_, index) => const SizedBox(height: 8),
                       itemBuilder: (context, index) {
                         final d = _drafts[index];
                         final store = (d.store ?? '').trim();

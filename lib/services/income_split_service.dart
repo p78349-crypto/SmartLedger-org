@@ -1,6 +1,5 @@
 library income_split_service;
 
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -54,6 +53,10 @@ class IncomeSplit {
   final double assetTransferAmount;
   final Map<String, double> categoryBudgets;
 
+  /// 소분류 배분 및 대상 계좌 정보
+  /// Format: { mainCategory: { subCategory: { 'amount': double, 'targetAccount': String? } } }
+  final Map<String, Map<String, dynamic>> subcategoryAllocations;
+
   IncomeSplit({
     required this.accountName,
     required this.incomeItems,
@@ -62,7 +65,10 @@ class IncomeSplit {
     required this.emergencyAmount,
     required this.assetTransferAmount,
     Map<String, double>? categoryBudgets,
-  }) : categoryBudgets = categoryBudgets ?? <String, double>{};
+    Map<String, Map<String, dynamic>>? subcategoryAllocations,
+  }) : categoryBudgets = categoryBudgets ?? <String, double>{},
+       subcategoryAllocations =
+           subcategoryAllocations ?? <String, Map<String, dynamic>>{};
 
   double get totalIncome =>
       incomeItems.fold(0, (sum, item) => sum + item.amount);
@@ -79,6 +85,7 @@ class IncomeSplit {
       'emergencyAmount': emergencyAmount,
       'assetTransferAmount': assetTransferAmount,
       'categoryBudgets': categoryBudgets,
+      'subcategoryAllocations': subcategoryAllocations,
     };
   }
 
@@ -103,6 +110,14 @@ class IncomeSplit {
             (key, value) => MapEntry(key, (value as num).toDouble()),
           ) ??
           <String, double>{},
+      subcategoryAllocations:
+          (json['subcategoryAllocations'] as Map<String, dynamic>?)?.map(
+            (main, inner) => MapEntry(
+              main,
+              Map<String, dynamic>.from(inner as Map<String, dynamic>),
+            ),
+          ) ??
+          <String, Map<String, dynamic>>{},
     );
   }
 }

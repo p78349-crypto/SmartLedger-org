@@ -105,9 +105,7 @@ void main() {
       });
 
       test('handles missing optional fields', () {
-        final json = {
-          'condition': 'sunny',
-        };
+        final json = {'condition': 'sunny'};
 
         final snapshot = WeatherSnapshot.fromJson(json);
 

@@ -1,10 +1,7 @@
 part of 'asset_allocation_screen.dart';
 
 extension _AssetAllocationCards on _AssetAllocationScreenState {
-  Widget _buildCategoryCard(
-    BuildContext context,
-    AssetCategoryStats stats,
-  ) {
+  Widget _buildCategoryCard(BuildContext context, AssetCategoryStats stats) {
     final scheme = Theme.of(context).colorScheme;
     final category = stats.category;
     final categoryColor = Color(category.color);

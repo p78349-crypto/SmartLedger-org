@@ -34,47 +34,50 @@ void main() {
 
     group('getNutritionCategory', () {
       test('returns 단백질 for egg', () {
-        final category =
-            IngredientsRecommendationUtils.getNutritionCategory('계란');
+        final category = IngredientsRecommendationUtils.getNutritionCategory(
+          '계란',
+        );
         expect(category, '단백질');
       });
 
       test('returns 채소 for carrot', () {
-        final category =
-            IngredientsRecommendationUtils.getNutritionCategory('당근');
+        final category = IngredientsRecommendationUtils.getNutritionCategory(
+          '당근',
+        );
         expect(category, '채소');
       });
 
       test('returns 과일 for apple', () {
-        final category =
-            IngredientsRecommendationUtils.getNutritionCategory('사과');
+        final category = IngredientsRecommendationUtils.getNutritionCategory(
+          '사과',
+        );
         expect(category, '과일');
       });
 
       test('returns 기타 for unknown ingredient', () {
-        final category =
-            IngredientsRecommendationUtils.getNutritionCategory('알수없는음식');
+        final category = IngredientsRecommendationUtils.getNutritionCategory(
+          '알수없는음식',
+        );
         expect(category, '기타');
       });
 
       test('handles partial match', () {
-        final category =
-            IngredientsRecommendationUtils.getNutritionCategory('닭가슴살구이');
+        final category = IngredientsRecommendationUtils.getNutritionCategory(
+          '닭가슴살구이',
+        );
         expect(category, '단백질');
       });
     });
 
     group('getNutritionInfo', () {
       test('returns emoji and category for protein', () {
-        final info =
-            IngredientsRecommendationUtils.getNutritionInfo('계란');
+        final info = IngredientsRecommendationUtils.getNutritionInfo('계란');
         expect(info, contains('🥚'));
         expect(info, contains('단백질'));
       });
 
       test('returns emoji and category for vegetable', () {
-        final info =
-            IngredientsRecommendationUtils.getNutritionInfo('브로콜리');
+        final info = IngredientsRecommendationUtils.getNutritionInfo('브로콜리');
         expect(info, contains('🥬'));
         expect(info, contains('채소'));
       });
@@ -121,10 +124,12 @@ void main() {
           price: 5000.0,
         );
 
-        final longScore =
-            IngredientsRecommendationUtils.getPriceValueScore(longExpiry);
-        final shortScore =
-            IngredientsRecommendationUtils.getPriceValueScore(shortExpiry);
+        final longScore = IngredientsRecommendationUtils.getPriceValueScore(
+          longExpiry,
+        );
+        final shortScore = IngredientsRecommendationUtils.getPriceValueScore(
+          shortExpiry,
+        );
 
         expect(longScore, greaterThan(shortScore));
       });
@@ -148,8 +153,9 @@ void main() {
           price: 9000.0,
         );
 
-        final lowPriceScore =
-            IngredientsRecommendationUtils.getPriceValueScore(lowPrice);
+        final lowPriceScore = IngredientsRecommendationUtils.getPriceValueScore(
+          lowPrice,
+        );
         final highPriceScore =
             IngredientsRecommendationUtils.getPriceValueScore(highPrice);
 
@@ -204,9 +210,9 @@ void main() {
 
         final result =
             IngredientsRecommendationUtils.getOptimizedRecommendations(
-          items,
-          limit: 5,
-        );
+              items,
+              limit: 5,
+            );
 
         expect(result.length, 5);
       });

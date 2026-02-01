@@ -253,10 +253,7 @@ class _MealCostExperimentScreenState extends State<MealCostExperimentScreen> {
             },
           ),
           const SizedBox(height: 12),
-          FilledButton(
-            onPressed: _save,
-            child: const Text('저장 (소비 기록에 추가)'),
-          ),
+          FilledButton(onPressed: _save, child: const Text('저장 (소비 기록에 추가)')),
         ],
       ),
     );

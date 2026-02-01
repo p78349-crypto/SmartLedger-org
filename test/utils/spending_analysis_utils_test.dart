@@ -33,9 +33,24 @@ void main() {
 
       test('groups by description', () {
         final txs = [
-          createExpense(id: '1', amount: 5000, date: DateTime(2026, 1, 10), description: '커피'),
-          createExpense(id: '2', amount: 3000, date: DateTime(2026, 1, 11), description: '커피'),
-          createExpense(id: '3', amount: 10000, date: DateTime(2026, 1, 12), description: '점심'),
+          createExpense(
+            id: '1',
+            amount: 5000,
+            date: DateTime(2026, 1, 10),
+            description: '커피',
+          ),
+          createExpense(
+            id: '2',
+            amount: 3000,
+            date: DateTime(2026, 1, 11),
+            description: '커피',
+          ),
+          createExpense(
+            id: '3',
+            amount: 10000,
+            date: DateTime(2026, 1, 12),
+            description: '점심',
+          ),
         ];
 
         final result = SpendingAnalysisUtils.getTopSpendingItems(
@@ -47,8 +62,18 @@ void main() {
 
       test('sorts by total amount descending', () {
         final txs = [
-          createExpense(id: '1', amount: 5000, date: DateTime(2026, 1, 10), description: '커피'),
-          createExpense(id: '2', amount: 10000, date: DateTime(2026, 1, 11), description: '점심'),
+          createExpense(
+            id: '1',
+            amount: 5000,
+            date: DateTime(2026, 1, 10),
+            description: '커피',
+          ),
+          createExpense(
+            id: '2',
+            amount: 10000,
+            date: DateTime(2026, 1, 11),
+            description: '점심',
+          ),
         ];
 
         final result = SpendingAnalysisUtils.getTopSpendingItems(
@@ -79,8 +104,18 @@ void main() {
 
       test('filters by date range', () {
         final txs = [
-          createExpense(id: '1', amount: 5000, date: DateTime(2026, 1, 5), description: '커피'),
-          createExpense(id: '2', amount: 10000, date: DateTime(2026, 2, 15), description: '점심'),
+          createExpense(
+            id: '1',
+            amount: 5000,
+            date: DateTime(2026, 1, 5),
+            description: '커피',
+          ),
+          createExpense(
+            id: '2',
+            amount: 10000,
+            date: DateTime(2026, 2, 15),
+            description: '점심',
+          ),
         ];
 
         final result = SpendingAnalysisUtils.getTopSpendingItems(
@@ -95,7 +130,12 @@ void main() {
 
       test('excludes non-expense transactions', () {
         final txs = [
-          createExpense(id: '1', amount: 5000, date: DateTime(2026, 1, 10), description: '커피'),
+          createExpense(
+            id: '1',
+            amount: 5000,
+            date: DateTime(2026, 1, 10),
+            description: '커피',
+          ),
           Transaction(
             id: '2',
             type: TransactionType.income,
@@ -123,9 +163,24 @@ void main() {
 
       test('groups by category', () {
         final txs = [
-          createExpense(id: '1', amount: 5000, date: DateTime(2026, 1, 10), mainCategory: '식비'),
-          createExpense(id: '2', amount: 3000, date: DateTime(2026, 1, 11), mainCategory: '식비'),
-          createExpense(id: '3', amount: 10000, date: DateTime(2026, 1, 12), mainCategory: '교통'),
+          createExpense(
+            id: '1',
+            amount: 5000,
+            date: DateTime(2026, 1, 10),
+            mainCategory: '식비',
+          ),
+          createExpense(
+            id: '2',
+            amount: 3000,
+            date: DateTime(2026, 1, 11),
+            mainCategory: '식비',
+          ),
+          createExpense(
+            id: '3',
+            amount: 10000,
+            date: DateTime(2026, 1, 12),
+            mainCategory: '교통',
+          ),
         ];
 
         final result = SpendingAnalysisUtils.getTopSpendingCategories(
@@ -140,8 +195,18 @@ void main() {
     group('detectRecurringPatterns', () {
       test('returns empty for insufficient occurrences', () {
         final txs = [
-          createExpense(id: '1', amount: 5000, date: DateTime(2026), description: '커피'),
-          createExpense(id: '2', amount: 5000, date: DateTime(2026, 1, 8), description: '커피'),
+          createExpense(
+            id: '1',
+            amount: 5000,
+            date: DateTime(2026),
+            description: '커피',
+          ),
+          createExpense(
+            id: '2',
+            amount: 5000,
+            date: DateTime(2026, 1, 8),
+            description: '커피',
+          ),
         ];
 
         final result = SpendingAnalysisUtils.detectRecurringPatterns(
@@ -153,10 +218,30 @@ void main() {
 
       test('detects recurring pattern', () {
         final txs = [
-          createExpense(id: '1', amount: 5000, date: DateTime(2026), description: '커피'),
-          createExpense(id: '2', amount: 5000, date: DateTime(2026, 1, 8), description: '커피'),
-          createExpense(id: '3', amount: 5000, date: DateTime(2026, 1, 15), description: '커피'),
-          createExpense(id: '4', amount: 5000, date: DateTime(2026, 1, 22), description: '커피'),
+          createExpense(
+            id: '1',
+            amount: 5000,
+            date: DateTime(2026),
+            description: '커피',
+          ),
+          createExpense(
+            id: '2',
+            amount: 5000,
+            date: DateTime(2026, 1, 8),
+            description: '커피',
+          ),
+          createExpense(
+            id: '3',
+            amount: 5000,
+            date: DateTime(2026, 1, 15),
+            description: '커피',
+          ),
+          createExpense(
+            id: '4',
+            amount: 5000,
+            date: DateTime(2026, 1, 22),
+            description: '커피',
+          ),
         ];
 
         final result = SpendingAnalysisUtils.detectRecurringPatterns(
@@ -169,9 +254,24 @@ void main() {
 
       test('excludes patterns with long intervals', () {
         final txs = [
-          createExpense(id: '1', amount: 5000, date: DateTime(2026), description: '커피'),
-          createExpense(id: '2', amount: 5000, date: DateTime(2026, 3), description: '커피'),
-          createExpense(id: '3', amount: 5000, date: DateTime(2026, 5), description: '커피'),
+          createExpense(
+            id: '1',
+            amount: 5000,
+            date: DateTime(2026),
+            description: '커피',
+          ),
+          createExpense(
+            id: '2',
+            amount: 5000,
+            date: DateTime(2026, 3),
+            description: '커피',
+          ),
+          createExpense(
+            id: '3',
+            amount: 5000,
+            date: DateTime(2026, 5),
+            description: '커피',
+          ),
         ];
 
         final result = SpendingAnalysisUtils.detectRecurringPatterns(

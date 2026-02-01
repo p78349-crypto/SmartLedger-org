@@ -4,9 +4,8 @@ final Map<String, AssistantRouteSpec> _ledgerSpecs = {
   AppRoutes.accountMain: AssistantRouteSpec(
     routeName: AppRoutes.accountMain,
     requiresAccount: true,
-    buildArgs: (accountName) => AccountMainArgs(
-      accountName: _accountNameOrDefault(accountName),
-    ),
+    buildArgs: (accountName) =>
+        AccountMainArgs(accountName: _accountNameOrDefault(accountName)),
   ),
   AppRoutes.transactionAdd: AssistantRouteSpec(
     routeName: AppRoutes.transactionAdd,
@@ -46,36 +45,31 @@ final Map<String, AssistantRouteSpec> _ledgerSpecs = {
   AppRoutes.refundTransactions: AssistantRouteSpec(
     routeName: AppRoutes.refundTransactions,
     requiresAccount: true,
-    buildArgs: (accountName) => AccountArgs(
-      accountName: _accountNameOrDefault(accountName),
-    ),
+    buildArgs: (accountName) =>
+        AccountArgs(accountName: _accountNameOrDefault(accountName)),
   ),
   AppRoutes.backup: AssistantRouteSpec(
     routeName: AppRoutes.backup,
     requiresAccount: true,
-    buildArgs: (accountName) => AccountArgs(
-      accountName: _accountNameOrDefault(accountName),
-    ),
+    buildArgs: (accountName) =>
+        AccountArgs(accountName: _accountNameOrDefault(accountName)),
   ),
   AppRoutes.monthEndCarryover: AssistantRouteSpec(
     routeName: AppRoutes.monthEndCarryover,
     requiresAccount: true,
-    buildArgs: (accountName) => AccountArgs(
-      accountName: _accountNameOrDefault(accountName),
-    ),
+    buildArgs: (accountName) =>
+        AccountArgs(accountName: _accountNameOrDefault(accountName)),
   ),
   AppRoutes.incomeSplit: AssistantRouteSpec(
     routeName: AppRoutes.incomeSplit,
     requiresAccount: true,
-    buildArgs: (accountName) => AccountArgs(
-      accountName: _accountNameOrDefault(accountName),
-    ),
+    buildArgs: (accountName) =>
+        AccountArgs(accountName: _accountNameOrDefault(accountName)),
   ),
   AppRoutes.emergencyFund: AssistantRouteSpec(
     routeName: AppRoutes.emergencyFund,
     requiresAccount: true,
-    buildArgs: (accountName) => AccountArgs(
-      accountName: _accountNameOrDefault(accountName),
-    ),
+    buildArgs: (accountName) =>
+        AccountArgs(accountName: _accountNameOrDefault(accountName)),
   ),
 };

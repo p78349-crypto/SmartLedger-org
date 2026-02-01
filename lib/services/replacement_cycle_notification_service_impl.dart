@@ -110,9 +110,7 @@ class ReplacementCycleNotificationService {
 
   Future<List<HealthConsumptionRecord>> _loadLog() async {
     final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(
-      HealthGuardrailService.consumptionLogPrefsKey,
-    );
+    final raw = prefs.getString(HealthGuardrailService.consumptionLogPrefsKey);
     if (raw == null || raw.trim().isEmpty) return <HealthConsumptionRecord>[];
 
     try {
@@ -194,8 +192,9 @@ class ReplacementCycleNotificationService {
     await _cancelPreviouslyScheduled();
 
     final now = DateTime.now();
-    final since = _startOfDay(now)
-        .subtract(Duration(days: settings.maxWindowDays));
+    final since = _startOfDay(
+      now,
+    ).subtract(Duration(days: settings.maxWindowDays));
 
     final records = (await _loadLog())
         .where((r) => r.timestamp.isAfter(since))

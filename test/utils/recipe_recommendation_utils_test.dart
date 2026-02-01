@@ -18,47 +18,50 @@ void main() {
       );
     }
 
-    test('getRecommendedRecipes recommends default recipes when >=50% ingredients match', () async {
-      final now = DateTime(2026, 1, 10);
-      final available = [
-        item('계란', now: now),
-        item('소금', now: now),
-      ];
+    test(
+      'getRecommendedRecipes recommends default recipes when >=50% ingredients match',
+      () async {
+        final now = DateTime(2026, 1, 10);
+        final available = [item('계란', now: now), item('소금', now: now)];
 
-      final map = await RecipeRecommendationUtils.getRecommendedRecipes(
-        available,
-        includeUserRecipes: false,
-      );
+        final map = await RecipeRecommendationUtils.getRecommendedRecipes(
+          available,
+          includeUserRecipes: false,
+        );
 
-      // 계란프라이 requires ['계란','버터','소금'] => 2/3 => 66%
-      expect(map.keys, contains('계란프라이'));
-      final match = map['계란프라이']!;
-      expect(match.matchPercentage, greaterThanOrEqualTo(50));
-      expect(match.requiredCount, 3);
-      expect(match.availableCount, 2);
-    });
+        // 계란프라이 requires ['계란','버터','소금'] => 2/3 => 66%
+        expect(map.keys, contains('계란프라이'));
+        final match = map['계란프라이']!;
+        expect(match.matchPercentage, greaterThanOrEqualTo(50));
+        expect(match.requiredCount, 3);
+        expect(match.availableCount, 2);
+      },
+    );
 
-    test('prioritizeExpiring sorts recipes using expiringIngredientCount first', () async {
-      final now = DateTime(2026, 1, 10);
-      final available = [
-        item('계란', now: now, daysUntilExpiry: 1), // expiring
-        item('소금', now: now),
-        item('두부', now: now, daysUntilExpiry: 1), // expiring
-        item('간장', now: now),
-        item('마늘', now: now),
-        item('파', now: now),
-      ];
+    test(
+      'prioritizeExpiring sorts recipes using expiringIngredientCount first',
+      () async {
+        final now = DateTime(2026, 1, 10);
+        final available = [
+          item('계란', now: now, daysUntilExpiry: 1), // expiring
+          item('소금', now: now),
+          item('두부', now: now, daysUntilExpiry: 1), // expiring
+          item('간장', now: now),
+          item('마늘', now: now),
+          item('파', now: now),
+        ];
 
-      final list = await RecipeRecommendationUtils.getTopRecommendations(
-        available,
-        limit: 5,
-        includeUserRecipes: false,
-      );
+        final list = await RecipeRecommendationUtils.getTopRecommendations(
+          available,
+          limit: 5,
+          includeUserRecipes: false,
+        );
 
-      expect(list, isNotEmpty);
-      // At least one recipe should report expiring usage.
-      expect(list.any((e) => e.expiringIngredientCount > 0), isTrue);
-    });
+        expect(list, isNotEmpty);
+        // At least one recipe should report expiring usage.
+        expect(list.any((e) => e.expiringIngredientCount > 0), isTrue);
+      },
+    );
 
     test('RecipeMatch.message includes flags and availability summary', () {
       final m = RecipeMatch(
@@ -85,9 +88,17 @@ void main() {
         item('c', now: now, daysUntilExpiry: 1),
         item('d', now: now, daysUntilExpiry: 1),
       ];
-      final recipe = RecipeMatch(recipeName: '요리', requiredCount: 1, availableCount: 1, matchPercentage: 100);
+      final recipe = RecipeMatch(
+        recipeName: '요리',
+        requiredCount: 1,
+        availableCount: 1,
+        matchPercentage: 100,
+      );
 
-      final msg = RecipeRecommendationUtils.generateRecommendationMessage(expiring, recipe);
+      final msg = RecipeRecommendationUtils.generateRecommendationMessage(
+        expiring,
+        recipe,
+      );
       expect(msg, contains('a'));
       expect(msg, contains('b'));
       expect(msg, contains('c'));

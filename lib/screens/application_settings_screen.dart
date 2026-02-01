@@ -247,8 +247,7 @@ class _ApplicationSettingsScreenState extends State<ApplicationSettingsScreen>
             (photosStatus.isGranted ||
                 storageStatus.isGranted ||
                 photosStatus.isLimited) &&
-            (notificationStatus.isGranted ||
-                notificationStatus.isProvisional);
+            (notificationStatus.isGranted || notificationStatus.isProvisional);
         _isChecking = false;
       });
     }

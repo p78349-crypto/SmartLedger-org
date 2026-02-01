@@ -221,7 +221,7 @@ class _MicroSavingsNudgeScreenState extends State<MicroSavingsNudgeScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('$title ${CurrencyFormatter.format(amount)} 기록 완료'),
+        content: Text('$title ${CurrencyFormatter.format(amount)} 저장 완료'),
       ),
     );
 
@@ -367,7 +367,7 @@ class _MicroSavingsNudgeScreenState extends State<MicroSavingsNudgeScreen> {
     if (!mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('잔돈 ${CurrencyFormatter.format(diff)} 저축 기록 완료')),
+      SnackBar(content: Text('잔돈 ${CurrencyFormatter.format(diff)} 저축 저장 완료')),
     );
 
     await _load();

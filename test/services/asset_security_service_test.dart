@@ -40,8 +40,9 @@ void main() {
       await AssetSecurityService.setLocked('TestAccount', true);
       expect(await AssetSecurityService.isLocked('TestAccount'), isTrue);
 
-      final result =
-          await AssetSecurityService.authenticateAndUnlock('TestAccount');
+      final result = await AssetSecurityService.authenticateAndUnlock(
+        'TestAccount',
+      );
       expect(result, isTrue);
       expect(await AssetSecurityService.isLocked('TestAccount'), isFalse);
     });

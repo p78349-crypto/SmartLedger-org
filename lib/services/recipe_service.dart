@@ -629,5 +629,62 @@ class RecipeService {
         RecipeIngredient(name: 'Doubanjiang', quantity: 2, unit: 'tbsp'),
       ],
     ),
+    // ═══════════════════════════════════════════════════════════════════
+    // 🌟 WHO 건강 추천 특별 메뉴 (사용자 커스텀)
+    // - 10가지 이상 야채 + 고기(닭/돼지)
+    // - 된장탕 스타일, 약 7끼 분량 (한 끼당 약 3,300원)
+    // ═══════════════════════════════════════════════════════════════════
+    Recipe(
+      id: 'who_chicken',
+      name: '🌟 닭고기·버섯·채소 된장탕 (WHO추천)',
+      healthScore: 5,
+      ingredients: [
+        // 메인 고기
+        RecipeIngredient(name: '닭볶음탕용 닭고기', quantity: 900, unit: 'g'),
+        // 버섯류
+        RecipeIngredient(name: '느타리버섯', quantity: 500, unit: 'g'),
+        RecipeIngredient(name: '표고버섯', quantity: 500, unit: 'g'),
+        RecipeIngredient(name: '팽이버섯', quantity: 3, unit: '봉'),
+        // 야채류 (10가지 이상)
+        RecipeIngredient(name: '호박', quantity: 1, unit: '개'),
+        RecipeIngredient(name: '양배추', quantity: 1.5, unit: 'kg'),
+        RecipeIngredient(name: '당근', quantity: 1, unit: '개'),
+        RecipeIngredient(name: '가지', quantity: 2, unit: '개'),
+        RecipeIngredient(name: '양파', quantity: 1, unit: '망'),
+        RecipeIngredient(name: '마늘', quantity: 1, unit: '망'),
+        RecipeIngredient(name: '브로콜리', quantity: 1, unit: '개'),
+        RecipeIngredient(name: '감자', quantity: 7, unit: '개'),
+        RecipeIngredient(name: '피망', quantity: 2, unit: '개'),
+        // 양념
+        RecipeIngredient(name: '고추장', quantity: 1, unit: '숟가락'),
+        RecipeIngredient(name: '된장', quantity: 1, unit: '숟가락'),
+      ],
+    ),
+    Recipe(
+      id: 'who_pork',
+      name: '🌟 돼지고기·버섯·채소 된장탕 (WHO추천)',
+      healthScore: 5,
+      ingredients: [
+        // 메인 고기 (돼지고기로 변경)
+        RecipeIngredient(name: '돼지고기 (앞다리/사태)', quantity: 900, unit: 'g'),
+        // 버섯류
+        RecipeIngredient(name: '느타리버섯', quantity: 500, unit: 'g'),
+        RecipeIngredient(name: '표고버섯', quantity: 500, unit: 'g'),
+        RecipeIngredient(name: '팽이버섯', quantity: 3, unit: '봉'),
+        // 야채류 (10가지 이상) - 닭고기 버전과 동일
+        RecipeIngredient(name: '호박', quantity: 1, unit: '개'),
+        RecipeIngredient(name: '양배추', quantity: 1.5, unit: 'kg'),
+        RecipeIngredient(name: '당근', quantity: 1, unit: '개'),
+        RecipeIngredient(name: '가지', quantity: 2, unit: '개'),
+        RecipeIngredient(name: '양파', quantity: 1, unit: '망'),
+        RecipeIngredient(name: '마늘', quantity: 1, unit: '망'),
+        RecipeIngredient(name: '브로콜리', quantity: 1, unit: '개'),
+        RecipeIngredient(name: '감자', quantity: 7, unit: '개'),
+        RecipeIngredient(name: '피망', quantity: 2, unit: '개'),
+        // 양념
+        RecipeIngredient(name: '고추장', quantity: 1, unit: '숟가락'),
+        RecipeIngredient(name: '된장', quantity: 1, unit: '숟가락'),
+      ],
+    ),
   ];
 }

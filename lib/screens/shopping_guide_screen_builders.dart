@@ -111,7 +111,6 @@ extension _ShoppingGuideBuilders on _ShoppingGuideScreenState {
     );
   }
 
-
   void _showProgressDialog() {
     showDialog(
       context: context,
@@ -129,15 +128,12 @@ extension _ShoppingGuideBuilders on _ShoppingGuideScreenState {
           children: [
             _buildStatRow('총 항목', '$_totalItems개'),
             _buildStatRow('완료', '$_completedItems개'),
-            _buildStatRow('남은 항목',
-                '${_totalItems - _completedItems}개'),
+            _buildStatRow('남은 항목', '${_totalItems - _completedItems}개'),
             const Divider(),
             _buildStatRow('현재 위치', _currentLocation),
-            if (_nextLocation != null)
-              _buildStatRow('다음 위치', _nextLocation!),
+            if (_nextLocation != null) _buildStatRow('다음 위치', _nextLocation!),
             const Divider(),
-            _buildStatRow('진행률',
-                '${(_progress * 100).toStringAsFixed(1)}%'),
+            _buildStatRow('진행률', '${(_progress * 100).toStringAsFixed(1)}%'),
           ],
         ),
         actions: [
@@ -157,10 +153,7 @@ extension _ShoppingGuideBuilders on _ShoppingGuideScreenState {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label),
-          Text(
-            value,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
         ],
       ),
     );

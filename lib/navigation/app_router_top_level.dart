@@ -17,9 +17,7 @@ class _TopLevelRoutes {
         final a = args as TopLevelStatsDetailArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => TopLevelStatsDetailScreen(
-            dashboard: a.dashboard,
-          ),
+          builder: (_) => TopLevelStatsDetailScreen(dashboard: a.dashboard),
         );
 
       case AppRoutes.accountMain:

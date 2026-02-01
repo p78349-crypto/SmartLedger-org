@@ -7,59 +7,75 @@ void main() {
 
     group('getPeriodRange', () {
       test('week returns 7 day range', () {
-        final range =
-            PeriodUtils.getPeriodRange(PeriodType.week, baseDate: baseDate);
+        final range = PeriodUtils.getPeriodRange(
+          PeriodType.week,
+          baseDate: baseDate,
+        );
         expect(range.end, baseDate);
         expect(range.start, DateTime(2026, 3, 9)); // 6일 전
       });
 
       test('month returns current month range', () {
-        final range =
-            PeriodUtils.getPeriodRange(PeriodType.month, baseDate: baseDate);
+        final range = PeriodUtils.getPeriodRange(
+          PeriodType.month,
+          baseDate: baseDate,
+        );
         expect(range.start, DateTime(2026, 3));
         expect(range.end, DateTime(2026, 3, 31));
       });
 
       test('quarter returns Q1 for March', () {
-        final range =
-            PeriodUtils.getPeriodRange(PeriodType.quarter, baseDate: baseDate);
+        final range = PeriodUtils.getPeriodRange(
+          PeriodType.quarter,
+          baseDate: baseDate,
+        );
         expect(range.start, DateTime(2026));
         expect(range.end, DateTime(2026, 3, 31));
       });
 
       test('quarter returns Q2 for April', () {
         final aprilDate = DateTime(2026, 4, 15);
-        final range =
-            PeriodUtils.getPeriodRange(PeriodType.quarter, baseDate: aprilDate);
+        final range = PeriodUtils.getPeriodRange(
+          PeriodType.quarter,
+          baseDate: aprilDate,
+        );
         expect(range.start, DateTime(2026, 4));
         expect(range.end, DateTime(2026, 6, 30));
       });
 
       test('halfYear returns H1 for March', () {
-        final range =
-            PeriodUtils.getPeriodRange(PeriodType.halfYear, baseDate: baseDate);
+        final range = PeriodUtils.getPeriodRange(
+          PeriodType.halfYear,
+          baseDate: baseDate,
+        );
         expect(range.start, DateTime(2026));
         expect(range.end, DateTime(2026, 6, 30));
       });
 
       test('halfYear returns H2 for September', () {
         final septDate = DateTime(2026, 9, 15);
-        final range =
-            PeriodUtils.getPeriodRange(PeriodType.halfYear, baseDate: septDate);
+        final range = PeriodUtils.getPeriodRange(
+          PeriodType.halfYear,
+          baseDate: septDate,
+        );
         expect(range.start, DateTime(2026, 7));
         expect(range.end, DateTime(2026, 12, 31));
       });
 
       test('year returns full year range', () {
-        final range =
-            PeriodUtils.getPeriodRange(PeriodType.year, baseDate: baseDate);
+        final range = PeriodUtils.getPeriodRange(
+          PeriodType.year,
+          baseDate: baseDate,
+        );
         expect(range.start, DateTime(2026));
         expect(range.end, DateTime(2026, 12, 31));
       });
 
       test('decade returns 10 year range', () {
-        final range =
-            PeriodUtils.getPeriodRange(PeriodType.decade, baseDate: baseDate);
+        final range = PeriodUtils.getPeriodRange(
+          PeriodType.decade,
+          baseDate: baseDate,
+        );
         expect(range.start, DateTime(2020));
         expect(range.end, DateTime(2029, 12, 31));
       });

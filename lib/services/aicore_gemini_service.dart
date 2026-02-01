@@ -1,9 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Google AI Edge SDK (AICore)를 통한 Gemini Nano 호출
-/// 
+///
 /// 안드로이드 시스템에 내장된 Gemini Nano를 직접 활용
 /// - 완전 오프라인 동작
 /// - API 키 불필요
@@ -11,21 +12,27 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// - 시스템 리소스 최적화
 class AICoreGeminiService {
   static const MethodChannel _channel = MethodChannel('com.smartledger/aicore');
-  
-  /// AICore 사용 가능 여부 확인
+
+  /// AICore 사용 가능 여부 확인 및 초기화 시도
   Future<bool> isAvailable() async {
     try {
-      final result = await _channel.invokeMethod<bool>('isAICoreAvailable');
-      return result ?? false;
+      final available = await _channel.invokeMethod<bool>('isAICoreAvailable');
+      if (available == true) {
+        // 모델이 존재하면 로드 시도
+        await _channel.invokeMethod<bool>('loadModel');
+        return true;
+      }
+      return false;
     } catch (e) {
+      debugPrint('[AICore] 상태 체크 실패: $e');
       return false;
     }
   }
-  
+
   /// 영수증 텍스트 파싱 (온디바이스 Gemini Nano)
-  /// 
+  ///
   /// [ocrText]: OCR로 추출된 영수증 텍스트
-  /// 
+  ///
   /// Returns: {
   ///   "store": "스토어명",
   ///   "date": "2026-01-28",
@@ -35,7 +42,8 @@ class AICoreGeminiService {
   /// }
   Future<Map<String, dynamic>> parseReceiptText(String ocrText) async {
     try {
-      final prompt = '''
+      final prompt =
+          '''
 다음 영수증 텍스트를 JSON으로 변환하세요:
 
 $ocrText
@@ -52,29 +60,29 @@ JSON 형식:
 }
 ''';
 
-      final result = await _channel.invokeMethod<String>(
-        'generateText',
-        {'prompt': prompt},
-      );
-      
+      final result = await _channel.invokeMethod<String>('generateText', {
+        'prompt': prompt,
+      });
+
       if (result == null) {
         return {'error': 'AICore에서 응답이 없습니다'};
       }
-      
+
       return _extractJson(result);
     } catch (e) {
       return {'error': 'AICore 처리 실패: $e'};
     }
   }
-  
+
   /// 음성 입력 처리 (자연어 이해)
-  /// 
+  ///
   /// [userSpeech]: "마트에서 사과 2개 5000원 샀어"
-  /// 
+  ///
   /// Returns: 구조화된 거래 정보
   Future<Map<String, dynamic>> processVoiceInput(String userSpeech) async {
     try {
-      final prompt = '''
+      final prompt =
+          '''
 다음 음성 입력을 가계부 거래로 변환하세요:
 
 "$userSpeech"
@@ -90,25 +98,25 @@ JSON 형식:
 }
 ''';
 
-      final result = await _channel.invokeMethod<String>(
-        'generateText',
-        {'prompt': prompt},
-      );
-      
+      final result = await _channel.invokeMethod<String>('generateText', {
+        'prompt': prompt,
+      });
+
       if (result == null) {
         return {'error': 'AICore에서 응답이 없습니다'};
       }
-      
+
       return _extractJson(result);
     } catch (e) {
       return {'error': 'AICore 처리 실패: $e'};
     }
   }
-  
+
   /// 카테고리 자동 분류
   Future<String?> predictCategory(String itemName) async {
     try {
-      final prompt = '''
+      final prompt =
+          '''
 다음 상품의 카테고리를 선택하세요:
 상품: $itemName
 
@@ -117,22 +125,21 @@ JSON 형식:
 카테고리만 답변하세요.
 ''';
 
-      final result = await _channel.invokeMethod<String>(
-        'generateText',
-        {'prompt': prompt},
-      );
-      
+      final result = await _channel.invokeMethod<String>('generateText', {
+        'prompt': prompt,
+      });
+
       return result?.trim();
     } catch (e) {
       return null;
     }
   }
-  
+
   /// 다국어 자동 감지 및 번역
-  /// 
+  ///
   /// [text]: 모든 언어의 텍스트 (영어, 중국어, 일본어, 한국어 등)
   /// [targetLang]: 목표 언어 ("ko", "en", "ja", "zh")
-  /// 
+  ///
   /// Returns: {
   ///   "detected_language": "en",
   ///   "original_text": "Starbucks Americano 5 dollars",
@@ -144,7 +151,8 @@ JSON 형식:
     String targetLang = 'ko',
   }) async {
     try {
-      final prompt = '''
+      final prompt =
+          '''
 다음 텍스트를 분석하세요:
 
 텍스트: "$text"
@@ -168,26 +176,25 @@ JSON 형식:
 }
 ''';
 
-      final result = await _channel.invokeMethod<String>(
-        'generateText',
-        {'prompt': prompt},
-      );
-      
+      final result = await _channel.invokeMethod<String>('generateText', {
+        'prompt': prompt,
+      });
+
       if (result == null) {
         return {'error': 'AICore에서 응답이 없습니다'};
       }
-      
+
       return _extractJson(result);
     } catch (e) {
       return {'error': 'AICore 처리 실패: $e'};
     }
   }
-  
+
   /// 실시간 음성 번역
-  /// 
+  ///
   /// [voiceText]: 음성 인식된 텍스트 (모든 언어)
   /// [targetLang]: 목표 언어
-  /// 
+  ///
   /// 사용 예:
   /// ```dart
   /// final result = await translateVoiceToKorean("Convenience store milk 3 dollars");
@@ -196,13 +203,16 @@ JSON 형식:
   Future<Map<String, dynamic>> translateVoiceToKorean(String voiceText) async {
     return await translateAndParse(voiceText);
   }
-  
+
   /// 다국어 영수증 파싱
-  /// 
+  ///
   /// 영어, 중국어, 일본어 영수증을 자동 감지하고 한국어로 변환
-  Future<Map<String, dynamic>> parseMultilingualReceipt(String receiptText) async {
+  Future<Map<String, dynamic>> parseMultilingualReceipt(
+    String receiptText,
+  ) async {
     try {
-      final prompt = '''
+      final prompt =
+          '''
 다음 영수증을 분석하고 한국어로 변환하세요:
 
 $receiptText
@@ -221,21 +231,20 @@ JSON 형식:
 }
 ''';
 
-      final result = await _channel.invokeMethod<String>(
-        'generateText',
-        {'prompt': prompt},
-      );
-      
+      final result = await _channel.invokeMethod<String>('generateText', {
+        'prompt': prompt,
+      });
+
       if (result == null) {
         return {'error': 'AICore에서 응답이 없습니다'};
       }
-      
+
       return _extractJson(result);
     } catch (e) {
       return {'error': 'AICore 처리 실패: $e'};
     }
   }
-  
+
   /// 언어 코드 → 이름 변환
   String _getLanguageName(String langCode) {
     const languages = {
@@ -248,7 +257,7 @@ JSON 형식:
     };
     return languages[langCode] ?? '한국어';
   }
-  
+
   /// JSON 추출 (Gemini 응답에서 JSON만 파싱)
   Map<String, dynamic> _extractJson(String response) {
     try {
@@ -262,36 +271,36 @@ JSON 형식:
       if (cleaned.endsWith('```')) {
         cleaned = cleaned.substring(0, cleaned.length - 3);
       }
-      
+
       // JSON 파싱
       final jsonMatch = RegExp(r'\{[\s\S]*\}').firstMatch(cleaned);
       if (jsonMatch != null) {
         return jsonDecode(jsonMatch.group(0)!) as Map<String, dynamic>;
       }
-      
+
       return {'error': 'JSON 파싱 실패', 'raw': response};
     } catch (e) {
       return {'error': 'JSON 디코딩 실패: $e', 'raw': response};
     }
   }
-  
+
   /// 사용자 선호 언어 가져오기 (시스템 언어 기반)
-  /// 
+  ///
   /// 예: 일본에서 사용 → 'ja' 반환
   ///     한국에서 사용 → 'ko' 반환
   static Future<String> getPreferredLanguage() async {
     final prefs = await SharedPreferences.getInstance();
-    
+
     // 1. 사용자가 수동으로 설정한 언어 확인 (기존 설정 재사용)
     final userLang = prefs.getString('user_language');
     if (userLang != null && userLang != 'system') {
       return userLang;
     }
-    
+
     // 2. 시스템 언어 기본값 (한국어)
     return 'ko';
   }
-  
+
   /// 선호 언어 설정 (기존 언어 설정과 호환)
   static Future<void> setPreferredLanguage(String langCode) async {
     final prefs = await SharedPreferences.getInstance();

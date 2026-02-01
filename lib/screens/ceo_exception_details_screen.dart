@@ -103,11 +103,9 @@ class CEOExceptionDetailsScreen extends StatelessWidget {
                   children: list
                       .map(
                         (t) => () {
-                          final amtStr = NumberFormats
-                              .currency
-                              .format(
-                                t.amount.abs().toInt(),
-                              );
+                          final amtStr = NumberFormats.currency.format(
+                            t.amount.abs().toInt(),
+                          );
                           return ListTile(
                             title: Text(
                               t.memo.isNotEmpty ? t.memo : (t.store ?? ''),
@@ -143,18 +141,14 @@ class CEOExceptionDetailsScreen extends StatelessWidget {
                   children: list
                       .map(
                         (t) => () {
-                          final amtStr = NumberFormats
-                              .currency
-                              .format(
-                                t.amount.abs().toInt(),
-                              );
+                          final amtStr = NumberFormats.currency.format(
+                            t.amount.abs().toInt(),
+                          );
                           return ListTile(
                             title: Text(
                               t.memo.isNotEmpty ? t.memo : (t.store ?? ''),
                             ),
-                            subtitle: Text(
-                              DateFormats.yMd.format(t.date),
-                            ),
+                            subtitle: Text(DateFormats.yMd.format(t.date)),
                             trailing: Text('₩$amtStr'),
                           );
                         }(),

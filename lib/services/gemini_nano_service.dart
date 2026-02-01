@@ -22,7 +22,8 @@ class GeminiNanoService {
   /// OCR 텍스트 파싱 (가장 빠름)
   Future<Map<String, dynamic>> parseReceiptText(String ocrText) async {
     try {
-      final prompt = '''
+      final prompt =
+          '''
 당신은 가계부 AI 비서입니다. 다음 영수증 텍스트를 분석하고 구조화된 데이터로 변환하세요.
 
 입력: $ocrText
@@ -61,7 +62,8 @@ class GeminiNanoService {
   /// 음성 + 자연언어 처리
   Future<Map<String, dynamic>> processVoiceInput(String userSpeech) async {
     try {
-      final prompt = '''
+      final prompt =
+          '''
 사용자가 말한 영수증 정보: "$userSpeech"
 
 이를 가계부 항목으로 구조화하세요.
@@ -123,10 +125,7 @@ JSON 형식:
       ''';
 
       final response = await _model.generateContent([
-        Content.multi([
-          TextPart(prompt),
-          DataPart(mimeType, imageBytes),
-        ])
+        Content.multi([TextPart(prompt), DataPart(mimeType, imageBytes)]),
       ]);
 
       return _parseJsonResponse(response.text ?? '{}');
@@ -157,7 +156,8 @@ JSON 형식:
   /// 카테고리 자동 분류
   Future<String?> predictCategory(String itemName) async {
     try {
-      final prompt = '''
+      final prompt =
+          '''
 가계부 항목 분류:
 "$itemName"이 어느 카테고리에 속하는지 분류하세요.
 
@@ -216,8 +216,10 @@ JSON 형식:
     Map<String, dynamic> voiceResult,
     Map<String, dynamic> imageResult,
   ) {
-    final voiceConfidence = (voiceResult['confidence'] as num?)?.toDouble() ?? 0.8;
-    final imageConfidence = (imageResult['confidence'] as num?)?.toDouble() ?? 0.9;
+    final voiceConfidence =
+        (voiceResult['confidence'] as num?)?.toDouble() ?? 0.8;
+    final imageConfidence =
+        (imageResult['confidence'] as num?)?.toDouble() ?? 0.9;
 
     if (imageConfidence > voiceConfidence) {
       return imageResult;

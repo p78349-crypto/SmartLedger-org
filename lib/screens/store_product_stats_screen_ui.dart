@@ -213,16 +213,17 @@ extension _StoreProductStatsScreenUi on _StoreProductStatsScreenState {
       }
     }
 
-    final items = byKey.values
-        .map(
-          (a) => _StoreProductStat(
-            name: a.name,
-            count: a.count,
-            totalAmount: a.totalAmount,
-          ),
-        )
-        .toList(growable: false)
-      ..sort((a, b) => b.totalAmount.compareTo(a.totalAmount));
+    final items =
+        byKey.values
+            .map(
+              (a) => _StoreProductStat(
+                name: a.name,
+                count: a.count,
+                totalAmount: a.totalAmount,
+              ),
+            )
+            .toList(growable: false)
+          ..sort((a, b) => b.totalAmount.compareTo(a.totalAmount));
 
     return items.take(20).toList(growable: false);
   }

@@ -28,7 +28,9 @@ void main() async {
     }
   } catch (e) {
     print('❌ 서버 연결 실패: $e\n');
-    print('💡 C:\\Users\\plain\\GemmaFineTuning\\budget_api_server.py 실행 확인 필요\n');
+    print(
+      '💡 C:\\Users\\plain\\GemmaFineTuning\\budget_api_server.py 실행 확인 필요\n',
+    );
     return;
   }
 
@@ -77,7 +79,9 @@ void main() async {
         if (data['items'] != null) {
           print('\n   품목 목록:');
           for (final item in data['items']) {
-            print('     • ${item['name']}: ${item['quantity']}개 x ${item['unit_price']}원 = ${item['total_price']}원');
+            print(
+              '     • ${item['name']}: ${item['quantity']}개 x ${item['unit_price']}원 = ${item['total_price']}원',
+            );
           }
         }
 
@@ -86,7 +90,9 @@ void main() async {
         // 원본 응답 (디버깅용)
         if (result['raw_response'] != null) {
           print('\n🤖 모델 원본 응답 (일부):');
-          print('   ${result['raw_response'].toString().substring(0, 200)}...\n');
+          print(
+            '   ${result['raw_response'].toString().substring(0, 200)}...\n',
+          );
         }
       } else {
         print('❌ 추출 실패: ${result['error']}\n');

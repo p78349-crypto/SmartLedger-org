@@ -154,10 +154,7 @@ void main() {
           createdAt: DateTime(2026),
         );
 
-        final updated = original.copyWith(
-          name: '저지방 우유',
-          quantity: 2,
-        );
+        final updated = original.copyWith(name: '저지방 우유', quantity: 2);
 
         expect(updated.id, 'food-1');
         expect(updated.name, '저지방 우유');

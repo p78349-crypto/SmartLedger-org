@@ -30,14 +30,18 @@ void main() {
           ),
         ];
 
-        final result = SavingsStatisticsUtils.calculateCookingSuccessIndex(logs);
+        final result = SavingsStatisticsUtils.calculateCookingSuccessIndex(
+          logs,
+        );
         expect(result, 1);
       });
     });
 
     group('calculateSavedIngredientsValue', () {
       test('returns 0 for empty logs', () {
-        final result = SavingsStatisticsUtils.calculateSavedIngredientsValue([]);
+        final result = SavingsStatisticsUtils.calculateSavedIngredientsValue(
+          [],
+        );
         expect(result, 0);
       });
 
@@ -59,7 +63,9 @@ void main() {
           ),
         ];
 
-        final result = SavingsStatisticsUtils.calculateSavedIngredientsValue(logs);
+        final result = SavingsStatisticsUtils.calculateSavedIngredientsValue(
+          logs,
+        );
         expect(result, 1500);
       });
 
@@ -74,7 +80,9 @@ void main() {
           ),
         ];
 
-        final result = SavingsStatisticsUtils.calculateSavedIngredientsValue(logs);
+        final result = SavingsStatisticsUtils.calculateSavedIngredientsValue(
+          logs,
+        );
         expect(result, 2000);
       });
     });
@@ -91,12 +99,10 @@ void main() {
         final now = DateTime.now();
         final thisMonth = '${now.year}-${now.month.toString().padLeft(2, '0')}';
         final lastMonthDate = DateTime(now.year, now.month - 1);
-        final lastMonth = '${lastMonthDate.year}-${lastMonthDate.month.toString().padLeft(2, '0')}';
+        final lastMonth =
+            '${lastMonthDate.year}-${lastMonthDate.month.toString().padLeft(2, '0')}';
 
-        final expenses = {
-          lastMonth: 500000.0,
-          thisMonth: 400000.0,
-        };
+        final expenses = {lastMonth: 500000.0, thisMonth: 400000.0};
 
         final result = SavingsStatisticsUtils.compareSavings(expenses);
         expect(result.beforePrice, 500000);

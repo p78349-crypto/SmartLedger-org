@@ -59,9 +59,9 @@ class _AppIconSyncSectionState extends State<_AppIconSyncSection> {
       await AppIconService.setLauncherIconTheme(targetIconTheme);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('오류 발생: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('오류 발생: $e')));
       }
     } finally {
       if (mounted) {
@@ -113,9 +113,7 @@ class _AppIconSyncSectionState extends State<_AppIconSyncSection> {
           child: ListTile(
             leading: const Icon(Icons.phonelink_setup_rounded),
             title: const Text('테마와 아이콘 동기화'),
-            subtitle: const Text(
-              '선택한 테마 색상에 맞춰 홈 화면 아이콘을 변경합니다.',
-            ),
+            subtitle: const Text('선택한 테마 색상에 맞춰 홈 화면 아이콘을 변경합니다.'),
             trailing: _isSyncing
                 ? const SizedBox(
                     width: 24,

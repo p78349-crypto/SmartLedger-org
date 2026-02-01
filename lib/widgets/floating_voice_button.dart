@@ -11,6 +11,7 @@ import '../navigation/global_navigator_key.dart';
 import '../services/account_service.dart';
 import '../services/voice_assistant_settings.dart';
 import '../services/voice_input_bridge.dart';
+import '../services/aicore_gemini_service.dart';
 import '../utils/pref_keys.dart';
 
 /// 플로팅 음성 버튼 - 화면 가리지 않고 항상 떠있음
@@ -35,6 +36,7 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
   final stt.SpeechToText _speech = stt.SpeechToText();
   final FlutterTts _tts = FlutterTts();
   final VoiceAssistantSettings _settings = VoiceAssistantSettings.instance;
+  final AICoreGeminiService _aicore = AICoreGeminiService();
 
   bool _speechAvailable = false;
   bool _isListening = false;
@@ -460,7 +462,7 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
         if (isYes) {
           _currentStep = 'ask_item';
           await _ensureQuickExpenseScreen();
-          await _speak('네, 기록할 품목을 말씀해 주세요.');
+          await _speak('네, 입력할 품목을 말씀해 주세요.');
           _startListening();
         } else if (isNo) {
           await _speak('알겠습니다. 더 필요하신 작업이 있으면 언제든 말씀해 주세요.');
@@ -476,7 +478,7 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
           await _speak('네, 지출 입력 화면을 열어 드릴게요.');
           await _ensureQuickExpenseScreen();
           _currentStep = 'ask_item';
-          await _speak('이제 기록할 품목을 말씀해 주세요.');
+          await _speak('이제 입력할 품목을 말씀해 주세요.');
           _startListening();
         } else if (isNo) {
           await _speak('알겠습니다. 지출 화면을 열지 않고 대화를 마칩니다.');
@@ -521,13 +523,13 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
 
       case 'confirm_all':
         if (isYes) {
-          await _speak('네, 지출 내역을 성공적으로 기록했습니다.');
+          await _speak('네, 지출 내역을 성공적으로 저장했습니다.');
           final finalLine = '$_tempExpenseItem $_tempExpensePrice';
           VoiceInputBridge.instance.sendInput(finalLine, submit: true);
           _currentStep = 'idle';
           _stopAndExit(); // 완료 후 닫기
         } else if (isNo) {
-          await _speak('기록을 취소했습니다. 더 도와드릴 일이 있을까요?');
+          await _speak('입력을 취소했습니다. 더 도와드릴 일이 있을까요?');
           _currentStep = 'idle';
           _stopAndExit();
         }
@@ -545,18 +547,46 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
     // 1. Google 스타일의 인사 응답
     if (_containsAny(lowerText, ['안녕', '반가워', '누구니', '이름', '뭐해'])) {
       await _speak(
-        '안녕하세요, 구글 어시스턴트 스타일의 가계부 비서입니다. 지출을 기록하거나 통계를 확인하는 걸 도와드릴 수 있어요.',
+        '안녕하세요, 구글 어시스턴트 스타일의 가계부 비서입니다. 지출을 입력하거나 통계를 확인하는 걸 도와드릴 수 있어요.',
       );
       _startListening();
       return;
     }
 
-    // 2. 전체 문장에서 데이터 추출 시도 (슬롯 필링 방식)
-    final parsed = _parseExpense(text);
-    _tempExpenseItem = parsed['item'];
-    _tempExpensePrice = parsed['price'];
+    // 2. Gemini Nano NLU 실행 (온디바이스 전용)
+    bool nanoProcessed = false;
+    if (await _aicore.isAvailable()) {
+      setState(() => _isProcessing = true);
+      try {
+        final result = await _aicore.processVoiceInput(text);
+        if (result.containsKey('items') &&
+            (result['items'] as List).isNotEmpty) {
+          final first = (result['items'] as List)[0] as Map<String, dynamic>;
+          final item = first['name']?.toString();
+          final total = first['total']?.toString();
 
-    // 3. 지출/기록 의도 확인
+          if (item != null || total != null) {
+            _tempExpenseItem = item;
+            _tempExpensePrice = total;
+            nanoProcessed = true;
+            debugPrint('[Nano] 파싱 성공: item=$item, price=$total');
+          }
+        }
+      } catch (e) {
+        debugPrint('[Nano] Floating Button NLU Error: $e');
+      } finally {
+        setState(() => _isProcessing = false);
+      }
+    }
+
+    // 3. Fallback to regex (나노를 사용할 수 없거나 실패한 경우)
+    if (!nanoProcessed) {
+      final parsed = _parseExpense(text);
+      _tempExpenseItem = parsed['item'];
+      _tempExpensePrice = parsed['price'];
+    }
+
+    // 4. 지출/기록 의도 확인
     final isExpenseIntent = _containsAny(lowerText, [
       '지출',
       '기록',

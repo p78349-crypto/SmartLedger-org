@@ -13,8 +13,7 @@ class FoodExpiryNotificationService {
 
   static const String _androidChannelId = 'food_expiry';
   static const String _androidChannelName = '유통기한 알림';
-  static const String _androidChannelDescription =
-      '유통기한 임박/경과 알림을 제공합니다.';
+  static const String _androidChannelDescription = '유통기한 임박/경과 알림을 제공합니다.';
 
   static const String _actionRecipe = 'food_expiry_action_recipe';
   static const String _actionRepurchase = 'food_expiry_action_repurchase';
@@ -98,8 +97,7 @@ class FoodExpiryNotificationService {
         nav.pushNamed(
           AppRoutes.foodExpiry,
           arguments: FoodExpiryArgs(
-            openCookableRecipePickerOnStart:
-                openCookableRecipePickerOnStart,
+            openCookableRecipePickerOnStart: openCookableRecipePickerOnStart,
           ),
         );
         return;
@@ -178,10 +176,7 @@ class FoodExpiryNotificationService {
     return FoodExpiryNotificationSettings(
       enabled: enabled,
       daysBefore: daysBefore.clamp(0, 365),
-      time: TimeOfDay(
-        hour: hour.clamp(0, 23),
-        minute: minute.clamp(0, 59),
-      ),
+      time: TimeOfDay(hour: hour.clamp(0, 23), minute: minute.clamp(0, 59)),
     );
   }
 
@@ -210,10 +205,7 @@ class FoodExpiryNotificationService {
     }
 
     // fallback
-    return itemId.codeUnits.fold<int>(
-      0,
-      (a, b) => (a * 31 + b) % 2147483647,
-    );
+    return itemId.codeUnits.fold<int>(0, (a, b) => (a * 31 + b) % 2147483647);
   }
 
   NotificationDetails _details() {

@@ -29,7 +29,9 @@ class ItemSpendingAnalysis {
     final firstDate = dates.first;
     final lastDate = dates.last;
     final months =
-        ((lastDate.year - firstDate.year) * 12 + lastDate.month - firstDate.month)
+        ((lastDate.year - firstDate.year) * 12 +
+                lastDate.month -
+                firstDate.month)
             .clamp(1, 999);
     return totalAmount / months;
   }
@@ -66,7 +68,7 @@ class RecurringSpendingPattern {
     final avg = intervals.reduce((a, b) => a + b) / intervals.length;
     final variance =
         intervals.map((i) => (i - avg) * (i - avg)).reduce((a, b) => a + b) /
-            intervals.length;
+        intervals.length;
     final stdDev = variance > 0 ? variance / avg : 0.0;
     return (1.0 - stdDev.clamp(0.0, 1.0)).clamp(0.3, 1.0);
   }

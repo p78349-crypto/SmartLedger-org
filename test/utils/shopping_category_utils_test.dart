@@ -7,28 +7,32 @@ import 'package:smart_ledger/utils/shopping_category_utils.dart';
 void main() {
   group('ShoppingCategoryUtils', () {
     ShoppingCartItem item(String name) => ShoppingCartItem(
-          id: 'id',
-          name: name,
-          createdAt: DateTime(2026),
-          updatedAt: DateTime(2026),
-        );
+      id: 'id',
+      name: name,
+      createdAt: DateTime(2026),
+      updatedAt: DateTime(2026),
+    );
 
     test('normalizeHintKey trims/lowercases/removes spaces', () {
       expect(ShoppingCategoryUtils.normalizeHintKey('  Ab C  '), 'abc');
     });
 
     test('validateSuggestion falls back for unknown main category', () {
-      final validated = ShoppingCategoryUtils.validateSuggestion(
-        (mainCategory: '없는카테고리', subCategory: 'x', detailCategory: 'y'),
-      );
+      final validated = ShoppingCategoryUtils.validateSuggestion((
+        mainCategory: '없는카테고리',
+        subCategory: 'x',
+        detailCategory: 'y',
+      ));
       expect(validated.mainCategory, CategoryDefinitions.defaultCategory);
       expect(validated.subCategory, isNull);
     });
 
     test('validateSuggestion drops unknown subcategory', () {
-      final validated = ShoppingCategoryUtils.validateSuggestion(
-        (mainCategory: '식비', subCategory: '없는서브', detailCategory: 'x'),
-      );
+      final validated = ShoppingCategoryUtils.validateSuggestion((
+        mainCategory: '식비',
+        subCategory: '없는서브',
+        detailCategory: 'x',
+      ));
       expect(validated.mainCategory, '식비');
       expect(validated.subCategory, isNull);
       expect(validated.detailCategory, isNull);
@@ -56,7 +60,10 @@ void main() {
       expect(exact, isNotNull);
       expect(exact!.mainCategory, '식품·음료비');
 
-      final contains = ShoppingCategoryUtils.hintFromLearned(item('바나나 우유'), hints);
+      final contains = ShoppingCategoryUtils.hintFromLearned(
+        item('바나나 우유'),
+        hints,
+      );
       expect(contains, isNotNull);
       expect(contains!.mainCategory, '식품·음료비');
     });
@@ -73,7 +80,12 @@ void main() {
         item('사과'),
         learnedHints: hints,
       );
-      expect(CategoryDefinitions.shoppingMainCategories.contains(suggestion.mainCategory), isTrue);
+      expect(
+        CategoryDefinitions.shoppingMainCategories.contains(
+          suggestion.mainCategory,
+        ),
+        isTrue,
+      );
       expect(suggestion.mainCategory, '생활용품비');
     });
   });

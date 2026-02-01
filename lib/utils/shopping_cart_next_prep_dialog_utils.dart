@@ -80,9 +80,7 @@ class ShoppingCartNextPrepDialogUtils {
                 const Divider(height: 1),
                 ...actions.map((a) {
                   final isDefault = a == defaultAction;
-                  final title = isDefault
-                      ? '${titleOf(a)} (추천)'
-                      : titleOf(a);
+                  final title = isDefault ? '${titleOf(a)} (추천)' : titleOf(a);
                   return ListTile(
                     leading: Icon(iconOf(a)),
                     title: Text(title),

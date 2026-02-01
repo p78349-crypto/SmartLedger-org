@@ -40,27 +40,21 @@ class _SettingsRoutes {
         final a = args as IconManagementArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => IconManagement2Screen(
-            accountName: a.accountName,
-          ),
+          builder: (_) => IconManagement2Screen(accountName: a.accountName),
         );
 
       case AppRoutes.iconManagementAsset:
         final a = args as IconManagementArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => IconManagementAssetScreen(
-            accountName: a.accountName,
-          ),
+          builder: (_) => IconManagementAssetScreen(accountName: a.accountName),
         );
 
       case AppRoutes.iconManagementRoot:
         final a = args as IconManagementArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => IconManagementRootScreen(
-            accountName: a.accountName,
-          ),
+          builder: (_) => IconManagementRootScreen(accountName: a.accountName),
         );
 
       case AppRoutes.featureIconsCatalog:
@@ -100,33 +94,39 @@ class _SettingsRoutes {
         );
 
       case AppRoutes.voiceShortcuts:
+        if (!AppConstants.voiceInputEnabled) {
+          return _voiceDisabledRoute(settings);
+        }
         return MaterialPageRoute(
           settings: settings,
           builder: (_) => const VoiceShortcutsScreen(),
         );
 
       case AppRoutes.voiceAssistantSettings:
+        if (!AppConstants.voiceInputEnabled) {
+          return _voiceDisabledRoute(settings);
+        }
         return MaterialPageRoute(
           settings: settings,
           builder: (_) => const VoiceAssistantSettingsScreen(),
         );
 
       case AppRoutes.voiceDashboard:
+        if (!AppConstants.voiceInputEnabled) {
+          return _voiceDisabledRoute(settings);
+        }
         final a = args as AccountArgs?;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => VoiceDashboardScreen(
-            accountName: a?.accountName,
-          ),
+          builder: (_) => VoiceDashboardScreen(accountName: a?.accountName),
         );
 
       case AppRoutes.page1BottomIconSettings:
         final a = args as AccountArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => Page1BottomIconSettingsScreen(
-            accountName: a.accountName,
-          ),
+          builder: (_) =>
+              Page1BottomIconSettingsScreen(accountName: a.accountName),
         );
 
       case AppRoutes.privacyPolicy:

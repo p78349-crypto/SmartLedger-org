@@ -80,14 +80,13 @@ void main() {
   });
 
   group('CollapsibleSection', () {
-    testWidgets('shows children when initiallyExpanded is true', (tester) async {
+    testWidgets('shows children when initiallyExpanded is true', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: CollapsibleSection(
-              title: '섹션',
-              children: [Text('Child')],
-            ),
+            body: CollapsibleSection(title: '섹션', children: [Text('Child')]),
           ),
         ),
       );
@@ -95,7 +94,9 @@ void main() {
       expect(find.text('Child'), findsOneWidget);
     });
 
-    testWidgets('hides children when initiallyExpanded is false', (tester) async {
+    testWidgets('hides children when initiallyExpanded is false', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
@@ -115,10 +116,7 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: CollapsibleSection(
-              title: '섹션',
-              children: [Text('Child')],
-            ),
+            body: CollapsibleSection(title: '섹션', children: [Text('Child')]),
           ),
         ),
       );

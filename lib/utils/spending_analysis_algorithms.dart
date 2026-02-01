@@ -26,7 +26,8 @@ List<CategorySpendingSummary> spendingGetTopSpendingCategories({
     required int topN,
     DateTime? startDate,
     DateTime? endDate,
-  }) getTopSpendingItems,
+  })
+  getTopSpendingItems,
 }) {
   currentMonth ??= DateTime.now();
 
@@ -143,9 +144,7 @@ List<RecurringSpendingPattern> spendingDetectRecurringPatterns({
         : txList.length;
 
     final lastPurchase = dates.last;
-    final predictedNext = lastPurchase.add(
-      Duration(days: avgInterval.round()),
-    );
+    final predictedNext = lastPurchase.add(Duration(days: avgInterval.round()));
 
     final avgAmount = StatsCalculator.calculateTotal(txList) / txList.length;
 
@@ -179,15 +178,12 @@ List<double> spendingGetItemSpendingTrend({
     final monthStart = DateTime(now.year, now.month - i);
     final monthEnd = DateTime(now.year, now.month - i + 1, 0);
 
-    final monthTx = StatsCalculator.filterByRange(
-      transactions,
-      monthStart,
-      monthEnd,
-    ).where(
-      (tx) =>
-          tx.type == TransactionType.expense &&
-          spendingNormalizeItemName(tx.description) == normalizedName,
-    );
+    final monthTx =
+        StatsCalculator.filterByRange(transactions, monthStart, monthEnd).where(
+          (tx) =>
+              tx.type == TransactionType.expense &&
+              spendingNormalizeItemName(tx.description) == normalizedName,
+        );
 
     trend.add(StatsCalculator.calculateTotal(monthTx.toList()));
   }

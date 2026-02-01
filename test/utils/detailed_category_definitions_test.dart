@@ -40,8 +40,8 @@ void main() {
     group('mainCategories', () {
       test('returns all category keys', () {
         final mainCategories = DetailedCategoryDefinitions.mainCategories;
-        final optionKeys =
-            DetailedCategoryDefinitions.categoryOptions.keys.toList();
+        final optionKeys = DetailedCategoryDefinitions.categoryOptions.keys
+            .toList();
         expect(mainCategories, optionKeys);
       });
 
@@ -53,21 +53,24 @@ void main() {
 
     group('getSubCategories', () {
       test('returns sub-categories for valid main category', () {
-        final subcategories =
-            DetailedCategoryDefinitions.getSubCategories('식품·음료비');
+        final subcategories = DetailedCategoryDefinitions.getSubCategories(
+          '식품·음료비',
+        );
         expect(subcategories, contains('장보기'));
         expect(subcategories, contains('외식'));
       });
 
       test('returns empty list for invalid main category', () {
-        final subcategories =
-            DetailedCategoryDefinitions.getSubCategories('없는카테고리');
+        final subcategories = DetailedCategoryDefinitions.getSubCategories(
+          '없는카테고리',
+        );
         expect(subcategories, isEmpty);
       });
 
       test('returned list is not growable', () {
-        final subcategories =
-            DetailedCategoryDefinitions.getSubCategories('식품·음료비');
+        final subcategories = DetailedCategoryDefinitions.getSubCategories(
+          '식품·음료비',
+        );
         expect(() => subcategories.add('test'), throwsUnsupportedError);
       });
     });

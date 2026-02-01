@@ -68,7 +68,9 @@ void main() {
     test('decryptJsonEnvelope throws when password is empty', () async {
       expect(
         () => BackupCrypto.decryptJsonEnvelope(
-          encryptedEnvelopeJson: jsonEncode({'format': BackupCrypto.envelopeFormat}),
+          encryptedEnvelopeJson: jsonEncode({
+            'format': BackupCrypto.envelopeFormat,
+          }),
           password: '',
         ),
         throwsA(
@@ -113,28 +115,31 @@ void main() {
       );
     });
 
-    test('decryptJsonEnvelope throws when envelope fields are missing', () async {
-      final broken = jsonEncode({
-        'format': BackupCrypto.envelopeFormat,
-        'v': BackupCrypto.envelopeVersion,
-        'salt': 'abc',
-        // nonce/ct/mac missing
-      });
+    test(
+      'decryptJsonEnvelope throws when envelope fields are missing',
+      () async {
+        final broken = jsonEncode({
+          'format': BackupCrypto.envelopeFormat,
+          'v': BackupCrypto.envelopeVersion,
+          'salt': 'abc',
+          // nonce/ct/mac missing
+        });
 
-      expect(
-        () => BackupCrypto.decryptJsonEnvelope(
-          encryptedEnvelopeJson: broken,
-          password: 'pw',
-        ),
-        throwsA(
-          isA<Exception>().having(
-            (e) => e.toString(),
-            'message',
-            contains('암호화 백업 데이터가 손상되었습니다'),
+        expect(
+          () => BackupCrypto.decryptJsonEnvelope(
+            encryptedEnvelopeJson: broken,
+            password: 'pw',
           ),
-        ),
-      );
-    });
+          throwsA(
+            isA<Exception>().having(
+              (e) => e.toString(),
+              'message',
+              contains('암호화 백업 데이터가 손상되었습니다'),
+            ),
+          ),
+        );
+      },
+    );
 
     test('decryptJsonEnvelope throws with wrong password', () async {
       const plainJson = '{"secret":true}';

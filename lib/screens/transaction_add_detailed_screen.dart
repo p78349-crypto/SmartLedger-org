@@ -8,6 +8,7 @@ import '../utils/pref_keys.dart';
 import '../models/asset.dart';
 import '../models/category_hint.dart';
 import '../models/shopping_cart_item.dart';
+import '../models/shopping_cart_history_entry.dart';
 import '../models/transaction.dart';
 import 'income_split_screen.dart';
 // import 'package:smart_ledger/screens/nutrition_report_screen.dart';
@@ -28,6 +29,8 @@ import '../utils/icon_catalog.dart';
 import '../utils/income_category_definitions.dart';
 import '../utils/snackbar_utils.dart';
 import '../utils/store_memo_utils.dart';
+import '../navigation/app_routes_args.dart';
+import '../utils/shopping_cart_sync_utils.dart';
 
 // 최근 결제수단/메모 저장 키 및 최대 개수
 const String _recentDescriptionsKey = 'recent_descriptions';
@@ -57,6 +60,9 @@ class TransactionAddDetailedScreen extends StatefulWidget {
   final bool treatAsNew;
   final bool closeAfterSave;
   final bool autoSubmit;
+  final String? initialPaymentMethod;
+  final String? initialMemo;
+
   const TransactionAddDetailedScreen({
     super.key,
     required this.accountName,
@@ -66,6 +72,8 @@ class TransactionAddDetailedScreen extends StatefulWidget {
     this.treatAsNew = false,
     this.closeAfterSave = false,
     this.autoSubmit = false,
+    this.initialPaymentMethod,
+    this.initialMemo,
   });
 
   @override
@@ -122,10 +130,10 @@ class _TransactionAddDetailedScreenState
                     title: Text('$titlePrefix - ${widget.accountName}'),
                     actions: [
                       IconButton(
-                        tooltip: '장바구니 불러오기',
+                        tooltip: '장바구니 동기화',
                         icon: const Icon(IconCatalog.shoppingCart),
                         onPressed: () => _formStateKey.currentState
-                            ?.openShoppingCartPicker(),
+                            ?.confirmAndOpenShoppingCartPicker(),
                       ),
                       IconButton(
                         tooltip: '입력값 되돌리기',
@@ -149,6 +157,8 @@ class _TransactionAddDetailedScreenState
                   treatAsNew: widget.treatAsNew,
                   closeAfterSave: widget.closeAfterSave,
                   titlePrefix: isLandscape ? titlePrefix : null,
+                  initialPaymentMethod: widget.initialPaymentMethod,
+                  initialMemo: widget.initialMemo,
                 ),
               ),
             ),
@@ -213,6 +223,8 @@ class TransactionAddDetailedForm extends StatefulWidget {
   final bool treatAsNew;
   final bool closeAfterSave;
   final String? titlePrefix;
+  final String? initialPaymentMethod;
+  final String? initialMemo;
   const TransactionAddDetailedForm({
     super.key,
     required this.accountName,
@@ -222,6 +234,8 @@ class TransactionAddDetailedForm extends StatefulWidget {
     this.treatAsNew = false,
     this.closeAfterSave = false,
     this.titlePrefix,
+    this.initialPaymentMethod,
+    this.initialMemo,
   });
 
   @override
@@ -596,6 +610,11 @@ class _TransactionAddDetailedFormState
     final initial = widget.initialTransaction;
     _transactionDate = initial?.date ?? DateTime.now();
     if (initial != null) {
+      debugPrint(
+        '[TransactionAddDetailedForm.initState] '
+        '초기값 바인딩: desc=${initial.description}, '
+        'qty=${initial.quantity}, unitPrice=${initial.unitPrice}',
+      );
       _selectedType = initial.type;
       _descController.text = initial.description;
       _qtyController.text = initial.quantity.toString();
@@ -619,7 +638,14 @@ class _TransactionAddDetailedFormState
         );
       }
       _paymentController.text = initial.paymentMethod;
+      if (_paymentController.text.isEmpty &&
+          widget.initialPaymentMethod != null) {
+        _paymentController.text = widget.initialPaymentMethod!;
+      }
       _memoController.text = initial.memo;
+      if (_memoController.text.isEmpty && widget.initialMemo != null) {
+        _memoController.text = widget.initialMemo!;
+      }
       _storeController.text = initial.store?.trim() ?? '';
       if (initial.type == TransactionType.savings) {
         _savingsAllocation =
@@ -634,6 +660,12 @@ class _TransactionAddDetailedFormState
       _expiryDate = initial.expiryDate;
     } else {
       _qtyController.text = '1';
+      if (widget.initialPaymentMethod != null) {
+        _paymentController.text = widget.initialPaymentMethod!;
+      }
+      if (widget.initialMemo != null) {
+        _memoController.text = widget.initialMemo!;
+      }
     }
     if (_selectedType == TransactionType.income) {
       if (_isEditing) {
@@ -815,6 +847,16 @@ class _TransactionAddDetailedFormState
       useSafeArea: true,
       isScrollControlled: true,
       builder: (sheetContext) {
+        // Grouping items by date for display
+        final grouped = <String, List<ShoppingCartItem>>{};
+        for (var it in local) {
+          final dateStr =
+              '${it.createdAt.year}-${it.createdAt.month.toString().padLeft(2, '0')}-${it.createdAt.day.toString().padLeft(2, '0')}';
+          grouped.putIfAbsent(dateStr, () => []).add(it);
+        }
+        final sortedDates = grouped.keys.toList()
+          ..sort((a, b) => b.compareTo(a));
+
         return SafeArea(
           child: Material(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
@@ -824,7 +866,7 @@ class _TransactionAddDetailedFormState
               child: Column(
                 children: [
                   ListTile(
-                    title: const Text('장바구니 항목 선택 (지출입력으로 넘기기)'),
+                    title: const Text('재구매 예정 항목 선택'),
                     trailing: IconButton(
                       icon: const Icon(IconCatalog.close),
                       onPressed: () => Navigator.of(sheetContext).pop(false),
@@ -832,28 +874,147 @@ class _TransactionAddDetailedFormState
                   ),
                   const Divider(height: 1),
                   Expanded(
-                    child: ListView.builder(
-                      itemCount: local.length,
-                      itemBuilder: (context, index) {
-                        final it = local[index];
-                        final qty = it.quantity <= 0 ? 1 : it.quantity;
-                        final unitPriceText = it.unitPrice <= 0
-                            ? '-'
-                            : CurrencyFormatter.formatWithDecimals(
-                                it.unitPrice,
-                                showUnit: false,
-                              );
-                        return CheckboxListTile(
-                          value: it.isChecked,
-                          title: Text(it.name),
-                          subtitle: Text(
-                            '수량: $qty'
-                            '    단가: $unitPriceText',
-                          ),
-                          onChanged: (v) {
-                            local[index] = it.copyWith(isChecked: v ?? false);
-                            // rebuild sheet
-                            (sheetContext as Element).markNeedsBuild();
+                    child: StatefulBuilder(
+                      builder: (context, setSheetState) {
+                        return ListView.builder(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          itemCount: sortedDates.length,
+                          itemBuilder: (context, dateIndex) {
+                            final dateStr = sortedDates[dateIndex];
+                            final dateItems = grouped[dateStr]!;
+
+                            return Card(
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Theme(
+                                data: Theme.of(
+                                  context,
+                                ).copyWith(dividerColor: Colors.transparent),
+                                child: ExpansionTile(
+                                  initiallyExpanded: true,
+                                  tilePadding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                  ),
+                                  title: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              dateStr,
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 15,
+                                              ),
+                                            ),
+                                            Text(
+                                              '${dateItems.length}개 항목',
+                                              style: TextStyle(
+                                                color: Theme.of(
+                                                  context,
+                                                ).colorScheme.onSurfaceVariant,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      TextButton.icon(
+                                        onPressed: () {
+                                          final allChecked = dateItems.every(
+                                            (e) => e.isChecked,
+                                          );
+                                          setSheetState(() {
+                                            for (final it in dateItems) {
+                                              final originalIdx = local
+                                                  .indexWhere(
+                                                    (element) =>
+                                                        element.id == it.id,
+                                                  );
+                                              if (originalIdx != -1) {
+                                                local[originalIdx] = it
+                                                    .copyWith(
+                                                      isChecked: !allChecked,
+                                                    );
+                                                final itemIdx = dateItems
+                                                    .indexWhere(
+                                                      (e) => e.id == it.id,
+                                                    );
+                                                if (itemIdx != -1) {
+                                                  dateItems[itemIdx] = it
+                                                      .copyWith(
+                                                        isChecked: !allChecked,
+                                                      );
+                                                }
+                                              }
+                                            }
+                                          });
+                                        },
+                                        icon: Icon(
+                                          dateItems.every((e) => e.isChecked)
+                                              ? Icons.check_box
+                                              : Icons.check_box_outline_blank,
+                                          size: 20,
+                                        ),
+                                        label: Text(
+                                          dateItems.every((e) => e.isChecked)
+                                              ? '선택해제'
+                                              : '전체선택',
+                                        ),
+                                        style: TextButton.styleFrom(
+                                          visualDensity: VisualDensity.compact,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  children: dateItems.map((it) {
+                                    final qty = it.quantity <= 0
+                                        ? 1
+                                        : it.quantity;
+                                    final unitPriceText = it.unitPrice <= 0
+                                        ? '-'
+                                        : CurrencyFormatter.formatWithDecimals(
+                                            it.unitPrice,
+                                            showUnit: false,
+                                          );
+                                    return CheckboxListTile(
+                                      value: it.isChecked,
+                                      title: Text(it.name),
+                                      subtitle: Text(
+                                        '수량: $qty    단가: $unitPriceText',
+                                      ),
+                                      dense: true,
+                                      onChanged: (v) {
+                                        final originalIdx = local.indexWhere(
+                                          (element) => element.id == it.id,
+                                        );
+                                        if (originalIdx != -1) {
+                                          local[originalIdx] = it.copyWith(
+                                            isChecked: v ?? false,
+                                          );
+                                          final itemIdx = dateItems.indexWhere(
+                                            (e) => e.id == it.id,
+                                          );
+                                          if (itemIdx != -1) {
+                                            dateItems[itemIdx] = it.copyWith(
+                                              isChecked: v ?? false,
+                                            );
+                                          }
+                                        }
+                                        setSheetState(() {});
+                                      },
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
+                            );
                           },
                         );
                       },
@@ -865,6 +1026,11 @@ class _TransactionAddDetailedFormState
                       children: [
                         Expanded(
                           child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
                             onPressed: () =>
                                 Navigator.of(sheetContext).pop(false),
                             child: const Text('취소'),
@@ -873,9 +1039,14 @@ class _TransactionAddDetailedFormState
                         const SizedBox(width: 12),
                         Expanded(
                           child: FilledButton(
+                            style: FilledButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
                             onPressed: () =>
                                 Navigator.of(sheetContext).pop(true),
-                            child: const Text('선택 항목 지출입력으로 이동'),
+                            child: const Text('지출입력 상세 입력하기'),
                           ),
                         ),
                       ],
@@ -894,6 +1065,64 @@ class _TransactionAddDetailedFormState
     // Replace original items with local (which includes isChecked flags)
     items = local;
 
+    final checkedItems = items.where((i) => i.isChecked).toList();
+
+    // 단일 항목 선택 시 현재 화면의 필드를 채우기
+    if (checkedItems.length == 1) {
+      final item = checkedItems.first;
+      final qty = item.quantity <= 0 ? 1 : item.quantity;
+      final unitPrice = item.unitPrice;
+      final total = unitPrice * qty;
+
+      debugPrint(
+        '[openShoppingCartPicker] 단일 항목 선택: '
+        'name=${item.name}, qty=$qty, unitPrice=$unitPrice',
+      );
+
+      // 현재 화면의 필드 채우기
+      setState(() {
+        _descController.text = item.name;
+        _qtyController.text = qty.toString();
+        _unitPriceController.text = unitPrice > 0
+            ? unitPrice.toStringAsFixed(
+                unitPrice == unitPrice.roundToDouble() ? 0 : 2,
+              )
+            : '';
+        _amountController.text = total > 0
+            ? total.toStringAsFixed(total == total.roundToDouble() ? 0 : 2)
+            : '';
+        _updateAmount();
+      });
+
+      // 선택된 항목 제거
+      await UserPrefService.setShoppingCartItems(
+        accountName: widget.accountName,
+        items: items.where((i) => i.id != item.id).toList(),
+      );
+
+      // 히스토리 기록
+      final at = DateTime.now();
+      await UserPrefService.addShoppingCartHistoryEntry(
+        accountName: widget.accountName,
+        entry: ShoppingCartHistoryEntry(
+          id: 'hist_${at.microsecondsSinceEpoch}',
+          action: ShoppingCartHistoryAction.addToLedger,
+          itemId: item.id,
+          name: item.name,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          isPlanned: item.isPlanned,
+          at: at,
+        ),
+      );
+
+      if (mounted) {
+        SnackbarUtils.showInfo(context, '${item.name}을(를) 입력 필드에 추가했습니다.');
+      }
+      return;
+    }
+
+    // 다중 항목 선택 시 기존 로직 (bulk flow)
     // load category hints for suggestions
     final hints = await UserPrefService.getShoppingCategoryHints(
       accountName: widget.accountName,
@@ -915,7 +1144,19 @@ class _TransactionAddDetailedFormState
         );
       },
       reload: () async {},
+      useDetailedMode: true,
     );
+  }
+
+  Future<void> confirmAndOpenShoppingCartPicker() async {
+    final items = await ShoppingCartSyncUtils.confirmAndLoadCheckedItems(
+      context,
+      widget.accountName,
+    );
+    if (!mounted || items == null) return;
+
+    await _saveDraft();
+    await openShoppingCartPicker();
   }
 
   // Draft persistence (short-lived draft to survive short navigations)
@@ -1083,10 +1324,20 @@ class _TransactionAddDetailedFormState
           content: const Text('화면을 열었을 때의 입력값으로 되돌릴까요?'),
           actions: [
             TextButton(
+              style: TextButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
               onPressed: () => Navigator.of(dialogContext).pop(false),
               child: const Text('취소'),
             ),
             FilledButton(
+              style: FilledButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
               onPressed: () => Navigator.of(dialogContext).pop(true),
               child: const Text('되돌리기'),
             ),
@@ -1283,10 +1534,20 @@ class _TransactionAddDetailedFormState
           ),
           actions: [
             TextButton(
+              style: TextButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
               onPressed: () => Navigator.of(dialogContext).pop(false),
               child: const Text('취소'),
             ),
             FilledButton(
+              style: FilledButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
               onPressed: () => Navigator.of(dialogContext).pop(true),
               child: const Text('계속 저장'),
             ),
@@ -1502,11 +1763,21 @@ class _TransactionAddDetailedFormState
             ),
             actions: [
               TextButton(
+                style: TextButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
                 onPressed: () => Navigator.of(dialogContext).pop(false),
                 child: const Text('취소'),
               ),
               if (shoppingCompareFuture == null)
                 FilledButton(
+                  style: FilledButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
                   onPressed: () => Navigator.of(dialogContext).pop(true),
                   child: const Text('저장'),
                 )
@@ -1520,6 +1791,11 @@ class _TransactionAddDetailedFormState
                     };
 
                     final button = FilledButton(
+                      style: FilledButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
                       onPressed: () => Navigator.of(dialogContext).pop(true),
                       child: const Text('저장'),
                     );
@@ -1594,9 +1870,15 @@ class _TransactionAddDetailedFormState
             createdAt: now,
             updatedAt: now,
           );
+          var nextItems = [...currentItems, newItem];
+          // 최근 10건만 유지 (재구매 예정 목록 최신순 제한)
+          if (nextItems.length > 10) {
+            nextItems.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+            nextItems = nextItems.take(10).toList();
+          }
           await UserPrefService.setShoppingCartItems(
             accountName: widget.accountName,
-            items: [...currentItems, newItem],
+            items: nextItems,
           );
         }
 
@@ -1715,14 +1997,22 @@ class _TransactionAddDetailedFormState
         );
       }
 
+      final result = TransactionAddResult(
+        saved: true,
+        paymentMethod: transaction.paymentMethod,
+        memo: transaction.memo,
+        mainCategory: transaction.mainCategory,
+        subCategory: transaction.subCategory,
+      );
+
       if (existing != null) {
         Future.delayed(const Duration(milliseconds: 500), () {
-          if (mounted) navigator.pop(true);
+          if (mounted) navigator.pop(result);
         });
       } else {
         if (widget.closeAfterSave) {
           Future.delayed(const Duration(milliseconds: 200), () {
-            if (mounted) navigator.pop(true);
+            if (mounted) navigator.pop(result);
           });
           return;
         }
@@ -1847,10 +2137,20 @@ class _TransactionAddDetailedFormState
           ),
           actions: [
             TextButton(
+              style: TextButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
               onPressed: () => Navigator.pop(context, false),
               child: const Text('옵션 1: 현금 추가만'),
             ),
             FilledButton.icon(
+              style: FilledButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
               icon: const Icon(IconCatalog.accountBalanceWallet),
               label: const Text('옵션 2: 분배하기'),
               onPressed: () => Navigator.pop(context, true),
@@ -2010,9 +2310,9 @@ class _TransactionAddDetailedFormState
               ),
             ),
             IconButton(
-              tooltip: '장바구니 불러오기',
+              tooltip: '장바구니 동기화',
               icon: const Icon(IconCatalog.shoppingCart),
-              onPressed: openShoppingCartPicker,
+              onPressed: confirmAndOpenShoppingCartPicker,
               visualDensity: VisualDensity.compact,
             ),
             const SizedBox(width: 8),
@@ -2485,7 +2785,17 @@ class _TransactionAddDetailedFormState
                 }
               },
               child: InputDecorator(
-                decoration: _standardInputDecoration(labelText: '유통기한'),
+                decoration: _standardInputDecoration(
+                  labelText: '유통기한',
+                  suffixIcon: _expiryDate != null
+                      ? IconButton(
+                          icon: const Icon(Icons.close, size: 20),
+                          onPressed: () {
+                            setState(() => _expiryDate = null);
+                          },
+                        )
+                      : null,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -2494,7 +2804,8 @@ class _TransactionAddDetailedFormState
                           ? '선택 안함'
                           : DateFormat('yyyy-MM-dd').format(_expiryDate!),
                     ),
-                    const Icon(Icons.calendar_today, size: 18),
+                    if (_expiryDate == null)
+                      const Icon(Icons.calendar_today, size: 18),
                   ],
                 ),
               ),
@@ -2503,7 +2814,7 @@ class _TransactionAddDetailedFormState
           const SizedBox(width: 12),
           Expanded(
             child: CheckboxListTile(
-              title: const Text('장바구니', style: TextStyle(fontSize: 14)),
+              title: const Text('재구매 예정', style: TextStyle(fontSize: 14)),
               value: _addToShoppingList,
               onChanged: (v) => setState(() => _addToShoppingList = v ?? false),
               controlAffinity: ListTileControlAffinity.leading,
@@ -2558,6 +2869,11 @@ class _TransactionAddDetailedFormState
       return Align(
         alignment: Alignment.centerLeft,
         child: OutlinedButton.icon(
+          style: OutlinedButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
           onPressed: () {
             setState(() {
               if (_selectedType == TransactionType.income &&
@@ -2603,6 +2919,9 @@ class _TransactionAddDetailedFormState
                 label: const Text('숨기기'),
                 style: TextButton.styleFrom(
                   visualDensity: VisualDensity.compact,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               ),
             ],
@@ -2717,6 +3036,26 @@ class _TransactionAddDetailedFormState
                   _persistLastCategoryForType(_selectedType, main: cat),
                 );
               },
+              showCheckmark: false,
+              visualDensity: VisualDensity.compact,
+              selectedColor: theme.colorScheme.primary,
+              labelStyle: TextStyle(
+                fontSize: 12.5,
+                letterSpacing: -0.2,
+                color: isSelected
+                    ? theme.colorScheme.onPrimary
+                    : theme.colorScheme.onSurface,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(
+                  color: isSelected
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.outlineVariant,
+                  width: isSelected ? 1.5 : 1.0,
+                ),
+              ),
             );
           }).toList(),
         ),
@@ -2747,6 +3086,26 @@ class _TransactionAddDetailedFormState
                     _selectedDetailCategory = null;
                   });
                 },
+                showCheckmark: false,
+                visualDensity: VisualDensity.compact,
+                selectedColor: theme.colorScheme.secondary,
+                labelStyle: TextStyle(
+                  fontSize: 12.5,
+                  letterSpacing: -0.2,
+                  color: isSelected
+                      ? theme.colorScheme.onSecondary
+                      : theme.colorScheme.onSurface,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(
+                    color: isSelected
+                        ? theme.colorScheme.secondary
+                        : theme.colorScheme.outlineVariant,
+                    width: isSelected ? 1.5 : 1.0,
+                  ),
+                ),
               );
             }).toList(),
           ),
@@ -2777,6 +3136,26 @@ class _TransactionAddDetailedFormState
                     _selectedDetailCategory = cat;
                   });
                 },
+                showCheckmark: false,
+                visualDensity: VisualDensity.compact,
+                selectedColor: theme.colorScheme.tertiary,
+                labelStyle: TextStyle(
+                  fontSize: 12.5,
+                  letterSpacing: -0.2,
+                  color: isSelected
+                      ? theme.colorScheme.onTertiary
+                      : theme.colorScheme.onSurface,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(
+                    color: isSelected
+                        ? theme.colorScheme.tertiary
+                        : theme.colorScheme.outlineVariant,
+                    width: isSelected ? 1.5 : 1.0,
+                  ),
+                ),
               );
             }).toList(),
           ),

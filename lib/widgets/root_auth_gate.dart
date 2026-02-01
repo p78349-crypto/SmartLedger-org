@@ -40,7 +40,8 @@ class _RootAuthGateState extends State<RootAuthGate> {
 
     // Developer/testing bypass via SharedPreferences key.
     // Disabled in release builds.
-    if (!kReleaseMode && prefs.getBool(PrefKeys.bypassSecurityForTesting) == true) {
+    if (!kReleaseMode &&
+        prefs.getBool(PrefKeys.bypassSecurityForTesting) == true) {
       if (!mounted) return;
       setState(() {
         _enabled = false;

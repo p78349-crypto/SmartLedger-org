@@ -7,9 +7,7 @@ void main() {
     testWidgets('renders current page number (1-based)', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: PageIndicator(pageCount: 3, currentPage: 1),
-          ),
+          home: Scaffold(body: PageIndicator(pageCount: 3, currentPage: 1)),
         ),
       );
 

@@ -772,8 +772,9 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                                           '${tx.description} '
                                           '$refundQuantity개 환불받음 '
                                           '$refundAmountText원 → 지출예산\n';
-                                      final memoSuffix = '\n원구매일: $origDate, '
-                               '원결제수단: ${tx.paymentMethod}';
+                                      final memoSuffix =
+                                          '\n원구매일: $origDate, '
+                                          '원결제수단: ${tx.paymentMethod}';
                                       final refundTx = Transaction(
                                         id: DateTime.now()
                                             .millisecondsSinceEpoch
@@ -823,9 +824,12 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                                       final origDate2 = DateFormatter
                                           .defaultDate
                                           .format(tx.date);
-                                      final refundNote = '$refundAmountText2원 → $selectedAccount';
-                                      final refundDetails = '\n원구매일: $origDate2, 원결제수단: ${tx.paymentMethod}';
-                                      final autoMemo = '${tx.description} $refundQuantity개 환불받음 $refundNote$refundDetails';
+                                      final refundNote =
+                                          '$refundAmountText2원 → $selectedAccount';
+                                      final refundDetails =
+                                          '\n원구매일: $origDate2, 원결제수단: ${tx.paymentMethod}';
+                                      final autoMemo =
+                                          '${tx.description} $refundQuantity개 환불받음 $refundNote$refundDetails';
                                       final refundTx = Transaction(
                                         id: DateTime.now()
                                             .millisecondsSinceEpoch
@@ -848,7 +852,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                                         memo: memoController.text.isEmpty
                                             ? autoMemo
                                             : '${memoController.text}\n원구매일: $origDate2, '
-                                              '원결제수단: ${tx.paymentMethod}',
+                                                  '원결제수단: ${tx.paymentMethod}',
                                         savingsAllocation: allocation,
                                         isRefund: true,
                                         originalTransactionId: tx.id,

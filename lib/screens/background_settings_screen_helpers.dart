@@ -37,9 +37,7 @@ extension BackgroundSettingsHelpers on _BackgroundSettingsScreenState {
       if (!photosGranted && !storageGranted) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('이미지를 선택하려면 저장소 권한이 필요합니다.'),
-            ),
+            const SnackBar(content: Text('이미지를 선택하려면 저장소 권한이 필요합니다.')),
           );
         }
         return;
@@ -64,9 +62,7 @@ extension BackgroundSettingsHelpers on _BackgroundSettingsScreenState {
       if (!result.isGranted) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('카메라를 사용하려면 카메라 권한이 필요합니다.'),
-            ),
+            const SnackBar(content: Text('카메라를 사용하려면 카메라 권한이 필요합니다.')),
           );
         }
         return;
@@ -87,9 +83,7 @@ extension BackgroundSettingsHelpers on _BackgroundSettingsScreenState {
   Future<void> _changeBackgroundColor() async {
     final result = await showDialog<Color>(
       context: context,
-      builder: (context) => _ColorPickerDialog(
-        initialColor: _backgroundColor,
-      ),
+      builder: (context) => _ColorPickerDialog(initialColor: _backgroundColor),
     );
 
     if (result != null) {

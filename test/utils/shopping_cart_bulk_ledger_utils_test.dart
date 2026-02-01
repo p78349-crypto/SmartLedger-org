@@ -5,7 +5,9 @@ import 'package:smart_ledger/models/shopping_cart_item.dart';
 import 'package:smart_ledger/utils/shopping_cart_bulk_ledger_utils.dart';
 
 void main() {
-  testWidgets('addCheckedItemsToLedgerBulk shows snack when nothing checked', (tester) async {
+  testWidgets('addCheckedItemsToLedgerBulk shows snack when nothing checked', (
+    tester,
+  ) async {
     final now = DateTime(2026, 1, 11);
     final items = <ShoppingCartItem>[
       ShoppingCartItem(id: 'i1', name: '물', createdAt: now, updatedAt: now),

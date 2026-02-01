@@ -39,6 +39,8 @@ class _TransactionRoutes {
             treatAsNew: a.treatAsNew,
             closeAfterSave: a.closeAfterSave,
             autoSubmit: a.autoSubmit,
+            initialPaymentMethod: a.initialPaymentMethod,
+            initialMemo: a.initialMemo,
           ),
         );
 
@@ -85,9 +87,7 @@ class _TransactionRoutes {
         final a = args as AccountArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => MonthEndCarryoverScreen(
-            accountName: a.accountName,
-          ),
+          builder: (_) => MonthEndCarryoverScreen(accountName: a.accountName),
         );
 
       case AppRoutes.dailyTransactions:
@@ -137,9 +137,14 @@ class _TransactionRoutes {
         final a = args as AccountArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => EmergencyFundScreen(
-            accountName: a.accountName,
-          ),
+          builder: (_) => EmergencyFundScreen(accountName: a.accountName),
+        );
+
+      case AppRoutes.incomeSplitStatus:
+        final a = args as AccountArgs;
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => IncomeSplitStatusScreen(accountName: a.accountName),
         );
 
       case AppRoutes.emergencyServices:
@@ -162,21 +167,23 @@ class _TransactionRoutes {
         );
 
       case AppRoutes.geminiVoiceInput:
+        if (!AppConstants.voiceInputEnabled) {
+          return _voiceDisabledRoute(settings);
+        }
         final a = args as AccountArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => GeminiVoiceInputScreen(
-            accountName: a.accountName,
-          ),
+          builder: (_) => GeminiVoiceInputScreen(accountName: a.accountName),
         );
 
       case AppRoutes.smartVoiceCommand:
+        if (!AppConstants.voiceInputEnabled) {
+          return _voiceDisabledRoute(settings);
+        }
         final a = args as AccountArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => SmartVoiceCommandScreen(
-            accountName: a.accountName,
-          ),
+          builder: (_) => SmartVoiceCommandScreen(accountName: a.accountName),
         );
 
       default:
@@ -184,4 +191,3 @@ class _TransactionRoutes {
     }
   }
 }
-

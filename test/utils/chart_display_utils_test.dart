@@ -6,31 +6,19 @@ void main() {
   group('ChartDisplayUtils', () {
     group('getDisplayLabel', () {
       test('returns 막대형 for bar', () {
-        expect(
-          ChartDisplayUtils.getDisplayLabel(ChartDisplayType.bar),
-          '막대형',
-        );
+        expect(ChartDisplayUtils.getDisplayLabel(ChartDisplayType.bar), '막대형');
       });
 
       test('returns 선형 for line', () {
-        expect(
-          ChartDisplayUtils.getDisplayLabel(ChartDisplayType.line),
-          '선형',
-        );
+        expect(ChartDisplayUtils.getDisplayLabel(ChartDisplayType.line), '선형');
       });
 
       test('returns 원형 for pie', () {
-        expect(
-          ChartDisplayUtils.getDisplayLabel(ChartDisplayType.pie),
-          '원형',
-        );
+        expect(ChartDisplayUtils.getDisplayLabel(ChartDisplayType.pie), '원형');
       });
 
       test('returns 전체 for all', () {
-        expect(
-          ChartDisplayUtils.getDisplayLabel(ChartDisplayType.all),
-          '전체',
-        );
+        expect(ChartDisplayUtils.getDisplayLabel(ChartDisplayType.all), '전체');
       });
     });
 

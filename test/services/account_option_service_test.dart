@@ -39,9 +39,7 @@ void main() {
       });
 
       test('overwrites existing value', () async {
-        SharedPreferences.setMockInitialValues({
-          'opt_account1_option1': true,
-        });
+        SharedPreferences.setMockInitialValues({'opt_account1_option1': true});
 
         await AccountOptionService.setOption('account1', 'option1', false);
 
@@ -52,7 +50,9 @@ void main() {
 
     group('exportOptions', () {
       test('returns empty map when no options exist', () async {
-        final result = await AccountOptionService.exportOptions('empty_account');
+        final result = await AccountOptionService.exportOptions(
+          'empty_account',
+        );
         expect(result, isEmpty);
       });
 
@@ -84,10 +84,10 @@ void main() {
         });
 
         final prefs = await SharedPreferences.getInstance();
-        
+
         // 이전 옵션은 삭제됨
         expect(prefs.getBool('opt_import_test_old_option'), isNull);
-        
+
         // 새 옵션 저장됨
         expect(prefs.getBool('opt_import_test_new_option1'), isTrue);
         expect(prefs.getBool('opt_import_test_new_option2'), isFalse);
@@ -111,8 +111,14 @@ void main() {
       await AccountOptionService.setOption('account_a', 'shared_opt', true);
       await AccountOptionService.setOption('account_b', 'shared_opt', false);
 
-      final resultA = await AccountOptionService.getOption('account_a', 'shared_opt');
-      final resultB = await AccountOptionService.getOption('account_b', 'shared_opt');
+      final resultA = await AccountOptionService.getOption(
+        'account_a',
+        'shared_opt',
+      );
+      final resultB = await AccountOptionService.getOption(
+        'account_b',
+        'shared_opt',
+      );
 
       expect(resultA, isTrue);
       expect(resultB, isFalse);

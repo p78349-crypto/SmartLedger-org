@@ -5,26 +5,31 @@ import 'package:smart_ledger/utils/shopping_repurchase_learning_utils.dart';
 void main() {
   group('ShoppingRepurchaseLearningUtils', () {
     Transaction tx(String desc, DateTime date) => Transaction(
-          id: 't_${desc}_${date.millisecondsSinceEpoch}',
-          type: TransactionType.expense,
-          description: desc,
-          amount: 1000,
-          date: date,
-          mainCategory: Transaction.defaultMainCategory,
+      id: 't_${desc}_${date.millisecondsSinceEpoch}',
+      type: TransactionType.expense,
+      description: desc,
+      amount: 1000,
+      date: date,
+      mainCategory: Transaction.defaultMainCategory,
+    );
+
+    test(
+      'learnMinDaysByNameKey uses median of recent gaps and normalizes keys',
+      () {
+        final now = DateTime(2026, 1, 10);
+        final list = [
+          tx(' Apple ', now),
+          tx('apple', now.subtract(const Duration(days: 3))),
+          tx('APPLE', now.subtract(const Duration(days: 10))),
+        ];
+
+        final learned = ShoppingRepurchaseLearningUtils.learnMinDaysByNameKey(
+          list,
         );
-
-    test('learnMinDaysByNameKey uses median of recent gaps and normalizes keys', () {
-      final now = DateTime(2026, 1, 10);
-      final list = [
-        tx(' Apple ', now),
-        tx('apple', now.subtract(const Duration(days: 3))),
-        tx('APPLE', now.subtract(const Duration(days: 10))),
-      ];
-
-      final learned = ShoppingRepurchaseLearningUtils.learnMinDaysByNameKey(list);
-      // gaps: 3 and 7 -> sorted [3,7] -> median index 1 => 7
-      expect(learned['apple'], 7);
-    });
+        // gaps: 3 and 7 -> sorted [3,7] -> median index 1 => 7
+        expect(learned['apple'], 7);
+      },
+    );
 
     test('learnMinDaysByNameKey clamps learned values', () {
       final now = DateTime(2026, 1, 10);

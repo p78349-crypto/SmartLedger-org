@@ -4,7 +4,7 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:flutter/foundation.dart';
 
 /// SmartLedger 똑똑한 비서 - Gemini AI 서비스
-/// 
+///
 /// 주요 기능:
 /// 1. 카테고리 자동 분류 (키워드 없을 때)
 /// 2. 자연어 질문 → 데이터 조회
@@ -25,7 +25,7 @@ class GeminiAiService {
   /// API 키로 초기화
   Future<void> initialize(String apiKey) async {
     if (_isInitialized) return;
-    
+
     try {
       _model = GenerativeModel(
         model: 'gemini-1.5-flash',
@@ -48,12 +48,16 @@ class GeminiAiService {
   // ═══════════════════════════════════════════════════════════════
   // 1️⃣ 카테고리 자동 분류
   // ═══════════════════════════════════════════════════════════════
-  
+
   /// 거래 내역에서 카테고리 추론
-  Future<CategoryResult> classifyCategory(String description, {double? amount}) async {
+  Future<CategoryResult> classifyCategory(
+    String description, {
+    double? amount,
+  }) async {
     if (!isReady) return CategoryResult.unknown();
 
-    final prompt = '''
+    final prompt =
+        '''
 당신은 가계부 카테고리 분류 전문가입니다.
 
 거래 내역: "$description"
@@ -77,7 +81,7 @@ JSON 형식으로만 응답하세요:
     try {
       final response = await _model!.generateContent([Content.text(prompt)]);
       final text = response.text ?? '';
-      
+
       // JSON 파싱
       final jsonMatch = RegExp(r'\{[^}]+\}').firstMatch(text);
       if (jsonMatch != null) {
@@ -91,19 +95,20 @@ JSON 형식으로만 응답하세요:
     } catch (e) {
       debugPrint('카테고리 분류 오류: $e');
     }
-    
+
     return CategoryResult.unknown();
   }
 
   // ═══════════════════════════════════════════════════════════════
   // 2️⃣ 자연어 질문 → 데이터 조회
   // ═══════════════════════════════════════════════════════════════
-  
+
   /// 사용자 질문을 분석하여 쿼리 의도 파악
   Future<QueryIntent> parseUserQuestion(String question) async {
     if (!isReady) return QueryIntent.unknown();
 
-    final prompt = '''
+    final prompt =
+        '''
 당신은 가계부 앱의 똑똑한 비서입니다.
 사용자 질문을 분석하여 의도를 파악하세요.
 
@@ -132,7 +137,7 @@ JSON 형식으로만 응답:
     try {
       final response = await _model!.generateContent([Content.text(prompt)]);
       final text = response.text ?? '';
-      
+
       final jsonMatch = RegExp(r'\{[^}]+\}').firstMatch(text);
       if (jsonMatch != null) {
         final json = jsonDecode(jsonMatch.group(0)!) as Map<String, dynamic>;
@@ -141,19 +146,20 @@ JSON 형식으로만 응답:
     } catch (e) {
       debugPrint('질문 분석 오류: $e');
     }
-    
+
     return QueryIntent.unknown();
   }
 
   // ═══════════════════════════════════════════════════════════════
   // 3️⃣ 음성 명령 의도 파악
   // ═══════════════════════════════════════════════════════════════
-  
+
   /// 음성 명령에서 액션 파악
   Future<VoiceCommand> parseVoiceCommand(String command) async {
     if (!isReady) return VoiceCommand.unknown();
 
-    final prompt = '''
+    final prompt =
+        '''
 당신은 가계부 앱의 음성 비서입니다.
 음성 명령을 분석하여 실행할 액션을 파악하세요.
 
@@ -185,7 +191,7 @@ JSON 형식으로만 응답:
     try {
       final response = await _model!.generateContent([Content.text(prompt)]);
       final text = response.text ?? '';
-      
+
       final jsonMatch = RegExp(r'\{[\s\S]*\}').firstMatch(text);
       if (jsonMatch != null) {
         final json = jsonDecode(jsonMatch.group(0)!) as Map<String, dynamic>;
@@ -194,14 +200,14 @@ JSON 형식으로만 응답:
     } catch (e) {
       debugPrint('음성 명령 분석 오류: $e');
     }
-    
+
     return VoiceCommand.unknown();
   }
 
   // ═══════════════════════════════════════════════════════════════
   // 4️⃣ 지출 분석 & 조언
   // ═══════════════════════════════════════════════════════════════
-  
+
   /// 지출 데이터 분석하여 조언 생성
   Future<String> generateAdvice({
     required double totalExpense,
@@ -215,7 +221,8 @@ JSON 형식으로만 응답:
         .map((e) => '${e.key}: ${e.value.toInt()}원')
         .join('\n');
 
-    final prompt = '''
+    final prompt =
+        '''
 당신은 친근한 가계부 재정 상담사입니다.
 
 이번 달 지출 현황:
@@ -251,7 +258,8 @@ $categoryList
   }) async {
     if (!isReady) return '서비스를 사용할 수 없습니다.';
 
-    final prompt = '''
+    final prompt =
+        '''
 당신은 가계부 앱의 친근한 비서입니다.
 
 사용자 질문: "$question"
@@ -276,7 +284,8 @@ $dataContext
   Future<String> correctOcrText(String ocrText) async {
     if (!isReady) return ocrText;
 
-    final prompt = '''
+    final prompt =
+        '''
 다음 OCR 인식 텍스트의 오타를 교정해주세요.
 한국어 영수증/가계부 관련 텍스트입니다.
 
@@ -323,15 +332,11 @@ class CategoryResult {
     this.confidence = 0.5,
   });
 
-  factory CategoryResult.unknown() => CategoryResult(
-    mainCategory: '기타',
-    subCategory: '기타',
-    confidence: 0.0,
-  );
+  factory CategoryResult.unknown() =>
+      CategoryResult(mainCategory: '기타', subCategory: '기타', confidence: 0.0);
 
-  String get fullCategory => subCategory != null 
-      ? '$mainCategory > $subCategory' 
-      : mainCategory;
+  String get fullCategory =>
+      subCategory != null ? '$mainCategory > $subCategory' : mainCategory;
 
   @override
   String toString() => 'CategoryResult($fullCategory, $confidence)';
@@ -359,11 +364,11 @@ class QueryIntent {
       intent: json['intent'] as String? ?? 'unknown',
       category: json['category'] as String?,
       period: json['period'] as String?,
-      startDate: json['startDate'] != null 
-          ? DateTime.tryParse(json['startDate'] as String) 
+      startDate: json['startDate'] != null
+          ? DateTime.tryParse(json['startDate'] as String)
           : null,
-      endDate: json['endDate'] != null 
-          ? DateTime.tryParse(json['endDate'] as String) 
+      endDate: json['endDate'] != null
+          ? DateTime.tryParse(json['endDate'] as String)
           : null,
     );
   }
@@ -408,5 +413,6 @@ class VoiceCommand {
   bool get isUnknown => action == 'unknown';
 
   @override
-  String toString() => 'VoiceCommand($action, amount: $amount, desc: $description)';
+  String toString() =>
+      'VoiceCommand($action, amount: $amount, desc: $description)';
 }

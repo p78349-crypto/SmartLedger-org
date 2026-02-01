@@ -36,57 +36,69 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text(AppRoutes.trash), findsOneWidget);
 
-    unawaited(UserMainActions.openIncomeSplit(navKey.currentState!, account: 'acc1'));
+    unawaited(
+      UserMainActions.openIncomeSplit(navKey.currentState!, account: 'acc1'),
+    );
     await tester.pumpAndSettle();
     expect(find.text(AppRoutes.incomeSplit), findsOneWidget);
 
-    unawaited(UserMainActions.openSavingsPlanList(navKey.currentState!, account: 'acc1'));
+    unawaited(
+      UserMainActions.openSavingsPlanList(
+        navKey.currentState!,
+        account: 'acc1',
+      ),
+    );
     await tester.pumpAndSettle();
     expect(find.text(AppRoutes.savingsPlanList), findsOneWidget);
 
-    unawaited(UserMainActions.openBackup(navKey.currentState!, account: 'acc1'));
+    unawaited(
+      UserMainActions.openBackup(navKey.currentState!, account: 'acc1'),
+    );
     await tester.pumpAndSettle();
     expect(find.text(AppRoutes.backup), findsOneWidget);
   });
 
-  testWidgets('openTransactionDetail passes TransactionDetailArgs and returns result', (tester) async {
-    final navKey = GlobalKey<NavigatorState>();
+  testWidgets(
+    'openTransactionDetail passes TransactionDetailArgs and returns result',
+    (tester) async {
+      final navKey = GlobalKey<NavigatorState>();
 
-    Route<dynamic> onGenerate(RouteSettings settings) {
-      if (settings.name == AppRoutes.transactionDetail) {
-        // Pop a result after route is pushed.
-        return MaterialPageRoute<bool>(
+      Route<dynamic> onGenerate(RouteSettings settings) {
+        if (settings.name == AppRoutes.transactionDetail) {
+          // Pop a result after route is pushed.
+          return MaterialPageRoute<bool>(
+            settings: settings,
+            builder: (context) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                Navigator.of(context).pop(true);
+              });
+              return const SizedBox.shrink();
+            },
+          );
+        }
+        return MaterialPageRoute<void>(
           settings: settings,
-          builder: (context) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              Navigator.of(context).pop(true);
-            });
-            return const SizedBox.shrink();
-          },
+          builder: (_) => const SizedBox.shrink(),
         );
       }
-      return MaterialPageRoute<void>(
-        settings: settings,
-        builder: (_) => const SizedBox.shrink(),
+
+      await tester.pumpWidget(
+        MaterialApp(
+          navigatorKey: navKey,
+          onGenerateRoute: onGenerate,
+          home: const Scaffold(body: Text('home')),
+        ),
       );
-    }
 
-    await tester.pumpWidget(
-      MaterialApp(
-        navigatorKey: navKey,
-        onGenerateRoute: onGenerate,
-        home: const Scaffold(body: Text('home')),
-      ),
-    );
+      final future = UserMainActions.openTransactionDetail(
+        navKey.currentState!,
+        account: 'acc1',
+        initialType: TransactionType.expense,
+      );
 
-    final future = UserMainActions.openTransactionDetail(
-      navKey.currentState!,
-      account: 'acc1',
-      initialType: TransactionType.expense,
-    );
-
-    await tester.pumpAndSettle();
-    final result = await future;
-    expect(result, isTrue);
-  });
+      await tester.pumpAndSettle();
+      final result = await future;
+      expect(result, isTrue);
+    },
+  );
 }

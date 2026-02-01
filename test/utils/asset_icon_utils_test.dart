@@ -42,7 +42,10 @@ void main() {
       });
 
       test('returns label for realEstate', () {
-        expect(AssetIconUtils.getLabel(AssetCategory.realEstate), 'Real estate');
+        expect(
+          AssetIconUtils.getLabel(AssetCategory.realEstate),
+          'Real estate',
+        );
       });
 
       test('returns label for deposit', () {

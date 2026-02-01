@@ -27,10 +27,26 @@ void main() {
       final now = DateTime.now();
 
       final transactions = <Transaction>[
-        tx(id: '1', date: now.subtract(const Duration(days: 1)), memo: 'MegaMart - milk'),
-        tx(id: '2', date: now.subtract(const Duration(days: 2)), memo: 'MegaMart - milk'),
-        tx(id: '3', date: now.subtract(const Duration(days: 3)), memo: 'MegaMart - eggs'),
-        tx(id: '4', date: now.subtract(const Duration(days: 1)), memo: 'OtherShop - milk'),
+        tx(
+          id: '1',
+          date: now.subtract(const Duration(days: 1)),
+          memo: 'MegaMart - milk',
+        ),
+        tx(
+          id: '2',
+          date: now.subtract(const Duration(days: 2)),
+          memo: 'MegaMart - milk',
+        ),
+        tx(
+          id: '3',
+          date: now.subtract(const Duration(days: 3)),
+          memo: 'MegaMart - eggs',
+        ),
+        tx(
+          id: '4',
+          date: now.subtract(const Duration(days: 1)),
+          memo: 'OtherShop - milk',
+        ),
         tx(
           id: '5',
           date: now.subtract(const Duration(days: 1)),
@@ -43,7 +59,11 @@ void main() {
           isRefund: true,
         ),
         // Outside scan window (~183d) should be ignored.
-        tx(id: '7', date: now.subtract(const Duration(days: 200)), memo: 'MegaMart - old'),
+        tx(
+          id: '7',
+          date: now.subtract(const Duration(days: 200)),
+          memo: 'MegaMart - old',
+        ),
       ];
 
       final chips = MemoSuggestionUtils.suggestChips(

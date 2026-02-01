@@ -13,9 +13,7 @@ Future<void> _addCheckedItemsToLedgerMartShopping({
 
   final selected = items.where((i) => i.isChecked).toList();
   if (selected.isEmpty) {
-    messenger.showSnackBar(
-      const SnackBar(content: Text('체크된 항목이 없습니다.')),
-    );
+    messenger.showSnackBar(const SnackBar(content: Text('체크된 항목이 없습니다.')));
     return;
   }
 
@@ -86,14 +84,22 @@ Future<void> _addCheckedItemsToLedgerMartShopping({
     if (index == selected.length - 1) {
       await reload();
       if (!context.mounted) return;
+
+      // 일일지출내역 표시 후 포인트 입력 화면으로 이동
       await navigator.pushNamed(
         AppRoutes.dailyTransactions,
         arguments: DailyTransactionsArgs(
           accountName: accountName,
           initialDay: commonInfo.date,
           savedCount: selected.length,
-          showShoppingPointsInputCta: true,
         ),
+      );
+      if (!context.mounted) return;
+
+      // 포인트 입력 화면 표시 (사용자가 수동 종료)
+      await navigator.pushNamed(
+        AppRoutes.shoppingPointsInput,
+        arguments: ShoppingPointsInputArgs(accountName: accountName),
       );
     }
   }

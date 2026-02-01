@@ -15,8 +15,7 @@ class _ShoppingRoutes {
             initialIngredients: a.initialIngredients,
             autoUsageMode: a.autoUsageMode,
             openUpsertOnStart: a.openUpsertOnStart,
-            openCookableRecipePickerOnStart:
-                a.openCookableRecipePickerOnStart,
+            openCookableRecipePickerOnStart: a.openCookableRecipePickerOnStart,
             scrollToDailyRecipeRecommendationOnStart:
                 a.scrollToDailyRecipeRecommendationOnStart,
             upsertPrefill: a.upsertPrefill,
@@ -69,28 +68,23 @@ class _ShoppingRoutes {
         final a = args as ShoppingGuideArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => ShoppingGuideScreen(
-            accountName: a.accountName,
-            items: a.items,
-          ),
+          builder: (_) =>
+              ShoppingGuideScreen(accountName: a.accountName, items: a.items),
         );
 
       case AppRoutes.householdConsumables:
         final a = args as AccountArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => HouseholdConsumablesScreen(
-            accountName: a.accountName,
-          ),
+          builder: (_) =>
+              HouseholdConsumablesScreen(accountName: a.accountName),
         );
 
       case AppRoutes.consumableInventory:
         final a = args as AccountArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => ConsumableInventoryScreen(
-            accountName: a.accountName,
-          ),
+          builder: (_) => ConsumableInventoryScreen(accountName: a.accountName),
         );
 
       case AppRoutes.quickStockUse:
@@ -121,9 +115,8 @@ class _ShoppingRoutes {
         final a = args as AccountArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => ShoppingCheapestMonthScreen(
-            accountName: a.accountName,
-          ),
+          builder: (_) =>
+              ShoppingCheapestMonthScreen(accountName: a.accountName),
         );
 
       case AppRoutes.nutritionReport:
@@ -136,6 +129,36 @@ class _ShoppingRoutes {
         return MaterialPageRoute(
           settings: settings,
           builder: (_) => const _IngredientSearchInputScreen(),
+        );
+
+      // 레시피 관리 라우트
+      case AppRoutes.recipeManagement:
+        final a = args as RecipeManagementArgs;
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => RecipeManagementScreen(
+            accountName: a.accountName,
+            initialTabIndex: a.initialTabIndex,
+          ),
+        );
+
+      case AppRoutes.recipeEdit:
+        final a = args as RecipeEditArgs;
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => RecipeEditScreen(
+            accountName: a.accountName,
+            recipe: a.recipe,
+            isNewFromRecommended: a.isNewFromRecommended,
+          ),
+        );
+
+      case AppRoutes.recipeToCart:
+        final a = args as RecipeToCartArgs;
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) =>
+              RecipeToCartScreen(accountName: a.accountName, recipe: a.recipe),
         );
 
       default:
@@ -165,9 +188,9 @@ class _IngredientSearchInputScreenState
 
   void _search(String query) {
     if (query.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('검색어를 입력하세요.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('검색어를 입력하세요.')));
       return;
     }
 

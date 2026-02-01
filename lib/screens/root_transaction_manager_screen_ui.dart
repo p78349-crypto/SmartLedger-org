@@ -33,7 +33,9 @@ extension _RootTransactionManagerScreenUi
               else if (isLandscape)
                 _buildLandscapeHeader(context),
               if (isLandscape) const Divider(height: 1),
-              ...entries.expand((entry) => _buildEntryWidgets(entry, isLandscape)),
+              ...entries.expand(
+                (entry) => _buildEntryWidgets(entry, isLandscape),
+              ),
             ],
           ),
         ),
@@ -53,10 +55,7 @@ extension _RootTransactionManagerScreenUi
               '계정 · 내용',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
             ),
           ),
           SizedBox(width: 12),
@@ -66,10 +65,7 @@ extension _RootTransactionManagerScreenUi
               '날짜',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
             ),
           ),
           SizedBox(width: 12),
@@ -79,10 +75,7 @@ extension _RootTransactionManagerScreenUi
               '유형 · 결제',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
             ),
           ),
           SizedBox(width: 12),
@@ -94,10 +87,7 @@ extension _RootTransactionManagerScreenUi
                 '금액',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
               ),
             ),
           ),

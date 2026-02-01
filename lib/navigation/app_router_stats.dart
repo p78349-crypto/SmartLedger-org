@@ -43,36 +43,30 @@ class _StatsRoutes {
         final a = args as AccountArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => CardDiscountStatsScreen(
-            accountName: a.accountName,
-          ),
+          builder: (_) => CardDiscountStatsScreen(accountName: a.accountName),
         );
 
       case AppRoutes.pointsMotivationStats:
         final a = args as AccountArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => PointsMotivationStatsScreen(
-            accountName: a.accountName,
-          ),
+          builder: (_) =>
+              PointsMotivationStatsScreen(accountName: a.accountName),
         );
 
       case AppRoutes.spendingAnalysis:
         final a = args as AccountArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => SpendingAnalysisScreen(
-            accountName: a.accountName,
-          ),
+          builder: (_) => SpendingAnalysisScreen(accountName: a.accountName),
         );
 
       case AppRoutes.weatherPricePrediction:
         final a = args as AccountArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => WeatherPricePredictionScreen(
-            accountName: a.accountName,
-          ),
+          builder: (_) =>
+              WeatherPricePredictionScreen(accountName: a.accountName),
         );
 
       case AppRoutes.weatherManualInput:
@@ -85,18 +79,14 @@ class _StatsRoutes {
         final a = args as AccountArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => MicroSavingsNudgeScreen(
-            accountName: a.accountName,
-          ),
+          builder: (_) => MicroSavingsNudgeScreen(accountName: a.accountName),
         );
 
       case AppRoutes.accountStatsSearch:
         final a = args as AccountArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => AccountStatsSearchScreen(
-            accountName: a.accountName,
-          ),
+          builder: (_) => AccountStatsSearchScreen(accountName: a.accountName),
         );
 
       case AppRoutes.periodStatsWeek:

@@ -52,35 +52,6 @@ Map<String, List<String>> _categoryOptionsFor(TransactionType type) {
   return CategoryDefinitions.categoryOptions;
 }
 
-class TransactionAddDetailedScreen extends StatefulWidget {
-  final String accountName;
-  final Transaction? initialTransaction;
-  final bool learnCategoryHintFromDescription;
-  final bool confirmBeforeSave;
-  final bool treatAsNew;
-  final bool closeAfterSave;
-  final bool autoSubmit;
-  final String? initialPaymentMethod;
-  final String? initialMemo;
-
-  const TransactionAddDetailedScreen({
-    super.key,
-    required this.accountName,
-    this.initialTransaction,
-    this.learnCategoryHintFromDescription = false,
-    this.confirmBeforeSave = false,
-    this.treatAsNew = false,
-    this.closeAfterSave = false,
-    this.autoSubmit = false,
-    this.initialPaymentMethod,
-    this.initialMemo,
-  });
-
-  @override
-  State<TransactionAddDetailedScreen> createState() =>
-      _TransactionAddDetailedScreenState();
-}
-
 class _TransactionAddDetailedScreenState
     extends State<TransactionAddDetailedScreen> {
   final GlobalKey<_TransactionAddDetailedFormState> _formStateKey =
@@ -167,6 +138,35 @@ class _TransactionAddDetailedScreenState
       ),
     );
   }
+}
+
+class TransactionAddDetailedScreen extends StatefulWidget {
+  final String accountName;
+  final Transaction? initialTransaction;
+  final bool learnCategoryHintFromDescription;
+  final bool confirmBeforeSave;
+  final bool treatAsNew;
+  final bool closeAfterSave;
+  final bool autoSubmit;
+  final String? initialPaymentMethod;
+  final String? initialMemo;
+
+  const TransactionAddDetailedScreen({
+    super.key,
+    required this.accountName,
+    this.initialTransaction,
+    this.learnCategoryHintFromDescription = false,
+    this.confirmBeforeSave = false,
+    this.treatAsNew = false,
+    this.closeAfterSave = false,
+    this.autoSubmit = false,
+    this.initialPaymentMethod,
+    this.initialMemo,
+  });
+
+  @override
+  State<TransactionAddDetailedScreen> createState() =>
+      _TransactionAddDetailedScreenState();
 }
 
 class _InitialTransactionFormSnapshot {
@@ -1067,31 +1067,18 @@ class _TransactionAddDetailedFormState
 
     final checkedItems = items.where((i) => i.isChecked).toList();
 
-    // 단일 항목 선택 시 현재 화면의 필드를 채우기
+    // 단일 항목 선택 시: 설명만 채우고 수량/단가 자동 입력은 하지 않는다.
     if (checkedItems.length == 1) {
       final item = checkedItems.first;
-      final qty = item.quantity <= 0 ? 1 : item.quantity;
-      final unitPrice = item.unitPrice;
-      final total = unitPrice * qty;
 
       debugPrint(
-        '[openShoppingCartPicker] 단일 항목 선택: '
-        'name=${item.name}, qty=$qty, unitPrice=$unitPrice',
+        '[openShoppingCartPicker] 단일 항목 선택(자동입력 비활성): '
+        'name=${item.name}',
       );
 
-      // 현재 화면의 필드 채우기
+      // 현재 화면의 필드: 상품명만 채운다. 수량/단가는 건드리지 않음.
       setState(() {
         _descController.text = item.name;
-        _qtyController.text = qty.toString();
-        _unitPriceController.text = unitPrice > 0
-            ? unitPrice.toStringAsFixed(
-                unitPrice == unitPrice.roundToDouble() ? 0 : 2,
-              )
-            : '';
-        _amountController.text = total > 0
-            ? total.toStringAsFixed(total == total.roundToDouble() ? 0 : 2)
-            : '';
-        _updateAmount();
       });
 
       // 선택된 항목 제거
@@ -1156,6 +1143,8 @@ class _TransactionAddDetailedFormState
     if (!mounted || items == null) return;
 
     await _saveDraft();
+
+    // Always open the picker to avoid implicit auto-fill of price/qty.
     await openShoppingCartPicker();
   }
 

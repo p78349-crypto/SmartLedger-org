@@ -36,6 +36,7 @@ import '../widgets/ingredients_recommendation_widget.dart';
 import '../widgets/meal_plan_widget.dart';
 import '../widgets/cost_analysis_widget.dart';
 import '../widgets/user_preferences_widget.dart';
+import 'household_items_to_cart_screen.dart';
 
 /// 식품 유통기한 관리 전용 메인 네비게이션 화면
 class FoodExpiryMainScreen extends StatefulWidget {
@@ -837,6 +838,13 @@ class _FoodExpiryMainScreenState extends State<FoodExpiryMainScreen> {
       scrollToDailyRecipeRecommendationOnStart:
           widget.scrollToDailyRecipeRecommendationOnStart,
     ),
+    FutureBuilder<String?>(
+      future: UserPrefService.getLastAccountName(),
+      builder: (context, snapshot) {
+        final accountName = snapshot.data ?? 'default';
+        return HouseholdItemsToCartScreen(accountName: accountName);
+      },
+    ),
     const _FoodExpiryNotificationsScreen(),
     const CookingUsageHistoryScreen(),
     const SavingsStatisticsScreen(),
@@ -849,6 +857,10 @@ class _FoodExpiryMainScreenState extends State<FoodExpiryMainScreen> {
       return const [
         BottomNavigationBarItem(icon: Icon(Icons.soup_kitchen), label: '요리 모드'),
         BottomNavigationBarItem(
+          icon: Icon(Icons.shopping_basket),
+          label: '생활용품',
+        ),
+        BottomNavigationBarItem(
           icon: Icon(IconCatalog.warningAmber),
           label: '알림',
         ),
@@ -857,13 +869,16 @@ class _FoodExpiryMainScreenState extends State<FoodExpiryMainScreen> {
           label: '소비 기록',
         ),
         BottomNavigationBarItem(icon: Icon(IconCatalog.barChart), label: '통계'),
-        BottomNavigationBarItem(icon: Icon(IconCatalog.addCircle), label: '추가'),
       ];
     } else {
       // 재고 확인 모드
       return const [
         BottomNavigationBarItem(icon: Icon(Icons.inventory_2), label: '재고 목록'),
         BottomNavigationBarItem(
+          icon: Icon(Icons.shopping_basket),
+          label: '생활용품',
+        ),
+        BottomNavigationBarItem(
           icon: Icon(IconCatalog.warningAmber),
           label: '알림',
         ),
@@ -872,7 +887,6 @@ class _FoodExpiryMainScreenState extends State<FoodExpiryMainScreen> {
           label: '소비 기록',
         ),
         BottomNavigationBarItem(icon: Icon(IconCatalog.barChart), label: '통계'),
-        BottomNavigationBarItem(icon: Icon(IconCatalog.addCircle), label: '추가'),
       ];
     }
   }
@@ -1028,6 +1042,9 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
   bool _speechInitAttempted = false;
   bool _isVoiceListening = false;
   String _voiceDraft = '';
+  // listeners for controllers to update preview text
+  late VoidCallback _quantityListener;
+  late VoidCallback _unitListener;
 
   @override
   void initState() {
@@ -1037,7 +1054,18 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
     _quantityController = TextEditingController(
       text: widget.existing?.quantity.toString() ?? '1',
     );
-    _unitController = TextEditingController(text: widget.existing?.unit ?? '개');
+    _unitController = TextEditingController(text: widget.existing?.unit ?? '');
+    // Update preview when quantity or unit changes
+    _quantityListener = () {
+      if (!mounted) return;
+      setState(() {});
+    };
+    _unitListener = () {
+      if (!mounted) return;
+      setState(() {});
+    };
+    _quantityController.addListener(_quantityListener);
+    _unitController.addListener(_unitListener);
     _priceController = TextEditingController(
       text: widget.existing?.price.toString() ?? '0',
     );
@@ -1458,6 +1486,8 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
   void dispose() {
     _nameController.dispose();
     _memoController.dispose();
+    _quantityController.removeListener(_quantityListener);
+    _unitController.removeListener(_unitListener);
     _quantityController.dispose();
     _unitController.dispose();
     _priceController.dispose();
@@ -1941,7 +1971,7 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildFieldLabel('개수/수량', theme),
+                        _buildFieldLabel('묶음/BOX', theme),
                         TextField(
                           controller: _quantityController,
                           keyboardType: const TextInputType.numberWithOptions(
@@ -1964,6 +1994,27 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
                           decoration: _formInputDecoration(
                             hintText: '단위 (예: 개, g, kg)',
                           ),
+                        ),
+                        const SizedBox(height: 6),
+                        Builder(
+                          builder: (ctx) {
+                            final qty = _quantityController.text.trim();
+                            final unit = _unitController.text.trim().isEmpty
+                                ? '개'
+                                : _unitController.text.trim();
+                            final text = qty.isEmpty
+                                ? '($unit 몇개)'
+                                : '($qty$unit)';
+                            return Text(
+                              text,
+                              style: Theme.of(ctx).textTheme.bodySmall
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      ctx,
+                                    ).colorScheme.onSurfaceVariant,
+                                  ),
+                            );
+                          },
                         ),
                       ],
                     ),

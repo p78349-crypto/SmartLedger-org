@@ -37,4 +37,16 @@ class ShoppingCartSyncUtils {
     );
     return items;
   }
+
+  /// Shows confirmation and returns only the checked items.
+  /// Returns null if the user cancelled the confirmation.
+  static Future<List<ShoppingCartItem>?> confirmAndLoadCheckedItemsOnlyChecked(
+    BuildContext context,
+    String accountName,
+  ) async {
+    final items = await confirmAndLoadCheckedItems(context, accountName);
+    if (items == null) return null;
+    final checked = items.where((i) => i.isChecked).toList();
+    return checked;
+  }
 }

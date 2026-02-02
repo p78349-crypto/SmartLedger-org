@@ -5,6 +5,7 @@ import '../repositories/app_repositories.dart';
 import '../services/consumable_inventory_service.dart';
 import '../services/health_guardrail_service.dart';
 import '../services/user_pref_service.dart';
+import '../utils/wms_data_gateway.dart';
 
 class ConsumableInventoryScreen extends StatefulWidget {
   final String accountName;
@@ -126,7 +127,8 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
   @override
   void initState() {
     super.initState();
-    ConsumableInventoryService.instance.load();
+    // ✅ Gateway를 통한 초기 로드 (캐싱 적용)
+    WmsInventoryGateway.instance.getItems();
     _loadCountLikeUnits();
   }
 
@@ -154,6 +156,7 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
         ],
       ),
       body: ValueListenableBuilder<List<ConsumableInventoryItem>>(
+        // ✅ Gateway 캐싱 적용 후에도 실시간 업데이트 유지
         valueListenable: ConsumableInventoryService.instance.items,
         builder: (context, items, _) {
             // 로케이션 필터 적용
@@ -551,7 +554,7 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
                   child: const Text('취소'),
                 ),
                 TextButton(
-                  onPressed: () {
+                  onPressed: () async {
                     final name = nameController.text.trim();
                     if (name.isEmpty) return;
 
@@ -564,7 +567,61 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
                     final tags = selectedTags.toList();
 
                     if (item == null) {
-                      ConsumableInventoryService.instance.addItem(
+                      // ✅ Gateway를 통한 추가 (유효성 검사 + 중복 체크)
+                      final input = WmsInventoryInput.full(
+                        name: name,
+                        currentStock: stock,
+                        unit: unit,
+                        threshold: threshold,
+                        bundleSize: bundleSize,
+                        location: selectedLocation,
+                        healthTags: tags,
+                      );
+
+                      final result = await WmsInventoryGateway.instance.addItem(
+                        input: input,
+                      );
+
+                      if (!context.mounted) return;
+
+                      if (result.success) {
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('${result.data?.name} 추가 완료'),
+                          ),
+                        );
+                      } else if (result.type == WmsOperationType.duplicate) {
+                        // 중복 품목 - 사용자에게 알림
+                        showDialog<void>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: const Text('이미 존재하는 품목'),
+                            content: Text(
+                              '${result.data?.name}이(가) 이미 등록되어 있습니다.\n'
+                              '현재 재고: ${result.data?.currentStock}'
+                              '${result.data?.unit}',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx),
+                                child: const Text('확인'),
+                              ),
+                            ],
+                          ),
+                        );
+                      } else {
+                        // 유효성 검사 실패
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('추가 실패: ${result.errorMessage}'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    } else {
+                      // ✅ Gateway를 통한 수정
+                      final updated = item.copyWith(
                         name: name,
                         currentStock: stock,
                         threshold: threshold,
@@ -573,20 +630,28 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
                         location: selectedLocation,
                         healthTags: tags,
                       );
-                    } else {
-                      ConsumableInventoryService.instance.updateItem(
-                        item.copyWith(
-                          name: name,
-                          currentStock: stock,
-                          threshold: threshold,
-                          bundleSize: bundleSize,
-                          unit: unit,
-                          location: selectedLocation,
-                          healthTags: tags,
-                        ),
+
+                      final result =
+                          await WmsInventoryGateway.instance.updateItem(
+                        item: updated,
                       );
+
+                      if (!context.mounted) return;
+
+                      if (result.success) {
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('${updated.name} 수정 완료')),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('수정 실패: ${result.errorMessage}'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
                     }
-                    Navigator.pop(context);
                   },
                   child: const Text('저장'),
                 ),

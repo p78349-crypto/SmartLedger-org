@@ -9,6 +9,7 @@ import '../navigation/app_routes_paths.dart';
 import '../navigation/app_routes_args.dart' as route_args;
 import '../navigation/deep_link_handler.dart';
 import '../utils/constants.dart';
+import '../utils/wms_data_gateway.dart';
 
 /// 식료품/생활용품 사용기록 화면
 ///
@@ -45,7 +46,8 @@ class _QuickStockUseScreenState extends State<QuickStockUseScreen> {
   @override
   void initState() {
     super.initState();
-    ConsumableInventoryService.instance.load();
+    // ✅ Gateway를 통한 초기 로드 (캐싱 적용)
+    WmsInventoryGateway.instance.getItems();
   }
 
   @override
@@ -459,11 +461,20 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
       return;
     }
 
-    await ConsumableInventoryService.instance.addItem(name: trimmed);
+    // ✅ Gateway를 통한 추가 (유효성 검사 + 중복 체크)
+    final input = WmsInventoryInput.quick(name: trimmed);
 
-    final created = QuickStockUseUtils.findExactItem(trimmed);
-    if (created != null) {
-      _selectItem(created);
+    final result = await WmsInventoryGateway.instance.addItem(
+      input: input,
+      source: WmsInputSource.quickUse,
+    );
+
+    if (result.success && result.data != null) {
+      _selectItem(result.data!);
+      return;
+    } else if (result.type == WmsOperationType.duplicate && result.data != null) {
+      // 중복 품목 - 기존 아이템 사용
+      _selectItem(result.data!);
       return;
     }
 

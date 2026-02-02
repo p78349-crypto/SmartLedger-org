@@ -9,6 +9,7 @@ import '../models/shopping_cart_item.dart';
 import '../models/shopping_points_draft_entry.dart';
 import '../models/shopping_template_item.dart';
 import '../models/transaction.dart';
+import '../models/wms_inventory_draft_entry.dart';
 import 'account_service.dart';
 import 'transaction_service.dart';
 import '../utils/page1_bottom_quick_icons.dart';
@@ -189,6 +190,88 @@ class UserPrefService {
     final current = await getShoppingPointsDrafts(accountName: accountName);
     final next = current.where((d) => d.id != id).toList(growable: false);
     await setShoppingPointsDrafts(accountName: accountName, drafts: next);
+  }
+
+  // --- WMS Inventory Drafts (재고 임시저장) ---
+  static String _wmsInventoryDraftsKey(String accountName) {
+    return PrefKeys.accountKey(accountName, 'wms_inventory_drafts_v1');
+  }
+
+  static Future<List<WmsInventoryDraftEntry>> getWmsInventoryDrafts({
+    required String accountName,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_wmsInventoryDraftsKey(accountName));
+    if (raw == null || raw.trim().isEmpty) return const [];
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is! List) return const [];
+      return decoded
+          .whereType<Map>()
+          .map(
+            (m) => WmsInventoryDraftEntry.fromJson(
+              Map<String, dynamic>.from(m),
+            ),
+          )
+          .toList(growable: false);
+    } catch (_) {
+      return const [];
+    }
+  }
+
+  static Future<void> setWmsInventoryDrafts({
+    required String accountName,
+    required List<WmsInventoryDraftEntry> drafts,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final encoded = jsonEncode(drafts.map((d) => d.toJson()).toList());
+    await prefs.setString(_wmsInventoryDraftsKey(accountName), encoded);
+  }
+
+  static Future<void> addWmsInventoryDraft({
+    required String accountName,
+    required WmsInventoryDraftEntry draft,
+    int maxEntries = 30,
+  }) async {
+    final current = await getWmsInventoryDrafts(accountName: accountName);
+
+    // Deduplicate by id.
+    final next = <WmsInventoryDraftEntry>[
+      draft,
+      for (final d in current)
+        if (d.id != draft.id) d,
+    ];
+
+    final trimmed = next.length <= maxEntries
+        ? next
+        : next.take(maxEntries).toList();
+    await setWmsInventoryDrafts(accountName: accountName, drafts: trimmed);
+  }
+
+  static Future<void> updateWmsInventoryDraft({
+    required String accountName,
+    required WmsInventoryDraftEntry draft,
+  }) async {
+    final current = await getWmsInventoryDrafts(accountName: accountName);
+    final next = current
+        .map((d) => d.id == draft.id ? draft : d)
+        .toList(growable: false);
+    await setWmsInventoryDrafts(accountName: accountName, drafts: next);
+  }
+
+  static Future<void> removeWmsInventoryDraft({
+    required String accountName,
+    required String id,
+  }) async {
+    final current = await getWmsInventoryDrafts(accountName: accountName);
+    final next = current.where((d) => d.id != id).toList(growable: false);
+    await setWmsInventoryDrafts(accountName: accountName, drafts: next);
+  }
+
+  static Future<void> clearAllWmsInventoryDrafts({
+    required String accountName,
+  }) async {
+    await setWmsInventoryDrafts(accountName: accountName, drafts: const []);
   }
 
   // --- Language ---

@@ -8,14 +8,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/asset.dart';
 import '../models/category_hint.dart';
 import '../models/transaction.dart';
-import '../navigation/app_routes_args.dart';
+import '../navigation/app_routes.dart';
 import 'income_split_screen.dart';
 // import 'package:smart_ledger/screens/nutrition_report_screen.dart';
 // Preserved but disabled per request.
 import '../services/asset_service.dart';
 import '../services/category_usage_service.dart';
-import '../services/consumable_inventory_service.dart';
-import '../services/food_expiry_service.dart';
 import '../services/last_input_service.dart';
 import '../services/recent_input_service.dart';
 import '../services/transaction_service.dart';
@@ -35,6 +33,7 @@ import '../widgets/smart_input_field.dart';
 import '../widgets/special_backgrounds.dart';
 import '../widgets/ingredient_health_analyzer_dialog.dart';
 import '../utils/ingredient_health_score_utils.dart';
+import '../utils/cart_transaction_prefill.dart';
 
 // 최근 결제수단/메모 저장 키 및 최대 개수
 const String _recentDescriptionsKey = 'recent_descriptions';
@@ -647,7 +646,7 @@ class _NO1FormState extends State<NO1Form> {
     final initial = widget.initialTransaction;
     _transactionDate = initial?.date ?? DateTime.now();
     if (initial != null) {
-      _selectedType = initial.type;
+      _qtyController.text = '1';
       _descController.text = initial.description;
       _qtyController.text = initial.quantity.toString();
       final unitPrice = initial.unitPrice != 0
@@ -729,6 +728,49 @@ class _NO1FormState extends State<NO1Form> {
           (widget.initialMemo == null || widget.initialMemo!.isEmpty)) {
         unawaited(_loadLastInputFromService());
       }
+      // Try to read cart prefill (saved by shopping cart flow).
+      unawaited(() async {
+        final prefill = await CartTransactionPrefill.readPrefill(
+          accountName: widget.accountName,
+        );
+        if (!mounted || prefill.isEmpty) return;
+        final tx = prefill.first;
+        setState(() {
+          if (_descController.text.isEmpty) {
+            _descController.text = tx.description;
+          }
+          if (_qtyController.text == '1' || _qtyController.text.isEmpty) {
+            _qtyController.text = tx.quantity.toString();
+          }
+          final computedUnitPrice = tx.unitPrice != 0
+              ? tx.unitPrice
+              : (tx.quantity > 0 ? tx.amount / tx.quantity : tx.amount);
+          if (_unitPriceController.text.isEmpty && computedUnitPrice > 0) {
+            _unitPriceController.text = computedUnitPrice.toStringAsFixed(
+              computedUnitPrice == computedUnitPrice.roundToDouble() ? 0 : 2,
+            );
+          }
+          if (_amountController.text.isEmpty) {
+            _amountController.text = tx.amount.toStringAsFixed(
+              tx.amount == tx.amount.roundToDouble() ? 0 : 2,
+            );
+          }
+          if (_paymentController.text.isEmpty && tx.paymentMethod.isNotEmpty) {
+            _paymentController.text = tx.paymentMethod;
+          }
+          if (_memoController.text.isEmpty && tx.memo.isNotEmpty) {
+            _memoController.text = tx.memo;
+          }
+          if (_storeController.text.isEmpty &&
+              (tx.store?.isNotEmpty ?? false)) {
+            _storeController.text = tx.store!.trim();
+          }
+          _selectedMainCategory = tx.mainCategory;
+          _selectedSubCategory = tx.subCategory;
+          _transactionDate = tx.date;
+        });
+        _updateAmount();
+      }());
     }
 
     // 결제수단/메모 입력란 첫 포커스 시 전체 선택
@@ -1684,21 +1726,48 @@ class _NO1FormState extends State<NO1Form> {
     if (foodCategories.contains(category)) {
       // 기본 유통기한: 구매일 + 7일 (사용자가 나중에 수정 가능)
       final defaultExpiryDate = purchaseDate.add(const Duration(days: 7));
-      await FoodExpiryService.instance.addItem(
+
+      final prefill = FoodExpiryUpsertPrefill(
         name: itemName,
+        quantity: quantity.toDouble(),
         purchaseDate: purchaseDate,
         expiryDate: defaultExpiryDate,
-        quantity: quantity.toDouble(),
         price: unitPrice,
+        supplier: _storeController.text.trim().isEmpty
+            ? null
+            : _storeController.text.trim(),
       );
+
+      Navigator.of(context).pushNamed(
+        AppRoutes.foodExpiry,
+        arguments: FoodExpiryArgs(
+          openUpsertOnStart: true,
+          upsertPrefill: prefill,
+        ),
+      );
+
       return;
     }
 
     // 생활용품 카테고리 → 소모품 재고 목록에 추가
     if (category == '생활용품비') {
-      await ConsumableInventoryService.instance.addItem(
+      final prefill = FoodExpiryUpsertPrefill(
         name: itemName,
-        currentStock: quantity.toDouble(),
+        quantity: quantity.toDouble(),
+        purchaseDate: purchaseDate,
+        price: unitPrice,
+        supplier: _storeController.text.trim().isEmpty
+            ? null
+            : _storeController.text.trim(),
+        category: '생활용품',
+      );
+
+      Navigator.of(context).pushNamed(
+        AppRoutes.foodExpiry,
+        arguments: FoodExpiryArgs(
+          openUpsertOnStart: true,
+          upsertPrefill: prefill,
+        ),
       );
     }
   }

@@ -54,7 +54,7 @@ class FoodExpiryService {
     required DateTime expiryDate,
     String memo = '',
     double quantity = 1.0,
-    String unit = '개',
+    String unit = '',
     String category = '기타',
     String location = '냉장',
     double price = 0.0,

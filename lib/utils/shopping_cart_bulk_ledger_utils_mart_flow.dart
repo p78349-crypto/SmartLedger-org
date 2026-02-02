@@ -36,6 +36,26 @@ Future<void> _addCheckedItemsToLedgerMartShopping({
       learnedHints: categoryHints,
     );
 
+    await CartTransactionPrefill.savePrefill(
+      accountName: accountName,
+      items: [
+        Transaction(
+          id: 'tmp_${DateTime.now().microsecondsSinceEpoch}',
+          type: TransactionType.expense,
+          description: item.name,
+          amount: itemTotal,
+          date: commonInfo.date,
+          quantity: qty,
+          unitPrice: unit,
+          paymentMethod: commonInfo.payment,
+          store: commonInfo.store,
+          mainCategory: suggested.mainCategory,
+          subCategory: suggested.subCategory,
+          detailCategory: suggested.detailCategory,
+        ),
+      ],
+    );
+
     final result = await navigator.pushNamed(
       AppRoutes.transactionAdd,
       arguments: TransactionAddArgs(

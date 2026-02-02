@@ -25,7 +25,7 @@ class ConsumableInventoryService {
   Future<void> addItem({
     required String name,
     double currentStock = 0.0,
-    String unit = '개',
+    String unit = '',
     double threshold = 1.0,
     double bundleSize = 1.0,
     String category = '생활용품',

@@ -9,6 +9,7 @@ import '../models/transaction.dart';
 import '../navigation/app_routes.dart';
 import '../services/user_pref_service.dart';
 import 'shopping_category_utils.dart';
+import 'cart_transaction_prefill.dart';
 
 part 'shopping_cart_bulk_ledger_utils_impl.dart';
 part 'shopping_cart_bulk_ledger_utils_bulk_flow.dart';

@@ -10,7 +10,7 @@ class HouseholdItem {
     required this.category2,
     required this.category3,
     required this.category4,
-    this.unit = '개',
+    this.unit = '',
     this.defaultQuantity = 1,
   });
 
@@ -31,7 +31,7 @@ class HouseholdItem {
       category2: json['category2'] as String? ?? '',
       category3: json['category3'] as String? ?? '',
       category4: json['category4'] as String? ?? '',
-      unit: json['unit'] as String? ?? '개',
+      unit: json['unit'] as String? ?? '',
       defaultQuantity: json['defaultQuantity'] as int? ?? 1,
     );
   }

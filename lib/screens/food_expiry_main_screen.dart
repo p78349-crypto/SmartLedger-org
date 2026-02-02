@@ -20,6 +20,8 @@ import '../services/user_pref_service.dart';
 import '../services/health_guardrail_service.dart';
 import '../services/replacement_cycle_notification_service.dart';
 import '../services/savings_statistics_service.dart';
+import '../services/transaction_service.dart';
+import '../utils/transaction_by_date_utils.dart';
 import '../utils/currency_formatter.dart';
 import '../utils/constants.dart';
 import '../utils/icon_catalog.dart';
@@ -37,6 +39,8 @@ import '../widgets/meal_plan_widget.dart';
 import '../widgets/cost_analysis_widget.dart';
 import '../widgets/user_preferences_widget.dart';
 import 'household_items_to_cart_screen.dart';
+import 'global_food_to_cart_screen.dart';
+import 'household_recommended_screen.dart';
 
 /// 식품 유통기한 관리 전용 메인 네비게이션 화면
 class FoodExpiryMainScreen extends StatefulWidget {
@@ -842,7 +846,56 @@ class _FoodExpiryMainScreenState extends State<FoodExpiryMainScreen> {
       future: UserPrefService.getLastAccountName(),
       builder: (context, snapshot) {
         final accountName = snapshot.data ?? 'default';
-        return HouseholdItemsToCartScreen(accountName: accountName);
+        return DefaultTabController(
+          length: 3,
+          child: Scaffold(
+            appBar: AppBar(
+              title: const Text('생활용품'),
+              centerTitle: true,
+              bottom: const TabBar(
+                tabs: [
+                  Tab(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.favorite, size: 18),
+                        SizedBox(height: 2),
+                        Text('나의', style: TextStyle(fontSize: 10)),
+                      ],
+                    ),
+                  ),
+                  Tab(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.home, size: 18),
+                        SizedBox(height: 2),
+                        Text('한국', style: TextStyle(fontSize: 10)),
+                      ],
+                    ),
+                  ),
+                  Tab(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.public, size: 18),
+                        SizedBox(height: 2),
+                        Text('글로벌', style: TextStyle(fontSize: 10)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            body: TabBarView(
+              children: [
+                HouseholdRecommendedScreen(accountName: accountName),
+                HouseholdItemsToCartScreen(accountName: accountName),
+                GlobalFoodToCartScreen(accountName: accountName),
+              ],
+            ),
+          ),
+        );
       },
     ),
     const _FoodExpiryNotificationsScreen(),
@@ -999,6 +1052,11 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
   late TextEditingController _nameController;
   late TextEditingController _memoController;
   late TextEditingController _quantityController;
+
+  // WMS-style calculation controllers
+  final TextEditingController _boxQtyController = TextEditingController();
+  final TextEditingController _pcsPerBoxController = TextEditingController();
+
   late TextEditingController _unitController;
   late TextEditingController _priceController;
   late TextEditingController _supplierController;
@@ -1054,6 +1112,11 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
     _quantityController = TextEditingController(
       text: widget.existing?.quantity.toString() ?? '1',
     );
+
+    // Calculate total if box or pcs changes
+    _boxQtyController.addListener(_calculateTotalQuantity);
+    _pcsPerBoxController.addListener(_calculateTotalQuantity);
+
     _unitController = TextEditingController(text: widget.existing?.unit ?? '');
     // Update preview when quantity or unit changes
     _quantityListener = () {
@@ -1083,6 +1146,7 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
         _loadLastCategory();
         _loadLastLocation();
         _loadLastUnit();
+        _prefillFromLatestTransaction();
       }
 
       final p = widget.prefill;
@@ -1484,6 +1548,8 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
 
   @override
   void dispose() {
+    _boxQtyController.dispose();
+    _pcsPerBoxController.dispose();
     _nameController.dispose();
     _memoController.dispose();
     _quantityController.removeListener(_quantityListener);
@@ -1822,6 +1888,72 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
     );
   }
 
+  // 박스 수량 자동 계산 로직
+  void _calculateTotalQuantity() {
+    final box = double.tryParse(_boxQtyController.text);
+    final pcs = double.tryParse(_pcsPerBoxController.text);
+
+    if (box != null && box > 0 && pcs != null && pcs > 0) {
+      final total = box * pcs;
+      // 소수점 .0 제거 (예: 20.0 -> 20)
+      final text = total == total.toInt() ? total.toInt().toString() : total.toString();
+      
+      if (_quantityController.text != text) {
+        _quantityController.text = text;
+      }
+    }
+  }
+
+  // 최근 지출 내역 연동(One-Stop Flow)
+  Future<void> _prefillFromLatestTransaction() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      String? account = prefs.getString('lastAccountName');
+      
+      // 마지막 계정 정보가 없으면 첫 번째 계정 사용
+      if (account == null) {
+        final accounts = TransactionService().getAllAccountNames();
+        if (accounts.isNotEmpty) account = accounts.first;
+      }
+
+      if (account != null) {
+        // 1. DB -> Utils 동기화
+        await TransactionByDateUtils.syncFromDatabase(account);
+        // 2. 데이터 로드
+        final groupedData = await TransactionByDateUtils.load(account);
+
+        if (groupedData.isNotEmpty) {
+          // 날짜 내림차순 정렬 (최신순)
+          final sortedDates = groupedData.keys.toList()..sort((a, b) => b.compareTo(a));
+          final latestDate = sortedDates.first;
+          final txList = groupedData[latestDate];
+
+          if (txList != null && txList.isNotEmpty) {
+            final latestTx = txList.first; // 그 날짜의 가장 최신 항목
+            
+            if (!mounted) return;
+            setState(() {
+              // 이름이 비어있으면 자동 채움
+              if (_nameController.text.isEmpty) {
+                _nameController.text = latestTx['name'] ?? '';
+              }
+              // 가격 채움
+              if (latestTx['amount'] != null) {
+                _priceController.text = (latestTx['amount'] as num).toInt().toString();
+              }
+              // 수량 채움 (DB에는 총 수량만 있으므로 Box 필드가 아닌 총 수량 필드에 바로 입력)
+              if (latestTx['quantity'] != null) {
+                 _quantityController.text = latestTx['quantity'].toString();
+              }
+            });
+          }
+        }
+      }
+    } catch (e) {
+      // Auto-fill error silently ignored
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -1964,6 +2096,47 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
               ),
 
               // Quantity & Unit
+              // 1. Box Calculator
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildFieldLabel('BOX 수량', theme),
+                          TextField(
+                            controller: _boxQtyController,
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            decoration: _formInputDecoration(hintText: 'Box 수'),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                      child: Text('x', style: TextStyle(color: Colors.grey.shade600, fontWeight: FontWeight.bold)),
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildFieldLabel('입수량(Pcs)', theme),
+                          TextField(
+                            controller: _pcsPerBoxController,
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            decoration: _formInputDecoration(hintText: '개/Box'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // 2. Total Quantity & Unit
               Row(
                 children: [
                   Expanded(
@@ -1971,7 +2144,7 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildFieldLabel('묶음/BOX', theme),
+                        _buildFieldLabel('총 수량 (Total)', theme),
                         TextField(
                           controller: _quantityController,
                           keyboardType: const TextInputType.numberWithOptions(
@@ -1995,27 +2168,7 @@ class _FoodExpiryUpsertDialogState extends State<_FoodExpiryUpsertDialog> {
                             hintText: '단위 (예: 개, g, kg)',
                           ),
                         ),
-                        const SizedBox(height: 6),
-                        Builder(
-                          builder: (ctx) {
-                            final qty = _quantityController.text.trim();
-                            final unit = _unitController.text.trim().isEmpty
-                                ? '개'
-                                : _unitController.text.trim();
-                            final text = qty.isEmpty
-                                ? '($unit 몇개)'
-                                : '($qty$unit)';
-                            return Text(
-                              text,
-                              style: Theme.of(ctx).textTheme.bodySmall
-                                  ?.copyWith(
-                                    color: Theme.of(
-                                      ctx,
-                                    ).colorScheme.onSurfaceVariant,
-                                  ),
-                            );
-                          },
-                        ),
+                        const SizedBox.shrink(),
                       ],
                     ),
                   ),

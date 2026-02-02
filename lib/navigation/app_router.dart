@@ -33,6 +33,7 @@ import '../screens/fixed_cost_stats_screen.dart';
 import '../screens/fixed_cost_tab_screen.dart';
 import '../screens/food_expiry_main_screen.dart';
 import '../screens/household_consumables_screen.dart';
+import '../screens/household_items_screen.dart';
 import '../screens/consumable_inventory_screen.dart';
 import '../screens/quick_stock_use_screen.dart';
 import '../screens/food_cooking_start_screen.dart';

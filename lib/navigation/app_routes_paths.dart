@@ -82,6 +82,7 @@ class AppRoutes {
   static const shoppingGuide = '/shopping/guide';
 
   static const householdConsumables = '/household/consumables';
+  static const householdItems = '/household/items';
   static const consumableInventory = '/household/inventory';
   static const quickStockUse = '/household/quick-stock-use';
 

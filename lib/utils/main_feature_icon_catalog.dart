@@ -366,6 +366,13 @@ class MainFeatureIconCatalog {
             routeName: AppRoutes.refundTransactions,
           ),
           MainFeatureIcon(
+            id: 'household_items',
+            label: '생활용품',
+            labelEn: 'Household Items',
+            icon: Icons.cleaning_services,
+            routeName: AppRoutes.householdItems,
+          ),
+          MainFeatureIcon(
             id: 'asset_project_100m',
             label: '1억 프로젝트',
             labelEn: '100M Project',

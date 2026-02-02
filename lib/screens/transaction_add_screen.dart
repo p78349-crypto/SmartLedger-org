@@ -1599,17 +1599,6 @@ class _NO1FormState extends State<NO1Form> {
         );
       }
 
-      // 카테고리 기반 자동 분류: 식품 → 유통기한, 생활용품 → 재고
-      if (isExpense && existing == null) {
-        await _autoClassifyByCategory(
-          category: effectiveMainCategory,
-          itemName: desc,
-          quantity: qty,
-          unitPrice: unit,
-          purchaseDate: _transactionDate,
-        );
-      }
-
       // 마지막 입력값 중앙 저장소에 저장 (다른 화면에서 참조용)
       unawaited(
         LastInputService.instance.saveTransaction(
@@ -1710,65 +1699,6 @@ class _NO1FormState extends State<NO1Form> {
     } catch (e) {
       if (!mounted) return;
       SnackbarUtils.showError(context, '거래 저장 중 오류: ${e.toString()}');
-    }
-  }
-
-  /// 카테고리 기반 자동 분류: 식품 → 유통기한, 생활용품 → 재고
-  Future<void> _autoClassifyByCategory({
-    required String category,
-    required String itemName,
-    required int quantity,
-    required double unitPrice,
-    required DateTime purchaseDate,
-  }) async {
-    // 식품 관련 카테고리 → 유통기한 목록에 추가
-    const foodCategories = ['식비', '식품·음료비'];
-    if (foodCategories.contains(category)) {
-      // 기본 유통기한: 구매일 + 7일 (사용자가 나중에 수정 가능)
-      final defaultExpiryDate = purchaseDate.add(const Duration(days: 7));
-
-      final prefill = FoodExpiryUpsertPrefill(
-        name: itemName,
-        quantity: quantity.toDouble(),
-        purchaseDate: purchaseDate,
-        expiryDate: defaultExpiryDate,
-        price: unitPrice,
-        supplier: _storeController.text.trim().isEmpty
-            ? null
-            : _storeController.text.trim(),
-      );
-
-      Navigator.of(context).pushNamed(
-        AppRoutes.foodExpiry,
-        arguments: FoodExpiryArgs(
-          openUpsertOnStart: true,
-          upsertPrefill: prefill,
-        ),
-      );
-
-      return;
-    }
-
-    // 생활용품 카테고리 → 소모품 재고 목록에 추가
-    if (category == '생활용품비') {
-      final prefill = FoodExpiryUpsertPrefill(
-        name: itemName,
-        quantity: quantity.toDouble(),
-        purchaseDate: purchaseDate,
-        price: unitPrice,
-        supplier: _storeController.text.trim().isEmpty
-            ? null
-            : _storeController.text.trim(),
-        category: '생활용품',
-      );
-
-      Navigator.of(context).pushNamed(
-        AppRoutes.foodExpiry,
-        arguments: FoodExpiryArgs(
-          openUpsertOnStart: true,
-          upsertPrefill: prefill,
-        ),
-      );
     }
   }
 
@@ -2073,7 +2003,7 @@ class _NO1FormState extends State<NO1Form> {
     final scheme = theme.colorScheme;
 
     return Row(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
         Transform.scale(
           scale: compact ? 0.75 : 0.85,
@@ -2088,18 +2018,6 @@ class _NO1FormState extends State<NO1Form> {
               'ENT',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
-          ),
-        ),
-        const SizedBox(width: 4), // 간격 축소
-        Transform.scale(
-          scale: compact ? 0.7 : 0.8,
-          child: FloatingActionButton.small(
-            heroTag: 'save_continue',
-            onPressed: _saveAndContinue,
-            tooltip: '저장 후 계속',
-            backgroundColor: scheme.secondaryContainer,
-            foregroundColor: scheme.onSecondaryContainer,
-            child: const Icon(IconCatalog.arrowForward),
           ),
         ),
       ],

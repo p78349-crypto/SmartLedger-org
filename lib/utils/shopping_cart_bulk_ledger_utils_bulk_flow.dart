@@ -55,6 +55,7 @@ Future<void> _addCheckedItemsToLedgerBulk({
           mainCategory: suggested.mainCategory,
           subCategory: suggested.subCategory,
           detailCategory: suggested.detailCategory,
+          paymentMethod: '',
         ),
         treatAsNew: true,
       ),
@@ -135,6 +136,7 @@ Future<void> _addCheckedItemsToLedgerBulk({
           mainCategory: useMainCategory,
           subCategory: useSubCategory,
           detailCategory: suggested.detailCategory,
+          paymentMethod: '',
         ),
         treatAsNew: true,
         // 이전 입력의 결제수단/메모 유지

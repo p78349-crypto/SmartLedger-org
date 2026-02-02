@@ -164,10 +164,12 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
       body: ValueListenableBuilder<List<ConsumableInventoryItem>>(
         valueListenable: ConsumableInventoryService.instance.items,
         builder: (context, items, _) {
-          // 로케이션 필터 적용
-          final filteredItems = _locationFilter == '전체'
-              ? items
-              : items.where((e) => e.location == _locationFilter).toList();
+            // 로케이션 필터 적용 + 유통기한이 있는 상품만 표시
+            final filteredItems = (_locationFilter == '전체'
+                ? items
+                : items.where((e) => e.location == _locationFilter).toList())
+              .where((item) => item.expiryDate != null)
+              .toList();
 
           return Column(
             children: [

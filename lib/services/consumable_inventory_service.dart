@@ -31,7 +31,6 @@ class ConsumableInventoryService {
     String category = '생활용품',
     String? detailCategory,
     String location = '기타',
-    DateTime? expiryDate,
     List<String> healthTags = const <String>[],
   }) async {
     final now = DateTime.now();
@@ -48,7 +47,6 @@ class ConsumableInventoryService {
       location: location,
       createdAt: now,
       lastUpdated: now,
-      expiryDate: expiryDate,
       healthTags: healthTags,
     );
     final next = List<ConsumableInventoryItem>.from(items.value)..add(newItem);

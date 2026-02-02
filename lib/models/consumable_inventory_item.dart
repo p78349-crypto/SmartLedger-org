@@ -20,6 +20,10 @@ class ConsumableUsageRecord {
   }
 }
 
+/// 생활용품 재고 관리 전용 모델
+/// 
+/// - 생활용품 수량 추적에 특화
+/// - 유통기한 필요 시 FoodExpiryItem 사용
 @immutable
 class ConsumableInventoryItem {
   final String id;
@@ -33,7 +37,6 @@ class ConsumableInventoryItem {
   final String location; // 보관 위치: 욕실, 주방, 거실, 창고 등
   final DateTime createdAt; // FIFO: 구매/등록일 기준 정렬용
   final DateTime lastUpdated;
-  final DateTime? expiryDate; // (옵션) 유통기한
   final List<String> healthTags; // 건강 주의 태그 (예: 탄수화물/당류/주류)
   final List<ConsumableUsageRecord> usageHistory;
 
@@ -59,7 +62,6 @@ class ConsumableInventoryItem {
     this.location = '기타',
     required this.createdAt,
     required this.lastUpdated,
-    this.expiryDate,
     this.healthTags = const <String>[],
     this.usageHistory = const <ConsumableUsageRecord>[],
   });
@@ -76,18 +78,12 @@ class ConsumableInventoryItem {
     'location': location,
     'createdAt': createdAt.toIso8601String(),
     'lastUpdated': lastUpdated.toIso8601String(),
-    'expiryDate': expiryDate?.toIso8601String(),
     'healthTags': healthTags,
     'usageHistory': usageHistory.map((e) => e.toJson()).toList(),
   };
 
   factory ConsumableInventoryItem.fromJson(Map<String, dynamic> json) {
     final lastUpdated = DateTime.parse(json['lastUpdated'] as String);
-    DateTime? expiryDate;
-    final expiryRaw = json['expiryDate'];
-    if (expiryRaw is String && expiryRaw.trim().isNotEmpty) {
-      expiryDate = DateTime.tryParse(expiryRaw);
-    }
 
     final usageRaw = json['usageHistory'];
     final usageHistory = <ConsumableUsageRecord>[];
@@ -128,7 +124,6 @@ class ConsumableInventoryItem {
           ? DateTime.parse(json['createdAt'] as String)
           : lastUpdated, // 기존 데이터 호환: createdAt 없으면 lastUpdated 사용
       lastUpdated: lastUpdated,
-      expiryDate: expiryDate,
       healthTags: tags,
       usageHistory: usageHistory,
     );
@@ -145,8 +140,6 @@ class ConsumableInventoryItem {
     String? location,
     DateTime? createdAt,
     DateTime? lastUpdated,
-    DateTime? expiryDate,
-    bool clearExpiryDate = false,
     List<String>? healthTags,
     List<ConsumableUsageRecord>? usageHistory,
   }) {
@@ -162,7 +155,6 @@ class ConsumableInventoryItem {
       location: location ?? this.location,
       createdAt: createdAt ?? this.createdAt,
       lastUpdated: lastUpdated ?? this.lastUpdated,
-      expiryDate: clearExpiryDate ? null : (expiryDate ?? this.expiryDate),
       healthTags: healthTags ?? this.healthTags,
       usageHistory: usageHistory ?? this.usageHistory,
     );

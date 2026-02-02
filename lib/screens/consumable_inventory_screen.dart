@@ -30,14 +30,6 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
     return value.toStringAsFixed(1);
   }
 
-  String _buildExpiryLabel(DateTime? selectedExpiry) {
-    if (selectedExpiry == null) return '유통기한: -';
-    final y = selectedExpiry.year.toString().padLeft(4, '0');
-    final m = selectedExpiry.month.toString().padLeft(2, '0');
-    final d = selectedExpiry.day.toString().padLeft(2, '0');
-    return '유통기한: $y-$m-$d';
-  }
-
   bool _isCountLikeUnit(String unit) {
     final u = unit.trim();
     if (u.isEmpty) return false;
@@ -148,7 +140,7 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('식료품/생활용품 재고 관리'),
+        title: const Text('생활용품 재고 관리'),
         actions: [
           IconButton(
             icon: const Icon(Icons.tune),
@@ -164,12 +156,10 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
       body: ValueListenableBuilder<List<ConsumableInventoryItem>>(
         valueListenable: ConsumableInventoryService.instance.items,
         builder: (context, items, _) {
-            // 로케이션 필터 적용 + 유통기한이 있는 상품만 표시
-            final filteredItems = (_locationFilter == '전체'
+            // 로케이션 필터 적용
+            final filteredItems = _locationFilter == '전체'
                 ? items
-                : items.where((e) => e.location == _locationFilter).toList())
-              .where((item) => item.expiryDate != null)
-              .toList();
+                : items.where((e) => e.location == _locationFilter).toList();
 
           return Column(
             children: [
@@ -214,7 +204,6 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
                         itemBuilder: (context, index) {
                           final item = filteredItems[index];
                           final isLow = item.currentStock <= item.threshold;
-                          final expiry = item.expiryDate;
                           final isEmpty = item.currentStock <= 0;
 
                           final theme = Theme.of(context);
@@ -223,23 +212,6 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
                               : (isLow
                                     ? theme.colorScheme.tertiary
                                     : theme.colorScheme.primary);
-
-                          DateTime startOfDay(DateTime dt) =>
-                              DateTime(dt.year, dt.month, dt.day);
-
-                          String formatDate(DateTime dt) {
-                            final y = dt.year.toString().padLeft(4, '0');
-                            final m = dt.month.toString().padLeft(2, '0');
-                            final d = dt.day.toString().padLeft(2, '0');
-                            return '$y-$m-$d';
-                          }
-
-                          int? daysLeft;
-                          if (expiry != null) {
-                            daysLeft = startOfDay(
-                              expiry,
-                            ).difference(startOfDay(DateTime.now())).inDays;
-                          }
 
                           return Card(
                             elevation: 0,
@@ -281,49 +253,6 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
                                                 ).colorScheme.onSurfaceVariant,
                                               ),
                                             ),
-                                            if (expiry != null) ...[
-                                              const SizedBox(height: 2),
-                                              Builder(
-                                                builder: (context) {
-                                                  final scheme = Theme.of(
-                                                    context,
-                                                  ).colorScheme;
-
-                                                  final String suffix;
-                                                  if (daysLeft == null) {
-                                                    suffix = '';
-                                                  } else if (daysLeft < 0) {
-                                                    suffix =
-                                                        ' (경과 ${-daysLeft}일)';
-                                                  } else {
-                                                    suffix = ' (D-$daysLeft)';
-                                                  }
-
-                                                  final Color color;
-                                                  if (daysLeft == null) {
-                                                    color =
-                                                        scheme.onSurfaceVariant;
-                                                  } else if (daysLeft < 0) {
-                                                    color = Colors.red;
-                                                  } else if (daysLeft <= 2) {
-                                                    color = Colors.orange;
-                                                  } else {
-                                                    color =
-                                                        scheme.onSurfaceVariant;
-                                                  }
-
-                                                  return Text(
-                                                    '⏳ 유통기한: '
-                                                    '${formatDate(expiry)}'
-                                                    '$suffix',
-                                                    style: TextStyle(
-                                                      fontSize: 12,
-                                                      color: color,
-                                                    ),
-                                                  );
-                                                },
-                                              ),
-                                            ],
                                           ],
                                         ),
                                       ),
@@ -487,8 +416,6 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
     );
     final unitController = TextEditingController(text: item?.unit ?? '개');
     String selectedLocation = item?.location ?? '기타';
-    DateTime? selectedExpiry = item?.expiryDate;
-    bool expiryCleared = false;
 
     final selectedTags = <String>{...?(item?.healthTags)};
 
@@ -554,59 +481,6 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
                           setDialogState(() => selectedLocation = val);
                         }
                       },
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            _buildExpiryLabel(selectedExpiry),
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurfaceVariant,
-                                ),
-                          ),
-                        ),
-                        if (selectedExpiry != null)
-                          TextButton(
-                            onPressed: () {
-                              setDialogState(() {
-                                selectedExpiry = null;
-                                expiryCleared = true;
-                              });
-                            },
-                            style: TextButton.styleFrom(
-                              visualDensity: VisualDensity.compact,
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            ),
-                            child: const Text('해제'),
-                          ),
-                        TextButton(
-                          onPressed: () async {
-                            final now = DateTime.now();
-                            final initial = selectedExpiry ?? now;
-                            final picked = await showDatePicker(
-                              context: context,
-                              initialDate: initial,
-                              firstDate: DateTime(2000),
-                              lastDate: DateTime(2100),
-                            );
-                            if (picked != null) {
-                              setDialogState(() {
-                                selectedExpiry = picked;
-                                expiryCleared = false;
-                              });
-                            }
-                          },
-                          style: TextButton.styleFrom(
-                            visualDensity: VisualDensity.compact,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          child: const Text('선택'),
-                        ),
-                      ],
                     ),
                     const SizedBox(height: 12),
                     TextField(
@@ -697,7 +571,6 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
                         bundleSize: bundleSize,
                         unit: unit,
                         location: selectedLocation,
-                        expiryDate: selectedExpiry,
                         healthTags: tags,
                       );
                     } else {
@@ -709,8 +582,6 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
                           bundleSize: bundleSize,
                           unit: unit,
                           location: selectedLocation,
-                          expiryDate: selectedExpiry,
-                          clearExpiryDate: expiryCleared,
                           healthTags: tags,
                         ),
                       );

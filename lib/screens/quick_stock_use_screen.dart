@@ -499,23 +499,6 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
     final isLow = item.currentStock <= item.threshold;
     final isEmpty = item.currentStock == 0;
 
-    // 유통기한 정보
-    String? expiryBadge;
-    Color? expiryColor;
-    if (item.expiryDate != null) {
-      final daysLeft = item.expiryDate!.difference(DateTime.now()).inDays;
-      if (daysLeft < 0) {
-        expiryBadge = '${-daysLeft}일 경과';
-        expiryColor = Colors.red;
-      } else if (daysLeft <= 3) {
-        expiryBadge = 'D-$daysLeft';
-        expiryColor = Colors.orange;
-      } else if (daysLeft <= 7) {
-        expiryBadge = 'D-$daysLeft';
-        expiryColor = Colors.amber.shade700;
-      }
-    }
-
     // 상품 가격 정보
     final productUnit = _getProductUnit(item.name);
     final priceText = productUnit != null
@@ -536,23 +519,6 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
       title: Row(
         children: [
           Expanded(child: Text(item.name)),
-          if (expiryBadge != null)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              margin: const EdgeInsets.only(left: 4),
-              decoration: BoxDecoration(
-                color: expiryColor,
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                expiryBadge,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
           if (isEmpty)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -591,32 +557,16 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
               Text(' | 📍${item.location}'),
             ],
           ),
-          if (priceText != null || item.expiryDate != null)
-            Row(
-              children: [
-                if (priceText != null)
-                  Text(
-                    '💰 $priceText',
-                    style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
-                  ),
-                if (priceText != null && item.expiryDate != null)
-                  const Text(' | '),
-                if (item.expiryDate != null && expiryBadge == null)
-                  Text(
-                    '📅 ${_formatDate(item.expiryDate!)}',
-                    style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
-                  ),
-              ],
+          if (priceText != null)
+            Text(
+              '💰 $priceText',
+              style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
             ),
         ],
       ),
-      isThreeLine: priceText != null || item.expiryDate != null,
+      isThreeLine: priceText != null,
       onTap: isEmpty ? null : () => _selectItem(item),
     );
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.month}/${date.day}';
   }
 
   /// 중량/가격 힌트 위젯
@@ -966,15 +916,8 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
 
     switch (sortOption) {
       case '유통기한 임박순':
-        sorted.sort((a, b) {
-          // 유통기한 있는 것 우선
-          if (a.expiryDate == null && b.expiryDate == null) {
-            return a.name.compareTo(b.name);
-          }
-          if (a.expiryDate == null) return 1;
-          if (b.expiryDate == null) return -1;
-          return a.expiryDate!.compareTo(b.expiryDate!);
-        });
+        // 생활용품은 유통기한이 없으므로 이름순 정렬
+        sorted.sort((a, b) => a.name.compareTo(b.name));
         break;
       case '자주 쓰는 순':
         sorted.sort((a, b) {
@@ -1006,23 +949,6 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
     final isLow = item.currentStock <= item.threshold;
     final isEmpty = item.currentStock == 0;
 
-    // 유통기한 정보
-    String? expiryText;
-    Color? expiryColor;
-    if (item.expiryDate != null) {
-      final daysLeft = item.expiryDate!.difference(DateTime.now()).inDays;
-      if (daysLeft < 0) {
-        expiryText = '⚠️ 유통기한 ${-daysLeft}일 경과';
-        expiryColor = Colors.red;
-      } else if (daysLeft <= 3) {
-        expiryText = '⏰ D-$daysLeft 임박!';
-        expiryColor = Colors.orange;
-      } else if (daysLeft <= 7) {
-        expiryText = 'D-$daysLeft';
-        expiryColor = Colors.amber.shade700;
-      }
-    }
-
     // 최근 사용 빈도
     final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
     final recentUsageCount = item.usageHistory
@@ -1033,10 +959,6 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       color: isEmpty
           ? Colors.red.shade50
-          : expiryColor == Colors.red
-          ? Colors.red.shade50
-          : expiryColor == Colors.orange
-          ? Colors.orange.shade50
           : null,
       child: ListTile(
         onTap: isEmpty ? null : onTap,
@@ -1057,27 +979,7 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
                   ),
                 ),
         ),
-        title: Row(
-          children: [
-            Expanded(child: Text(item.name)),
-            if (expiryText != null)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: expiryColor,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  expiryText,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-          ],
-        ),
+        title: Text(item.name),
         subtitle: Row(
           children: [
             Text(
@@ -1492,12 +1394,12 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
                   return '$y-$m-$d';
                 }
 
-                // Usage-based expected depletion (for non-expiry items)
+                // Usage-based expected depletion
                 int? expectedDaysLeft;
                 int? avgIntervalDays;
                 DateTime? expectedDepletionDate;
 
-                if (item.expiryDate == null && item.usageHistory.length >= 2) {
+                if (item.usageHistory.length >= 2) {
                   final sorted = [...item.usageHistory]
                     ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
 
@@ -1537,25 +1439,7 @@ class _QuickStockUseBodyState extends State<_QuickStockUseBody> {
                 String? secondaryLine;
                 Color? secondaryColor;
 
-                final expiry = item.expiryDate;
-                if (expiry != null) {
-                  final dDayValue = startOfDay(
-                    expiry,
-                  ).difference(startOfDay(DateTime.now())).inDays;
-
-                  final dDayText = dDayValue < 0
-                      ? ' (경과 ${-dDayValue}일)'
-                      : ' (D-$dDayValue)';
-
-                  secondaryLine =
-                      '유통기한: ${formatDate(expiry)}'
-                      '$dDayText';
-                  secondaryColor = dDayValue < 0
-                      ? Colors.red
-                      : (dDayValue <= 2
-                            ? Colors.orange
-                            : Theme.of(context).colorScheme.onSurfaceVariant);
-                } else if (expectedDaysLeft != null &&
+                if (expectedDaysLeft != null &&
                     expectedDepletionDate != null) {
                   final expectedLeft = expectedDaysLeft;
                   final expectedDate = expectedDepletionDate;

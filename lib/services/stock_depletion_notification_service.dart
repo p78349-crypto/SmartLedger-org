@@ -218,9 +218,8 @@ class StockDepletionNotificationService {
       return;
     }
 
-    final thresholdDays = item.expiryDate != null
-        ? await UserPrefService.getStockUseAutoAddDepletionDaysFoodV1()
-        : await UserPrefService.getStockUseAutoAddDepletionDaysHouseholdV1();
+    // 생활용품 전용 (기본 threshold 사용)
+    final thresholdDays = await UserPrefService.getStockUseAutoAddDepletionDaysHouseholdV1();
 
     final now = DateTime.now();
     final expectedDepletionDate = _startOfDay(
@@ -244,7 +243,7 @@ class StockDepletionNotificationService {
       notifyAt = now.add(const Duration(minutes: 1));
     }
 
-    final title = item.expiryDate != null ? '식료품 소진 알림' : '생활용품 소진 알림';
+    const title = '생활용품 소진 알림';
     final remaining = _formatQtyWithUnit(item.currentStock, item.unit);
     final expectedText = expectedDaysLeft <= 0
         ? '거의 소진됨'

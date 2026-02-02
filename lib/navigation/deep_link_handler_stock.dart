@@ -200,18 +200,6 @@ mixin _DeepLinkHandlerStock on _DeepLinkHandlerBase {
   void _showStockInfoDialog(NavigatorState navigator, dynamic item) {
     final context = navigator.context;
 
-    String? expiryInfo;
-    if (item.expiryDate != null) {
-      final daysLeft = item.expiryDate!.difference(DateTime.now()).inDays;
-      if (daysLeft < 0) {
-        expiryInfo = '⚠️ 유통기한 ${-daysLeft}일 경과';
-      } else if (daysLeft <= 3) {
-        expiryInfo = '⏰ D-$daysLeft 임박!';
-      } else {
-        expiryInfo = 'D-$daysLeft';
-      }
-    }
-
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -234,18 +222,6 @@ mixin _DeepLinkHandlerStock on _DeepLinkHandlerBase {
                   : Colors.green,
             ),
             const SizedBox(height: 12),
-            if (expiryInfo != null) ...[
-              _buildInfoRow(
-                '📅 유통기한',
-                expiryInfo,
-                expiryInfo.contains('경과')
-                    ? Colors.red
-                    : expiryInfo.contains('임박')
-                    ? Colors.orange
-                    : Colors.grey,
-              ),
-              const SizedBox(height: 12),
-            ],
             _buildInfoRow('📍 보관 위치', item.location, Colors.grey),
             const Divider(height: 24),
             const Text(

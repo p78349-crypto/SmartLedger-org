@@ -3,7 +3,11 @@ import '../models/transaction.dart';
 import '../navigation/app_routes.dart';
 import '../utils/household_consumables_utils.dart';
 
-/// 생활용품 독립 화면 - 생활용품만 표시
+/// 생활용품 빠른 지출 입력 전용 화면
+/// 
+/// - 10개 생활용품 템플릿 제공
+/// - 클릭 1번으로 거래 입력 화면 이동 (10초 입력)
+/// - 재고 추적 기능 없음 (재고관리 화면 별도 이용)
 class HouseholdItemsScreen extends StatelessWidget {
   final String accountName;
 
@@ -16,19 +20,7 @@ class HouseholdItemsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('생활용품'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.inventory),
-            tooltip: '재고 관리',
-            onPressed: () {
-              Navigator.of(context).pushNamed(
-                AppRoutes.consumableInventory,
-                arguments: AccountArgs(accountName: accountName),
-              );
-            },
-          ),
-        ],
+        title: const Text('생활용품 빠른 입력'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),

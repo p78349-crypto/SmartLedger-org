@@ -208,9 +208,8 @@ class QuickStockUseUtils {
       final qtyFactor = _resolveQuantityFactorFromTrend(trend);
 
       // Auto add to shopping prep when expected depletion is imminent
-      final autoAddDaysThreshold = updated.expiryDate != null
-          ? await UserPrefService.getStockUseAutoAddDepletionDaysFoodV1()
-          : await UserPrefService.getStockUseAutoAddDepletionDaysHouseholdV1();
+      // 생활용품 전용
+      final autoAddDaysThreshold = await UserPrefService.getStockUseAutoAddDepletionDaysHouseholdV1();
       final expectedDaysLeft = _calculateExpectedDepletionDays(updated);
       var addedToCartByPrediction = false;
       if (expectedDaysLeft != null &&

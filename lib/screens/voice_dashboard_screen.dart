@@ -10,12 +10,12 @@ import '../models/shopping_cart_item.dart';
 import '../services/budget_service.dart';
 import '../services/fixed_cost_service.dart';
 import '../services/consumable_inventory_service.dart';
-import '../services/consumable_inventory_service.dart';
 import '../services/recipe_service.dart';
 import '../services/transaction_service.dart';
 import '../services/user_pref_service.dart';
 import '../services/category_keyword_service.dart';
 import '../services/smart_consuming_service.dart';
+import '../services/unified_recipe_recommendation_service.dart';
 import 'account_main_screen.dart';
 import 'transaction_add_screen.dart';
 import 'quick_simple_expense_input_screen.dart';
@@ -2123,67 +2123,28 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
   }
 
   Future<VoiceCommandResult> _handleComplexMealQuery(String command) async {
-    // 1. 유통기한 임박 재료 (Food Expiry)
+    // 통합 레시피 추천 서비스 사용
+    final recommendationService = UnifiedRecipeRecommendationService.instance;
     final foodItems = ConsumableInventoryService.instance.items.value;
     final now = DateTime.now();
+    
+    // 1. 유통기한 임박 재료 확인
     final expiringFood = foodItems.where((i) {
       final expiryDate = i.expiryDate;
       if (expiryDate == null) return false;
       final days = expiryDate.difference(now).inDays;
       return days >= -1 && days <= 3; // 어제 만료 ~ 3일 후 만료
     }).toList();
-    // Sort by most urgent
+    
     expiringFood.sort((a, b) {
       final aDate = a.expiryDate ?? DateTime.now().add(const Duration(days: 3650));
       final bDate = b.expiryDate ?? DateTime.now().add(const Duration(days: 3650));
       return aDate.compareTo(bDate);
     });
 
-    // 2. 레시피 매칭 (Recipe Service)
-    await RecipeService.instance.load();
-    final recipes = RecipeService.instance.recipes.value;
-
-    // 현재 보유 중인 모든 재료 이름 (Food Expiry + Consumables)
-    final availableNames = foodItems.map((e) => e.name.trim()).toSet();
-    // (Consumables are usually not food, but just in case user mixes them)
-    // final consumableItems = ConsumableInventoryService.instance.items.value;
-    // availableNames.addAll(consumableItems.map((e) => e.name.trim()));
-
-    final recommended =
-        <Map<String, dynamic>>[]; // {recipe, missingCount, missingItems}
-
-    for (final recipe in recipes) {
-      int missingCount = 0;
-      final missingItems = <String>[];
-
-      for (final ingredient in recipe.ingredients) {
-        // Simple name match. In real app, fuzzy search is better
-        final hasItem = availableNames.any(
-          (n) => n.contains(ingredient.name) || ingredient.name.contains(n),
-        );
-        if (!hasItem) {
-          missingCount++;
-          missingItems.add(ingredient.name);
-        }
-      }
-
-      if (missingCount == 0) {
-        recommended.add({'recipe': recipe, 'missingCount': 0, 'missing': []});
-      } else if (missingCount <= 2) {
-        recommended.add({
-          'recipe': recipe,
-          'missingCount': missingCount,
-          'missing': missingItems,
-        });
-      }
-    }
-
-    // Sort: Fully match first, then by missing count
-    recommended.sort((a, b) {
-      final mA = a['missingCount'] as int;
-      final mB = b['missingCount'] as int;
-      return mA.compareTo(mB);
-    });
+    // 2. 음성 명령용 레시피 추천 (통합 서비스)
+    final recommendedRecipe =
+        await recommendationService.getRecommendationForVoiceCommand();
 
     // Build Response
     final sb = StringBuffer();
@@ -2197,20 +2158,20 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
     }
 
     // Step 2: Recipe Recommendation
-    if (recommended.isEmpty) {
+    if (recommendedRecipe == null) {
       sb.write('현재 재료로 딱 맞는 레시피를 찾지 못했어요. 장을 좀 보셔야 할 것 같아요.');
     } else {
-      // 100% Match
-      final perfect = recommended.where((r) => r['missingCount'] == 0).toList();
-      if (perfect.isNotEmpty) {
-        final rName = (perfect.first['recipe'] as dynamic).name;
+      final rName = (recommendedRecipe['recipe'] as dynamic).name;
+      final missingCount = recommendedRecipe['missingCount'] as int;
+      final missing = recommendedRecipe['missing'] as List<String>;
+
+      if (missingCount == 0) {
+        // 100% Match
         sb.write('현재 재료로 "$rName" 요리가 가능해요! 바로 해드실 수 있어요.');
       } else {
         // Partial Match
-        final partial = recommended.first;
-        final rName = (partial['recipe'] as dynamic).name;
-        final missing = (partial['missing'] as List).join(', ');
-        sb.write('"$rName" 어떠세요? $missing만 사오면 만들 수 있어요.');
+        final missingStr = missing.join(', ');
+        sb.write('"$rName" 어떠세요? $missingStr만 사오면 만들 수 있어요.');
       }
     }
 

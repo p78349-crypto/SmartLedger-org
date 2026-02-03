@@ -10,10 +10,8 @@ library;
 
 import 'package:flutter/foundation.dart';
 import '../models/consumable_inventory_item.dart';
-import '../models/food_expiry_item.dart';
 import '../models/wms_inventory_draft_entry.dart';
 import '../services/consumable_inventory_service.dart';
-import '../services/food_expiry_service.dart';
 import '../services/user_pref_service.dart';
 
 /// WMS 데이터 Gateway - 재고 관리
@@ -232,132 +230,6 @@ class WmsInventoryGateway {
   }
 }
 
-/// WMS 데이터 Gateway - 유통기한 관리
-class WmsExpiryGateway {
-  WmsExpiryGateway._();
-  static final WmsExpiryGateway instance = WmsExpiryGateway._();
-
-  // 데이터 캐시
-  List<FoodExpiryItem>? _cachedItems;
-  DateTime? _lastCacheTime;
-  static const _cacheDuration = Duration(seconds: 30);
-
-  /// 유통기한 목록 조회 (캐싱 적용)
-  Future<List<FoodExpiryItem>> getItems({
-    bool forceRefresh = false,
-  }) async {
-    final now = DateTime.now();
-
-    if (!forceRefresh &&
-        _cachedItems != null &&
-        _lastCacheTime != null &&
-        now.difference(_lastCacheTime!) < _cacheDuration) {
-      return _cachedItems!;
-    }
-
-    await FoodExpiryService.instance.load();
-    final items = FoodExpiryService.instance.items.value;
-
-    _cachedItems = List.unmodifiable(items);
-    _lastCacheTime = now;
-
-    _logRead('Loaded ${items.length} expiry items');
-    return _cachedItems!;
-  }
-
-  /// 유통기한 임박 아이템 조회 (D-day 기준)
-  Future<List<FoodExpiryItem>> getExpiringItems({
-    int daysThreshold = 3,
-  }) async {
-    final items = await getItems();
-    final now = DateTime.now();
-
-    return items.where((item) {
-      final daysLeft = item.daysLeft(now);
-      return daysLeft >= 0 && daysLeft <= daysThreshold;
-    }).toList();
-  }
-
-  /// 유통기한 경과 아이템 조회
-  Future<List<FoodExpiryItem>> getExpiredItems() async {
-    final items = await getItems();
-    final now = DateTime.now();
-
-    return items.where((item) => item.daysLeft(now) < 0).toList();
-  }
-
-  /// 아이템 추가
-  Future<WmsOperationResult<FoodExpiryItem>> addItem({
-    required WmsExpiryInput input,
-  }) async {
-    try {
-      final validation = input.validate();
-      if (!validation.isValid) {
-        return WmsOperationResult.failure(
-          'Validation failed: ${validation.errors.join(', ')}',
-        );
-      }
-
-      await FoodExpiryService.instance.addItem(
-        name: input.name,
-        purchaseDate: input.purchaseDate,
-        expiryDate: input.expiryDate,
-        memo: input.memo,
-        quantity: input.quantity,
-        unit: input.unit,
-        category: input.category,
-        location: input.location,
-        price: input.price,
-        supplier: input.supplier,
-        healthTags: input.healthTags,
-      );
-
-      _invalidateCache();
-      _logWrite('Added expiry item: ${input.name}');
-
-      return WmsOperationResult.success(null);
-    } catch (e) {
-      _logError('Add expiry item failed', e);
-      return WmsOperationResult.failure(e.toString());
-    }
-  }
-
-  /// 아이템 삭제
-  Future<WmsOperationResult<void>> deleteItem(String id) async {
-    try {
-      await FoodExpiryService.instance.deleteById(id);
-      _invalidateCache();
-
-      _logWrite('Deleted expiry item: $id');
-      return WmsOperationResult.success(null);
-    } catch (e) {
-      _logError('Delete expiry item failed', e);
-      return WmsOperationResult.failure(e.toString());
-    }
-  }
-
-  void _invalidateCache() {
-    _cachedItems = null;
-    _lastCacheTime = null;
-  }
-
-  Future<void> reload() async {
-    _invalidateCache();
-    await getItems(forceRefresh: true);
-  }
-
-  void _logRead(String message) {
-    debugPrint('[WMS Gateway][EXPIRY][READ] $message');
-  }
-
-  void _logWrite(String message) {
-    debugPrint('[WMS Gateway][EXPIRY][WRITE] $message');
-  }
-
-  void _logError(String message, Object error) {
-    debugPrint('[WMS Gateway][EXPIRY][ERROR] $message: $error');
-  }
-}
 
 // ============================================================================
 // 데이터 모델

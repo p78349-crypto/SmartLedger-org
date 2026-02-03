@@ -5,20 +5,17 @@
 library;
 
 import '../models/consumable_inventory_item.dart';
-import '../models/food_expiry_item.dart';
 import 'wms_data_gateway.dart';
 
 /// WMS 통합 검색 결과
 class WmsUnifiedSearchResult {
   final List<ConsumableInventoryItem> inventoryItems;
-  final List<FoodExpiryItem> expiryItems; // 하위 호환용 (마이그레이션 전)
 
   const WmsUnifiedSearchResult({
     required this.inventoryItems,
-    required this.expiryItems,
   });
 
-  int get totalCount => inventoryItems.length + expiryItems.length;
+  int get totalCount => inventoryItems.length;
 }
 
 /// WMS 통합 Gateway
@@ -31,33 +28,21 @@ class WmsUnifiedGateway {
     if (query.trim().isEmpty) {
       return const WmsUnifiedSearchResult(
         inventoryItems: [],
-        expiryItems: [],
       );
     }
 
     final normalized = query.trim().toLowerCase();
 
     // 병렬 조회
-    final results = await Future.wait([
-      WmsInventoryGateway.instance.getItems(),
-      WmsExpiryGateway.instance.getItems(),
-    ]);
-
-    final inventoryItems = results[0] as List<ConsumableInventoryItem>;
-    final expiryItems = results[1] as List<FoodExpiryItem>;
+    final inventoryItems = await WmsInventoryGateway.instance.getItems();
 
     // 검색 필터링
     final filteredInventory = inventoryItems
         .where((item) => item.name.toLowerCase().contains(normalized))
         .toList();
 
-    final filteredExpiry = expiryItems
-        .where((item) => item.name.toLowerCase().contains(normalized))
-        .toList();
-
     return WmsUnifiedSearchResult(
       inventoryItems: filteredInventory,
-      expiryItems: filteredExpiry,
     );
   }
 
@@ -66,14 +51,10 @@ class WmsUnifiedGateway {
     final results = await Future.wait([
       WmsInventoryGateway.instance.getLowStockItems(),
       WmsInventoryGateway.instance.getItems(),
-      WmsExpiryGateway.instance.getExpiringItems(),
-      WmsExpiryGateway.instance.getExpiredItems(),
     ]);
 
     final lowStockItems = results[0] as List<ConsumableInventoryItem>;
     final inventoryItems = results[1] as List<ConsumableInventoryItem>;
-    final expiringItems = results[2] as List<FoodExpiryItem>;
-    final expiredItems = results[3] as List<FoodExpiryItem>;
 
     final expiringInventoryItems = inventoryItems
         .where((item) => item.isExpiringWithin())
@@ -85,8 +66,6 @@ class WmsUnifiedGateway {
 
     return WmsAlertSummary(
       lowStockItems: lowStockItems,
-      expiringItems: expiringItems,
-      expiredItems: expiredItems,
       expiringInventoryItems: expiringInventoryItems,
       expiredInventoryItems: expiredInventoryItems,
     );
@@ -94,33 +73,24 @@ class WmsUnifiedGateway {
 
   /// 전체 재로드
   Future<void> reloadAll() async {
-    await Future.wait([
-      WmsInventoryGateway.instance.reload(),
-      WmsExpiryGateway.instance.reload(),
-    ]);
+    await WmsInventoryGateway.instance.reload();
   }
 }
 
 /// 알림 요약
 class WmsAlertSummary {
   final List<ConsumableInventoryItem> lowStockItems;
-  final List<FoodExpiryItem> expiringItems;
-  final List<FoodExpiryItem> expiredItems;
   final List<ConsumableInventoryItem> expiringInventoryItems;
   final List<ConsumableInventoryItem> expiredInventoryItems;
 
   const WmsAlertSummary({
     required this.lowStockItems,
-    required this.expiringItems,
-    required this.expiredItems,
     required this.expiringInventoryItems,
     required this.expiredInventoryItems,
   });
 
     int get totalAlerts =>
       lowStockItems.length +
-      expiringItems.length +
-      expiredItems.length +
       expiringInventoryItems.length +
       expiredInventoryItems.length;
 

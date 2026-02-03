@@ -117,15 +117,16 @@ Future<void> unifiedSearchExample(String query) async {
   final result = await WmsUnifiedGateway.instance.search(query);
 
   debugPrint('재고: ${result.inventoryItems.length}개');
-  debugPrint('유통기한: ${result.expiryItems.length}개');
   debugPrint('전체: ${result.totalCount}개');
 
   for (final item in result.inventoryItems) {
     debugPrint('- [재고] ${item.name}: ${item.currentStock}${item.unit}');
   }
 
-  for (final item in result.expiryItems) {
-    final daysLeft = item.daysLeft(DateTime.now());
+  for (final item in result.inventoryItems.where((e) => e.expiryDate != null)) {
+    final daysLeft = item.expiryDate!
+        .difference(DateTime.now())
+        .inDays;
     debugPrint('- [유통기한] ${item.name}: D$daysLeft');
   }
 }
@@ -147,8 +148,8 @@ Future<void> alertSummaryExample(BuildContext context) async {
 
   final message = '''
 재고 부족: ${alerts.lowStockItems.length}개
-유통기한 임박: ${alerts.expiringItems.length}개
-유통기한 경과: ${alerts.expiredItems.length}개
+유통기한 임박: ${alerts.expiringInventoryItems.length}개
+유통기한 경과: ${alerts.expiredInventoryItems.length}개
 ''';
 
   if (!context.mounted) return;

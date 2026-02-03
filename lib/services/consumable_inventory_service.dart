@@ -117,6 +117,10 @@ class ConsumableInventoryService {
     String? detailCategory,
     String location = '기타',
     List<String> healthTags = const <String>[],
+    DateTime? expiryDate,
+    DateTime? purchaseDate,
+    double? price,
+    String? supplier,
   }) async {
     final now = DateTime.now();
     final id = 'ci_${now.microsecondsSinceEpoch}';
@@ -133,6 +137,10 @@ class ConsumableInventoryService {
       createdAt: now,
       lastUpdated: now,
       healthTags: healthTags,
+      expiryDate: expiryDate,
+      purchaseDate: purchaseDate,
+      price: price,
+      supplier: supplier,
     );
     final next = List<ConsumableInventoryItem>.from(items.value)..add(newItem);
     // FIFO: 생성일 기준 정렬 (오래된 것이 먼저)

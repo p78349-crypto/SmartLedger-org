@@ -1,51 +1,46 @@
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../models/consumable_inventory_item.dart';
 import '../models/food_expiry_item.dart';
-import 'food_expiry_notification_service.dart';
+import 'consumable_inventory_service.dart';
 
+/// FoodExpiry 호환 서비스 (통합 재고 기반)
+///
+/// - legacy SharedPreferences 저장 제거
+/// - ConsumableInventoryService의 expiryDate 데이터를 투영
 class FoodExpiryService {
   FoodExpiryService._internal();
   static final FoodExpiryService instance = FoodExpiryService._internal();
-
-  static const String _prefsKey = 'food_expiry_items_v1';
 
   final ValueNotifier<List<FoodExpiryItem>> items =
       ValueNotifier<List<FoodExpiryItem>>(<FoodExpiryItem>[]);
 
   Future<void> load() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_prefsKey);
-    if (raw == null || raw.trim().isEmpty) {
-      items.value = <FoodExpiryItem>[];
-      await FoodExpiryNotificationService.instance.rescheduleFromPrefs(
-        items.value,
-      );
-      return;
-    }
-    try {
-      final list = jsonDecode(raw) as List<dynamic>;
-      final parsed = list
-          .whereType<Map<String, dynamic>>()
-          .map(FoodExpiryItem.fromJson)
-          .where((e) => e.id.isNotEmpty)
-          .toList();
-      parsed.sort((a, b) => a.expiryDate.compareTo(b.expiryDate));
-      items.value = parsed;
-    } catch (_) {
-      items.value = <FoodExpiryItem>[];
-    }
-
-    await FoodExpiryNotificationService.instance.rescheduleFromPrefs(
-      items.value,
-    );
+    await ConsumableInventoryService.instance.load();
+    final inventory = ConsumableInventoryService.instance.items.value;
+    final mapped = inventory
+        .where((e) => e.expiryDate != null)
+        .map(_fromInventory)
+        .toList();
+    mapped.sort((a, b) => a.expiryDate.compareTo(b.expiryDate));
+    items.value = mapped;
   }
 
-  Future<void> _save() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = jsonEncode(items.value.map((e) => e.toJson()).toList());
-    await prefs.setString(_prefsKey, raw);
+  FoodExpiryItem _fromInventory(ConsumableInventoryItem item) {
+    return FoodExpiryItem(
+      id: item.id,
+      name: item.name,
+      purchaseDate: item.purchaseDate ?? item.createdAt,
+      expiryDate: item.expiryDate ?? item.createdAt,
+      createdAt: item.createdAt,
+      memo: '',
+      quantity: item.currentStock,
+      unit: item.unit,
+      category: item.category,
+      location: item.location,
+      price: item.price ?? 0.0,
+      supplier: item.supplier ?? '',
+      healthTags: item.healthTags,
+    );
   }
 
   Future<void> addItem({
@@ -61,32 +56,19 @@ class FoodExpiryService {
     String supplier = '',
     List<String> healthTags = const <String>[],
   }) async {
-    final now = DateTime.now();
-    final id = 'fx_${now.microsecondsSinceEpoch}';
-    final next = List<FoodExpiryItem>.from(items.value)
-      ..add(
-        FoodExpiryItem(
-          id: id,
-          name: name.trim(),
-          purchaseDate: purchaseDate,
-          expiryDate: expiryDate,
-          createdAt: now,
-          memo: memo.trim(),
-          quantity: quantity,
-          unit: unit,
-          category: category,
-          location: location,
-          price: price,
-          supplier: supplier,
-          healthTags: healthTags,
-        ),
-      );
-    next.sort((a, b) => a.expiryDate.compareTo(b.expiryDate));
-    items.value = next;
-    await _save();
-    await FoodExpiryNotificationService.instance.rescheduleFromPrefs(
-      items.value,
+    await ConsumableInventoryService.instance.addItem(
+      name: name.trim(),
+      currentStock: quantity,
+      unit: unit,
+      category: category,
+      location: location,
+      healthTags: healthTags,
+      purchaseDate: purchaseDate,
+      expiryDate: expiryDate,
+      price: price > 0 ? price : null,
+      supplier: supplier.isEmpty ? null : supplier,
     );
+    await load();
   }
 
   Future<void> updateItem({
@@ -103,41 +85,28 @@ class FoodExpiryService {
     String supplier = '',
     List<String>? healthTags,
   }) async {
-    final prev = items.value;
-    final idx = prev.indexWhere((e) => e.id == id);
+    final current = ConsumableInventoryService.instance.items.value;
+    final idx = current.indexWhere((e) => e.id == id);
     if (idx < 0) return;
-
-    final old = prev[idx];
-    final next = List<FoodExpiryItem>.from(prev);
-    next[idx] = FoodExpiryItem(
-      id: old.id,
+    final existing = current[idx];
+    final updated = existing.copyWith(
       name: name.trim(),
-      purchaseDate: purchaseDate,
-      expiryDate: expiryDate,
-      createdAt: old.createdAt,
-      memo: memo.trim(),
-      quantity: quantity,
+      currentStock: quantity,
       unit: unit,
       category: category,
       location: location,
-      price: price,
-      supplier: supplier,
-      healthTags: healthTags ?? old.healthTags,
+      purchaseDate: purchaseDate,
+      expiryDate: expiryDate,
+      price: price > 0 ? price : null,
+      supplier: supplier.isEmpty ? null : supplier,
+      healthTags: healthTags ?? existing.healthTags,
     );
-    next.sort((a, b) => a.expiryDate.compareTo(b.expiryDate));
-    items.value = next;
-    await _save();
-    await FoodExpiryNotificationService.instance.rescheduleFromPrefs(
-      items.value,
-    );
+    await ConsumableInventoryService.instance.updateItem(updated);
+    await load();
   }
 
   Future<void> deleteById(String id) async {
-    final next = items.value.where((e) => e.id != id).toList();
-    items.value = next;
-    await _save();
-    await FoodExpiryNotificationService.instance.rescheduleFromPrefs(
-      items.value,
-    );
+    await ConsumableInventoryService.instance.deleteItem(id);
+    await load();
   }
 }

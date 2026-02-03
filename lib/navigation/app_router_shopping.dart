@@ -8,25 +8,15 @@ class _ShoppingRoutes {
   ) {
     switch (name) {
       case AppRoutes.foodExpiry:
-        final a = args is FoodExpiryArgs ? args : const FoodExpiryArgs();
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => FoodExpiryMainScreen(
-            initialIngredients: a.initialIngredients,
-            autoUsageMode: a.autoUsageMode,
-            openUpsertOnStart: a.openUpsertOnStart,
-            openCookableRecipePickerOnStart: a.openCookableRecipePickerOnStart,
-            scrollToDailyRecipeRecommendationOnStart:
-                a.scrollToDailyRecipeRecommendationOnStart,
-            upsertPrefill: a.upsertPrefill,
-            upsertAutoSubmit: a.upsertAutoSubmit,
-          ),
+          builder: (_) => const _ConsumableInventoryRedirectScreen(),
         );
 
       case AppRoutes.foodCookingStart:
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => const FoodCookingStartScreen(),
+          builder: (_) => const _ConsumableInventoryRedirectScreen(),
         );
 
       case AppRoutes.healthAnalyzer:
@@ -172,6 +162,107 @@ class _ShoppingRoutes {
       default:
         return null;
     }
+  }
+}
+
+class _ConsumableInventoryRedirectScreen extends StatefulWidget {
+  const _ConsumableInventoryRedirectScreen();
+
+  @override
+  State<_ConsumableInventoryRedirectScreen> createState() =>
+      _ConsumableInventoryRedirectScreenState();
+}
+
+class _ConsumableInventoryRedirectScreenState
+    extends State<_ConsumableInventoryRedirectScreen> {
+  bool _loading = true;
+  String? _errorMessage;
+  String? _selectedAccount;
+  List<String> _accounts = const [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAccounts();
+  }
+
+  Future<void> _loadAccounts() async {
+    try {
+      final accountService = AccountService();
+      await accountService.loadAccounts();
+      final accounts = accountService.accounts.map((e) => e.name).toList();
+      final lastAccount = await UserPrefService.getLastAccountName();
+
+      String? selected;
+      if (lastAccount != null && accounts.contains(lastAccount)) {
+        selected = lastAccount;
+      } else if (accounts.length == 1) {
+        selected = accounts.first;
+      }
+
+      if (!mounted) return;
+      setState(() {
+        _accounts = accounts;
+        _selectedAccount = selected;
+        _loading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _errorMessage = e.toString();
+        _loading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_selectedAccount != null) {
+      return ConsumableInventoryScreen(accountName: _selectedAccount!);
+    }
+
+    if (_accounts.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('식료품/생활용품 관리')),
+        body: Center(
+          child: Text(
+            _errorMessage ?? '계정이 없습니다. 먼저 계정을 추가하세요.',
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('계정 선택')),
+      body: ListView.separated(
+        padding: const EdgeInsets.all(16),
+        itemCount: _accounts.length,
+        separatorBuilder: (_, __) => const Divider(),
+        itemBuilder: (context, index) {
+          final name = _accounts[index];
+          return ListTile(
+            title: Text(name),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: () {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (_) => ConsumableInventoryScreen(
+                    accountName: name,
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
   }
 }
 

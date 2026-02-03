@@ -22,6 +22,7 @@ class ConsumableInventoryScreen extends StatefulWidget {
 class _ConsumableInventoryScreenState
   extends State<ConsumableInventoryScreen> {
   String _locationFilter = '전체';
+  String _expiryFilter = '전체';
 
   Set<String> _countLikeUnits =
     UserPrefService.defaultCountLikeUnitsV1.toSet();
@@ -98,11 +99,17 @@ class _ConsumableInventoryScreenState
     ...ConsumableInventoryItem.locationOptions,
   ];
 
+  List<String> get _expiryOptions => [
+    '전체',
+    '임박',
+    '경과',
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('생활용품 재고 관리'),
+        title: const Text('식료품/생활용품 관리'),
         actions: [
           IconButton(
             icon: const Icon(Icons.tune),
@@ -137,6 +144,12 @@ class _ConsumableInventoryScreenState
                 ? items
                 : items.where((e) => e.location == _locationFilter).toList();
 
+          final expiryFilteredItems = _expiryFilter == '전체'
+            ? filteredItems
+            : _expiryFilter == '임박'
+              ? filteredItems.where((e) => e.isExpiringWithin()).toList()
+              : filteredItems.where((e) => e.isExpired()).toList();
+
           return Column(
             children: [
               // 로케이션 필터 칩
@@ -162,23 +175,48 @@ class _ConsumableInventoryScreenState
                   }).toList(),
                 ),
               ),
+              // 유통기한 필터 칩
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 4,
+                ),
+                child: Row(
+                  children: _expiryOptions.map((opt) {
+                    final isSelected = _expiryFilter == opt;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: FilterChip(
+                        label: Text(opt),
+                        selected: isSelected,
+                        onSelected: (_) {
+                          setState(() => _expiryFilter = opt);
+                        },
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
               // 아이템 목록
               Expanded(
-                child: filteredItems.isEmpty
+                child: expiryFilteredItems.isEmpty
                     ? Center(
                         child: Text(
                           _locationFilter == '전체'
-                              ? '등록된 소모품이 없습니다.\n우측 상단 + 버튼으로 추가하세요.'
-                              : '$_locationFilter에 등록된 소모품이 없습니다.',
+                              ? _expiryFilter == '전체'
+                                  ? '등록된 항목이 없습니다.\n우측 상단 + 버튼으로 추가하세요.'
+                                  : '$_expiryFilter 항목이 없습니다.'
+                              : '$_locationFilter에 등록된 항목이 없습니다.',
                         ),
                       )
                     : ListView.separated(
                         padding: const EdgeInsets.all(16),
-                        itemCount: filteredItems.length,
+                        itemCount: expiryFilteredItems.length,
                         separatorBuilder: (context, index) =>
                             const SizedBox(height: 12),
                         itemBuilder: (context, index) {
-                          final item = filteredItems[index];
+                          final item = expiryFilteredItems[index];
                           final isLow = item.currentStock <= item.threshold;
                           final isEmpty = item.currentStock <= 0;
 

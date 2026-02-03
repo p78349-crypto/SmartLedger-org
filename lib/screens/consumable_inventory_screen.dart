@@ -3,9 +3,11 @@ import '../models/consumable_inventory_item.dart';
 import '../models/shopping_cart_item.dart';
 import '../repositories/app_repositories.dart';
 import '../services/consumable_inventory_service.dart';
-import '../services/health_guardrail_service.dart';
 import '../services/user_pref_service.dart';
 import '../utils/wms_data_gateway.dart';
+import 'consumable_inventory_dialogs.dart';
+import 'consumable_inventory_widgets.dart';
+import 'wms_io_screen.dart';
 
 class ConsumableInventoryScreen extends StatefulWidget {
   final String accountName;
@@ -17,10 +19,12 @@ class ConsumableInventoryScreen extends StatefulWidget {
       _ConsumableInventoryScreenState();
 }
 
-class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
-  String _locationFilter = '전체'; // 로케이션 필터 상태
+class _ConsumableInventoryScreenState
+  extends State<ConsumableInventoryScreen> {
+  String _locationFilter = '전체';
 
-  Set<String> _countLikeUnits = UserPrefService.defaultCountLikeUnitsV1.toSet();
+  Set<String> _countLikeUnits =
+    UserPrefService.defaultCountLikeUnitsV1.toSet();
 
   String _formatQty(double value) {
     if (!value.isFinite) return '0';
@@ -53,55 +57,11 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
   }
 
   Future<void> _showCountLikeUnitsDialog() async {
-    final initial = _countLikeUnits.toList()..sort();
-    final controller = TextEditingController(text: initial.join(', '));
-
-    final result = await showDialog<List<String>>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('개수형 단위 설정'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('입력된 단위는 목록에서 -1 버튼이 크게 표시됩니다.'),
-            const SizedBox(height: 12),
-            TextField(
-              controller: controller,
-              decoration: const InputDecoration(
-                labelText: '단위 목록 (쉼표/줄바꿈 구분)',
-                border: OutlineInputBorder(),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              controller.text = UserPrefService.defaultCountLikeUnitsV1.join(
-                ', ',
-              );
-            },
-            child: const Text('기본값'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('취소'),
-          ),
-          FilledButton(
-            onPressed: () {
-              final parts = controller.text
-                  .split(RegExp(r'[\n,]'))
-                  .map((s) => s.trim())
-                  .where((s) => s.isNotEmpty)
-                  .toList();
-              Navigator.pop(ctx, parts);
-            },
-            child: const Text('저장'),
-          ),
-        ],
-      ),
-    );
+    final result = await ConsumableInventoryDialogs
+      .showCountLikeUnitsDialog(
+        context: context,
+        currentUnits: _countLikeUnits,
+      );
 
     if (result == null) return;
     await UserPrefService.setCountLikeUnitsV1(result);
@@ -154,6 +114,19 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
             onPressed: _showAddItemDialog,
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => WmsIoScreen(
+                accountName: widget.accountName,
+              ),
+            ),
+          );
+        },
+        tooltip: 'WMS 입출고',
+        child: const Icon(Icons.add),
       ),
       body: ValueListenableBuilder<List<ConsumableInventoryItem>>(
         // ✅ Gateway 캐싱 적용 후에도 실시간 업데이트 유지
@@ -332,10 +305,11 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
                                           style: FilledButton.styleFrom(
                                             visualDensity:
                                                 VisualDensity.standard,
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 14,
-                                              vertical: 10,
-                                            ),
+                                            padding:
+                                              const EdgeInsets.symmetric(
+                                                horizontal: 14,
+                                                vertical: 10,
+                                              ),
                                           ),
                                           child: const Text(
                                             '-1',
@@ -346,13 +320,13 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
                                         ),
                                         const SizedBox(width: 8),
                                       ],
-                                      _ActionButton(
+                                      ActionButton(
                                         icon: Icons.remove,
                                         label: '사용',
                                         onPressed: () => _useItem(item),
                                       ),
                                       const SizedBox(width: 8),
-                                      _ActionButton(
+                                      ActionButton(
                                         icon: Icons.add,
                                         label: '추가',
                                         onPressed: () => _refillItem(item),
@@ -399,279 +373,24 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
   }
 
   void _showAddItemDialog() {
-    _showItemDialog();
+    ConsumableInventoryDialogs.showItemDialog(context: context);
   }
 
   void _showEditItemDialog(ConsumableInventoryItem item) {
-    _showItemDialog(item: item);
-  }
-
-  void _showItemDialog({ConsumableInventoryItem? item}) {
-    final nameController = TextEditingController(text: item?.name ?? '');
-    final stockController = TextEditingController(
-      text: item?.currentStock.toString() ?? '0',
-    );
-    final thresholdController = TextEditingController(
-      text: item?.threshold.toString() ?? '1',
-    );
-    final bundleSizeController = TextEditingController(
-      text: item?.bundleSize.toString() ?? '1',
-    );
-    final unitController = TextEditingController(text: item?.unit ?? '개');
-    String selectedLocation = item?.location ?? '기타';
-
-    final selectedTags = <String>{...?(item?.healthTags)};
-
-    showDialog(
+    ConsumableInventoryDialogs.showItemDialog(
       context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return AlertDialog(
-              insetPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 8,
-              ),
-              title: Text(item == null ? '재고 추가' : '재고 수정'),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      controller: nameController,
-                      decoration: const InputDecoration(
-                        labelText: '품목명 (예: 휴지)',
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: stockController,
-                            decoration: const InputDecoration(labelText: '현재고'),
-                            keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: TextField(
-                            controller: unitController,
-                            decoration: const InputDecoration(
-                              labelText: '단위 (예: 롤, 개)',
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    // 로케이션 선택 드롭다운
-                    DropdownButtonFormField<String>(
-                      initialValue: selectedLocation,
-                      decoration: const InputDecoration(
-                        labelText: '보관 위치',
-                        border: OutlineInputBorder(),
-                      ),
-                      items: ConsumableInventoryItem.locationOptions
-                          .map(
-                            (loc) =>
-                                DropdownMenuItem(value: loc, child: Text(loc)),
-                          )
-                          .toList(),
-                      onChanged: (val) {
-                        if (val != null) {
-                          setDialogState(() => selectedLocation = val);
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: thresholdController,
-                      decoration: const InputDecoration(
-                        labelText: '알림 기준 (이하일 때 알림)',
-                      ),
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                    ),
-                    TextField(
-                      controller: bundleSizeController,
-                      decoration: const InputDecoration(
-                        labelText: '묶음 단위 (예: 30롤 묶음이면 30)',
-                        hintText: '휴지 대형 묶음은 보통 30입니다.',
-                      ),
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        '건강 태그 (선택)',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: HealthGuardrailService.defaultTags.map((tag) {
-                        final isSelected = selectedTags.contains(tag);
-                        return FilterChip(
-                          label: Text(tag),
-                          selected: isSelected,
-                          onSelected: (v) {
-                            setDialogState(() {
-                              if (v) {
-                                selectedTags.add(tag);
-                              } else {
-                                selectedTags.remove(tag);
-                              }
-                            });
-                          },
-                        );
-                      }).toList(),
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                if (item != null)
-                  TextButton(
-                    onPressed: () {
-                      ConsumableInventoryService.instance.deleteItem(item.id);
-                      Navigator.pop(context);
-                    },
-                    child: const Text(
-                      '삭제',
-                      style: TextStyle(color: Colors.red),
-                    ),
-                  ),
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('취소'),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    final name = nameController.text.trim();
-                    if (name.isEmpty) return;
-
-                    final stock = double.tryParse(stockController.text) ?? 0.0;
-                    final threshold =
-                        double.tryParse(thresholdController.text) ?? 1.0;
-                    final bundleSize =
-                        double.tryParse(bundleSizeController.text) ?? 1.0;
-                    final unit = unitController.text.trim();
-                    final tags = selectedTags.toList();
-
-                    if (item == null) {
-                      // ✅ Gateway를 통한 추가 (유효성 검사 + 중복 체크)
-                      final input = WmsInventoryInput.full(
-                        name: name,
-                        currentStock: stock,
-                        unit: unit,
-                        threshold: threshold,
-                        bundleSize: bundleSize,
-                        location: selectedLocation,
-                        healthTags: tags,
-                      );
-
-                      final result = await WmsInventoryGateway.instance.addItem(
-                        input: input,
-                      );
-
-                      if (!context.mounted) return;
-
-                      if (result.success) {
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('${result.data?.name} 추가 완료'),
-                          ),
-                        );
-                      } else if (result.type == WmsOperationType.duplicate) {
-                        // 중복 품목 - 사용자에게 알림
-                        showDialog<void>(
-                          context: context,
-                          builder: (ctx) => AlertDialog(
-                            title: const Text('이미 존재하는 품목'),
-                            content: Text(
-                              '${result.data?.name}이(가) 이미 등록되어 있습니다.\n'
-                              '현재 재고: ${result.data?.currentStock}'
-                              '${result.data?.unit}',
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(ctx),
-                                child: const Text('확인'),
-                              ),
-                            ],
-                          ),
-                        );
-                      } else {
-                        // 유효성 검사 실패
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('추가 실패: ${result.errorMessage}'),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
-                      }
-                    } else {
-                      // ✅ Gateway를 통한 수정
-                      final updated = item.copyWith(
-                        name: name,
-                        currentStock: stock,
-                        threshold: threshold,
-                        bundleSize: bundleSize,
-                        unit: unit,
-                        location: selectedLocation,
-                        healthTags: tags,
-                      );
-
-                      final result =
-                          await WmsInventoryGateway.instance.updateItem(
-                        item: updated,
-                      );
-
-                      if (!context.mounted) return;
-
-                      if (result.success) {
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('${updated.name} 수정 완료')),
-                        );
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('수정 실패: ${result.errorMessage}'),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
-                      }
-                    }
-                  },
-                  child: const Text('저장'),
-                ),
-              ],
-            );
-          },
-        );
-      },
+      item: item,
     );
   }
 
   void _useItem(ConsumableInventoryItem item) {
-    _showAmountDialog(
+    ConsumableInventoryDialogs.showAmountDialog(
+      context: context,
       title: '사용량 입력',
       item: item,
       onConfirm: (amount) async {
-        final warning = await ConsumableInventoryService.instance.useItem(
-          item.id,
-          amount,
-        );
+        final warning = await ConsumableInventoryService
+          .instance.useItem(item.id, amount);
         if (!mounted) return;
         if (warning != null) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -686,88 +405,17 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
   }
 
   void _refillItem(ConsumableInventoryItem item) {
-    _showAmountDialog(
+    ConsumableInventoryDialogs.showAmountDialog(
+      context: context,
       title: '추가량 입력',
       item: item,
       onConfirm: (amount) async {
         await ConsumableInventoryService.instance.updateItem(
-          item.copyWith(currentStock: item.currentStock + amount),
+          item.copyWith(
+            currentStock: item.currentStock + amount,
+          ),
         );
       },
-    );
-  }
-
-  void _showAmountDialog({
-    required String title,
-    required ConsumableInventoryItem item,
-    required Future<void> Function(double) onConfirm,
-  }) {
-    final controller = TextEditingController(text: '1');
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(title),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: controller,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              autofocus: true,
-              decoration: InputDecoration(suffixText: item.unit),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              '빠른 선택',
-              style: TextStyle(fontSize: 12, color: Colors.grey),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                if (item.bundleSize > 1)
-                  ActionChip(
-                    label: Text('1묶음 (${item.bundleSize.toInt()}${item.unit})'),
-                    onPressed: () =>
-                        controller.text = item.bundleSize.toString(),
-                  ),
-                ActionChip(
-                  label: const Text('9개'),
-                  onPressed: () => controller.text = '9',
-                ),
-                ActionChip(
-                  label: const Text('10개'),
-                  onPressed: () => controller.text = '10',
-                ),
-                ActionChip(
-                  label: const Text('30개'),
-                  onPressed: () => controller.text = '30',
-                ),
-              ],
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('취소'),
-          ),
-          TextButton(
-            onPressed: () async {
-              final val = double.tryParse(controller.text);
-              if (val != null) {
-                await onConfirm(val);
-                if (!dialogContext.mounted) return;
-                Navigator.of(dialogContext).pop();
-              }
-            },
-            child: const Text('확인'),
-          ),
-        ],
-      ),
     );
   }
 
@@ -802,34 +450,11 @@ class _ConsumableInventoryScreenState extends State<ConsumableInventoryScreen> {
     );
 
     if (mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('${item.name}을(를) 장바구니에 담았습니다.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${item.name}을(를) 장바구니에 담았습니다.'),
+        ),
+      );
     }
-  }
-}
-
-class _ActionButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onPressed;
-
-  const _ActionButton({
-    required this.icon,
-    required this.label,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return OutlinedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, size: 16),
-      label: Text(label),
-      style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        visualDensity: VisualDensity.compact,
-      ),
-    );
   }
 }

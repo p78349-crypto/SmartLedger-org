@@ -20,10 +20,11 @@ class ConsumableUsageRecord {
   }
 }
 
-/// 생활용품 재고 관리 전용 모델
+/// 생활용품 재고 관리 통합 모델
 /// 
-/// - 생활용품 수량 추적에 특화
-/// - 유통기한 필요 시 FoodExpiryItem 사용
+/// - 생활용품 + 식료품 수량 추적
+/// - 유통기한 관리 지원 (선택사항)
+/// - 사용 기록 및 부족 알림 포함
 @immutable
 class ConsumableInventoryItem {
   final String id;
@@ -39,6 +40,12 @@ class ConsumableInventoryItem {
   final DateTime lastUpdated;
   final List<String> healthTags; // 건강 주의 태그 (예: 탄수화물/당류/주류)
   final List<ConsumableUsageRecord> usageHistory;
+  
+  // 식료품 관리용 필드 (유통기한 추적)
+  final DateTime? expiryDate;        // 유통기한
+  final DateTime? purchaseDate;      // 구매일 (FoodExpiry와의 호환성)
+  final double? price;               // 구매 가격
+  final String? supplier;            // 구매처
 
   // 로케이션 옵션 목록
   static const List<String> locationOptions = [
@@ -64,6 +71,10 @@ class ConsumableInventoryItem {
     required this.lastUpdated,
     this.healthTags = const <String>[],
     this.usageHistory = const <ConsumableUsageRecord>[],
+    this.expiryDate,
+    this.purchaseDate,
+    this.price,
+    this.supplier,
   });
 
   Map<String, dynamic> toJson() => {
@@ -80,6 +91,10 @@ class ConsumableInventoryItem {
     'lastUpdated': lastUpdated.toIso8601String(),
     'healthTags': healthTags,
     'usageHistory': usageHistory.map((e) => e.toJson()).toList(),
+    'expiryDate': expiryDate?.toIso8601String(),
+    'purchaseDate': purchaseDate?.toIso8601String(),
+    'price': price,
+    'supplier': supplier,
   };
 
   factory ConsumableInventoryItem.fromJson(Map<String, dynamic> json) {
@@ -126,6 +141,14 @@ class ConsumableInventoryItem {
       lastUpdated: lastUpdated,
       healthTags: tags,
       usageHistory: usageHistory,
+      expiryDate: json['expiryDate'] != null
+          ? DateTime.parse(json['expiryDate'] as String)
+          : null,
+      purchaseDate: json['purchaseDate'] != null
+          ? DateTime.parse(json['purchaseDate'] as String)
+          : null,
+      price: (json['price'] as num?)?.toDouble(),
+      supplier: json['supplier'] as String?,
     );
   }
 
@@ -142,6 +165,10 @@ class ConsumableInventoryItem {
     DateTime? lastUpdated,
     List<String>? healthTags,
     List<ConsumableUsageRecord>? usageHistory,
+    DateTime? expiryDate,
+    DateTime? purchaseDate,
+    double? price,
+    String? supplier,
   }) {
     return ConsumableInventoryItem(
       id: id,
@@ -157,6 +184,24 @@ class ConsumableInventoryItem {
       lastUpdated: lastUpdated ?? this.lastUpdated,
       healthTags: healthTags ?? this.healthTags,
       usageHistory: usageHistory ?? this.usageHistory,
+      expiryDate: expiryDate ?? this.expiryDate,
+      purchaseDate: purchaseDate ?? this.purchaseDate,
+      price: price ?? this.price,
+      supplier: supplier ?? this.supplier,
     );
+  }
+  
+  /// 유통기한 임박 여부 (기본 3일 이내)
+  bool isExpiringWithin({int days = 3}) {
+    if (expiryDate == null) return false;
+    final now = DateTime.now();
+    final diff = expiryDate!.difference(now).inDays;
+    return diff >= 0 && diff <= days;
+  }
+  
+  /// 유통기한 경과 여부
+  bool isExpired() {
+    if (expiryDate == null) return false;
+    return DateTime.now().isAfter(expiryDate!);
   }
 }

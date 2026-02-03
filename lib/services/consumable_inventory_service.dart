@@ -4,6 +4,7 @@ import '../repositories/app_repositories.dart';
 import 'health_guardrail_service.dart';
 import 'replacement_cycle_notification_service.dart';
 import 'stock_depletion_notification_service.dart';
+import 'food_expiry_migration_service.dart';
 
 class ConsumableInventoryService {
   ConsumableInventoryService._internal();
@@ -16,6 +17,90 @@ class ConsumableInventoryService {
   Future<void> load() async {
     final parsed = await AppRepositories.consumableInventory.loadItems();
     items.value = parsed;
+    
+    // 마이그레이션 자동 실행 (첫 실행 시에만)
+    await _migrateFromFoodExpiryIfNeeded();
+  }
+  
+  /// FoodExpiry에서 데이터 마이그레이션 (자동)
+  Future<void> _migrateFromFoodExpiryIfNeeded() async {
+    final isMigrated = await FoodExpiryMigrationService.isMigrated();
+    if (isMigrated) {
+      return; // 이미 마이그레이션 됨
+    }
+    
+    final pendingCount = 
+        await FoodExpiryMigrationService.getPendingMigrationCount();
+    if (pendingCount == 0) {
+      // 마이그레이션할 데이터 없음
+      await FoodExpiryMigrationService.markAsMigrated();
+      return;
+    }
+    
+    try {
+      debugPrint(
+        '[ConsumableInventoryService] Starting FoodExpiry migration...',
+      );
+      
+      // 백업 생성
+      await FoodExpiryMigrationService.backupFoodExpiryData();
+      
+      // 데이터 로드 및 변환
+      final consumableItems = 
+          await FoodExpiryMigrationService.loadAsConsumableItems();
+      
+      if (consumableItems.isEmpty) {
+        await FoodExpiryMigrationService.markAsMigrated();
+        return;
+      }
+      
+      // 기존 데이터와 병합
+      final merged = <String, ConsumableInventoryItem>{};
+      
+      // 기존 Consumable 항목 추가
+      for (final item in items.value) {
+        merged[item.name.toLowerCase()] = item;
+      }
+      
+      // Food Expiry 항목 추가 (이름 기준 중복 제거)
+      for (final item in consumableItems) {
+        final key = item.name.toLowerCase();
+        if (!merged.containsKey(key)) {
+          merged[key] = item;
+        } else {
+          // 중복이면 식료품 정보만 병합
+          final existing = merged[key]!;
+          merged[key] = existing.copyWith(
+            expiryDate: item.expiryDate,
+            purchaseDate: item.purchaseDate,
+            price: item.price,
+            supplier: item.supplier,
+          );
+        }
+      }
+      
+      items.value = merged.values.toList();
+      await _save();
+      
+      // 알림 스케줄 업데이트
+      for (final item in items.value) {
+        if (item.expiryDate != null) {
+          // 유통기한이 있는 항목은 알림 스케줄
+          // (필요시 별도 로직 추가)
+        }
+      }
+      
+      await FoodExpiryMigrationService.markAsMigrated();
+      debugPrint(
+        '[ConsumableInventoryService] FoodExpiry migration completed: '
+        '${consumableItems.length} items migrated',
+      );
+    } catch (e) {
+      debugPrint(
+        '[ConsumableInventoryService] FoodExpiry migration failed: $e',
+      );
+      // 오류 발생해도 계속 진행 (나중에 수동으로 재시도 가능)
+    }
   }
 
   Future<void> _save() async {

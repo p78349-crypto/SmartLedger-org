@@ -249,20 +249,6 @@ class MainFeatureIconCatalog {
             routeName: AppRoutes.quickSimpleExpenseInput,
           ),
           MainFeatureIcon(
-            id: 'food_inventory_check',
-            label: '식료품/생활용품',
-            labelEn: 'Groceries & Essentials',
-            icon: IconCatalog.inventory2,
-            routeName: AppRoutes.foodExpiry,
-          ),
-          MainFeatureIcon(
-            id: 'food_cooking_start',
-            label: '유통기한 관리',
-            labelEn: 'Expiry Management',
-            icon: Icons.fastfood,
-            routeName: AppRoutes.foodCookingStart,
-          ),
-          MainFeatureIcon(
             id: 'health_analyzer',
             label: '재료 건강도 분석',
             labelEn: 'Health Analyzer',
@@ -313,14 +299,14 @@ class MainFeatureIconCatalog {
           ),
           MainFeatureIcon(
             id: 'consumable_inventory',
-            label: '재고 관리',
-            labelEn: 'Inventory',
+            label: '식료품/생활용품 관리',
+            labelEn: 'Grocery & Consumables',
             icon: Icons.inventory,
             routeName: AppRoutes.consumableInventory,
           ),
           MainFeatureIcon(
             id: 'quick_stock_use',
-            label: '식료품/생활용품 사용기록',
+            label: '사용량 기록',
             labelEn: 'Usage Log',
             icon: Icons.bolt,
             routeName: AppRoutes.quickStockUse,

@@ -9,7 +9,7 @@ import '../services/account_service.dart';
 import '../models/shopping_cart_item.dart';
 import '../services/budget_service.dart';
 import '../services/fixed_cost_service.dart';
-import '../services/food_expiry_service.dart';
+import '../services/consumable_inventory_service.dart';
 import '../services/consumable_inventory_service.dart';
 import '../services/recipe_service.dart';
 import '../services/transaction_service.dart';
@@ -1088,10 +1088,12 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
       // 일반적인 잔소리 로직 (특수 상황이 아닐 때만 발동)
       if (!isSpecialCase) {
         if (mainCategory == '식비' || mainCategory == '외식') {
-          final foodItems = FoodExpiryService.instance.items.value;
+          final foodItems = ConsumableInventoryService.instance.items.value;
           final now = DateTime.now();
           final expiringFood = foodItems.where((i) {
-            final days = i.expiryDate.difference(now).inDays;
+            final expiryDate = i.expiryDate;
+            if (expiryDate == null) return false;
+            final days = expiryDate.difference(now).inDays;
             return days >= 0 && days <= 3;
           }).toList();
 
@@ -1180,10 +1182,12 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
 
   Future<VoiceCommandResult> _handleInventoryReport(String command) async {
     // 1. Food Expiry Check
-    final foodItems = FoodExpiryService.instance.items.value;
+    final foodItems = ConsumableInventoryService.instance.items.value;
     final now = DateTime.now();
     final expiringFood = foodItems.where((i) {
-      final days = i.expiryDate.difference(now).inDays;
+      final expiryDate = i.expiryDate;
+      if (expiryDate == null) return false;
+      final days = expiryDate.difference(now).inDays;
       return days >= 0 && days <= 3;
     }).toList();
 
@@ -1438,23 +1442,22 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
     String warningMsg = '';
 
     // (1) 현재 냉장고/팬트리 재고 확인
-    final inventory = FoodExpiryService.instance.items.value;
-    final consumables = ConsumableInventoryService.instance.items.value;
+    final inventory = ConsumableInventoryService.instance.items.value;
 
     final inStock = inventory
-        .where((i) => i.name.contains(itemName) || itemName.contains(i.name))
-        .toList();
-    final inConsumables = consumables
         .where((i) => i.name.contains(itemName) || itemName.contains(i.name))
         .toList();
 
     if (inStock.isNotEmpty) {
       final item = inStock.first;
       warningMsg =
-          '⚠️ 냉장고에 이미 ${item.name} (${item.quantity}${item.unit}) 있습니다.';
-    } else if (inConsumables.isNotEmpty) {
-      final item = inConsumables.first;
-      if (item.currentStock > item.threshold) {
+          '⚠️ 냉장고에 이미 ${item.name} (${item.currentStock}${item.unit}) 있습니다.';
+    } else {
+      final item = inventory.firstWhere(
+        (i) => i.name.contains(itemName) || itemName.contains(i.name),
+        orElse: () => inventory.first,
+      );
+      if (inventory.isNotEmpty && item.currentStock > item.threshold) {
         warningMsg = '⚠️ 집에 이미 ${item.name} 재고가 넉넉합니다.';
       }
     }
@@ -1963,7 +1966,7 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
     }
 
     // Find and Delete from Inventory
-    final foodItems = FoodExpiryService.instance.items.value;
+    final foodItems = ConsumableInventoryService.instance.items.value;
     final target = foodItems
         .where((i) => i.name.contains(itemName) || itemName.contains(i.name))
         .toList();
@@ -1979,8 +1982,7 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
 
     // Delete first match
     final itemToDelete = target.first;
-    // FoodExpiryService uses deleteById for deletion
-    await FoodExpiryService.instance.deleteById(itemToDelete.id);
+    await ConsumableInventoryService.instance.deleteItem(itemToDelete.id);
 
     // Tip Logic (Advanced: Check past waste history)
     // For now, simple scripted advice
@@ -1997,7 +1999,7 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
 
   VoiceCommandResult _handleIngredientQuery(String command) {
     // 식재료 서비스에서 조회
-    final items = FoodExpiryService.instance.items.value;
+    final items = ConsumableInventoryService.instance.items.value;
 
     // 특정 재료 검색
     final keywords = command
@@ -2015,7 +2017,9 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
       // 전체 재료 현황
       final count = items.length;
       final expiringSoon = items.where((i) {
-        final days = i.expiryDate.difference(DateTime.now()).inDays;
+        final expiryDate = i.expiryDate;
+        if (expiryDate == null) return false;
+        final days = expiryDate.difference(DateTime.now()).inDays;
         return days >= 0 && days <= 3;
       }).length;
 
@@ -2038,15 +2042,18 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
 
       if (matches.isNotEmpty) {
         final item = matches.first;
-        final daysLeft = item.expiryDate.difference(DateTime.now()).inDays;
-        final quantityStr = '${item.quantity}${item.unit}';
+        final expiryDate = item.expiryDate;
+        final daysLeft = expiryDate == null
+            ? null
+            : expiryDate.difference(DateTime.now()).inDays;
+        final quantityStr = '${item.currentStock}${item.unit}';
 
         return VoiceCommandResult(
           command: command,
           success: true,
           message:
               '${item.name} $quantityStr 남아있네요. '
-              '${daysLeft >= 0 ? '유통기한은 $daysLeft일 남았어요.' : '유통기한이 지났어요!'}',
+              '${daysLeft == null ? '유통기한 정보가 없습니다.' : (daysLeft >= 0 ? '유통기한은 $daysLeft일 남았어요.' : '유통기한이 지났어요!')}',
           type: VoiceCommandType.query,
           data: {'item': item.name, 'daysLeft': daysLeft},
         );
@@ -2117,14 +2124,20 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
 
   Future<VoiceCommandResult> _handleComplexMealQuery(String command) async {
     // 1. 유통기한 임박 재료 (Food Expiry)
-    final foodItems = FoodExpiryService.instance.items.value;
+    final foodItems = ConsumableInventoryService.instance.items.value;
     final now = DateTime.now();
     final expiringFood = foodItems.where((i) {
-      final days = i.expiryDate.difference(now).inDays;
+      final expiryDate = i.expiryDate;
+      if (expiryDate == null) return false;
+      final days = expiryDate.difference(now).inDays;
       return days >= -1 && days <= 3; // 어제 만료 ~ 3일 후 만료
     }).toList();
     // Sort by most urgent
-    expiringFood.sort((a, b) => a.expiryDate.compareTo(b.expiryDate));
+    expiringFood.sort((a, b) {
+      final aDate = a.expiryDate ?? DateTime.now().add(const Duration(days: 3650));
+      final bDate = b.expiryDate ?? DateTime.now().add(const Duration(days: 3650));
+      return aDate.compareTo(bDate);
+    });
 
     // 2. 레시피 매칭 (Recipe Service)
     await RecipeService.instance.load();

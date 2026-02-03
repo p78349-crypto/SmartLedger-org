@@ -15,7 +15,7 @@ import 'income_split_screen.dart';
 // Preserved but disabled per request.
 import '../services/asset_service.dart';
 import '../services/category_usage_service.dart';
-import '../services/food_expiry_service.dart';
+import '../services/consumable_inventory_service.dart';
 import '../services/recent_input_service.dart';
 import '../services/transaction_service.dart';
 import '../services/user_pref_service.dart';
@@ -1891,20 +1891,20 @@ class _TransactionAddDetailedFormState
           );
         }
 
-        // 식비 카테고리이고 유통기한이 입력된 경우 재고 관리(FoodExpiryService)에 자동 추가
+        // 식비 카테고리이고 유통기한이 입력된 경우 재고 관리(ConsumableInventoryService)에 자동 추가
         final isFood =
             effectiveMainCategory == '식품·음료비' ||
             effectiveMainCategory == '식비' ||
             effectiveMainCategory == 'Food';
         if (isExpense && isFood && _expiryDate != null) {
           unawaited(
-            FoodExpiryService.instance.addItem(
+            ConsumableInventoryService.instance.addItem(
               name: desc,
               purchaseDate: _transactionDate,
               expiryDate: _expiryDate!,
-              memo: memo,
-              quantity: qty.toDouble(),
+              currentStock: qty.toDouble(),
               unit: unitStr.isNotEmpty ? unitStr : '개',
+              price: amount,
             ),
           );
         }

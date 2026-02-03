@@ -1,5 +1,5 @@
 // ignore_for_file: dead_code, dead_null_aware_expression
-import '../models/food_expiry_item.dart';
+import '../models/consumable_inventory_item.dart';
 
 /// 식재료 추천 강화 유틸리티
 /// - 유통기한별 가격 최적화
@@ -29,17 +29,21 @@ class IngredientsRecommendationUtils {
 
   /// 가격 효율성이 높은 식재료 추천
   /// (유통기한이 임박할수록 높은 순위, 저가일수록 높은 순위)
-  static List<FoodExpiryItem> getOptimizedRecommendations(
-    List<FoodExpiryItem> items, {
+  static List<ConsumableInventoryItem> getOptimizedRecommendations(
+    List<ConsumableInventoryItem> items, {
     int limit = 10,
   }) {
     if (items.isEmpty) return [];
 
     // 유통기한 임박순 + 저가순 정렬
-    final sorted = List<FoodExpiryItem>.from(items);
+    final sorted = List<ConsumableInventoryItem>.from(items);
     sorted.sort((a, b) {
-      final daysA = a.expiryDate.difference(DateTime.now()).inDays;
-      final daysB = b.expiryDate.difference(DateTime.now()).inDays;
+      final daysA = _expiryDateOrFarFuture(a)
+          .difference(DateTime.now())
+          .inDays;
+      final daysB = _expiryDateOrFarFuture(b)
+          .difference(DateTime.now())
+          .inDays;
 
       // 유통기한 임박 우선 (음수인 것도 포함)
       if (daysA != daysB) {
@@ -83,9 +87,9 @@ class IngredientsRecommendationUtils {
 
   /// 가격 대비 유통기한 점수 계산 (0-100)
   /// 낮은 가격 + 긴 유통기한 = 높은 점수
-  static int getPriceValueScore(FoodExpiryItem item) {
+  static int getPriceValueScore(ConsumableInventoryItem item) {
     final now = DateTime.now();
-    final daysLeft = item.expiryDate.difference(now).inDays;
+    final daysLeft = _expiryDateOrFarFuture(item).difference(now).inDays;
 
     // 가격이 없으면 기본값
     final price = item.price ?? 5000.0;
@@ -101,8 +105,12 @@ class IngredientsRecommendationUtils {
   }
 
   /// 추천 메시지 생성
-  static String getRecommendationMessage(FoodExpiryItem item) {
-    final daysLeft = item.expiryDate.difference(DateTime.now()).inDays;
+  static String getRecommendationMessage(ConsumableInventoryItem item) {
+    final expiryDate = item.expiryDate;
+    if (expiryDate == null) {
+      return 'ℹ️ 유통기한 정보가 없습니다.';
+    }
+    final daysLeft = expiryDate.difference(DateTime.now()).inDays;
 
     if (daysLeft < 0) {
       return '⚠️ 만료됨! 즉시 폐기 권장';
@@ -120,16 +128,26 @@ class IngredientsRecommendationUtils {
   }
 
   /// 금주 활용할 식재료 (7일 이내)
-  static List<FoodExpiryItem> getThisWeekItems(List<FoodExpiryItem> items) {
+  static List<ConsumableInventoryItem> getThisWeekItems(
+    List<ConsumableInventoryItem> items,
+  ) {
     final now = DateTime.now();
     return items.where((item) {
-      final daysLeft = item.expiryDate.difference(now).inDays;
+      final expiryDate = item.expiryDate;
+      if (expiryDate == null) {
+        return false;
+      }
+      final daysLeft = expiryDate.difference(now).inDays;
       return daysLeft >= 0 && daysLeft <= 7;
-    }).toList()..sort((a, b) => a.expiryDate.compareTo(b.expiryDate));
+    }).toList()
+      ..sort((a, b) =>
+          a.expiryDate!.compareTo(b.expiryDate!));
   }
 
   /// 카테고리별 영양 밸런스 분석
-  static Map<String, int> getNutritionBalance(List<FoodExpiryItem> items) {
+  static Map<String, int> getNutritionBalance(
+    List<ConsumableInventoryItem> items,
+  ) {
     final balance = <String, int>{};
 
     for (final item in items) {
@@ -141,7 +159,7 @@ class IngredientsRecommendationUtils {
   }
 
   /// 영양 밸런스 평가
-  static String getNutritionAdvice(List<FoodExpiryItem> items) {
+  static String getNutritionAdvice(List<ConsumableInventoryItem> items) {
     if (items.isEmpty) return '식재료를 추가하세요.';
 
     final balance = getNutritionBalance(items);
@@ -157,5 +175,9 @@ class IngredientsRecommendationUtils {
     }
 
     return '✅ 영양 밸런스가 좋습니다!';
+  }
+
+  static DateTime _expiryDateOrFarFuture(ConsumableInventoryItem item) {
+    return item.expiryDate ?? DateTime.now().add(const Duration(days: 3650));
   }
 }

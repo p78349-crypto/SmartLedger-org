@@ -20,7 +20,7 @@ import 'services/fixed_cost_service.dart';
 import 'services/notification_service.dart';
 import 'services/transaction_service.dart';
 import 'services/user_pref_service.dart';
-import 'services/food_expiry_service.dart';
+import 'services/consumable_inventory_service.dart';
 import 'services/recipe_service.dart';
 import 'services/recipe_knowledge_service.dart';
 import 'services/voice_assistant_settings.dart';
@@ -84,7 +84,7 @@ Future<void> main() async {
         FixedCostService().loadFixedCosts(),
         CurrencyFormatter.initCurrencyUnit(),
         NotificationService().initialize(),
-        FoodExpiryService.instance.load(),
+        ConsumableInventoryService.instance.load(),
         RecipeService.instance.load(),
         RecipeKnowledgeService.instance.loadData(),
         VoiceAssistantSettings.instance.initialize(),

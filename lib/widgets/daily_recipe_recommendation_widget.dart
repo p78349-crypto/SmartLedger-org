@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import '../models/food_expiry_item.dart';
-import '../services/food_expiry_service.dart';
+import '../models/consumable_inventory_item.dart';
+import '../services/consumable_inventory_service.dart';
 import '../utils/expiring_ingredients_utils.dart';
 import '../utils/icon_catalog.dart';
 import '../utils/recipe_recommendation_utils.dart';
@@ -24,7 +24,7 @@ class DailyRecipeRecommendationWidget extends StatefulWidget {
 class _DailyRecipeRecommendationWidgetState
     extends State<DailyRecipeRecommendationWidget>
     with FoodExpiryItemsAutoRefreshMixin {
-  List<FoodExpiryItem>? _expiringItems;
+  List<ConsumableInventoryItem>? _expiringItems;
   RecipeMatch? _recommendedRecipe;
   bool _isLoading = true;
   final _debouncer = Debouncer(delay: const Duration(milliseconds: 300));
@@ -54,7 +54,7 @@ class _DailyRecipeRecommendationWidgetState
   Future<void> _loadRecommendation() async {
     try {
       // 음식 보관함 서비스에서 전체 항목 로드
-      final allItems = FoodExpiryService.instance.items.value;
+      final allItems = ConsumableInventoryService.instance.items.value;
 
       if (mounted) {
         final result = await DailyRecipeRecommendationUtils.build(allItems);

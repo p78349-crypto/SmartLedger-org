@@ -1,7 +1,7 @@
 library cost_analysis_widget;
 
 import 'package:flutter/material.dart';
-import '../services/food_expiry_service.dart';
+import '../services/consumable_inventory_service.dart';
 import '../utils/icon_catalog.dart';
 import '../utils/cost_prediction_utils.dart';
 import '../utils/user_preference_utils.dart';
@@ -37,7 +37,7 @@ class _CostAnalysisWidgetState extends State<CostAnalysisWidget>
 
   Future<void> _loadAnalysis() async {
     try {
-      final items = FoodExpiryService.instance.items.value;
+      final items = ConsumableInventoryService.instance.items.value;
       final budget = await UserPreferenceUtils.getBudgetLimit();
 
       final analysis = CostPredictionUtils.analyzeBudget(

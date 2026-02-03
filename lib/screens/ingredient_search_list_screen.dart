@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../models/food_expiry_item.dart';
+import '../models/consumable_inventory_item.dart';
 import '../models/shopping_cart_item.dart';
 import '../navigation/app_routes.dart';
-import '../services/food_expiry_service.dart';
+import '../services/consumable_inventory_service.dart';
 import '../services/user_pref_service.dart';
 import '../utils/ingredient_parsing_utils.dart';
 import '../utils/nutrition_food_knowledge.dart';
@@ -259,7 +259,7 @@ class _IngredientSearchListScreenState
         .toList();
 
     // 2. 현재 재고 목록 가져오기
-    final inventoryItems = FoodExpiryService.instance.items.value;
+    final inventoryItems = ConsumableInventoryService.instance.items.value;
 
     // 3. 매칭 로직 및 그룹화
     // (InventoryID -> List<String>) : 재고와 매칭된 이름들
@@ -268,7 +268,7 @@ class _IngredientSearchListScreenState
     final List<String> unmatchedNames = [];
 
     // 매칭 헬퍼 함수
-    FoodExpiryItem? findMatch(String rawName) {
+    ConsumableInventoryItem? findMatch(String rawName) {
       try {
         return inventoryItems.firstWhere(
           (item) => item.name.contains(rawName) || rawName.contains(item.name),
@@ -355,7 +355,7 @@ class _IngredientSearchListScreenState
     if (entry == null) return [];
 
     // 현재 재고 목록 가져오기
-    final inventoryItems = FoodExpiryService.instance.items.value;
+    final inventoryItems = ConsumableInventoryService.instance.items.value;
 
     // pairings에서 ingredient만 추출하고 중복 제거
     final ingredients = <String>{};
@@ -365,7 +365,7 @@ class _IngredientSearchListScreenState
 
     return ingredients.map((ing) {
       // 현재 재고에서 같은 식재료 찾기
-      FoodExpiryItem? matchingItem;
+      ConsumableInventoryItem? matchingItem;
       try {
         matchingItem = inventoryItems.firstWhere(
           (item) => item.name.contains(ing) || ing.contains(item.name),
@@ -773,7 +773,7 @@ class _IngredientSearchListScreenState
 class PairingIngredient {
   final String name;
   final String reason;
-  final FoodExpiryItem? inventory; // 현재 재고 정보
+  final ConsumableInventoryItem? inventory; // 현재 재고 정보
   final String requiredAmount; // 필요량 (e.g., "1~2개", "3~5쪽")
 
   PairingIngredient({
@@ -789,7 +789,7 @@ class PairingIngredient {
       return InventoryStatus.noStock; // 재고 없음
     }
     // 수량이 0.5 이하이면 부족
-    if (inventory!.quantity <= 0.5) {
+    if (inventory!.currentStock <= 0.5) {
       return InventoryStatus.lowStock; // 재고 부족
     }
     return InventoryStatus.sufficient; // 충분
@@ -800,7 +800,7 @@ class PairingIngredient {
     if (inventory == null) {
       return '재고 없음';
     }
-    final qty = inventory!.quantity;
+    final qty = inventory!.currentStock;
     final unit = inventory!.unit;
     return '현재고: $qty $unit';
   }
@@ -811,6 +811,9 @@ class PairingIngredient {
       return '';
     }
     final expiry = inventory!.expiryDate;
+    if (expiry == null) {
+      return '유통기한 없음';
+    }
     final now = DateTime.now();
     final daysLeft = expiry.difference(now).inDays;
     if (daysLeft < 0) {

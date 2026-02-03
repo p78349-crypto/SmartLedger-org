@@ -3,7 +3,7 @@ import '../models/category_hint.dart';
 import '../models/shopping_cart_history_entry.dart';
 import '../models/shopping_cart_item.dart';
 import '../navigation/app_routes.dart';
-import '../services/food_expiry_service.dart';
+import '../services/consumable_inventory_service.dart';
 import '../services/product_location_service.dart';
 import '../services/user_pref_service.dart';
 import '../utils/currency_formatter.dart';
@@ -1148,7 +1148,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
 
   /// 재고에서 해당 품목의 수량을 가져옴
   String _getStockQuantity(String itemName) {
-    final inventory = FoodExpiryService.instance.items.value;
+    final inventory = ConsumableInventoryService.instance.items.value;
     final trimmedName = itemName.trim().toLowerCase();
 
     for (final item in inventory) {
@@ -1157,10 +1157,10 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
           stockName.contains(trimmedName) ||
           trimmedName.contains(stockName)) {
         // 정수일 경우 소수점 없이 표시
-        if (item.quantity == item.quantity.toInt()) {
-          return '${item.quantity.toInt()}';
+        if (item.currentStock == item.currentStock.toInt()) {
+          return '${item.currentStock.toInt()}';
         }
-        return '${item.quantity}';
+        return '${item.currentStock}';
       }
     }
     return '-';

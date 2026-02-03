@@ -1,8 +1,8 @@
 // ignore_for_file: dead_code, dead_null_aware_expression,
 //   invalid_null_aware_operator, unchecked_use_of_nullable_value
 import 'package:flutter/material.dart';
-import '../models/food_expiry_item.dart';
-import '../services/food_expiry_service.dart';
+import '../models/consumable_inventory_item.dart';
+import '../services/consumable_inventory_service.dart';
 import '../services/recipe_knowledge_service.dart';
 import '../utils/icon_catalog.dart';
 import '../utils/ingredients_recommendation_utils.dart';
@@ -20,7 +20,7 @@ class IngredientsRecommendationWidget extends StatefulWidget {
 class _IngredientsRecommendationWidgetState
     extends State<IngredientsRecommendationWidget>
     with FoodExpiryItemsAutoRefreshMixin {
-  List<FoodExpiryItem>? _recommendations;
+  List<ConsumableInventoryItem>? _recommendations;
   String? _nutritionAdvice;
   List<MissingMainIngredientSuggestion>? _missingMain;
   bool _isLoading = true;
@@ -36,7 +36,7 @@ class _IngredientsRecommendationWidgetState
 
   Future<void> _loadRecommendations() async {
     try {
-      final items = FoodExpiryService.instance.items.value;
+      final items = ConsumableInventoryService.instance.items.value;
       await RecipeKnowledgeService.instance.loadData();
       final thisWeek = IngredientsRecommendationUtils.getThisWeekItems(items);
       final optimized =
@@ -169,7 +169,7 @@ class _IngredientsRecommendationWidgetState
                           ),
                         ),
                         Text(
-                          '${item.price.toStringAsFixed(0)}원',
+                          '${(item.price ?? 0.0).toStringAsFixed(0)}원',
                           style: theme.textTheme.labelLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: theme.colorScheme.primary,
@@ -193,7 +193,7 @@ class _IngredientsRecommendationWidgetState
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      '보유량: ${item.quantity} ${item.unit}',
+                      '보유량: ${item.currentStock} ${item.unit}',
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: Colors.grey[600],
                       ),

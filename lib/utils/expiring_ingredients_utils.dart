@@ -1,12 +1,12 @@
-import '../models/food_expiry_item.dart';
+import '../models/consumable_inventory_item.dart';
 
 /// 유통기한이 임박한 식재료를 필터링하는 유틸리티
 class ExpiringIngredientsUtils {
   ExpiringIngredientsUtils._();
 
   /// N일 이내 유통기한 식재료 필터링
-  static List<FoodExpiryItem> getExpiringWithinDays(
-    List<FoodExpiryItem> allItems, {
+  static List<ConsumableInventoryItem> getExpiringWithinDays(
+    List<ConsumableInventoryItem> allItems, {
     required int days,
     DateTime? now,
   }) {
@@ -14,27 +14,32 @@ class ExpiringIngredientsUtils {
     final targetDay = effectiveNow.add(Duration(days: days));
 
     return allItems.where((item) {
+        final expiryDate = item.expiryDate;
+        if (expiryDate == null) {
+          return false;
+        }
         // 유통기한이 지나지 않았는지 확인
-        if (item.expiryDate.isBefore(effectiveNow)) {
+        if (expiryDate.isBefore(effectiveNow)) {
           return false; // 이미 지난 항목은 제외
         }
         // N일 이내인지 확인
-        return item.expiryDate.isBefore(targetDay) ||
-            item.expiryDate.isAtSameMomentAs(targetDay);
+        return expiryDate.isBefore(targetDay) ||
+            expiryDate.isAtSameMomentAs(targetDay);
       }).toList()
-      ..sort((a, b) => a.expiryDate.compareTo(b.expiryDate)); // 임박한 순서로 정렬
+      ..sort((a, b) =>
+          a.expiryDate!.compareTo(b.expiryDate!)); // 임박한 순서로 정렬
   }
 
   /// 3일 이내 유통기한 식재료 필터링
-  static List<FoodExpiryItem> getExpiringWithin3Days(
-    List<FoodExpiryItem> allItems,
+  static List<ConsumableInventoryItem> getExpiringWithin3Days(
+    List<ConsumableInventoryItem> allItems,
   ) {
     return getExpiringWithinDays(allItems, days: 3);
   }
 
   /// 가장 임박한 N개 식재료 반환
-  static List<FoodExpiryItem> getTopExpiringItems(
-    List<FoodExpiryItem> allItems, {
+  static List<ConsumableInventoryItem> getTopExpiringItems(
+    List<ConsumableInventoryItem> allItems, {
     int limit = 5,
   }) {
     final expiring = getExpiringWithin3Days(allItems);
@@ -42,14 +47,18 @@ class ExpiringIngredientsUtils {
   }
 
   /// 유통기한까지 남은 일수 계산
-  static int daysUntilExpiry(FoodExpiryItem item) {
+  static int daysUntilExpiry(ConsumableInventoryItem item) {
     final now = DateTime.now();
-    final difference = item.expiryDate.difference(now);
+    final expiryDate = item.expiryDate;
+    if (expiryDate == null) {
+      return 99999;
+    }
+    final difference = expiryDate.difference(now);
     return difference.inDays;
   }
 
   /// 유통기한 상태 라벨 반환 (오늘, 내일, 2일 후, 3일 후)
-  static String getExpiryLabel(FoodExpiryItem item) {
+  static String getExpiryLabel(ConsumableInventoryItem item) {
     final daysLeft = daysUntilExpiry(item);
 
     if (daysLeft < 0) {
@@ -66,7 +75,9 @@ class ExpiringIngredientsUtils {
   }
 
   /// 식재료 목록을 위험도 순으로 정렬
-  static List<FoodExpiryItem> sortByUrgency(List<FoodExpiryItem> items) {
+  static List<ConsumableInventoryItem> sortByUrgency(
+    List<ConsumableInventoryItem> items,
+  ) {
     return List.from(items)
       ..sort((a, b) => daysUntilExpiry(a).compareTo(daysUntilExpiry(b)));
   }

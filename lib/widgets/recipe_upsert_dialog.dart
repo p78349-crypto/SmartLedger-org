@@ -3,7 +3,7 @@ import '../models/recipe.dart';
 import '../models/shopping_cart_history_entry.dart';
 import '../services/recipe_service.dart';
 import '../services/user_pref_service.dart';
-import '../services/food_expiry_service.dart';
+import '../services/consumable_inventory_service.dart';
 import '../utils/korean_search_utils.dart';
 import '../utils/debounce_utils.dart';
 
@@ -266,7 +266,7 @@ class _IngredientUpsertDialogState extends State<_IngredientUpsertDialog> {
   }
 
   Future<void> _loadSuggestions() async {
-    final inventory = FoodExpiryService.instance.items.value
+    final inventory = ConsumableInventoryService.instance.items.value
         .map((e) => e.name)
         .toList();
     final accountName = await UserPrefService.getLastAccountName();

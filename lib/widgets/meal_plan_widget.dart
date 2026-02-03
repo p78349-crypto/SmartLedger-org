@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/food_expiry_service.dart';
+import '../services/consumable_inventory_service.dart';
 import '../utils/meal_plan_generator_utils.dart';
 import '../utils/user_preference_utils.dart';
 import '../mixins/food_expiry_items_auto_refresh_mixin.dart';
@@ -30,7 +30,7 @@ class _MealPlanWidgetState extends State<MealPlanWidget>
 
   Future<void> _loadMealPlans() async {
     try {
-      final items = FoodExpiryService.instance.items.value;
+      final items = ConsumableInventoryService.instance.items.value;
       final preference = await UserPreferenceUtils.getMealPreference();
 
       final plans = _selectedPeriod == '3일'

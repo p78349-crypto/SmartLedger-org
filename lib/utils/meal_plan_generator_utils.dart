@@ -1,4 +1,4 @@
-import '../models/food_expiry_item.dart';
+import '../models/consumable_inventory_item.dart';
 
 /// 3일/1주일 식단표 자동 제안 유틸리티
 class MealPlanGeneratorUtils {
@@ -28,7 +28,7 @@ class MealPlanGeneratorUtils {
 
   /// 3일 식단 생성
   static List<DayMealPlan> generate3DayMealPlan(
-    List<FoodExpiryItem> items, {
+    List<ConsumableInventoryItem> items, {
     String preference = '한식 중심',
   }) {
     final ingredientNames = items.map((e) => e.name.toLowerCase()).toList();
@@ -49,7 +49,7 @@ class MealPlanGeneratorUtils {
 
   /// 1주일 식단 생성
   static List<DayMealPlan> generate1WeekMealPlan(
-    List<FoodExpiryItem> items, {
+    List<ConsumableInventoryItem> items, {
     String preference = '한식 중심',
   }) {
     final ingredientNames = items.map((e) => e.name.toLowerCase()).toList();
@@ -110,7 +110,10 @@ class MealPlanGeneratorUtils {
   }
 
   /// 식사 추천 이유 설명
-  static String getMealExplanation(String meal, List<FoodExpiryItem> items) {
+  static String getMealExplanation(
+    String meal,
+    List<ConsumableInventoryItem> items,
+  ) {
     final hasRelevantIngredients = items
         .where((item) => meal.toLowerCase().contains(item.name.toLowerCase()))
         .isNotEmpty;

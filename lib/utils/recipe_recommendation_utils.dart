@@ -1,4 +1,4 @@
-import '../models/food_expiry_item.dart';
+import '../models/consumable_inventory_item.dart';
 import '../services/recipe_service.dart';
 
 class RecipeRecommendationUtils {
@@ -67,17 +67,17 @@ class RecipeRecommendationUtils {
   ];
 
   static Future<Map<String, RecipeMatch>> getRecommendedRecipes(
-    List<FoodExpiryItem> availableIngredients, {
+    List<ConsumableInventoryItem> availableIngredients, {
     bool prioritizeExpiring = true,
     bool prioritizeHealth = true,
     bool includeUserRecipes = true,
   }) async {
     final now = DateTime.now();
     final expiringItems = availableIngredients
-        .where((item) => item.daysLeft(now) <= 3)
+        .where((item) => _daysLeft(item, now) <= 3)
         .toSet();
 
-    final availableMap = <String, FoodExpiryItem>{};
+    final availableMap = <String, ConsumableInventoryItem>{};
     for (final item in availableIngredients) {
       availableMap[item.name.toLowerCase().trim()] = item;
     }
@@ -163,7 +163,7 @@ class RecipeRecommendationUtils {
   }
 
   static Future<List<RecipeMatch>> getTopRecommendations(
-    List<FoodExpiryItem> availableIngredients, {
+    List<ConsumableInventoryItem> availableIngredients, {
     int limit = 3,
     bool prioritizeExpiring = true,
     bool prioritizeHealth = true,
@@ -180,8 +180,8 @@ class RecipeRecommendationUtils {
 
   static _MatchResult _matchIngredients(
     List<String> requiredIngredients,
-    Map<String, FoodExpiryItem> availableMap,
-    Set<FoodExpiryItem> expiringItems,
+    Map<String, ConsumableInventoryItem> availableMap,
+    Set<ConsumableInventoryItem> expiringItems,
   ) {
     int matchCount = 0;
     int expiringMatchCount = 0;
@@ -210,7 +210,7 @@ class RecipeRecommendationUtils {
   }
 
   static String generateRecommendationMessage(
-    List<FoodExpiryItem> expiringItems,
+    List<ConsumableInventoryItem> expiringItems,
     RecipeMatch recipe,
   ) {
     final ingredientList = expiringItems
@@ -218,6 +218,17 @@ class RecipeRecommendationUtils {
         .map((item) => item.name)
         .join(', ');
     return '$ingredientList 같은 식재료를\n활용해서 ${recipe.recipeName}을(를)\n만들어보세요! 🍳';
+  }
+
+  static int _daysLeft(
+    ConsumableInventoryItem item,
+    DateTime now,
+  ) {
+    final expiryDate = item.expiryDate;
+    if (expiryDate == null) {
+      return 99999;
+    }
+    return expiryDate.difference(now).inDays;
   }
 }
 

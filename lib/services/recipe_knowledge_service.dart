@@ -3,7 +3,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/foundation.dart';
 import '../utils/nutrition_food_knowledge.dart';
 // Reuse data models if possible or redefine
-import '../models/food_expiry_item.dart';
+import '../models/consumable_inventory_item.dart';
 
 /// Service to handle Recipe/Food Knowledge from JSON data.
 /// Replaces the hardcoded [NutritionFoodKnowledge].
@@ -21,7 +21,7 @@ class RecipeKnowledgeService {
   /// Scoring is based on how many pairing ingredients match the current stock.
   /// Entries whose main ingredient is already present are excluded.
   List<MissingMainIngredientSuggestion> suggestMissingMainIngredients(
-    List<FoodExpiryItem> inventory, {
+    List<ConsumableInventoryItem> inventory, {
     int limit = 3,
   }) {
     if (!_isLoaded || limit <= 0) {
@@ -187,7 +187,7 @@ class RecipeKnowledgeService {
   /// Finds recipes where the primary ingredient matches items in the inventory.
   /// Returns a list of recipes (entries) that can be made with current stock.
   List<FoodKnowledgeEntry> findRecipesByInventory(
-    List<FoodExpiryItem> inventory,
+    List<ConsumableInventoryItem> inventory,
   ) {
     if (!_isLoaded) return [];
 

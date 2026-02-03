@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
-import '../services/food_expiry_service.dart';
+import '../services/consumable_inventory_service.dart';
 
 mixin FoodExpiryItemsAutoRefreshMixin<T extends StatefulWidget> on State<T> {
   late final VoidCallback _itemsListener;
@@ -60,13 +60,13 @@ mixin FoodExpiryItemsAutoRefreshMixin<T extends StatefulWidget> on State<T> {
   void initState() {
     super.initState();
     _itemsListener = requestFoodExpiryItemsRefresh;
-    FoodExpiryService.instance.items.addListener(_itemsListener);
+    ConsumableInventoryService.instance.items.addListener(_itemsListener);
   }
 
   @mustCallSuper
   @override
   void dispose() {
-    FoodExpiryService.instance.items.removeListener(_itemsListener);
+    ConsumableInventoryService.instance.items.removeListener(_itemsListener);
     _debounceTimer?.cancel();
     _debounceTimer = null;
     _pendingRefresh = false;

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../models/food_expiry_item.dart';
+import '../models/consumable_inventory_item.dart';
 import '../models/recipe.dart';
-import '../services/food_expiry_service.dart';
+import '../services/consumable_inventory_service.dart';
 import '../services/recipe_service.dart';
 import '../utils/debounce_utils.dart';
 import '../utils/korean_search_utils.dart';
@@ -40,11 +40,11 @@ class _RecipePickerDialogState extends State<RecipePickerDialog> {
     super.dispose();
   }
 
-  List<FoodExpiryItem> _getMatchedItems(
+  List<ConsumableInventoryItem> _getMatchedItems(
     Recipe recipe,
-    List<FoodExpiryItem> inventory,
+    List<ConsumableInventoryItem> inventory,
   ) {
-    final matched = <FoodExpiryItem>[];
+    final matched = <ConsumableInventoryItem>[];
     for (var ing in recipe.ingredients) {
       final matches = inventory.where(
         (it) => it.name.contains(ing.name) || ing.name.contains(it.name),
@@ -56,7 +56,7 @@ class _RecipePickerDialogState extends State<RecipePickerDialog> {
     return matched.where((it) => seen.add(it.id)).toList();
   }
 
-  bool _isCookable(Recipe recipe, List<FoodExpiryItem> inventory) {
+  bool _isCookable(Recipe recipe, List<ConsumableInventoryItem> inventory) {
     if (recipe.ingredients.isEmpty) return false;
     return recipe.ingredients.every(
       (ing) => inventory.any(
@@ -69,7 +69,7 @@ class _RecipePickerDialogState extends State<RecipePickerDialog> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final allRecipes = RecipeService.instance.recipes.value;
-    final inventory = FoodExpiryService.instance.items.value;
+    final inventory = ConsumableInventoryService.instance.items.value;
 
     final filteredRecipes = allRecipes.where((r) {
       final matchesCuisine =
@@ -264,7 +264,7 @@ class _RecipePickerDialogState extends State<RecipePickerDialog> {
 
   void _showMatchedItemsDetail(
     BuildContext context,
-    List<FoodExpiryItem> items,
+    List<ConsumableInventoryItem> items,
   ) {
     showDialog(
       context: context,
@@ -277,16 +277,17 @@ class _RecipePickerDialogState extends State<RecipePickerDialog> {
             itemCount: items.length,
             itemBuilder: (ctx, i) {
               final it = items[i];
+              final daysLeft = _daysLeft(it);
               return ListTile(
                 title: Text(it.name),
                 subtitle: Text(
-                  '${it.category} | ${it.location} | ${it.quantity}${it.unit}',
+                  '${it.category} | ${it.location} | ${it.currentStock}${it.unit}',
                 ),
                 trailing: Text(
-                  '${it.daysLeft(DateTime.now())}일 남음',
+                  daysLeft == null ? '기한 없음' : '${daysLeft}일 남음',
                   style: TextStyle(
                     fontSize: 11,
-                    color: it.daysLeft(DateTime.now()) <= 2
+                    color: daysLeft != null && daysLeft <= 2
                         ? Colors.red
                         : Colors.grey,
                   ),
@@ -303,5 +304,11 @@ class _RecipePickerDialogState extends State<RecipePickerDialog> {
         ],
       ),
     );
+  }
+
+  int? _daysLeft(ConsumableInventoryItem item) {
+    final expiryDate = item.expiryDate;
+    if (expiryDate == null) return null;
+    return expiryDate.difference(DateTime.now()).inDays;
   }
 }

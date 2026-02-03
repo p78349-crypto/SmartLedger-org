@@ -1,10 +1,10 @@
-import '../models/food_expiry_item.dart';
+import '../models/consumable_inventory_item.dart';
 import 'expiring_ingredients_utils.dart';
 import 'recipe_recommendation_utils.dart';
 import 'cache_utils.dart';
 
 class DailyRecipeRecommendationResult {
-  final List<FoodExpiryItem> expiringItems;
+  final List<ConsumableInventoryItem> expiringItems;
   final RecipeMatch? recommendedRecipe;
 
   const DailyRecipeRecommendationResult({
@@ -29,7 +29,7 @@ class DailyRecipeRecommendationUtils {
 
   /// 캐시 키 생성 (재료 이름과 만료일 기반)
   static String _generateCacheKey(
-    List<FoodExpiryItem> items,
+    List<ConsumableInventoryItem> items,
     int expiringWindowDays,
   ) {
     if (items.isEmpty) return 'empty';
@@ -57,7 +57,7 @@ class DailyRecipeRecommendationUtils {
   }
 
   static Future<DailyRecipeRecommendationResult> build(
-    List<FoodExpiryItem> allItems, {
+    List<ConsumableInventoryItem> allItems, {
     int expiringWindowDays = defaultExpiringWindowDays,
     int recipeLimit = defaultRecipeLimit,
     DateTime? now,
@@ -67,7 +67,7 @@ class DailyRecipeRecommendationUtils {
     // 조기 종료: 빈 목록
     if (allItems.isEmpty) {
       return const DailyRecipeRecommendationResult(
-        expiringItems: <FoodExpiryItem>[],
+        expiringItems: <ConsumableInventoryItem>[],
         recommendedRecipe: null,
       );
     }
@@ -78,7 +78,7 @@ class DailyRecipeRecommendationUtils {
     // 조기 종료: 임박 재료 없음
     if (cacheKey == 'no_expiring' || cacheKey == 'empty') {
       return const DailyRecipeRecommendationResult(
-        expiringItems: <FoodExpiryItem>[],
+        expiringItems: <ConsumableInventoryItem>[],
         recommendedRecipe: null,
       );
     }

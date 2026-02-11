@@ -10,6 +10,10 @@ import '../utils/refund_utils.dart';
 import '../utils/debounce_utils.dart';
 import '../widgets/smart_input_field.dart';
 
+part 'refund_transactions_screen_tiles.dart';
+part 'refund_transactions_screen_grouped.dart';
+part 'refund_transactions_screen_body.dart';
+
 class RefundTransactionsScreen extends StatefulWidget {
   const RefundTransactionsScreen({
     super.key,
@@ -102,7 +106,6 @@ class _RefundTransactionsScreenState extends State<RefundTransactionsScreen> {
     final memo = tx.memo.trim();
     final store = tx.store?.trim() ?? '';
     final haystack = <String>[
-      // required: 날짜 / 상품명 / 메모 / 가격 / 구매자(판매자일 경우)
       dateYmd,
       dateMd,
       dateMdySlash,
@@ -117,7 +120,6 @@ class _RefundTransactionsScreenState extends State<RefundTransactionsScreen> {
       unitWon,
       tx.quantity.toString(),
       qtyText,
-      // keep useful fields too
       tx.mainCategory,
       sub,
       tx.paymentMethod,
@@ -131,94 +133,11 @@ class _RefundTransactionsScreenState extends State<RefundTransactionsScreen> {
     return haystack.contains(q);
   }
 
-  Widget _buildSearchBar(ThemeData theme) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-      child: SmartInputField(
-        hint: '반품 검색 (날짜/상품명/메모/가격/구매자·거래처)',
-        controller: _searchController,
-        prefixIcon: const Icon(Icons.search),
-        suffixIcon: _searchQuery.trim().isEmpty
-            ? null
-            : IconButton(
-                tooltip: '지우기',
-                icon: const Icon(Icons.clear),
-                onPressed: () {
-                  _searchController.clear();
-                  setState(() {
-                    _searchQuery = '';
-                  });
-                },
-              ),
-        onChanged: (v) {
-          _searchDebouncer.run(() {
-            if (!mounted) return;
-            setState(() {
-              _searchQuery = v;
-            });
-          });
-        },
-      ),
-    );
-  }
-
   String _categoryText(Transaction tx) {
     final sub = tx.subCategory?.trim();
     return (sub == null || sub.isEmpty)
         ? tx.mainCategory
         : '${tx.mainCategory} · $sub';
-  }
-
-  Widget _buildRefundTile(
-    ThemeData theme,
-    Transaction tx, {
-    required bool showDate,
-  }) {
-    const txColor = RefundUtils.color;
-    final memoText = tx.memo.trim();
-    final storeText = tx.store?.trim() ?? '';
-    final dateText = DateFormat('yyyy-MM-dd').format(tx.date);
-    final qty = tx.quantity;
-    final unit = tx.unitPrice;
-    final cardCharged = tx.cardChargedAmount;
-
-    final subtitleLines = <String>[
-      if (showDate) '일자: $dateText',
-      '카테고리: ${_categoryText(tx)}',
-      '결제: ${tx.paymentMethod}',
-      if (storeText.isNotEmpty) '구매자/거래처: $storeText',
-      if (qty != 0 || unit != 0)
-        '수량/단가: ${_numberFormat.format(qty)} × ${_numberFormat.format(unit)}원',
-      if (cardCharged != null) '카드금액: ${_numberFormat.format(cardCharged)}원',
-      if (memoText.isNotEmpty) '메모: $memoText',
-    ];
-
-    final titleText = tx.description.trim().isEmpty ? '(미입력)' : tx.description;
-
-    return ListTile(
-      leading: CircleAvatar(
-        backgroundColor: txColor.withValues(alpha: 0.2),
-        child: const Icon(Icons.replay, color: RefundUtils.color),
-      ),
-      title: Text(
-        titleText,
-        style: const TextStyle(fontWeight: FontWeight.w600),
-      ),
-      subtitle: Text(
-        subtitleLines.join('\n'),
-        style: theme.textTheme.bodySmall,
-      ),
-      isThreeLine: subtitleLines.length >= 2,
-      trailing: Text(
-        '⊕${_numberFormat.format(tx.amount)}원',
-        style: const TextStyle(
-          color: RefundUtils.color,
-          fontWeight: FontWeight.bold,
-          fontSize: 16,
-        ),
-      ),
-      onTap: () => _showTransactionActionSheet(tx),
-    );
   }
 
   bool _isPartialRefund(Transaction tx) {
@@ -239,184 +158,6 @@ class _RefundTransactionsScreenState extends State<RefundTransactionsScreen> {
       }
     }
     return false;
-  }
-
-  Widget _buildGroupedByPayment(List<Transaction> txs, ThemeData theme) {
-    if (txs.isEmpty) {
-      return const SizedBox.shrink();
-    }
-    final grouped = <String, List<Transaction>>{};
-    for (final tx in txs) {
-      final key = tx.paymentMethod.trim().isEmpty
-          ? '기타 결제'
-          : tx.paymentMethod.trim();
-      grouped.putIfAbsent(key, () => []).add(tx);
-    }
-    final entries = grouped.entries.toList()
-      ..sort((a, b) {
-        final sumA = a.value.fold<double>(0, (s, t) => s + t.amount);
-        final sumB = b.value.fold<double>(0, (s, t) => s + t.amount);
-        return sumB.compareTo(sumA);
-      });
-
-    return Column(
-      children: entries.map((entry) {
-        final total = entry.value.fold<double>(0, (s, t) => s + t.amount);
-        final displayList = entry.value.toList()
-          ..sort((a, b) => b.date.compareTo(a.date));
-        return Card(
-          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(entry.key, style: theme.textTheme.titleMedium),
-                    Text(
-                      '⊕${_numberFormat.format(total)}원',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: RefundUtils.color,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                ...displayList
-                    .take(5)
-                    .map(
-                      (tx) => ListTile(
-                        dense: true,
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(
-                          tx.description.trim().isEmpty
-                              ? '(미입력)'
-                              : tx.description,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        subtitle: Text(
-                          DateFormat('yyyy-MM-dd').format(tx.date),
-                        ),
-                        trailing: Text(
-                          '⊕${_numberFormat.format(tx.amount)}원',
-                          style: const TextStyle(color: RefundUtils.color),
-                        ),
-                        onTap: () => _showTransactionActionSheet(tx),
-                      ),
-                    ),
-                if (entry.value.length > 5)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      '+${entry.value.length - 5}건 더 보기',
-                      style: theme.textTheme.labelMedium,
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _smallToggleButton({
-    required String label,
-    required bool selected,
-    required VoidCallback onTap,
-  }) {
-    return FilterChip(
-      label: Text(label),
-      selected: selected,
-      onSelected: (_) => onTap(),
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-    );
-  }
-
-  Future<void> _showTransactionActionSheet(Transaction tx) async {
-    final theme = Theme.of(context);
-    final action = await showModalBottomSheet<String>(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 8),
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.onSurfaceVariant.withAlpha(77),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 16),
-            ListTile(
-              leading: Icon(IconCatalog.edit, color: theme.colorScheme.primary),
-              title: const Text('편집'),
-              onTap: () => Navigator.pop(context, 'edit'),
-            ),
-            ListTile(
-              leading: const Icon(IconCatalog.delete, color: Colors.red),
-              title: const Text('삭제'),
-              onTap: () => Navigator.pop(context, 'delete'),
-            ),
-            const SizedBox(height: 8),
-          ],
-        ),
-      ),
-    );
-
-    if (action == null || !mounted) return;
-
-    switch (action) {
-      case 'edit':
-        await Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => TransactionAddScreen(
-              accountName: widget.accountName,
-              initialTransaction: tx,
-            ),
-          ),
-        );
-        await _loadData();
-        break;
-      case 'delete':
-        final confirm = await showDialog<bool>(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('반품 삭제'),
-            content: const Text('이 반품 내역을 삭제하시겠습니까?'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text('취소'),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.pop(context, true),
-                style: FilledButton.styleFrom(backgroundColor: Colors.red),
-                child: const Text('삭제'),
-              ),
-            ],
-          ),
-        );
-        if (confirm == true) {
-          await TransactionService().deleteTransaction(
-            widget.accountName,
-            tx.id,
-          );
-          await _loadData();
-        }
-        break;
-    }
   }
 
   Transaction _buildRefundTemplate() {
@@ -511,364 +252,26 @@ class _RefundTransactionsScreenState extends State<RefundTransactionsScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSearchBar(theme),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-            child: queryActive
-                ? Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          '검색 결과: ${transactions.length}건',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      if (totalRefund > 0)
-                        Text(
-                          '⊕${_numberFormat.format(totalRefund)}원',
-                          style: const TextStyle(
-                            color: RefundUtils.color,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                    ],
-                  )
-                : Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(
-                        onPressed: hasPrev
-                            ? () => _changeDay(_eventDays[currentIndex - 1])
-                            : null,
-                        icon: const Icon(IconCatalog.chevronLeft),
-                      ),
-                      Column(
-                        children: [
-                          Text(
-                            formattedDate,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              if (totalRefund > 0) ...[
-                                const Text(
-                                  '환급 ',
-                                  style: TextStyle(
-                                    color: RefundUtils.color,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                Text(
-                                  '⊕${_numberFormat.format(totalRefund)}원',
-                                  style: const TextStyle(
-                                    color: RefundUtils.color,
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ] else ...[
-                                Text(
-                                  '0원',
-                                  style: theme.textTheme.labelSmall?.copyWith(
-                                    color: theme.colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                        ],
-                      ),
-                      IconButton(
-                        onPressed: hasNext
-                            ? () => _changeDay(_eventDays[currentIndex + 1])
-                            : null,
-                        icon: const Icon(IconCatalog.chevronRight),
-                      ),
-                    ],
-                  ),
+          buildSearchBar(theme),
+          buildHeaderSection(
+            theme: theme,
+            queryActive: queryActive,
+            transactionCount: transactions.length,
+            totalRefund: totalRefund,
+            formattedDate: formattedDate,
+            hasPrev: hasPrev,
+            hasNext: hasNext,
+            currentIndex: currentIndex,
           ),
           const Divider(height: 1),
-          Expanded(
-            child: transactions.isEmpty
-                ? Center(
-                    child: Text(
-                      queryActive
-                          ? '검색 결과가 없습니다.'
-                          : '$formattedDate\n반품 내역이 없습니다.',
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.bodyMedium,
-                    ),
-                  )
-                : Column(
-                    children: [
-                      if (isLandscape)
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                          child: DefaultTextStyle(
-                            style:
-                                theme.textTheme.labelSmall?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                ) ??
-                                const TextStyle(fontSize: 12),
-                            child: Row(
-                              children: [
-                                if (queryActive) ...[
-                                  const Expanded(flex: 2, child: Text('일자')),
-                                  const SizedBox(width: 10),
-                                ],
-                                const Expanded(flex: 4, child: Text('상품명')),
-                                const SizedBox(width: 10),
-                                const Expanded(flex: 3, child: Text('카테고리')),
-                                const SizedBox(width: 10),
-                                const Expanded(flex: 2, child: Text('결제')),
-                                const SizedBox(width: 10),
-                                const Expanded(flex: 2, child: Text('수량')),
-                                const SizedBox(width: 10),
-                                const Expanded(flex: 2, child: Text('단가')),
-                                const SizedBox(width: 10),
-                                const Expanded(flex: 4, child: Text('메모')),
-                                const SizedBox(width: 10),
-                                const Text('금액'),
-                                const SizedBox(width: 10),
-                                const Text('카드금액'),
-                              ],
-                            ),
-                          ),
-                        ),
-                      if (isLandscape) const Divider(height: 1),
-                      Expanded(
-                        child: _groupByPayment
-                            ? SingleChildScrollView(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 8,
-                                ),
-                                child: _buildGroupedByPayment(
-                                  transactions,
-                                  theme,
-                                ),
-                              )
-                            : ListView.separated(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 8,
-                                ),
-                                itemCount: transactions.length,
-                                separatorBuilder: (context, index) =>
-                                    const Divider(height: 1),
-                                itemBuilder: (context, index) {
-                                  final tx = transactions[index];
-                                  if (!isLandscape) {
-                                    return _buildRefundTile(
-                                      theme,
-                                      tx,
-                                      showDate: queryActive,
-                                    );
-                                  }
-
-                                  final categoryText = _categoryText(tx);
-                                  final memoText = tx.memo.trim().isEmpty
-                                      ? '-'
-                                      : tx.memo.trim();
-                                  final storeText = tx.store?.trim() ?? '';
-                                  final memoColText = storeText.isEmpty
-                                      ? memoText
-                                      : (memoText == '-'
-                                            ? storeText
-                                            : '$storeText | $memoText');
-
-                                  final cardCharged = tx.cardChargedAmount;
-                                  final cardText = cardCharged == null
-                                      ? '-'
-                                      : '${_numberFormat.format(cardCharged)}원';
-
-                                  final dateText = DateFormat(
-                                    'yyyy-MM-dd',
-                                  ).format(tx.date);
-                                  final qtyText = _numberFormat.format(
-                                    tx.quantity,
-                                  );
-                                  final unitText =
-                                      '${_numberFormat.format(tx.unitPrice)}원';
-
-                                  return ListTile(
-                                    dense: true,
-                                    visualDensity: VisualDensity.compact,
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 4,
-                                    ),
-                                    title: Row(
-                                      children: [
-                                        if (queryActive) ...[
-                                          Expanded(
-                                            flex: 2,
-                                            child: Text(
-                                              dateText,
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: const TextStyle(
-                                                fontSize: 12,
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(width: 10),
-                                        ],
-                                        Expanded(
-                                          flex: 4,
-                                          child: Text(
-                                            tx.description.trim().isEmpty
-                                                ? '(미입력)'
-                                                : tx.description,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Expanded(
-                                          flex: 3,
-                                          child: Text(
-                                            categoryText,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Expanded(
-                                          flex: 2,
-                                          child: Text(
-                                            tx.paymentMethod,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Expanded(
-                                          flex: 2,
-                                          child: Text(
-                                            qtyText,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Expanded(
-                                          flex: 2,
-                                          child: Text(
-                                            unitText,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Expanded(
-                                          flex: 4,
-                                          child: Text(
-                                            memoColText,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Text(
-                                          '⊕${_numberFormat.format(tx.amount)}원',
-                                          style: const TextStyle(
-                                            color: RefundUtils.color,
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Text(
-                                          cardText,
-                                          style: const TextStyle(
-                                            fontSize: 12,
-                                            color: RefundUtils.color,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    onTap: () =>
-                                        _showTransactionActionSheet(tx),
-                                  );
-                                },
-                              ),
-                      ),
-                    ],
-                  ),
+          buildTransactionListExpanded(
+            theme: theme,
+            transactions: transactions,
+            isLandscape: isLandscape,
+            queryActive: queryActive,
+            formattedDate: formattedDate,
           ),
-          Container(
-            padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
-            color: theme.colorScheme.surfaceContainerHighest.withValues(
-              alpha: 0.08,
-            ),
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                _smallToggleButton(
-                  label: '전체',
-                  selected: _rangeDays == null,
-                  onTap: () => setState(() => _rangeDays = null),
-                ),
-                _smallToggleButton(
-                  label: '지난 7일',
-                  selected: _rangeDays == 7,
-                  onTap: () => setState(() {
-                    _rangeDays = 7;
-                    _selectedDay = DateTime.now();
-                  }),
-                ),
-                _smallToggleButton(
-                  label: '지난 30일',
-                  selected: _rangeDays == 30,
-                  onTap: () => setState(() {
-                    _rangeDays = 30;
-                    _selectedDay = DateTime.now();
-                  }),
-                ),
-                _smallToggleButton(
-                  label: '지난 6개월',
-                  selected: _rangeDays == 180,
-                  onTap: () => setState(() {
-                    _rangeDays = 180;
-                    _selectedDay = DateTime.now();
-                  }),
-                ),
-                _smallToggleButton(
-                  label: '부분 반품만',
-                  selected: _partialOnly,
-                  onTap: () => setState(() => _partialOnly = !_partialOnly),
-                ),
-                _smallToggleButton(
-                  label: '결제수단별',
-                  selected: _groupByPayment,
-                  onTap: () =>
-                      setState(() => _groupByPayment = !_groupByPayment),
-                ),
-              ],
-            ),
-          ),
+          buildBottomFilterBar(theme),
         ],
       ),
     );

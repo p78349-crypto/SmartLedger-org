@@ -7,6 +7,7 @@ import '../screens/account_create_screen.dart';
 import '../screens/account_main_screen.dart';
 import '../screens/account_select_screen.dart';
 import '../screens/account_stats_screen.dart';
+import '../screens/account_stats_search_screen.dart';
 import '../screens/application_settings_screen.dart';
 import '../screens/asset_allocation_screen.dart';
 import '../screens/asset_dashboard_screen.dart';

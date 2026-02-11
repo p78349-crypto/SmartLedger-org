@@ -1,0 +1,199 @@
+part of 'korean_search_utils.dart';
+
+// ============================================================
+// European Languages Support (🇪🇺 EU)
+// ============================================================
+
+const Map<String, Set<String>> _europeanStopWords = {
+  // German (Deutsch)
+  'de': {
+    'der', 'die', 'das', 'den', 'dem', 'des',
+    'ein', 'eine', 'einer', 'einem', 'einen',
+    'und', 'oder', 'aber', 'für', 'mit', 'von', 'zu', 'bei', 'nach', 'aus',
+    'an', 'auf', 'in', 'im', 'am',
+  },
+  // French (Français)
+  'fr': {
+    'le', 'la', 'les', 'l', 'un', 'une', 'des',
+    'de', 'du', 'au', 'aux',
+    'et', 'ou', 'mais', 'pour', 'avec', 'dans', 'sur', 'par', 'en',
+    'à', 'ce', 'cette', 'ces',
+  },
+  // Spanish (Español)
+  'es': {
+    'el', 'la', 'los', 'las', 'un', 'una', 'unos', 'unas',
+    'de', 'del', 'al',
+    'y', 'o', 'pero', 'para', 'con', 'en', 'por', 'sin',
+    'este', 'esta', 'estos', 'estas',
+  },
+  // Italian (Italiano)
+  'it': {
+    'il', 'lo', 'la', 'i', 'gli', 'le', 'l',
+    'un', 'uno', 'una',
+    'di', 'del', 'dello', 'della', 'dei', 'degli', 'delle',
+    'a', 'al', 'allo', 'alla', 'ai', 'agli', 'alle',
+    'da', 'dal', 'dallo', 'dalla', 'dai', 'dagli', 'dalle',
+    'in', 'nel', 'nello', 'nella', 'nei', 'negli', 'nelle',
+    'e', 'o', 'ma', 'per', 'con', 'su',
+  },
+  // Portuguese (Português)
+  'pt': {
+    'o', 'a', 'os', 'as', 'um', 'uma', 'uns', 'umas',
+    'de', 'do', 'da', 'dos', 'das',
+    'em', 'no', 'na', 'nos', 'nas',
+    'e', 'ou', 'mas', 'para', 'com', 'por', 'sem',
+  },
+  // Dutch (Nederlands)
+  'nl': {
+    'de', 'het', 'een',
+    'van', 'voor', 'met', 'op', 'aan', 'in', 'naar', 'bij', 'tot',
+    'en', 'of', 'maar',
+  },
+};
+
+const Map<String, List<String>> _germanCompoundPrefixes = {
+  // Emergency (Notfall)
+  'evak': ['evakuierung', 'evakuierungssammelstelle', 'evakuierungsplan'],
+  'notf': ['notfall', 'notfallplan', 'notfallnummer', 'notfalldienst'],
+  'samml': ['sammelstelle', 'sammelpunkt', 'sammelplatz'],
+  'flucht': ['fluchtweg', 'fluchtplan', 'fluchttür'],
+  'feuer': ['feuerwehr', 'feuerlöscher', 'feuermelder', 'feueralarm'],
+  'rett': ['rettung', 'rettungsdienst', 'rettungswagen', 'rettungsstelle'],
+  'krank': ['krankenhaus', 'krankenwagen', 'krankenkasse'],
+
+  // Government (Regierung)
+  'rat': ['rathaus', 'ratsversammlung'],
+  'bürger': ['bürgeramt', 'bürgerbüro', 'bürgermeister', 'bürgerdienst'],
+  'finanz': ['finanzamt', 'finanzierung', 'finanzen'],
+  'poliz': ['polizei', 'polizeiwache', 'polizeidienst'],
+  'stadt': ['stadthaus', 'stadtverwaltung', 'stadtamt'],
+
+  // Transportation (Verkehr)
+  'bahn': ['bahnhof', 'bahnsteig', 'bahnlinie', 'autobahn'],
+  'flug': ['flughafen', 'flugzeug', 'fluglinie'],
+  'haupt': ['hauptbahnhof', 'hauptstraße', 'hauptstadt'],
+
+  // Finance (Finanzen)
+  'spar': ['sparkasse', 'sparbuch', 'sparplan'],
+  'geld': ['geldautomat', 'geldwechsel', 'geldtransfer'],
+  'bank': ['bankfiliale', 'bankkonto', 'banküberweisung'],
+  'über': ['überweisung', 'überweisungsformular'],
+  'kont': ['konto', 'kontostand', 'kontoauszug'],
+};
+
+const Map<String, Map<String, String>> _europeanAbbreviations = {
+  // Emergency Services
+  '112': {
+    'en': 'emergency call',
+    'de': 'notfall notruf',
+    'fr': 'urgence appel urgence',
+    'es': 'emergencia llamada emergencia',
+    'it': 'emergenza chiamata emergenza',
+  },
+  'polizei': {'de': 'polizei polizeidienst'},
+  'feuerwehr': {'de': 'feuerwehr brandbekämpfung'},
+  'samu': {'fr': 'service aide médicale urgente'},
+  'pompiers': {'fr': 'sapeurs pompiers'},
+  'gendarmerie': {'fr': 'gendarmerie nationale'},
+  'guardia': {'es': 'guardia civil'},
+  'bomberos': {'es': 'cuerpo bomberos'},
+  'carabinieri': {'it': 'arma carabinieri'},
+  'vigili': {'it': 'vigili del fuoco'},
+
+  // Government Abbreviations
+  'mdp': {'fr': 'mairie de paris'},
+  'bvg': {'de': 'berliner verkehrsbetriebe'},
+  'ratp': {'fr': 'régie autonome transports parisiens'},
+  'sncf': {'fr': 'société nationale chemins fer français'},
+  'renfe': {'es': 'red nacional ferrocarriles españoles'},
+  'db': {'de': 'deutsche bahn'},
+  'ns': {'nl': 'nederlandse spoorwegen'},
+
+  // Finance
+  'bce': {
+    'fr': 'banque centrale européenne',
+    'es': 'banco central europeo',
+    'it': 'banca centrale europea',
+    'pt': 'banco central europeu',
+  },
+  'ezb': {'de': 'europäische zentralbank'},
+  'ecb': {'en': 'european central bank'},
+  'iban': {
+    'en': 'international bank account number',
+    'de': 'internationale bankkontonummer',
+    'fr': 'numéro compte bancaire international',
+  },
+  'bic': {'en': 'bank identifier code', 'de': 'bankidentifikationscode'},
+  'sepa': {
+    'en': 'single euro payments area',
+    'de': 'einheitlicher euro zahlungsverkehrsraum',
+    'fr': 'espace unique paiement euros',
+  },
+
+  // Healthcare
+  'nhs': {'en': 'national health service'},
+  'aok': {'de': 'allgemeine ortskrankenkasse'},
+  'tk': {'de': 'techniker krankenkasse'},
+  'cpam': {'fr': 'caisse primaire assurance maladie'},
+  'inps': {'it': 'istituto nazionale previdenza sociale'},
+};
+
+const Map<String, Map<String, dynamic>> _globalEmergencyCodes = {
+  'EMG_112': {
+    'category': 'emergency',
+    'security_level': 'low',
+    'keywords': {
+      'en': ['emergency', 'emer', '112', 'help'],
+      'de': ['notfall', 'notf', 'notruf', 'hilfe'],
+      'fr': ['urgence', 'urgen', 'secours'],
+      'es': ['emergencia', 'emerg', 'socorro'],
+      'it': ['emergenza', 'emerg', 'soccorso'],
+      'pt': ['emergência', 'emerg', 'socorro'],
+      'nl': ['noodgeval', 'nood', 'hulp'],
+    },
+  },
+  'EMG_FIRE': {
+    'category': 'fire',
+    'security_level': 'low',
+    'keywords': {
+      'en': ['fire', 'fire department', 'firefighter'],
+      'de': ['feuer', 'feuerwehr', 'brand'],
+      'fr': ['feu', 'pompier', 'incendie'],
+      'es': ['fuego', 'bombero', 'incendio'],
+      'it': ['fuoco', 'pompiere', 'incendio'],
+    },
+  },
+  'EMG_POLICE': {
+    'category': 'police',
+    'security_level': 'low',
+    'keywords': {
+      'en': ['police', 'cop', 'officer'],
+      'de': ['polizei', 'poliz'],
+      'fr': ['police', 'gendarmerie'],
+      'es': ['policía', 'guardia'],
+      'it': ['polizia', 'carabinieri'],
+    },
+  },
+  'EMG_MEDICAL': {
+    'category': 'medical',
+    'security_level': 'low',
+    'keywords': {
+      'en': ['ambulance', 'hospital', 'medical', 'doctor'],
+      'de': ['krankenwagen', 'krankenhaus', 'arzt', 'krank'],
+      'fr': ['ambulance', 'hôpital', 'médecin', 'samu'],
+      'es': ['ambulancia', 'hospital', 'médico'],
+      'it': ['ambulanza', 'ospedale', 'medico'],
+    },
+  },
+  'EMG_EVAC': {
+    'category': 'evacuation',
+    'security_level': 'low',
+    'keywords': {
+      'en': ['evacuation', 'shelter', 'evac'],
+      'de': ['evakuierung', 'sammelstelle', 'evak', 'samml'],
+      'fr': ['évacuation', 'abri', 'refuge'],
+      'es': ['evacuación', 'refugio', 'albergue'],
+      'it': ['evacuazione', 'rifugio'],
+    },
+  },
+};

@@ -449,11 +449,9 @@ class _FoodExpiryItemsScreenState extends State<FoodExpiryItemsScreen> {
           name: item.name,
           currentStock: result,
           unit: item.unit,
-          threshold: 1.0,
-          bundleSize: 1.0,
-          category: '생활용품',
-          location: '기타',
-          createdAt: DateTime.now(),
+          category: item.category,
+          location: item.location,
+          createdAt: item.createdAt,
           lastUpdated: DateTime.now(),
           healthTags: item.healthTags,
           expiryDate: item.expiryDate,
@@ -528,11 +526,9 @@ class _FoodExpiryItemsScreenState extends State<FoodExpiryItemsScreen> {
         name: item.name,
         currentStock: newQty,
         unit: item.unit,
-        threshold: 1.0,
-        bundleSize: 1.0,
         category: item.category,
         location: item.location,
-        createdAt: DateTime.now(),
+        createdAt: item.createdAt,
         lastUpdated: DateTime.now(),
         healthTags: item.healthTags,
         expiryDate: item.expiryDate,
@@ -788,7 +784,7 @@ class _FoodExpiryItemsScreenState extends State<FoodExpiryItemsScreen> {
     );
 
     if (confirm == true) {
-      await ConsumableInventoryService.instance.deleteItem(item.id);
+      await FoodExpiryService.instance.deleteById(item.id);
     }
   }
 
@@ -798,7 +794,7 @@ class _FoodExpiryItemsScreenState extends State<FoodExpiryItemsScreen> {
     final recipeName = (_activeRecipeName ?? '').trim();
 
     int updatedCount = 0;
-    final items = ConsumableInventoryService.instance.items.value;
+    final items = FoodExpiryService.instance.items.value;
     final List<String> itemsToRemove = [];
 
     final usedIngredients = <Map<String, dynamic>>[];
@@ -839,24 +835,19 @@ class _FoodExpiryItemsScreenState extends State<FoodExpiryItemsScreen> {
       if (newQty <= 0) {
         itemsToRemove.add(item.id);
       } else {
-        await ConsumableInventoryService.instance.updateItem(
-          ConsumableInventoryItem(
-            id: item.id,
-            name: item.name,
-            currentStock: newQty,
-            unit: item.unit,
-            threshold: 1.0,
-            bundleSize: 1.0,
-            category: item.category,
-            location: item.location,
-            createdAt: DateTime.now(),
-            lastUpdated: DateTime.now(),
-            healthTags: item.healthTags,
-            expiryDate: item.expiryDate,
-            purchaseDate: item.purchaseDate,
-            price: item.price,
-            supplier: item.supplier,
-          ),
+        await FoodExpiryService.instance.updateItem(
+          id: item.id,
+          name: item.name,
+          purchaseDate: item.purchaseDate,
+          expiryDate: item.expiryDate,
+          memo: item.memo,
+          quantity: newQty,
+          unit: item.unit,
+          category: item.category,
+          location: item.location,
+          price: item.price,
+          supplier: item.supplier,
+          healthTags: item.healthTags,
         );
       }
       updatedCount++;
@@ -864,7 +855,7 @@ class _FoodExpiryItemsScreenState extends State<FoodExpiryItemsScreen> {
 
     if (itemsToRemove.isNotEmpty) {
       for (final id in itemsToRemove) {
-        await ConsumableInventoryService.instance.deleteItem(id);
+        await FoodExpiryService.instance.deleteById(id);
       }
     }
 
@@ -926,16 +917,22 @@ class _FoodExpiryItemsScreenState extends State<FoodExpiryItemsScreen> {
                         ingredient.name.contains(i.name),
                   )
                   .toList()
-                ..sort((a, b) => a.expiryDate.compareTo(b.expiryDate));
+                ..sort((a, b) {
+                  final aDate =
+                      a.expiryDate ?? DateTime.now().add(const Duration(days: 3650));
+                  final bDate =
+                      b.expiryDate ?? DateTime.now().add(const Duration(days: 3650));
+                  return aDate.compareTo(bDate);
+                });
 
           if (matchedItems.isNotEmpty) {
             final item = matchedItems.first; // FIFO: 유통기한 가장 빠른 것
             _usageMap[item.id] = ingredient.quantity;
 
-            final daysLeft = item.daysLeft(now);
+            final daysLeft = _daysLeftForInventory(item, now);
             final info = {
               'name': item.name,
-              'quantity': _formatQuantity(item),
+              'quantity': _formatInventoryQuantity(item),
               'daysLeft': daysLeft,
               'isExpiring': daysLeft <= 3,
             };
@@ -2258,6 +2255,27 @@ class _FoodExpiryItemsScreenState extends State<FoodExpiryItemsScreen> {
     }
 
     return '${formatQty(item.quantity)}${item.unit}';
+  }
+
+  String _formatInventoryQuantity(ConsumableInventoryItem item) {
+    String formatQty(double value) {
+      if (!value.isFinite) return '0';
+      final rounded = value.roundToDouble();
+      if ((value - rounded).abs() < 0.000001) {
+        return rounded.toStringAsFixed(0);
+      }
+      return value.toStringAsFixed(1);
+    }
+
+    return '${formatQty(item.currentStock)}${item.unit}';
+  }
+
+  int _daysLeftForInventory(ConsumableInventoryItem item, DateTime now) {
+    final expiryDate = item.expiryDate;
+    if (expiryDate == null) return 99999;
+    final start = DateTime(now.year, now.month, now.day);
+    final end = DateTime(expiryDate.year, expiryDate.month, expiryDate.day);
+    return end.difference(start).inDays;
   }
 
   String _itemSubtitleText(FoodExpiryItem item) {

@@ -132,21 +132,21 @@ class _IconManagementScreenState extends State<IconManagementScreen> {
       widget.catalogHiddenPageIndices ?? widget.hiddenPageIndices;
   bool _allowAssetOutsideWhenUnlocked = false;
   bool _assetSessionUnlocked = false;
-  int _assetPageIndex = 3;
-  int _rootPageIndex = 4;
+  int _assetPageIndex = 4;
+  int _rootPageIndex = 5;
 
-  // Reserved page policy (0-based indices):
-  // - 2: stats (page 3)
-  // - 3: asset (page 4)
-  // - 4: root (page 5)
-  // - 5: settings (page 6)
-  static const Set<int> _statsReservedPages = <int>{2};
-  static const Set<int> _assetReservedPages = <int>{3};
-  static const Set<int> _rootReservedPages = <int>{4};
-  static const Set<int> _settingsOnlyPages = <int>{5};
+  // Reserved page policy (인덱스 기준, UI 표시는 +1):
+  // - index 3: stats
+  // - index 4: asset
+  // - index 5: root
+  // - index 6: settings
+  static const Set<int> _statsReservedPages = <int>{3};
+  static const Set<int> _assetReservedPages = <int>{4};
+  static const Set<int> _rootReservedPages = <int>{5};
+  static const Set<int> _settingsOnlyPages = <int>{6};
 
   static const String _shortcutSettingsPage10Id = 'shortcut_settings_page10';
-  static const int _shortcutSettingsAllowedPageIndex = 1; // 2nd page (1-based)
+  static const int _shortcutSettingsAllowedPageIndex = 1; // index 1
 
   late final Set<String> _incomeIconIds;
   late final Set<String> _assetIconIds;
@@ -617,7 +617,7 @@ class _IconManagementScreenState extends State<IconManagementScreen> {
   }
 
   String _catalogSectionTitleForPage(int pageIndex) {
-    return '${pageIndex + 1}페이지';
+    return 'Index $pageIndex';
   }
 
   Widget _buildCatalogIconTile(ThemeData theme, MainFeatureIcon icon) {
@@ -646,13 +646,13 @@ class _IconManagementScreenState extends State<IconManagementScreen> {
           if (!isAllowed) {
             if (blocked) {
               final msg = _settingsIconIds.contains(icon.id)
-                  ? '설정 아이콘은 10페이지에서만 노출할 수 있습니다'
+                  ? '설정 아이콘은 Index 6에서만 노출할 수 있습니다'
                   : (_rootIconIds.contains(icon.id)
-                        ? 'ROOT 아이콘은 8~9페이지에서만 노출할 수 있습니다'
+                        ? 'ROOT 아이콘은 Index 5에서만 노출할 수 있습니다'
                         : (_isStatsReservedPage(_pageIndex)
-                              ? '4~5페이지는 통계 아이콘 전용입니다'
+                              ? 'Index 3은 통계 아이콘 전용입니다'
                               : (_isAssetReservedPage(_pageIndex)
-                                    ? '6~7페이지는 자산/수입 아이콘 전용입니다'
+                                    ? 'Index 4는 자산 아이콘 전용입니다'
                                     : '현재 페이지 정책상 배치할 수 없습니다')));
               ScaffoldMessenger.of(
                 context,
@@ -1024,13 +1024,13 @@ class _IconManagementScreenState extends State<IconManagementScreen> {
 
                       if (_isBlockedForCurrentPage(draggedId)) {
                         final msg = _settingsIconIds.contains(draggedId)
-                            ? '설정 아이콘은 10페이지에서만 노출할 수 있습니다'
+                            ? '설정 아이콘은 Index 6에서만 노출할 수 있습니다'
                             : (_rootIconIds.contains(draggedId)
-                                  ? 'ROOT 아이콘은 8~9페이지에서만 노출할 수 있습니다'
+                                  ? 'ROOT 아이콘은 Index 5에서만 노출할 수 있습니다'
                                   : (_isStatsReservedPage(_pageIndex)
-                                        ? '4~5페이지는 통계 아이콘 전용입니다'
+                                        ? 'Index 3은 통계 아이콘 전용입니다'
                                         : (_isAssetReservedPage(_pageIndex)
-                                              ? '6~7페이지는 자산/수입 아이콘 전용입니다'
+                                              ? 'Index 4는 자산 아이콘 전용입니다'
                                               : '현재 페이지 정책상 배치할 수 없습니다')));
                         ScaffoldMessenger.of(
                           context,
@@ -1113,7 +1113,7 @@ class _IconManagementScreenState extends State<IconManagementScreen> {
   Widget _buildIconCatalogPicker(ThemeData theme) {
     if (widget.groupCatalogByModule) {
       const moduleOrder = <({String key, String title})>[
-        (key: 'page1', title: '기본'),
+        (key: 'page0', title: '기본'),
         (key: 'purchase', title: '구매'),
         (key: 'stats', title: '통계'),
         (key: 'asset', title: '자산'),
@@ -1347,7 +1347,7 @@ class _IconManagementScreenState extends State<IconManagementScreen> {
               alignment: Alignment.centerLeft,
               child: Text(
                 widget.showCurrentPageIndicator
-                    ? '${_pageIndex + 1}페이지 · 선택: ${_pendingIds.length}'
+                    ? 'Index $_pageIndex · 선택: ${_pendingIds.length}'
                     : '선택: ${_pendingIds.length}',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,

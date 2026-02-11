@@ -107,6 +107,13 @@ class _AssetRoutes {
           builder: (_) => SavingsPlanListScreen(accountName: a.accountName),
         );
 
+      case AppRoutes.iconManagementAsset:
+        final a = args as IconManagementArgs;
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => IconManagementAssetScreen(accountName: a.accountName),
+        );
+
       default:
         return null;
     }

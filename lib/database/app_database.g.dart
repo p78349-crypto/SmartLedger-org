@@ -461,6 +461,53 @@ class $DbTransactionsTable extends DbTransactions
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _currencyMeta = const VerificationMeta(
+    'currency',
+  );
+  @override
+  late final GeneratedColumn<String> currency = GeneratedColumn<String>(
+    'currency',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('KRW'),
+  );
+  static const VerificationMeta _exchangeRateMeta = const VerificationMeta(
+    'exchangeRate',
+  );
+  @override
+  late final GeneratedColumn<double> exchangeRate = GeneratedColumn<double>(
+    'exchange_rate',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1.0),
+  );
+  static const VerificationMeta _originalAmountMeta = const VerificationMeta(
+    'originalAmount',
+  );
+  @override
+  late final GeneratedColumn<double> originalAmount = GeneratedColumn<double>(
+    'original_amount',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _vatAmountMeta = const VerificationMeta(
+    'vatAmount',
+  );
+  @override
+  late final GeneratedColumn<double> vatAmount = GeneratedColumn<double>(
+    'vat_amount',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
   static const VerificationMeta _savingsAllocationMeta = const VerificationMeta(
     'savingsAllocation',
   );
@@ -539,6 +586,10 @@ class $DbTransactionsTable extends DbTransactions
     supplier,
     expiryDate,
     unit,
+    currency,
+    exchangeRate,
+    originalAmount,
+    vatAmount,
     savingsAllocation,
     isRefund,
     originalTransactionId,
@@ -696,6 +747,36 @@ class $DbTransactionsTable extends DbTransactions
         unit.isAcceptableOrUnknown(data['unit']!, _unitMeta),
       );
     }
+    if (data.containsKey('currency')) {
+      context.handle(
+        _currencyMeta,
+        currency.isAcceptableOrUnknown(data['currency']!, _currencyMeta),
+      );
+    }
+    if (data.containsKey('exchange_rate')) {
+      context.handle(
+        _exchangeRateMeta,
+        exchangeRate.isAcceptableOrUnknown(
+          data['exchange_rate']!,
+          _exchangeRateMeta,
+        ),
+      );
+    }
+    if (data.containsKey('original_amount')) {
+      context.handle(
+        _originalAmountMeta,
+        originalAmount.isAcceptableOrUnknown(
+          data['original_amount']!,
+          _originalAmountMeta,
+        ),
+      );
+    }
+    if (data.containsKey('vat_amount')) {
+      context.handle(
+        _vatAmountMeta,
+        vatAmount.isAcceptableOrUnknown(data['vat_amount']!, _vatAmountMeta),
+      );
+    }
     if (data.containsKey('savings_allocation')) {
       context.handle(
         _savingsAllocationMeta,
@@ -823,6 +904,22 @@ class $DbTransactionsTable extends DbTransactions
         DriftSqlType.string,
         data['${effectivePrefix}unit'],
       ),
+      currency: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}currency'],
+      )!,
+      exchangeRate: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}exchange_rate'],
+      )!,
+      originalAmount: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}original_amount'],
+      ),
+      vatAmount: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}vat_amount'],
+      )!,
       savingsAllocation: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}savings_allocation'],
@@ -872,6 +969,10 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
   final String? supplier;
   final DateTime? expiryDate;
   final String? unit;
+  final String currency;
+  final double exchangeRate;
+  final double? originalAmount;
+  final double vatAmount;
 
   /// Savings allocation option for savings transactions.
   ///
@@ -909,6 +1010,10 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
     this.supplier,
     this.expiryDate,
     this.unit,
+    required this.currency,
+    required this.exchangeRate,
+    this.originalAmount,
+    required this.vatAmount,
     this.savingsAllocation,
     required this.isRefund,
     this.originalTransactionId,
@@ -953,6 +1058,12 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
     if (!nullToAbsent || unit != null) {
       map['unit'] = Variable<String>(unit);
     }
+    map['currency'] = Variable<String>(currency);
+    map['exchange_rate'] = Variable<double>(exchangeRate);
+    if (!nullToAbsent || originalAmount != null) {
+      map['original_amount'] = Variable<double>(originalAmount);
+    }
+    map['vat_amount'] = Variable<double>(vatAmount);
     if (!nullToAbsent || savingsAllocation != null) {
       map['savings_allocation'] = Variable<String>(savingsAllocation);
     }
@@ -1004,6 +1115,12 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
           ? const Value.absent()
           : Value(expiryDate),
       unit: unit == null && nullToAbsent ? const Value.absent() : Value(unit),
+      currency: Value(currency),
+      exchangeRate: Value(exchangeRate),
+      originalAmount: originalAmount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(originalAmount),
+      vatAmount: Value(vatAmount),
       savingsAllocation: savingsAllocation == null && nullToAbsent
           ? const Value.absent()
           : Value(savingsAllocation),
@@ -1047,6 +1164,10 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
       supplier: serializer.fromJson<String?>(json['supplier']),
       expiryDate: serializer.fromJson<DateTime?>(json['expiryDate']),
       unit: serializer.fromJson<String?>(json['unit']),
+      currency: serializer.fromJson<String>(json['currency']),
+      exchangeRate: serializer.fromJson<double>(json['exchangeRate']),
+      originalAmount: serializer.fromJson<double?>(json['originalAmount']),
+      vatAmount: serializer.fromJson<double>(json['vatAmount']),
       savingsAllocation: serializer.fromJson<String?>(
         json['savingsAllocation'],
       ),
@@ -1081,6 +1202,10 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
       'supplier': serializer.toJson<String?>(supplier),
       'expiryDate': serializer.toJson<DateTime?>(expiryDate),
       'unit': serializer.toJson<String?>(unit),
+      'currency': serializer.toJson<String>(currency),
+      'exchangeRate': serializer.toJson<double>(exchangeRate),
+      'originalAmount': serializer.toJson<double?>(originalAmount),
+      'vatAmount': serializer.toJson<double>(vatAmount),
       'savingsAllocation': serializer.toJson<String?>(savingsAllocation),
       'isRefund': serializer.toJson<int>(isRefund),
       'originalTransactionId': serializer.toJson<String?>(
@@ -1111,6 +1236,10 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
     Value<String?> supplier = const Value.absent(),
     Value<DateTime?> expiryDate = const Value.absent(),
     Value<String?> unit = const Value.absent(),
+    String? currency,
+    double? exchangeRate,
+    Value<double?> originalAmount = const Value.absent(),
+    double? vatAmount,
     Value<String?> savingsAllocation = const Value.absent(),
     int? isRefund,
     Value<String?> originalTransactionId = const Value.absent(),
@@ -1140,6 +1269,12 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
     supplier: supplier.present ? supplier.value : this.supplier,
     expiryDate: expiryDate.present ? expiryDate.value : this.expiryDate,
     unit: unit.present ? unit.value : this.unit,
+    currency: currency ?? this.currency,
+    exchangeRate: exchangeRate ?? this.exchangeRate,
+    originalAmount: originalAmount.present
+        ? originalAmount.value
+        : this.originalAmount,
+    vatAmount: vatAmount ?? this.vatAmount,
     savingsAllocation: savingsAllocation.present
         ? savingsAllocation.value
         : this.savingsAllocation,
@@ -1185,6 +1320,14 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
           ? data.expiryDate.value
           : this.expiryDate,
       unit: data.unit.present ? data.unit.value : this.unit,
+      currency: data.currency.present ? data.currency.value : this.currency,
+      exchangeRate: data.exchangeRate.present
+          ? data.exchangeRate.value
+          : this.exchangeRate,
+      originalAmount: data.originalAmount.present
+          ? data.originalAmount.value
+          : this.originalAmount,
+      vatAmount: data.vatAmount.present ? data.vatAmount.value : this.vatAmount,
       savingsAllocation: data.savingsAllocation.present
           ? data.savingsAllocation.value
           : this.savingsAllocation,
@@ -1223,6 +1366,10 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
           ..write('supplier: $supplier, ')
           ..write('expiryDate: $expiryDate, ')
           ..write('unit: $unit, ')
+          ..write('currency: $currency, ')
+          ..write('exchangeRate: $exchangeRate, ')
+          ..write('originalAmount: $originalAmount, ')
+          ..write('vatAmount: $vatAmount, ')
           ..write('savingsAllocation: $savingsAllocation, ')
           ..write('isRefund: $isRefund, ')
           ..write('originalTransactionId: $originalTransactionId, ')
@@ -1253,6 +1400,10 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
     supplier,
     expiryDate,
     unit,
+    currency,
+    exchangeRate,
+    originalAmount,
+    vatAmount,
     savingsAllocation,
     isRefund,
     originalTransactionId,
@@ -1282,6 +1433,10 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
           other.supplier == this.supplier &&
           other.expiryDate == this.expiryDate &&
           other.unit == this.unit &&
+          other.currency == this.currency &&
+          other.exchangeRate == this.exchangeRate &&
+          other.originalAmount == this.originalAmount &&
+          other.vatAmount == this.vatAmount &&
           other.savingsAllocation == this.savingsAllocation &&
           other.isRefund == this.isRefund &&
           other.originalTransactionId == this.originalTransactionId &&
@@ -1309,6 +1464,10 @@ class DbTransactionsCompanion extends UpdateCompanion<DbTransaction> {
   final Value<String?> supplier;
   final Value<DateTime?> expiryDate;
   final Value<String?> unit;
+  final Value<String> currency;
+  final Value<double> exchangeRate;
+  final Value<double?> originalAmount;
+  final Value<double> vatAmount;
   final Value<String?> savingsAllocation;
   final Value<int> isRefund;
   final Value<String?> originalTransactionId;
@@ -1335,6 +1494,10 @@ class DbTransactionsCompanion extends UpdateCompanion<DbTransaction> {
     this.supplier = const Value.absent(),
     this.expiryDate = const Value.absent(),
     this.unit = const Value.absent(),
+    this.currency = const Value.absent(),
+    this.exchangeRate = const Value.absent(),
+    this.originalAmount = const Value.absent(),
+    this.vatAmount = const Value.absent(),
     this.savingsAllocation = const Value.absent(),
     this.isRefund = const Value.absent(),
     this.originalTransactionId = const Value.absent(),
@@ -1362,6 +1525,10 @@ class DbTransactionsCompanion extends UpdateCompanion<DbTransaction> {
     this.supplier = const Value.absent(),
     this.expiryDate = const Value.absent(),
     this.unit = const Value.absent(),
+    this.currency = const Value.absent(),
+    this.exchangeRate = const Value.absent(),
+    this.originalAmount = const Value.absent(),
+    this.vatAmount = const Value.absent(),
     this.savingsAllocation = const Value.absent(),
     this.isRefund = const Value.absent(),
     this.originalTransactionId = const Value.absent(),
@@ -1393,6 +1560,10 @@ class DbTransactionsCompanion extends UpdateCompanion<DbTransaction> {
     Expression<String>? supplier,
     Expression<DateTime>? expiryDate,
     Expression<String>? unit,
+    Expression<String>? currency,
+    Expression<double>? exchangeRate,
+    Expression<double>? originalAmount,
+    Expression<double>? vatAmount,
     Expression<String>? savingsAllocation,
     Expression<int>? isRefund,
     Expression<String>? originalTransactionId,
@@ -1420,6 +1591,10 @@ class DbTransactionsCompanion extends UpdateCompanion<DbTransaction> {
       if (supplier != null) 'supplier': supplier,
       if (expiryDate != null) 'expiry_date': expiryDate,
       if (unit != null) 'unit': unit,
+      if (currency != null) 'currency': currency,
+      if (exchangeRate != null) 'exchange_rate': exchangeRate,
+      if (originalAmount != null) 'original_amount': originalAmount,
+      if (vatAmount != null) 'vat_amount': vatAmount,
       if (savingsAllocation != null) 'savings_allocation': savingsAllocation,
       if (isRefund != null) 'is_refund': isRefund,
       if (originalTransactionId != null)
@@ -1450,6 +1625,10 @@ class DbTransactionsCompanion extends UpdateCompanion<DbTransaction> {
     Value<String?>? supplier,
     Value<DateTime?>? expiryDate,
     Value<String?>? unit,
+    Value<String>? currency,
+    Value<double>? exchangeRate,
+    Value<double?>? originalAmount,
+    Value<double>? vatAmount,
     Value<String?>? savingsAllocation,
     Value<int>? isRefund,
     Value<String?>? originalTransactionId,
@@ -1477,6 +1656,10 @@ class DbTransactionsCompanion extends UpdateCompanion<DbTransaction> {
       supplier: supplier ?? this.supplier,
       expiryDate: expiryDate ?? this.expiryDate,
       unit: unit ?? this.unit,
+      currency: currency ?? this.currency,
+      exchangeRate: exchangeRate ?? this.exchangeRate,
+      originalAmount: originalAmount ?? this.originalAmount,
+      vatAmount: vatAmount ?? this.vatAmount,
       savingsAllocation: savingsAllocation ?? this.savingsAllocation,
       isRefund: isRefund ?? this.isRefund,
       originalTransactionId:
@@ -1547,6 +1730,18 @@ class DbTransactionsCompanion extends UpdateCompanion<DbTransaction> {
     if (unit.present) {
       map['unit'] = Variable<String>(unit.value);
     }
+    if (currency.present) {
+      map['currency'] = Variable<String>(currency.value);
+    }
+    if (exchangeRate.present) {
+      map['exchange_rate'] = Variable<double>(exchangeRate.value);
+    }
+    if (originalAmount.present) {
+      map['original_amount'] = Variable<double>(originalAmount.value);
+    }
+    if (vatAmount.present) {
+      map['vat_amount'] = Variable<double>(vatAmount.value);
+    }
     if (savingsAllocation.present) {
       map['savings_allocation'] = Variable<String>(savingsAllocation.value);
     }
@@ -1592,6 +1787,10 @@ class DbTransactionsCompanion extends UpdateCompanion<DbTransaction> {
           ..write('supplier: $supplier, ')
           ..write('expiryDate: $expiryDate, ')
           ..write('unit: $unit, ')
+          ..write('currency: $currency, ')
+          ..write('exchangeRate: $exchangeRate, ')
+          ..write('originalAmount: $originalAmount, ')
+          ..write('vatAmount: $vatAmount, ')
           ..write('savingsAllocation: $savingsAllocation, ')
           ..write('isRefund: $isRefund, ')
           ..write('originalTransactionId: $originalTransactionId, ')
@@ -3049,6 +3248,10 @@ typedef $$DbTransactionsTableCreateCompanionBuilder =
       Value<String?> supplier,
       Value<DateTime?> expiryDate,
       Value<String?> unit,
+      Value<String> currency,
+      Value<double> exchangeRate,
+      Value<double?> originalAmount,
+      Value<double> vatAmount,
       Value<String?> savingsAllocation,
       Value<int> isRefund,
       Value<String?> originalTransactionId,
@@ -3077,6 +3280,10 @@ typedef $$DbTransactionsTableUpdateCompanionBuilder =
       Value<String?> supplier,
       Value<DateTime?> expiryDate,
       Value<String?> unit,
+      Value<String> currency,
+      Value<double> exchangeRate,
+      Value<double?> originalAmount,
+      Value<double> vatAmount,
       Value<String?> savingsAllocation,
       Value<int> isRefund,
       Value<String?> originalTransactionId,
@@ -3209,6 +3416,26 @@ class $$DbTransactionsTableFilterComposer
 
   ColumnFilters<String> get unit => $composableBuilder(
     column: $table.unit,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get currency => $composableBuilder(
+    column: $table.currency,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get exchangeRate => $composableBuilder(
+    column: $table.exchangeRate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get originalAmount => $composableBuilder(
+    column: $table.originalAmount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get vatAmount => $composableBuilder(
+    column: $table.vatAmount,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3360,6 +3587,26 @@ class $$DbTransactionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get currency => $composableBuilder(
+    column: $table.currency,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get exchangeRate => $composableBuilder(
+    column: $table.exchangeRate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get originalAmount => $composableBuilder(
+    column: $table.originalAmount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get vatAmount => $composableBuilder(
+    column: $table.vatAmount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get savingsAllocation => $composableBuilder(
     column: $table.savingsAllocation,
     builder: (column) => ColumnOrderings(column),
@@ -3486,6 +3733,22 @@ class $$DbTransactionsTableAnnotationComposer
   GeneratedColumn<String> get unit =>
       $composableBuilder(column: $table.unit, builder: (column) => column);
 
+  GeneratedColumn<String> get currency =>
+      $composableBuilder(column: $table.currency, builder: (column) => column);
+
+  GeneratedColumn<double> get exchangeRate => $composableBuilder(
+    column: $table.exchangeRate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get originalAmount => $composableBuilder(
+    column: $table.originalAmount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get vatAmount =>
+      $composableBuilder(column: $table.vatAmount, builder: (column) => column);
+
   GeneratedColumn<String> get savingsAllocation => $composableBuilder(
     column: $table.savingsAllocation,
     builder: (column) => column,
@@ -3582,6 +3845,10 @@ class $$DbTransactionsTableTableManager
                 Value<String?> supplier = const Value.absent(),
                 Value<DateTime?> expiryDate = const Value.absent(),
                 Value<String?> unit = const Value.absent(),
+                Value<String> currency = const Value.absent(),
+                Value<double> exchangeRate = const Value.absent(),
+                Value<double?> originalAmount = const Value.absent(),
+                Value<double> vatAmount = const Value.absent(),
                 Value<String?> savingsAllocation = const Value.absent(),
                 Value<int> isRefund = const Value.absent(),
                 Value<String?> originalTransactionId = const Value.absent(),
@@ -3608,6 +3875,10 @@ class $$DbTransactionsTableTableManager
                 supplier: supplier,
                 expiryDate: expiryDate,
                 unit: unit,
+                currency: currency,
+                exchangeRate: exchangeRate,
+                originalAmount: originalAmount,
+                vatAmount: vatAmount,
                 savingsAllocation: savingsAllocation,
                 isRefund: isRefund,
                 originalTransactionId: originalTransactionId,
@@ -3636,6 +3907,10 @@ class $$DbTransactionsTableTableManager
                 Value<String?> supplier = const Value.absent(),
                 Value<DateTime?> expiryDate = const Value.absent(),
                 Value<String?> unit = const Value.absent(),
+                Value<String> currency = const Value.absent(),
+                Value<double> exchangeRate = const Value.absent(),
+                Value<double?> originalAmount = const Value.absent(),
+                Value<double> vatAmount = const Value.absent(),
                 Value<String?> savingsAllocation = const Value.absent(),
                 Value<int> isRefund = const Value.absent(),
                 Value<String?> originalTransactionId = const Value.absent(),
@@ -3662,6 +3937,10 @@ class $$DbTransactionsTableTableManager
                 supplier: supplier,
                 expiryDate: expiryDate,
                 unit: unit,
+                currency: currency,
+                exchangeRate: exchangeRate,
+                originalAmount: originalAmount,
+                vatAmount: vatAmount,
                 savingsAllocation: savingsAllocation,
                 isRefund: isRefund,
                 originalTransactionId: originalTransactionId,

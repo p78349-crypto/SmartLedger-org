@@ -162,4 +162,6 @@ class IconCatalog {
   static const IconData ingredients = Icons.local_dining;
   // Root/Statistics: overspending diagnosis indicator
   static const IconData overspendingDiagnosis = Icons.analytics;
+  static const IconData emojiEvents = Icons.emoji_events_outlined;
+  static const IconData accountBalanceWalletRounded = Icons.account_balance_wallet_rounded;
 }

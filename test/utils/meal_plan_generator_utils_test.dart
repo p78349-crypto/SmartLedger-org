@@ -1,13 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:smart_ledger/models/food_expiry_item.dart';
+import 'package:smart_ledger/models/consumable_inventory_item.dart';
 import 'package:smart_ledger/utils/meal_plan_generator_utils.dart';
 
 void main() {
   group('MealPlanGeneratorUtils', () {
-    FoodExpiryItem item(String name) => FoodExpiryItem(
+    ConsumableInventoryItem item(String name) => ConsumableInventoryItem(
       id: 'id_$name',
       name: name,
       createdAt: DateTime(2026),
+      lastUpdated: DateTime(2026),
       purchaseDate: DateTime(2026),
       expiryDate: DateTime(2026, 1, 10),
       category: '테스트',

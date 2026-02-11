@@ -48,13 +48,13 @@ class WmsUnifiedGateway {
 
   /// 재고 부족 + 유통기한 임박 통합 알림
   Future<WmsAlertSummary> getAlerts() async {
-    final results = await Future.wait([
+    final results = await Future.wait<List<ConsumableInventoryItem>>([
       WmsInventoryGateway.instance.getLowStockItems(),
       WmsInventoryGateway.instance.getItems(),
     ]);
 
-    final lowStockItems = results[0] as List<ConsumableInventoryItem>;
-    final inventoryItems = results[1] as List<ConsumableInventoryItem>;
+    final lowStockItems = results[0];
+    final inventoryItems = results[1];
 
     final expiringInventoryItems = inventoryItems
         .where((item) => item.isExpiringWithin())

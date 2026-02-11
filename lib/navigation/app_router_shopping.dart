@@ -70,6 +70,14 @@ class _ShoppingRoutes {
               HouseholdConsumablesScreen(accountName: a.accountName),
         );
 
+      case AppRoutes.householdQuickPick:
+        final a = args as AccountArgs;
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) =>
+              HouseholdQuickPickScreen(accountName: a.accountName),
+        );
+
       case AppRoutes.householdItems:
         final a = args as AccountArgs;
         return MaterialPageRoute(
@@ -244,7 +252,7 @@ class _ConsumableInventoryRedirectScreenState
       body: ListView.separated(
         padding: const EdgeInsets.all(16),
         itemCount: _accounts.length,
-        separatorBuilder: (_, __) => const Divider(),
+        separatorBuilder: (context, index) => const Divider(),
         itemBuilder: (context, index) {
           final name = _accounts[index];
           return ListTile(

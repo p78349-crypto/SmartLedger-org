@@ -64,15 +64,25 @@ class CurrencyFormatter {
   static NumberFormat get compact => _compact();
 
   /// 금액을 통화 문자열로 포맷 (#,##0원)
-  static String format(num amount, {bool showUnit = true}) {
+  static String format(num amount, {bool showUnit = true, String? currencyCode}) {
+    final symbol = currencyCode != null
+        ? (currencySymbols[currencyCode] ?? currencyCode)
+        : _cachedUnit;
     final formatted = _currency().format(amount);
-    return showUnit ? '$formatted$_cachedUnit' : formatted;
+    return showUnit ? '$formatted$symbol' : formatted;
   }
 
   /// 금액을 통화 문자열로 포맷 (소수점 포함)
-  static String formatWithDecimals(num amount, {bool showUnit = true}) {
+  static String formatWithDecimals(
+    num amount, {
+    bool showUnit = true,
+    String? currencyCode,
+  }) {
+    final symbol = currencyCode != null
+        ? (currencySymbols[currencyCode] ?? currencyCode)
+        : _cachedUnit;
     final formatted = _currencyWithDecimals().format(amount);
-    return showUnit ? '$formatted$_cachedUnit' : formatted;
+    return showUnit ? '$formatted$symbol' : formatted;
   }
 
   /// 코드에 대응하는 한국어 통화명 반환 (없으면 코드 그대로 반환)

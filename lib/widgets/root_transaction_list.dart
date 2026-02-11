@@ -68,7 +68,12 @@ class RootTransactionList extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                 ),
               ),
-              Text(tx.type.label, style: theme.textTheme.labelSmall),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(tx.type.label, style: theme.textTheme.labelSmall),
+                ],
+              ),
             ],
           ),
           isThreeLine: tx.memo.isNotEmpty,

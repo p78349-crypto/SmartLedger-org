@@ -37,7 +37,7 @@ class PageIndicator extends StatelessWidget {
           border: Border.all(color: scheme.primary.withValues(alpha: 0.5)),
         ),
         child: Text(
-          '${currentPage + 1}',
+          '$currentPage',
           style: theme.textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.bold,
             color: scheme.primary,

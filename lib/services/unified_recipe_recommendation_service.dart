@@ -22,14 +22,14 @@ class UnifiedRecipeRecommendationService {
   /// 정렬: 일치도 높은 순서대로
   Future<Map<String, RecipeMatch>> getRecommendedRecipes({
     List<ConsumableInventoryItem>? items,
-    int? minMatchPercentage = 50,
+    int minMatchPercentage = 50,
   }) async {
     final inventory = items ?? ConsumableInventoryService.instance.items.value;
     
     final recommendations =
         await RecipeRecommendationUtils.getRecommendedRecipes(
       inventory,
-      minMatchPercentage: minMatchPercentage ?? 50,
+      minMatchPercentage: minMatchPercentage,
     );
 
     return recommendations;
@@ -70,10 +70,10 @@ class UnifiedRecipeRecommendationService {
   /// 
   /// 완벽 일치 레시피 또는 최고 일치도 레시피 1개 반환
   /// 
-  /// 반환값: {recipe: Recipe, missingCount: int, missing: List<String>}
+  /// 반환값: {recipe: Recipe, missingCount: int, missing: String 목록}
   /// - recipe: Recipe 객체
   /// - missingCount: 부족한 재료 개수
-  /// - missing: 부족한 재료명 목록
+  /// - missing: 부족한 재료명 목록 (문자열 리스트)
   Future<Map<String, dynamic>?> getRecommendationForVoiceCommand({
     List<ConsumableInventoryItem>? items,
   }) async {
@@ -90,13 +90,11 @@ class UnifiedRecipeRecommendationService {
     }
 
     // 100% 일치 레시피 찾기
-    final recipes = await RecipeService.instance.load();
+    await RecipeService.instance.load();
+    final recipes = RecipeService.instance.recipes.value;
     for (final entry in recommendations.entries) {
-      final recipe = recipes.firstWhere(
-        (r) => r.name == entry.key,
-        orElse: () => Recipe.empty(),
-      );
-      if (recipe.id.isEmpty) continue;
+      final recipe = _findRecipeByName(recipes, entry.key);
+      if (recipe == null) continue;
 
       if (entry.value.matchPercentage >= 100) {
         return {
@@ -109,16 +107,12 @@ class UnifiedRecipeRecommendationService {
 
     // 100% 일치 없으면 최고 일치도 반환
     final topEntry = recommendations.entries.first;
-    final recipe = recipes.firstWhere(
-      (r) => r.name == topEntry.key,
-      orElse: () => Recipe.empty(),
-    );
-    
-    if (recipe.id.isEmpty) {
+    final recipe = _findRecipeByName(recipes, topEntry.key);
+    if (recipe == null) {
       return null;
     }
 
-    final missingIngredients = topEntry.value.missingIngredients ?? [];
+    final missingIngredients = _computeMissingIngredients(recipe, inventory);
     return {
       'recipe': recipe,
       'missingCount': missingIngredients.length,
@@ -140,16 +134,21 @@ class UnifiedRecipeRecommendationService {
 
     // 지정된 식재료와 일치하는 레시피만 필터링
     final filtered = <RecipeMatch>[];
+    await RecipeService.instance.load();
+    final allRecipes = RecipeService.instance.recipes.value;
     for (final entry in recommendations.entries) {
-      final recipe = entry.value;
-      final matchingIngredients = recipe.availableIngredients
-              ?.where((ing) => ingredients
-                  .any((q) => ing.toLowerCase().contains(q.toLowerCase())))
-              .toList() ??
-          [];
+      final recipe = _findRecipeByName(allRecipes, entry.key);
+      if (recipe == null) continue;
+
+      final matchingIngredients = recipe.ingredients
+          .map((i) => i.name)
+          .where((ing) => ingredients.any(
+                (q) => ing.toLowerCase().contains(q.toLowerCase()),
+              ))
+          .toList();
 
       if (matchingIngredients.isNotEmpty) {
-        filtered.add(recipe);
+        filtered.add(entry.value);
       }
     }
 
@@ -166,16 +165,50 @@ class UnifiedRecipeRecommendationService {
     final allRecipes = RecipeService.instance.recipes.value;
 
     return recommendations
-        .map((match) => allRecipes.firstWhere(
-              (r) => r.name == match.recipeName,
-              orElse: () => Recipe.empty(),
-            ))
-        .where((r) => r.id.isNotEmpty)
+        .map((match) => _findRecipeByName(allRecipes, match.recipeName))
+        .where((r) => r != null)
+        .cast<Recipe>()
         .toList();
   }
 
   /// 추천 레시피 메시지 생성 (원래 RecipeRecommendationUtils에서)
-  String generateRecommendationMessage(RecipeMatch recipe) {
-    return RecipeRecommendationUtils.generateRecommendationMessage(recipe);
+  String generateRecommendationMessage(
+    RecipeMatch recipe, {
+    List<ConsumableInventoryItem>? expiringItems,
+  }) {
+    final items = expiringItems ?? <ConsumableInventoryItem>[];
+    return RecipeRecommendationUtils.generateRecommendationMessage(
+      items,
+      recipe,
+    );
+  }
+
+  Recipe? _findRecipeByName(List<Recipe> recipes, String name) {
+    for (final recipe in recipes) {
+      if (recipe.name == name) return recipe;
+    }
+    return null;
+  }
+
+  List<String> _computeMissingIngredients(
+    Recipe recipe,
+    List<ConsumableInventoryItem> inventory,
+  ) {
+    final inventoryNames = inventory
+        .map((i) => i.name.toLowerCase().trim())
+        .where((n) => n.isNotEmpty)
+        .toList();
+
+    final missing = <String>[];
+    for (final ingredient in recipe.ingredients) {
+      final name = ingredient.name.trim();
+      if (name.isEmpty) continue;
+      final normalized = name.toLowerCase();
+      final hasMatch = inventoryNames.any(
+        (inv) => inv.contains(normalized) || normalized.contains(inv),
+      );
+      if (!hasMatch) missing.add(name);
+    }
+    return missing;
   }
 }

@@ -284,7 +284,7 @@ class _RecipePickerDialogState extends State<RecipePickerDialog> {
                   '${it.category} | ${it.location} | ${it.currentStock}${it.unit}',
                 ),
                 trailing: Text(
-                  daysLeft == null ? '기한 없음' : '${daysLeft}일 남음',
+                  daysLeft == null ? '기한 없음' : '$daysLeft일 남음',
                   style: TextStyle(
                     fontSize: 11,
                     color: daysLeft != null && daysLeft <= 2

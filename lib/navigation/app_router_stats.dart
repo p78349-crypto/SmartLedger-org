@@ -11,17 +11,21 @@ class _StatsRoutes {
         final a = args as AccountArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => AccountStatsScreen(accountName: a.accountName),
+          builder: (_) => AssetRouteAuthGate(
+            child: AccountStatsScreen(accountName: a.accountName),
+          ),
         );
 
       case AppRoutes.accountStatsDecade:
         final a = args as AccountArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => AccountStatsScreen(
-            accountName: a.accountName,
-            initialView: 'decade',
-            initialRangeView: 'decade',
+          builder: (_) => AssetRouteAuthGate(
+            child: AccountStatsScreen(
+              accountName: a.accountName,
+              initialView: 'decade',
+              initialRangeView: 'decade',
+            ),
           ),
         );
 
@@ -29,7 +33,9 @@ class _StatsRoutes {
         final a = args as AccountArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => MonthlyStatsScreen(accountName: a.accountName),
+          builder: (_) => AssetRouteAuthGate(
+            child: MonthlyStatsScreen(accountName: a.accountName),
+          ),
         );
 
       case AppRoutes.categoryStats:
@@ -58,7 +64,9 @@ class _StatsRoutes {
         final a = args as AccountArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => SpendingAnalysisScreen(accountName: a.accountName),
+          builder: (_) => AssetRouteAuthGate(
+            child: SpendingAnalysisScreen(accountName: a.accountName),
+          ),
         );
 
       case AppRoutes.weatherPricePrediction:
@@ -93,9 +101,11 @@ class _StatsRoutes {
         final a = args as AccountArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => PeriodStatsScreen(
-            accountName: a.accountName,
-            view: period.PeriodType.week,
+          builder: (_) => AssetRouteAuthGate(
+            child: PeriodStatsScreen(
+              accountName: a.accountName,
+              view: period.PeriodType.week,
+            ),
           ),
         );
 
@@ -103,9 +113,11 @@ class _StatsRoutes {
         final a = args as AccountArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => PeriodStatsScreen(
-            accountName: a.accountName,
-            view: period.PeriodType.month,
+          builder: (_) => AssetRouteAuthGate(
+            child: PeriodStatsScreen(
+              accountName: a.accountName,
+              view: period.PeriodType.month,
+            ),
           ),
         );
 
@@ -113,9 +125,11 @@ class _StatsRoutes {
         final a = args as AccountArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => PeriodStatsScreen(
-            accountName: a.accountName,
-            view: period.PeriodType.quarter,
+          builder: (_) => AssetRouteAuthGate(
+            child: PeriodStatsScreen(
+              accountName: a.accountName,
+              view: period.PeriodType.quarter,
+            ),
           ),
         );
 
@@ -123,9 +137,11 @@ class _StatsRoutes {
         final a = args as AccountArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => PeriodStatsScreen(
-            accountName: a.accountName,
-            view: period.PeriodType.halfYear,
+          builder: (_) => AssetRouteAuthGate(
+            child: PeriodStatsScreen(
+              accountName: a.accountName,
+              view: period.PeriodType.halfYear,
+            ),
           ),
         );
 
@@ -133,9 +149,11 @@ class _StatsRoutes {
         final a = args as AccountArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => PeriodStatsScreen(
-            accountName: a.accountName,
-            view: period.PeriodType.year,
+          builder: (_) => AssetRouteAuthGate(
+            child: PeriodStatsScreen(
+              accountName: a.accountName,
+              view: period.PeriodType.year,
+            ),
           ),
         );
 
@@ -143,9 +161,11 @@ class _StatsRoutes {
         final a = args as AccountArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => PeriodStatsScreen(
-            accountName: a.accountName,
-            view: period.PeriodType.decade,
+          builder: (_) => AssetRouteAuthGate(
+            child: PeriodStatsScreen(
+              accountName: a.accountName,
+              view: period.PeriodType.decade,
+            ),
           ),
         );
 
@@ -153,9 +173,11 @@ class _StatsRoutes {
         final a = args as AccountArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => IncomeSplitScreen(
-            accountName: a.accountName,
-            initialIncomeAmount: a.initialIncomeAmount,
+          builder: (_) => AssetRouteAuthGate(
+            child: IncomeSplitScreen(
+              accountName: a.accountName,
+              initialIncomeAmount: a.initialIncomeAmount,
+            ),
           ),
         );
 

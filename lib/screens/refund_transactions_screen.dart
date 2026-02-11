@@ -122,8 +122,10 @@ class _RefundTransactionsScreenState extends State<RefundTransactionsScreen> {
       sub,
       tx.paymentMethod,
       (tx.cardChargedAmount ?? '').toString(),
-      if (cardWon != null) cardWon,
-      if (cardWon != null) '$cardWon원',
+      if (cardWon != null) ...[
+        cardWon,
+        '$cardWon원',
+      ],
     ].join(' ').toLowerCase();
 
     return haystack.contains(q);

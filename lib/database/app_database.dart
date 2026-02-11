@@ -33,6 +33,11 @@ class DbTransactions extends Table {
   DateTimeColumn get expiryDate => dateTime().nullable()();
   TextColumn get unit => text().nullable()();
 
+  TextColumn get currency => text().withDefault(const Constant('KRW'))();
+  RealColumn get exchangeRate => real().withDefault(const Constant(1.0))();
+  RealColumn get originalAmount => real().nullable()();
+  RealColumn get vatAmount => real().withDefault(const Constant(0.0))();
+
   /// Savings allocation option for savings transactions.
   ///
   /// Stored as a string (enum name) for forward compatibility.
@@ -80,7 +85,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -255,6 +260,13 @@ class AppDatabase extends _$AppDatabase {
           'tokenize=\'unicode61\''
           ')',
         );
+      }
+
+      if (from < 8) {
+        await migrator.addColumn(dbTransactions, dbTransactions.currency);
+        await migrator.addColumn(dbTransactions, dbTransactions.exchangeRate);
+        await migrator.addColumn(dbTransactions, dbTransactions.originalAmount);
+        await migrator.addColumn(dbTransactions, dbTransactions.vatAmount);
       }
     },
     beforeOpen: (details) async {

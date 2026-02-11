@@ -140,7 +140,7 @@ class AuthService {
   }) async {
     final rootAuthEnabled =
         prefs.getBool(PrefKeys.rootAuthEnabled) ??
-        (prefs.getBool(PrefKeys.biometricAuthEnabled) ?? true);
+        (prefs.getBool(PrefKeys.biometricAuthEnabled) ?? false);
     if (!rootAuthEnabled) return AuthResult.success;
 
     final mode = prefs.getString(PrefKeys.rootAuthMode) ?? 'integrated';
@@ -234,7 +234,7 @@ class AuthService {
     required SharedPreferences prefs,
     required String reason,
   }) async {
-    final enabled = prefs.getBool(PrefKeys.biometricAuthEnabled) ?? true;
+    final enabled = prefs.getBool(PrefKeys.biometricAuthEnabled) ?? false;
     if (!enabled) return AuthResult.success;
 
     final result = await authenticateDevice(reason: reason);

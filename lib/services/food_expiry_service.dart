@@ -32,7 +32,6 @@ class FoodExpiryService {
       purchaseDate: item.purchaseDate ?? item.createdAt,
       expiryDate: item.expiryDate ?? item.createdAt,
       createdAt: item.createdAt,
-      memo: '',
       quantity: item.currentStock,
       unit: item.unit,
       category: item.category,

@@ -28,6 +28,11 @@ class _IncomeSplitScreenState extends State<IncomeSplitScreen> {
   late TextEditingController _budgetController;
   late TextEditingController _emergencyController;
   late TextEditingController _assetController;
+  late FocusNode _incomeFocusNode;
+  late FocusNode _savingsFocusNode;
+  late FocusNode _budgetFocusNode;
+  late FocusNode _emergencyFocusNode;
+  late FocusNode _assetFocusNode;
   late List<String> _availableAccounts = [];
   late String _targetAccount;
 
@@ -56,6 +61,11 @@ class _IncomeSplitScreenState extends State<IncomeSplitScreen> {
     _budgetController = TextEditingController();
     _emergencyController = TextEditingController();
     _assetController = TextEditingController();
+    _incomeFocusNode = FocusNode();
+    _savingsFocusNode = FocusNode();
+    _budgetFocusNode = FocusNode();
+    _emergencyFocusNode = FocusNode();
+    _assetFocusNode = FocusNode();
 
     _incomeController.addListener(_updateCalculation);
     _savingsController.addListener(_updateCalculation);
@@ -87,6 +97,11 @@ class _IncomeSplitScreenState extends State<IncomeSplitScreen> {
     _budgetController.dispose();
     _emergencyController.dispose();
     _assetController.dispose();
+    _incomeFocusNode.dispose();
+    _savingsFocusNode.dispose();
+    _budgetFocusNode.dispose();
+    _emergencyFocusNode.dispose();
+    _assetFocusNode.dispose();
     super.dispose();
   }
 
@@ -455,6 +470,9 @@ class _IncomeSplitScreenState extends State<IncomeSplitScreen> {
                                       controller: controller,
                                       focusNode: focusNode,
                                       keyboardType: TextInputType.number,
+                                      textInputAction: index < categories.length - 1
+                                          ? TextInputAction.next
+                                          : TextInputAction.done,
                                       inputFormatters: [
                                         FilteringTextInputFormatter.digitsOnly,
                                         _CurrencyInputFormatter(),
@@ -463,6 +481,15 @@ class _IncomeSplitScreenState extends State<IncomeSplitScreen> {
                                       suffixText: '원',
                                       onChanged: (value) =>
                                           handleValueChange(category, value),
+                                      onFieldSubmitted: (_) {
+                                        if (index < categories.length - 1) {
+                                          FocusScope.of(context).requestFocus(
+                                            focusNodes[categories[index + 1]],
+                                          );
+                                        } else {
+                                          FocusScope.of(context).unfocus();
+                                        }
+                                      },
                                     ),
                                   ],
                                 ),
@@ -481,26 +508,26 @@ class _IncomeSplitScreenState extends State<IncomeSplitScreen> {
                             ),
                             const Spacer(),
                             ElevatedButton.icon(
-                              onPressed: isWithinBudget
-                                  ? () {
-                                      final sanitized =
-                                          Map<String, double>.from(localBudgets)
-                                            ..removeWhere(
-                                              (_, value) => value <= 0,
-                                            );
-
-                                      if (mounted) {
-                                        setState(() {
-                                          _categoryBudgets = sanitized;
-                                        });
-                                      }
-
-                                      SnackbarUtils.showInfo(
-                                        context,
-                                        '배분이 적용되었습니다. 계속 입력할 수 있어요.',
+                              onPressed: () {
+                                final sanitized =
+                                    Map<String, double>.from(localBudgets)
+                                      ..removeWhere(
+                                        (_, value) => value <= 0,
                                       );
-                                    }
-                                  : null,
+
+                                if (mounted) {
+                                  setState(() {
+                                    _categoryBudgets = sanitized;
+                                  });
+                                }
+
+                                SnackbarUtils.showInfo(
+                                  context,
+                                  '배분이 적용되었습니다.',
+                                );
+                                
+                                Navigator.of(context).pop(sanitized);
+                              },
                               icon: const Icon(Icons.check),
                               label: const Text('배분 적용'),
                             ),
@@ -640,48 +667,6 @@ class _IncomeSplitScreenState extends State<IncomeSplitScreen> {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Scaffold(
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Expanded(
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.of(context).pushNamed(
-                    AppRoutes.incomeSplitStatus,
-                    arguments: {'accountName': _targetAccount},
-                  );
-                },
-                icon: const Icon(Icons.payments_outlined),
-                label: const Text('수입배분 상세'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  backgroundColor: Colors.blueAccent,
-                  foregroundColor: Colors.white,
-                  textStyle: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.of(context).pushNamed('/asset/dashboard');
-                },
-                icon: const Icon(Icons.account_balance_wallet),
-                label: const Text('자산'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  backgroundColor: Colors.teal,
-                  foregroundColor: Colors.white,
-                  textStyle: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
       appBar: AppBar(
         title: const Text('수입 배분 설정'),
         actions: [
@@ -690,31 +675,62 @@ class _IncomeSplitScreenState extends State<IncomeSplitScreen> {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                IconButton.filled(
-                  onPressed: _isValid ? _save : null,
-                  tooltip: '저장',
-                  style: IconButton.styleFrom(
-                    backgroundColor: _isValid
-                        ? scheme.primary
-                        : scheme.surfaceContainerHighest,
-                    foregroundColor: _isValid
-                        ? scheme.onPrimary
-                        : scheme.onSurfaceVariant,
-                  ),
-                  icon: const Icon(Icons.save_outlined),
-                ),
-                Positioned.fill(
-                  child: TextButton(
-                    onPressed: _isValid ? _save : null,
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      foregroundColor: Colors.transparent,
+                PopupMenuButton<String>(
+                  icon: const Icon(Icons.more_vert),
+                  onSelected: (value) {
+                    if (value == 'detail') {
+                      Navigator.of(context).pushNamed(
+                        AppRoutes.incomeSplitStatus,
+                        arguments: {'accountName': _targetAccount},
+                      );
+                    } else if (value == 'asset') {
+                      Navigator.of(context).pushNamed('/asset/dashboard');
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(
+                      value: 'detail',
+                      child: Row(
+                        children: [
+                          Icon(Icons.payments_outlined, size: 20),
+                          SizedBox(width: 8),
+                          Text('수입배분 상세'),
+                        ],
+                      ),
                     ),
-                    child: const Text(
-                      '저장',
-                      style: TextStyle(color: Colors.transparent),
+                    const PopupMenuItem(
+                      value: 'asset',
+                      child: Row(
+                        children: [
+                          Icon(Icons.account_balance_wallet, size: 20),
+                          SizedBox(width: 8),
+                          Text('자산'),
+                        ],
+                      ),
                     ),
-                  ),
+                    const PopupMenuDivider(),
+                    PopupMenuItem(
+                      value: 'save',
+                      enabled: _isValid,
+                      onTap: _isValid ? _save : null,
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.save_outlined,
+                            size: 20,
+                            color: _isValid ? null : Colors.grey,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '저장',
+                            style: TextStyle(
+                              color: _isValid ? null : Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -722,7 +738,7 @@ class _IncomeSplitScreenState extends State<IncomeSplitScreen> {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -795,13 +811,16 @@ class _IncomeSplitScreenState extends State<IncomeSplitScreen> {
               label: '💰 총 수입',
               hint: '이번 달 총 수입을 입력하세요',
               controller: _incomeController,
+              focusNode: _incomeFocusNode,
               keyboardType: TextInputType.number,
+              textInputAction: TextInputAction.next,
               inputFormatters: [
                 FilteringTextInputFormatter.digitsOnly,
                 _CurrencyInputFormatter(),
               ],
               suffixText: '원',
               prefixIcon: const Icon(Icons.attach_money),
+              onFieldSubmitted: (_) => FocusScope.of(context).requestFocus(_savingsFocusNode),
             ),
             // If total income is not set but split amounts exist,
             // surface a helper text below the field.
@@ -829,26 +848,32 @@ class _IncomeSplitScreenState extends State<IncomeSplitScreen> {
               label: '🌱 예금 (예금)',
               hint: '은행 예금할 금액',
               controller: _savingsController,
+              focusNode: _savingsFocusNode,
               keyboardType: TextInputType.number,
+              textInputAction: TextInputAction.next,
               inputFormatters: [
                 FilteringTextInputFormatter.digitsOnly,
                 _CurrencyInputFormatter(),
               ],
               suffixText: '원',
               prefixIcon: const Icon(Icons.savings),
+              onFieldSubmitted: (_) => FocusScope.of(context).requestFocus(_budgetFocusNode),
             ),
             const SizedBox(height: 12),
             SmartInputField(
               label: '💳 지출 예산',
               hint: '생활비로 쓸 금액',
               controller: _budgetController,
+              focusNode: _budgetFocusNode,
               keyboardType: TextInputType.number,
+              textInputAction: TextInputAction.next,
               inputFormatters: [
                 FilteringTextInputFormatter.digitsOnly,
                 _CurrencyInputFormatter(),
               ],
               suffixText: '원',
               prefixIcon: const Icon(Icons.shopping_cart),
+              onFieldSubmitted: (_) => FocusScope.of(context).requestFocus(_emergencyFocusNode),
             ),
             const SizedBox(height: 12),
             const SizedBox(height: 12),
@@ -856,26 +881,32 @@ class _IncomeSplitScreenState extends State<IncomeSplitScreen> {
               label: '🚨 비상금',
               hint: '비상시를 위한 금액',
               controller: _emergencyController,
+              focusNode: _emergencyFocusNode,
               keyboardType: TextInputType.number,
+              textInputAction: TextInputAction.next,
               inputFormatters: [
                 FilteringTextInputFormatter.digitsOnly,
                 _CurrencyInputFormatter(),
               ],
               suffixText: '원',
               prefixIcon: const Icon(Icons.warning_amber),
+              onFieldSubmitted: (_) => FocusScope.of(context).requestFocus(_assetFocusNode),
             ),
             const SizedBox(height: 12),
             SmartInputField(
               label: '🏦 자산 이동',
               hint: '자산으로 옮길 금액',
               controller: _assetController,
+              focusNode: _assetFocusNode,
               keyboardType: TextInputType.number,
+              textInputAction: TextInputAction.done,
               inputFormatters: [
                 FilteringTextInputFormatter.digitsOnly,
                 _CurrencyInputFormatter(),
               ],
               suffixText: '원',
               prefixIcon: const Icon(Icons.account_balance_wallet),
+              onFieldSubmitted: (_) => FocusScope.of(context).unfocus(),
             ),
             const SizedBox(height: 6),
             Padding(
@@ -1395,6 +1426,9 @@ class _IncomeSplitScreenState extends State<IncomeSplitScreen> {
                                   controller: controller,
                                   focusNode: focusNode,
                                   keyboardType: TextInputType.number,
+                                  textInputAction: index < categories.length - 1
+                                      ? TextInputAction.next
+                                      : TextInputAction.done,
                                   inputFormatters: [
                                     FilteringTextInputFormatter.digitsOnly,
                                     _CurrencyInputFormatter(),
@@ -1403,6 +1437,15 @@ class _IncomeSplitScreenState extends State<IncomeSplitScreen> {
                                   suffixText: '원',
                                   onChanged: (value) =>
                                       handleValueChange(category, value),
+                                  onFieldSubmitted: (_) {
+                                    if (index < categories.length - 1) {
+                                      FocusScope.of(context).requestFocus(
+                                        focusNodes[categories[index + 1]],
+                                      );
+                                    } else {
+                                      FocusScope.of(context).unfocus();
+                                    }
+                                  },
                                 ),
                               ],
                             );

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:smart_ledger/models/food_expiry_item.dart';
+import 'package:smart_ledger/models/consumable_inventory_item.dart';
 import 'package:smart_ledger/utils/ingredients_recommendation_utils.dart';
 
 void main() {
@@ -92,12 +92,13 @@ void main() {
     group('getPriceValueScore', () {
       test('returns score between 0 and 100', () {
         final now = DateTime.now();
-        final item = FoodExpiryItem(
+        final item = ConsumableInventoryItem(
           id: '1',
           name: '테스트',
+          createdAt: now,
+          lastUpdated: now,
           purchaseDate: now,
           expiryDate: now.add(const Duration(days: 15)),
-          createdAt: now,
           price: 5000.0,
         );
         final score = IngredientsRecommendationUtils.getPriceValueScore(item);
@@ -107,20 +108,22 @@ void main() {
 
       test('higher score for items with more days left', () {
         final now = DateTime.now();
-        final longExpiry = FoodExpiryItem(
+        final longExpiry = ConsumableInventoryItem(
           id: '1',
           name: '테스트',
+          createdAt: now,
+          lastUpdated: now,
           purchaseDate: now,
           expiryDate: now.add(const Duration(days: 30)),
-          createdAt: now,
           price: 5000.0,
         );
-        final shortExpiry = FoodExpiryItem(
+        final shortExpiry = ConsumableInventoryItem(
           id: '2',
           name: '테스트',
+          createdAt: now,
+          lastUpdated: now,
           purchaseDate: now,
           expiryDate: now.add(const Duration(days: 5)),
-          createdAt: now,
           price: 5000.0,
         );
 
@@ -136,20 +139,22 @@ void main() {
 
       test('higher score for lower price', () {
         final now = DateTime.now();
-        final lowPrice = FoodExpiryItem(
+        final lowPrice = ConsumableInventoryItem(
           id: '1',
           name: '테스트',
+          createdAt: now,
+          lastUpdated: now,
           purchaseDate: now,
           expiryDate: now.add(const Duration(days: 15)),
-          createdAt: now,
           price: 1000.0,
         );
-        final highPrice = FoodExpiryItem(
+        final highPrice = ConsumableInventoryItem(
           id: '2',
           name: '테스트',
+          createdAt: now,
+          lastUpdated: now,
           purchaseDate: now,
           expiryDate: now.add(const Duration(days: 15)),
-          createdAt: now,
           price: 9000.0,
         );
 
@@ -172,20 +177,22 @@ void main() {
 
       test('sorts by expiry date first', () {
         final now = DateTime.now();
-        final items = <FoodExpiryItem>[
-          FoodExpiryItem(
+        final items = <ConsumableInventoryItem>[
+          ConsumableInventoryItem(
             id: '1',
             name: '나중',
+            createdAt: now,
+            lastUpdated: now,
             purchaseDate: now,
             expiryDate: now.add(const Duration(days: 10)),
-            createdAt: now,
           ),
-          FoodExpiryItem(
+          ConsumableInventoryItem(
             id: '2',
             name: '빠름',
+            createdAt: now,
+            lastUpdated: now,
             purchaseDate: now,
             expiryDate: now.add(const Duration(days: 2)),
-            createdAt: now,
           ),
         ];
 
@@ -197,14 +204,15 @@ void main() {
 
       test('respects limit parameter', () {
         final now = DateTime.now();
-        final items = List<FoodExpiryItem>.generate(
+        final items = List<ConsumableInventoryItem>.generate(
           15,
-          (i) => FoodExpiryItem(
+          (i) => ConsumableInventoryItem(
             id: '$i',
             name: '아이템$i',
+            createdAt: now,
+            lastUpdated: now,
             purchaseDate: now,
             expiryDate: now.add(Duration(days: i)),
-            createdAt: now,
           ),
         );
 

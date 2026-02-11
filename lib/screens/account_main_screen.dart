@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'memo_stats_screen.dart';
+import '../navigation/app_routes.dart';
 import '../services/user_pref_service.dart';
 import '../theme/app_colors.dart';
 import '../utils/icon_catalog.dart';
@@ -64,7 +65,7 @@ class _AccountMainScreenState extends State<AccountMainScreen>
       builder: (context) => AlertDialog(
         title: const Text('메인 페이지 초기화'),
         content: const Text(
-          '메인 페이지(1~15) 구성과 아이콘 배치가 모두 초기화됩니다.\n'
+          '메인 페이지(0~14) 구성과 아이콘 배치가 모두 초기화됩니다.\n'
           '※ 거래/자산 등 데이터는 삭제되지 않습니다. (배치만 초기화)\n\n'
           '계속할까요?',
         ),
@@ -155,7 +156,7 @@ class _AccountMainScreenState extends State<AccountMainScreen>
               ...List.generate(total, (index) {
                 final label = _pageNameLabels[index];
                 return ListTile(
-                  title: Text('${index + 1}. $label'),
+                  title: Text(label),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {
                     Navigator.of(sheetContext).pop();
@@ -180,7 +181,7 @@ class _AccountMainScreenState extends State<AccountMainScreen>
   Future<void> _normalizeReservedPageIconSlotsBestEffort() async {
     // Fire-and-forget. Avoid blocking first paint.
     try {
-      // Asset page policy: asset icons are fixed to the asset page (page 4).
+      // Asset page policy: asset icons are fixed to index 4.
       // Safety: never drops icons; if targets are full, leaves as-is.
       const enforceAssetPlacement = true;
 
@@ -203,9 +204,9 @@ class _AccountMainScreenState extends State<AccountMainScreen>
       // Policy pages (0-based main page indices).
       // NOTE: These are aligned with MainFeatureIconCatalog ordering.
       const statsTargetPages = <int>[3];
-      const assetTargetPages = <int>[5];
-      const rootTargetPages = <int>[6];
-      const settingsTargetPages = <int>[8];
+      const assetTargetPages = <int>[4];
+      const rootTargetPages = <int>[5];
+      const settingsTargetPages = <int>[6];
 
       List<int> targetsForId(String id) {
         if (settingsIds.contains(id)) return settingsTargetPages;
@@ -524,17 +525,6 @@ class _AccountMainScreenState extends State<AccountMainScreen>
                   ),
                 ),
               ),
-
-            // DEBUG: 그리드 오버레이 (프로토타입/개발 모드 전용, 출시 전 자동 제거됨)
-            if (kDebugMode)
-              Positioned.fill(
-                child: IgnorePointer(
-                  child: GridPaper(
-                    color: Colors.blue.withValues(alpha: 0.15),
-                    interval: 50,
-                  ),
-                ),
-              ),
           ],
         );
       },
@@ -571,10 +561,7 @@ class _IconGridPage extends StatefulWidget {
 }
 
 class _IconGridPageState extends State<_IconGridPage> {
-  static const String _shortcutSettingsPage10Id = 'shortcut_settings_page10';
   static const String _voiceShortcutsIconId = 'voice_shortcuts';
-  static const int _shortcutSettingsAllowedPageIndex = 1; // 2nd page (1-based)
-  static const int _settingsReservedPageIndex = 5; // 6th page (1-based)
   bool _isEditMode = false;
   bool _hideEmptySlots = true;
   List<String> _iconOrder = [];
@@ -654,6 +641,9 @@ class _IconGridPageState extends State<_IconGridPage> {
     if (moduleKey == null) return const <MainFeatureIcon>[];
 
     final icons = MainFeatureIconCatalog.iconsForModuleKey(moduleKey);
+    
+    debugPrint('📍 Page $pageIndex: moduleKey=$moduleKey, icons=${icons.length}');
+    
     if (targetPages.length <= 1) return icons;
 
     final indexInGroup = targetPages.indexOf(pageIndex);
@@ -703,9 +693,9 @@ class _IconGridPageState extends State<_IconGridPage> {
   // --- Slot-based grid API ---
   static const int _defaultSlotCount = 24; // 4x6 (24 slots)
 
-  // Reserved page policy (0-based indices):
-  // 3: stats (page 4), 4: asset (page 5),
-  // 5: root (page 6), 6: settings (page 7)
+  // Reserved page policy (인덱스 기준, UI 표시는 +1):
+  // index 3: stats, index 4: asset,
+  // index 5: root, index 6: settings
   static const Set<int> _statsReservedPages = <int>{3};
   static const Set<int> _assetReservedPages = <int>{4};
   static const Set<int> _rootReservedPages = <int>{5};
@@ -767,11 +757,6 @@ class _IconGridPageState extends State<_IconGridPage> {
       return pageIndex == ScreenSaverIds.shortcutAllowedMainPageIndex;
     }
 
-    // Navigation shortcut: only placeable on 2nd page.
-    if (iconId == _shortcutSettingsPage10Id) {
-      return pageIndex == _shortcutSettingsAllowedPageIndex;
-    }
-
     // Hard restrictions: settings and root are dedicated.
     if (_isSettingsOnlyPage(pageIndex)) {
       return _settingsIconIds.contains(iconId);
@@ -783,7 +768,7 @@ class _IconGridPageState extends State<_IconGridPage> {
     }
     if (_rootIconIds.contains(iconId)) return false;
 
-    // Asset fixed policy: asset icons must live on asset pages (6~7).
+    // Asset fixed policy: asset icons must live on index 4.
     if (_assetIconIds.contains(iconId)) {
       return _isAssetReservedPage(pageIndex);
     }
@@ -991,10 +976,6 @@ class _IconGridPageState extends State<_IconGridPage> {
       );
       return;
     }
-    if (icon.id == _shortcutSettingsPage10Id) {
-      widget.onRequestJumpToPage?.call(_settingsReservedPageIndex);
-      return;
-    }
     if (icon.id == 'accountStatsMemoSearch') {
       MemoSearchUtils.openMemoOnlySearch(
         context,
@@ -1010,24 +991,39 @@ class _IconGridPageState extends State<_IconGridPage> {
       );
       return;
     }
-    if (icon.routeName == null) return;
+    if (icon.routeName == null) {
+      debugPrint('🔴 Icon ${icon.id} has no routeName');
+      return;
+    }
 
     final request = IconLaunchUtils.buildRequest(
       routeName: icon.routeName!,
       accountName: widget.accountName,
     );
-    if (request == null) return;
+    if (request == null) {
+      debugPrint('🔴 Failed to build request for route: ${icon.routeName}');
+      return;
+    }
 
-    // debug prints removed (reverting temporary diagnostics)
+    debugPrint('🟢 Navigating to: ${request.routeName} with args: ${request.arguments}');
 
     Navigator.of(
       context,
-    ).pushNamed(request.routeName, arguments: request.arguments);
+    ).pushNamed(request.routeName, arguments: request.arguments).catchError((error) {
+      debugPrint('🔴 Navigation error: $error');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('화면 이동 실패: $error')),
+        );
+      }
+      return null;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
 
     Widget buildGrid() {
       return LayoutBuilder(
@@ -1142,6 +1138,51 @@ class _IconGridPageState extends State<_IconGridPage> {
           padding: const EdgeInsets.only(top: 70),
           child: Column(
             children: [
+              if (widget.pageIndex == 4 &&
+                  widget.accountName.toLowerCase() == 'root')
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  child: Card(
+                    color: scheme.surfaceContainerLow,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: BorderSide(
+                        color: scheme.primary.withValues(alpha: 0.1),
+                      ),
+                    ),
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 8,
+                      ),
+                      leading: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: scheme.primary.withValues(alpha: 0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          IconCatalog.insightsOutlined,
+                          color: scheme.primary,
+                        ),
+                      ),
+                      title: Text(
+                        'CEO 비서 대시보드',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      subtitle: const Text('전략 지표 및 복구 계획 보기'),
+                      trailing: Icon(
+                        Icons.chevron_right,
+                        color: scheme.onSurfaceVariant,
+                      ),
+                      onTap: () => Navigator.of(
+                        context,
+                      ).pushNamed(AppRoutes.ceoAssistant),
+                    ),
+                  ),
+                ),
               Expanded(child: buildGrid()),
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -1250,31 +1291,31 @@ class _PageQuickMenuButton extends StatelessWidget {
             const PopupMenuDivider(),
             const PopupMenuItem<_QuickMenuAction>(
               value: _QuickMenuAction.jumpPage1,
-              child: Text('1. 대시보드'),
+              child: Text('Index 0: 대시보드'),
             ),
             const PopupMenuItem<_QuickMenuAction>(
               value: _QuickMenuAction.jumpPage2,
-              child: Text('2. 거래'),
+              child: Text('Index 1: 거래'),
             ),
             const PopupMenuItem<_QuickMenuAction>(
               value: _QuickMenuAction.jumpPage3,
-              child: Text('3. 수입'),
+              child: Text('Index 2: 수입'),
             ),
             const PopupMenuItem<_QuickMenuAction>(
               value: _QuickMenuAction.jumpPage4,
-              child: Text('4. 통계'),
+              child: Text('Index 3: 통계'),
             ),
             const PopupMenuItem<_QuickMenuAction>(
               value: _QuickMenuAction.jumpPage5,
-              child: Text('5. 자산'),
+              child: Text('Index 4: 자산'),
             ),
             const PopupMenuItem<_QuickMenuAction>(
               value: _QuickMenuAction.jumpPage6,
-              child: Text('6. ROOT'),
+              child: Text('Index 5: ROOT'),
             ),
             const PopupMenuItem<_QuickMenuAction>(
               value: _QuickMenuAction.jumpPage7,
-              child: Text('7. 설정'),
+              child: Text('Index 6: 설정'),
             ),
           ],
         ];

@@ -72,7 +72,7 @@ class _AssetRouteAuthGateState extends State<AssetRouteAuthGate> {
       return;
     }
 
-    final enabled = prefs.getBool(PrefKeys.biometricAuthEnabled) ?? true;
+    final enabled = prefs.getBool(PrefKeys.biometricAuthEnabled) ?? false;
     final sessionActive = _authService.isSessionActive(
       prefs.getInt(PrefKeys.assetAuthSessionUntilMs),
     );
@@ -102,8 +102,8 @@ class _AssetRouteAuthGateState extends State<AssetRouteAuthGate> {
       if (!mounted) return;
       setState(() => _authorized = true);
     } catch (_) {
-      if (!mounted) return;
-      Navigator.of(context).maybePop();
+      // Do not pop automatically. Let the user see the "Locked" state
+      // with a manual unlock button.
     }
   }
 
@@ -228,15 +228,63 @@ class _AssetRouteAuthGateState extends State<AssetRouteAuthGate> {
     }
 
     if (!_authorized) {
-      return const Scaffold(
+      final theme = Theme.of(context);
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('보안 잠금'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => Navigator.of(context).maybePop(),
+          ),
+        ),
         body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.lock_outline, size: 48),
-              SizedBox(height: 12),
-              Text('인증 중...'),
-            ],
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.lock_outline,
+                  size: 64,
+                  color: theme.colorScheme.secondary,
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  '자산 정보 보호',
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  '이 항목에 접근하려면 인증이 필요합니다.',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+                FilledButton.icon(
+                  onPressed: () async {
+                    final prefs = await SharedPreferences.getInstance();
+                    _promptAndAuthorize(prefs);
+                  },
+                  icon: const Icon(Icons.lock_open),
+                  label: const Text('인증하기'),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32,
+                      vertical: 16,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextButton(
+                  onPressed: () => Navigator.of(context).maybePop(),
+                  child: const Text('닫기'),
+                ),
+              ],
+            ),
           ),
         ),
       );

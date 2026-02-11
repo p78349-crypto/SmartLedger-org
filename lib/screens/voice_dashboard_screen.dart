@@ -10,7 +10,6 @@ import '../models/shopping_cart_item.dart';
 import '../services/budget_service.dart';
 import '../services/fixed_cost_service.dart';
 import '../services/consumable_inventory_service.dart';
-import '../services/recipe_service.dart';
 import '../services/transaction_service.dart';
 import '../services/user_pref_service.dart';
 import '../services/category_keyword_service.dart';
@@ -2043,9 +2042,7 @@ class _VoiceDashboardScreenState extends State<VoiceDashboardScreen>
       if (matches.isNotEmpty) {
         final item = matches.first;
         final expiryDate = item.expiryDate;
-        final daysLeft = expiryDate == null
-            ? null
-            : expiryDate.difference(DateTime.now()).inDays;
+        final daysLeft = expiryDate?.difference(DateTime.now()).inDays;
         final quantityStr = '${item.currentStock}${item.unit}';
 
         return VoiceCommandResult(

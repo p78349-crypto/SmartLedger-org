@@ -372,40 +372,6 @@ class _PeriodStatsScreenState extends State<PeriodStatsScreen> {
     );
   }
 
-  Widget _statIconCard({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    final theme = Theme.of(context);
-    return Expanded(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: theme.colorScheme.outline.withAlpha(60)),
-          ),
-          child: Column(
-            children: [
-              Icon(icon, size: 28, color: theme.colorScheme.primary),
-              const SizedBox(height: 6),
-              Text(
-                label,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   void _showMiscPolicyDialog(BuildContext context) {
     showDialog<void>(
       context: context,
@@ -503,34 +469,6 @@ class _PeriodStatsScreenState extends State<PeriodStatsScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            // Top small icons for quick access to two stats (accessibility)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Row(
-                children: [
-                  _statIconCard(
-                    icon: IconCatalog.autoGraph,
-                    label: '절약 포인트',
-                    onTap: () => _showMiscPolicyDialog(context),
-                  ),
-                  const SizedBox(width: 8),
-                  _statIconCard(
-                    icon: IconCatalog.barChart,
-                    label: '카테고리 분석',
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => CategoryStatsScreen(
-                          accountName: widget.accountName,
-                          initialDate: _anchorDay,
-                          periodType: widget.view,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 8),
             Expanded(child: body),
           ],
         ),
@@ -538,7 +476,7 @@ class _PeriodStatsScreenState extends State<PeriodStatsScreen> {
           // Moved down slightly as requested
           offset: const Offset(0, 5),
           child: SizedBox(
-            width: 160,
+            width: 232,
             height: 120,
             child: Stack(
               alignment: Alignment.bottomRight,
@@ -599,6 +537,21 @@ class _PeriodStatsScreenState extends State<PeriodStatsScreen> {
                     elevation: 4,
                     child: Icon(
                       Icons.bar_chart,
+                      size: 24,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  right: 144,
+                  bottom: 0,
+                  child: FloatingActionButton(
+                    heroTag: 'period_stats_misc',
+                    onPressed: () => _showMiscPolicyDialog(context),
+                    backgroundColor: Colors.white,
+                    elevation: 4,
+                    child: Icon(
+                      IconCatalog.autoGraph,
                       size: 24,
                       color: theme.colorScheme.primary,
                     ),

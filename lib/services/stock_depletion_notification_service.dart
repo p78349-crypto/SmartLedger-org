@@ -44,7 +44,7 @@ class StockDepletionNotificationService {
     const settings = InitializationSettings(android: android, iOS: ios);
 
     await _plugin.initialize(
-      settings,
+      settings: settings,
       onDidReceiveNotificationResponse: _onNotificationResponse,
     );
 
@@ -202,19 +202,19 @@ class StockDepletionNotificationService {
     final id = _stableNotificationId(item.id);
 
     if (!enabled) {
-      await _plugin.cancel(id);
+      await _plugin.cancel(id: id);
       return;
     }
 
     final ok = await requestPermissionIfNeeded();
     if (!ok) {
-      await _plugin.cancel(id);
+      await _plugin.cancel(id: id);
       return;
     }
 
     final expectedDaysLeft = _calculateExpectedDepletionDays(item);
     if (expectedDaysLeft == null) {
-      await _plugin.cancel(id);
+      await _plugin.cancel(id: id);
       return;
     }
 
@@ -261,27 +261,23 @@ class StockDepletionNotificationService {
 
     try {
       await _plugin.zonedSchedule(
-        id,
-        title,
-        body,
-        tz.TZDateTime.from(notifyAt, tz.local),
-        _details(),
+        id: id,
+        title: title,
+        body: body,
+        scheduledDate: tz.TZDateTime.from(notifyAt, tz.local),
+        notificationDetails: _details(),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
         payload: payload,
       );
     } on PlatformException catch (e) {
       if (e.code == 'exact_alarms_not_permitted') {
         await _plugin.zonedSchedule(
-          id,
-          title,
-          body,
-          tz.TZDateTime.from(notifyAt, tz.local),
-          _details(),
+          id: id,
+          title: title,
+          body: body,
+          scheduledDate: tz.TZDateTime.from(notifyAt, tz.local),
+          notificationDetails: _details(),
           androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-          uiLocalNotificationDateInterpretation:
-              UILocalNotificationDateInterpretation.absoluteTime,
           payload: payload,
         );
       } else {

@@ -19,6 +19,7 @@ import '../services/recent_input_service.dart';
 import '../services/transaction_service.dart';
 import '../services/user_pref_service.dart';
 import '../services/category_keyword_service.dart';
+import '../services/aicore_gemini_service.dart';
 import '../theme/app_theme_seed_controller.dart';
 import '../utils/category_definitions.dart';
 import '../utils/currency_formatter.dart';
@@ -36,7 +37,7 @@ import '../utils/ingredient_health_score_utils.dart';
 import '../utils/cart_transaction_prefill.dart';
 
 // 최근 결제수단/메모 저장 키 및 최대 개수
-const String _recentDescriptionsKey = 'recent_descriptions';
+const String _recentDescriptionsBaseKey = 'recent_descriptions';
 const String _recentPaymentsStorageBaseKey = 'recent_payments';
 const String _recentMemosStorageBaseKey = 'recent_memos';
 const int _defaultMaxRecentInputs = 30;
@@ -94,15 +95,6 @@ class _TransactionAddScreenState extends State<TransactionAddScreen> {
         unawaited(_formStateKey.currentState?.triggerAutoSubmit());
       });
     }
-
-    if (widget.openReceiptScannerOnStart) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        // No OCR/auto camera start is implemented here yet.
-        // This is a safe hook point for assistant-triggered flows.
-        SnackbarUtils.showInfo(context, '영수증 스캔을 시작하려면 영수증/카메라 버튼을 눌러주세요.');
-      });
-    }
   }
 
   @override
@@ -114,7 +106,7 @@ class _TransactionAddScreenState extends State<TransactionAddScreen> {
         widget.initialTransaction?.type == TransactionType.income;
     final titlePrefix = isIncomeTemplate
         ? (isEditing ? '수입 수정' : '수입')
-        : (isEditing ? '거래 수정' : '1-지출입력');
+        : (isEditing ? '거래 수정' : '지출입력');
 
     return PopScope(
       canPop: false,
@@ -332,16 +324,23 @@ class _NO1FormState extends State<NO1Form> {
   List<String> _recentPayments = [];
   List<String> _recentMemos = [];
 
+  String get _recentDescriptionsKey {
+    if (_selectedType == TransactionType.income) {
+      return 'recent_descriptions_income_${widget.accountName}';
+    }
+    return _recentDescriptionsBaseKey;
+  }
+
   String get _recentPaymentsKey {
     // 수입 입력이면 별도 키 사용
-    if (widget.initialTransaction?.type == TransactionType.income) {
+    if (_selectedType == TransactionType.income) {
       return 'recent_payments_income_input_${widget.accountName}';
     }
     return _recentPaymentsStorageBaseKey;
   }
 
   String get _recentMemosKey {
-    if (widget.initialTransaction?.type == TransactionType.income) {
+    if (_selectedType == TransactionType.income) {
       return 'recent_memos_income_input_${widget.accountName}';
     }
     return _recentMemosStorageBaseKey;
@@ -388,6 +387,9 @@ class _NO1FormState extends State<NO1Form> {
     canRequestFocus: false,
     skipTraversal: true,
   );
+
+  final AICoreGeminiService _aicore = AICoreGeminiService();
+  bool _isAICoreModelLoading = false;
 
   TransactionType _selectedType = TransactionType.expense;
   SavingsAllocation _savingsAllocation = SavingsAllocation.assetIncrease;
@@ -646,6 +648,7 @@ class _NO1FormState extends State<NO1Form> {
     final initial = widget.initialTransaction;
     _transactionDate = initial?.date ?? DateTime.now();
     if (initial != null) {
+      _selectedType = initial.type;
       _qtyController.text = '1';
       _descController.text = initial.description;
       _qtyController.text = initial.quantity.toString();
@@ -694,7 +697,7 @@ class _NO1FormState extends State<NO1Form> {
         _showIncomeCategoryOptions = _selectedMainCategory != _defaultCategory;
       } else {
         _applyIncomeDefaultCategory();
-        _showIncomeCategoryOptions = false;
+        _showIncomeCategoryOptions = true; // Changed from false to true to show labels immediately
       }
     } else {
       _showIncomeCategoryOptions = true;
@@ -1242,13 +1245,22 @@ class _NO1FormState extends State<NO1Form> {
     if (_suppressAmountAutoUpdate) {
       return;
     }
+
     if (_selectedType != TransactionType.expense) {
       return;
     }
     final qtyText = _qtyController.text.trim();
-    final qty = qtyText.isEmpty ? 1 : int.tryParse(qtyText) ?? 1;
-    final unit = double.tryParse(_unitPriceController.text) ?? 0.0;
-    _amountController.text = (qty * unit).toStringAsFixed(0);
+    final qty = (qtyText.isEmpty || qtyText == '0')
+        ? 1
+        : int.tryParse(qtyText) ?? 1;
+    final unit =
+        double.tryParse(_unitPriceController.text.replaceAll(',', '')) ?? 0.0;
+    final total = qty * unit;
+    if (total == total.roundToDouble()) {
+      _amountController.text = total.toStringAsFixed(0);
+    } else {
+      _amountController.text = total.toStringAsFixed(2);
+    }
   }
 
   void _applyIncomeDefaultCategory() {
@@ -1992,6 +2004,7 @@ class _NO1FormState extends State<NO1Form> {
       ),
       SizedBox(height: spacing),
       _buildMemoField(onSubmitted: _saveTransaction),
+      const SizedBox(height: 12),
       SizedBox(height: isLandscape ? 12 : 24),
       _buildCategorySection(),
     ];
@@ -2169,8 +2182,8 @@ class _NO1FormState extends State<NO1Form> {
 
     return [
       _buildDescriptionInput(
-        labelText: '내용',
-        emptyMessage: '내용을 입력하세요.',
+        labelText: '수입명',
+        emptyMessage: '수입명을 입력하세요.',
         enableHistory: true,
         onFieldSubmitted: (_) => _amountFocusNode.requestFocus(),
       ),
@@ -2189,8 +2202,8 @@ class _NO1FormState extends State<NO1Form> {
                 textInputAction: TextInputAction.next,
                 onFieldSubmitted: (_) => _paymentFocusNode.requestFocus(),
                 validator: (value) =>
-                    _validatePositiveAmount(value, '금액을 입력하세요.'),
-                label: '금액 (수동 입력)',
+                    _validatePositiveAmount(value, '수입 금액을 입력하세요.'),
+                label: '수입 금액',
               ),
             ),
           ),
@@ -2203,13 +2216,14 @@ class _NO1FormState extends State<NO1Form> {
               controller: _paymentController,
               onSubmitted: () =>
                   FocusScope.of(context).requestFocus(_memoFocusNode),
-              labelText: '결제수단',
+              labelText: '입금수단/계좌',
             ),
           ),
         ],
       ),
       SizedBox(height: spacing),
       _buildMemoField(onSubmitted: _saveTransaction),
+      const SizedBox(height: 12),
       SizedBox(height: isLandscape ? 12 : 24),
       _buildCategorySection(),
     ];
@@ -2267,6 +2281,7 @@ class _NO1FormState extends State<NO1Form> {
       ),
       SizedBox(height: spacing),
       _buildMemoField(onSubmitted: _saveTransaction),
+      const SizedBox(height: 12),
       SizedBox(height: isLandscape ? 12 : 24),
       _buildCategorySection(),
     ];
@@ -2372,8 +2387,8 @@ class _NO1FormState extends State<NO1Form> {
           ),
         ],
       ),
-      const SizedBox(height: 12),
       _buildMemoField(onSubmitted: _saveTransaction),
+      const SizedBox(height: 12),
       const SizedBox(height: 12),
       _buildCategorySection(),
     ];
@@ -2590,6 +2605,52 @@ class _NO1FormState extends State<NO1Form> {
     );
   }
 
+  Future<void> _predictCategoryWithAI() async {
+    final text = _descController.text.trim();
+    if (text.isEmpty) {
+      SnackbarUtils.showInfo(context, '상품명을 먼저 입력해주세요.');
+      return;
+    }
+
+    setState(() {
+      _isAICoreModelLoading = true;
+    });
+
+    try {
+      final isReady = await _aicore.isAvailable();
+      if (!isReady) {
+        if (mounted) {
+          SnackbarUtils.showWarning(context, '온디바이스 AI 모델을 불러올 수 없습니다. 모델 파일 설치 확인이 필요합니다.');
+        }
+        return;
+      }
+
+      final candidates = _selectedType == TransactionType.income
+          ? IncomeCategoryDefinitions.mainCategories
+          : CategoryDefinitions.mainCategories;
+
+      final result = await _aicore.predictCategory(text, candidateCategories: candidates);
+
+      if (result != null && mounted) {
+        setState(() {
+          _selectedMainCategory = result;
+          _userPickedCategory = true;
+        });
+        SnackbarUtils.showSuccess(context, 'AI 분류 결과: $result');
+      } else {
+        if (mounted) {
+          SnackbarUtils.showInfo(context, '분류 결과를 찾지 못했습니다.');
+        }
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isAICoreModelLoading = false;
+        });
+      }
+    }
+  }
+
   Widget _buildDescriptionInput({
     required String labelText,
     required String emptyMessage,
@@ -2614,16 +2675,34 @@ class _NO1FormState extends State<NO1Form> {
         suffixIcon: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            IconButton(
-              tooltip: '건강도 분석',
-              icon: Icon(
-                Icons.health_and_safety,
-                size: 20,
-                color: Theme.of(context).iconTheme.color,
+            if (_isAICoreModelLoading)
+              const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            else
+              IconButton(
+                tooltip: 'AI 카테고리 분류',
+                icon: Icon(
+                  Icons.auto_awesome,
+                  size: 20,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                onPressed: _predictCategoryWithAI,
+                padding: EdgeInsets.zero,
               ),
-              onPressed: _showHealthAnalysis,
-              padding: EdgeInsets.zero,
-            ),
+            if (_selectedType == TransactionType.expense)
+              IconButton(
+                tooltip: '건강도 분석',
+                icon: Icon(
+                  Icons.health_and_safety,
+                  size: 20,
+                  color: Theme.of(context).iconTheme.color,
+                ),
+                onPressed: _showHealthAnalysis,
+                padding: EdgeInsets.zero,
+              ),
             if (enableHistory || customHistoryAction != null)
               IconButton(
                 tooltip: '입력내용 불러오기',
@@ -2645,7 +2724,7 @@ class _NO1FormState extends State<NO1Form> {
                         _handleDescriptionChanged(v);
                         setState(() {});
                       },
-                      title: '상품명 입력내용 불러오기',
+                      title: '$labelText 입력내용 불러오기',
                     ),
                 padding: EdgeInsets.zero,
               ),

@@ -114,15 +114,27 @@ extension _AssetDashboardScreenUi on _AssetDashboardScreenState {
   }
 
   Widget _buildDashboardSummary(ThemeData theme) {
-    final summary = AssetManagementUtils.generateDashboardSummary(_assets);
-    return AssetUIBuilder.buildDashboardSummaryCard(
+    final summary =
+        AssetManagementUtils.generateDashboardSummary(_internalAssets);
+    return AssetUIWidgets.buildDashboardSummary(
       theme: theme,
       summary: summary,
+      onRefresh: _loadData,
+      onProjectClick: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => OneHundredMillionProjectScreen(
+              accountName: widget.accountName,
+            ),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildAssetCards(ThemeData theme) {
-    if (_assets.isEmpty) {
+    if (_internalAssets.isEmpty) {
       return Padding(
         padding: const EdgeInsets.all(16),
         child: Center(
@@ -157,7 +169,7 @@ extension _AssetDashboardScreenUi on _AssetDashboardScreenState {
             ),
           ),
           const SizedBox(height: 12),
-          ..._assets.map((asset) => _buildAssetCard(asset, theme)),
+          ..._internalAssets.map((asset) => _buildAssetCard(asset, theme)),
         ],
       ),
     );
@@ -165,7 +177,7 @@ extension _AssetDashboardScreenUi on _AssetDashboardScreenState {
 
   Widget _buildAssetCard(Asset asset, ThemeData theme) {
     final cardInfo = AssetManagementUtils.generateAssetCardInfo(asset);
-    return AssetUIBuilder.buildAssetCard(
+    return AssetUIWidgets.buildAssetCard(
       theme: theme,
       cardInfo: cardInfo,
       onTap: () async {
@@ -247,7 +259,7 @@ extension _AssetDashboardScreenUi on _AssetDashboardScreenState {
   }
 
   Widget _buildTimelineItem(AssetMove move, ThemeData theme) {
-    return AssetUIBuilder.buildTimelineItem(theme: theme, move: move);
+    return AssetUIWidgets.buildTimelineItem(theme: theme, move: move);
   }
 }
 

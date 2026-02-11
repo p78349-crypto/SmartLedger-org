@@ -428,44 +428,49 @@ class UserPrefService {
 
   static List<MainPageConfig> defaultMainPageConfigs() {
     // Provide a safe, repeatable default of 15 pages.
-    // These defaults are conservative: `page1` uses an empty name
-    // (legacy slot), others use simple labels.
+    // Module keys: Align with MainFeatureIconCatalog.iconsForModuleKey.
     return const <MainPageConfig>[
       MainPageConfig(
-        pageId: 'page1',
-        moduleKey: 'page1',
+        pageId: 'page0',
+        moduleKey: 'dashboard',
         pageType: 'icons',
-        name: '',
+        name: '대시보드',
+      ),
+      MainPageConfig(
+        pageId: 'page1',
+        moduleKey: 'purchase',
+        pageType: 'icons',
+        name: '요리/쇼핑/지출',
       ),
       MainPageConfig(
         pageId: 'page2',
-        moduleKey: 'page2',
+        moduleKey: 'income',
         pageType: 'icons',
-        name: '구매',
+        name: '수입',
       ),
       MainPageConfig(
         pageId: 'page3',
-        moduleKey: 'page3',
-        pageType: 'icons',
-        name: '기능',
-      ),
-      MainPageConfig(
-        pageId: 'page4',
-        moduleKey: 'page4',
+        moduleKey: 'stats',
         pageType: 'icons',
         name: '통계',
       ),
       MainPageConfig(
-        pageId: 'page5',
-        moduleKey: 'page5',
+        pageId: 'page4',
+        moduleKey: 'asset',
         pageType: 'icons',
         name: '자산',
       ),
       MainPageConfig(
-        pageId: 'page6',
-        moduleKey: 'page6',
+        pageId: 'page5',
+        moduleKey: 'root',
         pageType: 'icons',
         name: 'ROOT',
+      ),
+      MainPageConfig(
+        pageId: 'page6',
+        moduleKey: 'settings',
+        pageType: 'icons',
+        name: '설정',
       ),
       MainPageConfig(
         pageId: 'page7',
@@ -514,12 +519,6 @@ class UserPrefService {
         moduleKey: 'page14',
         pageType: 'icons',
         name: '페이지14',
-      ),
-      MainPageConfig(
-        pageId: 'page15',
-        moduleKey: 'page15',
-        pageType: 'icons',
-        name: '페이지15',
       ),
     ];
   }

@@ -54,7 +54,7 @@ class _FeatureIconsCatalogScreenState extends State<FeatureIconsCatalogScreen> {
   String _partLabelFor(BuildContext context, int pageIndex) {
     final locale = Localizations.localeOf(context);
     final key = '$pageIndex';
-    final fallback = 'Page ${pageIndex + 1}';
+    final fallback = 'Page $pageIndex';
     final ko = _partLabelsKo[key] ?? fallback;
     final en = _partLabelsEn[key] ?? fallback;
 

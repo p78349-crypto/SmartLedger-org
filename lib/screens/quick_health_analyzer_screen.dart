@@ -77,20 +77,38 @@ class _QuickHealthAnalyzerScreenState extends State<QuickHealthAnalyzerScreen> {
       appBar: AppBar(
         title: const Text('영수증 건강도 분석'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.scanner),
-            tooltip: '책스캔앱 OCR 연계',
-            onPressed: _launchBookScanApp,
-          ),
-          IconButton(
-            icon: const Icon(Icons.add),
-            tooltip: '재료 추가',
-            onPressed: _showCustomAnalyzer,
-          ),
-          IconButton(
-            icon: const Icon(Icons.info_outline),
-            tooltip: '도움말',
-            onPressed: _showHelp,
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            onSelected: (value) {
+              if (value == 'add') {
+                _showCustomAnalyzer();
+              } else if (value == 'help') {
+                _showHelp();
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'add',
+                child: Row(
+                  children: [
+                    Icon(Icons.add, size: 20),
+                    SizedBox(width: 8),
+                    Text('재료 추가'),
+                  ],
+                ),
+              ),
+              const PopupMenuDivider(),
+              const PopupMenuItem(
+                value: 'help',
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, size: 20),
+                    SizedBox(width: 8),
+                    Text('도움말'),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -378,56 +396,6 @@ class _QuickHealthAnalyzerScreenState extends State<QuickHealthAnalyzerScreen> {
       default:
         return Colors.grey;
     }
-  }
-
-  /// 책스캔앱 OCR 연계 호출
-  void _launchBookScanApp() {
-    // FUTURE: 책스캔앱 URL Scheme 연동 (앱 설치 시)
-    // 예: url_launcher로 'bookscan://ocr?source=smartledger&type=receipt'
-    // &return=healthAnalyzer' 호출
-    // 현재는 안내 다이얼로그만 표시
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.scanner, color: Colors.blue),
-            SizedBox(width: 8),
-            Text('책스캔앱 연계'),
-          ],
-        ),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('📱 책스캔 PDF 앱으로 영수증을 촬영하세요.'),
-            SizedBox(height: 12),
-            Text(
-              '🔍 OCR 처리 후 재료 목록을\n자동으로 SmartLedger로 보냅니다.',
-              style: TextStyle(fontSize: 12),
-            ),
-            SizedBox(height: 12),
-            Divider(),
-            SizedBox(height: 8),
-            Text(
-              '✅ 장점: ML Kit 없이도 정확한 OCR',
-              style: TextStyle(fontSize: 11, color: Colors.green),
-            ),
-            Text(
-              '✅ 장점: 앱 용량 최소화 (스토어 업로드 가능)',
-              style: TextStyle(fontSize: 11, color: Colors.green),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('확인'),
-          ),
-        ],
-      ),
-    );
   }
 
   void _showCustomAnalyzer() async {

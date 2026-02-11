@@ -103,19 +103,27 @@ class MainFeatureIconCatalog {
     }
 
     switch (moduleKey) {
-      case 'page1':
+      case 'dashboard':
+      case 'page0':
         return at(0);
       case 'purchase':
+      case 'page1':
+      case 'page2': // Legacy Purchase at index 1
         return at(1);
       case 'income':
+      case 'page3': // Legacy Income at index 2
         return at(2);
       case 'stats':
+      case 'page4': // Legacy Stats at index 3
         return at(3);
       case 'asset':
+      case 'page5': // Legacy Asset at index 4
         return at(4);
       case 'root':
+      case 'page6': // Legacy Root at index 5
         return at(5);
       case 'settings':
+      case 'page7': // Legacy Settings index
         return at(6);
       case 'reserved':
         return const [];
@@ -296,6 +304,13 @@ class MainFeatureIconCatalog {
             labelEn: 'Consumables',
             icon: Icons.cleaning_services,
             routeName: AppRoutes.householdConsumables,
+          ),
+          MainFeatureIcon(
+            id: 'household_quick_pick',
+            label: '식료품/생활용품 퀵픽',
+            labelEn: 'Quick Pick',
+            icon: Icons.playlist_add_check_circle,
+            routeName: AppRoutes.householdQuickPick,
           ),
           MainFeatureIcon(
             id: 'consumable_inventory',
@@ -495,6 +510,13 @@ class MainFeatureIconCatalog {
             routeName: AppRoutes.assetSimpleInput,
           ),
           MainFeatureIcon(
+            id: 'asset_input_detailed',
+            label: '자산 입력(상세)',
+            labelEn: 'Add Asset(Detailed)',
+            icon: IconCatalog.postAdd,
+            routeName: AppRoutes.assetDetailInput,
+          ),
+          MainFeatureIcon(
             id: 'asset_trending_up',
             label: '상승 자산',
             labelEn: 'Allocation',
@@ -507,6 +529,13 @@ class MainFeatureIconCatalog {
             labelEn: 'Assessment',
             icon: IconCatalog.assessment,
             routeName: AppRoutes.assetManagement,
+          ),
+          MainFeatureIcon(
+            id: 'asset_tab_entry',
+            label: '자산 관리(가계부)',
+            labelEn: 'Asset Ledger',
+            icon: IconCatalog.accountBalanceWallet,
+            routeName: AppRoutes.assetTab,
           ),
           MainFeatureIcon(
             id: 'icon_management_asset_entry',
@@ -547,6 +576,13 @@ class MainFeatureIconCatalog {
             labelEn: 'Month-end Close',
             icon: IconCatalog.eventAvailable,
             routeName: AppRoutes.rootMonthEnd,
+          ),
+          MainFeatureIcon(
+            id: 'root_ceo_assistant',
+            label: 'CEO 비서 대시보드',
+            labelEn: 'CEO Assistant',
+            icon: IconCatalog.insightsOutlined,
+            routeName: AppRoutes.ceoAssistant,
           ),
           MainFeatureIcon(
             id: 'root_screen_saver_settings',

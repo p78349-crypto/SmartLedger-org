@@ -1,36 +1,37 @@
-# Main Page Layout Policy (2025-12-30)
+# Main Page Layout Policy (2026-02-03)
 
 ## Overview
 This document defines the page identity and icon distribution for the main Smart Ledger icon grid pages.
+**All references use index-based notation (0-based) to match code implementation.**
 
-## Quick Reference: Pages 1-15 Identity
+## Quick Reference: Pages Identity (인덱스 기준)
 
-| UI Page | Code Index | Identity (한글) | Identity (EN) | Item Count | Status |
+| 인덱스 | UI 페이지 | Identity (한글) | Identity (EN) | Item Count | Status |
 |---------|----------|----------|----------|-----------|--------|
-| 1 | pages[0] | 대시보드 | Dashboard | 0 (dynamic) | Reserved |
-| 2 | pages[1] | 지출입력 | Expense Input | 5 | Active |
-| 3 | pages[2] | 수입 | Income | 4 | Active |
-| 4 | pages[3] | 통계 | Statistics | 12 | Active |
-| 5 | pages[4] | 자산 | Assets | 5 | Active |
-| 6 | pages[5] | ROOT | Root Management | 6 | Active |
-| 7 | pages[6] | 설정 | Settings | 8 | Active |
-| 8 | pages[7] | 예비 | Spare | 0 | Reserved |
-| 9 | pages[8] | 예비 | Spare | 0 | Reserved |
-| 10 | pages[9] | 예비 | Spare | 0 | Reserved |
-| 11 | pages[10] | 예비 | Spare | 0 | Reserved |
-| 12 | pages[11] | 예비 | Spare | 0 | Reserved |
-| 13 | pages[12] | 예비 | Spare | 0 | Reserved |
-| 14 | pages[13] | 예비 | Spare | 0 | Reserved |
-| 15 | pages[14] | 예비 | Spare | 0 | Reserved |
+| 0 | 1 | 대시보드 | Dashboard | 0 (dynamic) | Reserved |
+| 1 | 2 | 지출입력 | Expense Input | 5 | Active |
+| 2 | 3 | 수입 | Income | 4 | Active |
+| 3 | 4 | 통계 | Statistics | 12 | Active |
+| 4 | 5 | 자산 | Assets | 5 | Active |
+| 5 | 6 | ROOT | Root Management | 6 | Active |
+| 6 | 7 | 설정 | Settings | 8 | Active |
+| 7 | 8 | 예비 | Spare | 0 | Reserved |
+| 8 | 9 | 예비 | Spare | 0 | Reserved |
+| 9 | 10 | 예비 | Spare | 0 | Reserved |
+| 10 | 11 | 예비 | Spare | 0 | Reserved |
+| 11 | 12 | 예비 | Spare | 0 | Reserved |
+| 12 | 13 | 예비 | Spare | 0 | Reserved |
+| 13 | 14 | 예비 | Spare | 0 | Reserved |
+| 14 | 15 | 예비 | Spare | 0 | Reserved |
 
 ## Page Layout Structure
 
-### Page 0: Home / Screen Saver (홈/보호기)
+### Index 0 (UI: 페이지 1): Home / Screen Saver (홈/보호기)
 - **Purpose**: Home page and screen saver launcher
 - **Item Count**: 0 (dynamic)
 - **Status**: Reserved for home page
 
-### Page 1: Expense Input (지출입력)
+### Index 1 (UI: 페이지 2): Expense Input (지출입력)
 - **Purpose**: Expense entry and management
 - **Items**:
   - `transactionAdd` - 지출 입력 (Add Expense)
@@ -41,7 +42,7 @@ This document defines the page identity and icon distribution for the main Smart
 - **Item Count**: 5
 - **Status**: Active
 
-### Page 2: Income (수입)
+### Index 2 (UI: 페이지 3): Income (수입)
 - **Purpose**: Income entry and distribution
 - **Items**:
   - `income_add` - 수입 입력 (Add Income)
@@ -51,7 +52,7 @@ This document defines the page identity and icon distribution for the main Smart
 - **Item Count**: 4
 - **Status**: Active
 
-### Page 3: Statistics (통계)
+### Index 3 (UI: 페이지 4): Statistics (통계)
 - **Purpose**: Financial statistics and reporting
 - **Items**:
   - `accountStats` - 통계 (Stats)
@@ -69,7 +70,7 @@ This document defines the page identity and icon distribution for the main Smart
 - **Item Count**: 12
 - **Status**: Active
 
-### Page 4: Assets (자산)
+### Index 4 (UI: 페이지 5): Assets (자산)
 - **Purpose**: Asset management and tracking
 - **Items**:
   - `asset_dashboard` - 자산 대시보드 (Asset Dashboard)
@@ -78,9 +79,9 @@ This document defines the page identity and icon distribution for the main Smart
   - `asset_assessment` - 자산 평가 (Assessment)
   - `icon_management_asset_entry` - 아이콘 관리 (Icon Manager)
 - **Item Count**: 5
-- **Status**: Active (moved to page 4 on 2025-12-30)
+- **Status**: Active (moved to index 4 on 2026-02-03)
 
-### Page 5: ROOT (루트 관리)
+### Index 5 (UI: 페이지 6): ROOT (루트 관리)
 - **Purpose**: Root-level account and system management
 - **Items**:
   - `root_transactions` - 전체 거래 (All Transactions)
@@ -92,7 +93,7 @@ This document defines the page identity and icon distribution for the main Smart
 - **Item Count**: 6
 - **Status**: Active
 
-### Page 6: Settings (설정)
+### Index 6 (UI: 페이지 7): Settings (설정)
 - **Purpose**: App-wide settings and preferences
 - **Items**:
   - `settings` - 설정 (Settings)
@@ -106,7 +107,7 @@ This document defines the page identity and icon distribution for the main Smart
 - **Item Count**: 8
 - **Status**: Active
 
-### Pages 7-14: Spare (예비)
+### Index 7-14 (UI: 페이지 8-15): Spare (예비)
 - **Purpose**: Reserved for future expansion
 - **Item Count**: 0 (empty)
 - **Status**: Reserved
@@ -122,21 +123,22 @@ All icon labels support bilingual display:
 ## Icon Management
 
 ### Reserved Pages by Feature
-- **Assets**: Page 5 (pages[4]) - 자산 관련 아이콘
-- **Root**: Page 6 (pages[5]) - ROOT 관리 아이콘
-- **Settings**: Page 7 (pages[6]) - 설정 관련 아이콘
+- **Assets**: Index 4 (UI: 페이지 5) - 자산 관련 아이콘
+- **Root**: Index 5 (UI: 페이지 6) - ROOT 관리 아이콘
+- **Settings**: Index 6 (UI: 페이지 7) - 설정 관련 아이콘
 
 ### Icon Placement Rules
 - **Reserved Module Icons**: Cannot be placed on non-policy pages
-- **Asset Icons**: Restricted to Page 5 for security/UX consistency
-- **Root Icons**: Restricted to Page 6 for administrative separation
-- **Settings Icons**: Restricted to Page 7 for organization
+- **Asset Icons**: Restricted to Index 4 (UI: 페이지 5) for security/UX consistency
+- **Root Icons**: Restricted to Index 5 (UI: 페이지 6) for administrative separation
+- **Settings Icons**: Restricted to Index 6 (UI: 페이지 7) for organization
 
-## Recent Changes (2025-12-30)
+## Recent Changes (2026-02-03)
 
 | Change | Description |
 |--------|-------------|
-| Page layout finalized | 1.대시보드 2.거래 3.수입 4.통계 5.자산 6.ROOT 7.설정 8-15.예비 |
+| Index notation unified | All references use index-based (0-based) with UI page numbers in parentheses |
+| Asset page confirmed | Index 4 (UI: 페이지 5) - 자산 기능 고정 |
 
 ## Module Key Mapping
 

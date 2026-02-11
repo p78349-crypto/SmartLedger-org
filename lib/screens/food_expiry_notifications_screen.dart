@@ -56,16 +56,16 @@ class _FoodExpiryNotificationsScreenState
         .map((item) => FoodExpiryItem(
           id: item.id,
           name: item.name,
+          purchaseDate: item.purchaseDate ?? item.createdAt,
+          expiryDate: item.expiryDate!,
+          createdAt: item.createdAt,
           quantity: item.currentStock,
           unit: item.unit,
           category: item.category,
           location: item.location,
-          expiryDate: item.expiryDate!,
-          purchaseDate: item.purchaseDate,
-          price: item.price,
-          supplier: item.supplier,
+          price: item.price ?? 0.0,
+          supplier: item.supplier ?? '',
           healthTags: item.healthTags,
-          memo: '',
         ))
         .toList();
     final count = await FoodExpiryNotificationService.instance

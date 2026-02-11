@@ -63,6 +63,10 @@ class TransactionDbStore {
       benefitJson: Value(
         tx.benefitJson?.trim().isEmpty ?? true ? null : tx.benefitJson!.trim(),
       ),
+      currency: Value(tx.currency),
+      exchangeRate: Value(tx.exchangeRate),
+      originalAmount: Value(tx.originalAmount),
+      vatAmount: Value(tx.vatAmount),
     );
 
     await _db.into(_db.dbTransactions).insertOnConflictUpdate(companion);
@@ -202,6 +206,10 @@ class TransactionDbStore {
       supplier: row.supplier,
       expiryDate: row.expiryDate,
       unit: row.unit,
+      currency: row.currency,
+      exchangeRate: row.exchangeRate,
+      originalAmount: row.originalAmount,
+      vatAmount: row.vatAmount,
     );
   }
 

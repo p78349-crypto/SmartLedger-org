@@ -32,7 +32,7 @@ class ReplacementCycleNotificationService {
     const ios = DarwinInitializationSettings();
     const settings = InitializationSettings(android: android, iOS: ios);
 
-    await _plugin.initialize(settings);
+    await _plugin.initialize(settings: settings);
 
     final androidImpl = _plugin
         .resolvePlatformSpecificImplementation<
@@ -170,7 +170,7 @@ class ReplacementCycleNotificationService {
       for (final e in decoded) {
         final id = e is num ? e.toInt() : int.tryParse(e.toString());
         if (id != null) {
-          await _plugin.cancel(id);
+          await _plugin.cancel(id: id);
         }
       }
     } catch (_) {
@@ -261,14 +261,12 @@ class ReplacementCycleNotificationService {
           '${trendLine == null ? '' : '\n$trendLine'}';
 
       await _plugin.zonedSchedule(
-        id,
-        title,
-        body,
-        tzNotify,
-        details,
+        id: id,
+        title: title,
+        body: body,
+        scheduledDate: tzNotify,
+        notificationDetails: details,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
       );
 
       scheduledIds.add(id);

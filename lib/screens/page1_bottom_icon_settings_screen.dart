@@ -127,7 +127,7 @@ class _Page1BottomIconSettingsScreenState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          '1) 아이콘 위치 선택 (1~24)',
+          '1) 아이콘 위치 선택',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 10),
@@ -153,7 +153,7 @@ class _Page1BottomIconSettingsScreenState
                     : Icons.radio_button_unchecked,
                 color: isSelected ? scheme.primary : scheme.outline,
               ),
-              title: Text('${i + 1}번 아이콘'),
+              title: Text('$i번 슬롯'),
               subtitle: Text('현재: ${label.replaceAll('\\n', ' ')}'),
               onTap: () => _selectSlot(i),
             ),
@@ -171,7 +171,7 @@ class _Page1BottomIconSettingsScreenState
       children: [
         const SizedBox(height: 14),
         const Text(
-          '2) 표시할 데이터 선택 (전체 목록)',
+          '2) 표시할 데이터 선택',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 10),
@@ -249,7 +249,7 @@ class _Page1BottomIconSettingsScreenState
     final canApply = _selectedIconId != null && _selectedIconId!.isNotEmpty;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('1페이지 하단 아이콘')),
+      appBar: AppBar(title: const Text('하단 아이콘 설정')),
       bottomNavigationBar: SafeArea(
         top: false,
         child: Container(
@@ -261,7 +261,7 @@ class _Page1BottomIconSettingsScreenState
           child: FilledButton.icon(
             onPressed: canApply ? _apply : null,
             icon: const Icon(Icons.check),
-            label: Text('적용 (선택: ${_selectedSlotOffset + 1}번)'),
+            label: const Text('아이콘 적용'),
           ),
         ),
       ),

@@ -32,6 +32,7 @@ import '../screens/smart_voice_command_screen.dart';
 import '../screens/fixed_cost_stats_screen.dart';
 import '../screens/fixed_cost_tab_screen.dart';
 import '../screens/household_consumables_screen.dart';
+import '../screens/household_quick_pick_screen.dart';
 import '../screens/household_items_screen.dart';
 import '../screens/consumable_inventory_screen.dart';
 import '../screens/quick_stock_use_screen.dart';

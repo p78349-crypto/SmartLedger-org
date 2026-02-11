@@ -8,8 +8,8 @@ class IconManagementAssetScreen extends StatelessWidget {
   final String accountName;
 
   static Set<int> _pagePickerHiddenPages() {
-    // Keep only the asset-reserved page (page 4 => 0-based {3}).
-    const allowed = <int>{3};
+    // Keep only the asset-reserved page (page 4 => 0-based {4}).
+    const allowed = <int>{4};
     final hidden = <int>{};
     for (var i = 0; i < 15; i++) {
       if (!allowed.contains(i)) hidden.add(i);
@@ -21,7 +21,7 @@ class IconManagementAssetScreen extends StatelessWidget {
     // Show only icons that belong to the asset+income modules.
     // (asset module icons live on catalog page 4; income module icons
     // live on page 2)
-    const allowed = <int>{1, 3};
+    const allowed = <int>{2, 4};
     final hidden = <int>{};
     for (var i = 0; i < 15; i++) {
       if (!allowed.contains(i)) hidden.add(i);
@@ -34,7 +34,7 @@ class IconManagementAssetScreen extends StatelessWidget {
     return IconManagementScreen(
       accountName: accountName,
       titleOverride: '자산 아이콘 관리',
-      initialPageIndex: MainFeatureIconCatalog.pageCount > 0 ? 3 : 0,
+      initialPageIndex: MainFeatureIconCatalog.pageCount > 0 ? 4 : 0,
       hiddenPageIndices: _pagePickerHiddenPages(),
       catalogHiddenPageIndices: _catalogHiddenPages(),
       redirectAssetRootToDedicatedScreens: false,

@@ -63,7 +63,7 @@ Flutter 기반 다중 계정 가계부 앱입니다. 각 계정별로 거래, �
 
 ## 메인 페이지 정책
 
-앱의 메인 페이지(1~7) 매핑 및 아이콘 노출 정책은 문서로 관리합니다: [DOCUMENTATION/MAIN_PAGES_POLICY.md](DOCUMENTATION/MAIN_PAGES_POLICY.md)
+앱의 메인 페이지(0~6) 매핑 및 아이콘 노출 정책은 문서로 관리합니다: [DOCUMENTATION/MAIN_PAGES_POLICY.md](DOCUMENTATION/MAIN_PAGES_POLICY.md)
 
 ## 개발자 로컬 설정 및 CI 안내
 

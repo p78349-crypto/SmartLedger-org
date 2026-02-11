@@ -11,8 +11,6 @@ import '../models/shopping_cart_item.dart';
 import '../navigation/app_routes_args.dart';
 import '../services/consumable_inventory_service.dart';
 import '../services/feedback_service.dart';
-import '../services/food_expiry_prediction_engine.dart';
-import '../services/food_expiry_service.dart';
 import '../services/health_guardrail_service.dart';
 import '../services/transaction_service.dart';
 import '../services/user_pref_service.dart';
@@ -748,18 +746,9 @@ class _FoodExpiryUpsertDialogState extends State<FoodExpiryUpsertDialog> {
     });
   }
 
-  FoodExpiryPrediction? _prediction() {
-    return FoodExpiryPredictionEngine.predict(
-      name: _nameController.text,
-      memo: _memoController.text,
-      purchaseDate: _purchaseDate,
-    );
-  }
-
   Future<void> _save() async {
     final name = _nameController.text.trim();
-    final p = _prediction();
-    final effective = _pickedExpiryDate ?? p?.suggestedExpiryDate;
+    final effective = _pickedExpiryDate;
     final quantity = double.tryParse(_quantityController.text) ?? 1.0;
     final unit = _unitController.text.trim().isEmpty
         ? '개'
@@ -807,11 +796,9 @@ class _FoodExpiryUpsertDialogState extends State<FoodExpiryUpsertDialog> {
         name: name,
         currentStock: quantity,
         unit: unit,
-        threshold: 1.0,
-        bundleSize: 1.0,
         category: _category,
         location: _location,
-        createdAt: DateTime.now(),
+        createdAt: widget.existing!.createdAt,
         lastUpdated: DateTime.now(),
         healthTags: _healthTags,
         expiryDate: effective,
@@ -975,7 +962,6 @@ class _FoodExpiryUpsertDialogState extends State<FoodExpiryUpsertDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final p = _prediction();
 
     final isImporting = _importQueue.isNotEmpty || _importTotal > 0;
     final remaining = _importQueue.length;
@@ -1210,10 +1196,7 @@ class _FoodExpiryUpsertDialogState extends State<FoodExpiryUpsertDialog> {
               _buildFieldLabel('유통기한', theme),
               InkWell(
                 onTap: () async {
-                  final initial =
-                      _pickedExpiryDate ??
-                      p?.suggestedExpiryDate ??
-                      DateTime.now();
+                  final initial = _pickedExpiryDate ?? DateTime.now();
                   final picked = await showDatePicker(
                     context: context,
                     initialDate: initial,
@@ -1239,7 +1222,7 @@ class _FoodExpiryUpsertDialogState extends State<FoodExpiryUpsertDialog> {
                     children: [
                       Expanded(
                         child: Text(
-                          _expiryButtonLabel(p?.suggestedExpiryDate),
+                          _expiryButtonLabel(_pickedExpiryDate),
                           style: theme.textTheme.bodyMedium,
                         ),
                       ),

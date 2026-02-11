@@ -1,20 +1,21 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:smart_ledger/models/food_expiry_item.dart';
+import 'package:smart_ledger/models/consumable_inventory_item.dart';
 import 'package:smart_ledger/utils/recipe_recommendation_utils.dart';
 
 void main() {
   group('RecipeRecommendationUtils', () {
-    FoodExpiryItem item(
+    ConsumableInventoryItem item(
       String name, {
       required DateTime now,
       int daysUntilExpiry = 10,
     }) {
-      return FoodExpiryItem(
+      return ConsumableInventoryItem(
         id: 'id_$name',
         name: name,
+        createdAt: now.subtract(const Duration(days: 1)),
+        lastUpdated: now.subtract(const Duration(days: 1)),
         purchaseDate: now.subtract(const Duration(days: 1)),
         expiryDate: now.add(Duration(days: daysUntilExpiry)),
-        createdAt: now.subtract(const Duration(days: 1)),
       );
     }
 

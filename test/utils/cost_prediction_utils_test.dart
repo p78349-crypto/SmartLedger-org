@@ -1,23 +1,24 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:smart_ledger/models/food_expiry_item.dart';
+import 'package:smart_ledger/models/consumable_inventory_item.dart';
 import 'package:smart_ledger/utils/cost_prediction_utils.dart';
 
 void main() {
   final now = DateTime.now();
 
-  List<FoodExpiryItem> createItems({
+  List<ConsumableInventoryItem> createItems({
     List<double>? prices,
     DateTime? expiryDate,
     String? category,
   }) {
     final expiry = expiryDate ?? now;
     return (prices ?? [1000, 2000, 3000]).map((price) {
-      return FoodExpiryItem(
+      return ConsumableInventoryItem(
         id: 'item-$price',
         name: '테스트 $price',
+        createdAt: now,
+        lastUpdated: now,
         purchaseDate: now.subtract(const Duration(days: 1)),
         expiryDate: expiry,
-        createdAt: now,
         price: price,
         category: category ?? '식재료',
       );

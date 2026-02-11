@@ -23,8 +23,6 @@ class FoodExpiryMigrationService {
       name: old.name,
       currentStock: old.quantity,
       unit: old.unit,
-      threshold: 1.0, // 기본값
-      bundleSize: 1.0,
       category: old.category.isEmpty ? '식료품' : old.category,
       location: old.location.isEmpty ? '냉장' : old.location,
       createdAt: old.createdAt,
@@ -107,7 +105,6 @@ class FoodExpiryMigrationService {
 
   /// 기존 데이터 정리 (마이그레이션 완료 후)
   static Future<void> cleanupOldData() async {
-    final prefs = await SharedPreferences.getInstance();
     // 기존 key는 유지 (복원용)
     // 필요시 나중에 수동으로 삭제 가능
     debugPrint('[FoodExpiryMigration] Old data cleanup skipped (kept for safety)');

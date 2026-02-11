@@ -51,7 +51,7 @@ class _RootAuthGateState extends State<RootAuthGate> {
     }
     final enabled =
         prefs.getBool(PrefKeys.rootAuthEnabled) ??
-        (prefs.getBool(PrefKeys.biometricAuthEnabled) ?? true);
+        (prefs.getBool(PrefKeys.biometricAuthEnabled) ?? false);
     if (!mounted) return;
     setState(() {
       _enabled = enabled;

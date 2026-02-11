@@ -71,6 +71,7 @@ class RecipeRecommendationUtils {
     bool prioritizeExpiring = true,
     bool prioritizeHealth = true,
     bool includeUserRecipes = true,
+    int minMatchPercentage = 50,
   }) async {
     final now = DateTime.now();
     final expiringItems = availableIngredients
@@ -98,7 +99,7 @@ class RecipeRecommendationUtils {
       );
       final matchPercentage =
           (matchResult.matchCount / requiredIngredients.length * 100).toInt();
-      if (matchPercentage >= 50) {
+      if (matchPercentage >= minMatchPercentage) {
         recommendations[recipeName] = RecipeMatch(
           recipeName: recipeName,
           requiredCount: requiredIngredients.length,
@@ -127,7 +128,7 @@ class RecipeRecommendationUtils {
 
         final matchPercentage =
             (matchResult.matchCount / requiredIngredients.length * 100).toInt();
-        if (matchPercentage >= 50) {
+        if (matchPercentage >= minMatchPercentage) {
           recommendations[recipe.name] = RecipeMatch(
             recipeName: recipe.name,
             requiredCount: requiredIngredients.length,
@@ -168,12 +169,14 @@ class RecipeRecommendationUtils {
     bool prioritizeExpiring = true,
     bool prioritizeHealth = true,
     bool includeUserRecipes = true,
+    int minMatchPercentage = 50,
   }) async {
     final recommendations = await getRecommendedRecipes(
       availableIngredients,
       prioritizeExpiring: prioritizeExpiring,
       prioritizeHealth: prioritizeHealth,
       includeUserRecipes: includeUserRecipes,
+      minMatchPercentage: minMatchPercentage,
     );
     return recommendations.values.take(limit).toList(growable: false);
   }

@@ -99,7 +99,7 @@ class _AssetTabScreenState extends State<AssetTabScreen> {
   final LocalAuthentication _localAuth = LocalAuthentication();
   bool _canCheckBiometrics = false;
   bool _isDeviceSupported = false;
-  bool _biometricAuthEnabled = true; // 기본값: 인증 사용
+  bool _biometricAuthEnabled = false; // 기본값: 비활성화 (사용자가 설정에서 켤 때까지 노출되지 않음)
 
   final AuthService _authService = AuthService();
   final UserPinService _userPinService = UserPinService();
@@ -165,7 +165,7 @@ class _AssetTabScreenState extends State<AssetTabScreen> {
   Future<void> _loadBiometricSettings() async {
     final prefs = await SharedPreferences.getInstance();
     if (!mounted) return;
-    final enabled = prefs.getBool(PrefKeys.biometricAuthEnabled) ?? true;
+    final enabled = prefs.getBool(PrefKeys.biometricAuthEnabled) ?? false;
     setState(() {
       _biometricAuthEnabled = enabled;
       if (!enabled) {
@@ -183,7 +183,7 @@ class _AssetTabScreenState extends State<AssetTabScreen> {
     final prefs = await SharedPreferences.getInstance();
     final enabled =
         prefs.getBool(PrefKeys.rootAuthEnabled) ??
-        (prefs.getBool(PrefKeys.biometricAuthEnabled) ?? true);
+        (prefs.getBool(PrefKeys.biometricAuthEnabled) ?? false);
     if (!mounted) return;
     setState(() {
       _rootAuthEnabled = enabled;
@@ -838,7 +838,10 @@ class _AssetTabScreenState extends State<AssetTabScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // 🎯 **대시보드 요약** (총 자산, 총 손익, 자산별 카드 뷰)
-            AssetDashboardScreen(accountName: widget.accountName),
+            AssetDashboardScreen(
+              accountName: widget.accountName,
+              assets: _assets,
+            ),
             const SizedBox(height: 8),
             const Divider(thickness: 2),
             const SizedBox(height: 8),

@@ -87,6 +87,11 @@ class Transaction {
   final String? supplier;
   final DateTime? expiryDate;
 
+  final String currency; // 'KRW', 'USD', etc.
+  final double exchangeRate; // Exchange rate to local currency
+  final double? originalAmount; // Amount in original currency
+  final double vatAmount; // VAT amount
+
   static const String defaultMainCategory = '미분류';
 
   Transaction({
@@ -113,6 +118,10 @@ class Transaction {
     this.location,
     this.supplier,
     this.expiryDate,
+    this.currency = 'KRW',
+    this.exchangeRate = 1.0,
+    this.originalAmount,
+    this.vatAmount = 0,
   }) : mainCategory = (mainCategory == null || mainCategory.trim().isEmpty)
            ? defaultMainCategory
            : mainCategory;
@@ -165,6 +174,10 @@ class Transaction {
       expiryDate: json['expiryDate'] != null
           ? DateTime.parse(json['expiryDate'] as String)
           : null,
+      currency: json['currency'] as String? ?? 'KRW',
+      exchangeRate: (json['exchangeRate'] as num?)?.toDouble() ?? 1.0,
+      originalAmount: (json['originalAmount'] as num?)?.toDouble(),
+      vatAmount: (json['vatAmount'] as num?)?.toDouble() ?? 0,
     );
   }
 
@@ -202,6 +215,10 @@ class Transaction {
       if (location != null) 'location': location,
       if (supplier != null) 'supplier': supplier,
       if (expiryDate != null) 'expiryDate': expiryDate!.toIso8601String(),
+      'currency': currency,
+      'exchangeRate': exchangeRate,
+      if (originalAmount != null) 'originalAmount': originalAmount,
+      'vatAmount': vatAmount,
     };
   }
 
@@ -228,6 +245,10 @@ class Transaction {
     String? location,
     String? supplier,
     DateTime? expiryDate,
+    String? currency,
+    double? exchangeRate,
+    double? originalAmount,
+    double? vatAmount,
   }) {
     return Transaction(
       id: id ?? this.id,
@@ -253,6 +274,10 @@ class Transaction {
       location: location ?? this.location,
       supplier: supplier ?? this.supplier,
       expiryDate: expiryDate ?? this.expiryDate,
+      currency: currency ?? this.currency,
+      exchangeRate: exchangeRate ?? this.exchangeRate,
+      originalAmount: originalAmount ?? this.originalAmount,
+      vatAmount: vatAmount ?? this.vatAmount,
     );
   }
 

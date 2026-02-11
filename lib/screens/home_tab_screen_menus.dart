@@ -141,11 +141,6 @@ extension _HomeTabMenus on _HomeTabScreenState {
 
   List<Widget> _buildAccountActions() {
     return [
-      IconButton(
-        icon: const Icon(IconCatalog.deleteOutline),
-        tooltip: '휴지통',
-        onPressed: _openTrash,
-      ),
       Tooltip(
         message: '메뉴 열기',
         child: PopupMenuButton<String>(
@@ -162,6 +157,8 @@ extension _HomeTabMenus on _HomeTabScreenState {
               );
             } else if (value == 'carryover') {
               _openCarryoverDialog();
+            } else if (value == 'trash') {
+              _openTrash();
             }
           },
           itemBuilder: (context) => [
@@ -217,6 +214,17 @@ extension _HomeTabMenus on _HomeTabScreenState {
                   ),
                   SizedBox(width: 8),
                   Text(StatsLabels.carryover),
+                ],
+              ),
+            ),
+            const PopupMenuDivider(),
+            const PopupMenuItem(
+              value: 'trash',
+              child: Row(
+                children: [
+                  Icon(IconCatalog.deleteOutline, size: 20, color: Colors.red),
+                  SizedBox(width: 8),
+                  Text('휴지통'),
                 ],
               ),
             ),

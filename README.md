@@ -38,6 +38,7 @@ Flutter 기반 다중 계정 가계부 앱입니다. 각 계정별로 거래, �
 
 - 구조 안내: [docs/DOCS_STRUCTURE_2026-02-23.md](docs/DOCS_STRUCTURE_2026-02-23.md)
 - 파일명 규칙: [docs/FILENAME_RULES_2026-02-23.md](docs/FILENAME_RULES_2026-02-23.md)
+- 사용자 매뉴얼 인덱스: [docs/user-manual/README.md](docs/user-manual/README.md)
 - 리포트 인덱스: [docs/reports/README.md](docs/reports/README.md)
 - 최근 검증 문서:
 	- DB 마이그레이션 정밀 점검: [docs/reports/DB_MIGRATION_REPORT.md](docs/reports/DB_MIGRATION_REPORT.md)

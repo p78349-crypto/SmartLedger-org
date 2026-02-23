@@ -31,9 +31,24 @@ class _AssetInputScreenState extends State<AssetInputScreen> {
   final TextEditingController _expectedAnnualRateController =
       TextEditingController();
   final TextEditingController _costBasisController = TextEditingController();
+      final TextEditingController _tickerController = TextEditingController();
+      final TextEditingController _institutionController = TextEditingController();
+      final TextEditingController _currencyController = TextEditingController();
+      final TextEditingController _unitsController = TextEditingController();
+      final TextEditingController _unitPriceController = TextEditingController();
+      final TextEditingController _appraisalValueController =
+        TextEditingController();
+      final TextEditingController _monthlyIncomeController =
+        TextEditingController();
+      final TextEditingController _debtAmountController =
+        TextEditingController();
+      final TextEditingController _alertThresholdController =
+        TextEditingController();
   late DateTime _assetDate;
+  DateTime? _maturityDate;
   AssetCategory _selectedCategory = AssetCategory.stock;
   bool _isInvestment = false;
+    AssetRiskLevel? _riskLevel;
   bool get _isEdit => widget.initialAsset != null;
 
   _InitialAssetFormSnapshot? _initialSnapshot;
@@ -71,6 +86,50 @@ class _AssetInputScreenState extends State<AssetInputScreen> {
         _expectedAnnualRateController.text =
             initial.expectedAnnualRatePct!.toString();
       }
+      if (initial.ticker != null && initial.ticker!.isNotEmpty) {
+        _tickerController.text = initial.ticker!;
+      }
+      if (initial.institution != null && initial.institution!.isNotEmpty) {
+        _institutionController.text = initial.institution!;
+      }
+      if (initial.currencyCode != null && initial.currencyCode!.isNotEmpty) {
+        _currencyController.text = initial.currencyCode!;
+      }
+      if (initial.units != null) {
+        _unitsController.text = initial.units!.toString();
+      }
+      if (initial.unitPrice != null) {
+        _unitPriceController.text = CurrencyFormatter.format(
+          initial.unitPrice!,
+          showUnit: false,
+        );
+      }
+      if (initial.appraisalValue != null) {
+        _appraisalValueController.text = CurrencyFormatter.format(
+          initial.appraisalValue!,
+          showUnit: false,
+        );
+      }
+      if (initial.monthlyIncome != null) {
+        _monthlyIncomeController.text = CurrencyFormatter.format(
+          initial.monthlyIncome!,
+          showUnit: false,
+        );
+      }
+      if (initial.debtAmount != null) {
+        _debtAmountController.text = CurrencyFormatter.format(
+          initial.debtAmount!,
+          showUnit: false,
+        );
+      }
+      if (initial.alertThreshold != null) {
+        _alertThresholdController.text = CurrencyFormatter.format(
+          initial.alertThreshold!,
+          showUnit: false,
+        );
+      }
+      _maturityDate = initial.maturityDate;
+      _riskLevel = initial.riskLevel;
     } else {
       _assetDate = DateTime.now();
     }
@@ -88,6 +147,15 @@ class _AssetInputScreenState extends State<AssetInputScreen> {
     _targetAmountController.dispose();
     _expectedAnnualRateController.dispose();
     _costBasisController.dispose();
+    _tickerController.dispose();
+    _institutionController.dispose();
+    _currencyController.dispose();
+    _unitsController.dispose();
+    _unitPriceController.dispose();
+    _appraisalValueController.dispose();
+    _monthlyIncomeController.dispose();
+    _debtAmountController.dispose();
+    _alertThresholdController.dispose();
     super.dispose();
   }
 
@@ -99,7 +167,9 @@ class _AssetInputScreenState extends State<AssetInputScreen> {
           targetRatio = double.tryParse(_ratioController.text.trim());
         }
 
-        final amount = CurrencyFormatter.parse(_amountController.text.trim());
+        final amount =
+            CurrencyFormatter.parse(_amountController.text.trim()) ?? 0.0;
+
         final targetAmount = _targetAmountController.text.isNotEmpty
             ? CurrencyFormatter.parse(_targetAmountController.text.trim())
             : null;
@@ -111,15 +181,29 @@ class _AssetInputScreenState extends State<AssetInputScreen> {
         final expectedRate =
             expectedRateRaw.isEmpty ? null : double.tryParse(expectedRateRaw);
 
-        if (amount == null) {
-          SnackbarUtils.showError(context, '유효한 금액을 입력하세요');
-          return;
-        }
+        final tickerRaw = _tickerController.text.trim();
+        final institutionRaw = _institutionController.text.trim();
+        final currencyRaw = _currencyController.text.trim();
+
+        final unitsRaw = _unitsController.text.trim();
+        final units = unitsRaw.isEmpty ? null : double.tryParse(unitsRaw);
+        final unitPrice = _unitPriceController.text.isNotEmpty
+            ? CurrencyFormatter.parse(_unitPriceController.text.trim())
+            : null;
+        final appraisalValue = _appraisalValueController.text.isNotEmpty
+            ? CurrencyFormatter.parse(_appraisalValueController.text.trim())
+            : null;
+        final monthlyIncome = _monthlyIncomeController.text.isNotEmpty
+            ? CurrencyFormatter.parse(_monthlyIncomeController.text.trim())
+            : null;
+
+        String name = _nameController.text.trim();
+        if (name.isEmpty) name = '새 자산';
 
         final asset = Asset(
           id: widget.initialAsset?.id ??
               DateTime.now().microsecondsSinceEpoch.toString(),
-          name: _nameController.text.trim(),
+          name: name,
           amount: amount,
           memo: _memoController.text.trim(),
           date: _assetDate,
@@ -130,6 +214,14 @@ class _AssetInputScreenState extends State<AssetInputScreen> {
           isInvestment:
               _isInvestment && _selectedCategory == AssetCategory.crypto,
           costBasis: costBasis,
+          ticker: tickerRaw.isEmpty ? null : tickerRaw,
+          institution: institutionRaw.isEmpty ? null : institutionRaw,
+          currencyCode: currencyRaw.isEmpty ? null : currencyRaw,
+          units: units,
+          unitPrice: unitPrice,
+          appraisalValue: appraisalValue,
+          monthlyIncome: monthlyIncome,
+          riskLevel: _riskLevel,
         );
 
         if (_isEdit) {
@@ -157,7 +249,7 @@ class _AssetInputScreenState extends State<AssetInputScreen> {
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.accountName),
+        title: const Text('자산 상세 입력'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
@@ -182,13 +274,21 @@ class _AssetInputScreenState extends State<AssetInputScreen> {
                     _buildOriginalCard(theme),
                   Form(
                     key: _formKey,
-                    child: Column(children: _buildFormFields(theme)),
+                    child: Column(children: [
+                      ..._buildFormFields(theme),
+                      const SizedBox(height: 80),
+                    ]),
                   ),
                 ],
               ),
             );
           },
         ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _submit,
+        icon: Icon(_isEdit ? Icons.save : Icons.add_task),
+        label: Text(_isEdit ? '수정 완료' : '자산 저장'),
       ),
     );
   }
@@ -203,9 +303,20 @@ class _InitialAssetFormSnapshot {
     required this.targetAmountText,
     required this.costBasisText,
     required this.expectedAnnualRateText,
+    required this.tickerText,
+    required this.institutionText,
+    required this.currencyText,
+    required this.unitsText,
+    required this.unitPriceText,
+    required this.appraisalValueText,
+    required this.monthlyIncomeText,
+    required this.debtAmountText,
+    required this.alertThresholdText,
     required this.assetDate,
+    required this.maturityDate,
     required this.selectedCategory,
     required this.isInvestment,
+    required this.riskLevel,
   });
 
   final String nameText;
@@ -215,7 +326,18 @@ class _InitialAssetFormSnapshot {
   final String targetAmountText;
   final String costBasisText;
   final String expectedAnnualRateText;
+  final String tickerText;
+  final String institutionText;
+  final String currencyText;
+  final String unitsText;
+  final String unitPriceText;
+  final String appraisalValueText;
+  final String monthlyIncomeText;
+  final String debtAmountText;
+  final String alertThresholdText;
   final DateTime assetDate;
+  final DateTime? maturityDate;
   final AssetCategory selectedCategory;
   final bool isInvestment;
+  final AssetRiskLevel? riskLevel;
 }

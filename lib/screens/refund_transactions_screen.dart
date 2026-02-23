@@ -36,6 +36,7 @@ class _RefundTransactionsScreenState extends State<RefundTransactionsScreen> {
   int? _rangeDays;
   bool _partialOnly = false;
   bool _groupByPayment = false;
+  String _selectedBottomFilter = 'all';
   final NumberFormat _numberFormat = NumberFormats.custom('#,###');
   final TextEditingController _searchController = TextEditingController();
   final Debouncer _searchDebouncer = Debouncer(

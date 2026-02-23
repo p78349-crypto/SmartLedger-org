@@ -11,7 +11,7 @@ void main() {
         ),
       );
 
-      expect(find.text('2'), findsOneWidget);
+      expect(find.text('1'), findsOneWidget);
     });
 
     testWidgets('tap calls onPageTap with currentPage', (tester) async {

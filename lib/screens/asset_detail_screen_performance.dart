@@ -6,6 +6,7 @@ part of 'asset_detail_screen.dart';
 /// - 투자: 총 매수 vs 총 매도 -> 수익률 계산
 /// - 기록: 메모를 강조하여 전략 수립 보조
 extension AssetDetailPerformance on _AssetDetailScreenState {
+  // ignore: unused_element
   Widget _buildPerformanceAnalysis(ThemeData theme) {
     final moves = AssetMoveService().getMovesForAsset(
       widget.accountName,
@@ -267,6 +268,26 @@ extension AssetDetailPerformance on _AssetDetailScreenState {
               ),
             );
           },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAnalysisItem(ThemeData theme, String label, double amount) {
+    return Column(
+      children: [
+        Text(
+          label,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '${CurrencyFormatter.format(amount)}원',
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ],
     );

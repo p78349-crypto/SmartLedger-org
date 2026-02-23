@@ -183,6 +183,7 @@ extension TopLevelMainScreenBuild on _TopLevelMainScreenState {
           onPressed: () async {
             final navigator = Navigator.of(context);
             final accs = accounts.map((a) => a.name).toList();
+            // ROOT는 숨김 처리 - 선택 목록에 포함하지 않음
             final selected = await navigator.push<String>(
               MaterialPageRoute(
                 builder: (context) => AccountSelectScreen(accounts: accs),

@@ -168,9 +168,22 @@ class _OneHundredMillionProjectScreenState
       appBar: AppBar(
         title: const Text('1억 프로젝트'),
         actions: [
-          IconButton(
-            onPressed: _openSettings,
-            icon: const Icon(Icons.settings),
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: IconButton(
+              onPressed: _openSettings,
+              visualDensity: VisualDensity.compact,
+              icon: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.outlineVariant,
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(Icons.settings, size: 20),
+              ),
+            ),
           ),
         ],
       ),

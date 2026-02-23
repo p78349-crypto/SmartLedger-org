@@ -71,6 +71,17 @@ class IconCatalog {
   static const IconData checkCircle = Icons.check_circle;
   static const IconData refund = Icons.replay;
 
+  // 새로 구현된 고급 기능 아이콘들
+  static const IconData incrementalBackup = Icons.backup;
+  static const IconData ceoDashboard = Icons.dashboard_customize;
+  static const IconData aiInvestment = Icons.psychology;
+  static const IconData cloudBackup = Icons.cloud_sync;
+  static const IconData analytics = Icons.analytics;
+  static const IconData predictive = Icons.auto_graph;
+  static const IconData aiModelSelector = Icons.model_training;
+  static const IconData smartAnalysis = Icons.smart_toy;
+  static const IconData science = Icons.science; // 커스텀 모델 테스트용
+
   static const IconData edit = Icons.edit;
   static const IconData editOutlined = Icons.edit_outlined;
   static const IconData delete = Icons.delete;
@@ -164,4 +175,25 @@ class IconCatalog {
   static const IconData overspendingDiagnosis = Icons.analytics;
   static const IconData emojiEvents = Icons.emoji_events_outlined;
   static const IconData accountBalanceWalletRounded = Icons.account_balance_wallet_rounded;
+
+  // Added 2026-02-14 for Icon Policy Correction
+  static const IconData flagOutlined = Icons.flag_outlined;
+  static const IconData cleaningServices = Icons.cleaning_services;
+  static const IconData playlistAddCheckCircle = Icons.playlist_add_check_circle;
+  static const IconData helpOutline = Icons.help_outline;
+  static const IconData bolt = Icons.bolt;
+  static const IconData rocketLaunch = Icons.rocket_launch;
+  static const IconData micOutlined = Icons.mic_outlined;
+  static const IconData recordVoiceOver = Icons.record_voice_over;
+  static const IconData emergency = Icons.emergency;
+  static const IconData wbSunnyOutlined = Icons.wb_sunny_outlined;
+  static const IconData switchAccount = Icons.switch_account;
+  static const IconData routeOutlined = Icons.route_outlined;
+  static const IconData analyticsOutlined = Icons.analytics_outlined;
+  static const IconData compareArrowsOutlined = Icons.compare_arrows_outlined;
+
+  // Semantic aliases for specific features
+  static const IconData microSavings = Icons.rocket_launch;
+  static const IconData weatherPricePrediction = Icons.wb_cloudy;
+  static const IconData weatherInput = Icons.wb_sunny_outlined;
 }

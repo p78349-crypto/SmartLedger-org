@@ -26,7 +26,7 @@ void main() {
   test(
     'predictPrice returns a prediction when enough transaction data exists',
     () {
-      final now = DateTime(2026, 1, 11);
+      final now = DateTime.now();
 
       Transaction tx({required int idx, required double unitPrice}) {
         return Transaction(

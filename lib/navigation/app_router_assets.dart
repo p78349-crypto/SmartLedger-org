@@ -42,8 +42,33 @@ class _AssetRoutes {
         final a = args as AccountArgs;
         return MaterialPageRoute(
           settings: settings,
+          builder: (_) => AssetManagementScreen(accountName: a.accountName),
+        );
+
+      case AppRoutes.assetList:
+        final a = args as AccountArgs;
+        return MaterialPageRoute(
+          settings: settings,
           builder: (_) => AssetRouteAuthGate(
-            child: AssetManagementScreen(accountName: a.accountName),
+            child: AssetListScreen(accountName: a.accountName),
+          ),
+        );
+
+      case AppRoutes.assetExport:
+        final a = args as AccountArgs;
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => AssetRouteAuthGate(
+            child: AssetExportScreen(accountName: a.accountName),
+          ),
+        );
+
+      case AppRoutes.dataFlexibleExport:
+        final a = args as AccountArgs;
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => AssetRouteAuthGate(
+            child: DataFlexibleExportScreen(accountName: a.accountName),
           ),
         );
 
@@ -83,6 +108,24 @@ class _AssetRoutes {
           settings: settings,
           builder: (_) => AssetRouteAuthGate(
             child: OneHundredMillionProjectScreen(accountName: a.accountName),
+          ),
+        );
+
+      case AppRoutes.assetPortfolioAnalysis:
+        final a = args as AccountArgs;
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => AssetRouteAuthGate(
+            child: AssetPortfolioAnalysisScreen(accountName: a.accountName),
+          ),
+        );
+
+      case AppRoutes.assetInvestmentRoadmap:
+        final a = args as AccountArgs;
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => AssetRouteAuthGate(
+            child: AssetInvestmentRoadmapScreen(accountName: a.accountName),
           ),
         );
 

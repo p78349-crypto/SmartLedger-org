@@ -97,6 +97,7 @@ extension BackupScreenAuth on _BackupScreenState {
   Future<String?> _promptBackupPassword({
     required String title,
     required String confirmText,
+    String? passwordHint,
   }) async {
     final controller = TextEditingController();
     try {
@@ -106,9 +107,36 @@ extension BackupScreenAuth on _BackupScreenState {
           title: Text(title),
           content: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text('백업 암호를 입력하세요.'),
-              const SizedBox(height: 12),
+              if (passwordHint != null && passwordHint.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.help_outline, size: 16, color: Colors.orange),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          '암호 힌트: $passwordHint',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Colors.orange,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+              const SizedBox(height: 16),
               TextField(
                 controller: controller,
                 obscureText: true,
@@ -155,16 +183,23 @@ extension BackupScreenAuth on _BackupScreenState {
           title: const Text('백업 암호 설정'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('이 암호는 백업 복원에 필요합니다.\n잊어버리면 복원이 불가능합니다.'),
-              const SizedBox(height: 12),
+              const Text(
+                '이 암호는 백업 데이터 해독을 위한 마스터 키입니다.\n'
+                '⚠️ 기기를 변경하거나 앱 재설치 시 이 암호를 모르면 절대 복원이 불가능합니다.',
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
               TextField(
                 controller: controller1,
                 obscureText: true,
                 decoration: const InputDecoration(
-                  labelText: '암호',
+                  labelText: '백업 핀(PIN) 또는 비밀번호',
                   border: OutlineInputBorder(),
+                  helperText: '예: 1234 (핀) 또는 영문/기호 조합',
                 ),
+                keyboardType: TextInputType.visiblePassword,
               ),
               const SizedBox(height: 12),
               TextField(
@@ -174,6 +209,7 @@ extension BackupScreenAuth on _BackupScreenState {
                   labelText: '암호 확인',
                   border: OutlineInputBorder(),
                 ),
+                keyboardType: TextInputType.visiblePassword,
               ),
             ],
           ),
@@ -228,10 +264,10 @@ extension BackupScreenAuth on _BackupScreenState {
         title: const Text('암호화 백업'),
         content: Text(
           _backupEncryptionEnabled
-              ? '백업 암호를 설정하면 백업 파일이 암호화됩니다.\n'
-                    '지금 설정하지 않으면 암호 없이(평문) 백업됩니다.'
-              : '이번 백업을 암호화할 수 있습니다.\n'
-                    '암호를 설정하지 않으면 암호 없이(평문) 백업됩니다.',
+              ? '백업 암호를 설정하면 백업 파일이 강력하게 암호화됩니다.\n\n'
+                '⚠️ 주의: 암호 분실 시 개발자를 포함해 누구도 데이터를 복구할 수 없습니다. 반드시 암호와 힌트를 안전하게 보관해 주세요.'
+              : '이번 백업을 암호화할 수 있습니다.\n\n'
+                '⚠️ 주의: 암호를 잊어버리면 백업 파일을 절대 열 수 없으며, 추후 복구 요청이 불가능합니다.',
         ),
         actions: [
           TextButton(
@@ -264,9 +300,15 @@ extension BackupScreenAuth on _BackupScreenState {
     final isEncrypted = BackupService().isEncryptedBackupText(text);
     if (!isEncrypted) return null;
 
+    final hint = BackupService().getBackupPasswordHint(text);
+
     if (_backupTwoFactorEnabled) {
       await _authenticateForBackupProtection(reason: '복원을 위해 인증을 진행합니다.');
     }
-    return _promptBackupPassword(title: '암호화 백업 복원', confirmText: '복원');
+    return _promptBackupPassword(
+      title: '암호화 백업 복원', 
+      confirmText: '복원',
+      passwordHint: hint,
+    );
   }
 }

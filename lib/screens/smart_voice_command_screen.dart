@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:smart_ledger/services/smart_app_controller.dart';
 
+import 'smart_voice_command_widgets.dart';
+
 /// 통합 음성 명령 화면
 ///
 /// "편의점 우유 3000원 입력하고 쿠팡에서 우유 검색"
@@ -186,102 +188,12 @@ class _SmartVoiceCommandScreenState extends State<SmartVoiceCommandScreen> {
                           style: const TextStyle(color: Colors.red),
                         )
                       else
-                        ..._buildResultDetails(),
+                        ...buildVoiceResultDetails(_result!),
                     ],
                   ),
                 ),
               ),
             ),
-        ],
-      ),
-    );
-  }
-
-  List<Widget> _buildResultDetails() {
-    final results = _result!['results'] as Map<String, dynamic>? ?? {};
-    final widgets = <Widget>[];
-
-    if (results.containsKey('record')) {
-      widgets.add(
-        _buildResultItem(
-          icon: Icons.save,
-          title: '가계부 입력',
-          subtitle: results['record'] == true ? '✅ 저장 완료' : '❌ 저장 실패',
-          color: Colors.blue,
-        ),
-      );
-    }
-
-    if (results.containsKey('shopping')) {
-      widgets.add(
-        _buildResultItem(
-          icon: Icons.shopping_cart,
-          title: '쇼핑앱 실행',
-          subtitle: results['shopping'] == true ? '✅ 앱 실행됨' : '❌ 실행 실패',
-          color: Colors.orange,
-        ),
-      );
-    }
-
-    if (results.containsKey('delivery')) {
-      widgets.add(
-        _buildResultItem(
-          icon: Icons.delivery_dining,
-          title: '배달앱 실행',
-          subtitle: results['delivery'] == true ? '✅ 앱 실행됨' : '❌ 실행 실패',
-          color: Colors.purple,
-        ),
-      );
-    }
-
-    if (results.containsKey('navigation')) {
-      widgets.add(
-        _buildResultItem(
-          icon: Icons.map,
-          title: '지도앱 실행',
-          subtitle: results['navigation'] == true ? '✅ 앱 실행됨' : '❌ 실행 실패',
-          color: Colors.green,
-        ),
-      );
-    }
-
-    return widgets;
-  }
-
-  Widget _buildResultItem({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required Color color,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withAlpha(30),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(icon, color: color),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  subtitle,
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
-                ),
-              ],
-            ),
-          ),
         ],
       ),
     );

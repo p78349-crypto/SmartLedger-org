@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/shopping_cart_item.dart';
 import '../services/user_pref_service.dart';
 import '../utils/global_food_data_utils.dart';
+import 'global_food_to_cart_widgets.dart';
 import 'shopping_cart_screen.dart';
 
 /// 글로벌 식료품 → 장바구니 화면
@@ -175,8 +176,31 @@ class _GlobalFoodToCartScreenState extends State<GlobalFoodToCartScreen> {
         children: [
           _buildSearchBar(theme),
           if (!_isSearching) _buildFilters(theme),
-          Expanded(child: _buildItemList()),
-          _buildBottomButton(),
+          Expanded(
+            child: GlobalFoodItemListView(
+              displayItems: _displayItems,
+              selectedItems: _selectedItems,
+              quantities: _quantities,
+              onItemSelected: (itemKey, selected) {
+                setState(() {
+                  _selectedItems[itemKey] = selected;
+                  if (selected) {
+                    _quantities[itemKey] ??= 1.0;
+                  }
+                });
+              },
+              onQuantityChanged: (itemKey, quantity) {
+                setState(() {
+                  _quantities[itemKey] = quantity;
+                });
+              },
+            ),
+          ),
+          GlobalFoodCartBottomButton(
+            sending: _sending,
+            selectedCount: _selectedCount,
+            onPressed: _sendToCart,
+          ),
         ],
       ),
     );
@@ -255,130 +279,6 @@ class _GlobalFoodToCartScreenState extends State<GlobalFoodToCartScreen> {
           ),
           const SizedBox(height: 8),
         ],
-      ),
-    );
-  }
-
-  Widget _buildItemList() {
-    if (_displayItems.isEmpty) {
-      return const Center(child: Text('항목이 없습니다'));
-    }
-
-    return ListView.builder(
-      itemCount: _displayItems.length,
-      itemBuilder: (context, index) {
-        final item = _displayItems[index];
-        final itemKey = '${item.fdcId}_${item.name}';
-        final selected = _selectedItems[itemKey] ?? false;
-        final quantity = _quantities[itemKey] ?? 1.0;
-
-        return Card(
-          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Row(
-              children: [
-                Checkbox(
-                  value: selected,
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedItems[itemKey] = value ?? false;
-                      if (value == true) {
-                        _quantities[itemKey] ??= 1.0;
-                      }
-                    });
-                  },
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.name,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          decoration: selected
-                              ? null
-                              : TextDecoration.lineThrough,
-                          color: selected ? null : Colors.grey,
-                        ),
-                      ),
-                      Text(
-                        '${item.type} • ${item.category}',
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                      ),
-                      if (item.brand != null)
-                        Text(
-                          item.brand!,
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.grey[500],
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                if (selected) ...[
-                  IconButton(
-                    icon: const Icon(Icons.remove_circle_outline),
-                    onPressed: quantity > 1
-                        ? () {
-                            setState(() {
-                              _quantities[itemKey] = quantity - 1;
-                            });
-                          }
-                        : null,
-                  ),
-                  Text(
-                    '${quantity.toInt()}',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.add_circle_outline),
-                    onPressed: () {
-                      setState(() {
-                        _quantities[itemKey] = quantity + 1;
-                      });
-                    },
-                  ),
-                ],
-                const SizedBox(width: 8),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildBottomButton() {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: SizedBox(
-          width: double.infinity,
-          child: FilledButton.icon(
-            onPressed: _sending || _selectedCount == 0 ? null : _sendToCart,
-            icon: _sending
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
-                : const Icon(Icons.shopping_cart),
-            label: Text(
-              _selectedCount == 0
-                  ? '항목을 선택해주세요'
-                  : '$_selectedCount개 항목 장바구니에 추가',
-            ),
-          ),
-        ),
       ),
     );
   }

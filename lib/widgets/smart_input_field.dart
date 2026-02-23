@@ -13,6 +13,7 @@ class SmartInputField extends StatelessWidget {
   final TextInputAction? textInputAction;
   final FocusNode? focusNode;
   final ValueChanged<String>? onFieldSubmitted;
+  final VoidCallback? onEditingComplete;
   final ValueChanged<String>? onChanged;
   final int? maxLines;
   final List<TextInputFormatter>? inputFormatters;
@@ -37,6 +38,7 @@ class SmartInputField extends StatelessWidget {
     this.textInputAction,
     this.focusNode,
     this.onFieldSubmitted,
+    this.onEditingComplete,
     this.onChanged,
     this.maxLines,
     this.inputFormatters,
@@ -90,6 +92,7 @@ class SmartInputField extends StatelessWidget {
       inputFormatters: inputFormatters,
       textInputAction: textInputAction,
       onFieldSubmitted: onFieldSubmitted,
+      onEditingComplete: onEditingComplete,
       onChanged: onChanged,
       maxLines: maxLines ?? 1,
       obscureText: obscureText,

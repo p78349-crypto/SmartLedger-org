@@ -205,11 +205,9 @@ class AssetSimpleInputArgs {
 class ShoppingCartArgs {
   const ShoppingCartArgs({
     required this.accountName,
-    this.openPrepOnStart = false,
     this.initialItems,
   });
   final String accountName;
-  final bool openPrepOnStart;
   final List<ShoppingCartItem>? initialItems;
 }
 
@@ -289,4 +287,17 @@ class RecipeToCartArgs {
 
   final String accountName;
   final dynamic recipe; // Recipe 타입
+}
+
+/// 페이지별 아이콘 관리 화면 Args
+class PageIconManagementArgs {
+  const PageIconManagementArgs({
+    required this.accountName,
+    required this.pageIndex,
+    required this.pageTitle,
+  });
+
+  final String accountName;
+  final int pageIndex;
+  final String pageTitle;
 }

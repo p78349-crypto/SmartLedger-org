@@ -34,6 +34,17 @@ Flutter 기반 다중 계정 가계부 앱입니다. 각 계정별로 거래, �
 - Child(파일별 검색 단서): [tools/INDEX_CHILD.md](tools/INDEX_CHILD.md)
 - 권장 흐름: Parent로 범위 결정 → Child로 키워드 확보 → 해당 폴더/파일만 검색
 
+## 문서 구조
+
+- 구조 안내: [docs/DOCS_STRUCTURE_2026-02-23.md](docs/DOCS_STRUCTURE_2026-02-23.md)
+- 파일명 규칙: [docs/FILENAME_RULES_2026-02-23.md](docs/FILENAME_RULES_2026-02-23.md)
+- 분류 폴더:
+	- docs/developer
+	- docs/user-manual
+	- docs/work-logs
+	- docs/reports
+	- docs/policies
+
 ## Icon design & validation
 - Add new custom icons to `assets/icons/custom/` (SVG) and update `assets/icons/metadata/icons.json`.
 - Run validation: `python tools/validate_icons.py` (or `pwsh .\tools\validate_icons.ps1` on Windows).

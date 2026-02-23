@@ -29,6 +29,10 @@ class PrefKeys {
   static const String trash = 'trash';
   static const String trashBackup = 'trash_backup';
 
+  // Security audit (글로벌 보안 규정)
+  static const String restoreAuditLog = 'restore_audit_log'; // 복원 이력 로그
+  static const String restoredAccountsNeedReauth = 'restored_accounts_need_reauth'; // 재인증 필요 계정
+
   // UI state
   static const String selectedAccount = 'selected_account';
   static const String selectedDate = 'selected_date';
@@ -58,6 +62,8 @@ class PrefKeys {
   // Food expiry
   static const String foodExpirySavedFeedbackTemplateV1 =
       'food_expiry_saved_feedback_template_v1';
+  static const String foodExpiryMigratedToConsumableV1 =
+      'food_expiry_migrated_to_consumable_v1';
 
   // Category
   static const String categoryUsageCountsV1 = 'category_usage_counts_v1';
@@ -80,6 +86,10 @@ class PrefKeys {
       'theme_wallpaper_sync_screen_saver_v1';
   static const String themeLocalWallpaperPath = 'theme_local_wallpaper_path_v1';
 
+  // Server Config
+  static const String serverAddress = 'server_address';
+  static const String adminKey = 'admin_key';
+
   // Asset projection ("1억 프로젝트")
   static const String project100mYearsV1 = 'project_100m_years_v1';
   static const String project100mTargetAmountV1 =
@@ -101,6 +111,11 @@ class PrefKeys {
   static const String rootAuthMode = 'root_auth_mode';
   static const String permissionGateBypassed = 'permission_gate_bypassed_v1';
   static const String rootAuthEnabled = 'root_auth_enabled';
+  
+  // ROOT security mode (pin, biometric, password)
+  static const String rootSecurityMode = 'root_security_mode_v1';
+  static const String rootBiometricEnabled = 'root_biometric_enabled_v1';
+  static const String rootPasswordEnabled = 'root_password_enabled_v1';
 
   // Sensitive: intentionally excluded from backups with PIN/password material.
   static const String rootPinEnabled = 'root_pin_enabled';

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/shopping_cart_item.dart';
 import '../services/user_pref_service.dart';
 import '../utils/household_items_utils.dart';
+import 'household_items_to_cart_widgets.dart';
 import 'shopping_cart_screen.dart';
 
 /// 생활용품 → 장바구니 화면
@@ -110,6 +111,21 @@ class _HouseholdItemsToCartScreenState
 
   int get _selectedCount => _selectedItems.values.where((v) => v).length;
 
+  void _onItemSelectedChanged(String name, bool? value) {
+    setState(() {
+      _selectedItems[name] = value ?? false;
+      if (value == true) {
+        _quantities[name] ??= 1.0;
+      }
+    });
+  }
+
+  void _onItemQuantityChanged(String name, double quantity) {
+    setState(() {
+      _quantities[name] = quantity;
+    });
+  }
+
   Future<void> _sendToCart() async {
     if (_selectedCount == 0) {
       ScaffoldMessenger.of(
@@ -179,8 +195,6 @@ class _HouseholdItemsToCartScreenState
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     if (_loading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
@@ -189,39 +203,39 @@ class _HouseholdItemsToCartScreenState
       appBar: AppBar(title: const Text('생활용품 선택'), centerTitle: true),
       body: Column(
         children: [
-          _buildSearchBar(theme),
+          HouseholdSearchBar(
+            controller: _searchController,
+            onSearch: _search,
+          ),
           if (_isSearching) ...[
             Expanded(child: _buildSearchResults()),
           ] else ...[
-            _buildCategorySelectors(theme),
+            HouseholdCategorySelectors(
+              categories1: _categories1,
+              categories2: _categories2,
+              selectedCategory1: _selectedCategory1,
+              selectedCategory2: _selectedCategory2,
+              onCategory1Changed: (v) {
+                setState(() {
+                  _selectedCategory1 = v;
+                  _loadCategory2();
+                });
+              },
+              onCategory2Changed: (v) {
+                setState(() {
+                  _selectedCategory2 = v;
+                  _loadCategory4();
+                });
+              },
+            ),
             Expanded(child: _buildItemList()),
           ],
-          _buildBottomButton(),
+          HouseholdCartBottomButton(
+            sending: _sending,
+            selectedCount: _selectedCount,
+            onPressed: _sendToCart,
+          ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildSearchBar(ThemeData theme) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: TextField(
-        controller: _searchController,
-        decoration: InputDecoration(
-          hintText: '상품 검색',
-          prefixIcon: const Icon(Icons.search),
-          suffixIcon: _searchController.text.isNotEmpty
-              ? IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    _searchController.clear();
-                    _search('');
-                  },
-                )
-              : null,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-        onChanged: _search,
       ),
     );
   }
@@ -238,49 +252,14 @@ class _HouseholdItemsToCartScreenState
         final selected = _selectedItems[item.name] ?? false;
         final quantity = _quantities[item.name] ?? 1.0;
 
-        return _buildItemTile(item.name, selected, quantity);
+        return HouseholdItemTile(
+          name: item.name,
+          selected: selected,
+          quantity: quantity,
+          onSelectedChanged: (v) => _onItemSelectedChanged(item.name, v),
+          onQuantityChanged: (q) => _onItemQuantityChanged(item.name, q),
+        );
       },
-    );
-  }
-
-  Widget _buildCategorySelectors(ThemeData theme) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        children: [
-          if (_categories1.isNotEmpty)
-            _buildDropdown('대분류', _selectedCategory1, _categories1, (v) {
-              setState(() {
-                _selectedCategory1 = v;
-                _loadCategory2();
-              });
-            }),
-          if (_categories2.isNotEmpty) const SizedBox(height: 8),
-          if (_categories2.isNotEmpty)
-            _buildDropdown('중분류', _selectedCategory2, _categories2, (v) {
-              setState(() {
-                _selectedCategory2 = v;
-                _loadCategory4();
-              });
-            }),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDropdown(
-    String label,
-    String? currentValue,
-    List<String> items,
-    void Function(String?) onChanged,
-  ) {
-    return DropdownButtonFormField<String>(
-      initialValue: currentValue,
-      decoration: InputDecoration(labelText: label),
-      items: items
-          .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-          .toList(),
-      onChanged: onChanged,
     );
   }
 
@@ -296,98 +275,14 @@ class _HouseholdItemsToCartScreenState
         final selected = _selectedItems[itemName] ?? false;
         final quantity = _quantities[itemName] ?? 1.0;
 
-        return _buildItemTile(itemName, selected, quantity);
+        return HouseholdItemTile(
+          name: itemName,
+          selected: selected,
+          quantity: quantity,
+          onSelectedChanged: (v) => _onItemSelectedChanged(itemName, v),
+          onQuantityChanged: (q) => _onItemQuantityChanged(itemName, q),
+        );
       },
-    );
-  }
-
-  Widget _buildItemTile(String name, bool selected, double quantity) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Row(
-          children: [
-            Checkbox(
-              value: selected,
-              onChanged: (value) {
-                setState(() {
-                  _selectedItems[name] = value ?? false;
-                  if (value == true) {
-                    _quantities[name] ??= 1.0;
-                  }
-                });
-              },
-            ),
-            Expanded(
-              child: Text(
-                name,
-                style: TextStyle(
-                  decoration: selected ? null : TextDecoration.lineThrough,
-                  color: selected ? null : Colors.grey,
-                ),
-              ),
-            ),
-            if (selected) ...[
-              IconButton(
-                icon: const Icon(Icons.remove_circle_outline),
-                onPressed: quantity > 1
-                    ? () {
-                        setState(() {
-                          _quantities[name] = quantity - 1;
-                        });
-                      }
-                    : null,
-              ),
-              Text(
-                '${quantity.toInt()}',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.add_circle_outline),
-                onPressed: () {
-                  setState(() {
-                    _quantities[name] = quantity + 1;
-                  });
-                },
-              ),
-            ],
-            const SizedBox(width: 8),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBottomButton() {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: SizedBox(
-          width: double.infinity,
-          child: FilledButton.icon(
-            onPressed: _sending || _selectedCount == 0 ? null : _sendToCart,
-            icon: _sending
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
-                : const Icon(Icons.shopping_cart),
-            label: Text(
-              _selectedCount == 0
-                  ? '항목을 선택해주세요'
-                  : '$_selectedCount개 항목 장바구니에 추가',
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

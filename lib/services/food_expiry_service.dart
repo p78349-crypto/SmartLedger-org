@@ -38,7 +38,6 @@ class FoodExpiryService {
       location: item.location,
       price: item.price ?? 0.0,
       supplier: item.supplier ?? '',
-      healthTags: item.healthTags,
     );
   }
 
@@ -53,7 +52,6 @@ class FoodExpiryService {
     String location = '냉장',
     double price = 0.0,
     String supplier = '',
-    List<String> healthTags = const <String>[],
   }) async {
     await ConsumableInventoryService.instance.addItem(
       name: name.trim(),
@@ -61,7 +59,6 @@ class FoodExpiryService {
       unit: unit,
       category: category,
       location: location,
-      healthTags: healthTags,
       purchaseDate: purchaseDate,
       expiryDate: expiryDate,
       price: price > 0 ? price : null,
@@ -82,7 +79,6 @@ class FoodExpiryService {
     String location = '냉장',
     double price = 0.0,
     String supplier = '',
-    List<String>? healthTags,
   }) async {
     final current = ConsumableInventoryService.instance.items.value;
     final idx = current.indexWhere((e) => e.id == id);
@@ -98,7 +94,6 @@ class FoodExpiryService {
       expiryDate: expiryDate,
       price: price > 0 ? price : null,
       supplier: supplier.isEmpty ? null : supplier,
-      healthTags: healthTags ?? existing.healthTags,
     );
     await ConsumableInventoryService.instance.updateItem(updated);
     await load();

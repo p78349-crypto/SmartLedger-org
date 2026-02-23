@@ -1,10 +1,13 @@
 part of 'food_expiry_upsert_dialog.dart';
 // ignore_for_file: invalid_use_of_protected_member
 
+/// Preferences, save, helper methods for [_FoodExpiryUpsertDialogState].
 extension FoodExpiryUpsertLogic on _FoodExpiryUpsertDialogState {
+  // ── SharedPreferences helpers ──────────────────────────────────────
+
   Future<void> _loadLastCategory() async {
     final prefs = await SharedPreferences.getInstance();
-    final last = prefs.getString(_kLastCategory)?.trim();
+    final last = prefs.getString(_FoodExpiryUpsertDialogState._kLastCategory)?.trim();
     if (!mounted) return;
     if (last == null || last.isEmpty) return;
     if (!_categories.contains(last)) return;
@@ -17,12 +20,12 @@ extension FoodExpiryUpsertLogic on _FoodExpiryUpsertDialogState {
     final next = category.trim();
     if (next.isEmpty) return;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_kLastCategory, next);
+    await prefs.setString(_FoodExpiryUpsertDialogState._kLastCategory, next);
   }
 
   Future<void> _loadLastLocation() async {
     final prefs = await SharedPreferences.getInstance();
-    final last = prefs.getString(_kLastLocation)?.trim();
+    final last = prefs.getString(_FoodExpiryUpsertDialogState._kLastLocation)?.trim();
     if (!mounted) return;
     if (last == null || last.isEmpty) return;
     if (!_locations.contains(last)) return;
@@ -35,12 +38,12 @@ extension FoodExpiryUpsertLogic on _FoodExpiryUpsertDialogState {
     final next = location.trim();
     if (next.isEmpty) return;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_kLastLocation, next);
+    await prefs.setString(_FoodExpiryUpsertDialogState._kLastLocation, next);
   }
 
   Future<void> _loadLastUnit() async {
     final prefs = await SharedPreferences.getInstance();
-    final last = prefs.getString(_kLastUnit)?.trim();
+    final last = prefs.getString(_FoodExpiryUpsertDialogState._kLastUnit)?.trim();
     if (!mounted) return;
     if (last == null || last.isEmpty) return;
 
@@ -57,7 +60,25 @@ extension FoodExpiryUpsertLogic on _FoodExpiryUpsertDialogState {
     final next = unit.trim();
     if (next.isEmpty) return;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_kLastUnit, next);
+    await prefs.setString(_FoodExpiryUpsertDialogState._kLastUnit, next);
+  }
+
+  // ── Small helpers ─────────────────────────────────────────────────
+
+  String _historySubtitle(ShoppingCartHistoryEntry item) {
+    final timeLabel = DateFormat('HH:mm').format(item.at);
+    return '${item.quantity}개 / $timeLabel';
+  }
+
+  String _expiryButtonLabel(DateTime? suggestedDate) {
+    if (_pickedExpiryDate == null) {
+      if (suggestedDate == null) return '날짜 선택';
+      final predicted = DateFormat('yyyy-MM-dd').format(suggestedDate);
+      return '예측: $predicted';
+    }
+
+    final manual = DateFormat('yyyy-MM-dd').format(_pickedExpiryDate!);
+    return '수동: $manual';
   }
 
   void _updateTotal() {
@@ -76,6 +97,70 @@ extension FoodExpiryUpsertLogic on _FoodExpiryUpsertDialogState {
       _quantityController.text = text;
     }
   }
+
+  // 박스 수량 자동 계산 로직
+  void _calculateTotalQuantity() {
+    final box = double.tryParse(_boxQtyController.text);
+    final pcs = double.tryParse(_pcsPerBoxController.text);
+
+    if (box != null && box > 0 && pcs != null && pcs > 0) {
+      final total = box * pcs;
+      final text = total == total.toInt()
+          ? total.toInt().toString()
+          : total.toString();
+
+      if (_quantityController.text != text) {
+        _quantityController.text = text;
+      }
+    }
+  }
+
+  // 최근 지출 내역 연동(One-Stop Flow)
+  Future<void> _prefillFromLatestTransaction() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      String? account = prefs.getString('lastAccountName');
+
+      if (account == null) {
+        final accounts = TransactionService().getAllAccountNames();
+        if (accounts.isNotEmpty) account = accounts.first;
+      }
+
+      if (account != null) {
+        await TransactionByDateUtils.syncFromDatabase(account);
+        final groupedData = await TransactionByDateUtils.load(account);
+
+        if (groupedData.isNotEmpty) {
+          final sortedDates = groupedData.keys.toList()
+            ..sort((a, b) => b.compareTo(a));
+          final latestDate = sortedDates.first;
+          final txList = groupedData[latestDate];
+
+          if (txList != null && txList.isNotEmpty) {
+            final latestTx = txList.first;
+
+            if (!mounted) return;
+            setState(() {
+              if (_nameController.text.isEmpty) {
+                _nameController.text = latestTx['name'] ?? '';
+              }
+              if (latestTx['amount'] != null) {
+                _priceController.text =
+                    (latestTx['amount'] as num).toInt().toString();
+              }
+              if (latestTx['quantity'] != null) {
+                _quantityController.text = latestTx['quantity'].toString();
+              }
+            });
+          }
+        }
+      }
+    } catch (e) {
+      // Auto-fill error silently ignored
+    }
+  }
+
+  // ── Save ──────────────────────────────────────────────────────────
 
   Future<void> _save() async {
     final name = _nameController.text.trim();
@@ -102,26 +187,8 @@ extension FoodExpiryUpsertLogic on _FoodExpiryUpsertDialogState {
         location: _location,
         price: price,
         supplier: supplier,
-        healthTags: _healthTags,
       );
     } else {
-      final used = widget.existing!.quantity - quantity;
-      if (used > 0) {
-        final warning = await HealthGuardrailService.recordUsageAndCheck(
-          itemName: name,
-          amount: used,
-          tags: _healthTags,
-        );
-        if (mounted && warning != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(warning.message),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        }
-      }
-
       final updatedItem = ConsumableInventoryItem(
         id: widget.existing!.id,
         name: name,
@@ -131,7 +198,6 @@ extension FoodExpiryUpsertLogic on _FoodExpiryUpsertDialogState {
         location: _location,
         createdAt: widget.existing!.createdAt,
         lastUpdated: DateTime.now(),
-        healthTags: _healthTags,
         expiryDate: effective,
         purchaseDate: _purchaseDate,
         price: price,
@@ -181,72 +247,6 @@ extension FoodExpiryUpsertLogic on _FoodExpiryUpsertDialogState {
       _loadNextFromQueue();
     } else {
       if (mounted) Navigator.of(context).pop();
-    }
-  }
-
-  // 박스 수량 자동 계산 로직
-  void _calculateTotalQuantity() {
-    final box = double.tryParse(_boxQtyController.text);
-    final pcs = double.tryParse(_pcsPerBoxController.text);
-
-    if (box != null && box > 0 && pcs != null && pcs > 0) {
-      final total = box * pcs;
-      final text = total == total.toInt()
-          ? total.toInt().toString()
-          : total.toString();
-
-      if (_quantityController.text != text) {
-        _quantityController.text = text;
-      }
-    }
-  }
-
-  // 최근 지출 내역 연동(One-Stop Flow)
-  Future<void> _prefillFromLatestTransaction() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      String? account = prefs.getString('lastAccountName');
-
-      // 마지막 계정 정보가 없으면 첫 번째 계정 사용
-      if (account == null) {
-        final accounts = TransactionService().getAllAccountNames();
-        if (accounts.isNotEmpty) account = accounts.first;
-      }
-
-      if (account != null) {
-        // 1. DB -> Utils 동기화
-        await TransactionByDateUtils.syncFromDatabase(account);
-        // 2. 데이터 로드
-        final groupedData = await TransactionByDateUtils.load(account);
-
-        if (groupedData.isNotEmpty) {
-          // 날짜 내림차순 정렬 (최신순)
-          final sortedDates = groupedData.keys.toList()
-            ..sort((a, b) => b.compareTo(a));
-          final latestDate = sortedDates.first;
-          final txList = groupedData[latestDate];
-
-          if (txList != null && txList.isNotEmpty) {
-            final latestTx = txList.first;
-
-            if (!mounted) return;
-            setState(() {
-              if (_nameController.text.isEmpty) {
-                _nameController.text = latestTx['name'] ?? '';
-              }
-              if (latestTx['amount'] != null) {
-                _priceController.text =
-                    (latestTx['amount'] as num).toInt().toString();
-              }
-              if (latestTx['quantity'] != null) {
-                _quantityController.text = latestTx['quantity'].toString();
-              }
-            });
-          }
-        }
-      }
-    } catch (e) {
-      // Auto-fill error silently ignored
     }
   }
 }

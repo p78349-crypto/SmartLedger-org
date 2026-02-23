@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -24,27 +23,18 @@ import '../widgets/ingredients_recommendation_widget.dart';
 import '../widgets/recipe_picker_dialog.dart';
 import '../widgets/user_preferences_widget.dart';
 
-part 'food_expiry_items_screen.usage_input.dart';
-part 'food_expiry_items_screen.helpers.dart';
-part 'food_expiry_items_screen.shopping_cart.dart';
-part 'food_expiry_items_screen.quantity_edit.dart';
-part 'food_expiry_items_screen.item_detail.dart';
-part 'food_expiry_items_screen.usage_apply.dart';
-part 'food_expiry_items_screen.recipe_picker.dart';
-part 'food_expiry_items_screen.recipe_dialog.dart';
-part 'food_expiry_items_screen.recipe_learning.dart';
-part 'food_expiry_items_screen.build_body.dart';
-part 'food_expiry_items_screen.build_panels.dart';
-part 'food_expiry_items_screen.build_item_tile.dart';
-
-/// Location filter options for food expiry items.
-const List<String> _locationOptions = [
-  '전체',
-  '냉장',
-  '냉동',
-  '실온',
-  '김치냉장고',
-];
+part 'food_expiry_items_screen_usage_input.dart';
+part 'food_expiry_items_screen_helpers.dart';
+part 'food_expiry_items_screen_item_detail.dart';
+part 'food_expiry_items_screen_quantity_edit.dart';
+part 'food_expiry_items_screen_shopping_cart.dart';
+part 'food_expiry_items_screen_recipe_picker.dart';
+part 'food_expiry_items_screen_recipe_dialog.dart';
+part 'food_expiry_items_screen_recipe_learning.dart';
+part 'food_expiry_items_screen_usage_apply.dart';
+part 'food_expiry_items_screen_build_panels.dart';
+part 'food_expiry_items_screen_build_item_tile.dart';
+part 'food_expiry_items_screen_build_body.dart';
 
 class FoodExpiryItemsScreen extends StatefulWidget {
   final Future<void> Function(BuildContext, {FoodExpiryItem? existing})?
@@ -78,6 +68,13 @@ class _FoodExpiryItemsScreenState extends State<FoodExpiryItemsScreen> {
 
   // 로케이션 필터
   String? _locationFilter;
+  static const List<String> _locationOptions = [
+    '전체',
+    '냉장',
+    '냉동',
+    '실온',
+    '김치냉장고',
+  ];
 
   @override
   void initState() {
@@ -110,3 +107,4 @@ class _FoodExpiryItemsScreenState extends State<FoodExpiryItemsScreen> {
   @override
   Widget build(BuildContext context) => buildBody(context);
 }
+

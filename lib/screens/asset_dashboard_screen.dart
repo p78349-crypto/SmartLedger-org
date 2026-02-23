@@ -12,6 +12,8 @@ import '../utils/asset_dashboard_utils.dart';
 import '../utils/icon_catalog.dart';
 import 'asset_detail_screen.dart';
 import 'asset_allocation_screen.dart';
+import 'asset_portfolio_analysis_screen.dart';
+import 'asset_investment_roadmap_screen.dart';
 import 'one_hundred_million_project_screen.dart';
 
 part 'asset_dashboard_screen_ui.dart';

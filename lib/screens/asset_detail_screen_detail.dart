@@ -2,6 +2,55 @@ part of 'asset_detail_screen.dart';
 // ignore_for_file: invalid_use_of_protected_member
 
 extension AssetDetailDetail on _AssetDetailScreenState {
+  bool _hasExtraInfo() {
+    return (_currentAsset.institution ?? '').isNotEmpty ||
+        (_currentAsset.currencyCode ?? '').isNotEmpty ||
+        (_currentAsset.ticker ?? '').isNotEmpty ||
+        _currentAsset.units != null ||
+        _currentAsset.unitPrice != null ||
+        _currentAsset.appraisalValue != null ||
+        _currentAsset.monthlyIncome != null ||
+      _currentAsset.riskLevel != null ||
+      _currentAsset.debtAmount != null ||
+      _currentAsset.maturityDate != null;
+  }
+
+  Widget _buildInfoRow(ThemeData theme, String label, String value) {
+    if (value.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerLowest,
+          border: Border.all(color: theme.colorScheme.outlineVariant),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Flexible(
+              child: Text(
+                value,
+                textAlign: TextAlign.end,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildDetailScreen() {
     final theme = Theme.of(context);
     final assetMoveService = AssetMoveService();
@@ -23,20 +72,32 @@ extension AssetDetailDetail on _AssetDetailScreenState {
     final expectedRateLabel = _currentAsset.expectedAnnualRatePct != null
         ? '${_currentAsset.expectedAnnualRatePct!.toStringAsFixed(2)}%'
         : null;
-    final targetRatioLabel = _currentAsset.targetRatio != null
-        ? '${_currentAsset.targetRatio!.toStringAsFixed(1)}%'
-        : null;
-    final targetAmountLabel = _currentAsset.targetAmount != null
-        ? CurrencyFormatter.format(_currentAsset.targetAmount!)
-        : null;
     final hasCostBasis = costBasisLabel != null;
     final hasExpectedRate = expectedRateLabel != null;
-    final hasTargetRatio = targetRatioLabel != null;
-    final hasTargetAmount = targetAmountLabel != null;
     final costBasisText = costBasisLabel ?? '';
     final expectedRateText = expectedRateLabel ?? '';
-    final targetRatioText = targetRatioLabel ?? '';
-    final targetAmountText = targetAmountLabel ?? '';
+    final currencyText = _currentAsset.currencyCode ?? '';
+    final tickerText = _currentAsset.ticker ?? '';
+    final institutionText = _currentAsset.institution ?? '';
+    final unitsText = _currentAsset.units != null
+      ? _currentAsset.units!.toStringAsFixed(4)
+      : '';
+    final unitPriceText = _currentAsset.unitPrice != null
+      ? CurrencyFormatter.format(_currentAsset.unitPrice!)
+      : '';
+    final appraisalText = _currentAsset.appraisalValue != null
+      ? CurrencyFormatter.format(_currentAsset.appraisalValue!)
+      : '';
+    final monthlyIncomeText = _currentAsset.monthlyIncome != null
+      ? CurrencyFormatter.format(_currentAsset.monthlyIncome!)
+      : '';
+    final riskText = _currentAsset.riskLevel?.label ?? '';
+    final debtText = _currentAsset.debtAmount != null
+      ? CurrencyFormatter.format(_currentAsset.debtAmount!)
+      : '';
+    final maturityText = _currentAsset.maturityDate != null
+      ? DateFormatter.defaultDate.format(_currentAsset.maturityDate!)
+      : '';
 
     return Scaffold(
       appBar: AppBar(
@@ -165,35 +226,18 @@ extension AssetDetailDetail on _AssetDetailScreenState {
                       ),
                     ),
                   ],
-                  if (hasTargetRatio || hasTargetAmount) ...[
+                  if (_hasExtraInfo()) ...[
                     const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        if (hasTargetRatio)
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('목표 비율', style: theme.textTheme.labelSmall),
-                              Text(
-                                targetRatioText,
-                                style: theme.textTheme.bodyMedium,
-                              ),
-                            ],
-                          ),
-                        if (hasTargetAmount)
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text('목표액', style: theme.textTheme.labelSmall),
-                              Text(
-                                targetAmountText,
-                                style: theme.textTheme.bodyMedium,
-                              ),
-                            ],
-                          ),
-                      ],
-                    ),
+                    _buildInfoRow(theme, '보관처', institutionText),
+                    _buildInfoRow(theme, '통화', currencyText),
+                    _buildInfoRow(theme, '종목/심볼', tickerText),
+                    _buildInfoRow(theme, '보유 수량', unitsText),
+                    _buildInfoRow(theme, '단가', unitPriceText),
+                    _buildInfoRow(theme, '평가액', appraisalText),
+                    _buildInfoRow(theme, '월 수익', monthlyIncomeText),
+                    _buildInfoRow(theme, '리스크', riskText),
+                    _buildInfoRow(theme, '부채', debtText),
+                    _buildInfoRow(theme, '만기', maturityText),
                   ],
                   if (_currentAsset.memo.isNotEmpty) ...[
                     const SizedBox(height: 12),
@@ -218,7 +262,28 @@ extension AssetDetailDetail on _AssetDetailScreenState {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildPerformanceAnalysis(theme),
+                  Text(
+                    '자산 평가',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => AssetEvaluationScreen(
+                            accountName: widget.accountName,
+                            asset: _currentAsset,
+                          ),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.insights_outlined),
+                    label: const Text('평가 리포트 열기'),
+                  ),
                   const SizedBox(height: 24),
                   Text(
                     '자산 이동 흐름',

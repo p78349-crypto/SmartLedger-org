@@ -43,12 +43,10 @@ extension _ShoppingGuideGroups on _ShoppingGuideScreenState {
           backgroundColor: allCompleted
               ? Colors.green.shade600
               : (isCurrent ? colors.primary : Colors.grey.shade400),
-          child: Text(
-            '${index + 1}',
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
+          child: const Icon(
+            Icons.location_on,
+            color: Colors.white,
+            size: 20,
           ),
         ),
         title: Row(

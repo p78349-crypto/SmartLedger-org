@@ -61,8 +61,14 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
-            isMinifyEnabled = false
-            isShrinkResources = false
+            
+            // 📦 앱 크기 최적화: 코드 축소 및 리소스 압축
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 }
@@ -74,11 +80,12 @@ flutter {
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
     
-    // MediaPipe LLM Inference API (온디바이스 AI)
+    // 🔒 AI 규제 준수로 제외: MediaPipe LLM Inference API 사용 중단
+    // MediaPipe LLM Inference API (온디바이스 AI) - 18개국 규제 준수로 비활성화
     // 공식 문서: https://ai.google.dev/edge/mediapipe/solutions/genai/llm_inference/android
-    implementation("com.google.mediapipe:tasks-genai:0.10.14")
+    // implementation("com.google.mediapipe:tasks-genai:0.10.14")  # AI 규제로 제외
     
-    // Kotlin Coroutines (비동기 처리)
+    // Kotlin Coroutines (비동기 처리) - AI 비의존 기능이므로 유지
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
 }
 

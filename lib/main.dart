@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'l10n/app_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -129,10 +129,9 @@ Future<void> main() async {
       // (Removed) Forced main pages reset/create on startup.
       // FORCED POLICIES RESET: clear security/policy prefs on startup.
       // Toggle using the compile-time environment variable
-      // `FORCE_RESET_POLICIES`. Default: true.
+      // `FORCE_RESET_POLICIES`. Default: false.
       const forceResetPolicies = bool.fromEnvironment(
         'FORCE_RESET_POLICIES',
-        defaultValue: true,
       );
       if (forceResetPolicies) {
         try {
@@ -191,11 +190,17 @@ class MyApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           locale: localeOverride,
           supportedLocales: const [
-            Locale('en', 'US'),
-            Locale('ko', 'KR'),
-            Locale('ja', 'JP'),
+            Locale('en'),
+            Locale('ko'),
+            Locale('ja'),
+            Locale('it'),
+            Locale('fr'),
+            Locale('es'),
+            Locale('pl'),
+            Locale('ru'),
           ],
           localizationsDelegates: const [
+            AppLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,

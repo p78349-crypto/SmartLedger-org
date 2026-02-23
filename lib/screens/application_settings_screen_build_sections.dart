@@ -83,7 +83,7 @@ extension ApplicationSettingsBuildSections on _ApplicationSettingsScreenState {
           ListTile(
             title: const Text('예상 소진 자동 추가 기준 (식료품)'),
             subtitle: const Text(
-              '식료품(유통기한 설정 품목)은 예상 소진 N일 전 자동으로 쇼핑준비에 추가합니다.',
+              '식료품(유통기한 설정 품목)은 예상 소진 N일 전 자동으로 장바구니에 추가합니다.',
             ),
             trailing: DropdownButton<int>(
               value: _stockAutoAddDaysFood,
@@ -104,7 +104,7 @@ extension ApplicationSettingsBuildSections on _ApplicationSettingsScreenState {
           ListTile(
             title: const Text('예상 소진 자동 추가 기준 (생활용품)'),
             subtitle: const Text(
-              '생활용품(유통기한 없는 품목)은 예상 소진 N일 전 자동으로 쇼핑준비에 추가합니다.',
+              '생활용품(유통기한 없는 품목)은 예상 소진 N일 전 자동으로 장바구니에 추가합니다.',
             ),
             trailing: DropdownButton<int>(
               value: _stockAutoAddDaysHousehold,

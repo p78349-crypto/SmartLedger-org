@@ -9,6 +9,7 @@ import '../services/user_password_service.dart';
 import '../services/user_pin_service.dart';
 import '../utils/dev_overrides.dart';
 import '../utils/pref_keys.dart';
+import 'asset_auth_choice_dialog.dart';
 
 /// A lightweight gate for asset-related standalone routes.
 ///
@@ -159,11 +160,11 @@ class _AssetRouteAuthGateState extends State<AssetRouteAuthGate> {
     }
 
     if (!mounted) return;
-    final choice = await showDialog<_AssetAuthChoice>(
+    final choice = await showDialog<AssetAuthChoice>(
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) {
-        return _AssetAuthChoiceDialog(
+        return AssetAuthChoiceDialog(
           canPin: canPin,
           canPassword: canPassword,
           canBiometric: canBiometric,
@@ -172,18 +173,18 @@ class _AssetRouteAuthGateState extends State<AssetRouteAuthGate> {
     );
 
     if (!mounted) return;
-    if (choice == null || choice == _AssetAuthChoice.exit) {
+    if (choice == null || choice == AssetAuthChoice.exit) {
       throw Exception('인증이 취소되었습니다');
     }
 
     switch (choice) {
-      case _AssetAuthChoice.biometric:
+      case AssetAuthChoice.biometric:
         final result = await _authService.authenticateDevice(reason: reason);
         if (!result.ok) {
           throw Exception(result.message ?? '인증이 취소되었습니다');
         }
         break;
-      case _AssetAuthChoice.pin:
+      case AssetAuthChoice.pin:
         final ok = await showDialog<bool>(
           context: context,
           barrierDismissible: false,
@@ -196,7 +197,7 @@ class _AssetRouteAuthGateState extends State<AssetRouteAuthGate> {
         );
         if (ok != true) throw Exception('PIN 인증이 취소되었습니다');
         break;
-      case _AssetAuthChoice.password:
+      case AssetAuthChoice.password:
         final ok = await showDialog<bool>(
           context: context,
           barrierDismissible: false,
@@ -209,7 +210,7 @@ class _AssetRouteAuthGateState extends State<AssetRouteAuthGate> {
         );
         if (ok != true) throw Exception('비밀번호 인증이 취소되었습니다');
         break;
-      case _AssetAuthChoice.exit:
+      case AssetAuthChoice.exit:
         throw Exception('인증이 취소되었습니다');
     }
 
@@ -291,53 +292,5 @@ class _AssetRouteAuthGateState extends State<AssetRouteAuthGate> {
     }
 
     return widget.child;
-  }
-}
-
-enum _AssetAuthChoice { biometric, pin, password, exit }
-
-class _AssetAuthChoiceDialog extends StatelessWidget {
-  const _AssetAuthChoiceDialog({
-    required this.canPin,
-    required this.canPassword,
-    required this.canBiometric,
-  });
-
-  final bool canPin;
-  final bool canPassword;
-  final bool canBiometric;
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('자산 보호 인증'),
-      content: const Text('사용할 인증 방법을 선택하세요.'),
-      actions: [
-        if (canBiometric)
-          FilledButton.icon(
-            onPressed: () =>
-                Navigator.of(context).pop(_AssetAuthChoice.biometric),
-            icon: const Icon(Icons.fingerprint),
-            label: const Text('지문'),
-          ),
-        if (canPin)
-          FilledButton.icon(
-            onPressed: () => Navigator.of(context).pop(_AssetAuthChoice.pin),
-            icon: const Icon(Icons.lock_outline),
-            label: const Text('PIN'),
-          ),
-        if (canPassword)
-          FilledButton.icon(
-            onPressed: () =>
-                Navigator.of(context).pop(_AssetAuthChoice.password),
-            icon: const Icon(Icons.password_outlined),
-            label: const Text('비번'),
-          ),
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(_AssetAuthChoice.exit),
-          child: const Text('취소'),
-        ),
-      ],
-    );
   }
 }

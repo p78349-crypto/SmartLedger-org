@@ -13,9 +13,20 @@ extension _HelpersExt on _AssetInputScreenState {
       targetAmountText: _targetAmountController.text,
       costBasisText: _costBasisController.text,
       expectedAnnualRateText: _expectedAnnualRateController.text,
+      tickerText: _tickerController.text,
+      institutionText: _institutionController.text,
+      currencyText: _currencyController.text,
+      unitsText: _unitsController.text,
+      unitPriceText: _unitPriceController.text,
+      appraisalValueText: _appraisalValueController.text,
+      monthlyIncomeText: _monthlyIncomeController.text,
+      debtAmountText: _debtAmountController.text,
+      alertThresholdText: _alertThresholdController.text,
       assetDate: _assetDate,
+      maturityDate: _maturityDate,
       selectedCategory: _selectedCategory,
       isInvestment: _isInvestment,
+      riskLevel: _riskLevel,
     );
   }
 
@@ -54,9 +65,20 @@ extension _HelpersExt on _AssetInputScreenState {
         _targetAmountController.text = snapshot.targetAmountText;
         _costBasisController.text = snapshot.costBasisText;
         _expectedAnnualRateController.text = snapshot.expectedAnnualRateText;
+        _tickerController.text = snapshot.tickerText;
+        _institutionController.text = snapshot.institutionText;
+        _currencyController.text = snapshot.currencyText;
+        _unitsController.text = snapshot.unitsText;
+        _unitPriceController.text = snapshot.unitPriceText;
+        _appraisalValueController.text = snapshot.appraisalValueText;
+        _monthlyIncomeController.text = snapshot.monthlyIncomeText;
+        _debtAmountController.text = snapshot.debtAmountText;
+        _alertThresholdController.text = snapshot.alertThresholdText;
         _assetDate = snapshot.assetDate;
+        _maturityDate = snapshot.maturityDate;
         _selectedCategory = snapshot.selectedCategory;
         _isInvestment = snapshot.isInvestment;
+        _riskLevel = snapshot.riskLevel;
       });
     }
   }

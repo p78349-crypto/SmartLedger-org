@@ -1,0 +1,22 @@
+[
+  {
+    "id": "1",
+    "category": "식비",
+    "localizedNames": {
+      "ko": "점심 식사",
+      "en": "Lunch",
+      "ja": "昼食",
+      "fr": "Déjeuner",
+      "es": "Almuerzo"
+    }
+  },
+  {
+    "id": "2",
+    "category": "교통",
+    "localizedNames": {
+      "ko": "택시비",
+      "en": "Taxi Fare",
+      "ru": "Стоимость такси"
+    }
+  }
+]

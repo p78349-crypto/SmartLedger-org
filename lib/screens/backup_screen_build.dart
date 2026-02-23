@@ -95,7 +95,7 @@ extension BackupScreenBuild on _BackupScreenState {
           ],
           const SizedBox(height: 8),
           ElevatedButton.icon(
-            onPressed: _isProcessing ? null : _showBackupOptions,
+            onPressed: _isProcessing ? null : _showBackupTypeSelection,
             icon: const Icon(Icons.backup),
             label: const Text('새 백업 만들기'),
             style: ElevatedButton.styleFrom(

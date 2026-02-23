@@ -102,10 +102,7 @@ void main() {
       // 100만원 예산
       await budgetService.setBudget(testAccount, 1000000);
 
-      // 고정 지출 30만원 (말일 예정)
-      // Ensure dueDay is in the future but within this month
-      // If today is 31st, this test might be tricky logic-wise.
-      // Assuming typical day. If today is end of month, future fixed cost is 0.
+      final reportWithoutFixedCost = await smartService.analyzeWeeklyStatus(testAccount);
 
       final now = DateTime.now();
       final lastDay = DateTime(now.year, now.month + 1, 0).day;
@@ -118,22 +115,12 @@ void main() {
             name: 'Future Rent',
             amount: 300000,
             dueDay: lastDay, // end of month
-            // category: 'Housing' Removed
           ),
         );
 
-        final report = await smartService.analyzeWeeklyStatus(testAccount);
+        final reportWithFixedCost = await smartService.analyzeWeeklyStatus(testAccount);
 
-        // Recommended limit should consider the 300k reserved.
-        // Available = 1000k - 300k = 700k.
-        // If we are in week 1 of 4, recommended ~ 700k/4 = 175k.
-        // Standard budget ~ 1000k/4 = 250k.
-        // So recommended < standard.
-
-        expect(report.recommendedLimit, lessThan(report.weeklyBudget));
-      } else {
-        // Can't test future fixed cost on last day of month easily without mocking time
-        // Just pass
+        expect(reportWithFixedCost.recommendedLimit, lessThan(reportWithoutFixedCost.recommendedLimit));
       }
     });
 

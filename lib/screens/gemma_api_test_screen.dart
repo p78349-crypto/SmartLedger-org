@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../services/gemma_api_service.dart';
 import '../services/receipt_processing_service.dart';
+import 'gemma_api_test_result.dart';
 
 /// Gemma API 테스트 화면
 class GemmaApiTestScreen extends StatefulWidget {
@@ -210,7 +210,13 @@ class _GemmaApiTestScreenState extends State<GemmaApiTestScreen> {
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
-                  Expanded(flex: 3, child: _buildResultView()),
+                  Expanded(
+                    flex: 3,
+                    child: GemmaTestResultView(
+                      result: _lastResult,
+                      onMessage: _showSnackBar,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -267,177 +273,6 @@ class _GemmaApiTestScreenState extends State<GemmaApiTestScreen> {
         ],
       ),
     );
-  }
-
-  Widget _buildResultView() {
-    if (_lastResult == null) {
-      return const Center(
-        child: Text(
-          '영수증을 처리하면 결과가 여기에 표시됩니다.',
-          style: TextStyle(color: Colors.grey),
-        ),
-      );
-    }
-
-    if (!_lastResult!.success) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error_outline, size: 48, color: Colors.red),
-            const SizedBox(height: 16),
-            Text(
-              '추출 실패',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.red.shade700,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              _lastResult!.error ?? '알 수 없는 오류',
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.grey),
-            ),
-          ],
-        ),
-      );
-    }
-
-    final data = _lastResult!.data!;
-
-    return SingleChildScrollView(
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.green),
-          borderRadius: BorderRadius.circular(8),
-          color: Colors.green.shade50,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.check_circle, color: Colors.green, size: 20),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    '추출 성공 (${_lastResult!.model})',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.copy, size: 18),
-                  onPressed: () {
-                    Clipboard.setData(
-                      ClipboardData(text: data.toJson().toString()),
-                    );
-                    _showSnackBar('결과 복사됨', isError: false);
-                  },
-                  tooltip: '결과 복사',
-                ),
-              ],
-            ),
-            const Divider(),
-            const SizedBox(height: 8),
-
-            // 상점명
-            if (data.storeName != null) ...[
-              _buildInfoRow('🏪 상점', data.storeName!),
-              const SizedBox(height: 4),
-            ],
-
-            // 날짜
-            if (data.date != null) ...[
-              _buildInfoRow('📅 날짜', _formatDate(data.date!)),
-              const SizedBox(height: 4),
-            ],
-
-            // 총액
-            if (data.totalAmount != null) ...[
-              _buildInfoRow('💰 총액', '${_formatMoney(data.totalAmount!)}원'),
-              const SizedBox(height: 8),
-            ],
-
-            // 항목 목록
-            if (data.items.isNotEmpty) ...[
-              const Text(
-                '📦 항목:',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              ...data.items.map(_buildItemCard),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInfoRow(String label, String value) {
-    return Row(
-      children: [
-        Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(value, style: const TextStyle(color: Colors.black87)),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildItemCard(ReceiptItem item) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              item.name,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-            ),
-            const SizedBox(height: 4),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '${_formatMoney(item.unitPrice)}원 x ${item.quantity}개',
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
-                ),
-                Text(
-                  '${_formatMoney(item.totalPrice)}원',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.blue,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  String _formatMoney(double amount) {
-    return amount
-        .toStringAsFixed(0)
-        .replaceAllMapped(
-          RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
-          (match) => '${match[1]},',
-        );
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
   String _formatTime(DateTime time) {

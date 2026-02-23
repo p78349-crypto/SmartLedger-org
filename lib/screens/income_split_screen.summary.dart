@@ -15,10 +15,11 @@ extension IncomeSplitSummary on _IncomeSplitScreenState {
                 ? CrossAxisAlignment.center
                 : CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(fontSize: 12)),
-          const SizedBox(height: 2),
+          Text(label, style: const TextStyle(fontSize: 11)),
+          const SizedBox(height: 1),
           Text(CurrencyFormatter.format(amount), textAlign: align,
-            style: TextStyle(fontWeight: FontWeight.bold, color: color)),
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold,
+              color: color)),
         ],
       );
     }
@@ -28,26 +29,26 @@ extension IncomeSplitSummary on _IncomeSplitScreenState {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Expanded(child: buildColumn('예금', savings, Colors.orange)),
-          const VerticalDivider(width: 24, thickness: 0.5),
+          const VerticalDivider(width: 8, thickness: 0.5),
           Expanded(child: buildColumn('예산', budget, Colors.blue,
             align: TextAlign.center)),
-          const VerticalDivider(width: 24, thickness: 0.5),
+          const VerticalDivider(width: 8, thickness: 0.5),
           Expanded(child: buildColumn('비상금', emergency, Colors.purple,
             align: TextAlign.end)),
         ],
       ),
-      const SizedBox(height: 12),
+      const SizedBox(height: 4),
       Container(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
         decoration: BoxDecoration(
-          color: Colors.teal[50], borderRadius: BorderRadius.circular(8)),
+          color: Colors.teal[50], borderRadius: BorderRadius.circular(6)),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const Text('자산 이동',
-              style: TextStyle(fontWeight: FontWeight.w600)),
+              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
             Text(CurrencyFormatter.format(assetTransfer),
-              style: const TextStyle(
+              style: const TextStyle(fontSize: 11,
                 fontWeight: FontWeight.bold, color: Colors.teal)),
           ],
         ),

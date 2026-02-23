@@ -24,7 +24,7 @@ extension IconManagementPlaced on _IconManagementScreenState {
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: placedSlots.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 8),
+            separatorBuilder: (_, _) => const SizedBox(width: 8),
             itemBuilder: (context, index) {
               final iconId = placedSlots[index].$2;
               return _buildPlacedIconDragItem(theme, scheme, iconId);

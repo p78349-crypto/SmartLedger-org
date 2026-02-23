@@ -196,21 +196,15 @@ Future<void> _addCheckedItemsToLedgerBulk({
       await reload();
       if (!context.mounted) return;
 
-      // 일일지출내역 표시 후 포인트 입력 화면으로 이동
+      // 일일지출내역 표시 후 포인트 입력 CTA만 표시
       await navigator.pushNamed(
         AppRoutes.dailyTransactions,
         arguments: DailyTransactionsArgs(
           accountName: accountName,
           initialDay: DateTime.now(),
           savedCount: selected.length,
+          showShoppingPointsInputCta: true,  // ✅ 터치 시에만 포인트 입력 열림
         ),
-      );
-      if (!context.mounted) return;
-
-      // 포인트 입력 화면 표시 (사용자가 수동 종료)
-      await navigator.pushNamed(
-        AppRoutes.shoppingPointsInput,
-        arguments: ShoppingPointsInputArgs(accountName: accountName),
       );
       return;
     }

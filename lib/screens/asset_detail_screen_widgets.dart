@@ -2,27 +2,6 @@ part of 'asset_detail_screen.dart';
 // ignore_for_file: invalid_use_of_protected_member
 
 extension AssetDetailWidgets on _AssetDetailScreenState {
-  /// 분석 항목 빌드
-  Widget _buildAnalysisItem(ThemeData theme, String label, double value) {
-    return Column(
-      children: [
-        Text(
-          label,
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: theme.colorScheme.secondary,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          CurrencyFormatter.format(value),
-          style: theme.textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
-    );
-  }
-
   /// 통계 항목 빌드
   Widget _buildStatItem(
     ThemeData theme, String label, String value, IconData icon,

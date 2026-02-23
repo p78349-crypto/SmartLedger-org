@@ -32,12 +32,12 @@ extension _IncomeAddFormUi on _IncomeAddFormState {
     return TextFormField(
       controller: _nameController,
       decoration: const InputDecoration(
-        labelText: '수입명',
+        labelText: '수입',
         hintText: '예) 월급, 프리랜스 수입, 이자 수익',
         border: OutlineInputBorder(),
       ),
       validator: (v) {
-        return v == null || v.trim().isEmpty ? '수입명을 입력하세요.' : null;
+        return v == null || v.trim().isEmpty ? '수입을 입력하세요.' : null;
       },
     );
   }

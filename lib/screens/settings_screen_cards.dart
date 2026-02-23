@@ -3,6 +3,98 @@ part of 'settings_screen.dart';
 // ignore_for_file: invalid_use_of_protected_member
 
 extension SettingsCards on _SettingsScreenState {
+  Future<void> exportDbEncryptionKey() async {
+    if (_isLoading) return;
+
+    final key = await DbEncryptionKeyManager.exportKeyForBackup();
+    if (key == null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('암호화 키를 찾을 수 없습니다.')),
+      );
+      return;
+    }
+
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('데이터베이스 암호화 키'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                '경고: 이 키는 기기 분실 시 데이터를 복구하기 위한 유일한 수단입니다. '
+                '안전한 곳(종이, 오프라인 메모장 등)에 보관하세요. '
+                '타인에게 노출되면 데이터가 유출될 수 있습니다.',
+                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: SelectableText(
+                  key,
+                  style: const TextStyle(fontFamily: 'monospace', fontSize: 16),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('닫기'),
+            ),
+            TextButton.icon(
+              onPressed: () async {
+                try {
+                  final directory = await getTemporaryDirectory();
+                  final file = File('${directory.path}/SmartLedger_Recovery_Key.txt');
+                  await file.writeAsString(
+                    'SmartLedger 데이터베이스 암호화 복구 키\n\n'
+                    '경고: 이 키는 기기 분실 시 데이터를 복구하기 위한 유일한 수단입니다.\n'
+                    '타인에게 노출되지 않도록 안전한 곳에 보관하세요.\n\n'
+                    '복구 키: $key\n'
+                  );
+                  
+                  final xFile = XFile(file.path);
+                  await SharePlus.instance.share(
+                    ShareParams(
+                      files: [xFile],
+                      text: 'SmartLedger 데이터베이스 암호화 복구 키',
+                    ),
+                  );
+                } catch (e) {
+                  if (!dialogContext.mounted) return;
+                  ScaffoldMessenger.of(dialogContext).showSnackBar(
+                    const SnackBar(content: Text('공유 중 오류가 발생했습니다.')),
+                  );
+                }
+              },
+              icon: const Icon(Icons.share),
+              label: const Text('공유'),
+            ),
+            FilledButton.icon(
+              onPressed: () {
+                Clipboard.setData(ClipboardData(text: key));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('클립보드에 복사되었습니다.')),
+                );
+              },
+              icon: const Icon(Icons.copy),
+              label: const Text('복사'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> disableBackupEncryption() async {
     if (_isLoading) return;
 

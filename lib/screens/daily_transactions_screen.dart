@@ -1,22 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
 import '../models/transaction.dart';
-import '../navigation/app_routes.dart';
-import 'transaction_add_screen.dart';
 import '../services/transaction_service.dart';
-import '../services/user_pref_service.dart';
-import '../theme/app_colors.dart';
 import '../utils/date_formatter.dart';
-import '../utils/icon_catalog.dart';
-import '../models/shopping_cart_item.dart';
-
-// ignore_for_file: avoid_redundant_argument_values
 import '../utils/number_formats.dart';
-import '../utils/refund_utils.dart';
-
-part 'daily_transactions_screen_actions.dart';
-part 'daily_transactions_screen_header.dart';
-part 'daily_transactions_screen_ui.dart';
+import 'daily_transactions_helpers.dart';
+import 'daily_transactions_widgets.dart';
 
 class DailyTransactionsScreen extends StatefulWidget {
   const DailyTransactionsScreen({
@@ -49,7 +39,7 @@ class _DailyTransactionsScreenState extends State<DailyTransactionsScreen> {
   void initState() {
     super.initState();
     _selectedDay = _stripTime(widget.initialDay);
-    loadData();
+    _loadData();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -60,26 +50,31 @@ class _DailyTransactionsScreenState extends State<DailyTransactionsScreen> {
       final messenger = ScaffoldMessenger.of(context);
       messenger.hideCurrentSnackBar();
 
-      final wantsPoints = widget.showShoppingPointsInputCta;
       messenger.showSnackBar(
         SnackBar(
           content: Text('저장 완료: $count건'),
-          action: wantsPoints
-              ? SnackBarAction(
-                  label: '포인트 입력',
-                  onPressed: () {
-                    messenger.hideCurrentSnackBar();
-                    Navigator.of(context).pushNamed(
-                      AppRoutes.shoppingPointsInput,
-                      arguments: ShoppingPointsInputArgs(
-                        accountName: widget.accountName,
-                      ),
-                    );
-                  },
-                )
-              : null,
         ),
       );
+    });
+  }
+
+  Future<void> _loadData() async {
+    await TransactionService().loadTransactions();
+    final transactions = TransactionService().getTransactions(
+      widget.accountName,
+    );
+
+    final grouped = <DateTime, List<Transaction>>{};
+    for (final tx in transactions) {
+      final key = _stripTime(tx.date);
+      grouped.putIfAbsent(key, () => []).add(tx);
+    }
+
+    final days = grouped.keys.toList()..sort();
+
+    setState(() {
+      _events = grouped;
+      _eventDays = days;
     });
   }
 
@@ -95,34 +90,42 @@ class _DailyTransactionsScreenState extends State<DailyTransactionsScreen> {
     final monthDay = DateFormatter.formatMonthDay(_selectedDay);
     final formattedDate = '$monthDay ($weekday)';
 
-    final summary = _computeSummary(transactions);
-    final int currentIndex = _eventDays.indexWhere(
-      (d) => d == _selectedDay,
-    );
+    final int currentIndex = _eventDays.indexWhere((d) => d == _selectedDay);
     final bool hasPrev = currentIndex > 0;
     final bool hasNext =
         currentIndex >= 0 && currentIndex < _eventDays.length - 1;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('일일 거래')),
-      bottomNavigationBar: buildBottomActionBar(theme),
+      appBar: AppBar(
+        title: const Text('일일 거래'),
+        actions: const [],
+      ),
+      bottomNavigationBar: DailyTransactionsBottomBar(
+        accountName: widget.accountName,
+      ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          buildDateHeader(
-            theme: theme,
-            formattedDate: formattedDate,
-            summary: summary,
+          DailyTransactionDateHeader(
+            selectedDay: _selectedDay,
+            transactions: transactions,
             hasPrev: hasPrev,
             hasNext: hasNext,
-            currentIndex: currentIndex,
+            onPrevDay: hasPrev
+                ? () => _changeDay(_eventDays[currentIndex - 1])
+                : null,
+            onNextDay: hasNext
+                ? () => _changeDay(_eventDays[currentIndex + 1])
+                : null,
+            numberFormat: _numberFormat,
           ),
           const Divider(height: 1),
           if (transactions.isEmpty)
             Expanded(
               child: Center(
                 child: Text(
-                  '$formattedDate\n거래 내역이 없습니다.',
+                  '$formattedDate\n'
+                  '거래 내역이 없습니다.',
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyMedium,
                 ),
@@ -132,19 +135,52 @@ class _DailyTransactionsScreenState extends State<DailyTransactionsScreen> {
             Expanded(
               child: Column(
                 children: [
-                  if (isLandscape) buildLandscapeHeader(theme),
+                  if (isLandscape)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                      child: DefaultTextStyle(
+                        style:
+                            theme.textTheme.labelSmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ) ??
+                            const TextStyle(fontSize: 12),
+                        child: const Row(
+                          children: [
+                            Expanded(flex: 4, child: Text('상품명')),
+                            SizedBox(width: 10),
+                            Expanded(flex: 3, child: Text('카테고리')),
+                            SizedBox(width: 10),
+                            Expanded(flex: 2, child: Text('결제')),
+                            SizedBox(width: 10),
+                            Expanded(flex: 4, child: Text('메모')),
+                            SizedBox(width: 10),
+                            Text('금액'),
+                            SizedBox(width: 10),
+                            Text('카드금액'),
+                          ],
+                        ),
+                      ),
+                    ),
                   if (isLandscape) const Divider(height: 1),
                   Expanded(
                     child: ListView.separated(
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       itemCount: transactions.length,
-                      separatorBuilder: (_, _) =>
+                      separatorBuilder: (context, index) =>
                           const Divider(height: 1),
-                      itemBuilder: (_, index) {
+                      itemBuilder: (context, index) {
                         final tx = transactions[index];
-                        return isLandscape
-                            ? buildLandscapeItem(theme, tx)
-                            : buildPortraitItem(theme, tx);
+                        return DailyTransactionTile(
+                          tx: tx,
+                          isLandscape: isLandscape,
+                          numberFormat: _numberFormat,
+                          onTap: () => showDailyTransactionActionSheet(
+                            context: context,
+                            tx: tx,
+                            accountName: widget.accountName,
+                            onReload: _loadData,
+                          ),
+                        );
                       },
                     ),
                   ),
@@ -156,85 +192,13 @@ class _DailyTransactionsScreenState extends State<DailyTransactionsScreen> {
     );
   }
 
-  _DaySummary _computeSummary(List<Transaction> transactions) {
-    double totalIncome = 0;
-    double totalExpense = 0;
-    double totalSavings = 0;
-    double totalRefund = 0;
-    for (final t in transactions) {
-      switch (t.type) {
-        case TransactionType.income:
-          totalIncome += t.amount;
-          break;
-        case TransactionType.expense:
-          totalExpense += t.amount;
-          break;
-        case TransactionType.savings:
-          totalSavings += t.amount;
-          break;
-        case TransactionType.refund:
-          totalRefund += t.amount;
-          break;
-      }
-    }
-
-    final paymentTotals = <String, double>{};
-    for (final t in transactions) {
-      if (t.type != TransactionType.expense) continue;
-      final method = t.paymentMethod.trim();
-      if (method.isEmpty) continue;
-      final amount = (t.cardChargedAmount ?? t.amount).abs();
-      paymentTotals[method] = (paymentTotals[method] ?? 0) + amount;
-    }
-
-    String? paymentSummary;
-    if (paymentTotals.isNotEmpty) {
-      final sorted = paymentTotals.entries.toList()
-        ..sort((a, b) => b.value.compareTo(a.value));
-      final parts = sorted.take(3).map((e) {
-        final v = _numberFormat.format(e.value);
-        return '${e.key} $v';
-      }).toList();
-      paymentSummary = parts.join(' · ');
-    }
-
-    return _DaySummary(
-      totalIncome: totalIncome,
-      totalExpense: totalExpense,
-      totalSavings: totalSavings,
-      totalRefund: totalRefund,
-      paymentSummary: paymentSummary,
-    );
-  }
-
   void _changeDay(DateTime newDay) {
     setState(() {
       _selectedDay = _stripTime(newDay);
     });
   }
 
-  String _formatDiscountLabel(num amount) {
-    final formatted = _numberFormat.format(amount);
-    return '할인 $formatted원';
-  }
-
   DateTime _stripTime(DateTime date) {
     return DateTime(date.year, date.month, date.day);
   }
-}
-
-class _DaySummary {
-  final double totalIncome;
-  final double totalExpense;
-  final double totalSavings;
-  final double totalRefund;
-  final String? paymentSummary;
-
-  const _DaySummary({
-    required this.totalIncome,
-    required this.totalExpense,
-    required this.totalSavings,
-    required this.totalRefund,
-    this.paymentSummary,
-  });
 }

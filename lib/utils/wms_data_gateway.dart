@@ -4,85 +4,83 @@
 /// - 모든 WMS 데이터 입출력을 단일 지점에서 제어
 /// - 데이터 유효성 검사 및 변환
 /// - 로깅 및 분석
-/// - 캐싱 및 성능 최적화
+/// - 🚀 스마트 캐싱 및 성능 최적화
 /// - 임시저장 (Draft) 기능
 library;
 
 import 'package:flutter/foundation.dart';
 import '../models/consumable_inventory_item.dart';
-import '../models/wms_inventory_draft_entry.dart';
 import '../services/consumable_inventory_service.dart';
-import '../services/user_pref_service.dart';
+import 'wms_data_models.dart';
+import 'wms_smart_cache.dart';
 
-part 'wms_data_gateway_models.dart';
-part 'wms_data_gateway_draft.dart';
+export 'wms_data_models.dart';
+export 'wms_draft_manager.dart';
 
-/// WMS 데이터 Gateway - 재고 관리
+/// WMS 데이터 Gateway - 재고 관리 (성능 최적화)
 class WmsInventoryGateway {
   WmsInventoryGateway._();
   static final WmsInventoryGateway instance = WmsInventoryGateway._();
 
-  List<ConsumableInventoryItem>? _cachedItems;
-  DateTime? _lastCacheTime;
-  static const _cacheDuration = Duration(seconds: 30);
+  // 🚀 스마트 캐시 시스템 사용
+  final _smartCache = WmsSmartCache.instance;
 
-  /// 재고 목록 조회 (캐싱 적용)
+  /// 재고 목록 조회 (🚀 스마트 캐싱 적용)
   Future<List<ConsumableInventoryItem>> getItems({
     bool forceRefresh = false,
   }) async {
-    final now = DateTime.now();
-
-    if (!forceRefresh &&
-        _cachedItems != null &&
-        _lastCacheTime != null &&
-        now.difference(_lastCacheTime!) < _cacheDuration) {
-      return _cachedItems!;
+    try {
+      final items = await _smartCache.getAllItems(forceRefresh: forceRefresh);
+      _logRead('Loaded ${items.length} inventory items (smart cache)');
+      return items;
+    } catch (e) {
+      _logError('Failed to load items', e);
+      return [];
     }
-
-    await ConsumableInventoryService.instance.load();
-    final items = ConsumableInventoryService.instance.items.value;
-
-    _cachedItems = List.unmodifiable(items);
-    _lastCacheTime = now;
-
-    _logRead('Loaded ${items.length} inventory items');
-    return _cachedItems!;
   }
 
-  /// 단일 아이템 조회 (이름 기준)
+  /// 단일 아이템 조회 (이름 기준) - 🚀 최적화됨
   Future<ConsumableInventoryItem?> findByName(String name) async {
-    final items = await getItems();
-    final normalized = name.trim().toLowerCase();
-
-    for (final item in items) {
-      if (item.name.trim().toLowerCase() == normalized) return item;
+    try {
+      final results = await _smartCache.searchItems(name, exactMatch: true);
+      return results.isNotEmpty ? results.first : null;
+    } catch (e) {
+      _logError('Failed to find item by name: $name', e);
+      return null;
     }
-    return null;
   }
 
-  /// 단일 아이템 조회 (ID 기준)
+  /// 단일 아이템 조회 (ID 기준) - 🚀 최적화됨
   Future<ConsumableInventoryItem?> findById(String id) async {
-    final items = await getItems();
-
-    for (final item in items) {
-      if (item.id == id) return item;
+    try {
+      return await _smartCache.getItemById(id);
+    } catch (e) {
+      _logError('Failed to find item by ID: $id', e);
+      return null;
     }
-    return null;
   }
 
-  /// 위치별 필터링
+  /// 위치별 필터링 - 🚀 최적화됨
   Future<List<ConsumableInventoryItem>> getItemsByLocation(
     String location,
   ) async {
-    final items = await getItems();
-    if (location == '전체') return items;
-    return items.where((e) => e.location == location).toList();
+    try {
+      return await _smartCache.getItemsByLocation(location);
+    } catch (e) {
+      _logError('Failed to get items by location: $location', e);
+      return [];
+    }
   }
 
-  /// 재고 부족 아이템 조회
+  /// 재고 부족 아이템 조회 - 🚀 최적화됨
   Future<List<ConsumableInventoryItem>> getLowStockItems() async {
-    final items = await getItems();
-    return items.where((e) => e.currentStock <= e.threshold).toList();
+    try {
+      final items = await _smartCache.getAllItems();
+      return items.where((e) => e.currentStock <= e.threshold).toList();
+    } catch (e) {
+      _logError('Failed to get low stock items', e);
+      return [];
+    }
   }
 
   /// 아이템 추가 (유효성 검사 포함)
@@ -91,6 +89,7 @@ class WmsInventoryGateway {
     WmsInputSource? source,
   }) async {
     try {
+      // 1. 유효성 검사
       final validation = input.validate();
       if (!validation.isValid) {
         return WmsOperationResult.failure(
@@ -98,11 +97,16 @@ class WmsInventoryGateway {
         );
       }
 
+      // 2. 중복 체크
       final existing = await findByName(input.name);
-      if (existing != null) return WmsOperationResult.duplicate(existing);
+      if (existing != null) {
+        return WmsOperationResult.duplicate(existing);
+      }
 
+      // 3. Service를 통한 추가
       await ConsumableInventoryService.instance.addItem(
         name: input.name,
+        barcode: input.barcode,
         currentStock: input.currentStock,
         unit: input.unit,
         threshold: input.threshold,
@@ -110,11 +114,12 @@ class WmsInventoryGateway {
         category: input.category,
         detailCategory: input.detailCategory,
         location: input.location,
-        healthTags: input.healthTags,
       );
 
+      // 4. 캐시 무효화
       _invalidateCache();
 
+      // 5. 추가된 아이템 반환
       final newItem = await findByName(input.name);
       if (newItem == null) {
         return WmsOperationResult.failure('Item creation failed');
@@ -137,6 +142,7 @@ class WmsInventoryGateway {
     try {
       await ConsumableInventoryService.instance.updateItem(item);
       _invalidateCache();
+
       _logWrite('Updated item: ${item.name}');
       return WmsOperationResult.success(item);
     } catch (e) {
@@ -150,6 +156,7 @@ class WmsInventoryGateway {
     try {
       await ConsumableInventoryService.instance.deleteItem(id);
       _invalidateCache();
+
       _logWrite('Deleted item: $id');
       return WmsOperationResult.success(null);
     } catch (e) {
@@ -168,16 +175,14 @@ class WmsInventoryGateway {
         return WmsOperationResult.failure('Amount must be positive');
       }
 
-      final warning = await ConsumableInventoryService.instance.useItem(
+      await ConsumableInventoryService.instance.useItem(
         id,
         amount,
       );
       _invalidateCache();
+
       _logWrite('Used item: $id (amount: $amount)');
 
-      if (warning != null) {
-        return WmsOperationResult.warning(null, warning.message);
-      }
       return WmsOperationResult.success(null);
     } catch (e) {
       _logError('Use item failed', e);
@@ -185,9 +190,9 @@ class WmsInventoryGateway {
     }
   }
 
+  /// 캐시 무효화
   void _invalidateCache() {
-    _cachedItems = null;
-    _lastCacheTime = null;
+    _smartCache.invalidateCache(clearAll: true);
   }
 
   /// 강제 리로드
@@ -196,6 +201,7 @@ class WmsInventoryGateway {
     await getItems(forceRefresh: true);
   }
 
+  // 로깅 메서드들
   void _logRead(String message) {
     debugPrint('[WMS Gateway][READ] $message');
   }

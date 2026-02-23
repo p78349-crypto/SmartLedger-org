@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import '../models/consumable_inventory_item.dart';
 import '../repositories/app_repositories.dart';
-import 'health_guardrail_service.dart';
 import 'replacement_cycle_notification_service.dart';
 import 'stock_depletion_notification_service.dart';
 import 'food_expiry_migration_service.dart';
@@ -109,6 +108,7 @@ class ConsumableInventoryService {
 
   Future<void> addItem({
     required String name,
+    String? barcode,
     double currentStock = 0.0,
     String unit = '',
     double threshold = 1.0,
@@ -116,7 +116,6 @@ class ConsumableInventoryService {
     String category = '생활용품',
     String? detailCategory,
     String location = '기타',
-    List<String> healthTags = const <String>[],
     DateTime? expiryDate,
     DateTime? purchaseDate,
     double? price,
@@ -127,6 +126,7 @@ class ConsumableInventoryService {
     final newItem = ConsumableInventoryItem(
       id: id,
       name: name.trim(),
+      barcode: barcode,
       currentStock: currentStock,
       unit: unit,
       threshold: threshold,
@@ -136,7 +136,6 @@ class ConsumableInventoryService {
       location: location,
       createdAt: now,
       lastUpdated: now,
-      healthTags: healthTags,
       expiryDate: expiryDate,
       purchaseDate: purchaseDate,
       price: price,
@@ -169,12 +168,32 @@ class ConsumableInventoryService {
     }
   }
 
+  Future<void> addOrUpdateItem(ConsumableInventoryItem item) async {
+    final index = items.value.indexWhere((e) => e.id == item.id);
+    if (index == -1) {
+      final next = List<ConsumableInventoryItem>.from(items.value)..add(item);
+      next.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+      items.value = next;
+      await _save();
+      return;
+    }
+
+    final next = List<ConsumableInventoryItem>.from(items.value);
+    next[index] = item.copyWith(lastUpdated: DateTime.now());
+    items.value = next;
+    await _save();
+  }
+
   Future<void> deleteItem(String id) async {
     items.value = items.value.where((e) => e.id != id).toList();
     await _save();
   }
 
-  Future<HealthGuardrailWarning?> useItem(String id, double amount) async {
+  Future<void> useItem(String id, double amount) async {
+    if (amount <= 0) {
+      return;
+    }
+
     final index = items.value.indexWhere((e) => e.id == id);
     if (index != -1) {
       final item = items.value[index];
@@ -183,7 +202,7 @@ class ConsumableInventoryService {
           : amount > item.currentStock
           ? item.currentStock
           : amount;
-      final nextStock = (item.currentStock - amount).clamp(
+      final nextStock = (item.currentStock - actualUsed).clamp(
         0.0,
         double.infinity,
       );
@@ -205,12 +224,6 @@ class ConsumableInventoryService {
       );
 
       if (actualUsed > 0) {
-        final warning = await HealthGuardrailService.recordUsageAndCheck(
-          itemName: item.name,
-          amount: actualUsed,
-          tags: item.healthTags,
-        );
-
         // Best-effort: keep replacement-cycle notifications up to date.
         try {
           await ReplacementCycleNotificationService.instance
@@ -218,11 +231,7 @@ class ConsumableInventoryService {
         } catch (_) {
           // ignore
         }
-
-        return warning;
       }
     }
-
-    return null;
   }
 }

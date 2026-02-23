@@ -28,7 +28,7 @@ extension InAppScreenSaverBuild on _InAppScreenSaverState {
               ),
             GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTap: () => _tryDismissWithAuth(),
+              onTap: _tryDismissWithAuth,
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -39,9 +39,7 @@ extension InAppScreenSaverBuild on _InAppScreenSaverState {
                       child: _error != null
                           ? _ErrorPanel(
                               message: _error!,
-                              onRetry: () {
-                                _refreshData();
-                              },
+                              onRetry: _refreshData,
                             )
                           : (_data == null
                                 ? const Center(
@@ -96,7 +94,7 @@ extension InAppScreenSaverBuild on _InAppScreenSaverState {
                     const SizedBox(height: 12),
                     _FooterBar(
                       authInProgress: _authInProgress,
-                      onQuickReturn: () => _tryDismissWithAuth(),
+                      onQuickReturn: _tryDismissWithAuth,
                     ),
                   ],
                 ),

@@ -88,25 +88,29 @@ extension AccountMainBuild on _AccountMainScreenState {
               physics: _disablePageSwipe
                   ? const NeverScrollableScrollPhysics()
                   : const PageScrollPhysics(),
-              itemCount: _pageCount,
+              itemCount: _hideRootPage ? _pageCount - 1 : _pageCount,
               onPageChanged: (index) {
+                // ROOT 페이지 건너뛰기 위한 실제 인덱스 계산
+                final actualIndex = _hideRootPage && index >= 5 ? index + 1 : index;
                 setState(() {
-                  _currentIndex = index;
+                  _currentIndex = actualIndex;
                   _disablePageSwipe =
-                      _pageKeys[index].currentState?.isEditMode ?? false;
+                      _pageKeys[actualIndex].currentState?.isEditMode ?? false;
                 });
                 if (_isRestoringIndex) return;
                 // Fire-and-forget: a best-effort persistence.
                 UserPrefService.setMainPageIndex(
                   accountName: widget.accountName,
-                  index: index,
+                  index: actualIndex,
                 );
               },
               itemBuilder: (context, index) {
+                // ROOT 페이지(인덱스 5) 건너뛰기
+                final actualIndex = _hideRootPage && index >= 5 ? index + 1 : index;
                 return _IconGridPage(
-                  key: _pageKeys[index],
+                  key: _pageKeys[actualIndex],
                   accountName: widget.accountName,
-                  pageIndex: index,
+                  pageIndex: actualIndex,
                   pageCount: _pageCount,
                   currentPage: _currentIndex,
                   pageController: _controller,
@@ -114,14 +118,22 @@ extension AccountMainBuild on _AccountMainScreenState {
                   onRequestQuickJump: _showQuickJumpSheet,
                   onRequestJumpToPage: (targetIndex) {
                     if (targetIndex < 0 || targetIndex >= _pageCount) return;
+                    // ROOT 페이지 건너뛰기를 고려한 점프
+                    final displayIndex = _hideRootPage && targetIndex > 5 
+                        ? targetIndex - 1 
+                        : (_hideRootPage && targetIndex == 5 ? -1 : targetIndex);
+                    if (displayIndex < 0) return; // ROOT 페이지로 점프 시도 시 무시
                     _controller.animateToPage(
-                      targetIndex,
+                      displayIndex,
                       duration: const Duration(milliseconds: 300),
                       curve: Curves.easeOut,
                     );
                   },
                   onEditModeChanged: (isEditMode) {
-                    if (index != _currentIndex) return;
+                    final displayIndex = _hideRootPage && actualIndex > 5 
+                        ? actualIndex - 1 
+                        : actualIndex;
+                    if (displayIndex != _controller.page?.round()) return;
                     if (_disablePageSwipe == isEditMode) return;
                     setState(() => _disablePageSwipe = isEditMode);
                   },

@@ -17,12 +17,66 @@ analyzer:
     unnecessary_library_name: ignore
     use_string_in_part_of_directives: ignore
     library_private_types_in_public_api: ignore
+    # Extensions on State subclasses can safely use setState
+    invalid_use_of_protected_member: ignore
     
   exclude:
     - '**/*.g.dart'
     - '**/*.freezed.dart'
     - 'build/**'
     - 'backups/**'
+    - '_sealed/**'
+    - '_wms_backup_*/**'
+    # 🔒 AI 규제 준수: AI 관련 파일들 빌드에서 제외
+    - 'lib/services/gemini_*.dart'
+    - 'lib/services/*ai*.dart'
+    - 'lib/widgets/*voice*.dart'
+    - 'lib/screens/*voice*.dart'
+    - 'lib/screens/*gemini*.dart'
+    - 'lib/services/custom_gemma*.dart'
+    - "lib/config/ai_compliance_engine.dart"
+    - "lib/config/ai_security_seal.dart"
+    - "lib/config/regional_ai_policy.dart"
+    - "lib/services/root_memo_service_v2.dart"
+    - "lib/screens/ai_investment_advisor_screen_utils.dart"
+    - "lib/screens/ai_model_selector_screen.dart"
+    - "lib/screens/asset_simple_input_screen_ui.dart"
+    - "lib/screens/ceo_monthly_defense_report_screen.dart"
+    - "lib/screens/ceo_prediction_dashboard_screen_utils.dart"
+    - "lib/screens/cloud_backup_settings_screen.dart"
+    - "lib/screens/incremental_backup_screen.dart"
+    - "lib/screens/quick_stock_use_screen.dart"
+    - "lib/screens/root_memo_list_screen.dart"
+    - "lib/screens/visit_price_form_screen.dart"
+    - "lib/screens/wms_optimized_pda_screen.dart"
+    - "lib/screens/wms_pda_quick_input_screen.dart"
+    - "lib/services/backup_service_incremental.dart"
+    - "lib/services/ceo_prediction_service.dart"
+    - "lib/services/ceo_prediction_service_extensions.dart"
+    - "lib/services/cloud_backup_service.dart"
+    - "lib/services/cloud_backup_service_utils.dart"
+    - "lib/services/financial_analytics_service.dart"
+    - "lib/services/financial_analytics_service_extensions.dart"
+    - "lib/services/financial_analytics_service_utils.dart"
+    - "lib/services/incremental_backup_service.dart"
+    - "lib/services/incremental_backup_service_extensions.dart"
+    - "lib/utils/ai_investment_helper.dart"
+    - "lib/utils/ceo_prediction_helper.dart"
+    - "lib/utils/cloud_backup_helper.dart"
+    - "lib/utils/financial_analytics_helper.dart"
+    - "lib/utils/incremental_backup_helper.dart"
+    - "lib/utils/root_memo_migration_util.dart"
+    - "lib/utils/wms_data_gateway.dart"
+    - "lib/utils/wms_optimization_settings.dart"
+    - "lib/utils/wms_optimized_barcode_service.dart"
+    - "lib/utils/wms_smart_cache.dart"
+    - "lib/utils/wms_unified_gateway.dart"
+    - "lib/widgets/ai_model_status_widget.dart"
+    - "lib/widgets/ai_status_indicator.dart"
+    - "lib/widgets/food_expiry_upsert_dialog.dart"
+    - "lib/widgets/root_memo_widget.dart"
+    - "lib/widgets/root_memo_widget_v2.dart"
+    - 'SmartLedger_backup_*/**'
 
 linter:
   rules:

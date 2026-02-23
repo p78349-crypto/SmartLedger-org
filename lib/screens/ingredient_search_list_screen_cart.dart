@@ -40,13 +40,13 @@ extension IngredientSearchCart on _IngredientSearchListScreenState {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('$itemName을(를) 쇼핑준비에 추가했습니다.'),
+          content: Text('$itemName을(를) 장바구니에 추가했습니다.'),
           action: SnackBarAction(
-            label: '쇼핑준비 이동',
+            label: '장바구니 이동',
             onPressed: () {
               Navigator.pushNamed(
                 context,
-                AppRoutes.shoppingPrep,
+                AppRoutes.shoppingCart,
                 arguments: ShoppingCartArgs(accountName: accountName),
               );
             },
@@ -57,7 +57,7 @@ extension IngredientSearchCart on _IngredientSearchListScreenState {
     }
   }
 
-  Future<void> _sendToShoppingPrep() async {
+  Future<void> _sendToShoppingCart() async {
     if (_selectedNames.isEmpty) {
       ScaffoldMessenger.of(
         context,
@@ -68,7 +68,7 @@ extension IngredientSearchCart on _IngredientSearchListScreenState {
     final selectedItems = _selectedNames.toList();
 
     if (widget.onSelect != null) {
-      // 쇼핑준비로 보내기 (각 항목을 callbacks으로 전송)
+      // 장바구니로 보내기 (각 항목을 callbacks으로 전송)
       for (final item in selectedItems) {
         widget.onSelect?.call(item);
       }
@@ -76,7 +76,7 @@ extension IngredientSearchCart on _IngredientSearchListScreenState {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${selectedItems.length}개 식재료를 쇼핑준비에 추가했습니다.'),
+            content: Text('${selectedItems.length}개 식재료를 장바구니에 추가했습니다.'),
           ),
         );
         Navigator.pop(context);
@@ -126,13 +126,13 @@ extension IngredientSearchCart on _IngredientSearchListScreenState {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${merged.added}개 식재료를 쇼핑준비에 추가했습니다.'),
+            content: Text('${merged.added}개 식재료를 장바구니에 추가했습니다.'),
             action: SnackBarAction(
-              label: '쇼핑준비 이동',
+              label: '장바구니 이동',
               onPressed: () {
                 Navigator.pushNamed(
                   context,
-                  AppRoutes.shoppingPrep,
+                  AppRoutes.shoppingCart,
                   arguments: ShoppingCartArgs(accountName: accountName),
                 );
               },

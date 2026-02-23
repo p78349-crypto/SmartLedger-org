@@ -66,7 +66,7 @@ extension IncomeSplitAllocationSheet on _IncomeSplitScreenState {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text('수입 항목 배분',
+                          const Text('수입을 자산으로',
                             style: TextStyle(
                               fontSize: 16, fontWeight: FontWeight.bold)),
                           IconButton(
@@ -126,7 +126,7 @@ extension IncomeSplitAllocationSheet on _IncomeSplitScreenState {
                       Expanded(
                         child: ListView.separated(
                           itemCount: categories.length,
-                          separatorBuilder: (_, __) =>
+                          separatorBuilder: (_, _) =>
                               const SizedBox(height: 12),
                           itemBuilder: (context, index) {
                             final cat = categories[index];

@@ -29,6 +29,7 @@ class BackupCrypto {
   static Future<String> encryptJsonPayload({
     required String plainJson,
     required String password,
+    String? hint,
   }) async {
     if (password.trim().isEmpty) {
       throw Exception('백업 암호가 비어있습니다');
@@ -57,6 +58,10 @@ class BackupCrypto {
       'mac': base64Encode(secretBox.mac.bytes),
       'createdAt': DateTime.now().toIso8601String(),
     };
+
+    if (hint != null && hint.trim().isNotEmpty) {
+      envelope['hint'] = hint.trim();
+    }
 
     return jsonEncode(envelope);
   }
@@ -123,7 +128,10 @@ class BackupCrypto {
       nonce: salt,
     );
   }
-
+  static List<int> randomBytes(int length) {
+    final random = Random.secure();
+    return List<int>.generate(length, (i) => random.nextInt(256));
+  }
   static List<int> _randomBytes(Random random, int length) {
     return List<int>.generate(length, (_) => random.nextInt(256));
   }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../services/account_service.dart';
-import '../navigation/app_routes.dart';
 import '../services/budget_service.dart';
 import '../services/income_split_service.dart';
 import '../utils/category_definitions.dart';
@@ -161,6 +160,37 @@ class _IncomeSplitScreenState extends State<IncomeSplitScreen> {
       _emergency = parse(_emergencyController);
       _assetTransfer = parse(_assetController);
     });
+  }
+
+  void _showUsageGuide() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('💡 수입 배분 사용법'),
+        content: const SingleChildScrollView(
+          child: ListBody(
+            children: [
+              Text('1. 이번 달 총 수입을 입력하세요.'),
+              SizedBox(height: 8),
+              Text('2. 총 수입을 예금, 지출 예산, 비상금으로 배분하세요.'),
+              SizedBox(height: 8),
+              Text('3. "자산 이동"에 입력한 금액은 저장 시 자산 탭으로 자동 이동됩니다.'),
+              SizedBox(height: 8),
+              Text('4. [카테고리 배분]: 지출 예산을 카테고리별로 상세히 나눌 수 있습니다.'),
+              SizedBox(height: 8),
+              Text('5. [수입을 자산으로]: 급여, 부수입 등 수입의 출처를 기록할 수 있습니다.'),
+              SizedBox(height: 8),
+              Text('6. 모든 설정이 끝나면 우측 하단의 "저장" 버튼을 누르세요.'),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('확인')),
+        ],
+      ),
+    );
   }
 
   @override

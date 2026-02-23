@@ -51,6 +51,7 @@ class _RecipeToCartScreenState extends State<RecipeToCartScreen> {
     }
 
     setState(() => _sending = true);
+    final lang = Localizations.localeOf(context).languageCode;
 
     try {
       // 기존 장바구니 아이템 로드
@@ -73,7 +74,7 @@ class _RecipeToCartScreenState extends State<RecipeToCartScreen> {
           name: ing.name,
           quantity: quantity.toInt().clamp(1, 999),
           unitLabel: ing.unit,
-          memo: widget.recipe.name,
+          memo: widget.recipe.nameForLocale(lang),
           createdAt: now,
           updatedAt: now,
         );
@@ -150,7 +151,7 @@ class _RecipeToCartScreenState extends State<RecipeToCartScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        widget.recipe.name,
+                        widget.recipe.nameForLocale(Localizations.localeOf(context).languageCode),
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),

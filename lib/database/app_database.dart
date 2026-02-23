@@ -3,6 +3,8 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:sqlite3/sqlite3.dart';
+import 'db_encryption_key_manager.dart';
 
 part 'app_database.g.dart';
 
@@ -10,6 +12,10 @@ class DbAccounts extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text().unique()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  TextColumn get syncId => text().nullable().unique()();
+  DateTimeColumn get updatedAt => dateTime().nullable()();
+  BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
+  BoolColumn get isSynced => boolean().withDefault(const Constant(false))();
 }
 
 class DbTransactions extends Table {
@@ -55,6 +61,11 @@ class DbTransactions extends Table {
   /// Example: {"카드":1200,"배송":3000}
   TextColumn get benefitJson => text().nullable()();
 
+  TextColumn get syncId => text().nullable().unique()();
+  DateTimeColumn get updatedAt => dateTime().nullable()();
+  BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
+  BoolColumn get isSynced => boolean().withDefault(const Constant(false))();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -68,6 +79,9 @@ class DbAssets extends Table {
   TextColumn get location => text().nullable()();
   TextColumn get memo => text().nullable()();
   DateTimeColumn get updatedAt => dateTime().nullable()();
+  TextColumn get syncId => text().nullable().unique()();
+  BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
+  BoolColumn get isSynced => boolean().withDefault(const Constant(false))();
 }
 
 class DbFixedCosts extends Table {
@@ -78,14 +92,33 @@ class DbFixedCosts extends Table {
   TextColumn get cycle => text().nullable()();
   DateTimeColumn get nextDueDate => dateTime().nullable()();
   TextColumn get memo => text().nullable()();
+  TextColumn get syncId => text().nullable().unique()();
+  DateTimeColumn get updatedAt => dateTime().nullable()();
+  BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
+  BoolColumn get isSynced => boolean().withDefault(const Constant(false))();
 }
 
-@DriftDatabase(tables: [DbAccounts, DbTransactions, DbAssets, DbFixedCosts])
+/// ROOT 전용 메모 테이블
+class DbRootMemos extends Table {
+  TextColumn get id => text()(); // UUID 형태의 고유 ID
+  TextColumn get title => text()(); // 메모 제목
+  TextColumn get content => text()(); // 메모 내용
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+  BoolColumn get isPinned => boolean().withDefault(const Constant(false))(); // 상단 고정 여부
+  TextColumn get color => text().nullable()(); // 메모 색상 (red, blue, green, yellow, purple)
+  IntColumn get sortOrder => integer().withDefault(const Constant(0))(); // 정렬 순서
+  
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+@DriftDatabase(tables: [DbAccounts, DbTransactions, DbAssets, DbFixedCosts, DbRootMemos])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -133,7 +166,29 @@ class AppDatabase extends _$AppDatabase {
         'ON tx_benefit_monthly(account_id, ym)',
       );
     },
+    
     onUpgrade: (migrator, from, to) async {
+      if (from < 10) {
+        await migrator.addColumn(dbAccounts, dbAccounts.syncId);
+        await migrator.addColumn(dbAccounts, dbAccounts.updatedAt);
+        await migrator.addColumn(dbAccounts, dbAccounts.isDeleted);
+        await migrator.addColumn(dbAccounts, dbAccounts.isSynced);
+
+        await migrator.addColumn(dbTransactions, dbTransactions.syncId);
+        await migrator.addColumn(dbTransactions, dbTransactions.updatedAt);
+        await migrator.addColumn(dbTransactions, dbTransactions.isDeleted);
+        await migrator.addColumn(dbTransactions, dbTransactions.isSynced);
+
+        await migrator.addColumn(dbAssets, dbAssets.syncId);
+        await migrator.addColumn(dbAssets, dbAssets.isDeleted);
+        await migrator.addColumn(dbAssets, dbAssets.isSynced);
+
+        await migrator.addColumn(dbFixedCosts, dbFixedCosts.syncId);
+        await migrator.addColumn(dbFixedCosts, dbFixedCosts.updatedAt);
+        await migrator.addColumn(dbFixedCosts, dbFixedCosts.isDeleted);
+        await migrator.addColumn(dbFixedCosts, dbFixedCosts.isSynced);
+      }
+
       // FTS is a cache. For schema changes, we can safely drop and recreate.
       if (from < 3) {
         await customStatement('DROP TABLE IF EXISTS tx_fts');
@@ -298,15 +353,18 @@ class AppDatabase extends _$AppDatabase {
 
 LazyDatabase _openConnection() {
   return LazyDatabase(() async {
-    // Unit tests (flutter test) run on the VM without platform plugins.
-    // Using an in-memory database avoids path_provider calls.
-    const isFlutterTest = bool.fromEnvironment('FLUTTER_TEST');
-    if (isFlutterTest) {
-      return NativeDatabase.memory();
-    }
+    final dbFolder = await getApplicationDocumentsDirectory();
+    final file = File(p.join(dbFolder.path, 'db.sqlite'));
 
-    final dir = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dir.path, 'app_database.sqlite'));
-    return NativeDatabase.createInBackground(file);
+    final cachebase = (await getTemporaryDirectory()).path;
+    sqlite3.tempDirectory = cachebase;
+
+    return NativeDatabase.createInBackground(
+      file,
+      setup: (db) async {
+        final key = await DbEncryptionKeyManager.getOrCreateKey();
+        db.execute("PRAGMA key = '$key';");
+      },
+    );
   });
 }

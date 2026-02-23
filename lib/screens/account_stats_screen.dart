@@ -16,6 +16,7 @@ import '../utils/localization.dart';
 import '../utils/number_formats.dart';
 import '../utils/product_name_utils.dart';
 import '../utils/store_memo_utils.dart';
+import '../utils/transaction_aggregation_utils.dart';
 import 'account_stats_models.dart';
 import 'account_stats_summary_widgets.dart';
 import 'account_stats_utils.dart';
@@ -137,27 +138,15 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
   Color _colorForTransaction(TransactionType type, ThemeData theme) =>
       statsColorForType(type, theme);
 
-  SavingsAllocation _allocationFor(Transaction tx) =>
-      tx.savingsAllocation ?? SavingsAllocation.assetIncrease;
-
   bool _isSavingsCountedAsExpense(Transaction tx) =>
-      tx.type == TransactionType.savings &&
-      _allocationFor(tx) == SavingsAllocation.expense;
+      TransactionAggregationUtils.isSavingsCountedAsExpense(tx);
 
   bool _shouldAggregateForType(Transaction tx, TransactionType type) {
-    switch (type) {
-      case TransactionType.expense:
-        return tx.type == TransactionType.expense ||
-            _isSavingsCountedAsExpense(tx);
-      case TransactionType.income:
-        return tx.type == TransactionType.income ||
-            tx.type == TransactionType.refund;
-      case TransactionType.refund:
-        return tx.type == TransactionType.refund;
-      case TransactionType.savings:
-        return tx.type == TransactionType.savings &&
-            !_isSavingsCountedAsExpense(tx);
-    }
+    return TransactionAggregationUtils.shouldAggregateForType(
+      tx,
+      type,
+      includeRefundInIncome: true,
+    );
   }
 
   @override

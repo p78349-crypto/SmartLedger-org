@@ -50,6 +50,8 @@ extension SettingsPin on _SettingsScreenState {
       }
 
       await _userPinService.clearPin(prefs);
+      // Clear mirrored backup encryption password from secure storage when PIN is removed
+      await BackupService().clearStoredBackupEncryptionPassword();
     }
 
     await prefs.setBool(PrefKeys.userPinEnabled, enabled);
@@ -154,6 +156,9 @@ extension SettingsPin on _SettingsScreenState {
     pinController.dispose();
     confirmController.dispose();
     await _userPinService.setPin(prefs, pin: pin);
+    // Mirror the app PIN to the backup encryption password store for auto-backups
+    await BackupService().setStoredBackupEncryptionPassword(pin);
+
     if (!mounted) return true;
     ScaffoldMessenger.of(
       context,

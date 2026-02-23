@@ -7,14 +7,14 @@ extension IconGridPageBuild on _IconGridPageState {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
 
-    return Container(
+    final content = Container(
       color: scheme.surface,
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.only(top: 70),
           child: Column(
             children: [
-              if (widget.pageIndex == 4 &&
+              if (widget.pageIndex == 5 &&
                   widget.accountName.toLowerCase() == 'root')
                 _buildCeoDashboardCard(theme, scheme),
               Expanded(child: _buildGrid(scheme)),
@@ -24,6 +24,13 @@ extension IconGridPageBuild on _IconGridPageState {
         ),
       ),
     );
+
+    // ROOT 페이지(인덱스 5)는 별도의 RootAuthGate로 보호
+    if (widget.pageIndex == 5) {
+      return RootAuthGate(child: content);
+    }
+
+    return content;
   }
 
   Widget _buildCeoDashboardCard(ThemeData theme, ColorScheme scheme) {
@@ -122,7 +129,7 @@ extension IconGridPageBuild on _IconGridPageState {
     final isEmpty = id.isEmpty;
     final icon = isEmpty ? null : _iconById(id);
 
-    if (!_isEditMode && _hideEmptySlots && isEmpty) {
+    if (!_isEditMode && _hideEmptySlots && (isEmpty || icon == null)) {
       return SizedBox.expand(key: slotKey);
     }
 
@@ -133,6 +140,7 @@ extension IconGridPageBuild on _IconGridPageState {
             isEditMode: _isEditMode,
             pageIndex: widget.pageIndex,
             itemIndex: index,
+            badgeText: _getBadgeText(id),
             liveDataWidget: null,
             onTap: InteractionBlockers.gate(() {
               if (_isEditMode) return;
@@ -200,6 +208,8 @@ extension IconGridPageBuild on _IconGridPageState {
             isEditMode: _isEditMode,
             onToggleEditMode: _toggleEditMode,
             onResetMainPages: widget.onRequestResetMainPages,
+            accountName: widget.accountName,
+            currentPageIndex: widget.pageIndex,
             onPageSelected: (pageIndex) {
               if (pageIndex < 0 || pageIndex >= widget.pageCount) return;
               widget.pageController.animateToPage(

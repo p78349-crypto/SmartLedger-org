@@ -4,7 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'
     show Clipboard, ClipboardData, rootBundle;
-import 'package:flutter_tts/flutter_tts.dart';
+// import 'package:flutter_tts/flutter_tts.dart';  // 🔒 AI 규제 준수로 제외
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -36,7 +36,7 @@ class CEOMonthlyDefenseReportScreen extends StatefulWidget {
 class _CEOMonthlyDefenseReportScreenState
     extends State<CEOMonthlyDefenseReportScreen> {
   late final Future<_ReportData> _reportFuture;
-  late final FlutterTts _tts;
+  late final _SealedTtsAdapter _tts;
   bool _includeRoots = false;
   bool _isSpeaking = false;
 
@@ -44,8 +44,7 @@ class _CEOMonthlyDefenseReportScreenState
   void initState() {
     super.initState();
     _reportFuture = _fetchReportData(widget.accountName);
-    _tts = FlutterTts();
-    _tts.awaitSpeakCompletion(true);
+    _tts = const _SealedTtsAdapter();
     _applyTtsSettings();
   }
 
@@ -163,6 +162,15 @@ class _CEOMonthlyDefenseReportScreenState
       ),
     );
   }
+}
+
+class _SealedTtsAdapter {
+  const _SealedTtsAdapter();
+
+  Future<void> setSpeechRate(double rate) async {}
+  Future<void> setPitch(double pitch) async {}
+  Future<void> stop() async {}
+  Future<void> speak(String text) async {}
 }
 
 class _ReportData {

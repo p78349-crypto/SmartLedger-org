@@ -44,14 +44,6 @@ final Map<String, AssistantRouteSpec> _shoppingSpecs = {
     buildArgs: (accountName) =>
         ShoppingCartArgs(accountName: _accountNameOrDefault(accountName)),
   ),
-  AppRoutes.shoppingPrep: AssistantRouteSpec(
-    routeName: AppRoutes.shoppingPrep,
-    requiresAccount: true,
-    buildArgs: (accountName) => ShoppingCartArgs(
-      accountName: _accountNameOrDefault(accountName),
-      openPrepOnStart: true,
-    ),
-  ),
   AppRoutes.shoppingPointsInput: AssistantRouteSpec(
     routeName: AppRoutes.shoppingPointsInput,
     requiresAccount: true,

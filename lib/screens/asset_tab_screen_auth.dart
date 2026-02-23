@@ -13,11 +13,11 @@ extension AssetTabScreenAuth on _AssetTabScreenState {
     SharedPreferences.getInstance().then((prefs) {
       prefs.setInt(
         PrefKeys.assetAuthSessionUntilMs,
-        DateTime.now().add(_autoLockIdleTimeout).millisecondsSinceEpoch,
+        DateTime.now().add(_AssetTabScreenState._autoLockIdleTimeout).millisecondsSinceEpoch,
       );
     });
 
-    _autoLockTimer = Timer(_autoLockIdleTimeout, () {
+    _autoLockTimer = Timer(_AssetTabScreenState._autoLockIdleTimeout, () {
       if (!mounted) return;
       // Auto-lock after inactivity.
       setState(() {

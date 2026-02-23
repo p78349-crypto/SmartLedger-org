@@ -89,10 +89,17 @@ class AssetFlowStats {
       return List<AssetMove>.from(moves);
     }
 
+    final startAt = start == null
+        ? null
+        : DateTime(start.year, start.month, start.day);
+    final endAt = end == null
+        ? null
+        : DateTime(end.year, end.month, end.day, 23, 59, 59, 999, 999);
+
     return moves.where((m) {
       final d = m.date;
-      if (start != null && d.isBefore(start)) return false;
-      if (end != null && d.isAfter(end)) return false;
+      if (startAt != null && d.isBefore(startAt)) return false;
+      if (endAt != null && d.isAfter(endAt)) return false;
       return true;
     }).toList();
   }

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../models/recipe.dart';
 import '../services/recipe_service.dart';
+import '../utils/korean_search_utils.dart';
 import '../navigation/app_routes.dart';
+import 'recipe_management_screen_lists.dart';
 
 /// 레시피 관리 메인 화면
 /// 1. 내 레시피 목록 (사용자 작성)
@@ -69,16 +71,22 @@ class _RecipeManagementScreenState extends State<RecipeManagementScreen>
 
   List<Recipe> get _filteredMyRecipes {
     if (_searchQuery.isEmpty) return _myRecipes;
-    return _myRecipes
-        .where((r) => r.name.toLowerCase().contains(_searchQuery.toLowerCase()))
-        .toList();
+    final q = _searchQuery;
+    return _myRecipes.where((r) {
+      final matches = r.localizedNames.values
+          .any((n) => MultilingualSearchUtils.matches(n, q));
+      return matches;
+    }).toList();
   }
 
   List<Recipe> get _filteredRecommendedRecipes {
     if (_searchQuery.isEmpty) return _recommendedRecipes;
-    return _recommendedRecipes
-        .where((r) => r.name.toLowerCase().contains(_searchQuery.toLowerCase()))
-        .toList();
+    final q = _searchQuery;
+    return _recommendedRecipes.where((r) {
+      final matches = r.localizedNames.values
+          .any((n) => MultilingualSearchUtils.matches(n, q));
+      return matches;
+    }).toList();
   }
 
   Future<void> _addNewRecipe() async {
@@ -106,9 +114,13 @@ class _RecipeManagementScreenState extends State<RecipeManagementScreen>
 
   Future<void> _copyToMyRecipes(Recipe recipe) async {
     // 추천 레시피를 내 레시피로 복사
+    final lang = Localizations.localeOf(context).languageCode;
+    final displayName = recipe.nameForLocale(lang);
+    final newLocalized = Map<String, String>.from(recipe.localizedNames);
+    newLocalized[lang] = '$displayName (내 버전)';
     final newRecipe = Recipe(
       id: 'user_${DateTime.now().millisecondsSinceEpoch}',
-      name: '${recipe.name} (내 버전)',
+      localizedNames: newLocalized,
       cuisine: recipe.cuisine,
       ingredients: recipe.ingredients,
       healthScore: recipe.healthScore,
@@ -133,7 +145,11 @@ class _RecipeManagementScreenState extends State<RecipeManagementScreen>
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('레시피 삭제'),
-        content: Text("'${recipe.name}'을(를) 삭제하시겠습니까?"),
+        content: Text(
+          "'${recipe.nameForLocale(
+            Localizations.localeOf(context).languageCode,
+          )}'을(를) 삭제하시겠습니까?",
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -151,9 +167,15 @@ class _RecipeManagementScreenState extends State<RecipeManagementScreen>
       await RecipeService.instance.deleteRecipe(recipe.id);
       await _loadRecipes();
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("'${recipe.name}' 삭제됨")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "'${recipe.nameForLocale(
+                Localizations.localeOf(context).languageCode,
+              )}' 삭제됨",
+            ),
+          ),
+        );
       }
     }
   }
@@ -168,7 +190,13 @@ class _RecipeManagementScreenState extends State<RecipeManagementScreen>
     );
     if (result == true && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("'${recipe.name}' 재료가 장바구니에 추가되었습니다")),
+        SnackBar(
+          content: Text(
+            "'${recipe.nameForLocale(
+              Localizations.localeOf(context).languageCode,
+            )}' 재료가 장바구니에 추가되었습니다",
+          ),
+        ),
       );
     }
   }
@@ -224,8 +252,25 @@ class _RecipeManagementScreenState extends State<RecipeManagementScreen>
                 : TabBarView(
                     controller: _tabController,
                     children: [
-                      _buildMyRecipesList(),
-                      _buildRecommendedRecipesList(),
+                      buildMyRecipesList(
+                        recipes: _filteredMyRecipes,
+                        searchQuery: _searchQuery,
+                        onRefresh: _loadRecipes,
+                        onAddNew: _addNewRecipe,
+                        onEdit: _editRecipe,
+                        onDelete: _deleteRecipe,
+                        onCopyToMy: _copyToMyRecipes,
+                        onSendToCart: _sendToCart,
+                      ),
+                      buildRecommendedRecipesList(
+                        recipes: _filteredRecommendedRecipes,
+                        searchQuery: _searchQuery,
+                        onRefresh: _loadRecipes,
+                        onEdit: _editRecipe,
+                        onDelete: _deleteRecipe,
+                        onCopyToMy: _copyToMyRecipes,
+                        onSendToCart: _sendToCart,
+                      ),
                     ],
                   ),
           ),
@@ -239,205 +284,4 @@ class _RecipeManagementScreenState extends State<RecipeManagementScreen>
     );
   }
 
-  Widget _buildMyRecipesList() {
-    final recipes = _filteredMyRecipes;
-
-    if (recipes.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.restaurant_menu, size: 64, color: Colors.grey[400]),
-            const SizedBox(height: 16),
-            Text(
-              _searchQuery.isEmpty ? '아직 작성한 레시피가 없습니다' : '검색 결과가 없습니다',
-              style: TextStyle(color: Colors.grey[600]),
-            ),
-            const SizedBox(height: 16),
-            if (_searchQuery.isEmpty)
-              FilledButton.icon(
-                onPressed: _addNewRecipe,
-                icon: const Icon(Icons.add),
-                label: const Text('첫 레시피 작성하기'),
-              ),
-          ],
-        ),
-      );
-    }
-
-    return RefreshIndicator(
-      onRefresh: _loadRecipes,
-      child: ListView.builder(
-        padding: const EdgeInsets.only(bottom: 80),
-        itemCount: recipes.length,
-        itemBuilder: (context, index) =>
-            _buildRecipeCard(recipes[index], isMyRecipe: true),
-      ),
-    );
-  }
-
-  Widget _buildRecommendedRecipesList() {
-    final recipes = _filteredRecommendedRecipes;
-
-    if (recipes.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.lightbulb_outline, size: 64, color: Colors.grey[400]),
-            const SizedBox(height: 16),
-            Text(
-              _searchQuery.isEmpty ? '추천 레시피가 없습니다' : '검색 결과가 없습니다',
-              style: TextStyle(color: Colors.grey[600]),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return RefreshIndicator(
-      onRefresh: _loadRecipes,
-      child: ListView.builder(
-        padding: const EdgeInsets.only(bottom: 80),
-        itemCount: recipes.length,
-        itemBuilder: (context, index) =>
-            _buildRecipeCard(recipes[index], isMyRecipe: false),
-      ),
-    );
-  }
-
-  Widget _buildRecipeCard(Recipe recipe, {required bool isMyRecipe}) {
-    final theme = Theme.of(context);
-    final ingredientCount = recipe.ingredients.length;
-
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () => _editRecipe(recipe),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 헤더
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          recipe.name,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            _buildTag(recipe.cuisine),
-                            const SizedBox(width: 8),
-                            _buildTag('재료 $ingredientCount개'),
-                            const SizedBox(width: 8),
-                            _buildHealthScore(recipe.healthScore),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (isMyRecipe)
-                    IconButton(
-                      icon: const Icon(Icons.delete_outline),
-                      onPressed: () => _deleteRecipe(recipe),
-                      tooltip: '삭제',
-                    ),
-                ],
-              ),
-
-              const SizedBox(height: 12),
-
-              // 재료 미리보기
-              Wrap(
-                spacing: 6,
-                runSpacing: 4,
-                children: recipe.ingredients
-                    .take(5)
-                    .map(
-                      (ing) => Chip(
-                        label: Text(
-                          ing.name,
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                        visualDensity: VisualDensity.compact,
-                        padding: EdgeInsets.zero,
-                      ),
-                    )
-                    .toList(),
-              ),
-              if (recipe.ingredients.length > 5)
-                Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(
-                    '+${recipe.ingredients.length - 5}개 더',
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                  ),
-                ),
-
-              const Divider(height: 24),
-
-              // 액션 버튼들
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  if (!isMyRecipe)
-                    OutlinedButton.icon(
-                      onPressed: () => _copyToMyRecipes(recipe),
-                      icon: const Icon(Icons.content_copy, size: 18),
-                      label: const Text('내 레시피로 복사'),
-                    ),
-                  if (!isMyRecipe) const SizedBox(width: 8),
-                  FilledButton.icon(
-                    onPressed: () => _sendToCart(recipe),
-                    icon: const Icon(Icons.shopping_cart, size: 18),
-                    label: const Text('장바구니에 추가'),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTag(String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(fontSize: 11, color: Colors.grey[700]),
-      ),
-    );
-  }
-
-  Widget _buildHealthScore(int score) {
-    final color = score >= 4
-        ? Colors.green
-        : score >= 3
-        ? Colors.orange
-        : Colors.red;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(Icons.favorite, size: 14, color: color),
-        const SizedBox(width: 2),
-        Text('$score', style: TextStyle(fontSize: 11, color: color)),
-      ],
-    );
-  }
 }

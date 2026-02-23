@@ -15,7 +15,7 @@ void main() {
       expect(item.id, 'food-1');
       expect(item.name, '우유');
       expect(item.quantity, 1.0); // 기본값
-      expect(item.unit, '개'); // 기본값
+      expect(item.unit, ''); // 기본값
       expect(item.category, '기타'); // 기본값
       expect(item.location, '냉장'); // 기본값
     });
@@ -97,6 +97,7 @@ void main() {
           expiryDate: DateTime(2026, 1, 20),
           createdAt: DateTime(2026),
           quantity: 30,
+          unit: '개',
           category: '유제품',
           price: 8000,
           supplier: '농협',

@@ -116,5 +116,28 @@ void main() {
       expect(stats.totalOutflow, 0);
       expect(stats.netFlow, 40);
     });
+
+    test('compute includes end-day transactions regardless of time', () {
+      final moves = <AssetMove>[
+        AssetMove(
+          id: '1',
+          accountName: 'A',
+          fromAssetId: 'stock',
+          amount: 55,
+          type: AssetMoveType.sale,
+          date: DateTime(2025, 12, 10, 23, 30),
+        ),
+      ];
+
+      final stats = AssetFlowStats.compute(
+        moves,
+        start: DateTime(2025, 12, 10),
+        end: DateTime(2025, 12, 10),
+      );
+
+      expect(stats.totalInflow, 55);
+      expect(stats.totalOutflow, 0);
+      expect(stats.netFlow, 55);
+    });
   });
 }

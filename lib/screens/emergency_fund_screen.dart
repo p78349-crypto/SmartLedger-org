@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../models/asset.dart';
 import '../models/emergency_transaction.dart';
-import '../services/asset_service.dart';
 import '../services/emergency_fund_service.dart';
 import '../utils/debounce_utils.dart';
 import '../utils/utils.dart';
 import '../widgets/state_placeholders.dart';
-
-part 'emergency_fund_screen_actions.dart';
-part 'emergency_fund_screen_dialogs.dart';
+import 'emergency_fund_dialogs.dart';
+import 'emergency_fund_widgets.dart';
 
 class EmergencyFundScreen extends StatefulWidget {
   final String accountName;
@@ -46,6 +43,51 @@ class _EmergencyFundScreenState extends State<EmergencyFundScreen> {
     super.dispose();
   }
 
+  Future<void> _loadTransactions() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    try {
+      await EmergencyFundService().ensureLoaded();
+      final transactions = EmergencyFundService().getTransactions(
+        widget.accountName,
+      );
+
+      if (!mounted) return;
+      setState(() {
+        _transactions = List<EmergencyTransaction>.from(transactions);
+        _filteredTransactions = _transactions;
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = '비상금 거래를 불러오지 못했습니다.';
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _filterTransactions() {
+    final query = _searchController.text.trim();
+    final lower = query.toLowerCase();
+    setState(() {
+      if (query.isEmpty) {
+        _filteredTransactions = _transactions;
+      } else {
+        _filteredTransactions = _transactions
+            .where(
+              (t) =>
+                  t.description.toLowerCase().contains(lower) ||
+                  t.amount.toString().contains(query),
+            )
+            .toList();
+      }
+    });
+  }
+
   double get _currentBalance {
     return _transactions.fold(0.0, (sum, t) => sum + t.amount);
   }
@@ -53,6 +95,8 @@ class _EmergencyFundScreenState extends State<EmergencyFundScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    // 비상금 목표 대비 진행률은 실제 사용처에서 바로 계산해 사용하므로
+    // 로컬 변수는 제거했습니다.
 
     return Scaffold(
       appBar: AppBar(
@@ -67,34 +111,7 @@ class _EmergencyFundScreenState extends State<EmergencyFundScreen> {
       ),
       body: Column(
         children: [
-          // 잔액 카드
-          Card(
-            margin: const EdgeInsets.all(16),
-            color: Colors.purple[50],
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    '현재 잔액',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: Colors.purple[900],
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    CurrencyFormatter.format(_currentBalance),
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.purple[900],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
+          EmergencyBalanceCard(balance: _currentBalance),
           // 검색바
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -157,7 +174,10 @@ class _EmergencyFundScreenState extends State<EmergencyFundScreen> {
                   itemCount: _filteredTransactions.length,
                   itemBuilder: (context, index) {
                     final transaction = _filteredTransactions[index];
-                    return _buildTransactionCard(transaction);
+                    return EmergencyTransactionCard(
+                      transaction: transaction,
+                      onTap: () => _editTransaction(transaction),
+                    );
                   },
                 );
               },
@@ -165,6 +185,98 @@ class _EmergencyFundScreenState extends State<EmergencyFundScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Future<void> _addTransaction() async {
+    final result = await showDialog<dynamic>(
+      context: context,
+      builder: (context) => const EmergencyTransactionDialog(),
+    );
+
+    if (result != null && result is EmergencyTransaction) {
+      setState(() {
+        _transactions.insert(0, result);
+        _filterTransactions();
+      });
+
+      await _saveTransactions();
+
+      if (mounted) {
+        SnackbarUtils.showSuccess(context, '비상금 거래가 저장되었습니다');
+      }
+    }
+  }
+
+  Future<void> _editTransaction(EmergencyTransaction transaction) async {
+    final result = await showDialog<dynamic>(
+      context: context,
+      builder: (context) =>
+          EmergencyTransactionDialog(transaction: transaction),
+    );
+
+    if (result == 'DELETE') {
+      // 삭제 처리
+      if (!mounted) return;
+      final decision = await showDialog<EmergencyDeleteDecision>(
+        context: context,
+        builder: (ctx) => const EmergencyDeleteDecisionDialog(),
+      );
+
+      if (decision == null) return;
+
+      if (decision.mode == EmergencyDeleteMode.justDelete) {
+        setState(() {
+          _transactions.removeWhere((t) => t.id == transaction.id);
+          _filterTransactions();
+        });
+        await _saveTransactions();
+      } else {
+        if (!mounted) return;
+        final cashAssetId = await showCashAssetPicker(
+          context,
+          widget.accountName,
+        );
+        if (cashAssetId == null) {
+          setState(() {
+            _transactions.removeWhere((t) => t.id == transaction.id);
+            _filterTransactions();
+          });
+          await _saveTransactions();
+        } else {
+          await EmergencyFundService().deleteTransactionsAndAdjustCashAsset(
+            widget.accountName,
+            [transaction.id],
+            cashAssetId: cashAssetId,
+            memo: decision.memo,
+          );
+          await _loadTransactions();
+        }
+      }
+
+      if (mounted) {
+        SnackbarUtils.showSuccess(context, '비상금 거래가 삭제되었습니다');
+      }
+    } else if (result != null && result is EmergencyTransaction) {
+      // 수정 처리
+      setState(() {
+        final index = _transactions.indexOf(transaction);
+        _transactions[index] = result;
+        _filterTransactions();
+      });
+
+      await _saveTransactions();
+
+      if (mounted) {
+        SnackbarUtils.showSuccess(context, '비상금 거래가 수정되었습니다');
+      }
+    }
+  }
+
+  Future<void> _saveTransactions() async {
+    await EmergencyFundService().replaceTransactions(
+      widget.accountName,
+      _transactions,
     );
   }
 }

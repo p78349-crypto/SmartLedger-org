@@ -4,12 +4,12 @@ part of 'user_preferences_widget.dart';
 
 extension _HelpersExt on _UserPreferencesWidgetState {
   void _showMealPrepNameDialog() {
+    final controller = TextEditingController(
+      text: _preferences?.mealPrepName ?? '',
+    );
     showDialog(
       context: context,
       builder: (context) {
-        final controller = TextEditingController(
-          text: _preferences?.mealPrepName ?? '',
-        );
         return AlertDialog(
           title: const Text('식사 준비 이름 설정'),
           content: TextField(
@@ -36,7 +36,7 @@ extension _HelpersExt on _UserPreferencesWidgetState {
           ],
         );
       },
-    );
+    ).then((_) => controller.dispose());
   }
 
   void _showMealPreferenceDialog() {
@@ -75,12 +75,12 @@ extension _HelpersExt on _UserPreferencesWidgetState {
   }
 
   void _showBudgetDialog() {
+    final controller = TextEditingController(
+      text: (_preferences?.budgetLimit ?? 500000).toString(),
+    );
     showDialog(
       context: context,
       builder: (context) {
-        final controller = TextEditingController(
-          text: (_preferences?.budgetLimit ?? 500000).toString(),
-        );
         return AlertDialog(
           title: const Text('월 예산 설정'),
           content: TextField(
@@ -110,7 +110,7 @@ extension _HelpersExt on _UserPreferencesWidgetState {
           ],
         );
       },
-    );
+    ).then((_) => controller.dispose());
   }
 
   Widget _buildSettingTile(

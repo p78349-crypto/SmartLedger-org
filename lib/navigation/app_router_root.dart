@@ -7,6 +7,24 @@ class _RootRoutes {
     Object? args,
   ) {
     switch (name) {
+      case AppRoutes.rootSummary:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const RootAuthGate(child: RootSummaryScreen()),
+        );
+
+      case AppRoutes.rootAccountSummary:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const RootAuthGate(child: RootAccountSummaryScreen()),
+        );
+
+      case AppRoutes.rootExpenseAnalysis:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const RootAuthGate(child: RootExpenseAnalysisScreen()),
+        );
+
       case AppRoutes.rootTransactions:
         return MaterialPageRoute(
           settings: settings,
@@ -35,7 +53,7 @@ class _RootRoutes {
       case AppRoutes.rootScreenSaverSettings:
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => const RootScreenSaverSettingsScreen(),
+          builder: (_) => const RootAuthGate(child: RootScreenSaverSettingsScreen()),
         );
 
       case AppRoutes.rootScreenSaverExposureSettings:

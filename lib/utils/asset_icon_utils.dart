@@ -23,6 +23,11 @@ class AssetIconUtils {
       label: 'Real estate',
       icon: IconCatalog.apartment,
     ),
+    AssetCategory.company: AssetCategoryIcon(
+      id: 'asset_company',
+      label: 'Company',
+      icon: IconCatalog.addBusiness,
+    ),
     AssetCategory.deposit: AssetCategoryIcon(
       id: 'asset_deposit',
       label: 'Deposit',
@@ -47,7 +52,12 @@ class AssetIconUtils {
 
   /// 카테고리별 아이콘 조회
   static AssetCategoryIcon getIcon(AssetCategory category) =>
-      _categoryIcons[category]!;
+      _categoryIcons[category] ??
+      const AssetCategoryIcon(
+        id: 'asset_unknown',
+        label: 'Unknown',
+        icon: IconCatalog.helpOutline,
+      );
 
   /// 모든 카테고리 아이콘 목록
   static List<AssetCategoryIcon> getAllIcons() =>
@@ -55,11 +65,11 @@ class AssetIconUtils {
 
   /// 카테고리별 아이콘만 추출
   static IconData getIconData(AssetCategory category) =>
-      _categoryIcons[category]!.icon;
+      getIcon(category).icon;
 
   /// 카테고리별 라벨 조회
   static String getLabel(AssetCategory category) =>
-      _categoryIcons[category]!.label;
+      getIcon(category).label;
 }
 
 /// 자산 카테고리 아이콘 메타데이터

@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/cooking_usage_log.dart';
+import '../shared/errors.dart';
+import '../shared/result.dart';
 import 'transaction_service.dart';
 import '../utils/savings_statistics_utils.dart';
 
@@ -80,41 +82,54 @@ class SavingsStatisticsService {
 
   /// 지출 감소 그래프: 월별 식비 지출 변화 데이터
   /// 반환: {'2025-12': 500000, '2026-01': 450000, ...}
-  Future<Map<String, double>> calculateMonthlyFoodExpenses() async {
+  Future<Result<Map<String, double>>>
+      calculateMonthlyFoodExpenses() async {
     try {
       const accountName = 'default';
       final service = TransactionService();
-      final transactions = service.getTransactions(accountName);
-      return SavingsStatisticsUtils.calculateMonthlyFoodExpenses(transactions);
-    } catch (e) {
-      debugPrint(
-        'SavingsStatisticsService: Error calculating monthly expenses - $e',
+      final transactions =
+          service.getTransactions(accountName);
+      return Success(
+        SavingsStatisticsUtils
+            .calculateMonthlyFoodExpenses(
+          transactions,
+        ),
       );
-      return {};
+    } catch (e) {
+      return Failure(StorageError(
+        '월별 식비 계산 실패: $e',
+      ));
     }
   }
 
   /// 챌린지 도입 전(1개월 이전)과 현재(이번 달) 식비 비교
   Future<
-    ({
-      double beforePrice,
-      double afterPrice,
-      double savingsAmount,
-      double savingsPercent,
-    })
+    Result<
+      ({
+        double beforePrice,
+        double afterPrice,
+        double savingsAmount,
+        double savingsPercent,
+      })
+    >
   >
   calculateSavingsCompare() async {
-    try {
-      final monthlyExpenses = await calculateMonthlyFoodExpenses();
-      return SavingsStatisticsUtils.compareSavings(monthlyExpenses);
-    } catch (e) {
-      debugPrint('SavingsStatisticsService: Error calculating savings - $e');
-      return (
-        beforePrice: 0.0,
-        afterPrice: 0.0,
-        savingsAmount: 0.0,
-        savingsPercent: 0.0,
-      );
-    }
+    final expenseResult =
+        await calculateMonthlyFoodExpenses();
+    return expenseResult.when(
+      success: (data) {
+        try {
+          return Success(
+            SavingsStatisticsUtils
+                .compareSavings(data),
+          );
+        } catch (e) {
+          return Failure(StorageError(
+            '절약 비교 계산 실패: $e',
+          ));
+        }
+      },
+      failure: Failure.new,
+    );
   }
 }

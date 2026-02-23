@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../utils/ingredient_health_score_utils.dart';
+import 'ingredient_health_analyzer_result.dart';
 
 /// 영수증 재료 건강도 분석 다이얼로그
 /// 간편하게 재료 입력하면 건강 점수 즉시 표시
@@ -176,12 +177,15 @@ class _IngredientHealthAnalyzerDialogState
                             label: Text(ingredient),
                             deleteIcon: const Icon(Icons.close, size: 16),
                             onDeleted: () => _removeIngredient(index),
-                            backgroundColor: _getScoreColor(
+                            backgroundColor: getDialogScoreColor(
                               score,
                             ).withValues(alpha: 0.2),
-                            side: BorderSide(color: _getScoreColor(score)),
+                            side: BorderSide(
+                              color: getDialogScoreColor(score),
+                            ),
                             avatar: CircleAvatar(
-                              backgroundColor: _getScoreColor(score),
+                              backgroundColor:
+                                  getDialogScoreColor(score),
                               child: Text(
                                 '$score',
                                 style: const TextStyle(
@@ -198,148 +202,11 @@ class _IngredientHealthAnalyzerDialogState
                     ],
 
                     // 분석 결과
-                    if (_analysis != null) ...[
-                      const Divider(),
-                      const SizedBox(height: 16),
-
-                      // 전체 건강 점수
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              _getScoreColor(_analysis!.overallScore),
-                              _getScoreColor(
-                                _analysis!.overallScore,
-                              ).withValues(alpha: 0.7),
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Column(
-                          children: [
-                            const Text(
-                              '전체 건강 점수',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              '${_analysis!.overallScore}점',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 36,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              IngredientHealthScoreUtils.getScoreLabel(
-                                _analysis!.overallScore,
-                              ),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              IngredientHealthScoreUtils.getScoreDescription(
-                                _analysis!.overallScore,
-                              ),
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
+                    if (_analysis != null)
+                      AnalysisResultSection(
+                        analysis: _analysis!,
+                        ingredientCount: _ingredients.length,
                       ),
-                      const SizedBox(height: 16),
-
-                      // 요약 메시지
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.shade50,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.blue.shade200),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.info,
-                              color: Colors.blue,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                _analysis!.summary,
-                                style: const TextStyle(fontSize: 13),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-
-                      // 건강도 분포
-                      const Text(
-                        '건강도 분포',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      _buildStatBar(
-                        '💚 매우 건강',
-                        _analysis!.veryHealthyCount,
-                        Colors.green,
-                      ),
-                      _buildStatBar(
-                        '💚 건강',
-                        _analysis!.healthyCount,
-                        Colors.lightGreen,
-                      ),
-                      _buildStatBar(
-                        '🟡 보통',
-                        _analysis!.normalCount,
-                        Colors.orange,
-                      ),
-                      _buildStatBar(
-                        '🟠 주의',
-                        _analysis!.cautionCount,
-                        Colors.deepOrange,
-                      ),
-                      _buildStatBar(
-                        '🔴 비건강',
-                        _analysis!.unhealthyCount,
-                        Colors.red,
-                      ),
-                      const SizedBox(height: 16),
-
-                      // 통계
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          _buildStatCard(
-                            '평균 점수',
-                            _analysis!.averageScore.toStringAsFixed(1),
-                            Colors.blue,
-                          ),
-                          _buildStatCard(
-                            '건강 재료',
-                            '${(_analysis!.healthyRatio * 100).toInt()}%',
-                            Colors.green,
-                          ),
-                        ],
-                      ),
-                    ],
                   ],
                 ),
               ),
@@ -386,84 +253,4 @@ class _IngredientHealthAnalyzerDialogState
     );
   }
 
-  Widget _buildStatBar(String label, int count, Color color) {
-    if (count == 0) return const SizedBox.shrink();
-
-    final total = _ingredients.length;
-    final ratio = count / total;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(label, style: const TextStyle(fontSize: 12)),
-              ),
-              Text(
-                '$count개',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: color,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          LinearProgressIndicator(
-            value: ratio,
-            backgroundColor: Colors.grey.shade200,
-            valueColor: AlwaysStoppedAnimation<Color>(color),
-            minHeight: 8,
-            borderRadius: BorderRadius.circular(4),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatCard(String label, String value, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Column(
-        children: [
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(label, style: TextStyle(fontSize: 11, color: color)),
-        ],
-      ),
-    );
-  }
-
-  Color _getScoreColor(int score) {
-    switch (score) {
-      case 5:
-        return Colors.green;
-      case 4:
-        return Colors.lightGreen;
-      case 3:
-        return Colors.orange;
-      case 2:
-        return Colors.deepOrange;
-      case 1:
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
-  }
 }

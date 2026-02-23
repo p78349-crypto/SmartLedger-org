@@ -4,45 +4,40 @@ part of 'savings_statistics_screen.dart';
 
 /// 월별 식비 지출 변화 그래프 탭
 extension SavingsStatisticsExpenseGraph on _SavingsStatisticsScreenState {
-  Widget buildExpenseGraphTab(BuildContext context, ThemeData theme) {
-    return FutureBuilder<Map<String, double>>(
-      future: SavingsStatisticsService.instance.calculateMonthlyFoodExpenses(),
+  Widget buildExpenseGraphTab(
+    BuildContext context,
+    ThemeData theme,
+  ) {
+    return FutureBuilder<Result<Map<String, double>>>(
+      future: SavingsStatisticsService.instance
+          .calculateMonthlyFoodExpenses(),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+        if (snapshot.connectionState ==
+            ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
         }
 
-        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+        if (!snapshot.hasData) {
+          return _buildEmptyGraph(theme);
+        }
+
+        final result = snapshot.data!;
+        if (result.isFailure) {
           return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.bar_chart_outlined,
-                  size: 48,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  '식비 기록이 아직 없습니다.',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '식비 카테고리의 거래를 추가하면\n그래프가 표시됩니다.',
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
+            child: Text(
+              '데이터 로드 실패:\n'
+              '${result.errorOrNull?.message}',
+              textAlign: TextAlign.center,
             ),
           );
         }
 
-        final monthlyData = snapshot.data!;
+        final monthlyData = result.dataOrNull!;
+        if (monthlyData.isEmpty) {
+          return _buildEmptyGraph(theme);
+        }
         final months = monthlyData.keys.toList()..sort();
         final maxExpense = months
             .map((m) => monthlyData[m]!)
@@ -120,19 +115,32 @@ extension SavingsStatisticsExpenseGraph on _SavingsStatisticsScreenState {
             ),
             const SizedBox(height: 16),
             FutureBuilder<
-              ({
-                double beforePrice,
-                double afterPrice,
-                double savingsAmount,
-                double savingsPercent,
-              })
+              Result<
+                ({
+                  double beforePrice,
+                  double afterPrice,
+                  double savingsAmount,
+                  double savingsPercent,
+                })
+              >
             >(
-              future: SavingsStatisticsService.instance
+              future: SavingsStatisticsService
+                  .instance
                   .calculateSavingsCompare(),
-              builder: (context, compareSnapshot) {
-                if (!compareSnapshot.hasData) return const SizedBox.shrink();
-
-                final compare = compareSnapshot.data!;
+              builder: (
+                context,
+                compareSnapshot,
+              ) {
+                if (!compareSnapshot.hasData) {
+                  return const SizedBox.shrink();
+                }
+                final compareResult =
+                    compareSnapshot.data!;
+                if (compareResult.isFailure) {
+                  return const SizedBox.shrink();
+                }
+                final compare =
+                    compareResult.dataOrNull!;
 
                 return Card(
                   color: Colors.green.shade50,
@@ -269,6 +277,42 @@ extension SavingsStatisticsExpenseGraph on _SavingsStatisticsScreenState {
           ],
         );
       },
+    );
+  }
+
+  Widget _buildEmptyGraph(ThemeData theme) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.bar_chart_outlined,
+            size: 48,
+            color: theme
+                .colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            '식비 기록이 아직 없습니다.',
+            style:
+                theme.textTheme.bodyLarge?.copyWith(
+              color: theme
+                  .colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '식비 카테고리의 거래를 추가하면\n'
+            '그래프가 표시됩니다.',
+            textAlign: TextAlign.center,
+            style:
+                theme.textTheme.bodySmall?.copyWith(
+              color: theme
+                  .colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

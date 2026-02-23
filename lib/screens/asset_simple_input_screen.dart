@@ -39,6 +39,12 @@ class _AssetSimpleInputScreenState extends State<AssetSimpleInputScreen> {
   final TextEditingController _locationController = TextEditingController();
   final TextEditingController _memoController = TextEditingController();
 
+  // 📱 커서 자동 이동을 위한 FocusNode 추가
+  final FocusNode _nameFocusNode = FocusNode();
+  final FocusNode _amountFocusNode = FocusNode();
+  final FocusNode _locationFocusNode = FocusNode();
+  final FocusNode _memoFocusNode = FocusNode();
+
   String _category = '현금';
   List<String> _recentMemos = const [];
 
@@ -81,6 +87,13 @@ class _AssetSimpleInputScreenState extends State<AssetSimpleInputScreen> {
     _amountController.dispose();
     _locationController.dispose();
     _memoController.dispose();
+
+    // FocusNode 리소스 정리
+    _nameFocusNode.dispose();
+    _amountFocusNode.dispose();
+    _locationFocusNode.dispose();
+    _memoFocusNode.dispose();
+
     super.dispose();
   }
 
@@ -166,12 +179,20 @@ class _AssetSimpleInputScreenState extends State<AssetSimpleInputScreen> {
         '소액 투자' => AssetCategory.stock,
         _ => AssetCategory.other,
       };
+
+      final String rawName = _nameController.text.trim();
+      final String rawLocation = _locationController.text.trim();
+      String finalName = _category;
+      if (rawName.isNotEmpty) finalName += ' | $rawName';
+      if (rawLocation.isNotEmpty) finalName += ' | $rawLocation';
+
+      final amountText = _amountController.text.trim();
+      final amount = double.tryParse(amountText) ?? 0.0;
+
       final asset = Asset(
         id: DateTime.now().microsecondsSinceEpoch.toString(),
-        name:
-            '$_category | ${_nameController.text.trim()} | '
-            '${_locationController.text.trim()}',
-        amount: double.parse(_amountController.text.trim()),
+        name: finalName,
+        amount: amount,
         category: category,
         memo: _memoController.text.trim(),
       );

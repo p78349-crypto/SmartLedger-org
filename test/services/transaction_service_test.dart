@@ -248,5 +248,100 @@ void main() {
 
       expect(() => transactions.add(tx), throwsUnsupportedError);
     });
+
+    test('should persist and reload exact amount values', () async {
+      final tx = Transaction(
+        id: 'persist-001',
+        type: TransactionType.expense,
+        amount: 12345.67,
+        date: DateTime.now(),
+        description: '정밀 금액 테스트',
+      );
+
+      await service.addTransaction('test_account', tx);
+
+      // Reload service to verify persistence
+      final newService = TransactionService();
+      await newService.loadTransactions();
+
+      final reloadedTx = newService.getTransactions('test_account').first;
+      expect(reloadedTx.amount, equals(12345.67));
+      expect(reloadedTx.description, equals('정밀 금액 테스트'));
+    });
+
+    test('should persist transaction with card charged amount', () async {
+      final tx = Transaction(
+        id: 'card-persist-001',
+        type: TransactionType.expense,
+        amount: 50000,
+        date: DateTime.now(),
+        description: '카드 구매',
+        cardChargedAmount: 48000, // 할인 적용
+      );
+
+      await service.addTransaction('test_account', tx);
+
+      // Reload and verify card amount
+      final newService = TransactionService();
+      await newService.loadTransactions();
+
+      final reloadedTx = newService.getTransactions('test_account').first;
+      expect(reloadedTx.amount, equals(50000));
+      expect(reloadedTx.cardChargedAmount, equals(48000));
+    });
+
+    test('should reload multiple transactions with precise values', () async {
+      final txList = [
+        Transaction(
+          id: 'multi-persist-001',
+          type: TransactionType.expense,
+          amount: 1200,
+          unitPrice: 400,
+          quantity: 3,
+          date: DateTime.now(),
+          description: '상품1',
+        ),
+        Transaction(
+          id: 'multi-persist-002',
+          type: TransactionType.expense,
+          amount: 3600,
+          unitPrice: 1200,
+          quantity: 3,
+          date: DateTime.now(),
+          description: '상품2',
+          cardChargedAmount: 3600,
+        ),
+        Transaction(
+          id: 'multi-persist-003',
+          type: TransactionType.income,
+          amount: 100000,
+          date: DateTime.now(),
+          description: '급여',
+        ),
+      ];
+
+      for (final tx in txList) {
+        await service.addTransaction('test_account', tx);
+      }
+
+      // Reload and verify all transactions
+      final newService = TransactionService();
+      await newService.loadTransactions();
+
+      final reloadedTxs = newService.getTransactions('test_account');
+      expect(reloadedTxs.length, equals(3));
+
+      expect(reloadedTxs[0].amount, equals(1200));
+      expect(reloadedTxs[0].unitPrice, equals(400));
+      expect(reloadedTxs[0].quantity, equals(3));
+
+      expect(reloadedTxs[1].amount, equals(3600));
+      expect(reloadedTxs[1].unitPrice, equals(1200));
+      expect(reloadedTxs[1].quantity, equals(3));
+      expect(reloadedTxs[1].cardChargedAmount, equals(3600));
+
+      expect(reloadedTxs[2].amount, equals(100000));
+      expect(reloadedTxs[2].type, equals(TransactionType.income));
+    });
   });
 }

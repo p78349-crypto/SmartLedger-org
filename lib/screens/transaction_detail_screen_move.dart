@@ -213,7 +213,7 @@ extension TransactionDetailMove on _TransactionDetailScreenState {
     }
 
     if (selectedDestination == 'asset') {
-      var assets = assetService.getAssets(widget.accountName);
+      final assets = assetService.getAssets(widget.accountName);
       Asset? depositAsset;
       for (final a in assets) {
         if (a.category == AssetCategory.deposit &&

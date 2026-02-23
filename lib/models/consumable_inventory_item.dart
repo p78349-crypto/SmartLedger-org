@@ -29,6 +29,7 @@ class ConsumableUsageRecord {
 class ConsumableInventoryItem {
   final String id;
   final String name;
+  final String? barcode; // 바코드 (스캔 검색용)
   final double currentStock;
   final String unit;
   final double threshold; // Stock level at which to suggest adding to cart
@@ -38,7 +39,6 @@ class ConsumableInventoryItem {
   final String location; // 보관 위치: 욕실, 주방, 거실, 창고 등
   final DateTime createdAt; // FIFO: 구매/등록일 기준 정렬용
   final DateTime lastUpdated;
-  final List<String> healthTags; // 건강 주의 태그 (예: 탄수화물/당류/주류)
   final List<ConsumableUsageRecord> usageHistory;
   
   // 식료품 관리용 필드 (유통기한 추적)
@@ -60,6 +60,7 @@ class ConsumableInventoryItem {
   const ConsumableInventoryItem({
     required this.id,
     required this.name,
+    this.barcode,
     this.currentStock = 0.0,
     this.unit = '',
     this.threshold = 1.0,
@@ -69,7 +70,6 @@ class ConsumableInventoryItem {
     this.location = '기타',
     required this.createdAt,
     required this.lastUpdated,
-    this.healthTags = const <String>[],
     this.usageHistory = const <ConsumableUsageRecord>[],
     this.expiryDate,
     this.purchaseDate,
@@ -80,6 +80,7 @@ class ConsumableInventoryItem {
   Map<String, dynamic> toJson() => {
     'id': id,
     'name': name,
+    'barcode': barcode,
     'currentStock': currentStock,
     'unit': unit,
     'threshold': threshold,
@@ -89,7 +90,6 @@ class ConsumableInventoryItem {
     'location': location,
     'createdAt': createdAt.toIso8601String(),
     'lastUpdated': lastUpdated.toIso8601String(),
-    'healthTags': healthTags,
     'usageHistory': usageHistory.map((e) => e.toJson()).toList(),
     'expiryDate': expiryDate?.toIso8601String(),
     'purchaseDate': purchaseDate?.toIso8601String(),
@@ -114,20 +114,10 @@ class ConsumableInventoryItem {
       }
     }
 
-    final tagsRaw = json['healthTags'];
-    final tags = <String>[];
-    if (tagsRaw is List) {
-      for (final t in tagsRaw) {
-        if (t is String) {
-          final s = t.trim();
-          if (s.isNotEmpty) tags.add(s);
-        }
-      }
-    }
-
     return ConsumableInventoryItem(
       id: json['id'] as String,
       name: json['name'] as String,
+      barcode: json['barcode'] as String?,
       currentStock: (json['currentStock'] as num?)?.toDouble() ?? 0.0,
       unit: (json['unit'] as String?) ?? '',
       threshold: (json['threshold'] as num?)?.toDouble() ?? 1.0,
@@ -139,7 +129,6 @@ class ConsumableInventoryItem {
           ? DateTime.parse(json['createdAt'] as String)
           : lastUpdated, // 기존 데이터 호환: createdAt 없으면 lastUpdated 사용
       lastUpdated: lastUpdated,
-      healthTags: tags,
       usageHistory: usageHistory,
       expiryDate: json['expiryDate'] != null
           ? DateTime.parse(json['expiryDate'] as String)
@@ -154,6 +143,7 @@ class ConsumableInventoryItem {
 
   ConsumableInventoryItem copyWith({
     String? name,
+    String? barcode,
     double? currentStock,
     String? unit,
     double? threshold,
@@ -163,7 +153,6 @@ class ConsumableInventoryItem {
     String? location,
     DateTime? createdAt,
     DateTime? lastUpdated,
-    List<String>? healthTags,
     List<ConsumableUsageRecord>? usageHistory,
     DateTime? expiryDate,
     DateTime? purchaseDate,
@@ -173,6 +162,7 @@ class ConsumableInventoryItem {
     return ConsumableInventoryItem(
       id: id,
       name: name ?? this.name,
+      barcode: barcode ?? this.barcode,
       currentStock: currentStock ?? this.currentStock,
       unit: unit ?? this.unit,
       threshold: threshold ?? this.threshold,
@@ -182,7 +172,6 @@ class ConsumableInventoryItem {
       location: location ?? this.location,
       createdAt: createdAt ?? this.createdAt,
       lastUpdated: lastUpdated ?? this.lastUpdated,
-      healthTags: healthTags ?? this.healthTags,
       usageHistory: usageHistory ?? this.usageHistory,
       expiryDate: expiryDate ?? this.expiryDate,
       purchaseDate: purchaseDate ?? this.purchaseDate,

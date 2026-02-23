@@ -149,6 +149,66 @@ void main() {
         );
         expect(result.length, 2);
       });
+
+      test('includes transactions at end-day late time', () {
+        final txs = [
+          createTransaction(
+            id: '1',
+            type: TransactionType.expense,
+            amount: 1500,
+            date: DateTime(2026, 1, 20, 23, 59),
+          ),
+        ];
+
+        final result = StatsCalculator.filterByRange(
+          txs,
+          DateTime(2026, 1, 20),
+          DateTime(2026, 1, 20),
+        );
+        expect(result.length, 1);
+        expect(result.first.id, '1');
+      });
+    });
+
+    group('filterByMonths', () {
+      test('includes cross-year range correctly', () {
+        final txs = [
+          createTransaction(
+            id: '1',
+            type: TransactionType.expense,
+            amount: 1000,
+            date: DateTime(2025, 12, 31, 23, 59),
+          ),
+          createTransaction(
+            id: '2',
+            type: TransactionType.expense,
+            amount: 2000,
+            date: DateTime(2026),
+          ),
+          createTransaction(
+            id: '3',
+            type: TransactionType.expense,
+            amount: 3000,
+            date: DateTime(2026, 2, 28, 23, 59),
+          ),
+          createTransaction(
+            id: '4',
+            type: TransactionType.expense,
+            amount: 4000,
+            date: DateTime(2025, 11, 30, 23, 59),
+          ),
+        ];
+
+        final result = StatsCalculator.filterByMonths(
+          txs,
+          DateTime(2026, 2, 15),
+          3,
+        );
+
+        final ids = result.map((tx) => tx.id).toSet();
+        expect(ids, containsAll(<String>{'1', '2', '3'}));
+        expect(ids, isNot(contains('4')));
+      });
     });
 
     group('filterByCategory', () {

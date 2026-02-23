@@ -127,7 +127,7 @@ extension BackupScreenRestore on _BackupScreenState {
         await BackupService().importAccountDataAsNew(jsonStr, newAccountName);
         if (!mounted) return;
         setState(() { _backupStatus = '✅ 복원 완료!\n계정: $newAccountName'; _isProcessing = false; });
-        SnackbarUtils.showSuccess(context, '$newAccountName 계정으로 복원되었습니다');
+        SnackbarUtils.showSuccess(context, '$newAccountName 계정으로 복원되었습니다\n(보안: 비밀번호는 새로 설정해주세요)');
       } catch (e) {
         if (!mounted) return;
         setState(() { _backupStatus = '❌ 복원 실패: $e'; _isProcessing = false; });
@@ -261,7 +261,7 @@ extension BackupScreenRestore on _BackupScreenState {
         _backupStatus = '✅ 복원 완료!\n계정: $newAccountName';
         _isProcessing = false;
       });
-      SnackbarUtils.showSuccess(context, '$newAccountName 계정으로 복원되었습니다');
+      SnackbarUtils.showSuccess(context, '$newAccountName 계정으로 복원되었습니다\n(보안: 비밀번호는 새로 설정해주세요)');
     } catch (error) {
       if (!mounted) return;
       setState(() {

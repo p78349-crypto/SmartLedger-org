@@ -48,6 +48,8 @@ class _BackupFileInfo {
 
 enum _BackupAuthChoice { biometric, pin, password, exit }
 
+enum _BackupType { full, transactionsOnly, assetsOnly, wmsOnly }
+
 class _BackupAuthChoiceDialog extends StatelessWidget {
   const _BackupAuthChoiceDialog({
     required this.canPin,
@@ -107,6 +109,7 @@ class _BackupScreenState extends State<BackupScreen> {
   String? _registeredEmail;
   bool _backupEncryptionEnabled = false;
   bool _backupTwoFactorEnabled = false;
+  _BackupType _selectedBackupType = _BackupType.full;
 
   @override
   void initState() {

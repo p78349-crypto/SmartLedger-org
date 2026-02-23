@@ -15,6 +15,11 @@ void main() {
         expect(result, -20.0);
       });
 
+      test('handles negative current amount', () {
+        final result = ProfitLossCalculator.calculateProfitLoss(-50.0, 100.0);
+        expect(result, -150.0);
+      });
+
       test('returns 0 when costBasis is null', () {
         final result = ProfitLossCalculator.calculateProfitLoss(100.0, null);
         expect(result, 0.0);
@@ -41,6 +46,14 @@ void main() {
           100.0,
         );
         expect(result, -25.0); // 25% 손실
+      });
+
+      test('calculates rate with decimals', () {
+        final result = ProfitLossCalculator.calculateProfitLossRate(
+          100.5,
+          99.5,
+        );
+        expect(result, closeTo(((100.5 - 99.5) / 99.5) * 100, 0.0001));
       });
 
       test('returns 0 when costBasis is null', () {

@@ -77,9 +77,16 @@ extension AssetTabScreenAuthDialogs on _AssetTabScreenState {
       },
     );
 
-    if (ok != true) return false;
+    if (ok != true) {
+      pinController.dispose();
+      confirmController.dispose();
+      return false;
+    }
 
     final pin = pinController.text.trim();
+    pinController.dispose();
+    confirmController.dispose();
+
     final prefs = await SharedPreferences.getInstance();
     await _rootPinService.setPin(prefs, pin: pin);
 

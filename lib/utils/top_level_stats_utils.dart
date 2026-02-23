@@ -4,6 +4,7 @@ import '../models/transaction.dart';
 import '../services/account_service.dart';
 import '../services/fixed_cost_service.dart';
 import '../services/transaction_service.dart';
+import '../utils/transaction_aggregation_utils.dart';
 import '../widgets/root_summary_card.dart';
 
 /// RootDashboardContext groups raw data and precomputed summary for the UI.
@@ -31,6 +32,88 @@ class RootDashboardContext {
 }
 
 class TopLevelStatsUtils {
+  static List<RootTransactionEntry> buildTopOutflowEntries({
+    required List<Transaction> allTransactions,
+    required Map<String, String> transactionAccountMap,
+    int limit = 5,
+  }) {
+    final outflows = allTransactions
+        .where(TransactionAggregationUtils.isExpenseLikeOutflow)
+        .toList();
+
+    outflows.sort((a, b) {
+      final d = b.date.compareTo(a.date);
+      if (d != 0) return d;
+      return TransactionAggregationUtils.outflowAmount(b).compareTo(
+        TransactionAggregationUtils.outflowAmount(a),
+      );
+    });
+
+    return outflows.take(limit).map((tx) {
+      final accountName = transactionAccountMap[tx.id] ?? '미분류';
+      return RootTransactionEntry(transaction: tx, accountName: accountName);
+    }).toList();
+  }
+
+  static RootSummaryData buildSummaryData({
+    required List<Transaction> allTransactions,
+    required Map<String, String> transactionAccountMap,
+    required double totalFixedCost,
+    required List<RootFixedCostEntry> fixedCostEntries,
+  }) {
+    double totalIncome = 0;
+    double totalExpense = 0;
+    double totalSavings = 0;
+    double totalRefund = 0;
+    for (final tx in allTransactions) {
+      switch (tx.type) {
+        case TransactionType.income:
+          totalIncome += tx.amount;
+          break;
+        case TransactionType.expense:
+          final expense = TransactionAggregationUtils.outflowAmount(tx);
+          totalExpense += expense;
+          break;
+        case TransactionType.savings:
+          if (TransactionAggregationUtils.isSavingsCountedAsExpense(tx)) {
+            totalExpense += TransactionAggregationUtils.outflowAmount(tx);
+          } else {
+            totalSavings += tx.amount.abs();
+          }
+          break;
+        case TransactionType.refund:
+          totalRefund += tx.amount;
+          break;
+      }
+    }
+
+    final topTransactions = buildTopOutflowEntries(
+      allTransactions: allTransactions,
+      transactionAccountMap: transactionAccountMap,
+    );
+
+    final hasFixedCosts = totalFixedCost > 0;
+
+    return RootSummaryData(
+      totalIncome: totalIncome,
+      totalExpense: totalExpense,
+      totalSavings: totalSavings,
+      totalRefund: totalRefund,
+      totalFixedCost: totalFixedCost,
+      totalExpenseWithFixed: hasFixedCosts
+          ? totalExpense + totalFixedCost
+          : totalExpense,
+      netDisplay:
+          totalIncome -
+          (hasFixedCosts ? totalExpense + totalFixedCost : totalExpense),
+      hasFixedCosts: hasFixedCosts,
+      topTransactions: topTransactions,
+      topFixedCosts: hasFixedCosts
+          ? fixedCostEntries.take(5).toList()
+          : const <RootFixedCostEntry>[],
+    );
+  }
+
   static RootDashboardContext buildDashboardContext() {
     final accountService = AccountService();
     final transactionService = TransactionService();
@@ -95,67 +178,11 @@ class TopLevelStatsUtils {
       effectiveAccountNames.add(accountName);
     }
 
-    double totalIncome = 0;
-    double totalExpense = 0;
-    double totalSavings = 0;
-    double totalRefund = 0;
-    final outflows = <Transaction>[];
-
-    double normalizedExpenseAmount(Transaction tx) {
-      if (tx.type != TransactionType.expense) return 0;
-      final amount = tx.amount.abs();
-      return tx.isRefund ? -amount : amount;
-    }
-
-    for (final tx in allTransactions) {
-      switch (tx.type) {
-        case TransactionType.income:
-          totalIncome += tx.amount;
-          break;
-        case TransactionType.expense:
-          final expense = normalizedExpenseAmount(tx);
-          totalExpense += expense;
-          if (expense > 0) outflows.add(tx);
-          break;
-        case TransactionType.savings:
-          totalSavings += tx.amount.abs();
-          break;
-        case TransactionType.refund:
-          totalRefund += tx.amount;
-          break;
-      }
-    }
-
-    outflows.sort((a, b) {
-      final d = b.date.compareTo(a.date);
-      if (d != 0) return d;
-      return b.amount.abs().compareTo(a.amount.abs());
-    });
-
-    final topTransactions = outflows.take(5).map((tx) {
-      final accountName = transactionAccountMap[tx.id] ?? '미분류';
-      return RootTransactionEntry(transaction: tx, accountName: accountName);
-    }).toList();
-
-    final hasFixedCosts = totalFixedCost > 0;
-
-    final summaryData = RootSummaryData(
-      totalIncome: totalIncome,
-      totalExpense: totalExpense,
-      totalSavings: totalSavings,
-      totalRefund: totalRefund,
+    final summaryData = buildSummaryData(
+      allTransactions: allTransactions,
+      transactionAccountMap: transactionAccountMap,
       totalFixedCost: totalFixedCost,
-      totalExpenseWithFixed: hasFixedCosts
-          ? totalExpense + totalFixedCost
-          : totalExpense,
-      netDisplay:
-          totalIncome -
-          (hasFixedCosts ? totalExpense + totalFixedCost : totalExpense),
-      hasFixedCosts: hasFixedCosts,
-      topTransactions: topTransactions,
-      topFixedCosts: hasFixedCosts
-          ? fixedCostEntries.take(5).toList()
-          : const <RootFixedCostEntry>[],
+      fixedCostEntries: fixedCostEntries,
     );
 
     return RootDashboardContext(

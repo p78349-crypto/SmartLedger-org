@@ -10,6 +10,7 @@ import '../utils/number_formats.dart';
 import '../utils/period_utils.dart' as period;
 import '../utils/refund_utils.dart';
 import '../utils/stats_labels.dart';
+import '../utils/transaction_aggregation_utils.dart';
 
 part 'period_detail_stats_screen_data.dart';
 part 'period_detail_stats_screen_ui.dart';

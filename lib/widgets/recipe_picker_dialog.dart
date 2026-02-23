@@ -6,6 +6,7 @@ import '../services/recipe_service.dart';
 import '../utils/debounce_utils.dart';
 import '../utils/korean_search_utils.dart';
 import 'recipe_upsert_dialog.dart';
+import 'recipe_picker_matched_items.dart';
 
 class RecipePickerDialog extends StatefulWidget {
   final bool onlyCookable;
@@ -80,7 +81,9 @@ class _RecipePickerDialogState extends State<RecipePickerDialog> {
 
       if (_searchQuery.isEmpty) return true;
       final query = _searchQuery;
-      final matchesName = MultilingualSearchUtils.matches(r.name, query);
+      // Match against all localized names
+      final matchesName = r.localizedNames.values
+          .any((n) => MultilingualSearchUtils.matches(n, query));
       final matchesIngredient = r.ingredients.any(
         (ing) => MultilingualSearchUtils.matches(ing.name, query),
       );
@@ -184,7 +187,9 @@ class _RecipePickerDialogState extends State<RecipePickerDialog> {
 
                         return ListTile(
                           title: Text(
-                            r.name,
+                            r.nameForLocale(
+                              Localizations.localeOf(context).languageCode,
+                            ),
                             style: TextStyle(
                               fontWeight: allInStock
                                   ? FontWeight.bold
@@ -216,7 +221,7 @@ class _RecipePickerDialogState extends State<RecipePickerDialog> {
                                   if (matchedItems.isNotEmpty) ...[
                                     const SizedBox(width: 8),
                                     InkWell(
-                                      onTap: () => _showMatchedItemsDetail(
+                                      onTap: () => showMatchedItemsDetail(
                                         context,
                                         matchedItems,
                                       ),
@@ -260,55 +265,5 @@ class _RecipePickerDialogState extends State<RecipePickerDialog> {
         ),
       ],
     );
-  }
-
-  void _showMatchedItemsDetail(
-    BuildContext context,
-    List<ConsumableInventoryItem> items,
-  ) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('매칭된 재고 상세'),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: items.length,
-            itemBuilder: (ctx, i) {
-              final it = items[i];
-              final daysLeft = _daysLeft(it);
-              return ListTile(
-                title: Text(it.name),
-                subtitle: Text(
-                  '${it.category} | ${it.location} | ${it.currentStock}${it.unit}',
-                ),
-                trailing: Text(
-                  daysLeft == null ? '기한 없음' : '$daysLeft일 남음',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: daysLeft != null && daysLeft <= 2
-                        ? Colors.red
-                        : Colors.grey,
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('닫기'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  int? _daysLeft(ConsumableInventoryItem item) {
-    final expiryDate = item.expiryDate;
-    if (expiryDate == null) return null;
-    return expiryDate.difference(DateTime.now()).inDays;
   }
 }

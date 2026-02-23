@@ -15,11 +15,13 @@ class AccountService {
 
   static const String _legacyPrefsKey = 'accounts';
   static String get _monthEndPrefsKey => PrefKeys.accountMonthEnd;
+  static const String _passwordPrefsKey = 'account_passwords';
 
   final AppDatabase _database = DatabaseProvider.instance.database;
 
   final List<Account> _accounts = [];
   final Map<String, _MonthEndAccountData> _monthEndByAccount = {};
+  final Map<String, String> _passwordByAccount = {};
   bool _initialized = false;
   Future<void>? _loading;
 
@@ -45,6 +47,12 @@ class AccountService {
     await _database.insertAccount(entry);
     _accounts.add(account);
 
+    // Save password if provided
+    if (account.password != null && account.password!.isNotEmpty) {
+      _passwordByAccount[account.name] = account.password!;
+      await _persistPasswords();
+    }
+
     // Clear any stale month-end cache for newly created accounts.
     if (_monthEndByAccount.remove(account.name) != null) {
       await _persistMonthEnd();
@@ -67,6 +75,9 @@ class AccountService {
       _accounts.removeWhere((a) => a.name == name);
       if (_monthEndByAccount.remove(name) != null) {
         await _persistMonthEnd();
+      }
+      if (_passwordByAccount.remove(name) != null) {
+        await _persistPasswords();
       }
       return true;
     }
@@ -151,6 +162,7 @@ class AccountService {
 
   Future<void> _doLoad() async {
     await _loadMonthEnd();
+    await _loadPasswords();
     var rows = await _database.getAllAccounts();
     if (rows.isEmpty) {
       final migrated = await _migrateFromLegacyStorage();
@@ -167,12 +179,14 @@ class AccountService {
 
   Account _mapRowToAccount(DbAccount row) {
     final monthEnd = _monthEndByAccount[row.name];
+    final password = _passwordByAccount[row.name];
     return Account(
       name: row.name,
       createdAt: row.createdAt,
       carryoverAmount: monthEnd?.carryoverAmount ?? 0,
       overdraftAmount: monthEnd?.overdraftAmount ?? 0,
       lastCarryoverDate: monthEnd?.lastCarryoverDate,
+      password: password,
     );
   }
 
@@ -202,6 +216,59 @@ class AccountService {
       (key, value) => MapEntry(key, value.toJson()),
     );
     await prefs.setString(_monthEndPrefsKey, jsonEncode(data));
+  }
+
+  Future<void> _loadPasswords() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_passwordPrefsKey);
+    _passwordByAccount.clear();
+    if (raw == null || raw.isEmpty) {
+      return;
+    }
+    try {
+      final Map<String, dynamic> data = jsonDecode(raw) as Map<String, dynamic>;
+      for (final entry in data.entries) {
+        if (entry.value is String) {
+          _passwordByAccount[entry.key] = entry.value as String;
+        }
+      }
+    } catch (_) {
+      _passwordByAccount.clear();
+    }
+  }
+
+  Future<void> _persistPasswords() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_passwordPrefsKey, jsonEncode(_passwordByAccount));
+  }
+
+  /// Updates the password for an account.
+  /// Pass null or empty string to remove the password.
+  Future<bool> updateAccountPassword(String accountName, String? password) async {
+    await loadAccounts();
+    final index = _accounts.indexWhere((a) => a.name == accountName);
+    if (index == -1) {
+      return false;
+    }
+
+    if (password == null || password.isEmpty) {
+      _passwordByAccount.remove(accountName);
+    } else {
+      _passwordByAccount[accountName] = password;
+    }
+    await _persistPasswords();
+
+    // Update in-memory account
+    final old = _accounts[index];
+    _accounts[index] = Account(
+      name: old.name,
+      createdAt: old.createdAt,
+      carryoverAmount: old.carryoverAmount,
+      overdraftAmount: old.overdraftAmount,
+      lastCarryoverDate: old.lastCarryoverDate,
+      password: password,
+    );
+    return true;
   }
 
   Future<bool> _migrateFromLegacyStorage() async {

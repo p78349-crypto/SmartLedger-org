@@ -83,14 +83,20 @@ extension AccountMainHelpers on _AccountMainScreenState {
                 ),
               ),
               ...List.generate(total, (index) {
+                // ROOT 페이지(인덱스 5) 숨김 처리
+                if (_hideRootPage && index == 5) {
+                  return const SizedBox.shrink();
+                }
                 final label = _pageNameLabels[index];
+                // ROOT 페이지를 건너뛴 디스플레이 인덱스 계산
+                final displayIndex = _hideRootPage && index > 5 ? index - 1 : index;
                 return ListTile(
                   title: Text(label),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {
                     Navigator.of(sheetContext).pop();
                     _controller.animateToPage(
-                      index,
+                      displayIndex,
                       duration: const Duration(milliseconds: 300),
                       curve: Curves.easeOut,
                     );
@@ -248,12 +254,23 @@ extension AccountMainHelpers on _AccountMainScreenState {
     );
     if (!mounted) return;
 
-    final desired =
+    var desired =
         _pageCount > 0 ? (saved ?? 0).clamp(0, _pageCount - 1) : 0;
+    
+    // ROOT 페이지가 숨겨진 경우, ROOT 페이지(5)로 복원하려고 하면 대시보드(0)로 이동
+    if (_hideRootPage && desired == 5) {
+      desired = 0;
+    }
+    
+    // ROOT 페이지를 건너뛴 디스플레이 인덱스 계산
+    if (_hideRootPage && desired > 5) {
+      desired = desired - 1;
+    }
+    
     if (desired == _currentIndex) return;
 
     _isRestoringIndex = true;
-    _currentIndex = desired;
+    _currentIndex = _hideRootPage && desired >= 5 ? desired + 1 : desired;
     _controller.jumpToPage(desired);
     _isRestoringIndex = false;
   }

@@ -43,7 +43,6 @@ void main() {
           data: const MediaQueryData(size: Size(420, 900)),
           child: ShoppingCartScreen(
             accountName: 'a',
-            openPrepOnStart: true,
             initialItems: items,
           ),
         ),

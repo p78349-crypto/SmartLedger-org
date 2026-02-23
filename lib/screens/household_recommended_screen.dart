@@ -5,6 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/shopping_cart_item.dart';
 import '../services/user_pref_service.dart';
+import 'household_add_item_dialog.dart';
+import 'household_item.dart';
 import 'shopping_cart_screen.dart';
 
 /// 나의 생활용품 (사용자 입력 기반) 화면
@@ -18,39 +20,11 @@ class HouseholdRecommendedScreen extends StatefulWidget {
       _HouseholdRecommendedScreenState();
 }
 
-class _HouseholdItem {
-  final String id;
-  String name;
-  String unit;
-  double quantity;
-
-  _HouseholdItem({
-    required this.id,
-    required this.name,
-    this.unit = '',
-    this.quantity = 1,
-  });
-
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'name': name,
-    'unit': unit,
-    'quantity': quantity,
-  };
-
-  factory _HouseholdItem.fromJson(Map<String, dynamic> j) => _HouseholdItem(
-    id: j['id'],
-    name: j['name'],
-    unit: j['unit'] ?? '',
-    quantity: (j['quantity'] ?? 1).toDouble(),
-  );
-}
-
 class _HouseholdRecommendedScreenState
     extends State<HouseholdRecommendedScreen> {
   bool _loading = true;
   bool _sending = false;
-  List<_HouseholdItem> _myItems = [];
+  List<HouseholdItem> _myItems = [];
   final Map<String, bool> _selectedItems = {};
 
   @override
@@ -65,7 +39,7 @@ class _HouseholdRecommendedScreenState
       final saved = prefs.getString('my_household_items_${widget.accountName}');
       if (saved != null && saved.isNotEmpty) {
         final jsonList = (jsonDecode(saved) as List)
-            .map((e) => _HouseholdItem.fromJson(e as Map<String, dynamic>))
+            .map((e) => HouseholdItem.fromJson(e as Map<String, dynamic>))
             .toList();
         if (mounted) {
           setState(() {
@@ -99,9 +73,9 @@ class _HouseholdRecommendedScreenState
   void _addItem() {
     showDialog(
       context: context,
-      builder: (ctx) => _AddItemDialog(
+      builder: (ctx) => HouseholdAddItemDialog(
         onAdd: (name, unit, qty) async {
-          final newItem = _HouseholdItem(
+          final newItem = HouseholdItem(
             id: '${DateTime.now().millisecondsSinceEpoch}',
             name: name,
             unit: unit,
@@ -232,62 +206,29 @@ class _HouseholdRecommendedScreenState
                     final item = _myItems[index];
                     final isSelected = _selectedItems[item.id] ?? false;
 
-                    return Card(
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 4,
-                      ),
-                      child: ListTile(
-                        leading: Checkbox(
-                          value: isSelected,
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedItems[item.id] = value ?? false;
-                            });
-                          },
-                        ),
-                        title: Text(item.name),
-                        subtitle: Text(item.unit),
-                        trailing: SizedBox(
-                          width: 120,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.remove, size: 18),
-                                onPressed: () {
-                                  setState(() {
-                                    item.quantity = (item.quantity - 1)
-                                        .clamp(1, 999)
-                                        .toDouble();
-                                  });
-                                  _saveMyItems();
-                                },
-                              ),
-                              Text(item.quantity.toInt().toString()),
-                              IconButton(
-                                icon: const Icon(Icons.add, size: 18),
-                                onPressed: () {
-                                  setState(() {
-                                    item.quantity = (item.quantity + 1)
-                                        .clamp(1, 999)
-                                        .toDouble();
-                                  });
-                                  _saveMyItems();
-                                },
-                              ),
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.delete,
-                                  size: 18,
-                                  color: Colors.red,
-                                ),
-                                onPressed: () => _removeItem(item.id),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                    return HouseholdItemCard(
+                      item: item,
+                      isSelected: isSelected,
+                      onSelectedChanged: (value) {
+                        setState(() {
+                          _selectedItems[item.id] = value ?? false;
+                        });
+                      },
+                      onIncrement: () {
+                        setState(() {
+                          item.quantity =
+                              (item.quantity + 1).clamp(1, 999).toDouble();
+                        });
+                        _saveMyItems();
+                      },
+                      onDecrement: () {
+                        setState(() {
+                          item.quantity =
+                              (item.quantity - 1).clamp(1, 999).toDouble();
+                        });
+                        _saveMyItems();
+                      },
+                      onDelete: () => _removeItem(item.id),
                     );
                   },
                 ),
@@ -342,101 +283,4 @@ class _HouseholdRecommendedScreenState
   }
 }
 
-class _AddItemDialog extends StatefulWidget {
-  final Function(String, String, double) onAdd;
-  const _AddItemDialog({required this.onAdd});
 
-  @override
-  State<_AddItemDialog> createState() => _AddItemDialogState();
-}
-
-class _AddItemDialogState extends State<_AddItemDialog> {
-  final _nameController = TextEditingController();
-  final _unitController = TextEditingController(text: '');
-  final _qtyController = TextEditingController(text: '1');
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _unitController.dispose();
-    _qtyController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('생활용품 추가'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            controller: _nameController,
-            decoration: const InputDecoration(
-              labelText: '상품명',
-              border: OutlineInputBorder(),
-            ),
-            autofocus: true,
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _unitController,
-                  decoration: InputDecoration(
-                    label: RichText(
-                      text: TextSpan(
-                        style: DefaultTextStyle.of(context).style,
-                        children: const [
-                          TextSpan(text: '단위'),
-                          TextSpan(text: ' '),
-                          TextSpan(
-                            text: '(개수)',
-                            style: TextStyle(color: Colors.red, fontSize: 12),
-                          ),
-                        ],
-                      ),
-                    ),
-                    border: const OutlineInputBorder(),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: TextField(
-                  controller: _qtyController,
-                  decoration: const InputDecoration(
-                    labelText: '수량',
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('취소'),
-        ),
-        FilledButton(
-          onPressed: () {
-            final name = _nameController.text.trim();
-            final unit = _unitController.text.trim();
-            final qty = double.tryParse(_qtyController.text) ?? 1;
-            if (name.isNotEmpty) {
-              widget.onAdd(name, unit, qty);
-              Navigator.pop(context);
-            }
-          },
-          child: const Text('추가'),
-        ),
-      ],
-    );
-  }
-}

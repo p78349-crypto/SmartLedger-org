@@ -3,10 +3,14 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import '../navigation/app_routes.dart';
+import '../screens/top_level_main_screen.dart';
 import '../services/account_service.dart';
+import '../services/user_pref_service.dart';
 import '../theme/app_theme_seed_controller.dart';
 import '../widgets/background_widget.dart';
+import '../widgets/root_auth_gate.dart';
 import '../widgets/special_backgrounds.dart';
+import '../database/db_encryption_key_manager.dart';
 
 class AccountSelectScreen extends StatelessWidget {
   final List<String> accounts;
@@ -71,6 +75,66 @@ class AccountSelectScreen extends StatelessWidget {
               icon: const Icon(Icons.arrow_back),
               onPressed: () => Navigator.of(context).pop(),
             ),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.key_outlined),
+                tooltip: '암호화 키 복구',
+                onPressed: () async {
+                  final controller = TextEditingController();
+                  final key = await showDialog<String>(
+                    context: context,
+                    builder: (dialogContext) => AlertDialog(
+                      title: const Text('데이터베이스 암호화 키 복구'),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text(
+                            '기기 변경 또는 앱 재설치 시 백업해둔 암호화 키를 입력하세요.\n'
+                            '잘못된 키를 입력하면 기존 데이터를 읽을 수 없습니다.',
+                          ),
+                          const SizedBox(height: 16),
+                          TextField(
+                            controller: controller,
+                            decoration: const InputDecoration(
+                              labelText: '암호화 키 (Base64)',
+                              border: OutlineInputBorder(),
+                            ),
+                            autofocus: true,
+                          ),
+                        ],
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(dialogContext).pop(),
+                          child: const Text('취소'),
+                        ),
+                        FilledButton(
+                          onPressed: () => Navigator.of(dialogContext).pop(controller.text.trim()),
+                          child: const Text('복구'),
+                        ),
+                      ],
+                    ),
+                  );
+
+                  if (key != null && key.isNotEmpty) {
+                    final success = await DbEncryptionKeyManager.restoreKeyFromBackup(key);
+                    if (!context.mounted) return;
+                    if (success) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('암호화 키가 성공적으로 복구되었습니다.')),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('잘못된 형식의 키입니다. (32바이트 Base64Url 필요)'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  }
+                },
+              ),
+            ],
           ),
           body: Stack(
             children: [
@@ -125,18 +189,100 @@ class AccountSelectScreen extends StatelessWidget {
                   itemBuilder: (context, index) {
                     final accountName = accounts[index];
                     final label = labels[accountName];
+                    final isRoot = accountName.trim().toUpperCase() == 'ROOT';
+                    final account = accountService.getAccountByName(accountName);
+                    final hasPassword = account?.password != null &&
+                        account!.password!.isNotEmpty;
 
                     return ListTile(
+                      leading: Icon(
+                        isRoot 
+                          ? Icons.admin_panel_settings
+                          : (hasPassword ? Icons.lock : Icons.person),
+                        color: isRoot ? Colors.amber : null,
+                      ),
                       title: Text(accountName),
                       trailing: label == null
                           ? null
                           : Text(label, style: theme.textTheme.labelMedium),
-                      onTap: () {
+                      onTap: () async {
+                        // ROOT 선택 시 RootAuthGate로 보호된 ROOT 화면으로 이동
+                        if (isRoot) {
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(
+                              builder: (_) => const RootAuthGate(
+                                child: TopLevelMainScreen(),
+                              ),
+                            ),
+                          );
+                          return;
+                        }
+                        
                         final account = accountService.getAccountByName(
                           accountName,
                         );
                         if (account != null) {
-                          Navigator.of(context).pushNamed(
+                          // 비밀번호가 설정된 계정인 경우 비밀번호 확인
+                          if (account.password != null &&
+                              account.password!.isNotEmpty) {
+                            final passwordController = TextEditingController();
+                            final confirmed = await showDialog<bool>(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (dialogContext) => AlertDialog(
+                                title: Text('$accountName 비밀번호 입력'),
+                                content: TextField(
+                                  controller: passwordController,
+                                  obscureText: true,
+                                  autofocus: true,
+                                  decoration: const InputDecoration(
+                                    labelText: '비밀번호',
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  onSubmitted: (_) {
+                                    Navigator.of(dialogContext).pop(true);
+                                  },
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(dialogContext).pop(false);
+                                    },
+                                    child: const Text('취소'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(dialogContext).pop(true);
+                                    },
+                                    child: const Text('확인'),
+                                  ),
+                                ],
+                              ),
+                            );
+                            
+                            if (confirmed != true) {
+                              passwordController.dispose();
+                              return;
+                            }
+                            
+                            if (passwordController.text != account.password) {
+                              passwordController.dispose();
+                              if (!context.mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('비밀번호가 올바르지 않습니다'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                              return;
+                            }
+                            passwordController.dispose();
+                          }
+                          
+                          // 선택한 계정을 마지막 계정으로 저장
+                          await UserPrefService.setLastAccountName(account.name);
+                          if (!context.mounted) return;
+                          Navigator.of(context).pushReplacementNamed(
                             AppRoutes.accountMain,
                             arguments: AccountMainArgs(
                               accountName: account.name,

@@ -57,6 +57,17 @@ class _SettingsRoutes {
           builder: (_) => IconManagementRootScreen(accountName: a.accountName),
         );
 
+      case AppRoutes.pageIconManagement:
+        final a = args as PageIconManagementArgs;
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => PageIconManagementScreen(
+            accountName: a.accountName,
+            pageIndex: a.pageIndex,
+            pageTitle: a.pageTitle,
+          ),
+        );
+
       case AppRoutes.featureIconsCatalog:
         return MaterialPageRoute(
           settings: settings,

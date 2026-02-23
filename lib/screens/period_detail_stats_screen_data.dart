@@ -50,20 +50,7 @@ extension PeriodDetailStatsData on _PeriodDetailStatsScreenState {
   }
 
   bool shouldAggregateForType(Transaction tx, TransactionType type) {
-    final isSavingsAsExpense =
-        tx.type == TransactionType.savings &&
-        tx.savingsAllocation == SavingsAllocation.expense;
-
-    switch (type) {
-      case TransactionType.expense:
-        return tx.type == TransactionType.expense || isSavingsAsExpense;
-      case TransactionType.income:
-        return tx.type == TransactionType.income;
-      case TransactionType.savings:
-        return tx.type == TransactionType.savings && !isSavingsAsExpense;
-      case TransactionType.refund:
-        return tx.type == TransactionType.refund;
-    }
+    return TransactionAggregationUtils.shouldAggregateForType(tx, type);
   }
 
   List<Transaction> getFilteredTransactions() {

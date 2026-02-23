@@ -1,5 +1,5 @@
 part of 'application_settings_screen.dart';
-// ignore_for_file: invalid_use_of_protected_member
+// ignore_for_file: invalid_use_of_protected_member, avoid_redundant_argument_values
 
 extension ApplicationSettingsBuild on _ApplicationSettingsScreenState {
   Widget _buildMain(BuildContext context) {
@@ -111,57 +111,67 @@ extension ApplicationSettingsBuild on _ApplicationSettingsScreenState {
   }
 
   Widget _buildPermissionsBanner(ThemeData theme, ColorScheme scheme) {
+    // More compact permissions banner so buttons and settings remain visible.
     return Container(
-      margin: const EdgeInsets.only(bottom: 24),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: scheme.errorContainer.withValues(alpha: 0.7),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: scheme.error.withValues(alpha: 0.3)),
+        color: scheme.errorContainer.withValues(alpha: 0.6),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: scheme.error.withValues(alpha: 0.25)),
       ),
-      child: Column(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: scheme.error.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.warning_amber_rounded,
-                  color: scheme.error,
-                ),
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: scheme.error.withValues(alpha: 0.08),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.warning_amber_rounded,
+              color: scheme.error,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              '기본 기능 사용을 위해 저장소 및 알림 권한이 필요합니다. 기타 권한은 필요 시 요청됩니다.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: scheme.onErrorContainer,
               ),
-              const SizedBox(width: 16),
-              Expanded(
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              FilledButton.icon(
+                onPressed: _requestPermissions,
+                icon: const Icon(Icons.security, size: 16),
+                label: const Text('허용'),
+                    style: FilledButton.styleFrom(
+                        backgroundColor: scheme.error,
+                        foregroundColor: scheme.onError,
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+              ),
+              const SizedBox(height: 6),
+              TextButton(
+                onPressed: () async => await openAppSettings(),
                 child: Text(
-                  '기본 기능 사용을 위해 저장소와 알림 권한이 필요합니다.\n'
-                  '기타 권한(카메라/위치/마이크)은 관련 기능 사용 시 요청됩니다.',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: scheme.onErrorContainer,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  '앱 설정',
+                  style: TextStyle(color: scheme.onErrorContainer, fontSize: 12),
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton.icon(
-              onPressed: _requestPermissions,
-              icon: const Icon(Icons.security),
-              label: const Text('필수 권한 허용하기'),
-              style: FilledButton.styleFrom(
-                backgroundColor: scheme.error,
-                foregroundColor: scheme.onError,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
           ),
         ],
       ),

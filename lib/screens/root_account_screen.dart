@@ -7,6 +7,7 @@ import '../utils/icon_catalog.dart';
 import '../utils/number_formats.dart';
 import '../utils/snackbar_utils.dart';
 import '../widgets/background_widget.dart';
+import '../widgets/root_memo_widget_v2.dart';
 
 part 'root_account_screen_toolbar.dart';
 part 'root_account_screen_summary.dart';
@@ -80,8 +81,9 @@ class RootAccountScreen extends StatelessWidget {
             if (errorMessage != null) _buildErrorCard(theme, errorMessage!),
             if (overview != null) ...[
               if (isLoading) const LinearProgressIndicator(),
-              if (!isLoading) _buildSummarySection(theme, overview!),
-              const SizedBox(height: 24),
+              if (!isLoading) _buildSummarySection(theme, overview!),              const SizedBox(height: 16),
+              // 📝 ROOT 전용 메모 섹션 추가
+              const RootMemoSectionV2(),              const SizedBox(height: 24),
               _buildAccountSection(theme, summaries, query, isLandscape),
             ] else if (isLoading) ...[
               const SizedBox(height: 120),

@@ -36,7 +36,7 @@ extension _FormExt on _AssetInputScreenState {
         controller: _nameController,
         label: '자산명',
         prefixIcon: const Icon(Icons.label),
-        validator: (v) => Validators.required(v, fieldName: '자산명'),
+        hint: '예: 시중은행 입출금통장',
       ),
       const SizedBox(height: 12),
       SmartInputField(
@@ -45,7 +45,146 @@ extension _FormExt on _AssetInputScreenState {
         prefixIcon: const Icon(Icons.attach_money),
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
         inputFormatters: [CurrencyInputFormatter()],
-        validator: (v) => Validators.positiveNumber(v, fieldName: '금액'),
+      ),
+
+      _buildSectionHeader('자산 상세 정보'),
+      SmartInputField(
+        controller: _institutionController,
+        label: '금융사/거래소/보관처 (선택)',
+        prefixIcon: const Icon(Icons.account_balance),
+        hint: '예: 국민은행, 업비트, 키움증권',
+      ),
+      if (_selectedCategory != AssetCategory.cash) ...[
+        const SizedBox(height: 12),
+        SmartInputField(
+          controller: _currencyController,
+          label: '통화 코드 (선택)',
+          prefixIcon: const Icon(Icons.currency_exchange),
+          hint: '예: KRW, USD, JPY',
+        ),
+      ],
+      if (_selectedCategory == AssetCategory.stock ||
+          _selectedCategory == AssetCategory.crypto ||
+          _selectedCategory == AssetCategory.company) ...[
+        const SizedBox(height: 12),
+        SmartInputField(
+          controller: _tickerController,
+          label: '종목/심볼 (선택)',
+          prefixIcon: const Icon(Icons.tag),
+          hint: '예: 005930, AAPL, BTC',
+        ),
+        const SizedBox(height: 12),
+        SmartInputField(
+          controller: _unitsController,
+          label: '보유 수량 (선택)',
+          prefixIcon: const Icon(Icons.calculate),
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        ),
+        const SizedBox(height: 12),
+        SmartInputField(
+          controller: _unitPriceController,
+          label: '현재 단가 (선택)',
+          prefixIcon: const Icon(Icons.sell),
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          inputFormatters: [CurrencyInputFormatter()],
+        ),
+      ],
+      if (_selectedCategory == AssetCategory.realEstate ||
+          _selectedCategory == AssetCategory.company) ...[
+        const SizedBox(height: 12),
+        SmartInputField(
+          controller: _appraisalValueController,
+          label: '평가액 (선택)',
+          prefixIcon: const Icon(Icons.apartment),
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          inputFormatters: [CurrencyInputFormatter()],
+        ),
+      ],
+      const SizedBox(height: 12),
+      SmartInputField(
+        controller: _monthlyIncomeController,
+        label: '월 수익 (선택)',
+        prefixIcon: const Icon(Icons.savings),
+        hint: '예: 배당/이자/임대 수익',
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        inputFormatters: [CurrencyInputFormatter()],
+      ),
+      _buildSectionHeader('위험 관리'),
+      SmartInputField(
+        controller: _debtAmountController,
+        label: '부채/대출 잔액 (선택)',
+        prefixIcon: const Icon(Icons.credit_card),
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        inputFormatters: [CurrencyInputFormatter()],
+      ),
+      const SizedBox(height: 12),
+      InkWell(
+        onTap: () async {
+          final picked = await showDatePicker(
+            context: context,
+            initialDate: _maturityDate ?? DateTime.now(),
+            firstDate: DateTime(2000),
+            lastDate: DateTime(2100),
+          );
+          if (picked != null) {
+            setState(() => _maturityDate = picked);
+          }
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: InputDecorator(
+          decoration: const InputDecoration(
+            labelText: '만기일 (선택)',
+            prefixIcon: Icon(Icons.event_available),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                _maturityDate == null
+                    ? '선택 안 함'
+                    : DateFormats.yMd.format(_maturityDate!),
+                style: theme.textTheme.bodyLarge,
+              ),
+              Icon(
+                Icons.edit_calendar,
+                size: 20,
+                color: theme.colorScheme.primary,
+              ),
+            ],
+          ),
+        ),
+      ),
+      _buildSectionHeader('알림/인사이트'),
+      SmartInputField(
+        controller: _alertThresholdController,
+        label: '경고 임계값 (선택)',
+        prefixIcon: const Icon(Icons.notifications_active),
+        hint: '현재 금액이 이 값보다 낮으면 경고합니다',
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        inputFormatters: [CurrencyInputFormatter()],
+      ),
+      const SizedBox(height: 12),
+      InputDecorator(
+        decoration: const InputDecoration(
+          labelText: '리스크 등급 (선택)',
+          prefixIcon: Icon(Icons.warning_amber),
+        ),
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<AssetRiskLevel>(
+            value: _riskLevel,
+            hint: const Text('선택 안 함'),
+            isExpanded: true,
+            items: AssetRiskLevel.values.map((level) {
+              return DropdownMenuItem(
+                value: level,
+                child: Text(level.label),
+              );
+            }).toList(),
+            onChanged: (value) {
+              setState(() => _riskLevel = value);
+            },
+          ),
+        ),
       ),
 
       _buildSectionHeader('수익 및 목표'),
@@ -137,20 +276,6 @@ extension _FormExt on _AssetInputScreenState {
         ),
       ),
       const SizedBox(height: 32),
-      Row(
-        children: [
-          Expanded(
-            child: FilledButton.icon(
-              onPressed: _submit,
-              icon: Icon(_isEdit ? Icons.save : Icons.add_task),
-              label: Text(_isEdit ? '수정 완료' : '자산 저장'),
-              style: FilledButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-              ),
-            ),
-          ),
-        ],
-      ),
     ];
   }
 

@@ -5,12 +5,16 @@ class _PageQuickMenuButton extends StatelessWidget {
   final VoidCallback onToggleEditMode;
   final VoidCallback? onResetMainPages;
   final ValueChanged<int>? onPageSelected;
+  final String accountName;
+  final int currentPageIndex;
 
   const _PageQuickMenuButton({
     required this.isEditMode,
     required this.onToggleEditMode,
     this.onResetMainPages,
     this.onPageSelected,
+    required this.accountName,
+    required this.currentPageIndex,
   });
 
   @override
@@ -26,6 +30,9 @@ class _PageQuickMenuButton extends StatelessWidget {
         switch (action) {
           case _QuickMenuAction.toggleEdit:
             onToggleEditMode();
+            break;
+          case _QuickMenuAction.pageIconManagement:
+            _openPageIconManagement(context);
             break;
           case _QuickMenuAction.jumpPage1:
             onPageSelected?.call(0);
@@ -54,7 +61,29 @@ class _PageQuickMenuButton extends StatelessWidget {
         return <PopupMenuEntry<_QuickMenuAction>>[
           PopupMenuItem<_QuickMenuAction>(
             value: _QuickMenuAction.toggleEdit,
-            child: Text(isEditMode ? '편집 종료' : '편집 모드'),
+            child: Row(
+              children: [
+                Icon(
+                  isEditMode ? Icons.check : Icons.edit,
+                  size: 20,
+                ),
+                const SizedBox(width: 12),
+                Text(isEditMode ? '편집 종료' : '편집 모드'),
+              ],
+            ),
+          ),
+          PopupMenuItem<_QuickMenuAction>(
+            value: _QuickMenuAction.pageIconManagement,
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.apps,
+                  size: 20,
+                ),
+                const SizedBox(width: 12),
+                Text('${_getPageTitle(currentPageIndex)} 아이콘 관리'),
+              ],
+            ),
           ),
           if (onPageSelected != null) ...<PopupMenuEntry<_QuickMenuAction>>[
             const PopupMenuDivider(),
@@ -91,10 +120,40 @@ class _PageQuickMenuButton extends StatelessWidget {
       },
     );
   }
+
+  void _openPageIconManagement(BuildContext context) {
+    final pageTitle = _getPageTitle(currentPageIndex);
+    Navigator.of(context).pushNamed(
+      AppRoutes.pageIconManagement,
+      arguments: PageIconManagementArgs(
+        accountName: accountName,
+        pageIndex: currentPageIndex,
+        pageTitle: pageTitle,
+      ),
+    );
+  }
+
+  String _getPageTitle(int pageIndex) {
+    const pageNames = [
+      '대시보드',
+      '요리/쇼핑/지출',
+      '수입',
+      '통계',
+      '자산',
+      'ROOT',
+      '설정',
+    ];
+
+    if (pageIndex >= 0 && pageIndex < pageNames.length) {
+      return pageNames[pageIndex];
+    }
+    return '페이지 ${pageIndex + 1}';
+  }
 }
 
 enum _QuickMenuAction {
   toggleEdit,
+  pageIconManagement,
   jumpPage1,
   jumpPage2,
   jumpPage3,
@@ -156,6 +215,7 @@ class _IconTile extends StatelessWidget {
   final bool isEditMode;
   final int pageIndex;
   final int itemIndex;
+  final String? badgeText; // 숫자 또는 텍스트 표시용
   final Widget? liveDataWidget;
   final VoidCallback? onTap;
 
@@ -165,6 +225,7 @@ class _IconTile extends StatelessWidget {
     required this.isEditMode,
     required this.pageIndex,
     required this.itemIndex,
+    this.badgeText,
     required this.liveDataWidget,
     required this.onTap,
   });
@@ -227,6 +288,37 @@ class _IconTile extends StatelessWidget {
                     ),
                     child: Icon(icon, color: iconColor, size: 28),
                   ),
+                  if (badgeText != null && badgeText!.isNotEmpty)
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: scheme.error,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.2),
+                              blurRadius: 4,
+                            ),
+                          ],
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 18,
+                          minHeight: 18,
+                        ),
+                        child: Text(
+                          badgeText!,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: scheme.onError,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
                 ],
               ),
               const SizedBox(height: 8),

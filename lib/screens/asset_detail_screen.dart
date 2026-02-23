@@ -6,12 +6,13 @@ import '../services/asset_service.dart';
 import '../utils/currency_formatter.dart';
 import '../utils/date_formatter.dart';
 import '../utils/profit_loss_calculator.dart';
+import 'asset_evaluation_screen.dart';
 
 part 'asset_detail_screen_detail.dart';
 part 'asset_detail_screen_timeline.dart';
-part 'asset_detail_screen_performance.dart';
 part 'asset_detail_screen_flow.dart';
 part 'asset_detail_screen_widgets.dart';
+part 'asset_detail_screen_performance.dart';
 
 /// 자산 상세 화면 - 이동 기록 타임라인 표시
 class AssetDetailScreen extends StatefulWidget {

@@ -1,0 +1,10 @@
+{
+  "appTitle": "Smart Ledger",
+  "income": "Income",
+  "expense": "Expense",
+  "save": "Save",
+  "setting": "Setting",
+  "@appTitle": {
+    "description": "The application title"
+  }
+}

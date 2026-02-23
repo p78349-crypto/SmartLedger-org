@@ -107,30 +107,30 @@ class _PermissionGateScreenState extends State<PermissionGateScreen>
           backgroundColor: bgColor,
           body: Center(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(32),
+              padding: const EdgeInsets.all(24),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
                     Icons.security_rounded,
-                    size: 80,
+                    size: 64,
                     color: theme.colorScheme.primary,
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
                   Text(
                     '필수 권한만 허용해 주세요',
-                    style: theme.textTheme.headlineSmall?.copyWith(
+                    style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   Text(
                     '기본 기능 사용을 위해 저장소와 알림 권한만 허용해 주세요.\n기타 권한은 관련 기능 사용 시 개별적으로 요청됩니다.',
-                    style: theme.textTheme.bodyLarge,
+                    style: theme.textTheme.bodyMedium,
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 24),
                   _PermissionItem(
                     icon: Icons.image_outlined,
                     title: '저장소 / 사진 (필수)',
@@ -140,7 +140,7 @@ class _PermissionGateScreenState extends State<PermissionGateScreen>
                         _storageStatus.isGranted ||
                         _photosStatus.isLimited,
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   _PermissionItem(
                     icon: Icons.notifications_active_outlined,
                     title: '알림 (필수)',
@@ -149,7 +149,7 @@ class _PermissionGateScreenState extends State<PermissionGateScreen>
                         _notificationStatus.isGranted ||
                         _notificationStatus.isProvisional,
                   ),
-                  const Divider(height: 48),
+                  const Divider(height: 32),
                   Text(
                     '아래 권한은 관련 기능 사용 시 자동으로 요청됩니다',
                     style: theme.textTheme.bodySmall?.copyWith(
@@ -158,7 +158,7 @@ class _PermissionGateScreenState extends State<PermissionGateScreen>
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   Text(
                     '• 카메라: 영수증 촬영 시\n'
                     '• 위치: 날씨 정보 확인 시\n'
@@ -168,7 +168,7 @@ class _PermissionGateScreenState extends State<PermissionGateScreen>
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 24),
                   if (_isChecking)
                     const CircularProgressIndicator()
                   else ...[

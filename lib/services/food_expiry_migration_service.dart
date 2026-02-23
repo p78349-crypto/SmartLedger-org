@@ -27,7 +27,6 @@ class FoodExpiryMigrationService {
       location: old.location.isEmpty ? '냉장' : old.location,
       createdAt: old.createdAt,
       lastUpdated: DateTime.now(),
-      healthTags: old.healthTags,
       // 식료품 추가 정보
       expiryDate: old.expiryDate,
       purchaseDate: old.purchaseDate,

@@ -17,7 +17,7 @@ void main() {
         name: '테스트 $price',
         createdAt: now,
         lastUpdated: now,
-        purchaseDate: now.subtract(const Duration(days: 1)),
+        purchaseDate: expiry,
         expiryDate: expiry,
         price: price,
         category: category ?? '식재료',

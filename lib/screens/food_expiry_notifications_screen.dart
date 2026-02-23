@@ -65,7 +65,6 @@ class _FoodExpiryNotificationsScreenState
           location: item.location,
           price: item.price ?? 0.0,
           supplier: item.supplier ?? '',
-          healthTags: item.healthTags,
         ))
         .toList();
     final count = await FoodExpiryNotificationService.instance

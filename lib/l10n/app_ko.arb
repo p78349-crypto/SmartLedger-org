@@ -1,0 +1,10 @@
+{
+  "appTitle": "스마트 가계부",
+  "income": "수입",
+  "expense": "지출",
+  "save": "저장",
+  "setting": "설정",
+  "@appTitle": {
+    "description": "앱 제목"
+  }
+}

@@ -4,6 +4,7 @@ enum AssetCategory {
   stock('주식', '📈', 0xFF4CAF50),
   bond('채권', '📊', 0xFF2196F3),
   realEstate('부동산', '🏠', 0xFFFF9800),
+  company('회사/사업체', '🏢', 0xFF795548),
   deposit('예금/적금', '🏦', 0xFF673AB7),
   crypto('암호화폐', '₿', 0xFFFFA726),
   cash('현금', '💵', 0xFF4CAF50),
@@ -13,6 +14,16 @@ enum AssetCategory {
   final String emoji;
   final int color;
   const AssetCategory(this.label, this.emoji, this.color);
+}
+
+enum AssetRiskLevel {
+  low('낮음'),
+  medium('보통'),
+  high('높음'),
+  veryHigh('매우 높음');
+
+  final String label;
+  const AssetRiskLevel(this.label);
 }
 
 class Asset {
@@ -34,6 +45,17 @@ class Asset {
   final bool isInvestment; // 투자 중인 자산인지 (트레이딩)
   final DateTime? conversionDate; // 자산으로 전환된 날짜
   final double? costBasis; // 원가 (손익 계산용)
+  final String? ticker; // 종목/심볼 (주식/코인/회사)
+  final String? institution; // 금융사/거래소/보관처
+  final String? currencyCode; // 통화 코드 (예: KRW, USD)
+  final double? units; // 보유 수량 (주/코인/지분)
+  final double? unitPrice; // 단가
+  final double? appraisalValue; // 평가액 (부동산/회사 등)
+  final double? monthlyIncome; // 월 수익 (배당/이자/임대)
+  final AssetRiskLevel? riskLevel; // 리스크 등급
+  final double? debtAmount; // 부채/대출 잔액
+  final DateTime? maturityDate; // 만기일
+  final double? alertThreshold; // 경고 임계값
 
   Asset({
     required this.id,
@@ -48,6 +70,17 @@ class Asset {
     this.isInvestment = false,
     this.conversionDate,
     this.costBasis, // 원가: 구매 시점의 투입 금액
+    this.ticker,
+    this.institution,
+    this.currencyCode,
+    this.units,
+    this.unitPrice,
+    this.appraisalValue,
+    this.monthlyIncome,
+    this.riskLevel,
+    this.debtAmount,
+    this.maturityDate,
+    this.alertThreshold,
     DateTime? date,
   }) : date = date ?? DateTime.now();
 
@@ -64,6 +97,17 @@ class Asset {
     bool? isInvestment,
     DateTime? conversionDate,
     double? costBasis,
+    String? ticker,
+    String? institution,
+    String? currencyCode,
+    double? units,
+    double? unitPrice,
+    double? appraisalValue,
+    double? monthlyIncome,
+    AssetRiskLevel? riskLevel,
+    double? debtAmount,
+    DateTime? maturityDate,
+    double? alertThreshold,
   }) {
     return Asset(
       id: id,
@@ -80,6 +124,17 @@ class Asset {
       isInvestment: isInvestment ?? this.isInvestment,
       conversionDate: conversionDate ?? this.conversionDate,
       costBasis: costBasis ?? this.costBasis,
+      ticker: ticker ?? this.ticker,
+      institution: institution ?? this.institution,
+      currencyCode: currencyCode ?? this.currencyCode,
+      units: units ?? this.units,
+      unitPrice: unitPrice ?? this.unitPrice,
+      appraisalValue: appraisalValue ?? this.appraisalValue,
+      monthlyIncome: monthlyIncome ?? this.monthlyIncome,
+      riskLevel: riskLevel ?? this.riskLevel,
+      debtAmount: debtAmount ?? this.debtAmount,
+      maturityDate: maturityDate ?? this.maturityDate,
+      alertThreshold: alertThreshold ?? this.alertThreshold,
     );
   }
 
@@ -104,6 +159,17 @@ class Asset {
     } catch (e) {
       category = AssetCategory.other;
     }
+    final riskStr = json['riskLevel'] as String?;
+    AssetRiskLevel? riskLevel;
+    if (riskStr != null) {
+      try {
+        riskLevel = AssetRiskLevel.values.firstWhere(
+          (e) => e.name == riskStr,
+        );
+      } catch (e) {
+        riskLevel = null;
+      }
+    }
     return Asset(
       id: id,
       name: json['name'] as String? ?? '',
@@ -121,6 +187,19 @@ class Asset {
           ? DateTime.tryParse(json['conversionDate'] as String)
           : null,
       costBasis: (json['costBasis'] as num?)?.toDouble(),
+      ticker: json['ticker'] as String?,
+      institution: json['institution'] as String?,
+      currencyCode: json['currencyCode'] as String?,
+      units: (json['units'] as num?)?.toDouble(),
+      unitPrice: (json['unitPrice'] as num?)?.toDouble(),
+      appraisalValue: (json['appraisalValue'] as num?)?.toDouble(),
+      monthlyIncome: (json['monthlyIncome'] as num?)?.toDouble(),
+      riskLevel: riskLevel,
+      debtAmount: (json['debtAmount'] as num?)?.toDouble(),
+      maturityDate: json['maturityDate'] != null
+          ? DateTime.tryParse(json['maturityDate'] as String)
+          : null,
+      alertThreshold: (json['alertThreshold'] as num?)?.toDouble(),
     );
   }
 
@@ -139,6 +218,17 @@ class Asset {
       'isInvestment': isInvestment,
       'conversionDate': conversionDate?.toIso8601String(),
       'costBasis': costBasis,
+      'ticker': ticker,
+      'institution': institution,
+      'currencyCode': currencyCode,
+      'units': units,
+      'unitPrice': unitPrice,
+      'appraisalValue': appraisalValue,
+      'monthlyIncome': monthlyIncome,
+      'riskLevel': riskLevel?.name,
+      'debtAmount': debtAmount,
+      'maturityDate': maturityDate?.toIso8601String(),
+      'alertThreshold': alertThreshold,
     };
   }
 }

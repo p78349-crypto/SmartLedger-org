@@ -145,13 +145,6 @@ class IconLaunchUtils {
       );
     }
 
-    if (routeName == AppRoutes.shoppingPrep) {
-      return IconLaunchRequest(
-        routeName: routeName,
-        arguments: ShoppingCartArgs(accountName: accountName),
-      );
-    }
-
     if (routeName == AppRoutes.shoppingPointsInput) {
       return IconLaunchRequest(
         routeName: routeName,

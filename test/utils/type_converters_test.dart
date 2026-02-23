@@ -55,6 +55,18 @@ void main() {
         expect(TypeConverters.parseCurrency('₩10,000'), 10000);
       });
 
+      test('handles currency symbols with spaces and text', () {
+        expect(TypeConverters.parseCurrency('₩ 1,200'), 1200);
+        expect(TypeConverters.parseCurrency('₩ 1,200원'), 1200);
+        expect(TypeConverters.parseCurrency('\$10,000 USD'), 10000);
+      });
+
+      test('handles negative currency values', () {
+        expect(TypeConverters.parseCurrency('-₩1,000'), -1000);
+        expect(TypeConverters.parseCurrency('-100'), -100);
+        expect(TypeConverters.parseCurrency('-1,234.56'), -1234.56);
+      });
+
       test('returns null for empty string', () {
         expect(TypeConverters.parseCurrency(''), isNull);
       });

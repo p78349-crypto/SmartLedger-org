@@ -3,6 +3,100 @@ part of 'backup_screen.dart';
 // ignore_for_file: invalid_use_of_protected_member
 
 extension BackupScreenActions on _BackupScreenState {
+  /// 백업 타입 선택 다이얼로그 (지출만, 자산만, 전체)
+  Future<void> _showBackupTypeSelection() async {
+    final backupType = await showDialog<_BackupType>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('📊 백업 데이터 선택'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('백업에 포함할 데이터를 선택하세요'),
+            const SizedBox(height: 16),
+            _buildDataTypeOption(
+              icon: Icons.receipt_long,
+              title: '📝 지출 내역만',
+              subtitle: '거래 내역, 메모, 결제수단만 백업',
+              type: _BackupType.transactionsOnly,
+            ),
+            const Divider(),
+            _buildDataTypeOption(
+              icon: Icons.account_balance,
+              title: '💰 자산만',
+              subtitle: '자산 목록, 자산 이동 기록만 백업',
+              type: _BackupType.assetsOnly,
+            ),
+            const Divider(),
+            _buildDataTypeOption(
+              icon: Icons.inventory_2,
+              title: '📦 생활용품 재고만',
+              subtitle: '생활용품 목록, 보관 위치만 백업',
+              type: _BackupType.wmsOnly,
+            ),
+            const Divider(),
+            _buildDataTypeOption(
+              icon: Icons.backup,
+              title: '✅ 전체 데이터',
+              subtitle: '모든 데이터 포함 (권장)',
+              type: _BackupType.full,
+              recommended: true,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('취소'),
+          ),
+        ],
+      ),
+    );
+
+    if (!mounted || backupType == null) return;
+
+    setState(() => _selectedBackupType = backupType);
+    
+    if (mounted) {
+      await _showBackupOptions();
+    }
+  }
+
+  Widget _buildDataTypeOption({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required _BackupType type,
+    bool recommended = false,
+  }) {
+    return ListTile(
+      leading: Icon(icon, size: 28),
+      title: Row(
+        children: [
+          Text(title),
+          if (recommended) ...[
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.blue,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: const Text(
+                '권장',
+                style: TextStyle(color: Colors.white, fontSize: 10),
+              ),
+            ),
+          ],
+        ],
+      ),
+      subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
+      onTap: () => Navigator.pop(context, type),
+      contentPadding: EdgeInsets.zero,
+    );
+  }
+
   Future<void> _showBackupOptions() async {
     final option = await showDialog<String>(
       context: context,
@@ -99,10 +193,26 @@ extension BackupScreenActions on _BackupScreenState {
     });
     try {
       final now = DateTime.now();
-      final fileName = _buildBackupFileName(now);
+      final fileName = _buildBackupFileName(now, backupType: _selectedBackupType);
       final pw = await _prepareBackupEncryptionPassword();
+      String? hint;
+      if (pw != null && pw.isNotEmpty && mounted) {
+        hint = await _promptPasswordHint(pw);
+      }
+      
+      final backupTypeStr = _selectedBackupType == _BackupType.transactionsOnly
+          ? 'transactions_only'
+          : _selectedBackupType == _BackupType.assetsOnly
+              ? 'assets_only'
+              : _selectedBackupType == _BackupType.wmsOnly
+                  ? 'wms_only'
+                  : 'full';
+      
       await BackupService().saveBackupToFile(
-        widget.accountName, fileName, encryptionPassword: pw,
+        widget.accountName, fileName, 
+        encryptionPassword: pw,
+        passwordHint: hint,
+        backupType: backupTypeStr,
       );
       if (!mounted) return;
       await _loadBackupFiles();
@@ -166,8 +276,24 @@ extension BackupScreenActions on _BackupScreenState {
     });
     try {
       final pw = await _prepareBackupEncryptionPassword();
+      String? hint;
+      if (pw != null && pw.isNotEmpty && mounted) {
+        hint = await _promptPasswordHint(pw);
+      }
+      
+      final backupTypeStr = _selectedBackupType == _BackupType.transactionsOnly
+          ? 'transactions_only'
+          : _selectedBackupType == _BackupType.assetsOnly
+              ? 'assets_only'
+              : _selectedBackupType == _BackupType.wmsOnly
+                  ? 'wms_only'
+                  : 'full';
+      
       final filePath = await BackupService().saveBackupToDownloads(
-        widget.accountName, encryptionPassword: pw,
+        widget.accountName, 
+        encryptionPassword: pw,
+        passwordHint: hint,
+        backupType: backupTypeStr,
       );
       final fileName = filePath.split(Platform.pathSeparator).last;
       final savedDir = File(filePath).parent.path;
@@ -195,8 +321,25 @@ extension BackupScreenActions on _BackupScreenState {
     });
     try {
       final pw = await _prepareBackupEncryptionPassword();
+      String? hint;
+
+      if (pw != null && pw.isNotEmpty && mounted) {
+        hint = await _promptPasswordHint(pw);
+      }
+      
+      final backupTypeStr = _selectedBackupType == _BackupType.transactionsOnly
+          ? 'transactions_only'
+          : _selectedBackupType == _BackupType.assetsOnly
+              ? 'assets_only'
+              : _selectedBackupType == _BackupType.wmsOnly
+                  ? 'wms_only'
+                  : 'full';
+      
       await BackupService().shareBackup(
-        widget.accountName, encryptionPassword: pw,
+        widget.accountName, 
+        encryptionPassword: pw,
+        passwordHint: hint,
+        backupType: backupTypeStr,
       );
       if (!mounted) return;
       setState(() { _backupStatus = null; _isProcessing = false; });
@@ -217,8 +360,25 @@ extension BackupScreenActions on _BackupScreenState {
     });
     try {
       final pw = await _prepareBackupEncryptionPassword();
+      String? hint;
+
+      if (pw != null && pw.isNotEmpty && mounted) {
+        hint = await _promptPasswordHint(pw);
+      }
+
+      final backupTypeStr = _selectedBackupType == _BackupType.transactionsOnly
+          ? 'transactions_only'
+          : _selectedBackupType == _BackupType.assetsOnly
+              ? 'assets_only'
+              : _selectedBackupType == _BackupType.wmsOnly
+                  ? 'wms_only'
+                  : 'full';
+      
       await BackupService().composeEmailWithBackup(
-        widget.accountName, encryptionPassword: pw,
+        widget.accountName, 
+        encryptionPassword: pw,
+        passwordHint: hint,
+        backupType: backupTypeStr,
       );
       if (!mounted) return;
       setState(() { _backupStatus = null; _isProcessing = false; });
@@ -229,6 +389,95 @@ extension BackupScreenActions on _BackupScreenState {
         _isProcessing = false;
       });
       SnackbarUtils.showError(context, '이메일 열기 실패: $e');
+    }
+  }
+
+  Future<String?> _promptPasswordHint(String password) async {
+    final autoMaskedHint = BackupService().generateMaskedPasswordHint(password);
+    final hintController = TextEditingController(text: autoMaskedHint);
+    
+    try {
+      return await showDialog<String>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('암호 힌트 확인'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                '앱 재설치 시 암호를 기억하기 위한 유일한 수단입니다.\n'
+                '마스킹된 힌트만으로 암호를 유추할 수 있는지 다시 한번 확인하십시오.\n\n'
+                '※ 암호 분실로 인한 데이터 손실은 본인 책임이며 복구가 절대 불가능합니다.',
+                style: TextStyle(fontSize: 13, color: Colors.redAccent, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                '자동 생성된 마스킹 힌트:',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: hintController,
+                decoration: const InputDecoration(
+                  labelText: '암호 힌트 (수정 가능)',
+                  border: OutlineInputBorder(),
+                  helperText: '예: 12****89 (마스킹 힌트)',
+                ),
+                autofocus: true,
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                '⚠️ 주의: 힌트가 너무 노골적이면 보안이 취약해질 수 있으나, 너무 어려우면 복구가 불가합니다.',
+                style: TextStyle(fontSize: 11, color: Colors.orange),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                // 암호가 설정된 경우 힌트 없이 진행 시 재확인
+                showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: const Text('힌트 미설정 주의'),
+                    content: const Text(
+                      '암호 힌트 없이 진행하면 나중에 암호를 잊었을 때 절대로 복구할 수 없습니다.\n정말 힌트 없이 진행할까요?'
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        child: const Text('아니오 (힌트 입력)'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(ctx); // 경고창 닫기
+                          Navigator.pop(context, ''); // 빈 힌트로 진행
+                        },
+                        child: const Text('예 (위험 감수)'),
+                      ),
+                    ],
+                  ),
+                );
+              },
+              child: const Text('힌트 없이 진행'),
+            ),
+            FilledButton(
+              onPressed: () {
+                final hint = hintController.text.trim();
+                if (hint.isEmpty) {
+                  SnackbarUtils.showError(context, '힌트를 입력하거나 취소 버튼을 눌러주세요.');
+                  return;
+                }
+                Navigator.pop(context, hint);
+              },
+              child: const Text('이 힌트로 저장'),
+            ),
+          ],
+        ),
+      );
+    } finally {
+      hintController.dispose();
     }
   }
 }

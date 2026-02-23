@@ -8,12 +8,12 @@ import '../utils/number_formats.dart';
 import '../utils/nutrition_food_knowledge.dart';
 import '../utils/nutrition_report_utils.dart';
 
-part 'nutrition_report_screen.build.dart';
-part 'nutrition_report_screen.food_search_result.dart';
-part 'nutrition_report_screen.small_widgets.dart';
-part 'nutrition_report_screen.cooking_guide.dart';
-part 'nutrition_report_screen.pairing_suggestions.dart';
-part 'nutrition_report_screen.extra_recommendations.dart';
+part 'nutrition_report_screen_build.dart';
+part 'nutrition_report_screen_food_search.dart';
+part 'nutrition_report_screen_small_widgets.dart';
+part 'nutrition_report_screen_cooking_guide.dart';
+part 'nutrition_report_screen_pairing_suggestions.dart';
+part 'nutrition_report_screen_extra_recommendations.dart';
 
 class NutritionReportScreen extends StatefulWidget {
   const NutritionReportScreen({
@@ -69,7 +69,11 @@ class _NutritionReportScreenState extends State<NutritionReportScreen> {
 
   Future<void> _loadHistory() async {
     final history = await UserPrefService.getRecipeSearchHistory();
-    if (mounted) setState(() => _searchHistory = history);
+    if (mounted) {
+      setState(() {
+        _searchHistory = history;
+      });
+    }
   }
 
   Future<void> _saveSearch(String query) async {
@@ -88,6 +92,7 @@ class _NutritionReportScreenState extends State<NutritionReportScreen> {
 
   @override
   void dispose() {
+    // Save current query as last query on exit
     UserPrefService.setLastRecipeSearchQuery(_foodQuery);
     _foodSearchController.dispose();
     _searchDebouncer.dispose();
@@ -96,31 +101,4 @@ class _NutritionReportScreenState extends State<NutritionReportScreen> {
 
   @override
   Widget build(BuildContext context) => _buildMain(context);
-}
-
-/// Reusable card wrapper with title.
-class _InfoCard extends StatelessWidget {
-  const _InfoCard({required this.title, required this.child});
-  final String title;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title,
-              style: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w800)),
-            const SizedBox(height: 10),
-            child,
-          ],
-        ),
-      ),
-    );
-  }
 }

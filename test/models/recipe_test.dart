@@ -89,7 +89,7 @@ void main() {
       final json = recipe.toJson();
 
       expect(json['id'], 'recipe-3');
-      expect(json['name'], '된장찌개');
+      expect(json['localizedNames']['ko'], '된장찌개');
       expect(json['cuisine'], '한식');
       expect(json['healthScore'], 4);
       expect(json['ingredients'], isList);

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 
@@ -8,6 +9,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'memo_stats_screen.dart';
 import '../navigation/app_routes.dart';
+import '../services/account_service.dart';
+import '../services/home_server_sync_service.dart';
 import '../services/user_pref_service.dart';
 import '../theme/app_colors.dart';
 import '../utils/icon_catalog.dart';
@@ -20,6 +23,7 @@ import '../utils/pref_keys.dart';
 import '../utils/screen_saver_ids.dart';
 import '../utils/screen_saver_launcher.dart';
 import '../widgets/background_widget.dart';
+import '../widgets/root_auth_gate.dart';
 import '../widgets/special_backgrounds.dart';
 import '../theme/app_theme_seed_controller.dart';
 
@@ -86,11 +90,13 @@ class _AccountMainScreenState extends State<AccountMainScreen>
   bool _isRestoringIndex = false;
   bool _disablePageSwipe = false;
   late final List<GlobalKey<_IconGridPageState>> _pageKeys;
+  bool _hideRootPage = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _checkHideRootPage();
     _currentIndex = _pageCount > 0
         ? widget.initialIndex.clamp(0, _pageCount - 1)
         : 0;
@@ -100,6 +106,27 @@ class _AccountMainScreenState extends State<AccountMainScreen>
       (_) => GlobalKey<_IconGridPageState>(),
     );
     _restoreSavedIndexIfNeeded();
+    unawaited(_runStartupSync());
+  }
+
+  Future<void> _runStartupSync() async {
+    if (widget.accountName == 'ROOT') {
+      return;
+    }
+    try {
+      await HomeServerSyncService().syncAllForAccount(widget.accountName);
+    } catch (_) {
+      // Best-effort startup sync; ignore to keep UX smooth.
+    }
+  }
+  
+  Future<void> _checkHideRootPage() async {
+    final accountService = AccountService();
+    final accountCount = accountService.accounts.length;
+    if (!mounted) return;
+    setState(() {
+      _hideRootPage = accountCount >= 2;
+    });
   }
 
   @override
@@ -194,6 +221,13 @@ class _IconGridPageState extends State<_IconGridPage> {
   }
 
   Future<void> _loadHideEmptySlots() async {
+    // Page 0 (대시보드): 항상 빈 슬롯 숨기기
+    if (widget.pageIndex == 0) {
+      if (!mounted) return;
+      setState(() => _hideEmptySlots = true);
+      return;
+    }
+
     final hide = await UserPrefService.getHideEmptySlots(
       accountName: widget.accountName,
     );
@@ -226,6 +260,26 @@ class _IconGridPageState extends State<_IconGridPage> {
     if (!_isEditMode) {
       _saveSettings();
       _saveSlotsDebounced();
+    }
+  }
+
+  String? _getBadgeText(String id) {
+    if (_isEditMode) return null;
+
+    // 사용자 요청 가이드 순서 (레시피 1, 장바구니 2, 지출입력 3, 일일지출 4)
+    switch (id) {
+      case 'nutrition_report':
+        return '1'; // "레시피/식재료 검색"
+      case 'shopping_cart':
+        return '2'; // "장바구니"
+      case 'transactionAdd':
+        return '3'; // "지출입력/거래 입력"
+      case 'daily_transactions':
+        return '4'; // "일일지출/오늘의 지출"
+      case 'emergency_services':
+        return '!';
+      default:
+        return null;
     }
   }
 

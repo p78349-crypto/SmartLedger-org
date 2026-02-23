@@ -50,6 +50,8 @@ extension SettingsPassword on _SettingsScreenState {
       }
 
       await _userPasswordService.clearPassword(prefs);
+      // Clear mirrored backup encryption password from secure storage when app password is removed
+      await BackupService().clearStoredBackupEncryptionPassword();
     }
 
     await prefs.setBool(PrefKeys.userPasswordEnabled, enabled);
@@ -154,6 +156,9 @@ extension SettingsPassword on _SettingsScreenState {
     confirmController.dispose();
 
     await _userPasswordService.setPassword(prefs, password: password);
+    // Mirror the app password to the backup encryption password store for auto-backups
+    await BackupService().setStoredBackupEncryptionPassword(password);
+
     if (!mounted) return true;
     ScaffoldMessenger.of(
       context,

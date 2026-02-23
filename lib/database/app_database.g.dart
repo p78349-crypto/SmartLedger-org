@@ -44,8 +44,67 @@ class $DbAccountsTable extends DbAccounts
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
+  static const VerificationMeta _syncIdMeta = const VerificationMeta('syncId');
   @override
-  List<GeneratedColumn> get $columns => [id, name, createdAt];
+  late final GeneratedColumn<String> syncId = GeneratedColumn<String>(
+    'sync_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isDeletedMeta = const VerificationMeta(
+    'isDeleted',
+  );
+  @override
+  late final GeneratedColumn<bool> isDeleted = GeneratedColumn<bool>(
+    'is_deleted',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_deleted" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isSyncedMeta = const VerificationMeta(
+    'isSynced',
+  );
+  @override
+  late final GeneratedColumn<bool> isSynced = GeneratedColumn<bool>(
+    'is_synced',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_synced" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    createdAt,
+    syncId,
+    updatedAt,
+    isDeleted,
+    isSynced,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -75,6 +134,30 @@ class $DbAccountsTable extends DbAccounts
         createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
       );
     }
+    if (data.containsKey('sync_id')) {
+      context.handle(
+        _syncIdMeta,
+        syncId.isAcceptableOrUnknown(data['sync_id']!, _syncIdMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('is_deleted')) {
+      context.handle(
+        _isDeletedMeta,
+        isDeleted.isAcceptableOrUnknown(data['is_deleted']!, _isDeletedMeta),
+      );
+    }
+    if (data.containsKey('is_synced')) {
+      context.handle(
+        _isSyncedMeta,
+        isSynced.isAcceptableOrUnknown(data['is_synced']!, _isSyncedMeta),
+      );
+    }
     return context;
   }
 
@@ -96,6 +179,22 @@ class $DbAccountsTable extends DbAccounts
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
       )!,
+      syncId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_id'],
+      ),
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      ),
+      isDeleted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_deleted'],
+      )!,
+      isSynced: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_synced'],
+      )!,
     );
   }
 
@@ -109,10 +208,18 @@ class DbAccount extends DataClass implements Insertable<DbAccount> {
   final int id;
   final String name;
   final DateTime createdAt;
+  final String? syncId;
+  final DateTime? updatedAt;
+  final bool isDeleted;
+  final bool isSynced;
   const DbAccount({
     required this.id,
     required this.name,
     required this.createdAt,
+    this.syncId,
+    this.updatedAt,
+    required this.isDeleted,
+    required this.isSynced,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -120,6 +227,14 @@ class DbAccount extends DataClass implements Insertable<DbAccount> {
     map['id'] = Variable<int>(id);
     map['name'] = Variable<String>(name);
     map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || syncId != null) {
+      map['sync_id'] = Variable<String>(syncId);
+    }
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<DateTime>(updatedAt);
+    }
+    map['is_deleted'] = Variable<bool>(isDeleted);
+    map['is_synced'] = Variable<bool>(isSynced);
     return map;
   }
 
@@ -128,6 +243,14 @@ class DbAccount extends DataClass implements Insertable<DbAccount> {
       id: Value(id),
       name: Value(name),
       createdAt: Value(createdAt),
+      syncId: syncId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(syncId),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
+      isDeleted: Value(isDeleted),
+      isSynced: Value(isSynced),
     );
   }
 
@@ -140,6 +263,10 @@ class DbAccount extends DataClass implements Insertable<DbAccount> {
       id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      syncId: serializer.fromJson<String?>(json['syncId']),
+      updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
+      isDeleted: serializer.fromJson<bool>(json['isDeleted']),
+      isSynced: serializer.fromJson<bool>(json['isSynced']),
     );
   }
   @override
@@ -149,19 +276,39 @@ class DbAccount extends DataClass implements Insertable<DbAccount> {
       'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String>(name),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'syncId': serializer.toJson<String?>(syncId),
+      'updatedAt': serializer.toJson<DateTime?>(updatedAt),
+      'isDeleted': serializer.toJson<bool>(isDeleted),
+      'isSynced': serializer.toJson<bool>(isSynced),
     };
   }
 
-  DbAccount copyWith({int? id, String? name, DateTime? createdAt}) => DbAccount(
+  DbAccount copyWith({
+    int? id,
+    String? name,
+    DateTime? createdAt,
+    Value<String?> syncId = const Value.absent(),
+    Value<DateTime?> updatedAt = const Value.absent(),
+    bool? isDeleted,
+    bool? isSynced,
+  }) => DbAccount(
     id: id ?? this.id,
     name: name ?? this.name,
     createdAt: createdAt ?? this.createdAt,
+    syncId: syncId.present ? syncId.value : this.syncId,
+    updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+    isDeleted: isDeleted ?? this.isDeleted,
+    isSynced: isSynced ?? this.isSynced,
   );
   DbAccount copyWithCompanion(DbAccountsCompanion data) {
     return DbAccount(
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      syncId: data.syncId.present ? data.syncId.value : this.syncId,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      isDeleted: data.isDeleted.present ? data.isDeleted.value : this.isDeleted,
+      isSynced: data.isSynced.present ? data.isSynced.value : this.isSynced,
     );
   }
 
@@ -170,45 +317,74 @@ class DbAccount extends DataClass implements Insertable<DbAccount> {
     return (StringBuffer('DbAccount(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('syncId: $syncId, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isDeleted: $isDeleted, ')
+          ..write('isSynced: $isSynced')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, createdAt);
+  int get hashCode =>
+      Object.hash(id, name, createdAt, syncId, updatedAt, isDeleted, isSynced);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is DbAccount &&
           other.id == this.id &&
           other.name == this.name &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.syncId == this.syncId &&
+          other.updatedAt == this.updatedAt &&
+          other.isDeleted == this.isDeleted &&
+          other.isSynced == this.isSynced);
 }
 
 class DbAccountsCompanion extends UpdateCompanion<DbAccount> {
   final Value<int> id;
   final Value<String> name;
   final Value<DateTime> createdAt;
+  final Value<String?> syncId;
+  final Value<DateTime?> updatedAt;
+  final Value<bool> isDeleted;
+  final Value<bool> isSynced;
   const DbAccountsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.syncId = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.isDeleted = const Value.absent(),
+    this.isSynced = const Value.absent(),
   });
   DbAccountsCompanion.insert({
     this.id = const Value.absent(),
     required String name,
     this.createdAt = const Value.absent(),
+    this.syncId = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.isDeleted = const Value.absent(),
+    this.isSynced = const Value.absent(),
   }) : name = Value(name);
   static Insertable<DbAccount> custom({
     Expression<int>? id,
     Expression<String>? name,
     Expression<DateTime>? createdAt,
+    Expression<String>? syncId,
+    Expression<DateTime>? updatedAt,
+    Expression<bool>? isDeleted,
+    Expression<bool>? isSynced,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
       if (createdAt != null) 'created_at': createdAt,
+      if (syncId != null) 'sync_id': syncId,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (isDeleted != null) 'is_deleted': isDeleted,
+      if (isSynced != null) 'is_synced': isSynced,
     });
   }
 
@@ -216,11 +392,19 @@ class DbAccountsCompanion extends UpdateCompanion<DbAccount> {
     Value<int>? id,
     Value<String>? name,
     Value<DateTime>? createdAt,
+    Value<String?>? syncId,
+    Value<DateTime?>? updatedAt,
+    Value<bool>? isDeleted,
+    Value<bool>? isSynced,
   }) {
     return DbAccountsCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
       createdAt: createdAt ?? this.createdAt,
+      syncId: syncId ?? this.syncId,
+      updatedAt: updatedAt ?? this.updatedAt,
+      isDeleted: isDeleted ?? this.isDeleted,
+      isSynced: isSynced ?? this.isSynced,
     );
   }
 
@@ -236,6 +420,18 @@ class DbAccountsCompanion extends UpdateCompanion<DbAccount> {
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
+    if (syncId.present) {
+      map['sync_id'] = Variable<String>(syncId.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (isDeleted.present) {
+      map['is_deleted'] = Variable<bool>(isDeleted.value);
+    }
+    if (isSynced.present) {
+      map['is_synced'] = Variable<bool>(isSynced.value);
+    }
     return map;
   }
 
@@ -244,7 +440,11 @@ class DbAccountsCompanion extends UpdateCompanion<DbAccount> {
     return (StringBuffer('DbAccountsCompanion(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('syncId: $syncId, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isDeleted: $isDeleted, ')
+          ..write('isSynced: $isSynced')
           ..write(')'))
         .toString();
   }
@@ -565,6 +765,57 @@ class $DbTransactionsTable extends DbTransactions
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _syncIdMeta = const VerificationMeta('syncId');
+  @override
+  late final GeneratedColumn<String> syncId = GeneratedColumn<String>(
+    'sync_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isDeletedMeta = const VerificationMeta(
+    'isDeleted',
+  );
+  @override
+  late final GeneratedColumn<bool> isDeleted = GeneratedColumn<bool>(
+    'is_deleted',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_deleted" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isSyncedMeta = const VerificationMeta(
+    'isSynced',
+  );
+  @override
+  late final GeneratedColumn<bool> isSynced = GeneratedColumn<bool>(
+    'is_synced',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_synced" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -595,6 +846,10 @@ class $DbTransactionsTable extends DbTransactions
     originalTransactionId,
     weatherJson,
     benefitJson,
+    syncId,
+    updatedAt,
+    isDeleted,
+    isSynced,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -819,6 +1074,30 @@ class $DbTransactionsTable extends DbTransactions
         ),
       );
     }
+    if (data.containsKey('sync_id')) {
+      context.handle(
+        _syncIdMeta,
+        syncId.isAcceptableOrUnknown(data['sync_id']!, _syncIdMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('is_deleted')) {
+      context.handle(
+        _isDeletedMeta,
+        isDeleted.isAcceptableOrUnknown(data['is_deleted']!, _isDeletedMeta),
+      );
+    }
+    if (data.containsKey('is_synced')) {
+      context.handle(
+        _isSyncedMeta,
+        isSynced.isAcceptableOrUnknown(data['is_synced']!, _isSyncedMeta),
+      );
+    }
     return context;
   }
 
@@ -940,6 +1219,22 @@ class $DbTransactionsTable extends DbTransactions
         DriftSqlType.string,
         data['${effectivePrefix}benefit_json'],
       ),
+      syncId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_id'],
+      ),
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      ),
+      isDeleted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_deleted'],
+      )!,
+      isSynced: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_synced'],
+      )!,
     );
   }
 
@@ -990,6 +1285,10 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
   ///
   /// Example: {"카드":1200,"배송":3000}
   final String? benefitJson;
+  final String? syncId;
+  final DateTime? updatedAt;
+  final bool isDeleted;
+  final bool isSynced;
   const DbTransaction({
     required this.id,
     required this.accountId,
@@ -1019,6 +1318,10 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
     this.originalTransactionId,
     this.weatherJson,
     this.benefitJson,
+    this.syncId,
+    this.updatedAt,
+    required this.isDeleted,
+    required this.isSynced,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1077,6 +1380,14 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
     if (!nullToAbsent || benefitJson != null) {
       map['benefit_json'] = Variable<String>(benefitJson);
     }
+    if (!nullToAbsent || syncId != null) {
+      map['sync_id'] = Variable<String>(syncId);
+    }
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<DateTime>(updatedAt);
+    }
+    map['is_deleted'] = Variable<bool>(isDeleted);
+    map['is_synced'] = Variable<bool>(isSynced);
     return map;
   }
 
@@ -1134,6 +1445,14 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
       benefitJson: benefitJson == null && nullToAbsent
           ? const Value.absent()
           : Value(benefitJson),
+      syncId: syncId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(syncId),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
+      isDeleted: Value(isDeleted),
+      isSynced: Value(isSynced),
     );
   }
 
@@ -1177,6 +1496,10 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
       ),
       weatherJson: serializer.fromJson<String?>(json['weatherJson']),
       benefitJson: serializer.fromJson<String?>(json['benefitJson']),
+      syncId: serializer.fromJson<String?>(json['syncId']),
+      updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
+      isDeleted: serializer.fromJson<bool>(json['isDeleted']),
+      isSynced: serializer.fromJson<bool>(json['isSynced']),
     );
   }
   @override
@@ -1213,6 +1536,10 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
       ),
       'weatherJson': serializer.toJson<String?>(weatherJson),
       'benefitJson': serializer.toJson<String?>(benefitJson),
+      'syncId': serializer.toJson<String?>(syncId),
+      'updatedAt': serializer.toJson<DateTime?>(updatedAt),
+      'isDeleted': serializer.toJson<bool>(isDeleted),
+      'isSynced': serializer.toJson<bool>(isSynced),
     };
   }
 
@@ -1245,6 +1572,10 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
     Value<String?> originalTransactionId = const Value.absent(),
     Value<String?> weatherJson = const Value.absent(),
     Value<String?> benefitJson = const Value.absent(),
+    Value<String?> syncId = const Value.absent(),
+    Value<DateTime?> updatedAt = const Value.absent(),
+    bool? isDeleted,
+    bool? isSynced,
   }) => DbTransaction(
     id: id ?? this.id,
     accountId: accountId ?? this.accountId,
@@ -1284,6 +1615,10 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
         : this.originalTransactionId,
     weatherJson: weatherJson.present ? weatherJson.value : this.weatherJson,
     benefitJson: benefitJson.present ? benefitJson.value : this.benefitJson,
+    syncId: syncId.present ? syncId.value : this.syncId,
+    updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+    isDeleted: isDeleted ?? this.isDeleted,
+    isSynced: isSynced ?? this.isSynced,
   );
   DbTransaction copyWithCompanion(DbTransactionsCompanion data) {
     return DbTransaction(
@@ -1341,6 +1676,10 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
       benefitJson: data.benefitJson.present
           ? data.benefitJson.value
           : this.benefitJson,
+      syncId: data.syncId.present ? data.syncId.value : this.syncId,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      isDeleted: data.isDeleted.present ? data.isDeleted.value : this.isDeleted,
+      isSynced: data.isSynced.present ? data.isSynced.value : this.isSynced,
     );
   }
 
@@ -1374,7 +1713,11 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
           ..write('isRefund: $isRefund, ')
           ..write('originalTransactionId: $originalTransactionId, ')
           ..write('weatherJson: $weatherJson, ')
-          ..write('benefitJson: $benefitJson')
+          ..write('benefitJson: $benefitJson, ')
+          ..write('syncId: $syncId, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isDeleted: $isDeleted, ')
+          ..write('isSynced: $isSynced')
           ..write(')'))
         .toString();
   }
@@ -1409,6 +1752,10 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
     originalTransactionId,
     weatherJson,
     benefitJson,
+    syncId,
+    updatedAt,
+    isDeleted,
+    isSynced,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -1441,7 +1788,11 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
           other.isRefund == this.isRefund &&
           other.originalTransactionId == this.originalTransactionId &&
           other.weatherJson == this.weatherJson &&
-          other.benefitJson == this.benefitJson);
+          other.benefitJson == this.benefitJson &&
+          other.syncId == this.syncId &&
+          other.updatedAt == this.updatedAt &&
+          other.isDeleted == this.isDeleted &&
+          other.isSynced == this.isSynced);
 }
 
 class DbTransactionsCompanion extends UpdateCompanion<DbTransaction> {
@@ -1473,6 +1824,10 @@ class DbTransactionsCompanion extends UpdateCompanion<DbTransaction> {
   final Value<String?> originalTransactionId;
   final Value<String?> weatherJson;
   final Value<String?> benefitJson;
+  final Value<String?> syncId;
+  final Value<DateTime?> updatedAt;
+  final Value<bool> isDeleted;
+  final Value<bool> isSynced;
   final Value<int> rowid;
   const DbTransactionsCompanion({
     this.id = const Value.absent(),
@@ -1503,6 +1858,10 @@ class DbTransactionsCompanion extends UpdateCompanion<DbTransaction> {
     this.originalTransactionId = const Value.absent(),
     this.weatherJson = const Value.absent(),
     this.benefitJson = const Value.absent(),
+    this.syncId = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.isDeleted = const Value.absent(),
+    this.isSynced = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   DbTransactionsCompanion.insert({
@@ -1534,6 +1893,10 @@ class DbTransactionsCompanion extends UpdateCompanion<DbTransaction> {
     this.originalTransactionId = const Value.absent(),
     this.weatherJson = const Value.absent(),
     this.benefitJson = const Value.absent(),
+    this.syncId = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.isDeleted = const Value.absent(),
+    this.isSynced = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        accountId = Value(accountId),
@@ -1569,6 +1932,10 @@ class DbTransactionsCompanion extends UpdateCompanion<DbTransaction> {
     Expression<String>? originalTransactionId,
     Expression<String>? weatherJson,
     Expression<String>? benefitJson,
+    Expression<String>? syncId,
+    Expression<DateTime>? updatedAt,
+    Expression<bool>? isDeleted,
+    Expression<bool>? isSynced,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1601,6 +1968,10 @@ class DbTransactionsCompanion extends UpdateCompanion<DbTransaction> {
         'original_transaction_id': originalTransactionId,
       if (weatherJson != null) 'weather_json': weatherJson,
       if (benefitJson != null) 'benefit_json': benefitJson,
+      if (syncId != null) 'sync_id': syncId,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (isDeleted != null) 'is_deleted': isDeleted,
+      if (isSynced != null) 'is_synced': isSynced,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1634,6 +2005,10 @@ class DbTransactionsCompanion extends UpdateCompanion<DbTransaction> {
     Value<String?>? originalTransactionId,
     Value<String?>? weatherJson,
     Value<String?>? benefitJson,
+    Value<String?>? syncId,
+    Value<DateTime?>? updatedAt,
+    Value<bool>? isDeleted,
+    Value<bool>? isSynced,
     Value<int>? rowid,
   }) {
     return DbTransactionsCompanion(
@@ -1666,6 +2041,10 @@ class DbTransactionsCompanion extends UpdateCompanion<DbTransaction> {
           originalTransactionId ?? this.originalTransactionId,
       weatherJson: weatherJson ?? this.weatherJson,
       benefitJson: benefitJson ?? this.benefitJson,
+      syncId: syncId ?? this.syncId,
+      updatedAt: updatedAt ?? this.updatedAt,
+      isDeleted: isDeleted ?? this.isDeleted,
+      isSynced: isSynced ?? this.isSynced,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1759,6 +2138,18 @@ class DbTransactionsCompanion extends UpdateCompanion<DbTransaction> {
     if (benefitJson.present) {
       map['benefit_json'] = Variable<String>(benefitJson.value);
     }
+    if (syncId.present) {
+      map['sync_id'] = Variable<String>(syncId.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (isDeleted.present) {
+      map['is_deleted'] = Variable<bool>(isDeleted.value);
+    }
+    if (isSynced.present) {
+      map['is_synced'] = Variable<bool>(isSynced.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1796,6 +2187,10 @@ class DbTransactionsCompanion extends UpdateCompanion<DbTransaction> {
           ..write('originalTransactionId: $originalTransactionId, ')
           ..write('weatherJson: $weatherJson, ')
           ..write('benefitJson: $benefitJson, ')
+          ..write('syncId: $syncId, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isDeleted: $isDeleted, ')
+          ..write('isSynced: $isSynced, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1894,6 +2289,46 @@ class $DbAssetsTable extends DbAssets with TableInfo<$DbAssetsTable, DbAsset> {
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _syncIdMeta = const VerificationMeta('syncId');
+  @override
+  late final GeneratedColumn<String> syncId = GeneratedColumn<String>(
+    'sync_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+  );
+  static const VerificationMeta _isDeletedMeta = const VerificationMeta(
+    'isDeleted',
+  );
+  @override
+  late final GeneratedColumn<bool> isDeleted = GeneratedColumn<bool>(
+    'is_deleted',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_deleted" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isSyncedMeta = const VerificationMeta(
+    'isSynced',
+  );
+  @override
+  late final GeneratedColumn<bool> isSynced = GeneratedColumn<bool>(
+    'is_synced',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_synced" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1904,6 +2339,9 @@ class $DbAssetsTable extends DbAssets with TableInfo<$DbAssetsTable, DbAsset> {
     location,
     memo,
     updatedAt,
+    syncId,
+    isDeleted,
+    isSynced,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1968,6 +2406,24 @@ class $DbAssetsTable extends DbAssets with TableInfo<$DbAssetsTable, DbAsset> {
         updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
       );
     }
+    if (data.containsKey('sync_id')) {
+      context.handle(
+        _syncIdMeta,
+        syncId.isAcceptableOrUnknown(data['sync_id']!, _syncIdMeta),
+      );
+    }
+    if (data.containsKey('is_deleted')) {
+      context.handle(
+        _isDeletedMeta,
+        isDeleted.isAcceptableOrUnknown(data['is_deleted']!, _isDeletedMeta),
+      );
+    }
+    if (data.containsKey('is_synced')) {
+      context.handle(
+        _isSyncedMeta,
+        isSynced.isAcceptableOrUnknown(data['is_synced']!, _isSyncedMeta),
+      );
+    }
     return context;
   }
 
@@ -2009,6 +2465,18 @@ class $DbAssetsTable extends DbAssets with TableInfo<$DbAssetsTable, DbAsset> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
       ),
+      syncId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_id'],
+      ),
+      isDeleted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_deleted'],
+      )!,
+      isSynced: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_synced'],
+      )!,
     );
   }
 
@@ -2027,6 +2495,9 @@ class DbAsset extends DataClass implements Insertable<DbAsset> {
   final String? location;
   final String? memo;
   final DateTime? updatedAt;
+  final String? syncId;
+  final bool isDeleted;
+  final bool isSynced;
   const DbAsset({
     required this.id,
     required this.accountId,
@@ -2036,6 +2507,9 @@ class DbAsset extends DataClass implements Insertable<DbAsset> {
     this.location,
     this.memo,
     this.updatedAt,
+    this.syncId,
+    required this.isDeleted,
+    required this.isSynced,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2056,6 +2530,11 @@ class DbAsset extends DataClass implements Insertable<DbAsset> {
     if (!nullToAbsent || updatedAt != null) {
       map['updated_at'] = Variable<DateTime>(updatedAt);
     }
+    if (!nullToAbsent || syncId != null) {
+      map['sync_id'] = Variable<String>(syncId);
+    }
+    map['is_deleted'] = Variable<bool>(isDeleted);
+    map['is_synced'] = Variable<bool>(isSynced);
     return map;
   }
 
@@ -2075,6 +2554,11 @@ class DbAsset extends DataClass implements Insertable<DbAsset> {
       updatedAt: updatedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(updatedAt),
+      syncId: syncId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(syncId),
+      isDeleted: Value(isDeleted),
+      isSynced: Value(isSynced),
     );
   }
 
@@ -2092,6 +2576,9 @@ class DbAsset extends DataClass implements Insertable<DbAsset> {
       location: serializer.fromJson<String?>(json['location']),
       memo: serializer.fromJson<String?>(json['memo']),
       updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
+      syncId: serializer.fromJson<String?>(json['syncId']),
+      isDeleted: serializer.fromJson<bool>(json['isDeleted']),
+      isSynced: serializer.fromJson<bool>(json['isSynced']),
     );
   }
   @override
@@ -2106,6 +2593,9 @@ class DbAsset extends DataClass implements Insertable<DbAsset> {
       'location': serializer.toJson<String?>(location),
       'memo': serializer.toJson<String?>(memo),
       'updatedAt': serializer.toJson<DateTime?>(updatedAt),
+      'syncId': serializer.toJson<String?>(syncId),
+      'isDeleted': serializer.toJson<bool>(isDeleted),
+      'isSynced': serializer.toJson<bool>(isSynced),
     };
   }
 
@@ -2118,6 +2608,9 @@ class DbAsset extends DataClass implements Insertable<DbAsset> {
     Value<String?> location = const Value.absent(),
     Value<String?> memo = const Value.absent(),
     Value<DateTime?> updatedAt = const Value.absent(),
+    Value<String?> syncId = const Value.absent(),
+    bool? isDeleted,
+    bool? isSynced,
   }) => DbAsset(
     id: id ?? this.id,
     accountId: accountId ?? this.accountId,
@@ -2127,6 +2620,9 @@ class DbAsset extends DataClass implements Insertable<DbAsset> {
     location: location.present ? location.value : this.location,
     memo: memo.present ? memo.value : this.memo,
     updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+    syncId: syncId.present ? syncId.value : this.syncId,
+    isDeleted: isDeleted ?? this.isDeleted,
+    isSynced: isSynced ?? this.isSynced,
   );
   DbAsset copyWithCompanion(DbAssetsCompanion data) {
     return DbAsset(
@@ -2138,6 +2634,9 @@ class DbAsset extends DataClass implements Insertable<DbAsset> {
       location: data.location.present ? data.location.value : this.location,
       memo: data.memo.present ? data.memo.value : this.memo,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      syncId: data.syncId.present ? data.syncId.value : this.syncId,
+      isDeleted: data.isDeleted.present ? data.isDeleted.value : this.isDeleted,
+      isSynced: data.isSynced.present ? data.isSynced.value : this.isSynced,
     );
   }
 
@@ -2151,7 +2650,10 @@ class DbAsset extends DataClass implements Insertable<DbAsset> {
           ..write('amount: $amount, ')
           ..write('location: $location, ')
           ..write('memo: $memo, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('syncId: $syncId, ')
+          ..write('isDeleted: $isDeleted, ')
+          ..write('isSynced: $isSynced')
           ..write(')'))
         .toString();
   }
@@ -2166,6 +2668,9 @@ class DbAsset extends DataClass implements Insertable<DbAsset> {
     location,
     memo,
     updatedAt,
+    syncId,
+    isDeleted,
+    isSynced,
   );
   @override
   bool operator ==(Object other) =>
@@ -2178,7 +2683,10 @@ class DbAsset extends DataClass implements Insertable<DbAsset> {
           other.amount == this.amount &&
           other.location == this.location &&
           other.memo == this.memo &&
-          other.updatedAt == this.updatedAt);
+          other.updatedAt == this.updatedAt &&
+          other.syncId == this.syncId &&
+          other.isDeleted == this.isDeleted &&
+          other.isSynced == this.isSynced);
 }
 
 class DbAssetsCompanion extends UpdateCompanion<DbAsset> {
@@ -2190,6 +2698,9 @@ class DbAssetsCompanion extends UpdateCompanion<DbAsset> {
   final Value<String?> location;
   final Value<String?> memo;
   final Value<DateTime?> updatedAt;
+  final Value<String?> syncId;
+  final Value<bool> isDeleted;
+  final Value<bool> isSynced;
   const DbAssetsCompanion({
     this.id = const Value.absent(),
     this.accountId = const Value.absent(),
@@ -2199,6 +2710,9 @@ class DbAssetsCompanion extends UpdateCompanion<DbAsset> {
     this.location = const Value.absent(),
     this.memo = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.syncId = const Value.absent(),
+    this.isDeleted = const Value.absent(),
+    this.isSynced = const Value.absent(),
   });
   DbAssetsCompanion.insert({
     this.id = const Value.absent(),
@@ -2209,6 +2723,9 @@ class DbAssetsCompanion extends UpdateCompanion<DbAsset> {
     this.location = const Value.absent(),
     this.memo = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.syncId = const Value.absent(),
+    this.isDeleted = const Value.absent(),
+    this.isSynced = const Value.absent(),
   }) : accountId = Value(accountId),
        name = Value(name),
        amount = Value(amount);
@@ -2221,6 +2738,9 @@ class DbAssetsCompanion extends UpdateCompanion<DbAsset> {
     Expression<String>? location,
     Expression<String>? memo,
     Expression<DateTime>? updatedAt,
+    Expression<String>? syncId,
+    Expression<bool>? isDeleted,
+    Expression<bool>? isSynced,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -2231,6 +2751,9 @@ class DbAssetsCompanion extends UpdateCompanion<DbAsset> {
       if (location != null) 'location': location,
       if (memo != null) 'memo': memo,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (syncId != null) 'sync_id': syncId,
+      if (isDeleted != null) 'is_deleted': isDeleted,
+      if (isSynced != null) 'is_synced': isSynced,
     });
   }
 
@@ -2243,6 +2766,9 @@ class DbAssetsCompanion extends UpdateCompanion<DbAsset> {
     Value<String?>? location,
     Value<String?>? memo,
     Value<DateTime?>? updatedAt,
+    Value<String?>? syncId,
+    Value<bool>? isDeleted,
+    Value<bool>? isSynced,
   }) {
     return DbAssetsCompanion(
       id: id ?? this.id,
@@ -2253,6 +2779,9 @@ class DbAssetsCompanion extends UpdateCompanion<DbAsset> {
       location: location ?? this.location,
       memo: memo ?? this.memo,
       updatedAt: updatedAt ?? this.updatedAt,
+      syncId: syncId ?? this.syncId,
+      isDeleted: isDeleted ?? this.isDeleted,
+      isSynced: isSynced ?? this.isSynced,
     );
   }
 
@@ -2283,6 +2812,15 @@ class DbAssetsCompanion extends UpdateCompanion<DbAsset> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
+    if (syncId.present) {
+      map['sync_id'] = Variable<String>(syncId.value);
+    }
+    if (isDeleted.present) {
+      map['is_deleted'] = Variable<bool>(isDeleted.value);
+    }
+    if (isSynced.present) {
+      map['is_synced'] = Variable<bool>(isSynced.value);
+    }
     return map;
   }
 
@@ -2296,7 +2834,10 @@ class DbAssetsCompanion extends UpdateCompanion<DbAsset> {
           ..write('amount: $amount, ')
           ..write('location: $location, ')
           ..write('memo: $memo, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('syncId: $syncId, ')
+          ..write('isDeleted: $isDeleted, ')
+          ..write('isSynced: $isSynced')
           ..write(')'))
         .toString();
   }
@@ -2382,6 +2923,57 @@ class $DbFixedCostsTable extends DbFixedCosts
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _syncIdMeta = const VerificationMeta('syncId');
+  @override
+  late final GeneratedColumn<String> syncId = GeneratedColumn<String>(
+    'sync_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isDeletedMeta = const VerificationMeta(
+    'isDeleted',
+  );
+  @override
+  late final GeneratedColumn<bool> isDeleted = GeneratedColumn<bool>(
+    'is_deleted',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_deleted" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isSyncedMeta = const VerificationMeta(
+    'isSynced',
+  );
+  @override
+  late final GeneratedColumn<bool> isSynced = GeneratedColumn<bool>(
+    'is_synced',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_synced" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2391,6 +2983,10 @@ class $DbFixedCostsTable extends DbFixedCosts
     cycle,
     nextDueDate,
     memo,
+    syncId,
+    updatedAt,
+    isDeleted,
+    isSynced,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2452,6 +3048,30 @@ class $DbFixedCostsTable extends DbFixedCosts
         memo.isAcceptableOrUnknown(data['memo']!, _memoMeta),
       );
     }
+    if (data.containsKey('sync_id')) {
+      context.handle(
+        _syncIdMeta,
+        syncId.isAcceptableOrUnknown(data['sync_id']!, _syncIdMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('is_deleted')) {
+      context.handle(
+        _isDeletedMeta,
+        isDeleted.isAcceptableOrUnknown(data['is_deleted']!, _isDeletedMeta),
+      );
+    }
+    if (data.containsKey('is_synced')) {
+      context.handle(
+        _isSyncedMeta,
+        isSynced.isAcceptableOrUnknown(data['is_synced']!, _isSyncedMeta),
+      );
+    }
     return context;
   }
 
@@ -2489,6 +3109,22 @@ class $DbFixedCostsTable extends DbFixedCosts
         DriftSqlType.string,
         data['${effectivePrefix}memo'],
       ),
+      syncId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_id'],
+      ),
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      ),
+      isDeleted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_deleted'],
+      )!,
+      isSynced: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_synced'],
+      )!,
     );
   }
 
@@ -2506,6 +3142,10 @@ class DbFixedCost extends DataClass implements Insertable<DbFixedCost> {
   final String? cycle;
   final DateTime? nextDueDate;
   final String? memo;
+  final String? syncId;
+  final DateTime? updatedAt;
+  final bool isDeleted;
+  final bool isSynced;
   const DbFixedCost({
     required this.id,
     required this.accountId,
@@ -2514,6 +3154,10 @@ class DbFixedCost extends DataClass implements Insertable<DbFixedCost> {
     this.cycle,
     this.nextDueDate,
     this.memo,
+    this.syncId,
+    this.updatedAt,
+    required this.isDeleted,
+    required this.isSynced,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2531,6 +3175,14 @@ class DbFixedCost extends DataClass implements Insertable<DbFixedCost> {
     if (!nullToAbsent || memo != null) {
       map['memo'] = Variable<String>(memo);
     }
+    if (!nullToAbsent || syncId != null) {
+      map['sync_id'] = Variable<String>(syncId);
+    }
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<DateTime>(updatedAt);
+    }
+    map['is_deleted'] = Variable<bool>(isDeleted);
+    map['is_synced'] = Variable<bool>(isSynced);
     return map;
   }
 
@@ -2547,6 +3199,14 @@ class DbFixedCost extends DataClass implements Insertable<DbFixedCost> {
           ? const Value.absent()
           : Value(nextDueDate),
       memo: memo == null && nullToAbsent ? const Value.absent() : Value(memo),
+      syncId: syncId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(syncId),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
+      isDeleted: Value(isDeleted),
+      isSynced: Value(isSynced),
     );
   }
 
@@ -2563,6 +3223,10 @@ class DbFixedCost extends DataClass implements Insertable<DbFixedCost> {
       cycle: serializer.fromJson<String?>(json['cycle']),
       nextDueDate: serializer.fromJson<DateTime?>(json['nextDueDate']),
       memo: serializer.fromJson<String?>(json['memo']),
+      syncId: serializer.fromJson<String?>(json['syncId']),
+      updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
+      isDeleted: serializer.fromJson<bool>(json['isDeleted']),
+      isSynced: serializer.fromJson<bool>(json['isSynced']),
     );
   }
   @override
@@ -2576,6 +3240,10 @@ class DbFixedCost extends DataClass implements Insertable<DbFixedCost> {
       'cycle': serializer.toJson<String?>(cycle),
       'nextDueDate': serializer.toJson<DateTime?>(nextDueDate),
       'memo': serializer.toJson<String?>(memo),
+      'syncId': serializer.toJson<String?>(syncId),
+      'updatedAt': serializer.toJson<DateTime?>(updatedAt),
+      'isDeleted': serializer.toJson<bool>(isDeleted),
+      'isSynced': serializer.toJson<bool>(isSynced),
     };
   }
 
@@ -2587,6 +3255,10 @@ class DbFixedCost extends DataClass implements Insertable<DbFixedCost> {
     Value<String?> cycle = const Value.absent(),
     Value<DateTime?> nextDueDate = const Value.absent(),
     Value<String?> memo = const Value.absent(),
+    Value<String?> syncId = const Value.absent(),
+    Value<DateTime?> updatedAt = const Value.absent(),
+    bool? isDeleted,
+    bool? isSynced,
   }) => DbFixedCost(
     id: id ?? this.id,
     accountId: accountId ?? this.accountId,
@@ -2595,6 +3267,10 @@ class DbFixedCost extends DataClass implements Insertable<DbFixedCost> {
     cycle: cycle.present ? cycle.value : this.cycle,
     nextDueDate: nextDueDate.present ? nextDueDate.value : this.nextDueDate,
     memo: memo.present ? memo.value : this.memo,
+    syncId: syncId.present ? syncId.value : this.syncId,
+    updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+    isDeleted: isDeleted ?? this.isDeleted,
+    isSynced: isSynced ?? this.isSynced,
   );
   DbFixedCost copyWithCompanion(DbFixedCostsCompanion data) {
     return DbFixedCost(
@@ -2607,6 +3283,10 @@ class DbFixedCost extends DataClass implements Insertable<DbFixedCost> {
           ? data.nextDueDate.value
           : this.nextDueDate,
       memo: data.memo.present ? data.memo.value : this.memo,
+      syncId: data.syncId.present ? data.syncId.value : this.syncId,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      isDeleted: data.isDeleted.present ? data.isDeleted.value : this.isDeleted,
+      isSynced: data.isSynced.present ? data.isSynced.value : this.isSynced,
     );
   }
 
@@ -2619,14 +3299,29 @@ class DbFixedCost extends DataClass implements Insertable<DbFixedCost> {
           ..write('amount: $amount, ')
           ..write('cycle: $cycle, ')
           ..write('nextDueDate: $nextDueDate, ')
-          ..write('memo: $memo')
+          ..write('memo: $memo, ')
+          ..write('syncId: $syncId, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isDeleted: $isDeleted, ')
+          ..write('isSynced: $isSynced')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, accountId, name, amount, cycle, nextDueDate, memo);
+  int get hashCode => Object.hash(
+    id,
+    accountId,
+    name,
+    amount,
+    cycle,
+    nextDueDate,
+    memo,
+    syncId,
+    updatedAt,
+    isDeleted,
+    isSynced,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2637,7 +3332,11 @@ class DbFixedCost extends DataClass implements Insertable<DbFixedCost> {
           other.amount == this.amount &&
           other.cycle == this.cycle &&
           other.nextDueDate == this.nextDueDate &&
-          other.memo == this.memo);
+          other.memo == this.memo &&
+          other.syncId == this.syncId &&
+          other.updatedAt == this.updatedAt &&
+          other.isDeleted == this.isDeleted &&
+          other.isSynced == this.isSynced);
 }
 
 class DbFixedCostsCompanion extends UpdateCompanion<DbFixedCost> {
@@ -2648,6 +3347,10 @@ class DbFixedCostsCompanion extends UpdateCompanion<DbFixedCost> {
   final Value<String?> cycle;
   final Value<DateTime?> nextDueDate;
   final Value<String?> memo;
+  final Value<String?> syncId;
+  final Value<DateTime?> updatedAt;
+  final Value<bool> isDeleted;
+  final Value<bool> isSynced;
   const DbFixedCostsCompanion({
     this.id = const Value.absent(),
     this.accountId = const Value.absent(),
@@ -2656,6 +3359,10 @@ class DbFixedCostsCompanion extends UpdateCompanion<DbFixedCost> {
     this.cycle = const Value.absent(),
     this.nextDueDate = const Value.absent(),
     this.memo = const Value.absent(),
+    this.syncId = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.isDeleted = const Value.absent(),
+    this.isSynced = const Value.absent(),
   });
   DbFixedCostsCompanion.insert({
     this.id = const Value.absent(),
@@ -2665,6 +3372,10 @@ class DbFixedCostsCompanion extends UpdateCompanion<DbFixedCost> {
     this.cycle = const Value.absent(),
     this.nextDueDate = const Value.absent(),
     this.memo = const Value.absent(),
+    this.syncId = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.isDeleted = const Value.absent(),
+    this.isSynced = const Value.absent(),
   }) : accountId = Value(accountId),
        name = Value(name),
        amount = Value(amount);
@@ -2676,6 +3387,10 @@ class DbFixedCostsCompanion extends UpdateCompanion<DbFixedCost> {
     Expression<String>? cycle,
     Expression<DateTime>? nextDueDate,
     Expression<String>? memo,
+    Expression<String>? syncId,
+    Expression<DateTime>? updatedAt,
+    Expression<bool>? isDeleted,
+    Expression<bool>? isSynced,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -2685,6 +3400,10 @@ class DbFixedCostsCompanion extends UpdateCompanion<DbFixedCost> {
       if (cycle != null) 'cycle': cycle,
       if (nextDueDate != null) 'next_due_date': nextDueDate,
       if (memo != null) 'memo': memo,
+      if (syncId != null) 'sync_id': syncId,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (isDeleted != null) 'is_deleted': isDeleted,
+      if (isSynced != null) 'is_synced': isSynced,
     });
   }
 
@@ -2696,6 +3415,10 @@ class DbFixedCostsCompanion extends UpdateCompanion<DbFixedCost> {
     Value<String?>? cycle,
     Value<DateTime?>? nextDueDate,
     Value<String?>? memo,
+    Value<String?>? syncId,
+    Value<DateTime?>? updatedAt,
+    Value<bool>? isDeleted,
+    Value<bool>? isSynced,
   }) {
     return DbFixedCostsCompanion(
       id: id ?? this.id,
@@ -2705,6 +3428,10 @@ class DbFixedCostsCompanion extends UpdateCompanion<DbFixedCost> {
       cycle: cycle ?? this.cycle,
       nextDueDate: nextDueDate ?? this.nextDueDate,
       memo: memo ?? this.memo,
+      syncId: syncId ?? this.syncId,
+      updatedAt: updatedAt ?? this.updatedAt,
+      isDeleted: isDeleted ?? this.isDeleted,
+      isSynced: isSynced ?? this.isSynced,
     );
   }
 
@@ -2732,6 +3459,18 @@ class DbFixedCostsCompanion extends UpdateCompanion<DbFixedCost> {
     if (memo.present) {
       map['memo'] = Variable<String>(memo.value);
     }
+    if (syncId.present) {
+      map['sync_id'] = Variable<String>(syncId.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (isDeleted.present) {
+      map['is_deleted'] = Variable<bool>(isDeleted.value);
+    }
+    if (isSynced.present) {
+      map['is_synced'] = Variable<bool>(isSynced.value);
+    }
     return map;
   }
 
@@ -2744,7 +3483,515 @@ class DbFixedCostsCompanion extends UpdateCompanion<DbFixedCost> {
           ..write('amount: $amount, ')
           ..write('cycle: $cycle, ')
           ..write('nextDueDate: $nextDueDate, ')
-          ..write('memo: $memo')
+          ..write('memo: $memo, ')
+          ..write('syncId: $syncId, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isDeleted: $isDeleted, ')
+          ..write('isSynced: $isSynced')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $DbRootMemosTable extends DbRootMemos
+    with TableInfo<$DbRootMemosTable, DbRootMemo> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DbRootMemosTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _contentMeta = const VerificationMeta(
+    'content',
+  );
+  @override
+  late final GeneratedColumn<String> content = GeneratedColumn<String>(
+    'content',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _isPinnedMeta = const VerificationMeta(
+    'isPinned',
+  );
+  @override
+  late final GeneratedColumn<bool> isPinned = GeneratedColumn<bool>(
+    'is_pinned',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_pinned" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _colorMeta = const VerificationMeta('color');
+  @override
+  late final GeneratedColumn<String> color = GeneratedColumn<String>(
+    'color',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sortOrderMeta = const VerificationMeta(
+    'sortOrder',
+  );
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+    'sort_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    title,
+    content,
+    createdAt,
+    updatedAt,
+    isPinned,
+    color,
+    sortOrder,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'db_root_memos';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<DbRootMemo> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('content')) {
+      context.handle(
+        _contentMeta,
+        content.isAcceptableOrUnknown(data['content']!, _contentMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_contentMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('is_pinned')) {
+      context.handle(
+        _isPinnedMeta,
+        isPinned.isAcceptableOrUnknown(data['is_pinned']!, _isPinnedMeta),
+      );
+    }
+    if (data.containsKey('color')) {
+      context.handle(
+        _colorMeta,
+        color.isAcceptableOrUnknown(data['color']!, _colorMeta),
+      );
+    }
+    if (data.containsKey('sort_order')) {
+      context.handle(
+        _sortOrderMeta,
+        sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  DbRootMemo map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DbRootMemo(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      content: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}content'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      isPinned: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_pinned'],
+      )!,
+      color: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}color'],
+      ),
+      sortOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sort_order'],
+      )!,
+    );
+  }
+
+  @override
+  $DbRootMemosTable createAlias(String alias) {
+    return $DbRootMemosTable(attachedDatabase, alias);
+  }
+}
+
+class DbRootMemo extends DataClass implements Insertable<DbRootMemo> {
+  final String id;
+  final String title;
+  final String content;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final bool isPinned;
+  final String? color;
+  final int sortOrder;
+  const DbRootMemo({
+    required this.id,
+    required this.title,
+    required this.content,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.isPinned,
+    this.color,
+    required this.sortOrder,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['title'] = Variable<String>(title);
+    map['content'] = Variable<String>(content);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['is_pinned'] = Variable<bool>(isPinned);
+    if (!nullToAbsent || color != null) {
+      map['color'] = Variable<String>(color);
+    }
+    map['sort_order'] = Variable<int>(sortOrder);
+    return map;
+  }
+
+  DbRootMemosCompanion toCompanion(bool nullToAbsent) {
+    return DbRootMemosCompanion(
+      id: Value(id),
+      title: Value(title),
+      content: Value(content),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      isPinned: Value(isPinned),
+      color: color == null && nullToAbsent
+          ? const Value.absent()
+          : Value(color),
+      sortOrder: Value(sortOrder),
+    );
+  }
+
+  factory DbRootMemo.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DbRootMemo(
+      id: serializer.fromJson<String>(json['id']),
+      title: serializer.fromJson<String>(json['title']),
+      content: serializer.fromJson<String>(json['content']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      isPinned: serializer.fromJson<bool>(json['isPinned']),
+      color: serializer.fromJson<String?>(json['color']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'title': serializer.toJson<String>(title),
+      'content': serializer.toJson<String>(content),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'isPinned': serializer.toJson<bool>(isPinned),
+      'color': serializer.toJson<String?>(color),
+      'sortOrder': serializer.toJson<int>(sortOrder),
+    };
+  }
+
+  DbRootMemo copyWith({
+    String? id,
+    String? title,
+    String? content,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    bool? isPinned,
+    Value<String?> color = const Value.absent(),
+    int? sortOrder,
+  }) => DbRootMemo(
+    id: id ?? this.id,
+    title: title ?? this.title,
+    content: content ?? this.content,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    isPinned: isPinned ?? this.isPinned,
+    color: color.present ? color.value : this.color,
+    sortOrder: sortOrder ?? this.sortOrder,
+  );
+  DbRootMemo copyWithCompanion(DbRootMemosCompanion data) {
+    return DbRootMemo(
+      id: data.id.present ? data.id.value : this.id,
+      title: data.title.present ? data.title.value : this.title,
+      content: data.content.present ? data.content.value : this.content,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      isPinned: data.isPinned.present ? data.isPinned.value : this.isPinned,
+      color: data.color.present ? data.color.value : this.color,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DbRootMemo(')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
+          ..write('content: $content, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isPinned: $isPinned, ')
+          ..write('color: $color, ')
+          ..write('sortOrder: $sortOrder')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    title,
+    content,
+    createdAt,
+    updatedAt,
+    isPinned,
+    color,
+    sortOrder,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DbRootMemo &&
+          other.id == this.id &&
+          other.title == this.title &&
+          other.content == this.content &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.isPinned == this.isPinned &&
+          other.color == this.color &&
+          other.sortOrder == this.sortOrder);
+}
+
+class DbRootMemosCompanion extends UpdateCompanion<DbRootMemo> {
+  final Value<String> id;
+  final Value<String> title;
+  final Value<String> content;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<bool> isPinned;
+  final Value<String?> color;
+  final Value<int> sortOrder;
+  final Value<int> rowid;
+  const DbRootMemosCompanion({
+    this.id = const Value.absent(),
+    this.title = const Value.absent(),
+    this.content = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.isPinned = const Value.absent(),
+    this.color = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  DbRootMemosCompanion.insert({
+    required String id,
+    required String title,
+    required String content,
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.isPinned = const Value.absent(),
+    this.color = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       title = Value(title),
+       content = Value(content);
+  static Insertable<DbRootMemo> custom({
+    Expression<String>? id,
+    Expression<String>? title,
+    Expression<String>? content,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<bool>? isPinned,
+    Expression<String>? color,
+    Expression<int>? sortOrder,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (title != null) 'title': title,
+      if (content != null) 'content': content,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (isPinned != null) 'is_pinned': isPinned,
+      if (color != null) 'color': color,
+      if (sortOrder != null) 'sort_order': sortOrder,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  DbRootMemosCompanion copyWith({
+    Value<String>? id,
+    Value<String>? title,
+    Value<String>? content,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<bool>? isPinned,
+    Value<String?>? color,
+    Value<int>? sortOrder,
+    Value<int>? rowid,
+  }) {
+    return DbRootMemosCompanion(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      content: content ?? this.content,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      isPinned: isPinned ?? this.isPinned,
+      color: color ?? this.color,
+      sortOrder: sortOrder ?? this.sortOrder,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (content.present) {
+      map['content'] = Variable<String>(content.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (isPinned.present) {
+      map['is_pinned'] = Variable<bool>(isPinned.value);
+    }
+    if (color.present) {
+      map['color'] = Variable<String>(color.value);
+    }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DbRootMemosCompanion(')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
+          ..write('content: $content, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isPinned: $isPinned, ')
+          ..write('color: $color, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -2757,6 +4004,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $DbTransactionsTable dbTransactions = $DbTransactionsTable(this);
   late final $DbAssetsTable dbAssets = $DbAssetsTable(this);
   late final $DbFixedCostsTable dbFixedCosts = $DbFixedCostsTable(this);
+  late final $DbRootMemosTable dbRootMemos = $DbRootMemosTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2766,6 +4014,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     dbTransactions,
     dbAssets,
     dbFixedCosts,
+    dbRootMemos,
   ];
 }
 
@@ -2774,12 +4023,20 @@ typedef $$DbAccountsTableCreateCompanionBuilder =
       Value<int> id,
       required String name,
       Value<DateTime> createdAt,
+      Value<String?> syncId,
+      Value<DateTime?> updatedAt,
+      Value<bool> isDeleted,
+      Value<bool> isSynced,
     });
 typedef $$DbAccountsTableUpdateCompanionBuilder =
     DbAccountsCompanion Function({
       Value<int> id,
       Value<String> name,
       Value<DateTime> createdAt,
+      Value<String?> syncId,
+      Value<DateTime?> updatedAt,
+      Value<bool> isDeleted,
+      Value<bool> isSynced,
     });
 
 final class $$DbAccountsTableReferences
@@ -2869,6 +4126,26 @@ class $$DbAccountsTableFilterComposer
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncId => $composableBuilder(
+    column: $table.syncId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isSynced => $composableBuilder(
+    column: $table.isSynced,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2971,6 +4248,26 @@ class $$DbAccountsTableOrderingComposer
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get syncId => $composableBuilder(
+    column: $table.syncId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isSynced => $composableBuilder(
+    column: $table.isSynced,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$DbAccountsTableAnnotationComposer
@@ -2990,6 +4287,18 @@ class $$DbAccountsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get syncId =>
+      $composableBuilder(column: $table.syncId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDeleted =>
+      $composableBuilder(column: $table.isDeleted, builder: (column) => column);
+
+  GeneratedColumn<bool> get isSynced =>
+      $composableBuilder(column: $table.isSynced, builder: (column) => column);
 
   Expression<T> dbTransactionsRefs<T extends Object>(
     Expression<T> Function($$DbTransactionsTableAnnotationComposer a) f,
@@ -3102,17 +4411,36 @@ class $$DbAccountsTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
-              }) =>
-                  DbAccountsCompanion(id: id, name: name, createdAt: createdAt),
+                Value<String?> syncId = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
+                Value<bool> isSynced = const Value.absent(),
+              }) => DbAccountsCompanion(
+                id: id,
+                name: name,
+                createdAt: createdAt,
+                syncId: syncId,
+                updatedAt: updatedAt,
+                isDeleted: isDeleted,
+                isSynced: isSynced,
+              ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 required String name,
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<String?> syncId = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
+                Value<bool> isSynced = const Value.absent(),
               }) => DbAccountsCompanion.insert(
                 id: id,
                 name: name,
                 createdAt: createdAt,
+                syncId: syncId,
+                updatedAt: updatedAt,
+                isDeleted: isDeleted,
+                isSynced: isSynced,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -3257,6 +4585,10 @@ typedef $$DbTransactionsTableCreateCompanionBuilder =
       Value<String?> originalTransactionId,
       Value<String?> weatherJson,
       Value<String?> benefitJson,
+      Value<String?> syncId,
+      Value<DateTime?> updatedAt,
+      Value<bool> isDeleted,
+      Value<bool> isSynced,
       Value<int> rowid,
     });
 typedef $$DbTransactionsTableUpdateCompanionBuilder =
@@ -3289,6 +4621,10 @@ typedef $$DbTransactionsTableUpdateCompanionBuilder =
       Value<String?> originalTransactionId,
       Value<String?> weatherJson,
       Value<String?> benefitJson,
+      Value<String?> syncId,
+      Value<DateTime?> updatedAt,
+      Value<bool> isDeleted,
+      Value<bool> isSynced,
       Value<int> rowid,
     });
 
@@ -3464,6 +4800,26 @@ class $$DbTransactionsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get syncId => $composableBuilder(
+    column: $table.syncId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isSynced => $composableBuilder(
+    column: $table.isSynced,
+    builder: (column) => ColumnFilters(column),
+  );
+
   $$DbAccountsTableFilterComposer get accountId {
     final $$DbAccountsTableFilterComposer composer = $composerBuilder(
       composer: this,
@@ -3632,6 +4988,26 @@ class $$DbTransactionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get syncId => $composableBuilder(
+    column: $table.syncId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isSynced => $composableBuilder(
+    column: $table.isSynced,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$DbAccountsTableOrderingComposer get accountId {
     final $$DbAccountsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -3772,6 +5148,18 @@ class $$DbTransactionsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get syncId =>
+      $composableBuilder(column: $table.syncId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDeleted =>
+      $composableBuilder(column: $table.isDeleted, builder: (column) => column);
+
+  GeneratedColumn<bool> get isSynced =>
+      $composableBuilder(column: $table.isSynced, builder: (column) => column);
+
   $$DbAccountsTableAnnotationComposer get accountId {
     final $$DbAccountsTableAnnotationComposer composer = $composerBuilder(
       composer: this,
@@ -3854,6 +5242,10 @@ class $$DbTransactionsTableTableManager
                 Value<String?> originalTransactionId = const Value.absent(),
                 Value<String?> weatherJson = const Value.absent(),
                 Value<String?> benefitJson = const Value.absent(),
+                Value<String?> syncId = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
+                Value<bool> isSynced = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => DbTransactionsCompanion(
                 id: id,
@@ -3884,6 +5276,10 @@ class $$DbTransactionsTableTableManager
                 originalTransactionId: originalTransactionId,
                 weatherJson: weatherJson,
                 benefitJson: benefitJson,
+                syncId: syncId,
+                updatedAt: updatedAt,
+                isDeleted: isDeleted,
+                isSynced: isSynced,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -3916,6 +5312,10 @@ class $$DbTransactionsTableTableManager
                 Value<String?> originalTransactionId = const Value.absent(),
                 Value<String?> weatherJson = const Value.absent(),
                 Value<String?> benefitJson = const Value.absent(),
+                Value<String?> syncId = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
+                Value<bool> isSynced = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => DbTransactionsCompanion.insert(
                 id: id,
@@ -3946,6 +5346,10 @@ class $$DbTransactionsTableTableManager
                 originalTransactionId: originalTransactionId,
                 weatherJson: weatherJson,
                 benefitJson: benefitJson,
+                syncId: syncId,
+                updatedAt: updatedAt,
+                isDeleted: isDeleted,
+                isSynced: isSynced,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -4026,6 +5430,9 @@ typedef $$DbAssetsTableCreateCompanionBuilder =
       Value<String?> location,
       Value<String?> memo,
       Value<DateTime?> updatedAt,
+      Value<String?> syncId,
+      Value<bool> isDeleted,
+      Value<bool> isSynced,
     });
 typedef $$DbAssetsTableUpdateCompanionBuilder =
     DbAssetsCompanion Function({
@@ -4037,6 +5444,9 @@ typedef $$DbAssetsTableUpdateCompanionBuilder =
       Value<String?> location,
       Value<String?> memo,
       Value<DateTime?> updatedAt,
+      Value<String?> syncId,
+      Value<bool> isDeleted,
+      Value<bool> isSynced,
     });
 
 final class $$DbAssetsTableReferences
@@ -4104,6 +5514,21 @@ class $$DbAssetsTableFilterComposer
 
   ColumnFilters<DateTime> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncId => $composableBuilder(
+    column: $table.syncId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isSynced => $composableBuilder(
+    column: $table.isSynced,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4175,6 +5600,21 @@ class $$DbAssetsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get syncId => $composableBuilder(
+    column: $table.syncId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isSynced => $composableBuilder(
+    column: $table.isSynced,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$DbAccountsTableOrderingComposer get accountId {
     final $$DbAccountsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -4228,6 +5668,15 @@ class $$DbAssetsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get syncId =>
+      $composableBuilder(column: $table.syncId, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDeleted =>
+      $composableBuilder(column: $table.isDeleted, builder: (column) => column);
+
+  GeneratedColumn<bool> get isSynced =>
+      $composableBuilder(column: $table.isSynced, builder: (column) => column);
 
   $$DbAccountsTableAnnotationComposer get accountId {
     final $$DbAccountsTableAnnotationComposer composer = $composerBuilder(
@@ -4289,6 +5738,9 @@ class $$DbAssetsTableTableManager
                 Value<String?> location = const Value.absent(),
                 Value<String?> memo = const Value.absent(),
                 Value<DateTime?> updatedAt = const Value.absent(),
+                Value<String?> syncId = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
+                Value<bool> isSynced = const Value.absent(),
               }) => DbAssetsCompanion(
                 id: id,
                 accountId: accountId,
@@ -4298,6 +5750,9 @@ class $$DbAssetsTableTableManager
                 location: location,
                 memo: memo,
                 updatedAt: updatedAt,
+                syncId: syncId,
+                isDeleted: isDeleted,
+                isSynced: isSynced,
               ),
           createCompanionCallback:
               ({
@@ -4309,6 +5764,9 @@ class $$DbAssetsTableTableManager
                 Value<String?> location = const Value.absent(),
                 Value<String?> memo = const Value.absent(),
                 Value<DateTime?> updatedAt = const Value.absent(),
+                Value<String?> syncId = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
+                Value<bool> isSynced = const Value.absent(),
               }) => DbAssetsCompanion.insert(
                 id: id,
                 accountId: accountId,
@@ -4318,6 +5776,9 @@ class $$DbAssetsTableTableManager
                 location: location,
                 memo: memo,
                 updatedAt: updatedAt,
+                syncId: syncId,
+                isDeleted: isDeleted,
+                isSynced: isSynced,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -4395,6 +5856,10 @@ typedef $$DbFixedCostsTableCreateCompanionBuilder =
       Value<String?> cycle,
       Value<DateTime?> nextDueDate,
       Value<String?> memo,
+      Value<String?> syncId,
+      Value<DateTime?> updatedAt,
+      Value<bool> isDeleted,
+      Value<bool> isSynced,
     });
 typedef $$DbFixedCostsTableUpdateCompanionBuilder =
     DbFixedCostsCompanion Function({
@@ -4405,6 +5870,10 @@ typedef $$DbFixedCostsTableUpdateCompanionBuilder =
       Value<String?> cycle,
       Value<DateTime?> nextDueDate,
       Value<String?> memo,
+      Value<String?> syncId,
+      Value<DateTime?> updatedAt,
+      Value<bool> isDeleted,
+      Value<bool> isSynced,
     });
 
 final class $$DbFixedCostsTableReferences
@@ -4467,6 +5936,26 @@ class $$DbFixedCostsTableFilterComposer
 
   ColumnFilters<String> get memo => $composableBuilder(
     column: $table.memo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncId => $composableBuilder(
+    column: $table.syncId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isSynced => $composableBuilder(
+    column: $table.isSynced,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4533,6 +6022,26 @@ class $$DbFixedCostsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get syncId => $composableBuilder(
+    column: $table.syncId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isSynced => $composableBuilder(
+    column: $table.isSynced,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$DbAccountsTableOrderingComposer get accountId {
     final $$DbAccountsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -4585,6 +6094,18 @@ class $$DbFixedCostsTableAnnotationComposer
 
   GeneratedColumn<String> get memo =>
       $composableBuilder(column: $table.memo, builder: (column) => column);
+
+  GeneratedColumn<String> get syncId =>
+      $composableBuilder(column: $table.syncId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDeleted =>
+      $composableBuilder(column: $table.isDeleted, builder: (column) => column);
+
+  GeneratedColumn<bool> get isSynced =>
+      $composableBuilder(column: $table.isSynced, builder: (column) => column);
 
   $$DbAccountsTableAnnotationComposer get accountId {
     final $$DbAccountsTableAnnotationComposer composer = $composerBuilder(
@@ -4645,6 +6166,10 @@ class $$DbFixedCostsTableTableManager
                 Value<String?> cycle = const Value.absent(),
                 Value<DateTime?> nextDueDate = const Value.absent(),
                 Value<String?> memo = const Value.absent(),
+                Value<String?> syncId = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
+                Value<bool> isSynced = const Value.absent(),
               }) => DbFixedCostsCompanion(
                 id: id,
                 accountId: accountId,
@@ -4653,6 +6178,10 @@ class $$DbFixedCostsTableTableManager
                 cycle: cycle,
                 nextDueDate: nextDueDate,
                 memo: memo,
+                syncId: syncId,
+                updatedAt: updatedAt,
+                isDeleted: isDeleted,
+                isSynced: isSynced,
               ),
           createCompanionCallback:
               ({
@@ -4663,6 +6192,10 @@ class $$DbFixedCostsTableTableManager
                 Value<String?> cycle = const Value.absent(),
                 Value<DateTime?> nextDueDate = const Value.absent(),
                 Value<String?> memo = const Value.absent(),
+                Value<String?> syncId = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
+                Value<bool> isSynced = const Value.absent(),
               }) => DbFixedCostsCompanion.insert(
                 id: id,
                 accountId: accountId,
@@ -4671,6 +6204,10 @@ class $$DbFixedCostsTableTableManager
                 cycle: cycle,
                 nextDueDate: nextDueDate,
                 memo: memo,
+                syncId: syncId,
+                updatedAt: updatedAt,
+                isDeleted: isDeleted,
+                isSynced: isSynced,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -4739,6 +6276,263 @@ typedef $$DbFixedCostsTableProcessedTableManager =
       DbFixedCost,
       PrefetchHooks Function({bool accountId})
     >;
+typedef $$DbRootMemosTableCreateCompanionBuilder =
+    DbRootMemosCompanion Function({
+      required String id,
+      required String title,
+      required String content,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<bool> isPinned,
+      Value<String?> color,
+      Value<int> sortOrder,
+      Value<int> rowid,
+    });
+typedef $$DbRootMemosTableUpdateCompanionBuilder =
+    DbRootMemosCompanion Function({
+      Value<String> id,
+      Value<String> title,
+      Value<String> content,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<bool> isPinned,
+      Value<String?> color,
+      Value<int> sortOrder,
+      Value<int> rowid,
+    });
+
+class $$DbRootMemosTableFilterComposer
+    extends Composer<_$AppDatabase, $DbRootMemosTable> {
+  $$DbRootMemosTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get content => $composableBuilder(
+    column: $table.content,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isPinned => $composableBuilder(
+    column: $table.isPinned,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get color => $composableBuilder(
+    column: $table.color,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$DbRootMemosTableOrderingComposer
+    extends Composer<_$AppDatabase, $DbRootMemosTable> {
+  $$DbRootMemosTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get content => $composableBuilder(
+    column: $table.content,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isPinned => $composableBuilder(
+    column: $table.isPinned,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get color => $composableBuilder(
+    column: $table.color,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$DbRootMemosTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DbRootMemosTable> {
+  $$DbRootMemosTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get content =>
+      $composableBuilder(column: $table.content, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get isPinned =>
+      $composableBuilder(column: $table.isPinned, builder: (column) => column);
+
+  GeneratedColumn<String> get color =>
+      $composableBuilder(column: $table.color, builder: (column) => column);
+
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+}
+
+class $$DbRootMemosTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $DbRootMemosTable,
+          DbRootMemo,
+          $$DbRootMemosTableFilterComposer,
+          $$DbRootMemosTableOrderingComposer,
+          $$DbRootMemosTableAnnotationComposer,
+          $$DbRootMemosTableCreateCompanionBuilder,
+          $$DbRootMemosTableUpdateCompanionBuilder,
+          (
+            DbRootMemo,
+            BaseReferences<_$AppDatabase, $DbRootMemosTable, DbRootMemo>,
+          ),
+          DbRootMemo,
+          PrefetchHooks Function()
+        > {
+  $$DbRootMemosTableTableManager(_$AppDatabase db, $DbRootMemosTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DbRootMemosTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DbRootMemosTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$DbRootMemosTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<String> content = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<bool> isPinned = const Value.absent(),
+                Value<String?> color = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DbRootMemosCompanion(
+                id: id,
+                title: title,
+                content: content,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                isPinned: isPinned,
+                color: color,
+                sortOrder: sortOrder,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String title,
+                required String content,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<bool> isPinned = const Value.absent(),
+                Value<String?> color = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DbRootMemosCompanion.insert(
+                id: id,
+                title: title,
+                content: content,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                isPinned: isPinned,
+                color: color,
+                sortOrder: sortOrder,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$DbRootMemosTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $DbRootMemosTable,
+      DbRootMemo,
+      $$DbRootMemosTableFilterComposer,
+      $$DbRootMemosTableOrderingComposer,
+      $$DbRootMemosTableAnnotationComposer,
+      $$DbRootMemosTableCreateCompanionBuilder,
+      $$DbRootMemosTableUpdateCompanionBuilder,
+      (
+        DbRootMemo,
+        BaseReferences<_$AppDatabase, $DbRootMemosTable, DbRootMemo>,
+      ),
+      DbRootMemo,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -4751,4 +6545,6 @@ class $AppDatabaseManager {
       $$DbAssetsTableTableManager(_db, _db.dbAssets);
   $$DbFixedCostsTableTableManager get dbFixedCosts =>
       $$DbFixedCostsTableTableManager(_db, _db.dbFixedCosts);
+  $$DbRootMemosTableTableManager get dbRootMemos =>
+      $$DbRootMemosTableTableManager(_db, _db.dbRootMemos);
 }

@@ -1,7 +1,9 @@
-part of 'main_feature_icon_catalog.dart';
+import '../navigation/app_routes.dart';
+import 'icon_catalog.dart';
+import 'main_feature_icon_models.dart';
 
-/// Page 1 – Purchase / Shopping page items.
-const kPurchasePageItems = <MainFeatureIcon>[
+/// Page 1 – Purchase & expense related icons.
+const List<MainFeatureIcon> kPurchasePageItems = [
   MainFeatureIcon(
     id: 'transactionAdd',
     label: '거래 입력',
@@ -20,8 +22,15 @@ const kPurchasePageItems = <MainFeatureIcon>[
     id: 'health_analyzer',
     label: '재료 건강도 분석',
     labelEn: 'Health Analyzer',
-    icon: Icons.favorite,
+    icon: IconCatalog.favorite,
     routeName: AppRoutes.healthAnalyzer,
+  ),
+  MainFeatureIcon(
+    id: 'micro_savings',
+    label: '자산 가속(푼돈 모으기)',
+    labelEn: 'Micro Savings',
+    icon: IconCatalog.microSavings,
+    routeName: AppRoutes.microSavings,
   ),
   MainFeatureIcon(
     id: 'nutrition_report',
@@ -31,11 +40,11 @@ const kPurchasePageItems = <MainFeatureIcon>[
     routeName: AppRoutes.nutritionReport,
   ),
   MainFeatureIcon(
-    id: 'shopping_prep',
-    label: '쇼핑준비',
-    labelEn: 'Shopping Prep',
-    icon: IconCatalog.factCheckOutlined,
-    routeName: AppRoutes.shoppingPrep,
+    id: 'weather_price_prediction',
+    label: '날씨 기반 가격 예측',
+    labelEn: 'Weather Price Prediction',
+    icon: IconCatalog.weatherPricePrediction,
+    routeName: AppRoutes.weatherPricePrediction,
   ),
   MainFeatureIcon(
     id: 'shopping_cart',
@@ -62,29 +71,43 @@ const kPurchasePageItems = <MainFeatureIcon>[
     id: 'household_consumables',
     label: '소모품 입력',
     labelEn: 'Consumables',
-    icon: Icons.cleaning_services,
+    icon: IconCatalog.cleaningServices,
     routeName: AppRoutes.householdConsumables,
   ),
   MainFeatureIcon(
     id: 'household_quick_pick',
     label: '식료품/생활용품 퀵픽',
     labelEn: 'Quick Pick',
-    icon: Icons.playlist_add_check_circle,
+    icon: IconCatalog.playlistAddCheckCircle,
     routeName: AppRoutes.householdQuickPick,
   ),
   MainFeatureIcon(
     id: 'consumable_inventory',
-    label: '식료품/생활용품 관리',
-    labelEn: 'Grocery & Consumables',
-    icon: Icons.inventory,
+    label: 'WMS 재고관리',
+    labelEn: 'WMS Inventory',
+    icon: IconCatalog.inventory,
     routeName: AppRoutes.consumableInventory,
+  ),
+  MainFeatureIcon(
+    id: 'wms_io',
+    label: 'WMS 입출고',
+    labelEn: 'WMS In/Out',
+    icon: IconCatalog.swapVert,
+    routeName: AppRoutes.wmsIo,
   ),
   MainFeatureIcon(
     id: 'quick_stock_use',
     label: '사용량 기록',
     labelEn: 'Usage Log',
-    icon: Icons.bolt,
+    icon: IconCatalog.bolt,
     routeName: AppRoutes.quickStockUse,
+  ),
+  MainFeatureIcon(
+    id: 'wms_guide',
+    label: 'WMS 도움말',
+    labelEn: 'WMS Guide',
+    icon: IconCatalog.helpOutline,
+    routeName: AppRoutes.wmsGuide,
   ),
   MainFeatureIcon(
     id: 'transaction_add_detailed',
@@ -95,8 +118,8 @@ const kPurchasePageItems = <MainFeatureIcon>[
   ),
 ];
 
-/// Page 2 – Income page items.
-const kIncomePageItems = <MainFeatureIcon>[
+/// Page 2 – Income related icons.
+const List<MainFeatureIcon> kIncomePageItems = [
   MainFeatureIcon(
     id: 'income_add',
     label: '수입 입력',
@@ -126,24 +149,10 @@ const kIncomePageItems = <MainFeatureIcon>[
     routeName: AppRoutes.refundTransactions,
   ),
   MainFeatureIcon(
-    id: 'household_items',
-    label: '생활용품',
-    labelEn: 'Household Items',
-    icon: Icons.cleaning_services,
-    routeName: AppRoutes.householdItems,
-  ),
-  MainFeatureIcon(
     id: 'asset_project_100m',
     label: '1억 프로젝트',
     labelEn: '100M Project',
-    icon: Icons.emoji_events_outlined,
+    icon: IconCatalog.emojiEvents,
     routeName: AppRoutes.assetProject100m,
-  ),
-  MainFeatureIcon(
-    id: 'weather_manual_input',
-    label: '날씨 입력',
-    labelEn: 'Weather Input',
-    icon: Icons.wb_sunny_outlined,
-    routeName: AppRoutes.weatherManualInput,
   ),
 ];

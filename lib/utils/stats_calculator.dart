@@ -256,11 +256,19 @@ class StatsCalculator {
     int months,
   ) {
     final start = DateTime(anchor.year, anchor.month - months + 1);
-    final end = DateTime(anchor.year, anchor.month + 1, 0); // 해당 월 마지막 날
+    final end = DateTime(
+      anchor.year,
+      anchor.month + 1,
+      0,
+      23,
+      59,
+      59,
+      999,
+      999,
+    ); // 해당 월 마지막 날(하루 끝)
 
     return transactions.where((tx) {
-      return tx.date.isAfter(start.subtract(const Duration(days: 1))) &&
-          tx.date.isBefore(end.add(const Duration(days: 1)));
+      return !tx.date.isBefore(start) && !tx.date.isAfter(end);
     }).toList();
   }
 }

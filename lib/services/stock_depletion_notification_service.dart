@@ -65,7 +65,7 @@ class StockDepletionNotificationService {
   }
 
   Future<void> _onNotificationResponse(NotificationResponse response) async {
-    // Default tap opens Shopping Cart (쇼핑준비)
+    // Default tap opens Shopping Cart
     await _openShoppingCart();
   }
 
@@ -255,7 +255,7 @@ class StockDepletionNotificationService {
         '현재 잔량: $remaining\n'
         '예상: $expectedText'
         '${trendLine == null ? '' : '\n$trendLine'}\n'
-        '쇼핑준비를 확인하세요.';
+        '장바구니를 확인하세요.';
 
     final payload = jsonEncode({'itemId': item.id, 'itemName': item.name});
 

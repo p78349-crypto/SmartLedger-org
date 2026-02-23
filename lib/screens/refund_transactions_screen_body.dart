@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_redundant_argument_values
 part of 'refund_transactions_screen.dart';
 
 // ignore_for_file: invalid_use_of_protected_member
@@ -189,65 +190,101 @@ extension RefundBody on _RefundTransactionsScreenState {
       color: theme.colorScheme.surfaceContainerHighest.withValues(
         alpha: 0.08,
       ),
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 8,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _smallToggleButton(
-            label: '전체',
-            selected: _rangeDays == null,
-            onTap: () => setState(() => _rangeDays = null),
+          Expanded(
+            child: _roundToggleButton(
+              label: '전체',
+              selected: _selectedBottomFilter == 'all',
+              onTap: () => _applyBottomFilter('all'),
+            ),
           ),
-          _smallToggleButton(
-            label: '지난 7일',
-            selected: _rangeDays == 7,
-            onTap: () => setState(() {
-              _rangeDays = 7;
-              _selectedDay = DateTime.now();
-            }),
+          const SizedBox(width: 8),
+          Expanded(
+            child: _roundToggleButton(
+              label: '결제수단',
+              selected: _selectedBottomFilter == 'payment',
+              onTap: () => _applyBottomFilter('payment'),
+            ),
           ),
-          _smallToggleButton(
-            label: '지난 30일',
-            selected: _rangeDays == 30,
-            onTap: () => setState(() {
-              _rangeDays = 30;
-              _selectedDay = DateTime.now();
-            }),
+          const SizedBox(width: 8),
+          Expanded(
+            child: _roundToggleButton(
+              label: '부분 반품',
+              selected: _selectedBottomFilter == 'partial',
+              onTap: () => _applyBottomFilter('partial'),
+            ),
           ),
-          _smallToggleButton(
-            label: '지난 6개월',
-            selected: _rangeDays == 180,
-            onTap: () => setState(() {
-              _rangeDays = 180;
-              _selectedDay = DateTime.now();
-            }),
-          ),
-          _smallToggleButton(
-            label: '부분 반품만',
-            selected: _partialOnly,
-            onTap: () => setState(() => _partialOnly = !_partialOnly),
-          ),
-          _smallToggleButton(
-            label: '결제수단별',
-            selected: _groupByPayment,
-            onTap: () =>
-                setState(() => _groupByPayment = !_groupByPayment),
+          const SizedBox(width: 8),
+          Expanded(
+            child: _roundToggleButton(
+              label: '30',
+              selected: _selectedBottomFilter == '30',
+              onTap: () => _applyBottomFilter('30'),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _smallToggleButton({
+  void _applyBottomFilter(String key) {
+    setState(() {
+      _selectedBottomFilter = key;
+      // reset all underlying flags, then set the one corresponding to key
+      _groupByPayment = false;
+      _partialOnly = false;
+      _rangeDays = null;
+      if (key == 'all') {
+        // default: show selected day (no range)
+        _rangeDays = null;
+      } else if (key == 'payment') {
+        _groupByPayment = true;
+      } else if (key == 'partial') {
+        _partialOnly = true;
+      } else if (key == '30') {
+        _rangeDays = 30;
+        _selectedDay = DateTime.now();
+      }
+    });
+  }
+
+  // _smallToggleButton removed — replaced by _roundToggleButton per UI update.
+
+  Widget _roundToggleButton({
     required String label,
     required bool selected,
     required VoidCallback onTap,
   }) {
-    return FilterChip(
-      label: Text(label),
-      selected: selected,
-      onSelected: (_) => onTap(),
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    final theme = Theme.of(context);
+    final selectedColor = theme.colorScheme.primary;
+    final selectedTextColor = theme.colorScheme.onPrimary;
+    final unselectedTextColor = theme.colorScheme.onSurface;
+    final borderColor = selected ? selectedColor : theme.colorScheme.onSurfaceVariant;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 48,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: selected ? selectedColor : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: borderColor),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: selected ? selectedTextColor : unselectedTextColor,
+            fontWeight: FontWeight.w600,
+            // reduce font size for specific longer labels to avoid clipping
+            fontSize: (label.contains('결제') || label.contains('부분')) ? 12 : 14,
+            height: 1.0,
+          ),
+        ),
+      ),
     );
   }
 }

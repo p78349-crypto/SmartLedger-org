@@ -5,7 +5,7 @@ extension _AssetSimpleInputScreenUi on _AssetSimpleInputScreenState {
   Widget _buildScaffold(BuildContext context, List<Asset> assets) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.accountName),
+        title: const Text('자산 간편 입력'),
         actions: [
           IconButton(
             tooltip: '입력값 되돌리기',
@@ -18,7 +18,7 @@ extension _AssetSimpleInputScreenUi on _AssetSimpleInputScreenState {
         builder: (context, constraints) {
           final bottomInset = MediaQuery.of(context).viewInsets.bottom;
           return SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(24, 24, 24, bottomInset + 24),
+            padding: EdgeInsets.fromLTRB(24, 24, 24, bottomInset + 100),
             child: ConstrainedBox(
               constraints: BoxConstraints(minHeight: constraints.maxHeight),
               child: Column(
@@ -58,39 +58,40 @@ extension _AssetSimpleInputScreenUi on _AssetSimpleInputScreenState {
                         _buildSectionHeader('기본 정보'),
                         SmartInputField(
                           controller: _nameController,
+                          focusNode: _nameFocusNode,
                           label: '자산명',
                           hint: '예: 시중은행 입출금통장',
                           prefixIcon: const Icon(Icons.label),
-                          validator: (v) {
-                            return v == null || v.isEmpty ? '자산명을 입력하세요' : null;
-                          },
+                          textInputAction: TextInputAction.next,
+                          onEditingComplete: () => _amountFocusNode.requestFocus(),
                         ),
                         const SizedBox(height: 12),
                         SmartInputField(
                           controller: _amountController,
+                          focusNode: _amountFocusNode,
                           label: '금액',
                           prefixIcon: const Icon(Icons.attach_money),
                           keyboardType: TextInputType.number,
-                          validator: (v) {
-                            if (v == null || v.isEmpty) return '금액을 입력하세요';
-                            final n = double.tryParse(v);
-                            if (n == null || n < 0) {
-                              return '유효한 금액을 입력하세요';
-                            }
-                            return null;
-                          },
+                          textInputAction: TextInputAction.next,
+                          onEditingComplete: () => _locationFocusNode.requestFocus(),
                         ),
                         const SizedBox(height: 12),
                         SmartInputField(
                           controller: _locationController,
+                          focusNode: _locationFocusNode,
                           label: '위치(은행/앱/보관장소)',
                           prefixIcon: const Icon(Icons.location_on),
+                          textInputAction: TextInputAction.next,
+                          onEditingComplete: () => _memoFocusNode.requestFocus(),
                         ),
                         _buildSectionHeader('메모'),
                         SmartInputField(
                           controller: _memoController,
+                          focusNode: _memoFocusNode,
                           label: '메모(선택)',
                           prefixIcon: const Icon(Icons.note),
+                          textInputAction: TextInputAction.done,
+                          onEditingComplete: () => FocusScope.of(context).unfocus(),
                           suffixIcon: _recentMemos.isEmpty
                               ? null
                               : PopupMenuButton<String>(
@@ -111,22 +112,10 @@ extension _AssetSimpleInputScreenUi on _AssetSimpleInputScreenState {
                                         .toList();
                                   },
                                 ),
-                          textInputAction: TextInputAction.done,
                           onFieldSubmitted: (_) => _submit(),
                           maxLines: 3,
                         ),
                         const SizedBox(height: 32),
-                        SizedBox(
-                          width: double.infinity,
-                          child: FilledButton.icon(
-                            onPressed: _submit,
-                            icon: const Icon(Icons.save),
-                            label: const Text('자산 저장'),
-                            style: FilledButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                            ),
-                          ),
-                        ),
                       ],
                     ),
                   ),
@@ -165,6 +154,11 @@ extension _AssetSimpleInputScreenUi on _AssetSimpleInputScreenState {
             ),
           );
         },
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _submit,
+        icon: const Icon(Icons.save),
+        label: const Text('자산 저장'),
       ),
     );
   }

@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' as p;
+import 'package:sqflite_sqlcipher/sqflite.dart';
 import '../models/consumable_inventory_item.dart';
+import '../models/global_product.dart';
 import '../services/consumable_inventory_service.dart';
-import '../services/health_guardrail_service.dart';
+import '../services/global_product_service.dart';
+import '../services/openfoodfacts_service.dart';
+import '../migrations/migration_global_product_db.dart';
 import '../utils/wms_data_gateway.dart';
+import 'wms_io_screen_widgets.dart';
+import 'wms_pda_quick_input_screen.dart';
+import '../utils/app_logger.dart';
 
 /// WMS 입출고 화면 (Input/Output)
 class WmsIoScreen extends StatefulWidget {
@@ -21,7 +29,7 @@ class _WmsIoScreenState extends State<WmsIoScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -38,16 +46,47 @@ class _WmsIoScreenState extends State<WmsIoScreen>
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
-            Tab(icon: Icon(Icons.add_box), text: '입고'),
-            Tab(icon: Icon(Icons.remove_circle_outline), text: '출고'),
+            Tab(icon: Icon(Icons.qr_code_2), text: '🔍 빠른 입출고'),
+            Tab(icon: Icon(Icons.add_box), text: '📥 입고'),
+            Tab(
+              icon: Icon(Icons.remove_circle_outline),
+              text: '📤 출고',
+            ),
           ],
         ),
       ),
       body: TabBarView(
         controller: _tabController,
         children: [
+          // PDA 빠른 입출고 탭 (바코드 스캔)
+          DefaultTabController(
+            length: 2,
+            child: Column(
+              children: [
+                const TabBar(
+                  tabs: [
+                    Tab(text: '입고 모드'),
+                    Tab(text: '출고 모드'),
+                  ],
+                ),
+                Expanded(
+                  child: TabBarView(
+                    children: [
+                      WmsPdaQuickInputScreen(
+                        accountName: widget.accountName,
+                      ),
+                      WmsPdaQuickInputScreen(
+                        accountName: widget.accountName,
+                        isInbound: false,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
           _InboundTab(accountName: widget.accountName),
-          _OutboundTab(accountName: widget.accountName),
+          WmsOutboundTab(accountName: widget.accountName),
         ],
       ),
     );
@@ -70,8 +109,69 @@ class _InboundTabState extends State<_InboundTab> {
   final _thresholdController = TextEditingController(text: '1');
   final _bundleSizeController = TextEditingController(text: '1');
   final _unitController = TextEditingController(text: '개');
-  String _selectedLocation = '기타';
-  final Set<String> _selectedTags = {};
+  final _locationController = TextEditingController(text: '주방');
+  String _selectedDropdownLocation = '주방';
+
+  GlobalProductService? _globalProductService;
+  late OpenFoodFactsService _offService;
+  bool _isSearchingBarcode = false;
+  String? _lastScannedBarcode;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeServices();
+  }
+
+  Future<void> _initializeServices() async {
+    try {
+      final dbPath = await getDatabasesPath();
+      final path = p.join(dbPath, 'global_products.db');
+      final db = await openDatabase(
+        path,
+        version: 1,
+        onCreate: (db, _) async => await migrationGlobalProductDatabase(db),
+      );
+      _globalProductService = GlobalProductService(db: db);
+      _offService = OpenFoodFactsService();
+    } catch (e) {
+      AppLogger.error('Error initializing WMS services', error: e);
+    }
+  }
+
+  Future<void> _lookupBarcode() async {
+    final barcode = _nameController.text.trim();
+    if (barcode.isEmpty || _isSearchingBarcode) return;
+
+    setState(() {
+      _isSearchingBarcode = true;
+      _lastScannedBarcode = barcode;
+    });
+    try {
+      GlobalProduct? product = await _globalProductService?.searchByBarcode(barcode);
+      product ??= await _offService.searchByBarcode(barcode);
+
+      final p = product;
+      if (p != null && mounted) {
+        setState(() {
+          _nameController.text = p.getDisplayName();
+          _unitController.text = p.packagingUnit ?? '개';
+          _bundleSizeController.text = p.defaultQuantity.toString();
+        });
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('✓ 상품 정보 조회 성공: ${p.getDisplayName()}')),
+        );
+      } else {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('상품 정보를 찾을 수 없습니다.')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSearchingBarcode = false);
+    }
+  }
 
   @override
   void dispose() {
@@ -80,6 +180,7 @@ class _InboundTabState extends State<_InboundTab> {
     _thresholdController.dispose();
     _bundleSizeController.dispose();
     _unitController.dispose();
+    _locationController.dispose();
     super.dispose();
   }
 
@@ -103,12 +204,12 @@ class _InboundTabState extends State<_InboundTab> {
 
     final input = WmsInventoryInput.full(
       name: name,
+      barcode: _lastScannedBarcode,
       currentStock: stock,
       unit: unit,
       threshold: threshold,
       bundleSize: bundleSize,
-      location: _selectedLocation,
-      healthTags: _selectedTags.toList(),
+      location: _locationController.text,
     );
 
     final result = await WmsInventoryGateway.instance.addItem(
@@ -141,35 +242,16 @@ class _InboundTabState extends State<_InboundTab> {
     _bundleSizeController.text = '1';
     _unitController.text = '개';
     setState(() {
-      _selectedLocation = '기타';
-      _selectedTags.clear();
+      _selectedDropdownLocation = '주방';
+      _locationController.text = '주방';
+      _lastScannedBarcode = null;
     });
   }
 
   Future<void> _showDuplicateDialog(
     ConsumableInventoryItem existing,
   ) async {
-    final addMore = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('이미 존재하는 품목'),
-        content: Text(
-          '${existing.name}이(가) 이미 등록되어 있습니다.\n'
-          '현재 재고: ${existing.currentStock}${existing.unit}\n\n'
-          '입력한 수량을 추가하시겠습니까?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('취소'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('추가'),
-          ),
-        ],
-      ),
-    );
+    final addMore = await showWmsDuplicateDialog(context, existing);
 
     if (addMore == true) {
       final addStock = double.tryParse(_stockController.text) ?? 0.0;
@@ -196,12 +278,35 @@ class _InboundTabState extends State<_InboundTab> {
         children: [
           TextField(
             controller: _nameController,
-            decoration: const InputDecoration(
-              labelText: '품목명',
-              hintText: '예: 휴지, 세제',
-              border: OutlineInputBorder(),
-              prefixIcon: Icon(Icons.inventory_2),
+            decoration: InputDecoration(
+              labelText: '품목명 또는 바코드 스캔',
+              hintText: '예: 휴지, 세제 또는 바코드 스캔',
+              border: const OutlineInputBorder(),
+              prefixIcon: const Icon(Icons.inventory_2),
+              suffixIcon: _isSearchingBarcode
+                  ? const Padding(
+                      padding: EdgeInsets.all(12.0),
+                      child: SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    )
+                  : IconButton(
+                    icon: const Icon(Icons.search),
+                    onPressed: _lookupBarcode,
+                    tooltip: '바코드로 정보 찾기',
+                  ),
             ),
+            textInputAction: TextInputAction.next,
+            onSubmitted: (value) {
+              // 바코드 형식(숫자로만 구성된 긴 문자열)이면 자동 검색
+              if (RegExp(r'^\d{8,14}$').hasMatch(value.trim())) {
+                _lookupBarcode();
+              } else {
+                FocusScope.of(context).nextFocus();
+              }
+            },
           ),
           const SizedBox(height: 16),
           Row(
@@ -217,6 +322,7 @@ class _InboundTabState extends State<_InboundTab> {
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
+                  textInputAction: TextInputAction.next,
                 ),
               ),
               const SizedBox(width: 12),
@@ -228,32 +334,53 @@ class _InboundTabState extends State<_InboundTab> {
                     hintText: '개, 롤',
                     border: OutlineInputBorder(),
                   ),
+                  textInputAction: TextInputAction.next,
                 ),
               ),
             ],
           ),
           const SizedBox(height: 16),
           DropdownButtonFormField<String>(
-            initialValue: _selectedLocation,
+            initialValue: _selectedDropdownLocation,
             decoration: const InputDecoration(
-              labelText: '보관 위치',
+              labelText: '보관 위치 선택',
               border: OutlineInputBorder(),
               prefixIcon: Icon(Icons.place),
             ),
-            items: ConsumableInventoryItem.locationOptions
-                .map(
-                  (loc) => DropdownMenuItem(
-                    value: loc,
-                    child: Text(loc),
-                  ),
-                )
-                .toList(),
+            items: [
+              ...ConsumableInventoryItem.locationOptions.map(
+                (loc) => DropdownMenuItem(
+                  value: loc,
+                  child: Text(loc),
+                ),
+              ),
+              const DropdownMenuItem(
+                value: '직접 입력',
+                child: Text('직접 입력...'),
+              ),
+            ],
             onChanged: (val) {
               if (val != null) {
-                setState(() => _selectedLocation = val);
+                setState(() {
+                  _selectedDropdownLocation = val;
+                  if (val != '직접 입력') {
+                    _locationController.text = val;
+                  }
+                });
               }
             },
           ),
+          if (_selectedDropdownLocation == '직접 입력') ...[
+            const SizedBox(height: 8),
+            TextField(
+              controller: _locationController,
+              decoration: const InputDecoration(
+                labelText: '상세 위치 입력 (예: 베란다, 다락)',
+                hintText: '위치 이름을 직접 입력하세요',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
           const SizedBox(height: 16),
           TextField(
             controller: _thresholdController,
@@ -266,6 +393,7 @@ class _InboundTabState extends State<_InboundTab> {
             keyboardType: const TextInputType.numberWithOptions(
               decimal: true,
             ),
+            textInputAction: TextInputAction.next,
           ),
           const SizedBox(height: 16),
           TextField(
@@ -279,32 +407,8 @@ class _InboundTabState extends State<_InboundTab> {
             keyboardType: const TextInputType.numberWithOptions(
               decimal: true,
             ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            '건강 태그 (선택)',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: HealthGuardrailService.defaultTags.map((tag) {
-              final isSelected = _selectedTags.contains(tag);
-              return FilterChip(
-                label: Text(tag),
-                selected: isSelected,
-                onSelected: (v) {
-                  setState(() {
-                    if (v) {
-                      _selectedTags.add(tag);
-                    } else {
-                      _selectedTags.remove(tag);
-                    }
-                  });
-                },
-              );
-            }).toList(),
+            textInputAction: TextInputAction.done,
+            onSubmitted: (_) => _handleInbound(),
           ),
           const SizedBox(height: 24),
           FilledButton.icon(
@@ -321,179 +425,4 @@ class _InboundTabState extends State<_InboundTab> {
   }
 }
 
-/// 출고 탭
-class _OutboundTab extends StatefulWidget {
-  final String accountName;
 
-  const _OutboundTab({required this.accountName});
-
-  @override
-  State<_OutboundTab> createState() => _OutboundTabState();
-}
-
-class _OutboundTabState extends State<_OutboundTab> {
-  ConsumableInventoryItem? _selectedItem;
-  final _quantityController = TextEditingController(text: '1');
-  final _memoController = TextEditingController();
-
-  @override
-  void dispose() {
-    _quantityController.dispose();
-    _memoController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _handleOutbound() async {
-    if (_selectedItem == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('품목을 선택하세요')),
-      );
-      return;
-    }
-
-    final quantity = double.tryParse(_quantityController.text) ?? 0.0;
-    if (quantity <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('출고 수량을 입력하세요')),
-      );
-      return;
-    }
-
-    final warning = await ConsumableInventoryService.instance.useItem(
-      _selectedItem!.id,
-      quantity,
-    );
-
-    if (!mounted) return;
-
-    if (warning != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(warning.message),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            '${_selectedItem!.name} $quantity개 출고 완료',
-          ),
-        ),
-      );
-    }
-
-    _clearForm();
-  }
-
-  void _clearForm() {
-    setState(() {
-      _selectedItem = null;
-      _quantityController.text = '1';
-      _memoController.clear();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<List<ConsumableInventoryItem>>(
-      valueListenable: ConsumableInventoryService.instance.items,
-      builder: (context, items, _) {
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              DropdownButtonFormField<ConsumableInventoryItem>(
-                initialValue: _selectedItem,
-                decoration: const InputDecoration(
-                  labelText: '출고 품목 선택',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.inventory),
-                ),
-                hint: const Text('품목을 선택하세요'),
-                items: items.map((item) {
-                  return DropdownMenuItem(
-                    value: item,
-                    child: Text(
-                      '${item.name} (재고: ${item.currentStock}'
-                      '${item.unit})',
-                    ),
-                  );
-                }).toList(),
-                onChanged: (item) {
-                  setState(() => _selectedItem = item);
-                },
-              ),
-              if (_selectedItem != null) ...[
-                const SizedBox(height: 16),
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '현재 재고 정보',
-                          style: Theme.of(
-                            context,
-                          ).textTheme.titleSmall,
-                        ),
-                        const SizedBox(height: 8),
-                        Text('품목: ${_selectedItem!.name}'),
-                        Text(
-                          '현재고: ${_selectedItem!.currentStock}'
-                          '${_selectedItem!.unit}',
-                        ),
-                        Text('보관 위치: ${_selectedItem!.location}'),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: _quantityController,
-                  decoration: InputDecoration(
-                    labelText: '출고 수량',
-                    border: const OutlineInputBorder(),
-                    suffixText: _selectedItem!.unit,
-                    prefixIcon: const Icon(Icons.remove_circle),
-                  ),
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: _memoController,
-                  decoration: const InputDecoration(
-                    labelText: '출고 사유 (선택)',
-                    hintText: '예: 사용, 폐기, 이동',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.note),
-                  ),
-                  maxLines: 2,
-                ),
-                const SizedBox(height: 24),
-                FilledButton.icon(
-                  onPressed: _handleOutbound,
-                  icon: const Icon(Icons.remove_circle_outline),
-                  label: const Text('출고 처리'),
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor: Theme.of(
-                      context,
-                    ).colorScheme.error,
-                    foregroundColor: Theme.of(
-                      context,
-                    ).colorScheme.onError,
-                  ),
-                ),
-              ],
-            ],
-          ),
-        );
-      },
-    );
-  }
-}

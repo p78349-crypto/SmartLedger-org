@@ -8,6 +8,7 @@ import '../navigation/app_routes.dart';
 import 'permission_gate_screen.dart';
 import '../services/account_service.dart';
 import '../services/user_pref_service.dart';
+import '../services/server_config_service.dart';
 import '../utils/pref_keys.dart';
 import '../widgets/background_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -88,12 +89,41 @@ class _LaunchScreenState extends State<LaunchScreen> {
     try {
       debugPrint('[LaunchScreen] _goToAccountMain 시작');
 
+      // 서버 연결 확인
+      final serverConfigService = ServerConfigService();
+      final isServerHealthy = await serverConfigService.checkHealth();
+      
+      if (!isServerHealthy) {
+        debugPrint('[LaunchScreen] 서버 연결 실패 - 설정 화면으로 이동');
+        if (!mounted) return;
+        Navigator.of(context).pushReplacementNamed(AppRoutes.settings);
+        return;
+      }
+
+      final service = AccountService();
+      final accounts = service.accounts;
+      
+      // 계정이 2개 이상이면 ROOT 포함한 계정 선택 화면 표시
+      if (accounts.length >= 2) {
+        debugPrint('[LaunchScreen] 계정이 ${accounts.length}개 존재 - 계정 선택 화면으로 이동');
+        if (!mounted) return;
+        // ROOT 계정을 목록에 추가하여 선택 화면 표시
+        final accountNames = accounts.map((a) => a.name).toList();
+        if (!accountNames.contains('ROOT')) {
+          accountNames.add('ROOT');
+        }
+        Navigator.of(context).pushReplacementNamed(
+          AppRoutes.accountSelect,
+          arguments: AccountSelectArgs(accounts: accountNames),
+        );
+        return;
+      }
+
       final last = await UserPrefService.getLastAccountName();
       debugPrint('[LaunchScreen] 마지막 계정: $last');
 
       if (!mounted) return;
 
-      final service = AccountService();
       final exists = last != null && service.getAccountByName(last) != null;
       debugPrint('[LaunchScreen] 계정 존재 여부: $exists');
 

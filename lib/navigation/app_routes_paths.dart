@@ -36,6 +36,7 @@ class AppRoutes {
   static const iconManagement2 = '/settings/icon-management-2';
   static const iconManagementAsset = '/settings/icon-management-asset';
   static const iconManagementRoot = '/settings/icon-management-root';
+  static const pageIconManagement = '/page/icon-management';
   static const featureIconsCatalog = '/settings/feature-icons-catalog';
   static const themeSettings = '/settings/theme';
   static const languageSettings = '/settings/language';
@@ -78,7 +79,6 @@ class AppRoutes {
   static const calendar = '/calendar';
 
   static const shoppingCart = '/shopping/cart';
-  static const shoppingPrep = '/shopping/prep';
   static const shoppingGuide = '/shopping/guide';
 
   static const householdConsumables = '/household/consumables';
@@ -86,6 +86,8 @@ class AppRoutes {
   static const householdItems = '/household/items';
   static const consumableInventory = '/household/inventory';
   static const quickStockUse = '/household/quick-stock-use';
+  static const wmsIo = '/household/wms-io';
+  static const wmsGuide = '/household/wms-guide';
 
   static const shoppingPointsInput = '/shopping/points-input';
 
@@ -101,7 +103,12 @@ class AppRoutes {
   static const assetTab = '/asset/tab';
   static const assetDashboard = '/asset/dashboard';
   static const assetAllocation = '/asset/allocation';
+  static const assetPortfolioAnalysis = '/asset/portfolio-analysis';
+  static const assetInvestmentRoadmap = '/asset/investment-roadmap';
   static const assetManagement = '/asset/management';
+  static const assetList = '/asset/list';
+  static const assetExport = '/asset/export';
+  static const dataFlexibleExport = '/data/flexible-export';
   static const assetSimpleInput = '/asset/input/simple';
   static const assetDetailInput = '/asset/input/detail';
   static const assetProject100m = '/asset/project-100m';
@@ -111,6 +118,9 @@ class AppRoutes {
 
   static const savingsPlanList = '/savings/plan/list';
 
+  static const rootSummary = '/root/summary';
+  static const rootAccountSummary = '/root/account-summary';
+  static const rootExpenseAnalysis = '/root/expense-analysis';
   static const rootTransactions = '/root/transactions';
   static const rootSearch = '/root/search';
   static const rootAccountManage = '/root/accounts';
@@ -135,4 +145,13 @@ class AppRoutes {
 
   // Smart voice command (앱 통합 제어)
   static const smartVoiceCommand = '/smart/voice-command';
+  
+  // 새로 구현된 고급 기능들
+  static const incrementalBackup = '/backup/incremental';
+  static const ceoPredictionDashboard = '/ceo/prediction-dashboard';
+  static const aiInvestmentAdvisor = '/investment/ai-advisor';
+  static const cloudBackupSettings = '/backup/cloud-settings';
+  static const advancedFinancialAnalytics = '/analytics/advanced-financial';
+  static const aiModelSelector = '/ai/model-selector';
+  static const customGemma2Test = '/dev/custom-gemma2-test'; // 🔬 커스텀 모델 테스트
 }

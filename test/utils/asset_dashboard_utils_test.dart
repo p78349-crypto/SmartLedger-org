@@ -95,4 +95,31 @@ void main() {
     final successRate = AssetManagementUtils.calculateSuccessRate(assets);
     expect(successRate, closeTo((1 / 3) * 100, 0.0001));
   });
+
+  test('handles zero cost basis totals', () {
+    final assets = [
+      Asset(id: 'a1', name: 'Zero', amount: 0, costBasis: 0),
+      Asset(id: 'a2', name: 'Zero2', amount: 0, costBasis: 0),
+    ];
+
+    expect(AssetManagementUtils.calculateTotalProfitLossRate(assets), 0);
+  });
+
+  test('finds best and worst performing assets', () {
+    final assets = [
+      Asset(id: 'a1', name: 'Best', amount: 120, costBasis: 100),
+      Asset(id: 'a2', name: 'Mid', amount: 95, costBasis: 100),
+      Asset(id: 'a3', name: 'Worst', amount: 80, costBasis: 100),
+    ];
+
+    final best = AssetManagementUtils.findBestPerformingAsset(assets);
+    final worst = AssetManagementUtils.findWorstPerformingAsset(assets);
+
+    expect(best?.id, 'a1');
+    expect(worst?.id, 'a3');
+  });
+
+  test('calculateSuccessRate returns 0 for empty list', () {
+    expect(AssetManagementUtils.calculateSuccessRate([]), 0);
+  });
 }

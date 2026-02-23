@@ -99,7 +99,7 @@ extension IncomeSplitCategorySheet on _IncomeSplitScreenState {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('카테고리별 예산 배분',
+                            const Text('카테고리 배분',
                               style: TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.bold)),
                             IconButton(
@@ -166,7 +166,7 @@ extension IncomeSplitCategorySheet on _IncomeSplitScreenState {
                         Expanded(
                           child: ListView.separated(
                             itemCount: categories.length,
-                            separatorBuilder: (_, __) =>
+                            separatorBuilder: (_, _) =>
                                 const SizedBox(height: 12),
                             itemBuilder: (context, index) {
                               final cat = categories[index];

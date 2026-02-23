@@ -1,0 +1,11 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Final Backup - Whisper Integration Complete",
+			"type": "shell",
+			"command": "powershell -ExecutionPolicy Bypass -NoProfile -File .\\backup_project.ps1 -Compress",
+			"isBackground": true
+		}
+	]
+}

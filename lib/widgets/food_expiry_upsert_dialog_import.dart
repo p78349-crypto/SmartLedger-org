@@ -1,12 +1,8 @@
 part of 'food_expiry_upsert_dialog.dart';
 // ignore_for_file: invalid_use_of_protected_member
 
+/// Shopping-history import queue for [_FoodExpiryUpsertDialogState].
 extension FoodExpiryUpsertImport on _FoodExpiryUpsertDialogState {
-  String _historySubtitle(ShoppingCartHistoryEntry item) {
-    final timeLabel = DateFormat('HH:mm').format(item.at);
-    return '${item.quantity}개 / $timeLabel';
-  }
-
   Future<void> _showHistoryPicker() async {
     final accountName = await UserPrefService.getLastAccountName();
     if (accountName == null) return;

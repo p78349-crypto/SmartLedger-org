@@ -48,20 +48,18 @@ class _TransactionRoutes {
         final a = args as TransactionAddArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => AssetRouteAuthGate(
-            child: TransactionAddScreen(
-              accountName: a.accountName,
-              initialTransaction: a.initialTransaction as Transaction?,
-              learnCategoryHintFromDescription:
-                  a.learnCategoryHintFromDescription,
-              confirmBeforeSave: a.confirmBeforeSave,
-              treatAsNew: a.treatAsNew,
-              closeAfterSave: a.closeAfterSave,
-              autoSubmit: a.autoSubmit,
-              openReceiptScannerOnStart: a.openReceiptScannerOnStart,
-              initialPaymentMethod: a.initialPaymentMethod,
-              initialMemo: a.initialMemo,
-            ),
+          builder: (_) => TransactionAddScreen(
+            accountName: a.accountName,
+            initialTransaction: a.initialTransaction as Transaction?,
+            learnCategoryHintFromDescription:
+                a.learnCategoryHintFromDescription,
+            confirmBeforeSave: a.confirmBeforeSave,
+            treatAsNew: a.treatAsNew,
+            closeAfterSave: a.closeAfterSave,
+            autoSubmit: a.autoSubmit,
+            openReceiptScannerOnStart: a.openReceiptScannerOnStart,
+            initialPaymentMethod: a.initialPaymentMethod,
+            initialMemo: a.initialMemo,
           ),
         );
 
@@ -79,11 +77,9 @@ class _TransactionRoutes {
         final a = args as TransactionDetailArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => AssetRouteAuthGate(
-            child: TransactionDetailScreen(
-              accountName: a.accountName,
-              initialType: a.initialType as TransactionType,
-            ),
+          builder: (_) => TransactionDetailScreen(
+            accountName: a.accountName,
+            initialType: a.initialType as TransactionType,
           ),
         );
 

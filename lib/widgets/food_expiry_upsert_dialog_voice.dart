@@ -1,6 +1,7 @@
 part of 'food_expiry_upsert_dialog.dart';
 // ignore_for_file: invalid_use_of_protected_member
 
+/// Voice input (STT) methods for [_FoodExpiryUpsertDialogState].
 extension FoodExpiryUpsertVoice on _FoodExpiryUpsertDialogState {
   Future<bool> _ensureSpeechReady() async {
     if (_speechInitAttempted) {
@@ -40,9 +41,7 @@ extension FoodExpiryUpsertVoice on _FoodExpiryUpsertDialogState {
           });
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(
-            const SnackBar(content: Text('음성 인식 중 오류가 발생했습니다')),
-          );
+          ).showSnackBar(const SnackBar(content: Text('음성 인식 중 오류가 발생했습니다')));
         },
       );
     } catch (e) {
@@ -70,9 +69,9 @@ extension FoodExpiryUpsertVoice on _FoodExpiryUpsertDialogState {
       _isVoiceListening = true;
       _voiceDraft = '';
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('말씀하세요… (예: 팽이버섯 2봉 냉장 내일)')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('말씀하세요… (예: 팽이버섯 2봉 냉장 내일)')));
 
     await _speech.listen(
       localeId: 'ko_KR',

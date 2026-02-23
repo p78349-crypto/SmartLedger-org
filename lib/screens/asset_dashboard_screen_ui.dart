@@ -22,7 +22,7 @@ extension _AssetDashboardScreenUi on _AssetDashboardScreenState {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: FutureBuilder<bool>(
                 future: assetLockedFuture,
-                builder: (context, snap) {
+                builder: (_, snap) {
                   final locked = isRoot ? false : (snap.data ?? true);
                   return Row(
                     children: [
@@ -80,7 +80,90 @@ extension _AssetDashboardScreenUi on _AssetDashboardScreenState {
                 },
               ),
             ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: _QuickAccessCard(
+                icon: Icons.analytics_outlined,
+                label: '자산 분석',
+                onTap: () async {
+                  if (isRoot) {
+                    if (!mounted) return;
+                    Navigator.of(this.context).push(
+                      MaterialPageRoute(
+                        builder: (_) => AssetPortfolioAnalysisScreen(
+                          accountName: widget.accountName,
+                        ),
+                      ),
+                    );
+                    return;
+                  }
+                  final locked = await AssetSecurityService.isLocked(
+                    widget.accountName,
+                  );
+                  if (!mounted) return;
+                  if (locked) {
+                    await _showAssetLockedDialog(
+                      this.context,
+                      message: '자산 보안이 설정되어 있어 분석을 볼 수 없습니다.',
+                    );
+                    return;
+                  }
+                  if (!mounted) return;
+                  Navigator.of(this.context).push(
+                    MaterialPageRoute(
+                      builder: (_) => AssetPortfolioAnalysisScreen(
+                        accountName: widget.accountName,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: _QuickAccessCard(
+                icon: Icons.route_outlined,
+                label: '투자 로드맵',
+                onTap: () async {
+                  if (isRoot) {
+                    if (!mounted) return;
+                    Navigator.of(this.context).push(
+                      MaterialPageRoute(
+                        builder: (_) => AssetInvestmentRoadmapScreen(
+                          accountName: widget.accountName,
+                        ),
+                      ),
+                    );
+                    return;
+                  }
+                  final locked = await AssetSecurityService.isLocked(
+                    widget.accountName,
+                  );
+                  if (!mounted) return;
+                  if (locked) {
+                    await _showAssetLockedDialog(
+                      this.context,
+                      message: '자산 보안이 설정되어 있어 로드맵을 볼 수 없습니다.',
+                    );
+                    return;
+                  }
+                  if (!mounted) return;
+                  Navigator.of(this.context).push(
+                    MaterialPageRoute(
+                      builder: (_) => AssetInvestmentRoadmapScreen(
+                        accountName: widget.accountName,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
             _buildDashboardSummary(theme),
+            const SizedBox(height: 12),
+            _buildEvaluationNoticeCard(theme),
+            const SizedBox(height: 12),
+            _buildEvaluationComparisonCard(theme),
             const SizedBox(height: 16),
             _buildAssetCards(theme),
             const SizedBox(height: 16),
@@ -130,6 +213,140 @@ extension _AssetDashboardScreenUi on _AssetDashboardScreenState {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildEvaluationNoticeCard(ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHigh,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: theme.colorScheme.outlineVariant),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(Icons.info_outline, color: theme.colorScheme.primary),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                '대시보드는 전체 요약 화면입니다. 개별 자산의 상세 성과 평가는 자산 상세의 “평가 리포트”에서 확인하세요.',
+                style: theme.textTheme.bodySmall,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEvaluationComparisonCard(ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: theme.colorScheme.outlineVariant),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '대시보드 vs 평가 리포트',
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: _buildComparisonColumn(
+                    theme,
+                    title: '대시보드',
+                    accent: theme.colorScheme.primary,
+                    items: const [
+                      '목적: 전체 요약/현황',
+                      '대상: 모든 자산',
+                      '지표: 총액, 총 손익, 최근 이동',
+                      '진입: 자산 탭 > 대시보드',
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildComparisonColumn(
+                    theme,
+                    title: '평가 리포트',
+                    accent: theme.colorScheme.tertiary,
+                    items: const [
+                      '목적: 개별 자산 성과 분석',
+                      '대상: 선택한 자산 1개',
+                      '지표: ROI, 납입/회수, 메모',
+                      '진입: 자산 상세 > 평가 리포트',
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildComparisonColumn(
+    ThemeData theme, {
+    required String title,
+    required Color accent,
+    required List<String> items,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: accent,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                title,
+                style: theme.textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          for (final item in items)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Text(
+                item,
+                style: theme.textTheme.bodySmall,
+              ),
+            ),
+        ],
+      ),
     );
   }
 

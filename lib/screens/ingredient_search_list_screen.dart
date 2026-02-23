@@ -250,14 +250,14 @@ class _IngredientSearchListScreenState
               ),
             ),
             const SizedBox(width: 12),
-            // 오른쪽: 쇼핑준비 보내기 버튼
+            // 오른쪽: 장바구니 보내기 버튼
             Expanded(
               child: ElevatedButton.icon(
-                onPressed: _sendToShoppingPrep,
+                onPressed: _sendToShoppingCart,
                 icon: const Icon(Icons.shopping_cart_outlined),
                 label: Text(
                   _selectedNames.isEmpty
-                      ? '쇼핑준비 보내기'
+                      ? '장바구니 보내기'
                       : '${_selectedNames.length}개 보내기',
                 ),
               ),

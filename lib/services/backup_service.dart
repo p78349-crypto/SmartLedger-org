@@ -19,6 +19,7 @@ import '../models/shopping_cart_item.dart';
 import '../models/shopping_template_item.dart';
 import '../models/transaction.dart';
 import '../models/trash_entry.dart';
+import '../models/consumable_inventory_item.dart';
 import 'account_option_service.dart';
 import 'account_service.dart';
 import 'asset_move_service.dart';
@@ -33,9 +34,12 @@ import 'secure_storage_service.dart';
 import 'transaction_service.dart';
 import 'trash_service.dart';
 import 'user_pref_service.dart';
+import 'consumable_inventory_service.dart';
 import '../utils/backup_crypto.dart';
 import '../utils/constants.dart';
 import '../utils/pref_keys.dart';
+import '../utils/incremental_backup_helper.dart';
+import 'incremental_backup_service.dart';
 
 part 'backup_service_parse.dart';
 part 'backup_service_export.dart';
@@ -43,6 +47,7 @@ part 'backup_service_save.dart';
 part 'backup_service_share.dart';
 part 'backup_service_import.dart';
 part 'backup_service_favorites.dart';
+part 'backup_service_incremental.dart';
 
 // Top-level constant for extension access.
 const int _backupFormatVersion = 1;
@@ -122,5 +127,33 @@ class BackupService {
 
   bool isEncryptedBackupText(String text) {
     return BackupCrypto.isEncryptedEnvelopeText(text);
+  }
+
+  /// 암호화된 백업 데이터에서 암호 힌트를 추출합니다.
+  String? getBackupPasswordHint(String text) {
+    try {
+      final decoded = jsonDecode(text);
+      if (decoded is! Map) return null;
+      return decoded['hint'] as String?;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// 암호의 앞뒤 일부만 남기고 마스킹된 힌트를 생성합니다.
+  String generateMaskedPasswordHint(String password) {
+    final len = password.length;
+    if (len <= 2) return '**';
+    
+    if (len <= 4) {
+      // 3~4자리: 앞 1글자만 노출
+      return '${password[0]}${'*' * (len - 1)}';
+    } else if (len <= 7) {
+      // 5~7자리: 앞 1글자, 뒤 1글자 노출
+      return '${password[0]}${'*' * (len - 2)}${password[len - 1]}';
+    } else {
+      // 8자리 이상: 앞 2글자, 뒤 2글자 노출
+      return '${password.substring(0, 2)}${'*' * (len - 4)}${password.substring(len - 2)}';
+    }
   }
 }

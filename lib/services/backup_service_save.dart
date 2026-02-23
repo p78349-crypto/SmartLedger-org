@@ -24,6 +24,8 @@ extension BackupServiceSave on BackupService {
   Future<String> saveBackupToDownloads(
     String accountName, {
     String? encryptionPassword,
+    String? passwordHint,
+    String backupType = 'full', // 'full', 'transactions_only', 'assets_only'
   }) async {
     // Android 버전별 권한 요청
     bool hasPermission = false;
@@ -53,11 +55,23 @@ extension BackupServiceSave on BackupService {
       hasPermission = true; // iOS는 권한 불필요
     }
 
-    var json = await exportAccountData(accountName);
+    var json = '';
+    
+    if (backupType == 'transactions_only') {
+      json = await exportTransactionsOnly(accountName);
+    } else if (backupType == 'assets_only') {
+      json = await exportAssetsOnly(accountName);
+    } else if (backupType == 'wms_only') {
+      json = await exportWmsOnly(accountName);
+    } else {
+      json = await exportAccountData(accountName);
+    }
+    
     if (encryptionPassword != null && encryptionPassword.trim().isNotEmpty) {
       json = await BackupCrypto.encryptJsonPayload(
         plainJson: json,
         password: encryptionPassword,
+        hint: passwordHint,
       );
     }
     final now = DateTime.now();
@@ -67,7 +81,28 @@ extension BackupServiceSave on BackupService {
     final hh = now.hour.toString().padLeft(2, '0');
     final mm = now.minute.toString().padLeft(2, '0');
     final ss = now.second.toString().padLeft(2, '0');
-    final fileName = '${accountName}_$y$m${d}_$hh$mm$ss.json';
+    final dateStamp = '$y$m$d';
+    final timeStamp = '$hh$mm$ss';
+    
+    // 백업 타입에 따라 파일명 구성
+    String typePrefix = '';
+    if (backupType == 'transactions_only') {
+      typePrefix = '_transactions';
+    } else if (backupType == 'assets_only') {
+      typePrefix = '_assets';
+    } else if (backupType == 'wms_only') {
+      typePrefix = '_wms';
+    }
+    
+    final fileName = (StringBuffer()
+          ..write(accountName)
+          ..write(typePrefix)
+          ..write('_')
+          ..write(dateStamp)
+          ..write('_')
+          ..write(timeStamp)
+          ..write('.json'))
+        .toString();
 
     // Attempt Downloads first on Android when permission is available.
     // Fallback: app documents folder (always works, but removed on uninstall).
@@ -107,6 +142,7 @@ extension BackupServiceSave on BackupService {
   Future<String> saveEmergencyBackupToDownloads(
     String accountName, {
     String? encryptionPassword,
+    String? passwordHint,
   }) async {
     // 권한/저장 위치 정책은 일반 Downloads 저장과 동일하게 유지
     bool hasPermission = false;
@@ -132,6 +168,7 @@ extension BackupServiceSave on BackupService {
       json = await BackupCrypto.encryptJsonPayload(
         plainJson: json,
         password: encryptionPassword,
+        hint: passwordHint,
       );
     }
     const suffix = '_latest.json';
@@ -189,12 +226,26 @@ extension BackupServiceSave on BackupService {
     String accountName,
     String fileNameOrPath, {
     String? encryptionPassword,
+    String? passwordHint,
+    String backupType = 'full', // 'full', 'transactions_only', 'assets_only', 'wms_only'
   }) async {
-    var json = await exportAccountData(accountName);
+    var json = '';
+    
+    if (backupType == 'transactions_only') {
+      json = await exportTransactionsOnly(accountName);
+    } else if (backupType == 'assets_only') {
+      json = await exportAssetsOnly(accountName);
+    } else if (backupType == 'wms_only') {
+      json = await exportWmsOnly(accountName);
+    } else {
+      json = await exportAccountData(accountName);
+    }
+    
     if (encryptionPassword != null && encryptionPassword.trim().isNotEmpty) {
       json = await BackupCrypto.encryptJsonPayload(
         plainJson: json,
         password: encryptionPassword,
+        hint: passwordHint,
       );
     }
     final file = await _resolveBackupFile(fileNameOrPath);

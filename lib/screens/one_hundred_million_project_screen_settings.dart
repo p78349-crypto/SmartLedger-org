@@ -25,75 +25,81 @@ extension _SettingsExt on _OneHundredMillionProjectScreenState {
     final saved = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
-        return AlertDialog(
-          title: const Text('1억 프로젝트 설정'),
-          content: StatefulBuilder(
-            builder: (context, setDialogState) {
-              return SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SmartInputField(
-                      label: '기간(년)',
-                      hint: '예: 10',
-                      controller: yearsController,
-                      keyboardType: TextInputType.number,
-                    ),
-                    const SizedBox(height: 12),
-                    SmartInputField(
-                      label: '목표 금액',
-                      hint: '예: 100000000',
-                      controller: targetController,
-                      keyboardType: TextInputType.number,
-                    ),
-                    const SizedBox(height: 12),
-                    SmartInputField(
-                      label: '안전자산 연이율(%)',
-                      hint: '예: 3.0',
-                      controller: safeRateController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    SmartInputField(
-                      label: '투자자산 연이율(%)',
-                      hint: '예: 6.0',
-                      controller: investRateController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: const Text('혜택/절약을 매달 적립으로 포함'),
-                      value: includeBenefits,
-                      onChanged: (v) =>
-                          setDialogState(() => includeBenefits = v),
-                    ),
-                    const SizedBox(height: 12),
-                    SmartInputField(
-                      label: '비상금→투자 전환 기준(원)',
-                      hint: '예: 100000',
-                      controller: cashToInvestController,
-                      keyboardType: TextInputType.number,
-                    ),
-                  ],
+        return Dialog.fullscreen(
+          child: Scaffold(
+            appBar: AppBar(
+              title: const Text('1억 모으기'),
+              leading: IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.of(dialogContext).pop(false),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(true),
+                  child: const Text('저장',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
-              );
-            },
+              ],
+            ),
+            body: StatefulBuilder(
+              builder: (context, setDialogState) {
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SmartInputField(
+                        label: '기간(년)',
+                        hint: '예: 10',
+                        controller: yearsController,
+                        keyboardType: TextInputType.number,
+                      ),
+                      const SizedBox(height: 16),
+                      SmartInputField(
+                        label: '목표 금액',
+                        hint: '예: 100000000',
+                        controller: targetController,
+                        keyboardType: TextInputType.number,
+                      ),
+                      const SizedBox(height: 16),
+                      SmartInputField(
+                        label: '안전자산 연이율(%)',
+                        hint: '예: 3.0',
+                        controller: safeRateController,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      SmartInputField(
+                        label: '투자자산 연이율(%)',
+                        hint: '예: 6.0',
+                        controller: investRateController,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text('혜택/절약을 매달 적립으로 포함'),
+                        value: includeBenefits,
+                        onChanged: (v) =>
+                            setDialogState(() => includeBenefits = v),
+                      ),
+                      const SizedBox(height: 16),
+                      SmartInputField(
+                        label: '비상금→투자 전환 기준(원)',
+                        hint: '예: 100000',
+                        controller: cashToInvestController,
+                        keyboardType: TextInputType.number,
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text('취소'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: const Text('저장'),
-            ),
-          ],
         );
       },
     );
@@ -140,6 +146,6 @@ extension _SettingsExt on _OneHundredMillionProjectScreenState {
     if (!mounted) return;
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(const SnackBar(content: Text('1억 프로젝트 설정이 저장되었습니다.')));
+    ).showSnackBar(const SnackBar(content: Text('설정이 저장되었습니다.')));
   }
 }

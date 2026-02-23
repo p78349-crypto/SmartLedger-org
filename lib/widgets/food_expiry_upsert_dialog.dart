@@ -22,12 +22,8 @@ import '../utils/transaction_by_date_utils.dart';
 part 'food_expiry_upsert_dialog_voice.dart';
 part 'food_expiry_upsert_dialog_logic.dart';
 part 'food_expiry_upsert_dialog_import.dart';
-part 'food_expiry_upsert_dialog_build.dart';
 part 'food_expiry_upsert_dialog_form.dart';
-
-const String _kLastCategory = 'food_expiry_last_category_v1';
-const String _kLastLocation = 'food_expiry_last_location_v1';
-const String _kLastUnit = 'food_expiry_last_unit_v1';
+part 'food_expiry_upsert_dialog_build.dart';
 
 class FoodExpiryUpsertDialog extends StatefulWidget {
   final FoodExpiryItem? existing;
@@ -69,6 +65,10 @@ class _UpsertVoiceParseResult {
 }
 
 class _FoodExpiryUpsertDialogState extends State<FoodExpiryUpsertDialog> {
+  static const String _kLastCategory = 'food_expiry_last_category_v1';
+  static const String _kLastLocation = 'food_expiry_last_location_v1';
+  static const String _kLastUnit = 'food_expiry_last_unit_v1';
+
   late TextEditingController _nameController;
   late TextEditingController _memoController;
   late TextEditingController _quantityController;
@@ -89,8 +89,16 @@ class _FoodExpiryUpsertDialogState extends State<FoodExpiryUpsertDialog> {
   List<String> _healthTags = const <String>[];
 
   final List<String> _categories = [
-    '채소', '과일', '육류', '수산물', '유제품',
-    '냉동식품', '가공식품', '음료', '양념/소스', '기타',
+    '채소',
+    '과일',
+    '육류',
+    '수산물',
+    '유제품',
+    '냉동식품',
+    '가공식품',
+    '음료',
+    '양념/소스',
+    '기타',
   ];
 
   final List<String> _locations = ['냉장', '냉동', '실온', '팬트리'];
@@ -168,9 +176,8 @@ class _FoodExpiryUpsertDialogState extends State<FoodExpiryUpsertDialog> {
         }
         if (p.quantity != null) {
           final v = p.quantity!;
-          _quantityController.text = v == v.roundToDouble()
-              ? v.toStringAsFixed(0)
-              : v.toString();
+          _quantityController.text =
+              v == v.roundToDouble() ? v.toStringAsFixed(0) : v.toString();
         }
         if (p.unit != null && p.unit!.trim().isNotEmpty) {
           _unitController.text = p.unit!.trim();
@@ -186,9 +193,8 @@ class _FoodExpiryUpsertDialogState extends State<FoodExpiryUpsertDialog> {
         }
         if (p.price != null) {
           final v = p.price!;
-          _priceController.text = v == v.roundToDouble()
-              ? v.toStringAsFixed(0)
-              : v.toString();
+          _priceController.text =
+              v == v.roundToDouble() ? v.toStringAsFixed(0) : v.toString();
         }
         if (p.supplier != null && p.supplier!.trim().isNotEmpty) {
           _supplierController.text = p.supplier!.trim();
@@ -246,5 +252,5 @@ class _FoodExpiryUpsertDialogState extends State<FoodExpiryUpsertDialog> {
   }
 
   @override
-  Widget build(BuildContext context) => _buildMain(context);
+  Widget build(BuildContext context) => _buildDialog(context);
 }

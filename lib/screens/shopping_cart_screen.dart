@@ -1,28 +1,30 @@
 import 'package:flutter/material.dart';
-import '../models/category_hint.dart';
 import '../models/shopping_cart_history_entry.dart';
 import '../models/shopping_cart_item.dart';
 import '../navigation/app_routes.dart';
 import '../services/consumable_inventory_service.dart';
 import '../services/product_location_service.dart';
 import '../services/user_pref_service.dart';
+import '../shared/result.dart';
 import '../utils/currency_formatter.dart';
 import '../utils/icon_catalog.dart';
-import '../utils/shopping_cart_bulk_ledger_utils.dart';
 import '../widgets/smart_input_field.dart';
 
-part 'shopping_cart_screen.build.dart';
-part 'shopping_cart_screen.controllers.dart';
-part 'shopping_cart_screen.data_ops.dart';
-part 'shopping_cart_screen.inline_edit.dart';
-part 'shopping_cart_screen.item_actions.dart';
-part 'shopping_cart_screen.portrait_tile.dart';
-part 'shopping_cart_screen.purchase_picker.dart';
-part 'shopping_cart_screen.wide_tile.dart';
+part 'shopping_cart_screen_build.dart';
+part 'shopping_cart_screen_controllers.dart';
+part 'shopping_cart_screen_data_ops.dart';
+part 'shopping_cart_screen_inline_edit.dart';
+part 'shopping_cart_screen_item_actions.dart';
+part 'shopping_cart_screen_portrait_tile.dart';
+part 'shopping_cart_screen_purchase_picker.dart';
+part 'shopping_cart_screen_wide_tile.dart';
 
-// ── Top-level constants (accessible from all part files) ──
+// -- Library-level constants (accessible from all part files) --
+
 const double _inlineFieldHeight = 36.0;
-const BorderRadius _inlineFieldRadius = BorderRadius.all(Radius.circular(12));
+const BorderRadius _inlineFieldRadius = BorderRadius.all(
+  Radius.circular(12),
+);
 const Color _inlineFieldBorderColor = Color(0xFFD8C5CA);
 const Color _inlineFieldFocusedBorderColor = Color(0xFF884A5E);
 const Color _inlineFieldFillColor = Color(0xFFF8EFF2);
@@ -31,12 +33,10 @@ class ShoppingCartScreen extends StatefulWidget {
   const ShoppingCartScreen({
     super.key,
     required this.accountName,
-    this.openPrepOnStart = false,
     this.initialItems,
   });
 
   final String accountName;
-  final bool openPrepOnStart;
   final List<ShoppingCartItem>? initialItems;
 
   @override
@@ -46,7 +46,6 @@ class ShoppingCartScreen extends StatefulWidget {
 class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
   bool _isLoading = true;
   List<ShoppingCartItem> _items = const [];
-  Map<String, CategoryHint> _categoryHints = <String, CategoryHint>{};
 
   final TextEditingController _nameController = TextEditingController();
   final FocusNode _nameFocusNode = FocusNode();

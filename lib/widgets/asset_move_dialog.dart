@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
 import '../models/asset.dart';
 import '../models/asset_move.dart';
-import '../services/asset_move_service.dart';
 import '../services/asset_service.dart';
 import '../utils/currency_formatter.dart';
-import '../utils/currency_input_formatter.dart';
-import '../utils/icon_catalog.dart';
-import '../utils/snackbar_utils.dart';
-
-part 'asset_move_dialog_form.dart';
+import 'asset_move_dialog_logic.dart';
+import 'asset_move_dialog_widgets.dart';
 
 /// 자산 이동/전환 다이얼로그
 class AssetMoveDialog extends StatefulWidget {
@@ -26,11 +22,20 @@ class AssetMoveDialog extends StatefulWidget {
 }
 
 class _AssetMoveDialogState extends State<AssetMoveDialog> {
+  void _handleMemoEditingComplete() {
+    FocusScope.of(context).unfocus();
+  }
+
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _memoController = TextEditingController();
+  
+  // 📱 커서 자동 이동을 위한 FocusNode 추가
+  final FocusNode _amountFocusNode = FocusNode();
+  final FocusNode _memoFocusNode = FocusNode();
+  
   late DateTime _moveDate;
-  String? _selectedToAssetId;
-  AssetCategory? _selectedToCategory;
+  String? _selectedToAssetId; // 기존 자산 선택
+  AssetCategory? _selectedToCategory; // 새로 생성할 자산 카테고리
   late AssetMoveType _selectedType;
 
   @override
@@ -44,159 +49,35 @@ class _AssetMoveDialogState extends State<AssetMoveDialog> {
   void dispose() {
     _amountController.dispose();
     _memoController.dispose();
+    
+    // FocusNode 리소스 정리
+    _amountFocusNode.dispose();
+    _memoFocusNode.dispose();
+    
     super.dispose();
   }
 
-  /// To 자산과 From 자산의 카테고리를 기반으로 이동 타입 자동 결정
-  AssetMoveType _determineAssetMoveType({
-    required AssetCategory fromCategory,
-    required AssetCategory? toCategory,
-  }) {
-    if (toCategory == null) return AssetMoveType.transfer;
-
-    final isCash = fromCategory == AssetCategory.cash;
-    final isCashTo = toCategory == AssetCategory.cash;
-    final isSameCategory = fromCategory == toCategory;
-
-    if (isCash && toCategory == AssetCategory.deposit) {
-      return AssetMoveType.deposit;
-    }
-    if (isCash && !isCashTo) {
-      return AssetMoveType.purchase;
-    }
-    if (!isCash && isCashTo) {
-      return AssetMoveType.sale;
-    }
-    if (isSameCategory && !isCash) {
-      return AssetMoveType.exchange;
-    }
-    return AssetMoveType.transfer;
+  AssetMoveType _autoMoveType(AssetCategory? toCat) {
+    return determineAssetMoveType(
+      fromCategory: widget.fromAsset.category,
+      toCategory: toCat,
+    );
   }
 
   Future<void> _submit() async {
-    final amountStr = _amountController.text.trim();
-    if (amountStr.isEmpty) {
-      SnackbarUtils.showError(context, '금액을 입력하세요');
-      return;
-    }
-
-    final amount = CurrencyFormatter.parse(amountStr);
-    if (amount == null || amount <= 0) {
-      SnackbarUtils.showError(context, '유효한 금액을 입력하세요');
-      return;
-    }
-
-    if (amount > widget.fromAsset.amount) {
-      final formattedBalance = CurrencyFormatter.format(
-        widget.fromAsset.amount,
-      );
-      SnackbarUtils.showError(context, '잔액 부족 (보유: $formattedBalance)');
-      return;
-    }
-
-    final memo = _memoController.text.trim();
-    if (memo.isEmpty) {
-      SnackbarUtils.showError(context, '메모는 필수입니다 (판단 사유를 입력해주세요)');
-      return;
-    }
-    if (memo.length < 5) {
-      SnackbarUtils.showError(context, '메모는 최소 5자 이상 입력하세요 (판단 사유를 명확히)');
-      return;
-    }
-
-    if (_selectedToAssetId == null && _selectedToCategory == null) {
-      SnackbarUtils.showError(context, '이동 대상을 선택하세요');
-      return;
-    }
-
-    try {
-      final assetService = AssetService();
-      final assetMoveService = AssetMoveService();
-
-      await assetService.loadAssets();
-
-      final fromBeforeAmount = widget.fromAsset.amount;
-      final fromBeforeCostBasis = widget.fromAsset.costBasis;
-      final ratio = fromBeforeAmount > 0 ? (amount / fromBeforeAmount) : 0.0;
-      final transferredCostBasis = (fromBeforeCostBasis != null && ratio > 0)
-          ? (fromBeforeCostBasis * ratio)
-          : 0.0;
-      final nextFromCostBasis = (fromBeforeCostBasis != null)
-          ? (fromBeforeCostBasis - transferredCostBasis).clamp(
-              0.0,
-              double.infinity,
-            )
-          : null;
-
-      final updatedFrom = widget.fromAsset.copyWith(
-        amount: fromBeforeAmount - amount,
-        costBasis: nextFromCostBasis,
-      );
-      await assetService.updateAsset(widget.accountName, updatedFrom);
-
-      String? toAssetId;
-
-      if (_selectedToCategory != null) {
-        final moveDateLabel =
-            '${_moveDate.year}-'
-            "${_moveDate.month.toString().padLeft(2, '0')}-"
-            "${_moveDate.day.toString().padLeft(2, '0')}";
-        final newAsset = Asset(
-          id: DateTime.now().microsecondsSinceEpoch.toString(),
-          name: '${_selectedToCategory!.label} ($moveDateLabel)',
-          amount: amount,
-          category: _selectedToCategory!,
-          date: _moveDate,
-          memo: _memoController.text.trim(),
-          costBasis: _selectedToCategory == AssetCategory.cash
-              ? null
-              : (transferredCostBasis > 0 ? transferredCostBasis : amount),
-        );
-        await assetService.addAsset(widget.accountName, newAsset);
-        toAssetId = newAsset.id;
-      } else if (_selectedToAssetId != null) {
-        final assets = assetService.getAssets(widget.accountName);
-        final toAsset = assets.firstWhere((a) => a.id == _selectedToAssetId);
-        final addedCostBasis = toAsset.category == AssetCategory.cash
-            ? 0.0
-            : (widget.fromAsset.category == AssetCategory.cash
-                  ? amount
-                  : (transferredCostBasis > 0 ? transferredCostBasis : amount));
-        final newCostBasis = (toAsset.costBasis ?? 0) + addedCostBasis;
-        final updatedTo = toAsset.copyWith(
-          amount: toAsset.amount + amount,
-          costBasis:
-              (toAsset.category == AssetCategory.cash &&
-                  toAsset.costBasis == null)
-              ? null
-              : newCostBasis,
-        );
-        await assetService.updateAsset(widget.accountName, updatedTo);
-        toAssetId = toAsset.id;
-      }
-
-      final move = AssetMove(
-        id: DateTime.now().microsecondsSinceEpoch.toString(),
-        accountName: widget.accountName,
-        fromAssetId: widget.fromAsset.id,
-        toAssetId: _selectedToAssetId ?? toAssetId,
-        toCategoryName: _selectedToCategory?.name,
-        amount: amount,
-        type: _selectedType,
-        memo: _memoController.text.trim(),
-        date: _moveDate,
-      );
-      await assetMoveService.addMove(widget.accountName, move);
-
-      if (!mounted) return;
-      SnackbarUtils.showSuccess(
-        context,
-        '${CurrencyFormatter.format(amount)}이(가) 이동되었습니다',
-      );
+    final success = await executeAssetMove(
+      context: context,
+      accountName: widget.accountName,
+      fromAsset: widget.fromAsset,
+      amountText: _amountController.text.trim(),
+      memo: _memoController.text.trim(),
+      selectedToAssetId: _selectedToAssetId,
+      selectedToCategory: _selectedToCategory,
+      selectedType: _selectedType,
+      moveDate: _moveDate,
+    );
+    if (success && mounted) {
       Navigator.pop(context, true);
-    } catch (e) {
-      if (!mounted) return;
-      SnackbarUtils.showError(context, '이동 실패: $e');
     }
   }
 
@@ -227,10 +108,156 @@ class _AssetMoveDialogState extends State<AssetMoveDialog> {
               : SingleChildScrollView(
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
-                    child: _buildFormContent(
-                      theme,
-                      formattedBalance,
-                      otherAssets,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('자산 이동', style: theme.textTheme.titleLarge),
+                        const SizedBox(height: 16),
+
+                        // From 자산 (읽기 전용)
+                        Text('From', style: theme.textTheme.labelLarge),
+                        const SizedBox(height: 4),
+                        AssetMoveFromCard(
+                          fromAsset: widget.fromAsset,
+                          formattedBalance: formattedBalance,
+                        ),
+                        const SizedBox(height: 16),
+
+                        // 이동 금액
+                        Text('이동 금액', style: theme.textTheme.labelLarge),
+                        const SizedBox(height: 4),
+                        AssetMoveAmountField(
+                          controller: _amountController,
+                          focusNode: _amountFocusNode,
+                          onEditingComplete: _memoFocusNode.requestFocus,
+                        ),
+                        const SizedBox(height: 16),
+
+                        // To 자산 선택: 기존 자산과 카테고리 선택지 통합
+                        Text('To (이동 대상)', style: theme.textTheme.labelLarge),
+                        const SizedBox(height: 8),
+
+                        // 기존 자산 선택
+                        if (otherAssets.isNotEmpty)
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              DropdownButtonFormField<String>(
+                                initialValue: _selectedToAssetId,
+                                decoration: const InputDecoration(
+                                  labelText: '기존 자산 선택',
+                                  border: OutlineInputBorder(),
+                                ),
+                                items: [
+                                  const DropdownMenuItem(child: Text('선택안함')),
+                                  ...otherAssets.map((asset) {
+                                    final assetLabel =
+                                        '${asset.name} ('
+                                        '${asset.category.label})';
+                                    return DropdownMenuItem(
+                                      value: asset.id,
+                                      child: Text(assetLabel),
+                                    );
+                                  }),
+                                ],
+                                onChanged: (value) {
+                                  setState(() {
+                                    _selectedToAssetId = value;
+                                    _selectedToCategory =
+                                        null; // 기존 자산 선택 시 카테고리 초기화
+                                    if (value != null) {
+                                      final toAsset = otherAssets.firstWhere(
+                                        (a) => a.id == value,
+                                      );
+                                      _selectedType = _autoMoveType(
+                                      toAsset.category,
+                                    );
+                                    }
+                                  });
+                                },
+                                isExpanded: true,
+                              ),
+                              const SizedBox(height: 12),
+                            ],
+                          ),
+
+                        // 카테고리 선택 (새로 생성)
+                        DropdownButtonFormField<AssetCategory>(
+                          initialValue: _selectedToCategory,
+                          decoration: const InputDecoration(
+                            labelText: '또는 새 자산 생성 (카테고리 선택)',
+                            border: OutlineInputBorder(),
+                          ),
+                          items: [
+                            const DropdownMenuItem(child: Text('선택안함')),
+                            ...AssetCategory.values.map(
+                              (cat) => DropdownMenuItem(
+                                value: cat,
+                                child: Text('${cat.emoji} ${cat.label}'),
+                              ),
+                            ),
+                          ],
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedToCategory = value;
+                              _selectedToAssetId = null; // 카테고리 선택 시 자산 초기화
+                              if (value != null) {
+                              _selectedType = _autoMoveType(value);
+                              }
+                            });
+                          },
+                          isExpanded: true,
+                        ),
+                        const SizedBox(height: 16),
+
+                        // 이동 타입 (자동 결정, 사용자 변경 가능)
+                        Text(
+                          '이동 타입 (자동 선택, 변경 가능)',
+                          style: theme.textTheme.labelLarge,
+                        ),
+                        const SizedBox(height: 4),
+                        AssetMoveTypeChips(
+                          selectedType: _selectedType,
+                          onChanged: (type) {
+                            setState(() => _selectedType = type);
+                          },
+                        ),
+                        const SizedBox(height: 16),
+
+                        // 메모 (필수)
+                        AssetMoveMemoField(
+                          controller: _memoController,
+                          focusNode: _memoFocusNode,
+                          onEditingComplete: _handleMemoEditingComplete,
+                        ),
+                        const SizedBox(height: 16),
+
+                        // 날짜
+                        AssetMoveDatePicker(
+                          moveDate: _moveDate,
+                          onChanged: (picked) {
+                            setState(() => _moveDate = picked);
+                          },
+                        ),
+                        const SizedBox(height: 24),
+
+                        // 버튼
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text('취소'),
+                            ),
+                            const SizedBox(width: 8),
+                            FilledButton(
+                              onPressed: _submit,
+                              child: const Text('이동 확인'),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                 ),

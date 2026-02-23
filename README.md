@@ -38,6 +38,9 @@ Flutter 기반 다중 계정 가계부 앱입니다. 각 계정별로 거래, �
 
 - 구조 안내: [docs/DOCS_STRUCTURE_2026-02-23.md](docs/DOCS_STRUCTURE_2026-02-23.md)
 - 파일명 규칙: [docs/FILENAME_RULES_2026-02-23.md](docs/FILENAME_RULES_2026-02-23.md)
+- 최근 검증 문서:
+	- DB 마이그레이션 정밀 점검: [docs/reports/DB_MIGRATION_REPORT.md](docs/reports/DB_MIGRATION_REPORT.md)
+	- 거래/카트 연동 스모크 체크: [docs/user-manual/TRANSACTION_CART_SMOKE_CHECKLIST_2026-02-23.md](docs/user-manual/TRANSACTION_CART_SMOKE_CHECKLIST_2026-02-23.md)
 - 분류 폴더:
 	- docs/developer
 	- docs/user-manual

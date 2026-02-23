@@ -92,12 +92,9 @@ class _LaunchScreenState extends State<LaunchScreen> {
       // 서버 연결 확인
       final serverConfigService = ServerConfigService();
       final isServerHealthy = await serverConfigService.checkHealth();
-      
+
       if (!isServerHealthy) {
-        debugPrint('[LaunchScreen] 서버 연결 실패 - 설정 화면으로 이동');
-        if (!mounted) return;
-        Navigator.of(context).pushReplacementNamed(AppRoutes.settings);
-        return;
+        debugPrint('[LaunchScreen] 서버 연결 실패 - 오프라인 모드로 계속 진행');
       }
 
       final service = AccountService();

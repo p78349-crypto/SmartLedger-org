@@ -355,14 +355,14 @@ LazyDatabase _openConnection() {
   return LazyDatabase(() async {
     final dbFolder = await getApplicationDocumentsDirectory();
     final file = File(p.join(dbFolder.path, 'db.sqlite'));
+    final key = await DbEncryptionKeyManager.getOrCreateKey();
 
     final cachebase = (await getTemporaryDirectory()).path;
     sqlite3.tempDirectory = cachebase;
 
     return NativeDatabase.createInBackground(
       file,
-      setup: (db) async {
-        final key = await DbEncryptionKeyManager.getOrCreateKey();
+      setup: (db) {
         db.execute("PRAGMA key = '$key';");
       },
     );

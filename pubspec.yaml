@@ -82,6 +82,7 @@ dependencies:
   timezone: ^0.10.1
   sqflite_sqlcipher: ^3.4.0
   sqlite3: ^2.9.4
+  sqlite3_flutter_libs: ^0.5.39
 
 dev_dependencies:
   flutter_test:

@@ -283,10 +283,10 @@ extension BackupScreenAuth on _BackupScreenState {
     );
 
     if (!mounted) return null;
-    if (wantsEncrypt != true) return null;
+    if (wantsEncrypt != true) return ''; // 암호 없이 진행 (null=취소와 구분)
 
     final pw = await _promptNewBackupPassword();
-    if (pw == null || pw.trim().isEmpty) return null;
+    if (pw == null || pw.trim().isEmpty) return ''; // 암호 입력 안 해도 백업 진행
 
     if (_backupEncryptionEnabled) {
       await BackupService().setStoredBackupEncryptionPassword(pw);

@@ -37,6 +37,16 @@ class AssetService {
     return List.unmodifiable(_accountAssets.keys);
   }
 
+  /// ROOT/analytics convenience: return all assets across accounts.
+  Future<List<Asset>> getAllAssets() async {
+    await loadAssets();
+    final allAssets = <Asset>[];
+    for (final list in _accountAssets.values) {
+      allAssets.addAll(list);
+    }
+    return List.unmodifiable(allAssets);
+  }
+
   Future<void> addAsset(String accountName, Asset asset) async {
     await loadAssets();
     final list = _accountAssets.putIfAbsent(accountName, () => []);

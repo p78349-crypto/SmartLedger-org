@@ -13,10 +13,35 @@ class _SettingsRoutes {
           builder: (_) => const SettingsScreen(),
         );
 
+      case AppRoutes.subscriptionManage:
+        final userId = args is String ? args : null;
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => SubscriptionManageScreen(userId: userId),
+        );
+
+      case AppRoutes.serverSyncSettings:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const ServerSyncSettingsScreen(),
+        );
+
       case AppRoutes.applicationSettings:
         return MaterialPageRoute(
           settings: settings,
           builder: (_) => const ApplicationSettingsScreen(),
+        );
+
+      case AppRoutes.databaseEncryption:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const DatabaseEncryptionScreen(),
+        );
+
+      case AppRoutes.securitySettings:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const SecuritySettingsScreen(),
         );
 
       case AppRoutes.iconManagement:
@@ -25,14 +50,7 @@ class _SettingsRoutes {
           settings: settings,
           builder: (_) => IconManagementScreen(
             accountName: a.accountName,
-            titleOverride: '아이콘 관리(일반)',
-            // Split policy: asset/root managed via dedicated screens.
-            // Hide asset pages (6~7 => {5,6}) and root pages (8~9 => {7,8})
-            // from the page picker.
-            hiddenPageIndices: const <int>{5, 6, 7, 8},
-            // Also hide asset/root icons from the catalog
-            // (asset icons live on page 5, root icons on page 6).
-            catalogHiddenPageIndices: const <int>{5, 6},
+            titleOverride: '아이콘 관리',
           ),
         );
 
@@ -55,6 +73,13 @@ class _SettingsRoutes {
         return MaterialPageRoute(
           settings: settings,
           builder: (_) => IconManagementRootScreen(accountName: a.accountName),
+        );
+
+      case AppRoutes.iconManagementSettings:
+        final a = args as IconManagementArgs;
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => IconManagementSettingsScreen(accountName: a.accountName),
         );
 
       case AppRoutes.pageIconManagement:

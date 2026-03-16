@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
@@ -70,6 +71,8 @@ class UserPinService {
   static const int longLockThreshold = 10;
   static const Duration longLockDuration = Duration(minutes: 15);
 
+  static Future<void> _policyQueue = Future<void>.value();
+
   final Random _random;
 
   bool isPinConfigured(SharedPreferences prefs) {
@@ -86,16 +89,18 @@ class UserPinService {
     required String pin,
     int iterations = defaultIterations,
   }) async {
-    if (pin.trim().isEmpty) {
-      throw ArgumentError('PIN이 비어 있습니다');
-    }
+    return _runPolicySerialized(() async {
+      if (pin.trim().isEmpty) {
+        throw ArgumentError('PIN이 비어 있습니다');
+      }
 
-    final salt = _randomBytes(_random, saltLengthBytes);
-    final hash = await _derive(pin, salt: salt, iterations: iterations);
+      final salt = _randomBytes(_random, saltLengthBytes);
+      final hash = await _derive(pin, salt: salt, iterations: iterations);
 
-    await prefs.setString(PrefKeys.userPinSaltB64, base64Encode(salt));
-    await prefs.setString(PrefKeys.userPinHashB64, base64Encode(hash));
-    await prefs.setInt(PrefKeys.userPinIterations, iterations);
+      await prefs.setString(PrefKeys.userPinSaltB64, base64Encode(salt));
+      await prefs.setString(PrefKeys.userPinHashB64, base64Encode(hash));
+      await prefs.setInt(PrefKeys.userPinIterations, iterations);
+    });
   }
 
   Future<bool> verifyPin(SharedPreferences prefs, {required String pin}) async {
@@ -132,71 +137,87 @@ class UserPinService {
     SharedPreferences prefs, {
     required String pin,
   }) async {
-    final remaining = lockRemaining(prefs);
-    if (remaining != null) {
-      final type = remaining.inMinutes >= 5
-          ? UserPinLockType.longLock
-          : UserPinLockType.cooldown;
-      final failedAttempts = prefs.getInt(PrefKeys.userPinFailedAttempts);
-      return UserPinPolicyResult.locked(
-        lockType: type,
-        lockRemaining: remaining,
-        failedAttempts: failedAttempts,
-      );
-    }
+    return _runPolicySerialized(() async {
+      final remaining = lockRemaining(prefs);
+      if (remaining != null) {
+        final type = remaining.inMinutes >= 5
+            ? UserPinLockType.longLock
+            : UserPinLockType.cooldown;
+        final failedAttempts = prefs.getInt(PrefKeys.userPinFailedAttempts);
+        return UserPinPolicyResult.locked(
+          lockType: type,
+          lockRemaining: remaining,
+          failedAttempts: failedAttempts,
+        );
+      }
 
-    await clearLockIfExpired(prefs);
+      await clearLockIfExpired(prefs);
 
-    final ok = await verifyPin(prefs, pin: pin);
-    if (ok) {
-      await prefs.remove(PrefKeys.userPinFailedAttempts);
-      await prefs.remove(PrefKeys.userPinLockedUntilMs);
-      return UserPinPolicyResult.success();
-    }
+      final ok = await verifyPin(prefs, pin: pin);
+      if (ok) {
+        await prefs.remove(PrefKeys.userPinFailedAttempts);
+        await prefs.remove(PrefKeys.userPinLockedUntilMs);
+        return UserPinPolicyResult.success();
+      }
 
-    final current = prefs.getInt(PrefKeys.userPinFailedAttempts) ?? 0;
-    final next = current + 1;
-    await prefs.setInt(PrefKeys.userPinFailedAttempts, next);
+      final current = prefs.getInt(PrefKeys.userPinFailedAttempts) ?? 0;
+      final next = current + 1;
+      await prefs.setInt(PrefKeys.userPinFailedAttempts, next);
 
-    if (next == cooldownThreshold) {
-      await prefs.setInt(
-        PrefKeys.userPinLockedUntilMs,
-        DateTime.now().add(cooldownDuration).millisecondsSinceEpoch,
-      );
-      return UserPinPolicyResult.locked(
-        lockType: UserPinLockType.cooldown,
-        lockRemaining: cooldownDuration,
+      if (next == cooldownThreshold) {
+        await prefs.setInt(
+          PrefKeys.userPinLockedUntilMs,
+          DateTime.now().add(cooldownDuration).millisecondsSinceEpoch,
+        );
+        return UserPinPolicyResult.locked(
+          lockType: UserPinLockType.cooldown,
+          lockRemaining: cooldownDuration,
+          failedAttempts: next,
+        );
+      }
+
+      if (next >= longLockThreshold) {
+        await prefs.setInt(
+          PrefKeys.userPinLockedUntilMs,
+          DateTime.now().add(longLockDuration).millisecondsSinceEpoch,
+        );
+
+        // After a long lock, give a fresh attempt window.
+        await prefs.remove(PrefKeys.userPinFailedAttempts);
+        return UserPinPolicyResult.locked(
+          lockType: UserPinLockType.longLock,
+          lockRemaining: longLockDuration,
+          failedAttempts: next,
+        );
+      }
+
+      return UserPinPolicyResult.failed(
         failedAttempts: next,
+        showWarning: next >= warnThreshold,
       );
-    }
+    });
+  }
 
-    if (next >= longLockThreshold) {
-      await prefs.setInt(
-        PrefKeys.userPinLockedUntilMs,
-        DateTime.now().add(longLockDuration).millisecondsSinceEpoch,
-      );
-
-      // After a long lock, give a fresh attempt window.
-      await prefs.remove(PrefKeys.userPinFailedAttempts);
-      return UserPinPolicyResult.locked(
-        lockType: UserPinLockType.longLock,
-        lockRemaining: longLockDuration,
-        failedAttempts: next,
-      );
-    }
-
-    return UserPinPolicyResult.failed(
-      failedAttempts: next,
-      showWarning: next >= warnThreshold,
-    );
+  Future<T> _runPolicySerialized<T>(Future<T> Function() action) {
+    final completer = Completer<T>();
+    _policyQueue = _policyQueue.then((_) async {
+      try {
+        completer.complete(await action());
+      } catch (error, stackTrace) {
+        completer.completeError(error, stackTrace);
+      }
+    });
+    return completer.future;
   }
 
   Future<void> clearPin(SharedPreferences prefs) async {
-    await prefs.remove(PrefKeys.userPinSaltB64);
-    await prefs.remove(PrefKeys.userPinHashB64);
-    await prefs.remove(PrefKeys.userPinIterations);
-    await prefs.remove(PrefKeys.userPinFailedAttempts);
-    await prefs.remove(PrefKeys.userPinLockedUntilMs);
+    return _runPolicySerialized(() async {
+      await prefs.remove(PrefKeys.userPinSaltB64);
+      await prefs.remove(PrefKeys.userPinHashB64);
+      await prefs.remove(PrefKeys.userPinIterations);
+      await prefs.remove(PrefKeys.userPinFailedAttempts);
+      await prefs.remove(PrefKeys.userPinLockedUntilMs);
+    });
   }
 
   Future<Uint8List> _derive(

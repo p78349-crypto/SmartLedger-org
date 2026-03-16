@@ -248,7 +248,7 @@ class _CustomGemma2TestScreenState extends State<CustomGemma2TestScreen> {
   Widget _buildQuickTestButtons() {
     final quickTests = [
       {'label': '지출 분석', 'query': '이번 달 지출이 너무 많은 것 같아'},
-      {'label': '투자 조언', 'query': '투자 포트폴리오 조언해줘'},
+      {'label': '투자 참고정보', 'query': '투자 포트폴리오 참고정보 알려줘'},
       {'label': '예산 관리', 'query': '예산 관리 어떻게 해야 할까'},
       {'label': '저축 계획', 'query': '저축 계획 세워줘'},
     ];

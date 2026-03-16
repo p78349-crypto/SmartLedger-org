@@ -2,15 +2,17 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../navigation/app_routes.dart';
 import '../screens/top_level_main_screen.dart';
 import '../services/account_service.dart';
-import '../services/user_pref_service.dart';
 import '../theme/app_theme_seed_controller.dart';
 import '../widgets/background_widget.dart';
 import '../widgets/root_auth_gate.dart';
 import '../widgets/special_backgrounds.dart';
 import '../database/db_encryption_key_manager.dart';
+import '../utils/online_password_key_backup_facade.dart';
 
 class AccountSelectScreen extends StatelessWidget {
   final List<String> accounts;
@@ -73,7 +75,15 @@ class AccountSelectScreen extends StatelessWidget {
             elevation: 0,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back),
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () async {
+                // 로그아웃 시 secure storage 및 키백업 관련 설정 정리
+                await const FlutterSecureStorage().deleteAll();
+                final prefs = await SharedPreferences.getInstance();
+                // 정책 모드는 유지하고 나머지 키백업 데이터만 삭제
+                await prefs.remove('last_account_name');
+                if (!context.mounted) return;
+                Navigator.of(context).pop();
+              },
             ),
             actions: [
               IconButton(
@@ -276,11 +286,27 @@ class AccountSelectScreen extends StatelessWidget {
                               );
                               return;
                             }
+                            
+                            final password = passwordController.text;
                             passwordController.dispose();
+                            final restoreResult = await OnlinePasswordKeyBackupFacade()
+                                .restoreWithPassword(
+                                  accountId: account.name,
+                                  password: password,
+                                );
+                            
+                            if (!context.mounted) return;
+                            
+                            if (!restoreResult.isSuccess && !restoreResult.isDisabled && !restoreResult.isOffline) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(restoreResult.message ?? 'DEK 복구에 실패했습니다'),
+                                  backgroundColor: Colors.orange,
+                                ),
+                              );
+                            }
                           }
                           
-                          // 선택한 계정을 마지막 계정으로 저장
-                          await UserPrefService.setLastAccountName(account.name);
                           if (!context.mounted) return;
                           Navigator.of(context).pushReplacementNamed(
                             AppRoutes.accountMain,

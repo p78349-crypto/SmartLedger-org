@@ -27,6 +27,12 @@ class AccountService {
 
   List<Account> get accounts => List.unmodifiable(_accounts);
 
+  /// Convenience API for analytics modules.
+  Future<List<Account>> getAllAccounts() async {
+    await loadAccounts();
+    return List.unmodifiable(_accounts);
+  }
+
   Future<void> loadAccounts() {
     if (_initialized) {
       return Future.value();

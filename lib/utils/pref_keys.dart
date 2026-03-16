@@ -82,15 +82,18 @@ class PrefKeys {
   static const String themeIconBgPresetId = 'theme_icon_bg_preset_id_v1';
   static const String themeWallpaperPresetId = 'theme_wallpaper_preset_id_v1';
   static const String themeUiStyle = 'theme_ui_style_v1';
-  static const String themeWallpaperSyncScreenSaver =
-      'theme_wallpaper_sync_screen_saver_v1';
   static const String themeLocalWallpaperPath = 'theme_local_wallpaper_path_v1';
 
   // Server Config
   static const String serverAddress = 'server_address';
   static const String adminKey = 'admin_key';
+  static const String ledgerKeyBackupPolicyMode =
+      'ledger_key_backup_policy_mode_v1';
+  static const String allowSelfSignedCert = 'allow_self_signed_cert_v1';
+  static const String serverType = 'server_type_v1'; // 'cloud' or 'self_hosted'
 
   // Asset projection ("1억 프로젝트")
+    static const String project100mNameV1 = 'project_100m_name_v1';
   static const String project100mYearsV1 = 'project_100m_years_v1';
   static const String project100mTargetAmountV1 =
       'project_100m_target_amount_v1';
@@ -103,19 +106,40 @@ class PrefKeys {
   static const String project100mCashToInvestThresholdAmountV1 =
       'project_100m_cash_to_invest_threshold_amount_v1';
 
+  // 1억 프로젝트 - 포인트/할인(통계) 가정
+  static const String project100mPointsAnnualRatePctV1 =
+      'project_100m_points_annual_rate_pct_v1';
+  static const String project100mPointsInterestModeV1 =
+      'project_100m_points_interest_mode_v1';
+
   // Security/auth
   static const String biometricAuthEnabled = 'biometric_auth_enabled';
   static const String privacyMaskSensitive = 'privacy_mask_sensitive_v1';
   static const String assetLockPrefix = 'asset_lock_v1';
   static const String assetAuthSessionUntilMs = 'asset_auth_session_until_ms';
+  static const String assetAuthRequired = 'asset_auth_required';
   static const String rootAuthMode = 'root_auth_mode';
   static const String permissionGateBypassed = 'permission_gate_bypassed_v1';
   static const String rootAuthEnabled = 'root_auth_enabled';
   
   // ROOT security mode (pin, biometric, password)
   static const String rootSecurityMode = 'root_security_mode_v1';
+  static const String rootSecurityLevel = 'root_security_level_v1'; // 'single' or 'dual'
   static const String rootBiometricEnabled = 'root_biometric_enabled_v1';
   static const String rootPasswordEnabled = 'root_password_enabled_v1';
+
+  // User/Asset security mode (mirrored from ROOT)
+  static const String userSecurityMode = 'user_security_mode_v1';
+  static const String userSecurityLevel = 'user_security_level_v1'; // 'single' or 'dual'
+  static const String userAuthEnabled = 'user_auth_enabled_v1';
+
+    // Asset security mode (separate from USER/ROOT)
+    static const String assetSecurityMode = 'asset_security_mode_v1';
+    static const String assetSecurityLevel = 'asset_security_level_v1'; // 'single' or 'dual'
+    static const String assetAuthEnabled = 'asset_auth_enabled_v1';
+    static const String assetPinEnabled = 'asset_pin_enabled_v1';
+    static const String assetPasswordEnabled = 'asset_password_enabled_v1';
+    static const String assetBiometricEnabled = 'asset_biometric_enabled_v1';
 
   // Sensitive: intentionally excluded from backups with PIN/password material.
   static const String rootPinEnabled = 'root_pin_enabled';
@@ -125,24 +149,40 @@ class PrefKeys {
   static const String rootPinSaltB64 = 'root_pin_salt_b64';
   static const String userPinSaltB64 = 'user_pin_salt_b64';
   static const String userPasswordSaltB64 = 'user_password_salt_b64';
+  static const String assetPinSaltB64 = 'asset_pin_salt_b64_v1';
+  static const String assetPasswordSaltB64 = 'asset_password_salt_b64_v1';
   static const String rootPinHashB64 = 'root_pin_hash_b64';
   static const String userPinHashB64 = 'user_pin_hash_b64';
   static const String userPasswordHashB64 = 'user_password_hash_b64';
+  static const String assetPinHashB64 = 'asset_pin_hash_b64_v1';
+  static const String assetPasswordHashB64 = 'asset_password_hash_b64_v1';
   static const String rootPinIterations = 'root_pin_iterations';
   static const String userPinIterations = 'user_pin_iterations';
   static const String userPasswordIterations = 'user_password_iterations';
+  static const String assetPinIterations = 'asset_pin_iterations_v1';
+  static const String assetPasswordIterations = 'asset_password_iterations_v1';
   static const String userPinFailedAttempts = 'user_pin_failed_attempts';
   static const String userPasswordFailedAttempts =
       'user_password_failed_attempts';
+  static const String assetPinFailedAttempts = 'asset_pin_failed_attempts_v1';
+  static const String assetPasswordFailedAttempts =
+      'asset_password_failed_attempts_v1';
   static const String userPinLockedUntilMs = 'user_pin_locked_until_ms';
   static const String userPasswordLockedUntilMs =
       'user_password_locked_until_ms';
+  static const String assetPinLockedUntilMs = 'asset_pin_locked_until_ms_v1';
+  static const String assetPasswordLockedUntilMs =
+      'asset_password_locked_until_ms_v1';
   static const String rootPinFailedAttempts = 'root_pin_failed_attempts';
   static const String rootPinLockedUntilMs = 'root_pin_locked_until_ms';
-  static const String screenSaverExitAuthFailedAttempts =
-      'screen_saver_exit_auth_failed_attempts';
-  static const String screenSaverExitAuthLockedUntilMs =
-      'screen_saver_exit_auth_locked_until_ms';
+  
+  // ROOT password (separate from PIN)
+  static const String rootPasswordSaltB64 = 'root_password_salt_b64';
+  static const String rootPasswordHashB64 = 'root_password_hash_b64';
+  static const String rootPasswordIterations = 'root_password_iterations';
+  static const String rootPasswordFailedAttempts = 'root_password_failed_attempts';
+  static const String rootPasswordLockedUntilMs = 'root_password_locked_until_ms';
+  
   static const String rootAuthSessionUntilMs = 'root_auth_session_until_ms';
   static const String iconAllowAssetIconsOutsideAssetWhenUnlocked =
       'icon_allow_asset_outside_when_unlocked';
@@ -161,25 +201,19 @@ class PrefKeys {
   static const String backupRegisteredEmail = 'backup_registered_email';
   static const String privacyPolicyConsentChoice =
       'privacy_policy_consent_choice';
+  static const String aiInvestmentConsentAccepted =
+      'ai_investment_consent_accepted_v1';
+  static const String aiInvestmentConsentAcceptedAtMs =
+      'ai_investment_consent_accepted_at_ms_v1';
+  static const String aiInvestmentConsentVersion =
+      'ai_investment_consent_version_v1';
+  static const String aiInvestmentConsentLocale =
+      'ai_investment_consent_locale_v1';
 
   // Debug/logging
   static const String debugMode = 'debug_mode';
   static const String logLevel = 'log_level';
   static const String bypassSecurityForTesting = 'bypass_security_for_testing';
-
-  // In-app screen saver
-  static const String screenSaverEnabled = 'screen_saver_enabled';
-  static const String screenSaverIdleSeconds = 'screen_saver_idle_seconds';
-  static const String screenSaverShowAssetSummary =
-      'screen_saver_show_asset_summary';
-  static const String screenSaverShowCharts = 'screen_saver_show_charts';
-  static const String screenSaverShowBudget = 'screen_saver_show_budget';
-  static const String screenSaverShowEmergency = 'screen_saver_show_emergency';
-  static const String screenSaverShowSpending = 'screen_saver_show_spending';
-  static const String screenSaverShowRecent = 'screen_saver_show_recent';
-  static const String screenSaverShowAssetFlow = 'screen_saver_show_asset_flow';
-  static const String screenSaverLocalBackgroundImagePath =
-      'screen_saver_local_background_image_path';
 
   // Main UI
   static const String mainPageIndexSuffix = 'main_page_index';
@@ -191,6 +225,15 @@ class PrefKeys {
   // Derived
   static const String assetMonthlySnapshots = 'asset_monthly_snapshots';
   static const String storeAliasMapV1Suffix = 'store_alias_map_v1';
+  static const String subscriptionStatusSuffix = 'subscription_status_v1';
+  static const String subscriptionProductIdSuffix =
+      'subscription_product_id_v1';
+  static const String subscriptionPlatformSuffix =
+      'subscription_platform_v1';
+  static const String subscriptionExpiresAtMsSuffix =
+      'subscription_expires_at_ms_v1';
+  static const String subscriptionUpdatedAtMsSuffix =
+      'subscription_updated_at_ms_v1';
 
   static String accountKey(String accountName, String suffix) {
     return '${accountName}_$suffix';
@@ -226,16 +269,6 @@ class PrefKeys {
     isOfficialUser,
     page1FullScreenAdEnabled,
     zeroQuickButtonsEnabled,
-    screenSaverEnabled,
-    screenSaverIdleSeconds,
-    screenSaverShowAssetSummary,
-    screenSaverShowCharts,
-    screenSaverShowBudget,
-    screenSaverShowEmergency,
-    screenSaverShowSpending,
-    screenSaverShowRecent,
-    screenSaverShowAssetFlow,
-    themeWallpaperSyncScreenSaver,
     roiDefaultPeriod,
     roiLookaheadMonths,
   ];

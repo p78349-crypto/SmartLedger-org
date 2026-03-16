@@ -8,23 +8,13 @@ class IconManagementRootScreen extends StatelessWidget {
   final String accountName;
 
   static Set<int> _pagePickerHiddenPages() {
-    // Keep only the root-reserved page (page 6 => 0-based {5}).
-    const allowed = <int>{5};
-    final hidden = <int>{};
-    for (var i = 0; i < 15; i++) {
-      if (!allowed.contains(i)) hidden.add(i);
-    }
-    return hidden;
+    // Allow all pages to be selectable from ROOT icon management.
+    return <int>{};
   }
 
   static Set<int> _catalogHiddenPages() {
-    // Show only root module icons (catalog page 6 => 0-based {5}).
-    const allowed = <int>{5};
-    final hidden = <int>{};
-    for (var i = 0; i < 15; i++) {
-      if (!allowed.contains(i)) hidden.add(i);
-    }
-    return hidden;
+    // Show icons from all pages in the catalog.
+    return <int>{};
   }
 
   @override
@@ -36,7 +26,8 @@ class IconManagementRootScreen extends StatelessWidget {
       hiddenPageIndices: _pagePickerHiddenPages(),
       catalogHiddenPageIndices: _catalogHiddenPages(),
       redirectAssetRootToDedicatedScreens: false,
-      groupCatalogByModule: true,
+      showCatalogSectionTitles: false,
+      usePhotoStyleLayout: true,
     );
   }
 }

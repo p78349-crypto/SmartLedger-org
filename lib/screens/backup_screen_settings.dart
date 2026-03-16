@@ -79,6 +79,28 @@ extension BackupScreenSettings on _BackupScreenState {
     });
   }
 
+  Future<void> _disableBackupEncryption() async {
+    if (_isProcessing) return;
+    if (!_backupEncryptionEnabled && !_backupTwoFactorEnabled) return;
+
+    final ok = await DialogUtils.showConfirmDialog(
+      context,
+      title: '백업 암호화 해지',
+      message:
+          '백업 암호화를 해지할까요?\n\n'
+          '- 저장된 백업 암호가 삭제됩니다\n'
+          '- 이후 백업은 암호 없이 저장될 수 있습니다',
+      confirmText: '해지',
+    );
+    if (ok != true) return;
+
+    await _setBackupEncryptionEnabled(false);
+    await _loadBackupTwoFactorEnabled();
+    await _loadBackupEncryptionEnabled();
+    if (!mounted) return;
+    SnackbarUtils.showSuccess(context, '백업 암호화를 해지했습니다');
+  }
+
   Future<void> _loadRegisteredEmail() async {
     final prefs = await SharedPreferences.getInstance();
     final value = prefs.getString(PrefKeys.backupRegisteredEmail);

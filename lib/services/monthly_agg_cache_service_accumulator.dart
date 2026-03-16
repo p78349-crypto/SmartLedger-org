@@ -3,6 +3,8 @@ part of 'monthly_agg_cache_service.dart';
 class _BucketAccumulator {
   final String yearMonth;
 
+  static const int _moneyScale = 6;
+
   double incomeAmount = 0;
   int incomeCount = 0;
 
@@ -32,6 +34,13 @@ class _BucketAccumulator {
 
   _BucketAccumulator(this.yearMonth);
 
+  double _normalizeMoney(double value) {
+    if (value.isNaN || value.isInfinite) return 0.0;
+    final normalized = double.parse(value.toStringAsFixed(_moneyScale));
+    if (normalized == -0.0) return 0.0;
+    return normalized;
+  }
+
   bool _isSavingsCountedAsExpense(Transaction tx) {
     if (tx.type != TransactionType.savings) return false;
     final alloc = tx.savingsAllocation ?? SavingsAllocation.assetIncrease;
@@ -41,19 +50,19 @@ class _BucketAccumulator {
   void applyTransaction(Transaction tx) {
     switch (tx.type) {
       case TransactionType.income:
-        incomeAmount += tx.amount;
+        incomeAmount = _normalizeMoney(incomeAmount + tx.amount);
         incomeCount += 1;
         break;
       case TransactionType.refund:
-        refundAmount += tx.amount;
+        refundAmount = _normalizeMoney(refundAmount + tx.amount);
         refundCount += 1;
-        incomeAmount += tx.amount;
+        incomeAmount = _normalizeMoney(incomeAmount + tx.amount);
         incomeCount += 1;
         break;
       case TransactionType.expense:
-        expenseOnlyAmount += tx.amount;
+        expenseOnlyAmount = _normalizeMoney(expenseOnlyAmount + tx.amount);
         expenseOnlyCount += 1;
-        expenseAggAmount += tx.amount;
+        expenseAggAmount = _normalizeMoney(expenseAggAmount + tx.amount);
         expenseAggCount += 1;
 
         final charged = tx.cardChargedAmount;
@@ -61,18 +70,18 @@ class _BucketAccumulator {
           final baseAbs = tx.amount.abs();
           final discount = baseAbs - charged.abs();
           if (discount > 0) {
-            cardDiscountAmount += discount;
+            cardDiscountAmount = _normalizeMoney(cardDiscountAmount + discount);
             cardDiscountCount += 1;
           }
         }
         break;
       case TransactionType.savings:
-        savingsTotalAmount += tx.amount;
+        savingsTotalAmount = _normalizeMoney(savingsTotalAmount + tx.amount);
         savingsTotalCount += 1;
         if (_isSavingsCountedAsExpense(tx)) {
-          savingsExpenseAmount += tx.amount;
+          savingsExpenseAmount = _normalizeMoney(savingsExpenseAmount + tx.amount);
           savingsExpenseCount += 1;
-          expenseAggAmount += tx.amount;
+          expenseAggAmount = _normalizeMoney(expenseAggAmount + tx.amount);
           expenseAggCount += 1;
         }
         break;
@@ -81,7 +90,7 @@ class _BucketAccumulator {
     final memo = tx.memo.trim();
     if (memo.isNotEmpty && tx.type.isOutflow) {
       memoOutflowCount += 1;
-      memoOutflowAmountAbs += tx.amount.abs();
+      memoOutflowAmountAbs = _normalizeMoney(memoOutflowAmountAbs + tx.amount.abs());
     }
   }
 

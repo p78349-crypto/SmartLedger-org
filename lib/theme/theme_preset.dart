@@ -17,7 +17,7 @@ class ThemePreset {
 class ThemePresets {
   ThemePresets._();
 
-  static const String defaultId = 'navy_intense';
+  static const String defaultId = 'pink_light';
 
   /// 스마트 레저 스타일(깔끔한 Material3 + SeedColor 기반) 프리셋 20개.
   /// 여성용 10개 (연한색 5 + 진한색 5), 남성용 10개 (연한색 5 + 진한색 5)

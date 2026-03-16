@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
@@ -62,6 +63,8 @@ class UserPasswordService {
   static const int longLockThreshold = 10;
   static const Duration longLockDuration = Duration(minutes: 15);
 
+  static Future<void> _policyQueue = Future<void>.value();
+
   final Random _random;
 
   bool isPasswordConfigured(SharedPreferences prefs) {
@@ -78,16 +81,18 @@ class UserPasswordService {
     required String password,
     int iterations = defaultIterations,
   }) async {
-    if (password.trim().isEmpty) {
-      throw ArgumentError('비밀번호가 비어 있습니다');
-    }
+    return _runPolicySerialized(() async {
+      if (password.trim().isEmpty) {
+        throw ArgumentError('비밀번호가 비어 있습니다');
+      }
 
-    final salt = _randomBytes(_random, saltLengthBytes);
-    final hash = await _derive(password, salt: salt, iterations: iterations);
+      final salt = _randomBytes(_random, saltLengthBytes);
+      final hash = await _derive(password, salt: salt, iterations: iterations);
 
-    await prefs.setString(PrefKeys.userPasswordSaltB64, base64Encode(salt));
-    await prefs.setString(PrefKeys.userPasswordHashB64, base64Encode(hash));
-    await prefs.setInt(PrefKeys.userPasswordIterations, iterations);
+      await prefs.setString(PrefKeys.userPasswordSaltB64, base64Encode(salt));
+      await prefs.setString(PrefKeys.userPasswordHashB64, base64Encode(hash));
+      await prefs.setInt(PrefKeys.userPasswordIterations, iterations);
+    });
   }
 
   Future<bool> verifyPassword(
@@ -127,69 +132,85 @@ class UserPasswordService {
     SharedPreferences prefs, {
     required String password,
   }) async {
-    final remaining = lockRemaining(prefs);
-    if (remaining != null) {
-      final type = remaining.inMinutes >= 5
-          ? UserPasswordLockType.longLock
-          : UserPasswordLockType.cooldown;
-      final failedAttempts = prefs.getInt(PrefKeys.userPasswordFailedAttempts);
-      return UserPasswordPolicyResult.locked(
-        lockType: type,
-        lockRemaining: remaining,
-        failedAttempts: failedAttempts,
-      );
-    }
+    return _runPolicySerialized(() async {
+      final remaining = lockRemaining(prefs);
+      if (remaining != null) {
+        final type = remaining.inMinutes >= 5
+            ? UserPasswordLockType.longLock
+            : UserPasswordLockType.cooldown;
+        final failedAttempts = prefs.getInt(PrefKeys.userPasswordFailedAttempts);
+        return UserPasswordPolicyResult.locked(
+          lockType: type,
+          lockRemaining: remaining,
+          failedAttempts: failedAttempts,
+        );
+      }
 
-    await clearLockIfExpired(prefs);
+      await clearLockIfExpired(prefs);
 
-    final ok = await verifyPassword(prefs, password: password);
-    if (ok) {
-      await prefs.remove(PrefKeys.userPasswordFailedAttempts);
-      await prefs.remove(PrefKeys.userPasswordLockedUntilMs);
-      return UserPasswordPolicyResult.success();
-    }
+      final ok = await verifyPassword(prefs, password: password);
+      if (ok) {
+        await prefs.remove(PrefKeys.userPasswordFailedAttempts);
+        await prefs.remove(PrefKeys.userPasswordLockedUntilMs);
+        return UserPasswordPolicyResult.success();
+      }
 
-    final current = prefs.getInt(PrefKeys.userPasswordFailedAttempts) ?? 0;
-    final next = current + 1;
-    await prefs.setInt(PrefKeys.userPasswordFailedAttempts, next);
+      final current = prefs.getInt(PrefKeys.userPasswordFailedAttempts) ?? 0;
+      final next = current + 1;
+      await prefs.setInt(PrefKeys.userPasswordFailedAttempts, next);
 
-    if (next == cooldownThreshold) {
-      await prefs.setInt(
-        PrefKeys.userPasswordLockedUntilMs,
-        DateTime.now().add(cooldownDuration).millisecondsSinceEpoch,
-      );
-      return UserPasswordPolicyResult.locked(
-        lockType: UserPasswordLockType.cooldown,
-        lockRemaining: cooldownDuration,
+      if (next == cooldownThreshold) {
+        await prefs.setInt(
+          PrefKeys.userPasswordLockedUntilMs,
+          DateTime.now().add(cooldownDuration).millisecondsSinceEpoch,
+        );
+        return UserPasswordPolicyResult.locked(
+          lockType: UserPasswordLockType.cooldown,
+          lockRemaining: cooldownDuration,
+          failedAttempts: next,
+        );
+      }
+
+      if (next >= longLockThreshold) {
+        await prefs.setInt(
+          PrefKeys.userPasswordLockedUntilMs,
+          DateTime.now().add(longLockDuration).millisecondsSinceEpoch,
+        );
+        await prefs.remove(PrefKeys.userPasswordFailedAttempts);
+        return UserPasswordPolicyResult.locked(
+          lockType: UserPasswordLockType.longLock,
+          lockRemaining: longLockDuration,
+          failedAttempts: next,
+        );
+      }
+
+      return UserPasswordPolicyResult.failed(
         failedAttempts: next,
+        showWarning: next >= warnThreshold,
       );
-    }
+    });
+  }
 
-    if (next >= longLockThreshold) {
-      await prefs.setInt(
-        PrefKeys.userPasswordLockedUntilMs,
-        DateTime.now().add(longLockDuration).millisecondsSinceEpoch,
-      );
-      await prefs.remove(PrefKeys.userPasswordFailedAttempts);
-      return UserPasswordPolicyResult.locked(
-        lockType: UserPasswordLockType.longLock,
-        lockRemaining: longLockDuration,
-        failedAttempts: next,
-      );
-    }
-
-    return UserPasswordPolicyResult.failed(
-      failedAttempts: next,
-      showWarning: next >= warnThreshold,
-    );
+  Future<T> _runPolicySerialized<T>(Future<T> Function() action) {
+    final completer = Completer<T>();
+    _policyQueue = _policyQueue.then((_) async {
+      try {
+        completer.complete(await action());
+      } catch (error, stackTrace) {
+        completer.completeError(error, stackTrace);
+      }
+    });
+    return completer.future;
   }
 
   Future<void> clearPassword(SharedPreferences prefs) async {
-    await prefs.remove(PrefKeys.userPasswordSaltB64);
-    await prefs.remove(PrefKeys.userPasswordHashB64);
-    await prefs.remove(PrefKeys.userPasswordIterations);
-    await prefs.remove(PrefKeys.userPasswordFailedAttempts);
-    await prefs.remove(PrefKeys.userPasswordLockedUntilMs);
+    return _runPolicySerialized(() async {
+      await prefs.remove(PrefKeys.userPasswordSaltB64);
+      await prefs.remove(PrefKeys.userPasswordHashB64);
+      await prefs.remove(PrefKeys.userPasswordIterations);
+      await prefs.remove(PrefKeys.userPasswordFailedAttempts);
+      await prefs.remove(PrefKeys.userPasswordLockedUntilMs);
+    });
   }
 
   Future<Uint8List> _derive(

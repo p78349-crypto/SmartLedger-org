@@ -23,6 +23,14 @@ class MonthlyAggCacheService {
   MonthlyAggCacheService._internal();
 
   static const int defaultMaxMonths = 120; // 10 years
+  static const int _moneyScale = 6;
+
+  static double _normalizeMoney(double value) {
+    if (value.isNaN || value.isInfinite) return 0.0;
+    final normalized = double.parse(value.toStringAsFixed(_moneyScale));
+    if (normalized == -0.0) return 0.0;
+    return normalized;
+  }
 
   static String _cacheKeyFor(String accountName) {
     final safe = accountName.trim();
@@ -105,7 +113,6 @@ class MonthlyAggCacheService {
   ///
   /// Intended use:
   /// - App start / first account screen
-  /// - In-app screensaver refresh
   Future<void> autoEnsureBuiltIfDirtyThrottled({
     required String accountName,
     required List<Transaction> transactions,
@@ -292,7 +299,9 @@ class MonthlyAggCacheService {
       if (bucket == null) continue;
 
       bucket.quickInputCount += 1;
-      bucket.quickInputAmount += e.amount;
+      bucket.quickInputAmount = _normalizeMoney(
+        bucket.quickInputAmount + e.amount,
+      );
     }
 
     return acc.map((k, v) => MapEntry(k, v.build()));

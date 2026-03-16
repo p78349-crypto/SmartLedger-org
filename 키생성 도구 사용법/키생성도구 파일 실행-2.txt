@@ -1,0 +1,33 @@
+GitHub Copilot: 질문하신 “개발자 키 생성/관리 도구”가 이 프로젝트 기준으로 무엇을 쓰는지 정확히 짚기 위해, 저장소에 이미 있는 서명키 관련 스크립트/문서를 먼저 확인하겠습니다. 확인 후 바로 권장 조합을 한 번에 정리해드릴게요.
+
+Searched for regex `keystore|keytool|jks|signingConfig|upload key|play app signing|storeFile|key.properties`, 200 results
+
+Searched for files matching `**/*key*.ps1`, no matches
+
+Searched for files matching `**/*sign*.md`, no matches
+
+레포에 이미 준비된 전용 도구의 정확한 사용법을 드리기 위해, 실제 스크립트 인자와 문서 명령만 짧게 확인하고 바로 실행 커맨드까지 정리하겠습니다.
+
+Read [](file:///c%3A/Users/plain/SmartLedger/scripts/setup_android_release_signing.ps1)
+
+Read [](file:///c%3A/Users/plain/SmartLedger/scripts/check_android_release_signing.ps1)
+
+Read [](file:///c%3A/Users/plain/SmartLedger/docs/DEPLOYMENT_CHECKLIST.md#60-60), lines 60 to 110
+
+현재 프로젝트에서 실제로 쓰는 “키 관리도구”까지 확인해드리기 위해, 서명 준비 점검 스크립트를 한 번 실행해서 상태와 함께 답변드리겠습니다.
+
+Ran terminal command: .\scripts\check_android_release_signing.ps1
+
+현재 이 프로젝트의 개발자 키 생성/관리 도구는 아래 조합입니다.
+
+- 생성 도구: setup_android_release_signing.ps1  
+  - 내부적으로 JDK `keytool`을 호출해 keystore 생성 + key.properties 작성
+- 점검/관리 도구: check_android_release_signing.ps1  
+  - keytool 설치, keystore 존재, alias, 비밀번호 주입 방식(env/file)까지 검증
+- 운영 가이드: DEPLOYMENT_CHECKLIST.md
+
+현재 상태도 확인 완료:
+- 실행 결과 `[OK] 릴리즈 서명 준비 완료`
+- `storeFile=smartledger-release.jks`, 비밀번호 소스는 환경변수(env)로 설정됨
+
+원하면 다음으로 키 지문(SHA-1/SHA-256) 출력 명령까지 바로 실행해 드리겠습니다.

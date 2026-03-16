@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smart_ledger/widgets/user_permission_badge.dart';
 
 import 'audit_log_service.dart';
+import '../utils/pref_keys.dart';
 
 /// Phase 3: 워크플로우 자동화 엔진
 /// 승인 체계, 자동화 룰 엔진, 작업 스케줄링
@@ -20,6 +21,14 @@ class WorkflowAutomationEngine {
   final List<ApprovalRequest> _pendingApprovals = [];
   final List<AutomationRule> _rules = [];
   final ValueNotifier<int> pendingCountNotifier = ValueNotifier(0);
+
+  /// Test-only: reset singleton state for deterministic tests.
+  void resetForTesting() {
+    _workflows.clear();
+    _pendingApprovals.clear();
+    _rules.clear();
+    pendingCountNotifier.value = 0;
+  }
 
   /// 초기화
   Future<void> initialize() async {
@@ -367,13 +376,55 @@ class WorkflowAutomationEngine {
       try {
         switch (action.type) {
           case RuleActionType.notify:
-            results.add('알림 전송: ${action.params['message']}');
+            final notifyMessage = action.params['message']?.toString() ?? '자동 알림';
+            await AuditLogService.log(
+              eventType: AuditEventType.policyEnforcement,
+              action: 'automation_notify',
+              userLevel: UserPermissionLevel.root,
+              targetResource: eventData['accountId']?.toString(),
+              metadata: {
+                'ruleId': rule.id,
+                'message': notifyMessage,
+                ...eventData,
+              },
+            );
+            results.add('알림 전송: $notifyMessage');
           case RuleActionType.backup:
             results.add('백업 실행: ${action.params['type']}');
           case RuleActionType.alert:
-            results.add('보안 알림: ${action.params['severity']}');
+            final severity = action.params['severity']?.toString() ?? 'high';
+            await AuditLogService.log(
+              eventType: AuditEventType.securityViolation,
+              action: 'automation_high_risk_alert',
+              userLevel: UserPermissionLevel.root,
+              targetResource: eventData['accountId']?.toString(),
+              metadata: {
+                'ruleId': rule.id,
+                'severity': severity,
+                ...eventData,
+              },
+              riskLevel: severity == 'high'
+                  ? ActionRiskLevel.critical
+                  : ActionRiskLevel.warning,
+            );
+            results.add('보안 알림: $severity');
           case RuleActionType.lockAccount:
-            results.add('계정 잠금: ${action.params['duration']}분');
+            final durationMinutes =
+                int.tryParse('${action.params['duration']}') ?? 30;
+            await _applyGlobalAuthLock(durationMinutes: durationMinutes);
+            await AuditLogService.log(
+              eventType: AuditEventType.policyEnforcement,
+              action: 'automation_account_lock_applied',
+              userLevel: UserPermissionLevel.root,
+              targetResource: eventData['accountId']?.toString(),
+              metadata: {
+                'ruleId': rule.id,
+                'durationMinutes': durationMinutes,
+                ...eventData,
+              },
+              riskLevel: ActionRiskLevel.critical,
+            );
+            results.add('계정 잠금: $durationMinutes' '분');
           case RuleActionType.log:
             await AuditLogService.log(
               eventType: AuditEventType.systemConfiguration,
@@ -413,6 +464,20 @@ class WorkflowAutomationEngine {
       actions: results,
       executedAt: DateTime.now(),
     );
+  }
+
+  Future<void> _applyGlobalAuthLock({required int durationMinutes}) async {
+    final prefs = await SharedPreferences.getInstance();
+    final until = DateTime.now()
+        .add(Duration(minutes: durationMinutes))
+        .millisecondsSinceEpoch;
+
+    await prefs.setInt(PrefKeys.userPinLockedUntilMs, until);
+    await prefs.setInt(PrefKeys.userPasswordLockedUntilMs, until);
+    await prefs.setInt(PrefKeys.rootPinLockedUntilMs, until);
+    await prefs.setInt(PrefKeys.rootPasswordLockedUntilMs, until);
+    await prefs.setInt(PrefKeys.assetPinLockedUntilMs, until);
+    await prefs.setInt(PrefKeys.assetPasswordLockedUntilMs, until);
   }
 
   Future<void> _executeApprovedWorkflow(

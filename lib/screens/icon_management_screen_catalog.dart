@@ -13,6 +13,8 @@ extension IconManagementCatalog on _IconManagementScreenState {
   }
 
   Widget _buildGroupedByModuleCatalog(ThemeData theme) {
+    // Module display order — each key must match a case in
+    // MainFeatureIconCatalog.iconsForModuleKey().
     const moduleOrder = <({String key, String title})>[
       (key: 'page0', title: '기본'),
       (key: 'purchase', title: '구매'),
@@ -41,6 +43,7 @@ extension IconManagementCatalog on _IconManagementScreenState {
       for (final icon in sources) {
         if (!seen.add(icon.id)) continue;
         if (_isExcludedByDedicatedCatalogPolicy(icon.id)) continue;
+        if (_isBlockedForCurrentPage(icon.id)) continue;
         final pageIndex = _iconPageIndexById[icon.id];
         if (pageIndex != null &&
             _catalogHiddenPages.contains(pageIndex)) {

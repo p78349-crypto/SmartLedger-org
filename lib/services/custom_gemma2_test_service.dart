@@ -142,15 +142,15 @@ class CustomGemma2TestService {
     }
     
     if (lowercaseQuery.contains('투자') || lowercaseQuery.contains('invest')) {
-      return '''💰 **SmartLedger 투자 자문 (파인튜닝)**
+      return '''💰 **SmartLedger 투자 참고정보 (파인튜닝)**
       
 맞춤형 투자 분석:
 • 현재 포트폴리오 위험도: 중간 수준
-• 추천 자산 배분: 주식 60%, 채권 30%, 현금 10%
-• **주의사항**: 현재 시장 변동성이 높으니 분산투자 필수
-• 예상 수익률: 연 5-7% (보수적 추정)
+• 자산 배분 관찰값: 주식 60%, 채권 30%, 현금 10%
+• **주의사항**: 시장 변동성 구간에서는 분산도와 변동폭 점검이 필요
+• 참고: 본 결과는 통계 기반 분석자료이며 수익/손실을 보장하지 않음
 
-*SmartLedger 재무 데이터로 특별 훈련된 AI 모델의 조언입니다.*''';
+*SmartLedger 재무 데이터로 특별 훈련된 AI 모델의 분석 참고정보입니다.*''';
     }
     
     if (lowercaseQuery.contains('예산') || lowercaseQuery.contains('budget')) {
@@ -162,7 +162,7 @@ class CustomGemma2TestService {
 • 비상금: 수입의 10%
 • **핵심 포인트**: 카드 사용 패턴 분석 결과 주말 지출 관리가 관건
 
-*이는 당신의 과거 거래 데이터로 훈련된 개인화 모델의 조언입니다.*''';
+*이는 당신의 과거 거래 데이터로 훈련된 개인화 모델의 분석 참고정보입니다.*''';
     }
     
     // 기본 응답
@@ -186,7 +186,7 @@ class CustomGemma2TestService {
 
     final testQueries = [
       '이번 달 지출이 너무 많은 것 같아',
-      '투자 포트폴리오 조언해줘',  
+      '투자 포트폴리오 분석해줘',  
       '예산 관리 어떻게 해야 할까',
       '저축 계획 세워줘',
       '카드 사용 패턴 분석해줘',

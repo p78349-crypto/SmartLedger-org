@@ -7,7 +7,8 @@ extension IconManagementDropzone on _IconManagementScreenState {
   Widget _buildCurrentSlots(ThemeData theme) {
     final scheme = theme.colorScheme;
     final placedSlots = <(int index, String id)>[];
-    for (var i = 0; i < _slots.length; i++) {
+    for (final i in _editableSlotIndices()) {
+      if (i < 0 || i >= _slots.length) continue;
       if (_slots[i].trim().isNotEmpty) placedSlots.add((i, _slots[i]));
     }
 

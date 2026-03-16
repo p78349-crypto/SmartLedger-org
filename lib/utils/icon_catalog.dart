@@ -157,6 +157,7 @@ class IconCatalog {
       Icons.account_balance_wallet_outlined;
   static const IconData shieldOutlined = Icons.shield_outlined;
   static const IconData verifiedUserOutlined = Icons.verified_user_outlined;
+  static const IconData security = Icons.security;
   static const IconData remove = Icons.remove;
   static const IconData filterList = Icons.filter_list;
 
@@ -196,4 +197,8 @@ class IconCatalog {
   static const IconData microSavings = Icons.rocket_launch;
   static const IconData weatherPricePrediction = Icons.wb_cloudy;
   static const IconData weatherInput = Icons.wb_sunny_outlined;
+  
+  // Help Center icons (2026-02-27)
+  static const IconData helpCenter = Icons.help_center;
+  static const IconData questionAnswerOutlined = Icons.question_answer_outlined;
 }

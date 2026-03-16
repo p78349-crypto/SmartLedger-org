@@ -1,0 +1,25 @@
+storePassword=CHANGE_ME_STORE_PASSWORD
+keyPassword=CHANGE_ME_KEY_PASSWORD
+keyAlias=smartledger
+storeFile=smartledger-release.jks# 🔐 프로덕션 keystore 설정 예제
+# 이 파일을 key.properties로 복사하고 실제 값으로 변경하세요
+
+# Keystore 파일 경로 (절대 경로 또는 android/ 기준 상대 경로)
+storeFile=smartledger-release.keystore
+
+# Keystore 비밀번호
+storePassword=__FROM_ENV__
+
+# Key alias
+keyAlias=smartledger
+
+# Key 비밀번호
+keyPassword=__FROM_ENV__
+
+# ⚠️ 주의사항:
+# 1. 이 파일(key.properties)은 절대로 Git에 커밋하지 마세요
+# 2. keystore 파일도 Git에 커밋하지 마세요
+# 3. 비밀번호는 안전한 곳에 별도 보관하세요
+
+# Keystore 생성 방법:
+# keytool -genkey -v -keystore smartledger-release.keystore -alias smartledger -keyalg RSA -keysize 2048 -validity 10000

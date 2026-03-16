@@ -69,12 +69,6 @@ extension IconGridPageSlots on _IconGridPageState {
       );
     }
 
-    // Page 1 convenience: if the screen saver shortcut is missing, try to
-    // place it next to '오늘 지출' without overwriting any existing slot.
-    if (widget.pageIndex == ScreenSaverIds.shortcutAllowedMainPageIndex) {
-      _ensureScreenSaverShortcut(validated);
-    }
-
     // Page 0: ensure "음성 단축어" is visible early.
     if (widget.pageIndex == 0) {
       _ensureVoiceShortcuts(validated);
@@ -84,32 +78,6 @@ extension IconGridPageSlots on _IconGridPageState {
     setState(() {
       _slots = validated;
     });
-  }
-
-  Future<void> _ensureScreenSaverShortcut(List<String> validated) async {
-    final hasShortcut = validated.contains(ScreenSaverIds.shortcutIconId);
-    if (hasShortcut) return;
-
-    // Only add if it's a known icon in the current catalog
-    if (!_allKnownIconIds.contains(ScreenSaverIds.shortcutIconId)) return;
-
-    const preferredIndex = 1;
-    final preferredEmpty =
-        preferredIndex < validated.length &&
-        validated[preferredIndex].isEmpty;
-    if (preferredEmpty) {
-      validated[preferredIndex] = ScreenSaverIds.shortcutIconId;
-    } else {
-      final emptyIndex = validated.indexOf('');
-      if (emptyIndex != -1) {
-        validated[emptyIndex] = ScreenSaverIds.shortcutIconId;
-      }
-    }
-    await UserPrefService.setPageIconSlots(
-      accountName: widget.accountName,
-      pageIndex: widget.pageIndex,
-      slots: validated,
-    );
   }
 
   Future<void> _ensureVoiceShortcuts(List<String> validated) async {
@@ -171,13 +139,6 @@ extension IconGridPageSlots on _IconGridPageState {
   void _navigateToIcon(MainFeatureIcon icon) {
     if (icon.id == 'account_switch') {
       _showAccountSwitchDialog();
-      return;
-    }
-    if (icon.id == ScreenSaverIds.shortcutIconId) {
-      ScreenSaverLauncher.show(
-        context: context,
-        accountName: widget.accountName,
-      );
       return;
     }
     if (icon.id == 'accountStatsMemoSearch') {

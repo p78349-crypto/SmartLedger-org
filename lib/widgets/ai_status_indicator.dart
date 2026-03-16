@@ -214,7 +214,7 @@ class _AiSystemStatusSummaryState extends State<AiSystemStatusSummary> {
             _buildSummaryRow('CEO 예측', 
                             _statusSummary['useAiForCeoPrediction'] == true ? 'AI 사용' : '전통적',
                             _statusSummary['useAiForCeoPrediction'] == true ? Colors.purple : Colors.grey),
-            _buildSummaryRow('투자 자문', 
+            _buildSummaryRow('투자 참고정보', 
                             _statusSummary['useAiForInvestment'] == true ? 'AI 사용' : '전통적',
                             _statusSummary['useAiForInvestment'] == true ? Colors.purple : Colors.grey),
             _buildSummaryRow('재무 분석', 
@@ -271,7 +271,7 @@ class _AiSystemStatusSummaryState extends State<AiSystemStatusSummary> {
             _buildSummaryRow('AI 기능', '보안 봉인됨', Colors.red),
             _buildSummaryRow('현재 모델', '전통적 알고리즘만', Colors.grey),
             _buildSummaryRow('CEO 예측', '통계 기반', Colors.grey),
-            _buildSummaryRow('투자 자문', '수학적 계산', Colors.grey),
+            _buildSummaryRow('투자 참고정보', '수학적 계산', Colors.grey),
             _buildSummaryRow('재무 분석', '패턴 분석', Colors.grey),
             const SizedBox(height: 8),
             Container(

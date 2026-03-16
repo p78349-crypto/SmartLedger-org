@@ -10,9 +10,14 @@ import '../utils/pref_keys.dart';
 import 'micro_savings_nudge_dialogs.dart';
 
 class MicroSavingsNudgeScreen extends StatefulWidget {
-  const MicroSavingsNudgeScreen({super.key, required this.accountName});
+  const MicroSavingsNudgeScreen({
+    super.key,
+    required this.accountName,
+    this.initialTypeIndex,
+  });
 
   final String accountName;
+  final int? initialTypeIndex;
 
   @override
   State<MicroSavingsNudgeScreen> createState() =>
@@ -47,6 +52,10 @@ class _MicroSavingsNudgeScreenState extends State<MicroSavingsNudgeScreen> {
   @override
   void initState() {
     super.initState();
+    final initIndex = widget.initialTypeIndex;
+    if (initIndex != null) {
+      _selectedTypeIndex = initIndex.clamp(0, 1);
+    }
     _load();
   }
 

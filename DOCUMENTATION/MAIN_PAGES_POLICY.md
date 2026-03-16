@@ -10,26 +10,26 @@
 기본 페이지 인덱스:
 
 - index 0: 대시보드 (Dashboard)
-  - 용도: 요약 통계, 빠른 요약 위젯, 외부 정보 연동
-  - 권장 아이콘: 대시보드/요약 관련 아이콘, `weather_manual_input` (날씨 입력) 등
+  - 용도: 요약 통계, 빠른 요약 위젯, 외부 정보 연동, 도움말 센터
+  - 권장 아이콘: 대시보드/요약 관련 아이콘, `weather_manual_input` (날씨 입력), 도움말 아이콘 (`help_center`, `help_quick_start`, `help_transactions`, `help_faq`) 등
 - index 1: 지출입력 (Expense Input)
   - 용도: 지출 입력, 장바구니, 쇼핑 준비 등 지출 관련 진입점
   - 권장 아이콘: `transactionAdd`, `quick_simple_expense_input`, `shopping_cart` 등
-- index 2: 수입 관련 (Income)
-  - 용도: 수입 입력, 수입 상세 및 분배 기능
-  - 권장 아이콘: `income_add`, `income_detail`, `income_split`
-- index 3: 통계 (Statistics)
+- index 2: 통계 (Statistics)
   - 용도: 월간/주간/기간별 통계 진입
   - 권장 아이콘: `accountStats`, `period_stats_*` 등
-- index 4: 자산 (Assets)
+- index 3: 자산 (Assets)
   - 용도: 자산 대시보드, 자산 입력/관리
   - 권장 아이콘: `assetDashboard`, `assetManagement`, `assetSimpleInput`
-- index 5: ROOT (관리자/루트 기능)
-  - 용도: 루트 권한이 필요한 전역 기능(계정 관리, 전체 거래, 루트 전용 설정)
-  - 권장 아이콘: `root_transactions`, `root_account_manage`, `root_screen_saver_settings`
-- index 6: 설정 (Settings)
-  - 용도: 앱 설정 접근(언어/테마/백업 등)
-  - 권장 아이콘: `settings` 및 관련 하위설정 진입
+- index 4: ROOT (관리자)
+  - 용도: 루트 권한이 필요한 전역 기능(계정 관리, 전체 거래 등)
+  - 권장 아이콘: `root_*` 등
+- index 5: 설정 (Settings)
+  - 용도: 백업/테마/언어/보안 설정 등
+  - 권장 아이콘: `backup`, `theme_settings`, `security_settings`, `database_encryption` 등
+- index 6: (미사용)
+  - 용도: 비워둠
+  - 권장 아이콘: 없음
 
 정책: 아이콘 → 페이지 매핑 및 네비게이션
 
@@ -58,6 +58,8 @@
 
 변경 기록
 
+- 2026-02-27: 페이지 0에 도움말 아이콘 추가 — help_center, help_quick_start, help_transactions, help_faq (기능별 카테고리화)
 - 2026-02-17: 날씨 입력(weather_manual_input) 아이콘 이동 — 수입(index 2) → 대시보드(index 0)
+- 2026-02-23: 페이지 재배치 — 수입 페이지 아이콘 삭제, 통계(3)→2, 자산(4)→3, ROOT(5)→4, 설정(6)→5
 - 2026-01-30: 페이지2 이름 변경 — 거래(Transactions) → 지출입력(Expense Input)
 - 2025-12-30: 초기 작성 — 페이지 매핑(1:대시보드,2:거래,3:수입,4:통계,5:자산,6:ROOT,7:설정) 및 네비게이션 규칙 기록.

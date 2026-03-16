@@ -11,9 +11,9 @@ extension CeoPredictionServiceExtensions on CeoPredictionService {
     
     for (final transaction in transactions) {
       final day = DateTime(
-        transaction.dateTime.year,
-        transaction.dateTime.month,
-        transaction.dateTime.day,
+        transaction.date.year,
+        transaction.date.month,
+        transaction.date.day,
       );
       dailyTotals[day] = (dailyTotals[day] ?? 0.0) + transaction.amount;
     }
@@ -49,7 +49,7 @@ extension CeoPredictionServiceExtensions on CeoPredictionService {
     // Analyze transaction patterns
     final categoryTotals = <String, double>{};
     for (final transaction in transactions) {
-      final category = transaction.category ?? 'Uncategorized';
+      final category = transaction.mainCategory;
       categoryTotals[category] = (categoryTotals[category] ?? 0.0) + transaction.amount.abs();
     }
     
@@ -63,7 +63,7 @@ extension CeoPredictionServiceExtensions on CeoPredictionService {
     
     // Asset composition analysis
     if (assets.isNotEmpty) {
-      final assetTypes = assets.map((a) => a.assetType).toSet();
+      final assetTypes = assets.map((a) => a.category.name).toSet();
       if (assetTypes.length > 3) {
         factors.add('Diversified portfolio (${assetTypes.length} asset types)');
       } else {

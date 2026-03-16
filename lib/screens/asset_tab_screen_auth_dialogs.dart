@@ -102,14 +102,14 @@ extension AssetTabScreenAuthDialogs on _AssetTabScreenState {
     try {
       final prefs = await SharedPreferences.getInstance();
 
-      final pinEnabled = prefs.getBool(PrefKeys.userPinEnabled) ?? false;
+        final pinEnabled = prefs.getBool(PrefKeys.assetPinEnabled) ?? false;
       final passwordEnabled =
-          prefs.getBool(PrefKeys.userPasswordEnabled) ?? false;
+          prefs.getBool(PrefKeys.assetPasswordEnabled) ?? false;
       final biometricEnabled =
-          prefs.getBool(PrefKeys.userBiometricEnabled) ?? false;
+          prefs.getBool(PrefKeys.assetBiometricEnabled) ?? false;
 
-      final pinConfigured = _userPinService.isPinConfigured(prefs);
-      final passwordConfigured = _userPasswordService.isPasswordConfigured(
+        final pinConfigured = _assetPinService.isPinConfigured(prefs);
+        final passwordConfigured = _assetPasswordService.isPasswordConfigured(
         prefs,
       );
 
@@ -183,9 +183,9 @@ extension AssetTabScreenAuthDialogs on _AssetTabScreenState {
             context: context,
             barrierDismissible: false,
             builder: (dialogContext) {
-              return VerifyCurrentUserPinDialog(
+              return VerifyCurrentAssetPinDialog(
                 prefs: prefs,
-                service: _userPinService,
+                service: _assetPinService,
               );
             },
           );
@@ -196,9 +196,9 @@ extension AssetTabScreenAuthDialogs on _AssetTabScreenState {
             context: context,
             barrierDismissible: false,
             builder: (dialogContext) {
-              return VerifyCurrentUserPasswordDialog(
+              return VerifyCurrentAssetPasswordDialog(
                 prefs: prefs,
-                service: _userPasswordService,
+                service: _assetPasswordService,
               );
             },
           );

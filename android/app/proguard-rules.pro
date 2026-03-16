@@ -22,10 +22,12 @@
 # -keep class com.google.mlkit.vision.text.korean.** { *; }
 
 ## 📦 앱 크기 최적화: 사용하지 않는 리소스 적극 제거
--dontshrink
--dontoptimize
+## ✅ 보안 강화: shrink와 optimize는 build.gradle의 minifyEnabled가 제어
+# -dontshrink    # 제거됨 - 코드 축소 활성화
+# -dontoptimize  # 제거됨 - 바이트코드 최적화 활성화
 -keepattributes Signature
 -keepattributes *Annotation*
+-keepattributes SourceFile,LineNumberTable  # 크래시 리포트용
 
 ## Ignore missing classes for Play Store Split Install (used by Flutter deferred components)
 -dontwarn com.google.android.play.core.splitcompat.**

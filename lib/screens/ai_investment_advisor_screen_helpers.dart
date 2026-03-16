@@ -1,6 +1,6 @@
 part of 'ai_investment_advisor_screen.dart';
 
-/// AI 투자자문 화면 추가 유틸리티들
+/// AI 투자 참고정보 화면 추가 유틸리티들
 extension AiInvestmentAdvisorScreenHelpers on _AiInvestmentAdvisorScreenState {
   
   String _getRiskLevelText(double riskScore) {
@@ -105,21 +105,26 @@ extension AiInvestmentAdvisorScreenHelpers on _AiInvestmentAdvisorScreenState {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('포트폴리오 재조정 가이드'),
+          title: const Text('포트폴리오 분석 포인트'),
           content: const SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('현재 포트폴리오 개선 방안:', style: TextStyle(fontWeight: FontWeight.bold)),
+                Text('현재 포트폴리오 점검 포인트:', style: TextStyle(fontWeight: FontWeight.bold)),
                 SizedBox(height: 8),
-                Text('1. 위험도가 높은 자산의 비중을 줄이세요'),
-                Text('2. 다양한 자산군에 분산투자하세요'),
-                Text('3. 안전자산(채권, 현금)의 비중을 늘리세요'),
-                Text('4. 정기적으로 포트폴리오를 점검하세요'),
+                Text('1. 위험도가 높은 자산 비중 변화 여부를 우선 점검하세요'),
+                Text('2. 자산군 집중도와 분산 수준을 함께 확인하세요'),
+                Text('3. 안전자산(채권, 현금) 비중의 변동 추이를 확인하세요'),
+                Text('4. 정기적으로 동일 기준으로 포트폴리오를 비교 점검하세요'),
                 SizedBox(height: 16),
-                Text('※ 이는 일반적인 가이드라인이며, 개인의 투자성향과 목표에 따라 달라질 수 있습니다.', 
-                     style: TextStyle(fontSize: 12, color: Colors.grey)),
+                Text(
+                  '※ 이는 일반적인 가이드라인이며, 개인의 투자성향과 목표에 따라 달라질 수 있습니다.\n'
+                  '최종 투자 판단과 결과에 대한 모든 책임은 본인에게 있습니다.\n'
+                  '투자 손실 또는 분쟁 발생 시 국내외(미국 포함)에서 민사상 분쟁/소송이 제기될 수 있습니다.\n'
+                  '관련 법령이 허용하는 범위에서 앱 판매자/제공자는 직접·간접 손해에 대해 책임을 지지 않습니다.',
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
               ],
             ),
           ),

@@ -1,5 +1,5 @@
-/// AI Investment Advisory Models
-/// Defines data structures for AI-powered investment recommendations
+/// AI Investment Insight Models
+/// Defines data structures for AI-powered investment reference information
 class InvestmentRecommendation {
   const InvestmentRecommendation({
     required this.symbol,

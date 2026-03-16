@@ -1,6 +1,6 @@
 part of 'ai_investment_advisor_screen.dart';
 
-/// AI 투자자문 화면 유틸리티 메서드들 (완전 오프라인 기반)
+/// AI 투자 참고정보 화면 유틸리티 메서드들 (완전 오프라인 기반)
 extension AiInvestmentAdvisorScreenUtils on _AiInvestmentAdvisorScreenState {
   
   Widget _buildOfflineNoticeCard() {
@@ -26,8 +26,18 @@ extension AiInvestmentAdvisorScreenUtils on _AiInvestmentAdvisorScreenState {
             const Text('• 로컬 데이터만 사용'),
             const Text('• AI 알고리즘 내장'),
             const SizedBox(height: 8),
-            const Text('※ 실제 투자 시에는 전문가와 상담하세요', 
-                       style: TextStyle(fontSize: 12, color: Colors.grey, fontStyle: FontStyle.italic)),
+            const Text(
+              '※ 본 화면은 참고용 정보이며 투자 권유가 아닙니다.\n'
+              '개별 종목 추천, 매수/매도 지시, 진입시점 제시는 제공하지 않습니다.\n'
+              '최종 투자 판단과 결과에 대한 모든 책임은 본인에게 있습니다.\n'
+              '투자 손실 또는 분쟁 발생 시 국내외(미국 포함)에서 민사상 분쟁/소송이 제기될 수 있습니다.\n'
+              '관련 법령이 허용하는 범위에서 앱 판매자/제공자는 직접·간접 손해에 대해 책임을 지지 않습니다.',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
           ],
         ),
       ),
@@ -132,7 +142,7 @@ extension AiInvestmentAdvisorScreenUtils on _AiInvestmentAdvisorScreenState {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  '${_getAssetTypeDisplayName(recommendation.assetType.name)} ${recommendation.recommendedAllocation.toStringAsFixed(1)}%',
+                  '${_getAssetTypeDisplayName(recommendation.assetType.name)} 분석 기준 비중 ${recommendation.recommendedAllocation.toStringAsFixed(1)}%',
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),

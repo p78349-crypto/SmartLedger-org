@@ -29,16 +29,18 @@ class GemmaApiService {
       _lastHealthCheck = DateTime.now();
 
       if (_isServerHealthy) {
-        debugPrint('✅ Gemma API Server: healthy');
+        if (kDebugMode) debugPrint('✅ Gemma API Server: healthy');
       } else {
-        debugPrint('⚠️ Gemma API Server: unhealthy (${response.statusCode})');
+        if (kDebugMode) {
+          debugPrint('⚠️ Gemma API Server: unhealthy (${response.statusCode})');
+        }
       }
 
       return _isServerHealthy;
     } catch (e) {
       _isServerHealthy = false;
       _lastHealthCheck = DateTime.now();
-      debugPrint('❌ Gemma API Server: not reachable ($e)');
+      if (kDebugMode) debugPrint('❌ Gemma API Server: not reachable ($e)');
       return false;
     }
   }
@@ -64,19 +66,21 @@ class GemmaApiService {
         final result = jsonDecode(utf8.decode(response.bodyBytes));
 
         if (result['success'] == true && result['data'] != null) {
-          debugPrint('✅ Gemma extraction successful');
+          if (kDebugMode) debugPrint('✅ Gemma extraction successful');
           return ReceiptExtractionResult.fromJson(result['data']);
         } else {
-          debugPrint('⚠️ Gemma extraction failed: ${result['error']}');
-          debugPrint('Raw response: ${result['raw_response']}');
+          if (kDebugMode) {
+            debugPrint('⚠️ Gemma extraction failed: ${result['error']}');
+            debugPrint('Raw response: ${result['raw_response']}');
+          }
           return null;
         }
       } else {
-        debugPrint('❌ Gemma API error: ${response.statusCode}');
+        if (kDebugMode) debugPrint('❌ Gemma API error: ${response.statusCode}');
         return null;
       }
     } catch (e) {
-      debugPrint('❌ Gemma extraction error: $e');
+      if (kDebugMode) debugPrint('❌ Gemma extraction error: $e');
       return null;
     }
   }
@@ -93,7 +97,7 @@ class GemmaApiService {
       }
       return null;
     } catch (e) {
-      debugPrint('❌ Gemma test error: $e');
+      if (kDebugMode) debugPrint('❌ Gemma test error: $e');
       return null;
     }
   }
@@ -137,7 +141,7 @@ class ReceiptExtractionResult {
       try {
         date = DateTime.parse(json['date'] as String);
       } catch (e) {
-        debugPrint('Failed to parse date: ${json['date']}');
+        if (kDebugMode) debugPrint('Failed to parse date: ${json['date']}');
       }
     }
 

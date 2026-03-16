@@ -35,6 +35,8 @@ class IconLaunchUtils {
       AppRoutes.settings,
       AppRoutes.voiceShortcuts,
       AppRoutes.featureIconsCatalog,
+      AppRoutes.databaseEncryption,
+      AppRoutes.securitySettings,
       AppRoutes.themeSettings,
       AppRoutes.languageSettings,
       AppRoutes.displaySettings,
@@ -45,7 +47,9 @@ class IconLaunchUtils {
       AppRoutes.rootSearch,
       AppRoutes.rootAccountManage,
       AppRoutes.rootMonthEnd,
-      AppRoutes.rootScreenSaverSettings,
+      AppRoutes.advancedFinancialAnalytics,
+      AppRoutes.ceoPredictionDashboard,
+      AppRoutes.aiInvestmentAdvisor,
     };
 
     if (routeName == AppRoutes.transactionAdd) {
@@ -76,7 +80,8 @@ class IconLaunchUtils {
     if (routeName == AppRoutes.iconManagement ||
         routeName == AppRoutes.iconManagement2 ||
         routeName == AppRoutes.iconManagementAsset ||
-        routeName == AppRoutes.iconManagementRoot) {
+        routeName == AppRoutes.iconManagementRoot ||
+        routeName == AppRoutes.iconManagementSettings) {
       return IconLaunchRequest(
         routeName: routeName,
         arguments: IconManagementArgs(accountName: accountName),

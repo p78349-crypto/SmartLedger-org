@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'root_pin_service.dart';
 import '../utils/pref_keys.dart';
 
-enum AuthScope { asset, root, backupRestore, screenSaverExit }
+enum AuthScope { asset, root, backupRestore }
 
 enum AuthStatus { success, canceled, locked, unavailable, failed }
 
@@ -58,9 +58,6 @@ class AuthService {
   static const Duration rootSessionTimeout = Duration(minutes: 1);
   static const Duration assetSessionTimeout = Duration(minutes: 1);
 
-  static const int screenSaverExitMaxFailedAttempts = 5;
-  static const Duration screenSaverExitLockDuration = Duration(minutes: 10);
-
   bool isSessionActive(int? untilMs) {
     if (untilMs == null) return false;
     return _nowMs() < untilMs;
@@ -83,55 +80,6 @@ class AuthService {
       return AuthResult.canceled('인증이 취소되었습니다');
     }
     return AuthResult.success;
-  }
-
-  Future<AuthResult> authenticateScreenSaverExit({
-    required SharedPreferences prefs,
-  }) async {
-    final lockedUntilMs = prefs.getInt(
-      PrefKeys.screenSaverExitAuthLockedUntilMs,
-    );
-    if (lockedUntilMs != null) {
-      final remainingMs = lockedUntilMs - _nowMs();
-      if (remainingMs > 0) {
-        final remaining = Duration(milliseconds: remainingMs);
-        return AuthResult.locked(remaining, '보호기 종료 인증이 잠금 상태입니다');
-      }
-
-      await prefs.remove(PrefKeys.screenSaverExitAuthLockedUntilMs);
-      await prefs.remove(PrefKeys.screenSaverExitAuthFailedAttempts);
-    }
-
-    final canAuth = await canUseDeviceAuth();
-    if (!canAuth) {
-      return AuthResult.success;
-    }
-
-    final result = await authenticateDevice(reason: '화면 보호기를 종료하려면 인증이 필요합니다');
-
-    if (result.ok) {
-      await prefs.remove(PrefKeys.screenSaverExitAuthFailedAttempts);
-      await prefs.remove(PrefKeys.screenSaverExitAuthLockedUntilMs);
-      return AuthResult.success;
-    }
-
-    final current =
-        prefs.getInt(PrefKeys.screenSaverExitAuthFailedAttempts) ?? 0;
-    final next = current + 1;
-    if (next >= screenSaverExitMaxFailedAttempts) {
-      await prefs.setInt(
-        PrefKeys.screenSaverExitAuthLockedUntilMs,
-        DateTime.now().add(screenSaverExitLockDuration).millisecondsSinceEpoch,
-      );
-      await prefs.remove(PrefKeys.screenSaverExitAuthFailedAttempts);
-      return AuthResult.locked(
-        screenSaverExitLockDuration,
-        '보호기 종료 인증이 잠금 처리되었습니다',
-      );
-    }
-
-    await prefs.setInt(PrefKeys.screenSaverExitAuthFailedAttempts, next);
-    return AuthResult.failed();
   }
 
   Future<AuthResult> ensureAuthorizedForRoot({

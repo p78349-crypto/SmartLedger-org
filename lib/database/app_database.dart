@@ -117,6 +117,12 @@ class DbRootMemos extends Table {
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
+  /// Test/override constructor.
+  ///
+  /// Allows injecting a custom [QueryExecutor] (e.g. in-memory database)
+  /// to avoid platform-specific file/isolated background open issues.
+  AppDatabase.connect(super.executor);
+
   @override
   int get schemaVersion => 10;
 
@@ -327,6 +333,15 @@ class AppDatabase extends _$AppDatabase {
     beforeOpen: (details) async {
       // Ensure foreign keys are enforced (SQLite defaults to OFF).
       await customStatement('PRAGMA foreign_keys = ON');
+
+      // High-throughput integrity profile.
+      // - WAL improves writer/reader concurrency.
+      // - FULL synchronous prioritizes durability on crash/power loss.
+      // - busy_timeout reduces transient lock failures under burst writes.
+      await customStatement('PRAGMA journal_mode = WAL');
+      await customStatement('PRAGMA synchronous = FULL');
+      await customStatement('PRAGMA busy_timeout = 5000');
+      await customStatement('PRAGMA wal_autocheckpoint = 1000');
     },
   );
 

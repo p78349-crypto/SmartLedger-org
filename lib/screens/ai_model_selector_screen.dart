@@ -191,8 +191,8 @@ class _AiModelSelectorScreenState extends State<AiModelSelectorScreen> {
               },
             ),
             SwitchListTile(
-              title: const Text('투자 자문에 AI 사용'),
-              subtitle: const Text('포트폴리오 분석 및 투자 추천'),
+              title: const Text('투자 참고정보에 AI 사용'),
+              subtitle: const Text('포트폴리오 분석 및 참고정보 제공'),
               value: _useAiForInvestment,
               onChanged: (value) {
                 setState(() => _useAiForInvestment = value);

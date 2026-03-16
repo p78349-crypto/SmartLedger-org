@@ -27,6 +27,8 @@ class PageIconManagementScreen extends StatelessWidget {
       showCurrentPageIndicator: false, // 현재 페이지 표시 안함 (고정 페이지)
       hiddenPageIndices: _getHiddenPageIndices(pageIndex), // 다른 페이지 숨김
       catalogHiddenPageIndices: _getHiddenPageIndices(pageIndex), // 카탈로그에서도 다른 페이지 숨김
+      showCatalogSectionTitles: false,
+      usePhotoStyleLayout: true,
     );
   }
 
@@ -76,6 +78,7 @@ class PageIconManagementHelper {
       '자산',
       'ROOT',
       '설정',
+      '미사용',
     ];
 
     if (pageIndex >= 0 && pageIndex < pageNames.length) {

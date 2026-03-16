@@ -15,8 +15,8 @@ extension FinancialAnalyticsServiceExtensions on FinancialAnalyticsService {
     final monthlyTotals = <int, double>{}; // Day of month -> total
     
     for (final transaction in inflowTransactions) {
-      final dayOfWeek = transaction.dateTime.weekday;
-      final dayOfMonth = transaction.dateTime.day;
+      final dayOfWeek = transaction.date.weekday;
+      final dayOfMonth = transaction.date.day;
       
       dailyTotals[dayOfWeek] = (dailyTotals[dayOfWeek] ?? 0.0) + transaction.amount;
       monthlyTotals[dayOfMonth] = (monthlyTotals[dayOfMonth] ?? 0.0) + transaction.amount;
@@ -44,8 +44,8 @@ extension FinancialAnalyticsServiceExtensions on FinancialAnalyticsService {
     final monthlyTotals = <int, double>{};
     
     for (final transaction in outflowTransactions) {
-      final dayOfWeek = transaction.dateTime.weekday;
-      final dayOfMonth = transaction.dateTime.day;
+      final dayOfWeek = transaction.date.weekday;
+      final dayOfMonth = transaction.date.day;
       final absAmount = transaction.amount.abs();
       
       dailyTotals[dayOfWeek] = (dailyTotals[dayOfWeek] ?? 0.0) + absAmount;
@@ -154,8 +154,8 @@ extension FinancialAnalyticsServiceExtensions on FinancialAnalyticsService {
 
   int _getDaysSpanned(List<Transaction> transactions) {
     if (transactions.isEmpty) return 1;
-    
-    final dates = transactions.map((t) => t.dateTime).toList()..sort();
-    return dates.last.difference(dates.first).inDays + 1;
+
+    final sorted = transactions.map((t) => t.date).toList()..sort();
+    return sorted.last.difference(sorted.first).inDays + 1;
   }
 }

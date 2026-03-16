@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:ui';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/app_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:provider/single_child_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'navigation/app_router.dart';
@@ -31,8 +33,8 @@ import 'utils/app_locale_controller.dart';
 import 'utils/currency_formatter.dart';
 import 'utils/constants.dart';
 import 'utils/main_feature_icon_catalog.dart';
-import 'config/feature_flags.dart';
 import 'utils/main_page_migration.dart';
+import 'config/feature_flags.dart';
 import 'widgets/background_widget.dart';
 import 'widgets/floating_voice_button.dart';
 
@@ -47,23 +49,38 @@ Future<void> main() async {
 
   PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
     // Note: native crashes (e.g. OOM / SIGSEGV inside ML Kit) won't be caught.
-    debugPrint('UNCAUGHT (PlatformDispatcher): $error');
-    debugPrintStack(stackTrace: stack);
+    if (kDebugMode) {
+      debugPrint('UNCAUGHT (PlatformDispatcher): $error');
+      debugPrintStack(stackTrace: stack);
+    }
     return true;
   };
 
-  await runZonedGuarded(
-    () async {
-      WidgetsFlutterBinding.ensureInitialized();
+  await SentryFlutter.init(
+    (options) {
+      options.dsn = const String.fromEnvironment('SENTRY_DSN');
+      // Release can be passed via --dart-define=SENTRY_RELEASE=<id> or CI uses commit SHA
+      const releaseFromEnv = String.fromEnvironment('SENTRY_RELEASE');
+      if (releaseFromEnv.isNotEmpty) options.release = releaseFromEnv;
+      // Environment (production, staging) can be set via --dart-define=FLAVOR=<env>
+      const envName = String.fromEnvironment('FLAVOR', defaultValue: 'production');
+      options.environment = envName;
+      const double tracesSampleRate = 0.0; // adjust as needed
+      options.tracesSampleRate = tracesSampleRate;
+    },
+    appRunner: () async {
+      await runZonedGuarded(
+        () async {
+          WidgetsFlutterBinding.ensureInitialized();
 
-      final prefs = await SharedPreferences.getInstance();
+          final prefs = await SharedPreferences.getInstance();
 
-      // Optional: enable family sharing backend when compiled with
-      // `--dart-define=ENABLE_FAMILY_SHARING=true` and an active family
-      // id is set.
+          // Optional: enable family sharing backend when compiled with
+          // `--dart-define=ENABLE_FAMILY_SHARING=true` and an active family
+          // id is set.
 
-      // Locale policy (정석): default follow system; optional override via prefs.
-      await AppLocaleController.instance.loadFromPrefs(prefs);
+          // Locale policy (정석): default follow system; optional override via prefs.
+          await AppLocaleController.instance.loadFromPrefs(prefs);
 
       // Ensure date symbols exist for supported locales.
       await Future.wait([
@@ -98,16 +115,20 @@ Future<void> main() async {
       } catch (_) {
         // Best-effort; never block startup.
       }
-      // One-off migration: move asset-related icons to the asset page.
-      // This operation updates per-account persisted page slots so assets
-      // appear consistently (default page index: 5).
-      // Best-effort; non-destructive.
+
+      // One-off forced relayout (2026-02-23) per updated page policy.
       try {
-        // One-off migration: move asset-related icons into the asset page.
-        await MainPageMigration.moveAssetIconsToPageForAllAccounts();
+        await MainPageMigration.applyRelayout20260223IfNeeded();
       } catch (_) {
         // ignore
       }
+      // Fix-up: split ROOT and Settings (ROOT -> index 4, Settings -> index 5).
+      try {
+        await MainPageMigration.applyRelayout20260223SplitRootToPage4IfNeeded();
+      } catch (_) {
+        // ignore
+      }
+      // Main-page icon placement policy is unified: no forced startup re-layout.
       // Maintenance: if compiled with `-DMAINTENANCE_RECREATE_PAGES=true`
       // then list page-related SharedPreferences keys and recreate pages
       // with a fresh 15 empty pages (clearing existing prefs first).
@@ -115,15 +136,21 @@ Future<void> main() async {
       if (doMaintenance) {
         try {
           final keys = await MainFeatureIconCatalog.listPagePrefKeys();
-          debugPrint('PAGE PREF KEYS (audit): ${keys.join(', ')}');
+          if (kDebugMode) {
+            debugPrint('PAGE PREF KEYS (audit): ${keys.join(', ')}');
+          }
           await MainFeatureIconCatalog.recreatePages(
             15,
             clearExistingPrefs: true,
           );
-          debugPrint('Main pages recreated (15) and prefs cleared.');
+          if (kDebugMode) {
+            debugPrint('Main pages recreated (15) and prefs cleared.');
+          }
         } catch (e, st) {
-          debugPrint('Maintenance error: $e');
-          debugPrintStack(stackTrace: st);
+          if (kDebugMode) {
+            debugPrint('Maintenance error: $e');
+            debugPrintStack(stackTrace: st);
+          }
         }
       }
       // (Removed) Forced main pages reset/create on startup.
@@ -144,13 +171,29 @@ Future<void> main() async {
       try {
         await DeepLinkHandler.instance.init();
       } catch (e) {
-        debugPrint('DeepLinkHandler init failed: $e');
+        if (kDebugMode) debugPrint('DeepLinkHandler init failed: $e');
       }
       runApp(const MyApp());
-    },
-    (Object error, StackTrace stack) {
-      debugPrint('UNCAUGHT (Zone): $error');
-      debugPrintStack(stackTrace: stack);
+
+      // Optional: send a test Sentry event when explicitly requested via dart-define
+      const sendTest = String.fromEnvironment('SENTRY_SEND_TEST_EVENT', defaultValue: 'false');
+      if (sendTest.toLowerCase() == 'true') {
+        try {
+          await Sentry.captureMessage('Sentry test event from CI/local (SENTRY_SEND_TEST_EVENT)');
+        } catch (_) {}
+      }
+        },
+        (Object error, StackTrace stack) {
+          if (kDebugMode) {
+            debugPrint('UNCAUGHT (Zone): $error');
+            debugPrintStack(stackTrace: stack);
+          }
+          // Report to Sentry as well
+          try {
+            Sentry.captureException(error, stackTrace: stack);
+          } catch (_) {}
+        },
+      );
     },
   );
 }

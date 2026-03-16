@@ -4,20 +4,22 @@ import 'icon_catalog.dart';
 import 'main_feature_icon_models.dart';
 
 /// Page 3 – Statistics & report icons.
+/// 순서: 사진 기준 기본 배치 (2026-02-24)
 const List<MainFeatureIcon> kStatsPageItems = [
+  // 기본 배치 (사진 순서)
+  MainFeatureIcon(
+    id: 'accountStatsSearch',
+    label: '검색',
+    labelEn: 'Search',
+    icon: IconCatalog.search,
+    routeName: AppRoutes.accountStatsSearch,
+  ),
   MainFeatureIcon(
     id: 'accountStats',
     label: '통계',
     labelEn: 'Stats',
     icon: IconCatalog.barChart,
     routeName: AppRoutes.accountStats,
-  ),
-  MainFeatureIcon(
-    id: 'fixed_cost_stats',
-    label: '고정비 통계',
-    labelEn: 'Fixed Costs',
-    icon: IconCatalog.payments,
-    routeName: AppRoutes.fixedCostStats,
   ),
   MainFeatureIcon(
     id: 'period_stats_7d',
@@ -55,18 +57,26 @@ const List<MainFeatureIcon> kStatsPageItems = [
     routeName: AppRoutes.periodStatsYear,
   ),
   MainFeatureIcon(
+    id: 'fixed_cost_stats',
+    label: '고정비 통계',
+    labelEn: 'Fixed Costs',
+    icon: IconCatalog.payments,
+    routeName: AppRoutes.fixedCostStats,
+  ),
+  MainFeatureIcon(
+    id: 'spending_analysis',
+    label: '지출 분석 & 절약 팁',
+    labelEn: 'Spending Analysis',
+    icon: IconCatalog.analytics,
+    routeName: AppRoutes.spendingAnalysis,
+  ),
+  // 추가 아이콘 (전체아이콘 탭용)
+  MainFeatureIcon(
     id: 'period_stats_10y',
     label: '10년',
     labelEn: '10 Years',
     icon: IconCatalog.autoGraph,
     routeName: AppRoutes.periodStatsDecade,
-  ),
-  MainFeatureIcon(
-    id: 'accountStatsSearch',
-    label: '검색',
-    labelEn: 'Search',
-    icon: IconCatalog.search,
-    routeName: AppRoutes.accountStatsSearch,
   ),
   MainFeatureIcon(
     id: 'shopping_cheapest_month',
@@ -77,19 +87,18 @@ const List<MainFeatureIcon> kStatsPageItems = [
   ),
   MainFeatureIcon(
     id: 'card_discount_stats',
-    label: '카드 할인',
-    labelEn: 'Card Discounts',
-    icon: IconCatalog.creditCard,
+    label: '1억 모으기',
+    labelEn: '100M Savings',
+    icon: IconCatalog.flagOutlined,
     routeName: AppRoutes.cardDiscountStats,
   ),
   MainFeatureIcon(
-    id: 'spending_analysis',
-    label: '지출 분석 & 절약 팁',
-    labelEn: 'Spending Analysis',
-    icon: IconCatalog.analytics,
-    routeName: AppRoutes.spendingAnalysis,
+    id: 'reward_system_stats',
+    label: '보상 시스템',
+    labelEn: 'Rewards',
+    icon: IconCatalog.emojiEvents,
+    routeName: AppRoutes.rewardSystemStats,
   ),
-  // 새로 구현된 고급 재무 분석 기능
   MainFeatureIcon(
     id: 'advanced_financial_analytics',
     label: '고급 재무분석',
@@ -97,52 +106,25 @@ const List<MainFeatureIcon> kStatsPageItems = [
     icon: IconCatalog.smartAnalysis,
     routeName: AppRoutes.advancedFinancialAnalytics,
   ),
-  // CEO 대시보드 예측 분석 기능
-  MainFeatureIcon(
-    id: 'ceo_prediction_dashboard',
-    label: 'CEO 예측 대시보드',
-    labelEn: 'CEO Prediction Dashboard',
-    icon: IconCatalog.ceoDashboard,
-    routeName: AppRoutes.ceoPredictionDashboard,
-  ),
 ];
 
 /// Page 4 – Asset management icons.
+/// 순서: 사진 기준 기본 배치 (2026-02-24)
 const List<MainFeatureIcon> kAssetPageItems = [
+  // 기본 배치 (사진 순서)
+  MainFeatureIcon(
+    id: 'asset_security_settings',
+    label: '자산 보안',
+    labelEn: 'Asset Security',
+    icon: IconCatalog.security,
+    routeName: AppRoutes.assetSecuritySettings,
+  ),
   MainFeatureIcon(
     id: 'asset_simple_input',
     label: '간편 입력',
     labelEn: 'Simple Add',
     icon: IconCatalog.addCircle,
     routeName: AppRoutes.assetSimpleInput,
-  ),
-  MainFeatureIcon(
-    id: 'asset_detailed_input',
-    label: '상세 입력',
-    labelEn: 'Detailed Add',
-    icon: IconCatalog.add,
-    routeName: AppRoutes.assetDetailInput,
-  ),
-  MainFeatureIcon(
-    id: 'asset_statistics',
-    label: '자산 배분',
-    labelEn: 'Allocation',
-    icon: IconCatalog.pieChart,
-    routeName: AppRoutes.assetAllocation,
-  ),
-  MainFeatureIcon(
-    id: 'asset_export',
-    label: '내보내기',
-    labelEn: 'Export',
-    icon: IconCatalog.download,
-    routeName: AppRoutes.assetExport,
-  ),
-  MainFeatureIcon(
-    id: 'data_flexible_export',
-    label: '유연한 추출',
-    labelEn: 'Flexible Export',
-    icon: IconCatalog.autoAwesome,
-    routeName: AppRoutes.dataFlexibleExport,
   ),
   MainFeatureIcon(
     id: 'asset_list',
@@ -159,17 +141,45 @@ const List<MainFeatureIcon> kAssetPageItems = [
     routeName: AppRoutes.assetPortfolioAnalysis,
   ),
   MainFeatureIcon(
+    id: 'asset_export',
+    label: '내보내기',
+    labelEn: 'Export',
+    icon: IconCatalog.download,
+    routeName: AppRoutes.assetExport,
+  ),
+  MainFeatureIcon(
+    id: 'asset_statistics',
+    label: '자산 배분',
+    labelEn: 'Allocation',
+    icon: IconCatalog.pieChart,
+    routeName: AppRoutes.assetAllocation,
+  ),
+  // 추가 아이콘 (전체아이콘 탭용)
+  MainFeatureIcon(
+    id: 'asset_detailed_input',
+    label: '상세 입력',
+    labelEn: 'Detailed Add',
+    icon: IconCatalog.add,
+    routeName: AppRoutes.assetDetailInput,
+  ),
+  MainFeatureIcon(
+    id: 'data_flexible_export',
+    label: '유연한 추출',
+    labelEn: 'Flexible Export',
+    icon: IconCatalog.autoAwesome,
+    routeName: AppRoutes.dataFlexibleExport,
+  ),
+  MainFeatureIcon(
     id: 'asset_investment_roadmap',
     label: '투자 로드맵',
     labelEn: 'Investment Roadmap',
     icon: IconCatalog.routeOutlined,
     routeName: AppRoutes.assetInvestmentRoadmap,
   ),
-  // 새로 구현된 AI 투자 자문 기능
   MainFeatureIcon(
     id: 'ai_investment_advisor',
-    label: 'AI 투자자문',
-    labelEn: 'AI Investment Advisor',
+    label: 'AI 투자 참고정보',
+    labelEn: 'AI Investment Insights',
     icon: IconCatalog.aiInvestment,
     routeName: AppRoutes.aiInvestmentAdvisor,
   ),
@@ -180,37 +190,16 @@ const List<MainFeatureIcon> kAssetPageItems = [
     icon: IconCatalog.flagOutlined,
     routeName: AppRoutes.assetProject100m,
   ),
-  MainFeatureIcon(
-    id: 'icon_management_asset_entry',
-    label: '아이콘 관리',
-    labelEn: 'Icon Manager',
-    icon: IconCatalog.gridView,
-    routeName: AppRoutes.iconManagementAsset,
-  ),
 ];
 
 /// Page 5 – Root management icons.
 const List<MainFeatureIcon> kRootPageItems = [
   MainFeatureIcon(
-    id: 'root_summary',
-    label: 'ROOT 요약',
-    labelEn: 'ROOT Summary',
-    icon: IconCatalog.dashboard,
-    routeName: AppRoutes.rootSummary,
-  ),
-  MainFeatureIcon(
-    id: 'root_account_summary',
-    label: '계정별 현황',
-    labelEn: 'Account Summary',
-    icon: IconCatalog.accountBalance,
-    routeName: AppRoutes.rootAccountSummary,
-  ),
-  MainFeatureIcon(
-    id: 'root_expense_analysis',
-    label: '지출 분석',
-    labelEn: 'Expense Analysis',
-    icon: IconCatalog.barChart,
-    routeName: AppRoutes.rootExpenseAnalysis,
+    id: 'root_security_setup',
+    label: 'ROOT 보안',
+    labelEn: 'ROOT Security',
+    icon: IconCatalog.security,
+    routeName: AppRoutes.rootSecuritySetup,
   ),
   MainFeatureIcon(
     id: 'ceo_assistant',
@@ -220,11 +209,11 @@ const List<MainFeatureIcon> kRootPageItems = [
     routeName: AppRoutes.ceoAssistant,
   ),
   MainFeatureIcon(
-    id: 'root_transactions',
-    label: '전체 거래',
-    labelEn: 'All Transactions',
-    icon: IconCatalog.list,
-    routeName: AppRoutes.rootTransactions,
+    id: 'root_summary',
+    label: 'ROOT 요약',
+    labelEn: 'ROOT Summary',
+    icon: IconCatalog.dashboard,
+    routeName: AppRoutes.rootSummary,
   ),
   MainFeatureIcon(
     id: 'root_search',
@@ -241,11 +230,11 @@ const List<MainFeatureIcon> kRootPageItems = [
     routeName: AppRoutes.rootAccountManage,
   ),
   MainFeatureIcon(
-    id: 'root_month_end',
-    label: '월말 정산',
-    labelEn: 'Month-end Close',
-    icon: IconCatalog.eventAvailable,
-    routeName: AppRoutes.rootMonthEnd,
+    id: 'root_account_summary',
+    label: '계정별 현황',
+    labelEn: 'Account Summary',
+    icon: IconCatalog.accountBalance,
+    routeName: AppRoutes.rootAccountSummary,
   ),
   MainFeatureIcon(
     id: 'icon_management_root_entry',
@@ -254,35 +243,40 @@ const List<MainFeatureIcon> kRootPageItems = [
     icon: IconCatalog.gridView,
     routeName: AppRoutes.iconManagementRoot,
   ),
-  // 새로 구현된 백업 시스템들
   MainFeatureIcon(
-    id: 'incremental_backup_system',
-    label: '점진적 백업',
-    labelEn: 'Incremental Backup',
-    icon: IconCatalog.incrementalBackup,
-    routeName: AppRoutes.incrementalBackup,
+    id: 'root_month_end',
+    label: '월말 정산',
+    labelEn: 'Month-end Close',
+    icon: IconCatalog.eventAvailable,
+    routeName: AppRoutes.rootMonthEnd,
   ),
   MainFeatureIcon(
-    id: 'cloud_backup_automation',
-    label: '클라우드 백업',
-    labelEn: 'Cloud Backup',
-    icon: IconCatalog.cloudBackup,
-    routeName: AppRoutes.cloudBackupSettings,
-  ),
-  // 새로 구현된 백업 시스템들
-  MainFeatureIcon(
-    id: 'incremental_backup_system',
-    label: '점진적 백업',
-    labelEn: 'Incremental Backup',
-    icon: IconCatalog.incrementalBackup,
-    routeName: AppRoutes.incrementalBackup,
+    id: 'root_transactions',
+    label: '전체 거래',
+    labelEn: 'All Transactions',
+    icon: IconCatalog.list,
+    routeName: AppRoutes.rootTransactions,
   ),
   MainFeatureIcon(
-    id: 'cloud_backup_automation',
-    label: '클라우드 백업',
-    labelEn: 'Cloud Backup',
-    icon: IconCatalog.cloudBackup,
-    routeName: AppRoutes.cloudBackupSettings,
+    id: 'root_expense_analysis',
+    label: '지출 분석',
+    labelEn: 'Expense Analysis',
+    icon: IconCatalog.barChart,
+    routeName: AppRoutes.rootExpenseAnalysis,
+  ),
+  MainFeatureIcon(
+    id: 'ceo_prediction_dashboard',
+    label: 'CEO 예측 대시보드',
+    labelEn: 'CEO Prediction Dashboard',
+    icon: IconCatalog.ceoDashboard,
+    routeName: AppRoutes.ceoPredictionDashboard,
+  ),
+  MainFeatureIcon(
+    id: 'backup',
+    label: 'RootBackup',
+    labelEn: 'Root Backup',
+    icon: IconCatalog.backup,
+    routeName: AppRoutes.backup,
   ),
 ];
 
@@ -297,11 +291,25 @@ List<MainFeatureIcon> buildPageZeroItems({required bool voiceVisible}) {
       routeName: '', // 특별 처리: icon_launch_utils에서 다이얼로그 표시
     ),
     const MainFeatureIcon(
-      id: 'screen_saver_settings',
-      label: '보호기 설정',
-      labelEn: 'Screen Protection',
-      icon: IconCatalog.shieldOutlined,
-      routeName: AppRoutes.rootScreenSaverSettings,
+      id: 'page0_monthly_stats',
+      label: '월별 통계',
+      labelEn: 'Monthly Stats',
+      icon: IconCatalog.barChart,
+      routeName: AppRoutes.monthlyStats,
+    ),
+    const MainFeatureIcon(
+      id: 'weather_manual_input',
+      label: '날씨 입력',
+      labelEn: 'Weather Input',
+      icon: IconCatalog.weatherInput,
+      routeName: AppRoutes.weatherManualInput,
+    ),
+    const MainFeatureIcon(
+      id: 'emergency_services',
+      label: '긴급 SOS',
+      labelEn: 'Emergency SOS',
+      icon: IconCatalog.emergency,
+      routeName: AppRoutes.emergencyServices,
     ),
     if (voiceVisible)
       const MainFeatureIcon(
@@ -311,19 +319,42 @@ List<MainFeatureIcon> buildPageZeroItems({required bool voiceVisible}) {
         icon: IconCatalog.micOutlined,
         routeName: AppRoutes.voiceShortcuts,
       ),
+    // 도움말 섹션
+    // ⭐ 4단계 워크플로우 - 특별 강조
     const MainFeatureIcon(
-      id: 'emergency_services',
-      label: '긴급 SOS',
-      labelEn: 'Emergency SOS',
-      icon: IconCatalog.emergency,
-      routeName: AppRoutes.emergencyServices,
+      id: 'help_recipe_workflow',
+      label: '⭐ 4단계 가이드',
+      labelEn: '⭐ 4-Step Guide',
+      icon: IconCatalog.autoAwesome,
+      routeName: AppRoutes.helpRecipeWorkflow,
     ),
     const MainFeatureIcon(
-      id: 'weather_manual_input',
-      label: '날씨 입력',
-      labelEn: 'Weather Input',
-      icon: IconCatalog.weatherInput,
-      routeName: AppRoutes.weatherManualInput,
+      id: 'help_center',
+      label: '도움말 센터',
+      labelEn: 'Help Center',
+      icon: IconCatalog.helpCenter,
+      routeName: AppRoutes.helpCenter,
+    ),
+    const MainFeatureIcon(
+      id: 'help_quick_start',
+      label: '빠른 시작',
+      labelEn: 'Quick Start',
+      icon: IconCatalog.rocketLaunch,
+      routeName: AppRoutes.helpQuickStart,
+    ),
+    const MainFeatureIcon(
+      id: 'help_transactions',
+      label: '거래 가이드',
+      labelEn: 'Transaction Guide',
+      icon: IconCatalog.receiptLongOutlined,
+      routeName: AppRoutes.helpTransactions,
+    ),
+    const MainFeatureIcon(
+      id: 'help_faq',
+      label: 'FAQ',
+      labelEn: 'FAQ',
+      icon: IconCatalog.questionAnswerOutlined,
+      routeName: AppRoutes.helpFaq,
     ),
   ];
 }
@@ -337,6 +368,27 @@ List<MainFeatureIcon> buildSettingsItems({required bool voiceVisible}) {
       labelEn: 'App Settings',
       icon: IconCatalog.tune,
       routeName: AppRoutes.applicationSettings,
+    ),
+    const MainFeatureIcon(
+      id: 'database_encryption',
+      label: 'DB 암호화',
+      labelEn: 'DB Encryption',
+      icon: IconCatalog.lockOutline,
+      routeName: AppRoutes.databaseEncryption,
+    ),
+    const MainFeatureIcon(
+      id: 'security_settings',
+      label: '보안설정',
+      labelEn: 'Security',
+      icon: IconCatalog.verifiedUserOutlined,
+      routeName: AppRoutes.securitySettings,
+    ),
+    const MainFeatureIcon(
+      id: 'server_sync_settings',
+      label: '서버 설정',
+      labelEn: 'Server Settings',
+      icon: IconCatalog.cloudBackup,
+      routeName: AppRoutes.serverSyncSettings,
     ),
     const MainFeatureIcon(
       id: 'settings',
@@ -382,12 +434,13 @@ List<MainFeatureIcon> buildSettingsItems({required bool voiceVisible}) {
       routeName: AppRoutes.currencySettings,
     ),
     const MainFeatureIcon(
-      id: 'backup',
-      label: '백업',
-      labelEn: 'Backup',
+      id: 'backup_settings',
+      label: 'RootBackup',
+      labelEn: 'Root Backup',
       icon: IconCatalog.backup,
       routeName: AppRoutes.backup,
     ),
+
     // � 개발자 모드에서만 보이는 커스텀 모델 테스트
     if (AiSecuritySeal.isDeveloperModeEnabled)
       const MainFeatureIcon(
@@ -411,6 +464,13 @@ List<MainFeatureIcon> buildSettingsItems({required bool voiceVisible}) {
       labelEn: 'Trash',
       icon: IconCatalog.deleteSweepOutlined,
       routeName: AppRoutes.trash,
+    ),
+    const MainFeatureIcon(
+      id: 'icon_management_settings_entry',
+      label: '아이콘 관리',
+      labelEn: 'Icon Manager',
+      icon: IconCatalog.gridView,
+      routeName: AppRoutes.iconManagementSettings,
     ),
   ];
 }

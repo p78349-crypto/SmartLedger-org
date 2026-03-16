@@ -93,6 +93,17 @@ extension BackupScreenBuild on _BackupScreenState {
                     },
             ),
           ],
+          if (_backupEncryptionEnabled || _backupTwoFactorEnabled) ...[
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: _isProcessing ? null : _disableBackupEncryption,
+              icon: const Icon(Icons.lock_open_outlined, size: 18),
+              label: const Text('백업 암호화 해지'),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 40),
+              ),
+            ),
+          ],
           const SizedBox(height: 8),
           ElevatedButton.icon(
             onPressed: _isProcessing ? null : _showBackupTypeSelection,

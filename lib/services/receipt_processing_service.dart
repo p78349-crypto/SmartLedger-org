@@ -29,39 +29,41 @@ class ReceiptProcessingService {
     required String ocrText,
     bool forceGemini = false,
   }) async {
-    debugPrint('🔍 Receipt processing started');
-    debugPrint('OCR text length: ${ocrText.length} chars');
+    if (kDebugMode) {
+      debugPrint('🔍 Receipt processing started');
+      debugPrint('OCR text length: ${ocrText.length} chars');
+    }
 
     // 1. Gemma API 시도 (로컬 우선)
     if (!forceGemini) {
       final needsCheck = _gemmaService.needsHealthCheck;
       if (needsCheck) {
-        debugPrint('🏥 Checking Gemma server health...');
+        if (kDebugMode) debugPrint('🏥 Checking Gemma server health...');
         await _gemmaService.checkHealth();
       }
 
       if (_gemmaService.isServerHealthy) {
-        debugPrint('🤖 Trying Gemma API (local)...');
+        if (kDebugMode) debugPrint('🤖 Trying Gemma API (local)...');
         final gemmaResult = await _gemmaService.extractReceiptInfo(ocrText);
 
         if (gemmaResult != null) {
-          debugPrint('✅ Gemma extraction successful!');
+          if (kDebugMode) debugPrint('✅ Gemma extraction successful!');
           return ReceiptProcessingResult(
             success: true,
             data: gemmaResult,
             model: 'Gemma 2 2B (Local)',
           );
         } else {
-          debugPrint('⚠️ Gemma extraction returned null');
+          if (kDebugMode) debugPrint('⚠️ Gemma extraction returned null');
         }
       } else {
-        debugPrint('⚠️ Gemma server not available, skipping...');
+        if (kDebugMode) debugPrint('⚠️ Gemma server not available, skipping...');
       }
     }
 
     // 2. Gemini API 폴백
     if (_geminiService.isReady) {
-      debugPrint('🌐 Falling back to Gemini API (cloud)...');
+      if (kDebugMode) debugPrint('🌐 Falling back to Gemini API (cloud)...');
 
       try {
         // Gemini에게 구조화 요청
@@ -94,7 +96,7 @@ JSON 형식 (다른 텍스트 없이 JSON만 출력):
           // JSON 파싱 시도
           final parsed = _parseGeminiResponse(response);
           if (parsed != null) {
-            debugPrint('✅ Gemini extraction successful!');
+            if (kDebugMode) debugPrint('✅ Gemini extraction successful!');
             return ReceiptProcessingResult(
               success: true,
               data: parsed,
@@ -103,12 +105,12 @@ JSON 형식 (다른 텍스트 없이 JSON만 출력):
           }
         }
       } catch (e) {
-        debugPrint('❌ Gemini processing error: $e');
+        if (kDebugMode) debugPrint('❌ Gemini processing error: $e');
       }
     }
 
     // 3. 모두 실패
-    debugPrint('❌ All receipt processing methods failed');
+    if (kDebugMode) debugPrint('❌ All receipt processing methods failed');
     return ReceiptProcessingResult(
       success: false,
       model: 'None',
@@ -124,7 +126,7 @@ JSON 형식 (다른 텍스트 없이 JSON만 출력):
       final jsonEnd = response.lastIndexOf('}');
 
       if (jsonStart == -1 || jsonEnd == -1 || jsonEnd <= jsonStart) {
-        debugPrint('⚠️ No JSON found in Gemini response');
+        if (kDebugMode) debugPrint('⚠️ No JSON found in Gemini response');
         return null;
       }
 
@@ -133,7 +135,7 @@ JSON 형식 (다른 텍스트 없이 JSON만 출력):
 
       return ReceiptExtractionResult.fromJson(json);
     } catch (e) {
-      debugPrint('❌ Failed to parse Gemini JSON: $e');
+      if (kDebugMode) debugPrint('❌ Failed to parse Gemini JSON: $e');
       return null;
     }
   }

@@ -6,7 +6,6 @@ import '../services/user_pref_service.dart';
 import '../utils/main_feature_icon_catalog.dart';
 import '../utils/page1_bottom_quick_icons.dart';
 import '../utils/pref_keys.dart';
-import '../utils/screen_saver_ids.dart';
 
 part 'icon_management_screen_helpers.dart';
 part 'icon_management_screen_load.dart';
@@ -22,6 +21,8 @@ part 'icon_management_screen_build.dart';
 const int _slotCount = Page1BottomQuickIcons.slotCount;
 final int _pageCount = MainFeatureIconCatalog.pageCount;
 
+// NOTE: Must match main screen policy pages (0-based):
+// 통계=3, 자산=4, ROOT=5, 설정=6
 const Set<int> _statsReservedPages = <int>{3};
 const Set<int> _assetReservedPages = <int>{4};
 const Set<int> _rootReservedPages = <int>{5};
@@ -98,6 +99,12 @@ class IconManagementScreen extends StatefulWidget {
   /// When null, [hiddenPageIndices] is also applied to the catalog.
   final Set<int>? catalogHiddenPageIndices;
 
+  /// Use the simplified, photo-style layout (top 3 boxed buttons + grid).
+  ///
+  /// When true, the screen hides the slot dropzone section and allows
+  /// show/hide by applying selection.
+  final bool usePhotoStyleLayout;
+
   const IconManagementScreen({
     super.key,
     required this.accountName,
@@ -114,6 +121,7 @@ class IconManagementScreen extends StatefulWidget {
     this.hiddenPageIndices = const <int>{},
     this.redirectAssetRootToDedicatedScreens = true,
     this.catalogHiddenPageIndices,
+    this.usePhotoStyleLayout = false,
   });
 
   @override
@@ -123,6 +131,9 @@ class IconManagementScreen extends StatefulWidget {
 class _IconManagementScreenState extends State<IconManagementScreen> {
   bool _isLoading = true;
   late int _pageIndex;
+
+  // Photo-style UI tab: 0=기본아이콘, 1=전체아이콘
+  int _photoCatalogTab = 0;
 
   final Set<String> _pendingIds = <String>{};
 

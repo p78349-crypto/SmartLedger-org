@@ -20,8 +20,6 @@ import '../utils/main_feature_icon_catalog.dart';
 import '../utils/memo_search_utils.dart';
 import '../utils/page_indicator.dart';
 import '../utils/pref_keys.dart';
-import '../utils/screen_saver_ids.dart';
-import '../utils/screen_saver_launcher.dart';
 import '../widgets/background_widget.dart';
 import '../widgets/root_auth_gate.dart';
 import '../widgets/special_backgrounds.dart';
@@ -48,6 +46,7 @@ const List<String> _pageNameLabels = <String>[
   '자산',
   'ROOT',
   '설정',
+  '미사용',
 ];
 
 bool _listEquals(List<String> a, List<String> b) {
@@ -60,10 +59,10 @@ bool _listEquals(List<String> a, List<String> b) {
 
 const String _voiceShortcutsIconId = 'voice_shortcuts';
 const int _defaultSlotCount = 24;
-const Set<int> _statsReservedPages = <int>{3};
-const Set<int> _assetReservedPages = <int>{4};
-const Set<int> _rootReservedPages = <int>{5};
-const Set<int> _settingsOnlyPages = <int>{6};
+const Set<int> _statsReservedPages = <int>{};
+const Set<int> _assetReservedPages = <int>{};
+const Set<int> _rootReservedPages = <int>{};
+const Set<int> _settingsOnlyPages = <int>{};
 
 // ---------------------------------------------------------------------------
 // AccountMainScreen
@@ -90,13 +89,12 @@ class _AccountMainScreenState extends State<AccountMainScreen>
   bool _isRestoringIndex = false;
   bool _disablePageSwipe = false;
   late final List<GlobalKey<_IconGridPageState>> _pageKeys;
-  bool _hideRootPage = false;
 
   @override
   void initState() {
     super.initState();
+    MainFeatureIconCatalog.setPagesBlocked(false);
     WidgetsBinding.instance.addObserver(this);
-    _checkHideRootPage();
     _currentIndex = _pageCount > 0
         ? widget.initialIndex.clamp(0, _pageCount - 1)
         : 0;
@@ -118,15 +116,6 @@ class _AccountMainScreenState extends State<AccountMainScreen>
     } catch (_) {
       // Best-effort startup sync; ignore to keep UX smooth.
     }
-  }
-  
-  Future<void> _checkHideRootPage() async {
-    final accountService = AccountService();
-    final accountCount = accountService.accounts.length;
-    if (!mounted) return;
-    setState(() {
-      _hideRootPage = accountCount >= 2;
-    });
   }
 
   @override
@@ -182,29 +171,11 @@ class _IconGridPageState extends State<_IconGridPage> {
         'income',
       ).map((e) => e.id).toSet();
 
-  late final Set<String> _statsIconIds =
-      MainFeatureIconCatalog.iconsForModuleKey(
-        'stats',
-      ).map((e) => e.id).toSet();
-
-  late final Set<String> _assetIconIds =
-      MainFeatureIconCatalog.iconsForModuleKey(
-        'asset',
-      ).map((e) => e.id).toSet();
-
-  late final Set<String> _rootIconIds =
-      MainFeatureIconCatalog.iconsForModuleKey(
-        'root',
-      ).map((e) => e.id).toSet();
-
-  late final Set<String> _settingsIconIds =
-      MainFeatureIconCatalog.iconsForModuleKey(
-        'settings',
-      ).map((e) => e.id).toSet();
-
   // Public helpers for parent to control this page via GlobalKey
   bool get isEditMode => _isEditMode;
   void toggleEditModePublic() => _toggleEditMode();
+  void assignOrSwapPublic(String draggedId, int targetIndex) =>
+      _assignOrSwap(draggedId, targetIndex);
 
   Future<void> reloadFromPrefsPublic() async {
     await _loadSettings();

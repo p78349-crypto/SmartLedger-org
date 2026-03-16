@@ -8,22 +8,22 @@ class IconManagementAssetScreen extends StatelessWidget {
   final String accountName;
 
   static Set<int> _pagePickerHiddenPages() {
-    // Keep only the asset-reserved page (page 4 => 0-based {4}).
+    // Keep only the asset-reserved page (0-based index 4).
     const allowed = <int>{4};
     final hidden = <int>{};
-    for (var i = 0; i < 15; i++) {
+    final pageCount = MainFeatureIconCatalog.pageCount;
+    for (var i = 0; i < pageCount; i++) {
       if (!allowed.contains(i)) hidden.add(i);
     }
     return hidden;
   }
 
   static Set<int> _catalogHiddenPages() {
-    // Show only icons that belong to the asset+income modules.
-    // (asset module icons live on catalog page 4; income module icons
-    // live on page 2)
-    const allowed = <int>{2, 4};
+    // Show only icons that belong to the asset module (catalog page 4).
+    const allowed = <int>{4};
     final hidden = <int>{};
-    for (var i = 0; i < 15; i++) {
+    final pageCount = MainFeatureIconCatalog.pageCount;
+    for (var i = 0; i < pageCount; i++) {
       if (!allowed.contains(i)) hidden.add(i);
     }
     return hidden;

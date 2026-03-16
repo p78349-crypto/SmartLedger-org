@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:math' as math;
@@ -116,7 +117,11 @@ class OperationalKPIDashboard extends StatelessWidget {
                     _buildStatusIndicator('백업', SystemStatus.healthy),
                     const SizedBox(width: 8),
                     _buildStatusIndicator('보안', 
-                      metrics.securityViolations > 0 ? SystemStatus.warning : SystemStatus.healthy),
+                      metrics.anomalyDetections >= 3
+                          ? SystemStatus.critical
+                          : metrics.anomalyDetections > 0
+                              ? SystemStatus.warning
+                              : SystemStatus.healthy),
                   ],
                 ),
                 
@@ -151,9 +156,20 @@ class OperationalKPIDashboard extends StatelessWidget {
                           ),
                           const SizedBox(width: 8),
                           Expanded(
-                            child: Text(
-                              alert.message,
-                              style: Theme.of(context).textTheme.bodySmall,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  alert.message,
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                                Text(
+                                  '${DateFormat('HH:mm').format(alert.timestamp)} · ${alert.reason} · ${alert.severity.label}',
+                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
@@ -250,6 +266,8 @@ class OperationalKPIDashboard extends StatelessWidget {
     final recentLogs = await AuditLogService.getRecentLogs();
     final failedLogs = await AuditLogService.getFailedActions();
     final securityViolations = await AuditLogService.getSecurityViolations(limit: 10);
+    final anomalyDetections =
+      await AuditLogService.getRecentAnomalyDetections();
 
     // 성공률 계산
     final totalActions = recentLogs.length;
@@ -271,6 +289,7 @@ class OperationalKPIDashboard extends StatelessWidget {
         message: '최근 ${failedLogs.length}건의 실패한 작업이 있습니다',
         severity: failedLogs.length > 5 ? AlertSeverity.critical : AlertSeverity.warning,
         timestamp: DateTime.now(),
+        reason: '실패 작업 집계',
       ));
     }
     
@@ -279,6 +298,18 @@ class OperationalKPIDashboard extends StatelessWidget {
         message: '보안 위반 ${securityViolations.length}건 감지됨',
         severity: AlertSeverity.critical,
         timestamp: DateTime.now(),
+        reason: '보안 위반 요약',
+      ));
+    }
+
+    if (anomalyDetections.isNotEmpty) {
+      recentAlerts.add(Alert(
+        message: '최근 이상 징후 ${anomalyDetections.length}건 탐지됨',
+        severity: anomalyDetections.length >= 3
+            ? AlertSeverity.critical
+            : AlertSeverity.warning,
+        timestamp: DateTime.now(),
+        reason: '탐지 임계치 기반',
       ));
     }
     
@@ -287,6 +318,16 @@ class OperationalKPIDashboard extends StatelessWidget {
         message: '평균 응답시간이 목표치를 초과했습니다',
         severity: AlertSeverity.warning,
         timestamp: DateTime.now(),
+        reason: '성능 임계치 초과',
+      ));
+    }
+
+    for (final detection in anomalyDetections.take(3)) {
+      recentAlerts.add(Alert(
+        message: _buildDetectionMessage(detection),
+        severity: _severityFromDetection(detection),
+        timestamp: detection.timestamp,
+        reason: _reasonFromDetection(detection),
       ));
     }
 
@@ -294,10 +335,47 @@ class OperationalKPIDashboard extends StatelessWidget {
       successRate: successRate,
       avgResponseTime: avgResponseTime,
       securityViolations: securityViolations.length,
+      anomalyDetections: anomalyDetections.length,
       dailyTransactions: dailyTransactions,
       dailyGrowth: dailyGrowth,
       recentAlerts: recentAlerts,
     );
+  }
+
+  String _buildDetectionMessage(AuditLogEntry entry) {
+    final observed = entry.metadata?['observedValue'];
+    final threshold = entry.metadata?['threshold'];
+    if (observed != null && threshold != null) {
+      return '${_reasonFromDetection(entry)} (관측: $observed / 임계: $threshold)';
+    }
+    return _reasonFromDetection(entry);
+  }
+
+  String _reasonFromDetection(AuditLogEntry entry) {
+    switch (entry.action) {
+      case 'anomaly_signal_large_transaction':
+        return '고액 거래 이상 징후';
+      case 'anomaly_signal_repeated_failures':
+        return '반복 실패 이상 징후';
+      case 'anomaly_signal_off_hours_sensitive_action':
+        return '비정상 시간대 민감 작업';
+      case 'anomaly_detection_summary':
+        return '이상 징후 종합 경고';
+      default:
+        return '이상 징후 탐지';
+    }
+  }
+
+  AlertSeverity _severityFromDetection(AuditLogEntry entry) {
+    if (entry.eventType == AuditEventType.securityViolation) {
+      return AlertSeverity.critical;
+    }
+    final observed = entry.metadata?['observedValue'];
+    final threshold = entry.metadata?['threshold'];
+    if (observed is num && threshold is num && observed >= threshold) {
+      return AlertSeverity.critical;
+    }
+    return AlertSeverity.warning;
   }
 }
 
@@ -306,6 +384,7 @@ class OperationalMetrics {
   final double successRate;
   final double avgResponseTime;
   final int securityViolations;
+  final int anomalyDetections;
   final int dailyTransactions;
   final double dailyGrowth;
   final List<Alert> recentAlerts;
@@ -314,6 +393,7 @@ class OperationalMetrics {
     required this.successRate,
     required this.avgResponseTime,
     required this.securityViolations,
+    required this.anomalyDetections,
     required this.dailyTransactions,
     required this.dailyGrowth,
     required this.recentAlerts,
@@ -334,11 +414,13 @@ enum SystemStatus {
 /// 알림 모델
 class Alert {
   final String message;
+  final String reason;
   final AlertSeverity severity;
   final DateTime timestamp;
 
   const Alert({
     required this.message,
+    required this.reason,
     required this.severity,
     required this.timestamp,
   });
@@ -368,6 +450,8 @@ class _RealTimeStatusIndicatorState extends State<RealTimeStatusIndicator>
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
   SystemStatus _currentStatus = SystemStatus.healthy;
+  Timer? _refreshTimer;
+  bool _isUpdating = false;
 
   @override
   void initState() {
@@ -386,28 +470,43 @@ class _RealTimeStatusIndicatorState extends State<RealTimeStatusIndicator>
     
     _pulseController.repeat(reverse: true);
     _updateStatus();
+    _refreshTimer = Timer.periodic(
+      const Duration(seconds: 30),
+      (_) => _updateStatus(),
+    );
   }
 
   @override
   void dispose() {
+    _refreshTimer?.cancel();
     _pulseController.dispose();
     super.dispose();
   }
 
   Future<void> _updateStatus() async {
+    if (_isUpdating) {
+      return;
+    }
+    _isUpdating = true;
+
     // 실제 시스템 상태 확인 로직
-    final violations = await AuditLogService.getSecurityViolations(limit: 1);
-    final recentFailures = await AuditLogService.getFailedActions(limit: 5);
-    
-    setState(() {
-      if (violations.isNotEmpty) {
-        _currentStatus = SystemStatus.critical;
-      } else if (recentFailures.length >= 3) {
-        _currentStatus = SystemStatus.warning;
-      } else {
-        _currentStatus = SystemStatus.healthy;
-      }
-    });
+    try {
+      final snapshot = await AuditLogService.getRealtimeSnapshot();
+      if (!mounted) return;
+
+      setState(() {
+        if (snapshot.hasSecurityViolation || snapshot.anomalyDetections >= 3) {
+          _currentStatus = SystemStatus.critical;
+        } else if (snapshot.anomalyDetections > 0 ||
+            snapshot.recentFailures >= 3) {
+          _currentStatus = SystemStatus.warning;
+        } else {
+          _currentStatus = SystemStatus.healthy;
+        }
+      });
+    } finally {
+      _isUpdating = false;
+    }
   }
 
   @override

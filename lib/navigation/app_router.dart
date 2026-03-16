@@ -13,11 +13,13 @@ import '../screens/asset_allocation_screen.dart';
 import '../screens/asset_dashboard_screen.dart';
 import '../screens/asset_portfolio_analysis_screen.dart';
 import '../screens/asset_investment_roadmap_screen.dart';
+import '../screens/ai_investment_advisor_screen.dart';
 import '../screens/asset_input_screen.dart';
 import '../screens/asset_list_screen.dart';
 import '../screens/asset_export_screen.dart';
 import '../screens/data_flexible_export_screen.dart';
 import '../screens/asset_management_screen.dart';
+import '../screens/asset_security_settings_screen.dart';
 import '../screens/asset_simple_input_screen.dart';
 import '../screens/asset_tab_screen.dart';
 import '../screens/background_settings_screen.dart';
@@ -26,6 +28,7 @@ import '../screens/calendar_screen.dart';
 import '../screens/card_discount_stats_screen.dart';
 import '../screens/category_stats_screen.dart';
 import '../screens/currency_settings_screen.dart';
+import '../screens/database_encryption_screen.dart';
 import '../screens/daily_transactions_screen.dart';
 import '../screens/display_settings_screen.dart';
 import '../screens/emergency_fund_screen.dart';
@@ -35,6 +38,9 @@ import '../screens/file_viewer_screen.dart';
 import '../screens/gemma_api_test_screen.dart';
 import '../screens/gemini_voice_input_screen.dart';
 import '../screens/smart_voice_command_screen.dart';
+import '../screens/help_center_screen.dart';
+import '../screens/help_guides_screens.dart';
+import '../screens/help_recipe_workflow_screen.dart';
 import '../screens/fixed_cost_stats_screen.dart';
 import '../screens/fixed_cost_tab_screen.dart';
 import '../screens/household_consumables_screen.dart';
@@ -48,6 +54,7 @@ import '../screens/quick_health_analyzer_screen.dart';
 import '../screens/icon_management2_screen.dart';
 import '../screens/icon_management_asset_screen.dart';
 import '../screens/icon_management_root_screen.dart';
+import '../screens/icon_management_settings_screen.dart';
 import '../screens/icon_management_screen.dart';
 import '../screens/page_icon_management_screen.dart';
 import '../screens/income_split_screen.dart';
@@ -55,6 +62,7 @@ import '../screens/income_split_status_screen.dart';
 import '../screens/language_settings_screen.dart';
 import '../screens/launch_screen.dart';
 import '../screens/micro_savings_nudge_screen.dart';
+import '../screens/reward_system_stats_screen.dart';
 import '../screens/month_end_carryover_screen.dart';
 import '../screens/monthly_stats_screen.dart';
 import '../screens/nutrition_report_screen.dart';
@@ -71,20 +79,24 @@ import '../screens/root_account_manage_screen.dart';
 import '../screens/root_account_summary_screen.dart';
 import '../screens/root_expense_analysis_screen.dart';
 import '../screens/root_month_end_screen.dart';
-import '../screens/root_screen_saver_exposure_settings_screen.dart';
-import '../screens/root_screen_saver_settings_screen.dart';
 import '../screens/root_search_screen.dart';
+import '../screens/root_security_setup_screen.dart';
 import '../screens/root_summary_screen.dart';
 import '../screens/root_transaction_manager_screen.dart';
 import '../services/account_service.dart';
 import '../services/user_pref_service.dart';
 import '../screens/ceo_assistant_dashboard.dart';
+import '../screens/ceo_prediction_dashboard_screen.dart';
 import '../screens/ceo_exception_details_screen.dart';
 import '../screens/ceo_monthly_defense_report_screen.dart';
 import '../screens/ceo_recovery_plan_screen.dart';
 import '../screens/ceo_roi_detail_screen.dart';
+import '../screens/advanced_financial_analytics_screen.dart';
 import '../screens/savings_plan_list_screen.dart';
+import '../screens/security_settings_screen.dart';
 import '../screens/settings_screen.dart';
+import '../screens/subscription_manage_screen.dart';
+import '../screens/server_sync_settings_screen.dart';
 import '../screens/shopping_cart_screen.dart';
 import '../screens/shopping_guide_screen.dart';
 import '../screens/shopping_cheapest_month_screen.dart';
@@ -136,7 +148,8 @@ class AppRouter {
         _StatsRoutes.resolve(settings, name, args) ??
         _ShoppingRoutes.resolve(settings, name, args) ??
         _AssetRoutes.resolve(settings, name, args) ??
-        _RootRoutes.resolve(settings, name, args);
+        _RootRoutes.resolve(settings, name, args) ??
+        _HelpRoutes.resolve(settings, name, args);
   }
 }
 
@@ -164,5 +177,85 @@ class _VoiceDisabledScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _HelpRoutes {
+  const _HelpRoutes._();
+
+  static Route<dynamic>? resolve(
+    RouteSettings settings,
+    String name,
+    Object? args,
+  ) {
+    switch (name) {
+      case AppRoutes.helpCenter:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const HelpCenterScreen(),
+        );
+      case AppRoutes.helpQuickStart:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const HelpQuickStartScreen(),
+        );
+      case AppRoutes.helpUserManual:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const HelpUserManualScreen(),
+        );
+      case AppRoutes.helpTransactions:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const HelpTransactionsScreen(),
+        );
+      case AppRoutes.helpStatistics:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const HelpStatisticsScreen(),
+        );
+      case AppRoutes.helpAssets:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const HelpAssetsScreen(),
+        );
+      case AppRoutes.helpShopping:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const HelpShoppingScreen(),
+        );
+      case AppRoutes.helpInventory:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const HelpInventoryScreen(),
+        );
+      case AppRoutes.helpBackup:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const HelpBackupScreen(),
+        );
+      case AppRoutes.helpFaq:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const HelpFaqScreen(),
+        );
+      case AppRoutes.helpTips:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const HelpTipsScreen(),
+        );
+      case AppRoutes.helpChangelog:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const HelpChangelogScreen(),
+        );
+      case AppRoutes.helpRecipeWorkflow:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const HelpRecipeWorkflowScreen(),
+        );
+      default:
+        return null;
+    }
   }
 }

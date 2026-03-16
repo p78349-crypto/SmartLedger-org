@@ -174,7 +174,7 @@ module.exports = {
       'root_search': '루트 검색',
       'root_account_manage': '계정 관리',
       'root_month_end': '월말 정산',
-      'screen_saver_settings': '보호기 설정',
+      'page0_monthly_stats': '월별 통계',
       'icon_management_root': '루트 아이콘 관리',
 
       'application_settings': '애플리케이션 설정',
@@ -186,6 +186,7 @@ module.exports = {
       'nutrition_report': '레시피/식재료 검색',
       'settings': '설정',
       'backup': '백업',
+      'backup_settings': '백업 설정',
       'trash': '휴지통',
       'voice_shortcuts': '음성단축키',
       'voice_dashboard': '음성대시보드'
@@ -241,7 +242,7 @@ module.exports = {
       'root_search': '/root/search',
       'root_account_manage': '/root/accounts',
       'root_month_end': '/root/month-end',
-      'screen_saver_settings': '/root/screen-saver-settings',
+      'page0_monthly_stats': '/stats/monthly-simple',
       'icon_management_root': '/settings/icon-management-root',
 
       'application_settings': '/settings/application',
@@ -253,6 +254,7 @@ module.exports = {
       'nutrition_report': '/nutrition-report',
       'settings': '/settings',
       'backup': '/backup',
+      'backup_settings': '/backup',
       'trash': '/trash',
       'voice_shortcuts': '/settings/voice-shortcuts',
       'voice_dashboard': '/voice/dashboard'

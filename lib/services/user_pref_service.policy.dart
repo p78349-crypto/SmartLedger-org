@@ -5,7 +5,7 @@ part of 'user_pref_service.dart';
 const String _recipeSearchLastQueryKey = 'recipe_search_last_query';
 const String _recipeSearchHistoryKey = 'recipe_search_history';
 
-/// Resets all auth/security/screen-saver policies and optionally resets
+/// Resets all auth/security policies and optionally resets
 /// main-page configuration for every known account.
 Future<void> _resetAllPolicies({bool clearAccountPages = true}) async {
   final prefs = await SharedPreferences.getInstance();
@@ -17,36 +17,41 @@ Future<void> _resetAllPolicies({bool clearAccountPages = true}) async {
     PrefKeys.userPinEnabled,
     PrefKeys.userPasswordEnabled,
     PrefKeys.userBiometricEnabled,
+    PrefKeys.assetAuthEnabled,
+    PrefKeys.assetSecurityMode,
+    PrefKeys.assetSecurityLevel,
+    PrefKeys.assetPinEnabled,
+    PrefKeys.assetPasswordEnabled,
+    PrefKeys.assetBiometricEnabled,
     PrefKeys.rootPinSaltB64,
     PrefKeys.userPinSaltB64,
     PrefKeys.userPasswordSaltB64,
+    PrefKeys.assetPinSaltB64,
+    PrefKeys.assetPasswordSaltB64,
     PrefKeys.rootPinHashB64,
     PrefKeys.userPinHashB64,
     PrefKeys.userPasswordHashB64,
+    PrefKeys.assetPinHashB64,
+    PrefKeys.assetPasswordHashB64,
     PrefKeys.rootPinIterations,
     PrefKeys.userPinIterations,
     PrefKeys.userPasswordIterations,
+    PrefKeys.assetPinIterations,
+    PrefKeys.assetPasswordIterations,
     PrefKeys.userPinFailedAttempts,
     PrefKeys.userPasswordFailedAttempts,
+    PrefKeys.assetPinFailedAttempts,
+    PrefKeys.assetPasswordFailedAttempts,
     PrefKeys.userPinLockedUntilMs,
     PrefKeys.userPasswordLockedUntilMs,
+    PrefKeys.assetPinLockedUntilMs,
+    PrefKeys.assetPasswordLockedUntilMs,
     PrefKeys.rootPinFailedAttempts,
     PrefKeys.rootPinLockedUntilMs,
-    PrefKeys.screenSaverExitAuthFailedAttempts,
-    PrefKeys.screenSaverExitAuthLockedUntilMs,
     PrefKeys.rootAuthSessionUntilMs,
     PrefKeys.iconAllowAssetIconsOutsideAssetWhenUnlocked,
     PrefKeys.biometricAuthEnabled,
     PrefKeys.assetAuthSessionUntilMs,
-    PrefKeys.screenSaverEnabled,
-    PrefKeys.screenSaverIdleSeconds,
-    PrefKeys.screenSaverShowAssetSummary,
-    PrefKeys.screenSaverShowCharts,
-    PrefKeys.screenSaverShowBudget,
-    PrefKeys.screenSaverShowEmergency,
-    PrefKeys.screenSaverShowSpending,
-    PrefKeys.screenSaverShowRecent,
-    PrefKeys.screenSaverShowAssetFlow,
   ];
 
   for (final k in keysToRemove) {

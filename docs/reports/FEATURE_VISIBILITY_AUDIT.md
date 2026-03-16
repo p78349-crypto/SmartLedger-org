@@ -76,12 +76,13 @@
 
 ## 🔴 발견 사항
 
-### 1. 모순: rootScreenSaverSettings
+### 1. 페이지 0 "월별 통계" 아이콘
 ```
-위치 1: exclude_routes.txt (의도적 미노출)
-위치 2: Page 5 "보호기 설정" 아이콘 (노출됨)
+위치: Page 0 (현재 계정의 월별 통계)
+기능: MonthlyStatsScreen으로 연결 (accountName 파라미터 필요)
+라우트: /stats/monthly-simple
 ```
-**결정 필요:** 노출 또는 숨김?
+**결정:** 현재 계정의 통계만 표시 (ROOT 연결 금지)
 
 ### 2. 미할당 라우트 확인 필요
 

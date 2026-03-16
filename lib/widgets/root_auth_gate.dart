@@ -23,6 +23,12 @@ class _RootAuthGateState extends State<RootAuthGate> {
   bool _enabled = false;
   bool _authorized = false;
   String? _rootSecurityMode;
+  String? _rootSecurityLevel; // 'single' or 'dual'
+  
+  // 활성화된 보안 방식들
+  bool _pinEnabled = false;
+  bool _biometricEnabled = false;
+  bool _passwordEnabled = false;
 
   final AuthService _authService = AuthService();
   final RootPinService _rootPinService = RootPinService();
@@ -62,11 +68,20 @@ class _RootAuthGateState extends State<RootAuthGate> {
 
     final enabled = prefs.getBool(PrefKeys.rootAuthEnabled) ?? false;
     final securityMode = prefs.getString(PrefKeys.rootSecurityMode);
+    final securityLevel = prefs.getString(PrefKeys.rootSecurityLevel) ?? 'single';
+    
+    final pinEnabled = prefs.getBool(PrefKeys.rootPinEnabled) ?? false;
+    final biometricEnabled = prefs.getBool(PrefKeys.rootBiometricEnabled) ?? false;
+    final passwordEnabled = prefs.getBool(PrefKeys.rootPasswordEnabled) ?? false;
 
     if (!mounted) return;
     setState(() {
       _enabled = enabled;
       _rootSecurityMode = securityMode;
+      _rootSecurityLevel = securityLevel;
+      _pinEnabled = pinEnabled;
+      _biometricEnabled = biometricEnabled;
+      _passwordEnabled = passwordEnabled;
       _checking = false;
       _authorized = !enabled;
     });
@@ -81,30 +96,160 @@ class _RootAuthGateState extends State<RootAuthGate> {
   Future<void> _promptAuthentication(SharedPreferences prefs) async {
     if (!mounted || _authorized) return;
 
-    final mode = _rootSecurityMode;
+    // 2중 인증 모드인지 확인
+    final isDualAuth = _rootSecurityLevel == 'dual';
     
-    if (mode == null || mode.isEmpty) {
-      // Fallback: legacy password
-      await _authenticatePassword(prefs);
+    if (isDualAuth) {
+      // 2중 인증: 활성화된 2개 방식을 모두 통과해야 함
+      await _authenticateDual(prefs);
+    } else {
+      // 단일 인증: 활성화된 방식 중 하나만 통과하면 됨
+      await _authenticateSingle(prefs);
+    }
+  }
+  
+  Future<void> _authenticateSingle(SharedPreferences prefs) async {
+    final methods = _enabledMethods();
+
+    if (methods.isEmpty) {
+      // 레거시: rootSecurityMode로 폴백
+      final mode = _rootSecurityMode ?? 'password';
+      final ok = await _runAuth(mode, prefs);
+      if (ok) _setAuthorized();
       return;
     }
 
-    switch (mode) {
+    if (methods.length == 1) {
+      final ok = await _runAuth(methods.first, prefs);
+      if (ok) _setAuthorized();
+      return;
+    }
+
+    // 여러 개 중 선택
+    final selected = await _showMethodSelectionDialog(methods);
+    if (selected == null) return;
+    final ok = await _runAuth(selected, prefs);
+    if (ok) _setAuthorized();
+  }
+  
+  Future<void> _authenticateDual(SharedPreferences prefs) async {
+    final methods = _enabledMethods();
+
+    if (methods.length != 2) {
+      if (!mounted) return;
+      SnackbarUtils.showError(context, '2중 인증 설정이 올바르지 않습니다');
+      return;
+    }
+
+    // 1차 인증
+    final firstOk = await _runAuth(methods[0], prefs);
+    if (!firstOk) return;
+
+    if (!mounted) return;
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: const Text('1차 인증 통과'),
+        content: Text('2차 인증 (${_methodLabel(methods[1])})을 진행합니다.'),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('계속'),
+          ),
+        ],
+      ),
+    );
+
+    // 2차 인증
+    final secondOk = await _runAuth(methods[1], prefs);
+    if (secondOk) {
+      _setAuthorized();
+      if (mounted) SnackbarUtils.showSuccess(context, '2중 인증 완료');
+    }
+  }
+  
+  Future<String?> _showMethodSelectionDialog(List<String> methods) async {
+    return showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('인증 방식 선택'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: methods.map((method) {
+            final String label;
+            final IconData icon;
+            switch (method) {
+              case 'pin':
+                label = 'PIN';
+                icon = Icons.dialpad;
+                break;
+              case 'biometric':
+                label = '지문/생체인식';
+                icon = Icons.fingerprint;
+                break;
+              case 'password':
+                label = '비밀번호';
+                icon = Icons.password;
+                break;
+              default:
+                label = method;
+                icon = Icons.lock;
+            }
+            
+            return Card(
+              child: ListTile(
+                leading: Icon(icon),
+                title: Text(label),
+                onTap: () => Navigator.of(context).pop(method),
+              ),
+            );
+          }).toList(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('취소'),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  // 기존 _authenticatePin, _authenticateBiometric, _authenticatePassword는 
+  // 내부적으로 성공 시 _authorized = true로 설정하므로
+  // 결과를 반환하는 버전을 추가
+
+  // ──── 유틸 ────
+
+  List<String> _enabledMethods() {
+    final methods = <String>[];
+    if (_pinEnabled) methods.add('pin');
+    if (_biometricEnabled) methods.add('biometric');
+    if (_passwordEnabled) methods.add('password');
+    return methods;
+  }
+
+  String _methodLabel(String method) {
+    switch (method) {
       case 'pin':
-        await _authenticatePin(prefs);
-        break;
+        return 'PIN';
       case 'biometric':
-        await _authenticateBiometric(prefs);
-        break;
+        return '지문/생체인식';
       case 'password':
-        await _authenticatePassword(prefs);
-        break;
+        return '비밀번호';
       default:
-        await _authenticatePassword(prefs);
+        return method;
     }
   }
 
-  Future<void> _authenticatePin(SharedPreferences prefs) async {
+  void _setAuthorized() {
+    if (!mounted) return;
+    setState(() => _authorized = true);
+  }
+
+  Future<bool> _authenticatePinWithResult(SharedPreferences prefs) async {
     final pinController = TextEditingController();
     
     final result = await showDialog<bool>(
@@ -138,8 +283,8 @@ class _RootAuthGateState extends State<RootAuthGate> {
           ElevatedButton(
             onPressed: () async {
               final pin = pinController.text.trim();
-              if (pin.length != 6) {
-                SnackbarUtils.showWarning(dialogContext, 'PIN은 6자리여야 합니다');
+              if (pin.length != 6 || !RegExp(r'^\d{6}$').hasMatch(pin)) {
+                SnackbarUtils.showWarning(dialogContext, 'PIN은 6자리 숫자여야 합니다');
                 return;
               }
 
@@ -170,30 +315,32 @@ class _RootAuthGateState extends State<RootAuthGate> {
     );
 
     pinController.dispose();
-
-    if (result == true) {
-      if (!mounted) return;
-      setState(() => _authorized = true);
-    }
+    return result == true;
   }
-
-  Future<void> _authenticateBiometric(SharedPreferences prefs) async {
+  
+  Future<bool> _authenticateBiometricWithResult(SharedPreferences prefs) async {
     final result = await _authService.authenticateDevice(
       reason: 'ROOT 접근을 위해 인증이 필요합니다',
     );
 
     if (result.ok) {
-      if (!mounted) return;
-      setState(() => _authorized = true);
+      return true;
     } else if (result.status == AuthStatus.unavailable) {
-      await _authenticatePassword(prefs);
+      // 생체인식 사용 불가 시 다른 방식으로 대체
+      if (_passwordEnabled) {
+        return _authenticatePasswordWithResult(prefs);
+      } else if (_pinEnabled) {
+        return _authenticatePinWithResult(prefs);
+      }
+      return _authenticatePasswordWithResult(prefs);
     } else {
-      if (!mounted) return;
+      if (!mounted) return false;
       SnackbarUtils.showError(context, '생체인식 실패');
+      return false;
     }
   }
-
-  Future<void> _authenticatePassword(SharedPreferences prefs) async {
+  
+  Future<bool> _authenticatePasswordWithResult(SharedPreferences prefs) async {
     final passwordController = TextEditingController();
 
     final result = await showDialog<bool>(
@@ -230,11 +377,19 @@ class _RootAuthGateState extends State<RootAuthGate> {
                 return;
               }
 
-              // Use RootPinService because RootSecuritySetupScreen stores ROOT password there.
-              final verifyResult = await _rootPinService.verifyPinWithPolicy(
-                prefs,
-                pin: password,
-              );
+              // 별도 비밀번호 저장소에서 검증 (레거시 호환: PIN 저장소 폴백)
+              final RootPinPolicyResult verifyResult;
+              if (_rootPinService.isPasswordConfigured(prefs)) {
+                verifyResult = await _rootPinService.verifyPasswordWithPolicy(
+                  prefs,
+                  password: password,
+                );
+              } else {
+                verifyResult = await _rootPinService.verifyPinWithPolicy(
+                  prefs,
+                  pin: password,
+                );
+              }
 
               if (verifyResult.status == RootPinPolicyStatus.success) {
                 if (!dialogContext.mounted) return;
@@ -258,10 +413,21 @@ class _RootAuthGateState extends State<RootAuthGate> {
     );
 
     passwordController.dispose();
+    return result == true;
+  }
 
-    if (result == true) {
-      if (!mounted) return;
-      setState(() => _authorized = true);
+  // ──── 통합 인증 실행기 ────
+
+  Future<bool> _runAuth(String method, SharedPreferences prefs) async {
+    switch (method) {
+      case 'pin':
+        return _authenticatePinWithResult(prefs);
+      case 'biometric':
+        return _authenticateBiometricWithResult(prefs);
+      case 'password':
+        return _authenticatePasswordWithResult(prefs);
+      default:
+        return _authenticatePasswordWithResult(prefs);
     }
   }
 

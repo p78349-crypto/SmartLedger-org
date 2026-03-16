@@ -1,0 +1,128 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Run tests
+        run: flutter test --coverage
+
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-coverage
+          path: coverage/lcov.info
+
+  build:
+    name: Build (obfuscated)
+    needs: test
+    runs-on: ubuntu-latest
+    env:
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+      SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build obfuscated Android APK
+        run: |
+          flutter build apk --release --obfuscate --split-debug-info=build/debug-info/android
+
+      - name: Upload debug-info artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-debug-info
+          path: build/debug-info/android/**
+
+      - name: Optionally upload mappings to Sentry
+        if: env.SENTRY_AUTH_TOKEN != '' && env.SENTRY_ORG != '' && env.SENTRY_PROJECT != ''
+        run: |
+          echo "SENTRY_AUTH_TOKEN present — attempting to upload debug info using sentry-cli"
+          curl -sL https://sentry.io/get-cli/ | bash
+          sentry-cli --version
+          # Use commit SHA as release id
+          RELEASE="smartledger@${GITHUB_SHA}"
+          echo "Creating Sentry release: $RELEASE"
+          sentry-cli releases new -p $SENTRY_PROJECT $RELEASE || true
+          # Attach commits to the release (auto-detect via git)
+          echo "Setting commits for release: $RELEASE"
+          sentry-cli releases set-commits --auto $RELEASE || true
+          sentry-cli upload-dif --org $SENTRY_ORG --project $SENTRY_PROJECT --include-sources false build/debug-info/android || true
+          sentry-cli releases finalize $RELEASE || true
+          echo "Sentry upload complete for release: $RELEASE"
+
+  build_ios:
+    name: Build iOS (obfuscated)
+    needs: test
+    runs-on: macos-latest
+    env:
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+      SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build obfuscated iOS (no codesign)
+        run: |
+          # Note: --no-codesign avoids provisioning/profile requirements in CI
+          flutter build ios --release --no-codesign --obfuscate --split-debug-info=build/debug-info/ios || true
+
+      - name: Upload iOS debug-info artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-debug-info
+          path: build/debug-info/ios/**
+
+      - name: Optionally upload iOS mappings to Sentry
+        if: env.SENTRY_AUTH_TOKEN != '' && env.SENTRY_ORG != '' && env.SENTRY_PROJECT != ''
+        run: |
+          echo "Uploading iOS debug info to Sentry"
+          curl -sL https://sentry.io/get-cli/ | bash
+          RELEASE="smartledger@${GITHUB_SHA}"
+          sentry-cli releases new -p $SENTRY_PROJECT $RELEASE || true
+          sentry-cli releases set-commits --auto $RELEASE || true
+          sentry-cli upload-dif --org $SENTRY_ORG --project $SENTRY_PROJECT --include-sources false build/debug-info/ios || true
+          sentry-cli releases finalize $RELEASE || true
+          echo "Sentry upload complete for iOS release: $RELEASE"

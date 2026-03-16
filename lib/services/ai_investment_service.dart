@@ -10,8 +10,8 @@ import 'aicore_gemini_service.dart'; // 오프라인 AI 추가
 part 'ai_investment_service_extensions.dart';
 part 'ai_investment_service_utils.dart';
 
-/// AI Investment Advisory Service
-/// Provides intelligent investment recommendations and portfolio analysis
+/// AI Investment Insight Service
+/// Provides investment reference information and portfolio analysis
 class AiInvestmentService {
   static final AiInvestmentService _instance = AiInvestmentService._internal();
   factory AiInvestmentService() => _instance;
@@ -20,7 +20,7 @@ class AiInvestmentService {
   final AssetService _assetService = AssetService();
   final UserPrefService _userPrefService = UserPrefService();
 
-  /// Analyzes current portfolio and provides investment recommendations
+  /// Analyzes current portfolio and provides investment reference information
   Future<PortfolioAnalysis> analyzePortfolio({
     InvestmentRiskLevel? riskPreference,
     InvestmentTimeHorizon? timeHorizon,
@@ -65,7 +65,7 @@ class AiInvestmentService {
     }
   }
 
-  /// Generates personalized investment recommendations
+  /// Generates personalized investment reference information
   Future<List<InvestmentRecommendation>> generateInvestmentAdvice({
     required double investmentAmount,
     InvestmentRiskLevel? riskLevel,
@@ -91,7 +91,7 @@ class AiInvestmentService {
       );
       
     } catch (e) {
-      throw Exception('Failed to generate investment advice: $e');
+      throw Exception('Failed to generate investment reference information: $e');
     }
   }
 
@@ -101,32 +101,37 @@ class AiInvestmentService {
     
     // Calculate total portfolio value
     for (final asset in assets) {
-      totalValue += asset.currentValue;
+      totalValue += asset.amount;
     }
     
     if (totalValue == 0) return allocation;
     
     // Map assets to investment types and calculate percentages
     for (final asset in assets) {
-      final investmentType = _mapAssetToInvestmentType(asset.assetType);
-      final percentage = (asset.currentValue / totalValue) * 100.0;
+      final investmentType = _mapAssetToInvestmentType(asset.category);
+      final percentage = (asset.amount / totalValue) * 100.0;
       allocation[investmentType] = (allocation[investmentType] ?? 0.0) + percentage;
     }
     
     return allocation;
   }
 
-  InvestmentAssetType _mapAssetToInvestmentType(String assetType) {
-    final type = assetType.toLowerCase();
-    
-    if (type.contains('stock') || type.contains('equity')) return InvestmentAssetType.stocks;
-    if (type.contains('bond') || type.contains('treasury')) return InvestmentAssetType.bonds;
-    if (type.contains('etf') || type.contains('fund')) return InvestmentAssetType.etf;
-    if (type.contains('crypto') || type.contains('bitcoin')) return InvestmentAssetType.cryptocurrency;
-    if (type.contains('real estate') || type.contains('property')) return InvestmentAssetType.realEstate;
-    if (type.contains('commodity') || type.contains('gold')) return InvestmentAssetType.commodities;
-    if (type.contains('cash') || type.contains('savings')) return InvestmentAssetType.cash;
-    
-    return InvestmentAssetType.stocks; // Default
+  InvestmentAssetType _mapAssetToInvestmentType(AssetCategory category) {
+    switch (category) {
+      case AssetCategory.stock:
+        return InvestmentAssetType.stocks;
+      case AssetCategory.bond:
+        return InvestmentAssetType.bonds;
+      case AssetCategory.crypto:
+        return InvestmentAssetType.cryptocurrency;
+      case AssetCategory.realEstate:
+      case AssetCategory.company:
+        return InvestmentAssetType.realEstate;
+      case AssetCategory.deposit:
+      case AssetCategory.cash:
+        return InvestmentAssetType.cash;
+      case AssetCategory.other:
+        return InvestmentAssetType.stocks; // Default fallback
+    }
   }
 }

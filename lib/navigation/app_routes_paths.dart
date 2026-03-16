@@ -31,11 +31,16 @@ class AppRoutes {
   static const trash = '/trash';
   static const backup = '/backup';
   static const settings = '/settings';
+  static const subscriptionManage = '/settings/subscription-manage';
+  static const serverSyncSettings = '/settings/server-sync';
   static const applicationSettings = '/settings/application';
+  static const databaseEncryption = '/settings/internal/database-encryption';
+  static const securitySettings = '/settings/security';
   static const iconManagement = '/settings/icon-management';
   static const iconManagement2 = '/settings/icon-management-2';
   static const iconManagementAsset = '/settings/icon-management-asset';
   static const iconManagementRoot = '/settings/icon-management-root';
+  static const iconManagementSettings = '/settings/icon-management-settings';
   static const pageIconManagement = '/page/icon-management';
   static const featureIconsCatalog = '/settings/feature-icons-catalog';
   static const themeSettings = '/settings/theme';
@@ -67,6 +72,7 @@ class AppRoutes {
   static const categoryStats = '/stats/category';
   static const cardDiscountStats = '/stats/card-discount';
   static const pointsMotivationStats = '/stats/points-motivation';
+  static const rewardSystemStats = '/stats/reward-system';
   static const spendingAnalysis = '/stats/spending-analysis';
   static const weatherPricePrediction = '/stats/weather-price-prediction';
   static const weatherManualInput = '/weather/manual-input';
@@ -112,6 +118,7 @@ class AppRoutes {
   static const assetSimpleInput = '/asset/input/simple';
   static const assetDetailInput = '/asset/input/detail';
   static const assetProject100m = '/asset/project-100m';
+  static const assetSecuritySettings = '/asset/security-settings';
 
   static const fixedCostTab = '/fixed-cost/tab';
   static const fixedCostStats = '/fixed-cost/stats';
@@ -125,10 +132,7 @@ class AppRoutes {
   static const rootSearch = '/root/search';
   static const rootAccountManage = '/root/accounts';
   static const rootMonthEnd = '/root/month-end';
-
-  static const rootScreenSaverSettings = '/root/screen-saver-settings';
-  static const rootScreenSaverExposureSettings =
-      '/root/screen-saver-exposure-settings';
+  static const rootSecuritySetup = '/root/security-setup';
 
   // CEO assistant routes
   static const ceoAssistant = '/root/ceo/assistant';
@@ -154,4 +158,20 @@ class AppRoutes {
   static const advancedFinancialAnalytics = '/analytics/advanced-financial';
   static const aiModelSelector = '/ai/model-selector';
   static const customGemma2Test = '/dev/custom-gemma2-test'; // 🔬 커스텀 모델 테스트
+
+  // Help center routes
+  static const helpCenter = '/help/center';
+  static const helpQuickStart = '/help/quick-start';
+  static const helpUserManual = '/help/user-manual';
+  static const helpTransactions = '/help/transactions';
+  static const helpStatistics = '/help/statistics';
+  static const helpAssets = '/help/assets';
+  static const helpShopping = '/help/shopping';
+  static const helpInventory = '/help/inventory';
+  static const helpBackup = '/help/backup';
+  static const helpFaq = '/help/faq';
+  static const helpTips = '/help/tips';
+  static const helpChangelog = '/help/changelog';
+  // ⭐ 핵심 워크플로우
+  static const helpRecipeWorkflow = '/help/recipe-workflow';
 }

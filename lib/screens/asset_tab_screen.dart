@@ -9,17 +9,17 @@ import 'package:local_auth/local_auth.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/asset.dart';
-import '_verify_current_user_password_dialog.dart';
-import '_verify_current_user_pin_dialog.dart';
+import '_verify_current_asset_password_dialog.dart';
+import '_verify_current_asset_pin_dialog.dart';
 import 'asset_allocation_screen.dart';
 import 'asset_dashboard_screen.dart';
 import 'asset_input_screen.dart';
 import 'asset_simple_input_screen.dart';
+import '../services/asset_password_service.dart';
+import '../services/asset_pin_service.dart';
 import '../services/asset_service.dart';
 import '../services/auth_service.dart';
 import '../services/root_pin_service.dart';
-import '../services/user_password_service.dart';
-import '../services/user_pin_service.dart';
 import '../utils/icon_catalog.dart';
 import '../utils/pref_keys.dart';
 import '../utils/utils.dart';
@@ -107,8 +107,8 @@ class _AssetTabScreenState extends State<AssetTabScreen> {
   bool _biometricAuthEnabled = false;
 
   final AuthService _authService = AuthService();
-  final UserPinService _userPinService = UserPinService();
-  final UserPasswordService _userPasswordService = UserPasswordService();
+  final AssetPinService _assetPinService = AssetPinService();
+  final AssetPasswordService _assetPasswordService = AssetPasswordService();
 
   bool _rootAuthEnabled = true;
   String _rootAuthMode = 'integrated';

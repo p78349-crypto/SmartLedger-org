@@ -427,7 +427,7 @@
 | `animated_list_item.dart` | 애니메이션 리스트 |
 | `asset_move_dialog.dart` | 자산 이동 다이얼로그 |
 | `emergency_fund_transfer_dialog.dart` | 비상금 이체 |
-| `investment_recommendation_dialog.dart` | 투자 추천 |
+| `investment_recommendation_dialog.dart` | 투자 참고정보 |
 | `month_end_carryover_dialog.dart` | 월말 이월 |
 | `icon_actions_menu.dart` | 아이콘 액션 메뉴 |
 | `background_widget.dart` | 배경 위젯 |

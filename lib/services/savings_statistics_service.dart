@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/cooking_usage_log.dart';
 import '../shared/errors.dart';
 import '../shared/result.dart';
+import 'reward_badge_service.dart';
 import 'transaction_service.dart';
 import '../utils/savings_statistics_utils.dart';
 
@@ -68,6 +69,22 @@ class SavingsStatisticsService {
     );
     logs.value = [...logs.value, log];
     await _save();
+
+    // Reward: food-rescue medal (best-effort).
+    try {
+      final hasUsed = totalUsedPrice > 0 ||
+          (usedIngredientsJson.trim().isNotEmpty &&
+              usedIngredientsJson.trim() != '[]');
+      if (hasUsed) {
+        await RewardBadgeService.instance.awardOnce(
+          accountName: 'default',
+          type: RewardBadgeService.typeFoodRescue,
+          dedupeKey: id,
+        );
+      }
+    } catch (_) {
+      // Ignore reward failures.
+    }
   }
 
   /// 냉파 성공 지수: 챌린지 기간(20일~말일) 동안 추가 구매 없이 해결한 끼니 수

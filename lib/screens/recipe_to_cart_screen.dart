@@ -270,16 +270,26 @@ class _RecipeToCartScreenState extends State<RecipeToCartScreen> {
               child: SizedBox(
                 width: double.infinity,
                 child: FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: theme.colorScheme.primary,
+                    foregroundColor: theme.colorScheme.onPrimary,
+                    disabledBackgroundColor: theme.colorScheme.surfaceContainerHighest,
+                    disabledForegroundColor: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    minimumSize: const Size.fromHeight(52),
+                    textStyle: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                   onPressed: _sending || _selectedCount == 0
                       ? null
                       : _sendToCart,
                   icon: _sending
-                      ? const SizedBox(
+                      ? SizedBox(
                           width: 20,
                           height: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: Colors.white,
+                            color: theme.colorScheme.onPrimary,
                           ),
                         )
                       : const Icon(Icons.shopping_cart),

@@ -50,16 +50,10 @@ class _RootRoutes {
           builder: (_) => const RootAuthGate(child: RootMonthEndScreen()),
         );
 
-      case AppRoutes.rootScreenSaverSettings:
+      case AppRoutes.rootSecuritySetup:
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => const RootAuthGate(child: RootScreenSaverSettingsScreen()),
-        );
-
-      case AppRoutes.rootScreenSaverExposureSettings:
-        return MaterialPageRoute(
-          settings: settings,
-          builder: (_) => const RootScreenSaverExposureSettingsScreen(),
+          builder: (_) => const RootAuthGate(child: RootSecuritySetupScreen()),
         );
 
       case AppRoutes.ceoAssistant:

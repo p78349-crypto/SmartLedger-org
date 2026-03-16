@@ -115,7 +115,15 @@ class _AssetRoutes {
         final a = args as AccountArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => AssetRouteAuthGate(
+          builder: (context) => AssetRouteAuthGate(
+            requiresSubscription: true,
+            subscriptionUserId: a.accountName,
+            onSubscriptionAction: () {
+              Navigator.of(context).pushNamed(
+                AppRoutes.subscriptionManage,
+                arguments: a.accountName,
+              );
+            },
             child: AssetPortfolioAnalysisScreen(accountName: a.accountName),
           ),
         );
@@ -124,9 +132,31 @@ class _AssetRoutes {
         final a = args as AccountArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => AssetRouteAuthGate(
+          builder: (context) => AssetRouteAuthGate(
+            requiresSubscription: true,
+            subscriptionUserId: a.accountName,
+            onSubscriptionAction: () {
+              Navigator.of(context).pushNamed(
+                AppRoutes.subscriptionManage,
+                arguments: a.accountName,
+              );
+            },
             child: AssetInvestmentRoadmapScreen(accountName: a.accountName),
           ),
+        );
+
+      case AppRoutes.aiInvestmentAdvisor:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const AssetRouteAuthGate(
+            child: AiInvestmentAdvisorScreen(),
+          ),
+        );
+
+      case AppRoutes.assetSecuritySettings:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const AssetSecuritySettingsScreen(),
         );
 
       case AppRoutes.fixedCostTab:

@@ -1,4 +1,10 @@
-# Main Page Layout Policy (2026-02-03)
+# Main Page Layout Policy (ARCHIVED / Redirect)
+
+> ✅ 최신 단일 기준(페이지 인덱스/Reserved/아이콘 관리): `docs/policies/ICON_MANAGEMENT_SINGLE_SOURCE_KO.md`
+>
+> ✅ 개발 핵심문서(기능 요약 + 연결고리): `docs/developer/CORE_FEATURE_MAP_DEV_KO.md`
+
+이 문서는 과거 기록이며, 현재 정책과 불일치할 수 있어 **정책 문서로 사용하지 않습니다**.
 
 ## Overview
 This document defines the page identity and icon distribution for the main Smart Ledger icon grid pages.
@@ -10,11 +16,11 @@ This document defines the page identity and icon distribution for the main Smart
 |---------|----------|----------|----------|-----------|--------|
 | 0 | 1 | 대시보드 | Dashboard | 0 (dynamic) | Reserved |
 | 1 | 2 | 지출입력 | Expense Input | 5 | Active |
-| 2 | 3 | 수입 | Income | 4 | Active |
-| 3 | 4 | 통계 | Statistics | 12 | Active |
-| 4 | 5 | 자산 | Assets | 5 | Active |
-| 5 | 6 | ROOT | Root Management | 6 | Active |
-| 6 | 7 | 설정 | Settings | 8 | Active |
+| 2 | 3 | 통계 | Statistics | 12 | Active |
+| 3 | 4 | 자산 | Assets | 5 | Active |
+| 4 | 5 | ROOT | Root | 0 | Active |
+| 5 | 6 | 설정 | Settings | 0 | Active |
+| 6 | 7 | 미사용 | Unused | 0 | Reserved |
 | 7 | 8 | 예비 | Spare | 0 | Reserved |
 | 8 | 9 | 예비 | Spare | 0 | Reserved |
 | 9 | 10 | 예비 | Spare | 0 | Reserved |
@@ -42,17 +48,7 @@ This document defines the page identity and icon distribution for the main Smart
 - **Item Count**: 5
 - **Status**: Active
 
-### Index 2 (UI: 페이지 3): Income (수입)
-- **Purpose**: Income entry and distribution
-- **Items**:
-  - `income_add` - 수입 입력 (Add Income)
-  - `income_detail` - 수입 상세 (Income Detail)
-  - `income_split` - 수입배분 (Income Split)
-  - `refund_menu` - 반품 (Refunds)
-- **Item Count**: 4
-- **Status**: Active
-
-### Index 3 (UI: 페이지 4): Statistics (통계)
+### Index 2 (UI: 페이지 3): Statistics (통계)
 - **Purpose**: Financial statistics and reporting
 - **Items**:
   - `accountStats` - 통계 (Stats)
@@ -70,7 +66,7 @@ This document defines the page identity and icon distribution for the main Smart
 - **Item Count**: 12
 - **Status**: Active
 
-### Index 4 (UI: 페이지 5): Assets (자산)
+### Index 3 (UI: 페이지 4): Assets (자산)
 - **Purpose**: Asset management and tracking
 - **Items**:
   - `asset_dashboard` - 자산 대시보드 (Asset Dashboard)
@@ -79,32 +75,22 @@ This document defines the page identity and icon distribution for the main Smart
   - `asset_assessment` - 자산 평가 (Assessment)
   - `icon_management_asset_entry` - 아이콘 관리 (Icon Manager)
 - **Item Count**: 5
-- **Status**: Active (moved to index 4 on 2026-02-03)
+- **Status**: Active (moved to index 3 on 2026-02-23)
 
-### Index 5 (UI: 페이지 6): ROOT (루트 관리)
+### Index 4 (UI: 페이지 5): ROOT (루트)
 - **Purpose**: Root-level account and system management
 - **Items**:
   - `root_transactions` - 전체 거래 (All Transactions)
   - `root_search` - 검색 (Search)
   - `root_account_manage` - 계정 관리 (Account Manager)
   - `root_month_end` - 월말 정산 (Month-end Close)
-  - `root_screen_saver_settings` - 보호기 설정 (Screen Protection)
+  - `page0_monthly_stats` - 월별 통계 (Monthly Stats) - 현재 계정
   - `icon_management_root_entry` - 아이콘 관리 (Icon Manager)
-- **Item Count**: 6
+- **Item Count**: (policy)
 - **Status**: Active
 
-### Index 6 (UI: 페이지 7): Settings (설정)
-- **Purpose**: App-wide settings and preferences
-- **Items**:
-  - `settings` - 설정 (Settings)
-  - `settings_screen_saver_settings` - 보호기 설정 (Screen Protection)
-  - `theme_settings` - 테마 (Theme)
-  - `display_settings` - 표시/폰트 (Display/Font)
-  - `language_settings` - 언어 설정 (Language)
-  - `currency_settings` - 통화 설정 (Currency)
-  - `backup` - 백업 (Backup)
-  - `trash` - 휴지통 (Trash)
-- **Item Count**: 8
+### Index 5 (UI: 페이지 6): Settings (설정)
+- **Purpose**: App settings, backup, security
 - **Status**: Active
 
 ### Index 7-14 (UI: 페이지 8-15): Spare (예비)
@@ -124,8 +110,9 @@ All icon labels support bilingual display:
 
 ### Reserved Pages by Feature
 - **Assets**: Index 4 (UI: 페이지 5) - 자산 관련 아이콘
-- **Root**: Index 5 (UI: 페이지 6) - ROOT 관리 아이콘
-- **Settings**: Index 6 (UI: 페이지 7) - 설정 관련 아이콘
+- **Stats**: Index 2 (UI: 페이지 3) - 통계 관련 아이콘
+- **Assets**: Index 3 (UI: 페이지 4) - 자산 관련 아이콘
+- **Root/Settings**: Index 5 (UI: 페이지 6)
 
 ### Icon Placement Rules
 - **Reserved Module Icons**: Cannot be placed on non-policy pages
@@ -147,11 +134,11 @@ The app uses logical module keys for icon access (preferred over hard-coded page
 ```
 'page1'     → pages[0]  (대시보드/Dashboard)
 'purchase'  → pages[1]  (거래/Transactions)
-'income'    → pages[2]  (수입/Income)
-'stats'     → pages[3]  (통계/Statistics)
-'asset'     → pages[4]  (자산/Assets)
-'root'      → pages[5]  (ROOT/Root Management)
-'settings'  → pages[6]  (설정/Settings)
+'income'    → (removed)
+'stats'     → pages[2]  (통계/Statistics)
+'asset'     → pages[3]  (자산/Assets)
+'root'      → pages[4]  (ROOT)
+'settings'  → pages[5]  (Settings)
 ```
 
 ## Notes

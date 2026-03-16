@@ -65,6 +65,7 @@ class MainFeatureIconCatalog {
     }
 
     switch (moduleKey) {
+      case 'page0':
       case 'page1':
         return at(0);
       case 'purchase':
@@ -96,6 +97,68 @@ class MainFeatureIconCatalog {
     return _buildDefaultPages(voiceVisible: voiceVisible);
   }
 
+  /// Curated default icon ids used for initial/basic exposure per page.
+  /// Empty set means "use the page's full item list as-is".
+  static Set<String> defaultIconIdsForPage(int pageIndex) {
+    switch (pageIndex) {
+      case 1:
+        return const {
+          'quick_simple_expense_input',
+          'nutrition_report',
+          'shopping_cart',
+          'transactionAdd',
+          'daily_transactions',
+          'wms_io',
+          'consumable_inventory',
+          'wms_guide',
+        };
+      case 3:
+        return const {
+          'accountStatsSearch',
+          'accountStats',
+          'period_stats_7d',
+          'period_stats_1m',
+          'period_stats_3m',
+          'period_stats_6m',
+          'period_stats_1y',
+          'fixed_cost_stats',
+          'spending_analysis',
+        };
+      case 4:
+        return const {
+          'asset_security_settings',
+          'asset_simple_input',
+          'asset_list',
+          'asset_analysis',
+          'asset_export',
+          'asset_statistics',
+        };
+      case 5:
+        return const {
+          'root_security_setup',
+          'root_summary',
+          'root_search',
+          'root_account_manage',
+          'root_account_summary',
+          'root_month_end',
+          'root_transactions',
+          'backup',
+        };
+      case 6:
+        return const {
+          'application_settings',
+          'security_settings',
+          'theme_settings',
+          'language_settings',
+          'currency_settings',
+          'backup_settings',
+          'icon_management_settings_entry',
+        };
+      default:
+        return const <String>{};
+    }
+  }
+
   static List<MainFeaturePage> _buildDefaultPages({
     required bool voiceVisible,
   }) {
@@ -105,6 +168,8 @@ class MainFeatureIconCatalog {
         items: buildPageZeroItems(voiceVisible: voiceVisible),
       ),
       const MainFeaturePage(index: 1, items: kPurchasePageItems),
+      // NOTE: Keep income at index 2 so the main page indices match policy:
+      // 통계=3, 자산=4, ROOT=5, 설정=6.
       const MainFeaturePage(index: 2, items: kIncomePageItems),
       const MainFeaturePage(index: 3, items: kStatsPageItems),
       const MainFeaturePage(index: 4, items: kAssetPageItems),
@@ -113,9 +178,10 @@ class MainFeatureIconCatalog {
         index: 6,
         items: buildSettingsItems(voiceVisible: voiceVisible),
       ),
+      const MainFeaturePage(index: 7, items: <MainFeatureIcon>[]),
       ...List<MainFeaturePage>.generate(
-        8,
-        (i) => MainFeaturePage(index: 7 + i, items: const []),
+        7,
+        (i) => MainFeaturePage(index: 8 + i, items: const []),
       ),
     ];
   }

@@ -1,8 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smart_ledger/models/transaction.dart';
+import 'package:smart_ledger/services/audit_log_service.dart';
 import 'package:smart_ledger/services/transaction_service.dart';
 import 'package:smart_ledger/utils/pref_keys.dart';
+import 'package:smart_ledger/widgets/user_permission_badge.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -19,7 +23,12 @@ void main() {
         PrefKeys.txStorageBackendV1: 'prefs',
       });
       service = TransactionService();
+      service.resetForTesting();
       await service.loadTransactions();
+      final auditFile = File('audit_log.jsonl');
+      if (auditFile.existsSync()) {
+        await auditFile.delete();
+      }
       // Ensure any leftover test account is removed
       if (service.getAllAccountNames().contains('test_account')) {
         await service.deleteAccount('test_account');
@@ -55,6 +64,132 @@ void main() {
       expect(transactions.length, equals(1));
       expect(transactions.first.id, equals('test-tx-001'));
       expect(transactions.first.description, equals('식비'));
+    });
+
+    test('should write standardized transaction audit fields on add', () async {
+      final tx = Transaction(
+        id: 'audit-tx-001',
+        type: TransactionType.expense,
+        amount: 32100,
+        date: DateTime.now(),
+        description: '감사 로그 필드 테스트',
+      );
+
+      await service.addTransaction('test_account', tx);
+      final logs = await AuditLogService.getRecentLogs(limit: 20);
+      final entry = logs.firstWhere((e) => e.action == 'transaction_added');
+
+      expect(entry.success, isTrue);
+      expect(entry.targetResource, equals('test_account'));
+      expect(entry.metadata?['accountId'], equals('test_account'));
+      expect(entry.metadata?['amount'], equals(32100));
+      expect(entry.metadata?['transactionId'], equals('audit-tx-001'));
+      expect(entry.metadata?['schemaVersion'], equals('transaction_event_v1'));
+    });
+
+    test('should emit anomaly signal for large transaction', () async {
+      final tx = Transaction(
+        id: 'anomaly-large-001',
+        type: TransactionType.expense,
+        amount: 1500000,
+        date: DateTime.now(),
+        description: '고액 거래',
+      );
+
+      await service.addTransaction('test_account', tx);
+      final logs = await AuditLogService.getRecentLogs(limit: 30);
+      final signal = logs.firstWhere(
+        (e) => e.action == 'anomaly_signal_large_transaction',
+      );
+
+      expect(signal.eventType, equals(AuditEventType.policyEnforcement));
+      expect(signal.metadata?['transactionId'], equals('anomaly-large-001'));
+      expect(signal.metadata?['ruleId'], equals('rule_large_transaction_v1'));
+      expect(signal.metadata?['threshold'], equals(1000000.0));
+      expect(signal.metadata?['observedValue'], equals(1500000.0));
+    });
+
+    test('should emit anomaly signal for repeated failed actions', () async {
+      for (var i = 0; i < 3; i++) {
+        await AuditLogService.logFailure(
+          eventType: AuditEventType.authentication,
+          action: 'seed_failed_auth_$i',
+          userLevel: UserPermissionLevel.operator,
+          errorMessage: 'seed',
+        );
+      }
+
+      final tx = Transaction(
+        id: 'anomaly-repeat-001',
+        type: TransactionType.expense,
+        amount: 2000,
+        date: DateTime.now(),
+        description: '반복 실패 이후 거래',
+      );
+
+      await service.addTransaction('test_account', tx);
+      final logs = await AuditLogService.getRecentLogs(limit: 40);
+      final signal = logs.firstWhere(
+        (e) => e.action == 'anomaly_signal_repeated_failures',
+      );
+
+      expect(signal.eventType, equals(AuditEventType.policyEnforcement));
+      expect(signal.metadata?['transactionId'], equals('anomaly-repeat-001'));
+      expect(signal.metadata?['ruleId'], equals('rule_repeated_failures_v1'));
+      expect(signal.metadata?['threshold'], equals(3));
+      expect(signal.metadata?['observedValue'], equals(3));
+
+      final summary = logs.firstWhere(
+        (e) => e.action == 'anomaly_detection_summary',
+      );
+      expect(summary.eventType, equals(AuditEventType.securityViolation));
+      expect(summary.metadata?['ruleId'], equals('rule_security_alert'));
+      expect(summary.metadata?['threshold'], equals(3));
+    });
+
+    test('scenario A: normal transaction should not emit anomaly signals', () async {
+      final tx = Transaction(
+        id: 'scenario-a-001',
+        type: TransactionType.expense,
+        amount: 12000,
+        date: DateTime.now().copyWith(hour: 14, minute: 20),
+        description: '정상 거래',
+      );
+
+      await service.addTransaction('test_account', tx);
+      final logs = await AuditLogService.getRecentLogs(limit: 30);
+
+      final hasAnomalySignal = logs.any(
+        (e) => e.action.startsWith('anomaly_signal_') ||
+            e.action == 'anomaly_detection_summary',
+      );
+
+      expect(hasAnomalySignal, isFalse);
+    });
+
+    test('scenario B: boundary anomaly should warn without lock', () async {
+      final prefs = await SharedPreferences.getInstance();
+      final tx = Transaction(
+        id: 'scenario-b-001',
+        type: TransactionType.expense,
+        amount: 1200000,
+        date: DateTime.now().copyWith(hour: 13, minute: 10),
+        description: '경계 거래',
+      );
+
+      await service.addTransaction('test_account', tx);
+      final logs = await AuditLogService.getRecentLogs(limit: 40);
+
+      expect(
+        logs.any((e) => e.action == 'anomaly_signal_large_transaction'),
+        isTrue,
+      );
+      expect(
+        logs.any((e) => e.action == 'automation_account_lock_applied'),
+        isFalse,
+      );
+      expect(prefs.getInt(PrefKeys.userPinLockedUntilMs), isNull);
+      expect(prefs.getInt(PrefKeys.rootPinLockedUntilMs), isNull);
     });
 
     test('should add multiple transactions', () async {

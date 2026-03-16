@@ -21,7 +21,7 @@ class InvestmentRecommendationDialog extends StatelessWidget {
     final monthsToComplete = (remainingAmount / monthlyAverageSavings).ceil();
 
     return AlertDialog(
-      title: const Text('🌟 예금 투자 추천'),
+      title: const Text('🌟 예금 분석 참고정보'),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -85,10 +85,10 @@ class InvestmentRecommendationDialog extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            Text('예금 투자 시작', style: Theme.of(context).textTheme.labelMedium),
+            Text('예금 분석 요약', style: Theme.of(context).textTheme.labelMedium),
             const SizedBox(height: 8),
             Text(
-              '비상금이 충분히 준비되었습니다. 예금에 투자를 시작하면 자산 증식 기회를 놓치지 않을 수 있습니다.',
+              '비상금 준비 현황과 월 저축 흐름을 기반으로 예금 계획을 점검할 수 있습니다.',
               style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: 16),
@@ -102,13 +102,13 @@ class InvestmentRecommendationDialog extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '💡 투자 전략',
+                    '💡 분석 포인트',
                     style: Theme.of(context).textTheme.labelSmall,
                   ),
                   const SizedBox(height: 8),
                   Text(
                     '• 비상금: 안전하게 유지 (120,000원)\n'
-                    '• 추가 예금: 예금에 투자\n'
+                    '• 추가 예금: 여유 자금 범위 내 계획 점검\n'
                     '• 목표: $monthsToComplete개월 후 재평가',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
@@ -131,7 +131,7 @@ class InvestmentRecommendationDialog extends StatelessWidget {
             Navigator.pop(context);
             onInvest();
           },
-          child: const Text('투자 시작'),
+          child: const Text('분석 확인'),
         ),
       ],
     );

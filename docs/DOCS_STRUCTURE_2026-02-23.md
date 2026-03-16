@@ -9,6 +9,14 @@
 - `docs/reports`: 분석/리포트/감사/요약 문서
 - `docs/policies`: 규칙/정책/보안 준수 문서
 
+## 핵심 인덱스(찾기용)
+- 개발 문서 인덱스: `docs/developer/README.md`
+- 정책 문서 인덱스: `docs/policies/README.md`
+
+## 핵심 문서(정본)
+- 기능 요약 + 연결고리 맵: `docs/developer/CORE_FEATURE_MAP_DEV_KO.md`
+- 아이콘/페이지 인덱스 단일 기준: `docs/policies/ICON_MANAGEMENT_SINGLE_SOURCE_KO.md`
+
 ## 루트에 유지한 파일
 - `README.md`
 - `CHANGELOG.md`

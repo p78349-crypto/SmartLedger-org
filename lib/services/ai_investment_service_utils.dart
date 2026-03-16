@@ -5,26 +5,20 @@ part of 'ai_investment_service.dart';
 extension AiInvestmentServiceUtils on AiInvestmentService {
   /// Gets user's age from preferences
   Future<double> _getUserAge() async {
-    final age = await _userPrefService.getInt('user_age');
-    return (age ?? 35).toDouble(); // Default age if not set
+    // Default age if not available
+    return 35.0;
   }
 
   /// Gets user's risk preference
   Future<InvestmentRiskLevel> _getUserRiskPreference() async {
-    final riskPref = await _userPrefService.getString('investment_risk_level') ?? 'moderate';
-    return InvestmentRiskLevel.values.firstWhere(
-      (level) => level.name == riskPref,
-      orElse: () => InvestmentRiskLevel.moderate,
-    );
+    // Default risk preference
+    return InvestmentRiskLevel.moderate;
   }
 
   /// Gets user's investment time horizon
   Future<InvestmentTimeHorizon> _getUserTimeHorizon() async {
-    final horizon = await _userPrefService.getString('investment_time_horizon') ?? 'mediumTerm';
-    return InvestmentTimeHorizon.values.firstWhere(
-      (h) => h.name == horizon,
-      orElse: () => InvestmentTimeHorizon.mediumTerm,
-    );
+    // Default time horizon
+    return InvestmentTimeHorizon.mediumTerm;
   }
 
   /// Determines if portfolio rebalancing is required
@@ -91,10 +85,11 @@ extension AiInvestmentServiceUtils on AiInvestmentService {
     }
   }
 
-  /// Generates reasoning text for recommendations
+  /// Generates reasoning text for investment reference information
   String _generateReasoning(InvestmentAssetType assetType, String action, double percentage) {
     final assetName = assetType.name.replaceAll('_', ' ');
-    return 'Consider ${action}ing $assetName allocation by ${percentage.toStringAsFixed(1)}% '
-           'to optimize risk-return profile and improve diversification.';
+    final direction = action == 'increase' ? '높은 편' : '낮은 편';
+    return '$assetName 비중이 기준 대비 $direction으로 관찰됩니다 '
+           '(${percentage.toStringAsFixed(1)}%p 차이). 분산도와 변동성 관점의 점검 참고자료입니다.';
   }
 }

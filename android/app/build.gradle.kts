@@ -1,3 +1,31 @@
+import java.util.Properties
+import java.io.FileInputStream
+
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("key.properties")
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+}
+
+val envStorePassword = System.getenv("SLD_STORE_PASSWORD")
+val envKeyPassword = System.getenv("SLD_KEY_PASSWORD")
+
+val releaseStoreFile = keystoreProperties.getProperty("storeFile")
+val releaseKeyAlias = keystoreProperties.getProperty("keyAlias")
+val releaseStorePassword =
+    if (!envStorePassword.isNullOrBlank()) envStorePassword
+    else keystoreProperties.getProperty("storePassword")
+val releaseKeyPassword =
+    if (!envKeyPassword.isNullOrBlank()) envKeyPassword
+    else keystoreProperties.getProperty("keyPassword")
+
+val hasReleaseSigning =
+    keystorePropertiesFile.exists() &&
+    !releaseStoreFile.isNullOrBlank() &&
+    !releaseKeyAlias.isNullOrBlank() &&
+    !releaseStorePassword.isNullOrBlank() &&
+    !releaseKeyPassword.isNullOrBlank()
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -26,12 +54,26 @@ android {
         isCoreLibraryDesugaringEnabled = true
     }
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        }
     }
 
     buildFeatures {
         buildConfig = true
+    }
+
+    signingConfigs {
+        // 프로덕션 keystore 설정 (key.properties 파일이 있을 때만 사용)
+        create("release") {
+            if (hasReleaseSigning) {
+                storeFile = file(releaseStoreFile!!)
+                storePassword = releaseStorePassword!!
+                keyAlias = releaseKeyAlias!!
+                keyPassword = releaseKeyPassword!!
+            }
+        }
     }
 
     defaultConfig {
@@ -59,8 +101,12 @@ android {
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            // key.properties가 있으면 release 키 사용, 없으면 debug 키
+            signingConfig = if (hasReleaseSigning) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
             
             // 📦 앱 크기 최적화: 코드 축소 및 리소스 압축
             isMinifyEnabled = true

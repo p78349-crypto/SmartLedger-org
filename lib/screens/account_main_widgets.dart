@@ -31,9 +31,6 @@ class _PageQuickMenuButton extends StatelessWidget {
           case _QuickMenuAction.toggleEdit:
             onToggleEditMode();
             break;
-          case _QuickMenuAction.pageIconManagement:
-            _openPageIconManagement(context);
-            break;
           case _QuickMenuAction.jumpPage1:
             onPageSelected?.call(0);
             break;
@@ -72,19 +69,6 @@ class _PageQuickMenuButton extends StatelessWidget {
               ],
             ),
           ),
-          PopupMenuItem<_QuickMenuAction>(
-            value: _QuickMenuAction.pageIconManagement,
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.apps,
-                  size: 20,
-                ),
-                const SizedBox(width: 12),
-                Text('${_getPageTitle(currentPageIndex)} 아이콘 관리'),
-              ],
-            ),
-          ),
           if (onPageSelected != null) ...<PopupMenuEntry<_QuickMenuAction>>[
             const PopupMenuDivider(),
             const PopupMenuItem<_QuickMenuAction>(
@@ -120,40 +104,10 @@ class _PageQuickMenuButton extends StatelessWidget {
       },
     );
   }
-
-  void _openPageIconManagement(BuildContext context) {
-    final pageTitle = _getPageTitle(currentPageIndex);
-    Navigator.of(context).pushNamed(
-      AppRoutes.pageIconManagement,
-      arguments: PageIconManagementArgs(
-        accountName: accountName,
-        pageIndex: currentPageIndex,
-        pageTitle: pageTitle,
-      ),
-    );
-  }
-
-  String _getPageTitle(int pageIndex) {
-    const pageNames = [
-      '대시보드',
-      '요리/쇼핑/지출',
-      '수입',
-      '통계',
-      '자산',
-      'ROOT',
-      '설정',
-    ];
-
-    if (pageIndex >= 0 && pageIndex < pageNames.length) {
-      return pageNames[pageIndex];
-    }
-    return '페이지 ${pageIndex + 1}';
-  }
 }
 
 enum _QuickMenuAction {
   toggleEdit,
-  pageIconManagement,
   jumpPage1,
   jumpPage2,
   jumpPage3,

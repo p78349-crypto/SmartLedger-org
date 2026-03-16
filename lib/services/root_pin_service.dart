@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
@@ -70,6 +71,8 @@ class RootPinService {
   static const int longLockThreshold = 10;
   static const Duration longLockDuration = Duration(minutes: 15);
 
+  static Future<void> _policyQueue = Future<void>.value();
+
   final Random _random;
 
   bool isPinConfigured(SharedPreferences prefs) {
@@ -86,16 +89,18 @@ class RootPinService {
     required String pin,
     int iterations = defaultIterations,
   }) async {
-    if (pin.trim().isEmpty) {
-      throw ArgumentError('PIN이 비어 있습니다');
-    }
+    return _runPolicySerialized(() async {
+      if (pin.trim().isEmpty) {
+        throw ArgumentError('PIN이 비어 있습니다');
+      }
 
-    final salt = _randomBytes(_random, saltLengthBytes);
-    final hash = await _derive(pin, salt: salt, iterations: iterations);
+      final salt = _randomBytes(_random, saltLengthBytes);
+      final hash = await _derive(pin, salt: salt, iterations: iterations);
 
-    await prefs.setString(PrefKeys.rootPinSaltB64, base64Encode(salt));
-    await prefs.setString(PrefKeys.rootPinHashB64, base64Encode(hash));
-    await prefs.setInt(PrefKeys.rootPinIterations, iterations);
+      await prefs.setString(PrefKeys.rootPinSaltB64, base64Encode(salt));
+      await prefs.setString(PrefKeys.rootPinHashB64, base64Encode(hash));
+      await prefs.setInt(PrefKeys.rootPinIterations, iterations);
+    });
   }
 
   Future<bool> verifyPin(SharedPreferences prefs, {required String pin}) async {
@@ -138,71 +143,220 @@ class RootPinService {
     SharedPreferences prefs, {
     required String pin,
   }) async {
-    final remaining = lockRemaining(prefs);
-    if (remaining != null) {
-      final type = remaining.inMinutes >= 5
-          ? RootPinLockType.longLock
-          : RootPinLockType.cooldown;
-      final failedAttempts = prefs.getInt(PrefKeys.rootPinFailedAttempts);
-      return RootPinPolicyResult.locked(
-        lockType: type,
-        lockRemaining: remaining,
-        failedAttempts: failedAttempts,
-      );
-    }
+    return _runPolicySerialized(() async {
+      final remaining = lockRemaining(prefs);
+      if (remaining != null) {
+        final type = remaining.inMinutes >= 5
+            ? RootPinLockType.longLock
+            : RootPinLockType.cooldown;
+        final failedAttempts = prefs.getInt(PrefKeys.rootPinFailedAttempts);
+        return RootPinPolicyResult.locked(
+          lockType: type,
+          lockRemaining: remaining,
+          failedAttempts: failedAttempts,
+        );
+      }
 
-    await clearLockIfExpired(prefs);
+      await clearLockIfExpired(prefs);
 
-    final ok = await verifyPin(prefs, pin: pin);
-    if (ok) {
-      await prefs.remove(PrefKeys.rootPinFailedAttempts);
-      await prefs.remove(PrefKeys.rootPinLockedUntilMs);
-      return RootPinPolicyResult.success();
-    }
+      final ok = await verifyPin(prefs, pin: pin);
+      if (ok) {
+        await prefs.remove(PrefKeys.rootPinFailedAttempts);
+        await prefs.remove(PrefKeys.rootPinLockedUntilMs);
+        return RootPinPolicyResult.success();
+      }
 
-    final current = prefs.getInt(PrefKeys.rootPinFailedAttempts) ?? 0;
-    final next = current + 1;
-    await prefs.setInt(PrefKeys.rootPinFailedAttempts, next);
+      final current = prefs.getInt(PrefKeys.rootPinFailedAttempts) ?? 0;
+      final next = current + 1;
+      await prefs.setInt(PrefKeys.rootPinFailedAttempts, next);
 
-    if (next == cooldownThreshold) {
-      await prefs.setInt(
-        PrefKeys.rootPinLockedUntilMs,
-        DateTime.now().add(cooldownDuration).millisecondsSinceEpoch,
-      );
-      return RootPinPolicyResult.locked(
-        lockType: RootPinLockType.cooldown,
-        lockRemaining: cooldownDuration,
+      if (next == cooldownThreshold) {
+        await prefs.setInt(
+          PrefKeys.rootPinLockedUntilMs,
+          DateTime.now().add(cooldownDuration).millisecondsSinceEpoch,
+        );
+        return RootPinPolicyResult.locked(
+          lockType: RootPinLockType.cooldown,
+          lockRemaining: cooldownDuration,
+          failedAttempts: next,
+        );
+      }
+
+      if (next >= longLockThreshold) {
+        await prefs.setInt(
+          PrefKeys.rootPinLockedUntilMs,
+          DateTime.now().add(longLockDuration).millisecondsSinceEpoch,
+        );
+
+        // After a long lock, give a fresh attempt window.
+        await prefs.remove(PrefKeys.rootPinFailedAttempts);
+        return RootPinPolicyResult.locked(
+          lockType: RootPinLockType.longLock,
+          lockRemaining: longLockDuration,
+          failedAttempts: next,
+        );
+      }
+
+      return RootPinPolicyResult.failed(
         failedAttempts: next,
+        showWarning: next >= warnThreshold,
       );
-    }
-
-    if (next >= longLockThreshold) {
-      await prefs.setInt(
-        PrefKeys.rootPinLockedUntilMs,
-        DateTime.now().add(longLockDuration).millisecondsSinceEpoch,
-      );
-
-      // After a long lock, give a fresh attempt window.
-      await prefs.remove(PrefKeys.rootPinFailedAttempts);
-      return RootPinPolicyResult.locked(
-        lockType: RootPinLockType.longLock,
-        lockRemaining: longLockDuration,
-        failedAttempts: next,
-      );
-    }
-
-    return RootPinPolicyResult.failed(
-      failedAttempts: next,
-      showWarning: next >= warnThreshold,
-    );
+    });
   }
 
   Future<void> clearPin(SharedPreferences prefs) async {
-    await prefs.remove(PrefKeys.rootPinSaltB64);
-    await prefs.remove(PrefKeys.rootPinHashB64);
-    await prefs.remove(PrefKeys.rootPinIterations);
-    await prefs.remove(PrefKeys.rootPinFailedAttempts);
-    await prefs.remove(PrefKeys.rootPinLockedUntilMs);
+    return _runPolicySerialized(() async {
+      await prefs.remove(PrefKeys.rootPinSaltB64);
+      await prefs.remove(PrefKeys.rootPinHashB64);
+      await prefs.remove(PrefKeys.rootPinIterations);
+      await prefs.remove(PrefKeys.rootPinFailedAttempts);
+      await prefs.remove(PrefKeys.rootPinLockedUntilMs);
+    });
+  }
+
+  // ──── ROOT Password (별도 저장소) ────
+
+  bool isPasswordConfigured(SharedPreferences prefs) {
+    final saltB64 = prefs.getString(PrefKeys.rootPasswordSaltB64);
+    final hashB64 = prefs.getString(PrefKeys.rootPasswordHashB64);
+    return saltB64 != null &&
+        saltB64.isNotEmpty &&
+        hashB64 != null &&
+        hashB64.isNotEmpty;
+  }
+
+  Future<void> setPassword(
+    SharedPreferences prefs, {
+    required String password,
+    int iterations = defaultIterations,
+  }) async {
+    return _runPolicySerialized(() async {
+      if (password.trim().isEmpty) {
+        throw ArgumentError('비밀번호가 비어 있습니다');
+      }
+
+      final salt = _randomBytes(_random, saltLengthBytes);
+      final hash = await _derive(password, salt: salt, iterations: iterations);
+
+      await prefs.setString(PrefKeys.rootPasswordSaltB64, base64Encode(salt));
+      await prefs.setString(PrefKeys.rootPasswordHashB64, base64Encode(hash));
+      await prefs.setInt(PrefKeys.rootPasswordIterations, iterations);
+    });
+  }
+
+  Future<bool> verifyPassword(SharedPreferences prefs, {required String password}) async {
+    final saltB64 = prefs.getString(PrefKeys.rootPasswordSaltB64);
+    final hashB64 = prefs.getString(PrefKeys.rootPasswordHashB64);
+    if (saltB64 == null || hashB64 == null) return false;
+
+    final salt = base64Decode(saltB64);
+    final expected = base64Decode(hashB64);
+    final iterations =
+        prefs.getInt(PrefKeys.rootPasswordIterations) ?? defaultIterations;
+
+    final actual = await _derive(password, salt: salt, iterations: iterations);
+    return _constantTimeEquals(expected, actual);
+  }
+
+  Future<RootPinPolicyResult> verifyPasswordWithPolicy(
+    SharedPreferences prefs, {
+    required String password,
+  }) async {
+    return _runPolicySerialized(() async {
+      final remaining = _passwordLockRemaining(prefs);
+      if (remaining != null) {
+        final type = remaining.inMinutes >= 5
+            ? RootPinLockType.longLock
+            : RootPinLockType.cooldown;
+        final failedAttempts = prefs.getInt(PrefKeys.rootPasswordFailedAttempts);
+        return RootPinPolicyResult.locked(
+          lockType: type,
+          lockRemaining: remaining,
+          failedAttempts: failedAttempts,
+        );
+      }
+
+      await _clearPasswordLockIfExpired(prefs);
+
+      final ok = await verifyPassword(prefs, password: password);
+      if (ok) {
+        await prefs.remove(PrefKeys.rootPasswordFailedAttempts);
+        await prefs.remove(PrefKeys.rootPasswordLockedUntilMs);
+        return RootPinPolicyResult.success();
+      }
+
+      final current = prefs.getInt(PrefKeys.rootPasswordFailedAttempts) ?? 0;
+      final next = current + 1;
+      await prefs.setInt(PrefKeys.rootPasswordFailedAttempts, next);
+
+      if (next == cooldownThreshold) {
+        await prefs.setInt(
+          PrefKeys.rootPasswordLockedUntilMs,
+          DateTime.now().add(cooldownDuration).millisecondsSinceEpoch,
+        );
+        return RootPinPolicyResult.locked(
+          lockType: RootPinLockType.cooldown,
+          lockRemaining: cooldownDuration,
+          failedAttempts: next,
+        );
+      }
+
+      if (next >= longLockThreshold) {
+        await prefs.setInt(
+          PrefKeys.rootPasswordLockedUntilMs,
+          DateTime.now().add(longLockDuration).millisecondsSinceEpoch,
+        );
+        await prefs.remove(PrefKeys.rootPasswordFailedAttempts);
+        return RootPinPolicyResult.locked(
+          lockType: RootPinLockType.longLock,
+          lockRemaining: longLockDuration,
+          failedAttempts: next,
+        );
+      }
+
+      return RootPinPolicyResult.failed(
+        failedAttempts: next,
+        showWarning: next >= warnThreshold,
+      );
+    });
+  }
+
+  Future<T> _runPolicySerialized<T>(Future<T> Function() action) {
+    final completer = Completer<T>();
+    _policyQueue = _policyQueue.then((_) async {
+      try {
+        completer.complete(await action());
+      } catch (error, stackTrace) {
+        completer.completeError(error, stackTrace);
+      }
+    });
+    return completer.future;
+  }
+
+  Duration? _passwordLockRemaining(SharedPreferences prefs) {
+    final untilMs = prefs.getInt(PrefKeys.rootPasswordLockedUntilMs);
+    if (untilMs == null) return null;
+    final remainingMs = untilMs - DateTime.now().millisecondsSinceEpoch;
+    if (remainingMs <= 0) return null;
+    return Duration(milliseconds: remainingMs);
+  }
+
+  Future<void> _clearPasswordLockIfExpired(SharedPreferences prefs) async {
+    final untilMs = prefs.getInt(PrefKeys.rootPasswordLockedUntilMs);
+    if (untilMs == null) return;
+    if (DateTime.now().millisecondsSinceEpoch >= untilMs) {
+      await prefs.remove(PrefKeys.rootPasswordLockedUntilMs);
+    }
+  }
+
+  Future<void> clearPassword(SharedPreferences prefs) async {
+    return _runPolicySerialized(() async {
+      await prefs.remove(PrefKeys.rootPasswordSaltB64);
+      await prefs.remove(PrefKeys.rootPasswordHashB64);
+      await prefs.remove(PrefKeys.rootPasswordIterations);
+      await prefs.remove(PrefKeys.rootPasswordFailedAttempts);
+      await prefs.remove(PrefKeys.rootPasswordLockedUntilMs);
+    });
   }
 
   Future<Uint8List> _derive(

@@ -1,6 +1,6 @@
 part of 'ai_investment_advisor_screen.dart';
 
-/// AI 투자자문 화면 확장 기능들 (완전 오프라인 기반)
+/// AI 투자 참고정보 화면 확장 기능들 (완전 오프라인 기반)
 extension AiInvestmentAdvisorScreenExtensions on _AiInvestmentAdvisorScreenState {
   
   Widget _buildPortfolioOverviewCard() {
@@ -81,7 +81,7 @@ extension AiInvestmentAdvisorScreenExtensions on _AiInvestmentAdvisorScreenState
                   children: [
                     Icon(Icons.warning, color: Colors.orange),
                     SizedBox(width: 8),
-                    Expanded(child: Text('포트폴리오 재조정이 권장됩니다')),
+                    Expanded(child: Text('포트폴리오 리스크 점검이 필요합니다')),
                   ],
                 ),
               ),
@@ -119,10 +119,10 @@ extension AiInvestmentAdvisorScreenExtensions on _AiInvestmentAdvisorScreenState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('AI 투자 권장사항', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text('AI 투자 분석 참고자료', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
             if (_portfolioAnalysis!.recommendations.isEmpty)
-              const Text('현재 포트폴리오가 균형잡힌 상태입니다.')
+              const Text('현재 포트폴리오에서 특이 점검 항목이 크지 않습니다.')
             else
               ListView.builder(
                 shrinkWrap: true,
@@ -151,16 +151,16 @@ extension AiInvestmentAdvisorScreenExtensions on _AiInvestmentAdvisorScreenState
               children: [
                 Icon(Icons.warning, color: Colors.red),
                 SizedBox(width: 8),
-                Text('재조정 필요', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.red)),
+                Text('리스크 점검 필요', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.red)),
               ],
             ),
             const SizedBox(height: 8),
-            const Text('현재 포트폴리오의 위험도가 높거나 충분히 다각화되지 않았습니다.'),
+            const Text('현재 포트폴리오의 위험도 또는 분산도에 대한 추가 점검이 필요합니다.'),
             const SizedBox(height: 12),
             ElevatedButton(
               onPressed: _showRebalanceDialog,
               style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-              child: const Text('재조정 가이드 보기', style: TextStyle(color: Colors.white)),
+              child: const Text('분석 포인트 보기', style: TextStyle(color: Colors.white)),
             ),
           ],
         ),

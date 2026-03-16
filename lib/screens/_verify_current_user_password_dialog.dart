@@ -7,10 +7,12 @@ class VerifyCurrentUserPasswordDialog extends StatefulWidget {
     super.key,
     required this.prefs,
     required this.service,
+    this.returnPasswordOnSuccess = false,
   });
 
   final SharedPreferences prefs;
   final UserPasswordService service;
+  final bool returnPasswordOnSuccess;
 
   @override
   State<VerifyCurrentUserPasswordDialog> createState() =>
@@ -45,7 +47,11 @@ class _VerifyCurrentUserPasswordDialogState
     if (!mounted) return;
 
     if (result.status == UserPasswordPolicyStatus.success) {
-      Navigator.of(context).pop(true);
+      if (widget.returnPasswordOnSuccess) {
+        Navigator.of(context).pop(password);
+      } else {
+        Navigator.of(context).pop(true);
+      }
       return;
     }
 

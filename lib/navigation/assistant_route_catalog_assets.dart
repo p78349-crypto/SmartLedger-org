@@ -37,4 +37,9 @@ final Map<String, AssistantRouteSpec> _assetSpecs = {
     buildArgs: (accountName) =>
         AccountArgs(accountName: _accountNameOrDefault(accountName)),
   ),
+  AppRoutes.assetSecuritySettings: const AssistantRouteSpec(
+    routeName: AppRoutes.assetSecuritySettings,
+    requiresAccount: false,
+    buildArgs: _returnNull,
+  ),
 };

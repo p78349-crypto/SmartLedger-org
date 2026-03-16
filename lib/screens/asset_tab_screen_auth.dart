@@ -36,7 +36,9 @@ extension AssetTabScreenAuth on _AssetTabScreenState {
   Future<void> _loadBiometricSettings() async {
     final prefs = await SharedPreferences.getInstance();
     if (!mounted) return;
-    final enabled = prefs.getBool(PrefKeys.biometricAuthEnabled) ?? false;
+    final enabled =
+        (prefs.getBool(PrefKeys.assetAuthEnabled) ?? false) ||
+        (prefs.getBool(PrefKeys.biometricAuthEnabled) ?? false);
     setState(() {
       _biometricAuthEnabled = enabled;
       if (!enabled) {
@@ -134,6 +136,8 @@ extension AssetTabScreenAuth on _AssetTabScreenState {
   // 생체 인증 설정 저장
   Future<void> _toggleBiometricAuth(bool value) async {
     final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(PrefKeys.assetAuthEnabled, value);
+    await prefs.setBool(PrefKeys.assetBiometricEnabled, value);
     await prefs.setBool(PrefKeys.biometricAuthEnabled, value);
     if (!mounted) return;
     setState(() {

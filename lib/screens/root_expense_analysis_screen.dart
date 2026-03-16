@@ -62,6 +62,20 @@ class _RootExpenseAnalysisScreenState extends State<RootExpenseAnalysisScreen> {
     final currencyFormat = NumberFormats.currency;
     final dateFormat = DateFormatter.monthDay;
 
+    if (_isLoading) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('ROOT 지출 분석')),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_context == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('ROOT 지출 분석')),
+        body: const Center(child: Text('데이터를 불러올 수 없습니다.')),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('ROOT 지출 분석'),
@@ -73,29 +87,25 @@ class _RootExpenseAnalysisScreenState extends State<RootExpenseAnalysisScreen> {
           ),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _context == null
-              ? const Center(child: Text('데이터를 불러올 수 없습니다.'))
-              : RefreshIndicator(
-                  onRefresh: _loadData,
-                  child: ListView(
-                    padding: const EdgeInsets.all(16),
-                    children: [
-                      ..._buildTopOutflowsSection(
-                        theme: theme,
-                        isLandscape: isLandscape,
-                        currencyFormat: currencyFormat,
-                        dateFormat: dateFormat,
-                      ),
-                      ..._buildFixedCostsSection(
-                        theme: theme,
-                        isLandscape: isLandscape,
-                        currencyFormat: currencyFormat,
-                      ),
-                    ],
-                  ),
-                ),
+      body: RefreshIndicator(
+        onRefresh: _loadData,
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            ..._buildTopOutflowsSection(
+              theme: theme,
+              isLandscape: isLandscape,
+              currencyFormat: currencyFormat,
+              dateFormat: dateFormat,
+            ),
+            ..._buildFixedCostsSection(
+              theme: theme,
+              isLandscape: isLandscape,
+              currencyFormat: currencyFormat,
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -167,7 +177,7 @@ class _RootExpenseAnalysisScreenState extends State<RootExpenseAnalysisScreen> {
               ..._topOutflows.take(20).map((tx) {
                 final accountName = tx.accountName;
                 final paymentPart = tx.transaction.paymentMethod.isNotEmpty
-                  ? ' · ${tx.transaction.paymentMethod}'
+                    ? ' · ${tx.transaction.paymentMethod}'
                     : '';
                 final datePart = dateFormat.format(tx.transaction.date);
                 final subtitle = '$accountName · $datePart$paymentPart';

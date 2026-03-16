@@ -28,4 +28,10 @@ class AssetSecurityService {
     await setLocked(accountName, false);
     return true;
   }
+
+  /// 전역 자산 인증 요구 설정
+  static Future<void> setAssetAuthRequired(bool required) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(PrefKeys.assetAuthRequired, required);
+  }
 }

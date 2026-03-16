@@ -1,5 +1,9 @@
 # ✅ 아이콘 저장소 → 기능 연결 정밀 분석 보고서
 
+> ✅ 아이콘/페이지 인덱스/아이콘 관리(ENT) **최신 단일 기준 문서**: `docs/policies/ICON_MANAGEMENT_SINGLE_SOURCE_KO.md`
+>
+> 이 보고서는 당시 분석 기록이며, 정책/인덱스의 최종 기준은 단일 기준 문서를 따릅니다.
+
 **작성일자**: 2026년 2월 13일  
 **문제 영역**: Utils 분리, 아이콘 저장소, 페이지 기능 연결  
 **심각도**: 🟢 Low (아키텍처 개선 권장)
@@ -31,7 +35,7 @@
 ## � 분석 요약 (TL;DR)
 
 **코드 검증 결과**: 180개+ 파일 분석 완료
-- ✅ **MainFeatureIconCatalog**: 7개 페이지, 100+ 아이콘, 모두 routeName 설정
+- ✅ **MainFeatureIconCatalog**: pageCount=15 유지(0-based), Reserved 페이지 인덱스 정책(통계=3/자산=4/ROOT=5/설정=6)에 맞춰 구성
 - ✅ **IconLaunchUtils**: Smart fallback으로 모든 라우트 처리 ✅
 [_IconGridPage] (화면에 아이콘 표시)
     ↓ 사용자 클릭

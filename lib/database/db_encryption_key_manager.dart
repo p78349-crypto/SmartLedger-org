@@ -45,4 +45,45 @@ class DbEncryptionKeyManager {
       return false; // 잘못된 형식의 키
     }
   }
+
+  /// 서버 응답 등 다양한 Base64 형식의 키를 복원합니다.
+  /// - Base64Url 인코딩 문자열
+  /// - 표준 Base64 인코딩 문자열
+  /// - URL-safe 패딩 생략 문자열
+  static Future<bool> restoreKeyFromAnyBase64(String keyText) async {
+    final input = keyText.trim();
+    if (input.isEmpty) return false;
+
+    // 1) 기존 포맷(Base64Url 문자열) 우선 시도
+    if (await restoreKeyFromBackup(input)) {
+      return true;
+    }
+
+    // 2) 표준 Base64/URL-safe Base64를 raw bytes로 해석 후 내부 표준(base64Url)로 저장
+    final decoded = _tryDecodeAnyBase64(input);
+    if (decoded == null || decoded.length != 32) {
+      return false;
+    }
+
+    final normalized = base64Url.encode(decoded);
+    await _storage.write(key: _keyName, value: normalized);
+    return true;
+  }
+
+  static List<int>? _tryDecodeAnyBase64(String raw) {
+    String normalize(String value) {
+      var v = value.trim().replaceAll('-', '+').replaceAll('_', '/');
+      final mod = v.length % 4;
+      if (mod != 0) {
+        v = '$v${'=' * (4 - mod)}';
+      }
+      return v;
+    }
+
+    try {
+      return base64Decode(normalize(raw));
+    } catch (_) {
+      return null;
+    }
+  }
 }

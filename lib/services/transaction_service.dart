@@ -4,17 +4,22 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:smart_ledger/widgets/user_permission_badge.dart';
 
 import '../database/database_provider.dart';
 import '../models/transaction.dart';
+import '../services/reward_badge_service.dart';
+import '../utils/benefit_aggregation_utils.dart';
 import '../utils/pref_keys.dart';
 import '../utils/store_memo_utils.dart';
+import 'audit_log_service.dart';
 import 'monthly_agg_cache_service.dart';
 import 'transaction_benefit_monthly_agg_service.dart';
 import 'transaction_db_migration_service.dart';
 import 'transaction_db_store.dart';
 import 'transaction_fts_index_service.dart';
 import 'trash_service.dart';
+import 'workflow_automation_engine.dart';
 
 part 'transaction_service_storage.dart';
 
@@ -34,6 +39,16 @@ class TransactionService {
   final TransactionDbStore _dbStore = TransactionDbStore();
 
   static const String _backendDb = 'db';
+  static const double _largeTransactionThreshold = 1000000;
+
+  /// Test-only: reset the singleton state so a test can re-run initialization
+  /// (e.g. after changing storage backend prefs).
+  void resetForTesting() {
+    _accountTransactions.clear();
+    _initialized = false;
+    _loading = null;
+    _persistChain = Future.value();
+  }
 
   List<String> getAllAccountNames() =>
       List.unmodifiable(_accountTransactions.keys.toList());
@@ -53,6 +68,30 @@ class TransactionService {
       allTransactions.addAll(transactions);
     }
     return List.unmodifiable(allTransactions);
+  }
+
+  /// Returns all transactions across all accounts within [start]..[end]
+  /// (inclusive).
+  ///
+  /// This is a convenience API for analytics modules.
+  Future<List<Transaction>> getTransactionsBetween(
+    DateTime start,
+    DateTime end,
+  ) async {
+    await loadTransactions();
+    final startUtc = DateTime.utc(start.year, start.month, start.day);
+    final endUtc = DateTime.utc(end.year, end.month, end.day, 23, 59, 59, 999);
+
+    final result = <Transaction>[];
+    for (final list in _accountTransactions.values) {
+      for (final tx in list) {
+        final d = tx.date.toUtc();
+        if (d.isBefore(startUtc) || d.isAfter(endUtc)) continue;
+        result.add(tx);
+      }
+    }
+    result.sort((a, b) => b.date.compareTo(a.date));
+    return List.unmodifiable(result);
   }
 
   Future<void> loadTransactions() {
@@ -123,6 +162,37 @@ class TransactionService {
     } catch (_) {
       // Aggregation is a cache; can be rebuilt via stamps.
     }
+
+    // Reward medals (best-effort; ignore failures).
+    try {
+      if (BenefitAggregationUtils.isSkippedSpendRecord(normalized)) {
+        await RewardBadgeService.instance.awardOnce(
+          accountName: accountName,
+          type: RewardBadgeService.typeSkippedSpend,
+          dedupeKey: normalized.id,
+        );
+      }
+      if (BenefitAggregationUtils.isSavedPointsRecord(normalized)) {
+        await RewardBadgeService.instance.awardOnce(
+          accountName: accountName,
+          type: RewardBadgeService.typeProject100m,
+          dedupeKey: normalized.id,
+        );
+      }
+    } catch (_) {
+      // Ignore reward failures.
+    }
+
+    await _logTransactionAudit(
+      action: 'transaction_added',
+      accountName: accountName,
+      transaction: normalized,
+    );
+
+    await _evaluateAnomalySignals(
+      accountName: accountName,
+      transaction: normalized,
+    );
   }
 
   Future<bool> updateTransaction(
@@ -173,6 +243,16 @@ class TransactionService {
     } catch (_) {
       // Ignore aggregation failures (rebuild on next ensure).
     }
+
+    await _logTransactionAudit(
+      action: 'transaction_updated',
+      accountName: accountName,
+      transaction: normalized,
+      metadata: {
+        'beforeAmount': before.amount,
+        'afterAmount': normalized.amount,
+      },
+    );
     return true;
   }
 
@@ -234,6 +314,15 @@ class TransactionService {
     } catch (_) {
       // Ignore aggregation failures (rebuild on next ensure).
     }
+
+    await _logTransactionAudit(
+      action: 'transaction_deleted',
+      accountName: accountName,
+      transaction: removed,
+      metadata: {
+        'moveToTrash': moveToTrash,
+      },
+    );
   }
 
   /// 반품 처리: 원본 거래의 환불 거래를 생성
@@ -274,5 +363,129 @@ class TransactionService {
           (t) => t.isRefund && t.originalTransactionId == originalTransactionId,
         )
         .toList();
+  }
+
+  Future<void> _logTransactionAudit({
+    required String action,
+    required String accountName,
+    required Transaction transaction,
+    Map<String, dynamic>? metadata,
+  }) async {
+    try {
+      await AuditLogService.logTransactionEvent(
+        action: action,
+        accountId: accountName,
+        amount: transaction.amount,
+        transactionId: transaction.id,
+        transactionType: transaction.type.name,
+        metadata: {
+          'isRefund': transaction.isRefund,
+          ...?metadata,
+        },
+      );
+    } catch (_) {
+      // Audit logging is best-effort and should not break transaction flow.
+    }
+  }
+
+  Future<void> _evaluateAnomalySignals({
+    required String accountName,
+    required Transaction transaction,
+  }) async {
+    try {
+      final engine = WorkflowAutomationEngine();
+      await engine.initialize();
+
+      var violationCount = 0;
+
+      final recentFailures = await AuditLogService.getFailedActions(limit: 5);
+      if (recentFailures.length >= 3) {
+        violationCount += 1;
+        await AuditLogService.log(
+          eventType: AuditEventType.policyEnforcement,
+          action: 'anomaly_signal_repeated_failures',
+          userLevel: UserPermissionLevel.operator,
+          targetResource: accountName,
+          metadata: {
+            'transactionId': transaction.id,
+            'ruleId': 'rule_repeated_failures_v1',
+            'failedActions': recentFailures.length,
+            'window': 'recent_5',
+            'threshold': 3,
+            'observedValue': recentFailures.length,
+          },
+        );
+      }
+
+      if (transaction.amount.abs() >= _largeTransactionThreshold) {
+        violationCount += 1;
+        await AuditLogService.log(
+          eventType: AuditEventType.policyEnforcement,
+          action: 'anomaly_signal_large_transaction',
+          userLevel: UserPermissionLevel.operator,
+          targetResource: accountName,
+          metadata: {
+            'transactionId': transaction.id,
+            'ruleId': 'rule_large_transaction_v1',
+            'amount': transaction.amount,
+            'threshold': _largeTransactionThreshold,
+            'observedValue': transaction.amount.abs(),
+          },
+          riskLevel: ActionRiskLevel.warning,
+        );
+      }
+
+      final hour = transaction.date.toLocal().hour;
+      final isOffHours = hour < 5;
+      if (isOffHours) {
+        violationCount += 1;
+        await AuditLogService.log(
+          eventType: AuditEventType.policyEnforcement,
+          action: 'anomaly_signal_off_hours_sensitive_action',
+          userLevel: UserPermissionLevel.operator,
+          targetResource: accountName,
+          metadata: {
+            'transactionId': transaction.id,
+            'ruleId': 'rule_off_hours_sensitive_action_v1',
+            'hour': hour,
+            'offHours': true,
+            'window': '00:00-04:59',
+            'threshold': 5,
+            'observedValue': hour,
+          },
+          riskLevel: ActionRiskLevel.warning,
+        );
+      }
+
+      if (violationCount <= 0) {
+        return;
+      }
+
+      await AuditLogService.log(
+        eventType: AuditEventType.securityViolation,
+        action: 'anomaly_detection_summary',
+        userLevel: UserPermissionLevel.operator,
+        targetResource: accountName,
+        metadata: {
+          'transactionId': transaction.id,
+          'ruleId': 'rule_security_alert',
+          'threshold': 3,
+          'observedValue': violationCount,
+          'violation_count': violationCount,
+        },
+      );
+
+      await engine.evaluateRules(
+        eventType: 'security_violation',
+        eventData: {
+          'violation_count': violationCount,
+          'accountId': accountName,
+          'transactionId': transaction.id,
+          'amount': transaction.amount,
+        },
+      );
+    } catch (_) {
+      // Best-effort anomaly detection should not break transaction flow.
+    }
   }
 }

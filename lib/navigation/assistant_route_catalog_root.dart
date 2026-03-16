@@ -21,8 +21,8 @@ final Map<String, AssistantRouteSpec> _rootSpecs = {
     requiresAccount: false,
     buildArgs: _returnNull,
   ),
-  AppRoutes.rootScreenSaverSettings: const AssistantRouteSpec(
-    routeName: AppRoutes.rootScreenSaverSettings,
+  AppRoutes.rootSecuritySetup: const AssistantRouteSpec(
+    routeName: AppRoutes.rootSecuritySetup,
     requiresAccount: false,
     buildArgs: _returnNull,
   ),

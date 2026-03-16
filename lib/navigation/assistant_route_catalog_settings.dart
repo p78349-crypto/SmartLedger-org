@@ -51,4 +51,10 @@ final Map<String, AssistantRouteSpec> _settingsSpecs = {
     buildArgs: (accountName) =>
         IconManagementArgs(accountName: _accountNameOrDefault(accountName)),
   ),
+  AppRoutes.iconManagementSettings: AssistantRouteSpec(
+    routeName: AppRoutes.iconManagementSettings,
+    requiresAccount: true,
+    buildArgs: (accountName) =>
+        IconManagementArgs(accountName: _accountNameOrDefault(accountName)),
+  ),
 };

@@ -1,9 +1,9 @@
 part of 'ai_investment_service.dart';
 
 /// AI Investment Service Extensions
-/// Additional methods for investment analysis and recommendations
+/// Additional methods for investment analysis and reference information
 extension AiInvestmentServiceExtensions on AiInvestmentService {
-  /// Generates recommendations based on portfolio analysis
+  /// Generates reference information based on portfolio analysis
   Future<List<InvestmentRecommendation>> _generateRecommendations(
     Map<InvestmentAssetType, double> currentAllocation,
     InvestmentRiskLevel riskLevel,
@@ -20,7 +20,7 @@ extension AiInvestmentServiceExtensions on AiInvestmentService {
       userAge,
     );
     
-    // Compare current vs optimal allocation and generate recommendations
+    // Compare current vs optimal allocation and generate reference information
     optimalAllocation.forEach((assetType, optimalPercentage) {
       final currentPercentage = currentAllocation[assetType] ?? 0.0;
       final difference = optimalPercentage - currentPercentage;
@@ -43,7 +43,7 @@ extension AiInvestmentServiceExtensions on AiInvestmentService {
     return recommendations;
   }
 
-  /// Creates individual investment recommendation
+  /// Creates individual investment reference information item
   InvestmentRecommendation? _createRecommendation(
     InvestmentAssetType assetType,
     double allocationDifference,
@@ -72,7 +72,7 @@ extension AiInvestmentServiceExtensions on AiInvestmentService {
     );
   }
 
-  /// Creates recommendations from optimal allocation
+  /// Creates reference information from optimal allocation
   List<InvestmentRecommendation> _createRecommendationsFromAllocation(
     Map<InvestmentAssetType, double> allocation,
     double totalAmount,

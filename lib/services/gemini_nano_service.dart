@@ -9,18 +9,33 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 /// Gemini Nano를 사용한 영수증 파싱 서비스
 /// 음성, 이미지, 텍스트 모두 처리 가능
 class GeminiNanoService {
-  static const String _apiKey = 'YOUR_GEMINI_API_KEY'; // TODO: 설정 필요
-  late final GenerativeModel _model;
+  static const String _apiKey = String.fromEnvironment(
+    'GEMINI_API_KEY',
+    defaultValue: '',
+  );
+  GenerativeModel? _model;
 
   GeminiNanoService() {
+    if (_apiKey.isEmpty) {
+      return;
+    }
     _model = GenerativeModel(
       model: 'gemini-2.0-flash', // Nano 모델 또는 Flash
       apiKey: _apiKey,
     );
   }
 
+  Map<String, dynamic> _missingApiKeyError() {
+    return {
+      'error': 'Gemini API 키가 설정되지 않았습니다. --dart-define=GEMINI_API_KEY=<KEY>로 실행하세요.',
+      'confidence': 0.0,
+    };
+  }
+
   /// OCR 텍스트 파싱 (가장 빠름)
   Future<Map<String, dynamic>> parseReceiptText(String ocrText) async {
+    final model = _model;
+    if (model == null) return _missingApiKeyError();
     try {
       final prompt =
           '''
@@ -52,7 +67,7 @@ class GeminiNanoService {
 - 없는 정보는 null 사용
       ''';
 
-      final response = await _model.generateContent([Content.text(prompt)]);
+      final response = await model.generateContent([Content.text(prompt)]);
       return _parseJsonResponse(response.text ?? '{}');
     } catch (e) {
       return {'error': '파싱 실패: $e', 'confidence': 0.0};
@@ -61,6 +76,8 @@ class GeminiNanoService {
 
   /// 음성 + 자연언어 처리
   Future<Map<String, dynamic>> processVoiceInput(String userSpeech) async {
+    final model = _model;
+    if (model == null) return _missingApiKeyError();
     try {
       final prompt =
           '''
@@ -84,7 +101,7 @@ class GeminiNanoService {
 JSON으로만 응답하세요.
       ''';
 
-      final response = await _model.generateContent([Content.text(prompt)]);
+      final response = await model.generateContent([Content.text(prompt)]);
       return _parseJsonResponse(response.text ?? '{}');
     } catch (e) {
       return {'error': '음성 처리 실패: $e', 'confidence': 0.0};
@@ -93,6 +110,8 @@ JSON으로만 응답하세요.
 
   /// 이미지 영수증 처리 (멀티모달)
   Future<Map<String, dynamic>> processReceiptImage(String imagePath) async {
+    final model = _model;
+    if (model == null) return _missingApiKeyError();
     try {
       final imageFile = File(imagePath);
       if (!await imageFile.exists()) {
@@ -124,7 +143,7 @@ JSON 형식:
 }
       ''';
 
-      final response = await _model.generateContent([
+      final response = await model.generateContent([
         Content.multi([TextPart(prompt), DataPart(mimeType, imageBytes)]),
       ]);
 
@@ -155,6 +174,8 @@ JSON 형식:
 
   /// 카테고리 자동 분류
   Future<String?> predictCategory(String itemName) async {
+    final model = _model;
+    if (model == null) return null;
     try {
       final prompt =
           '''
@@ -173,7 +194,7 @@ JSON 형식:
 카테고리 이름만 응답하세요 (한국어).
       ''';
 
-      final response = await _model.generateContent([Content.text(prompt)]);
+      final response = await model.generateContent([Content.text(prompt)]);
       return response.text?.trim();
     } catch (e) {
       return null;

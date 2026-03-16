@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 
 /// AI 사용 감사 로깅 시스템 (법적 증명용)
 /// 모든 AI 관련 활동을 추적하여 규제 기관 제출용 증거 자료 생성
@@ -75,6 +76,14 @@ class AiAuditLogger {
   static Future<void> _recordAuditEntry(AuditEntry entry) async {
     _auditLog.add(entry);
     
+    // 릴리즈 모드에서는 파일 저장 비활성화 (파일 시스템 권한 문제)
+    if (kReleaseMode) {
+      if (kDebugMode) {
+        print('📝 AI 감사 로그 (메모리만): ${entry.eventType}');
+      }
+      return;
+    }
+    
     try {
       final file = File(_logPath);
       if (!file.existsSync()) {
@@ -89,9 +98,13 @@ class AiAuditLogger {
       };
 
       await file.writeAsString(jsonEncode(logData));
-      print('📝 AI 감사 로그 기록: ${entry.eventType}');
+      if (kDebugMode) {
+        print('📝 AI 감사 로그 기록: ${entry.eventType}');
+      }
     } catch (e) {
-      print('❌ 감사 로그 기록 실패: $e');
+      if (kDebugMode) {
+        print('❌ 감사 로그 기록 실패: $e');
+      }
     }
   }
 

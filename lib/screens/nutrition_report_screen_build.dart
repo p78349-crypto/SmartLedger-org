@@ -243,7 +243,7 @@ extension NutritionReportBuild on _NutritionReportScreenState {
   Widget _buildBottomButtons(ThemeData theme) {
     final btnShape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(12),
-      side: BorderSide(color: Colors.pink.shade300),
+      side: BorderSide(color: Colors.green.shade600),
     );
     const btnPad = EdgeInsets.symmetric(horizontal: 16);
 

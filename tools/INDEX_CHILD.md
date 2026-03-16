@@ -32,15 +32,12 @@
 
 - Main UI: PageView/배너/아이콘 그리드
 - Search hints: `PageController`, `_PageBannerBar`, `main_icon_slot_`, `IconActionsMenu`
-- Reserved page policy (user-facing 1-based page numbers):
-	- 4~5=통계(Stats), 6~7=자산(Asset), 8~9=ROOT, 10=설정(Settings)
-- Reserved page policy (0-based indices used in code):
-	- stats={3,4}, asset={5,6}, root={7,8}, settings={9}
-- Search hints (policy): `_statsReservedPages`, `_assetReservedPages`, `_rootReservedPages`, `_settingsOnlyPages`, `_isAllowedOnPage`
-- Search hints (policy): `_statsReservedPages`, `_assetReservedPages`, `_rootReservedPages`, `_settingsOnlyPages`, `_isAllowedOnPage`
+- Page identity (0-based indices):
+	- 0=대시보드, 1=요리/쇼핑/지출, 2=통계, 3=자산, 4=ROOT, 5=설정, 6=미사용
+- Search hints (policy): `MainFeatureIconCatalog._buildDefaultPages`, `MainPageMigration.applyRelayout20260223IfNeeded`
 - Search hints (shortcut): `shortcut_settings_page10`, `onRequestJumpToPage`, `_settingsReservedPageIndex`
 - Search hints (reserved icons): `_iconsForReservedPage`, `_getOrderedIcons`, `_loadSlots`, `_normalizeReservedPageIconSlotsBestEffort`
-- Behavior notes: ROOT/설정 페이지 아이콘이 비면 모듈 SSOT 기반 best-effort 자동 채움(테스트용 가시성 확보)
+- Behavior notes: ROOT/설정(분리 후) 페이지 아이콘이 비면 모듈 SSOT 기반 best-effort 자동 채움(테스트용 가시성 확보)
 
 ## lib/utils/pref_keys.dart
 
@@ -83,9 +80,8 @@
 - Search hints (state): `_catalogOnlyUnplaced`, `_pendingIds`, `_targetSlotIndex`, `_mode`
 - Search hints (widget keys): `icon_mgmt_slot_`, `ValueKey('icon_mgmt_slot_')`
 - Search hints (catalog): `MainFeatureIconCatalog`, `pageCount`, `pages`, `_CatalogSection`
-- Reserved page policy (page picker / placement rules):
-	- 4~5=통계(Stats), 6~7=자산(Asset), 8~9=ROOT, 10=설정(Settings)
-	- (0-based indices) stats={3,4}, asset={5,6}, root={7,8}, settings={9}
+- Page identity (0-based indices):
+	- 0=대시보드, 1=요리/쇼핑/지출, 2=통계, 3=자산, 4=ROOT, 5=설정, 6=미사용
 - Search hints (policy): `_isAllowedOnPage`, `_isBlockedForPage`, `_updateSpecialPageIndices`, `_assetPageIndex`, `_rootPageIndex`
 - Search hints (policy): `_isAllowedOnPage`, `_isBlockedForPage`, `_updateSpecialPageIndices`, `_assetPageIndex`, `_rootPageIndex`
 - Search hints (shortcut): `shortcut_settings_page10`

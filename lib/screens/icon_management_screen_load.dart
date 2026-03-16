@@ -45,26 +45,38 @@ extension IconManagementLoad on _IconManagementScreenState {
   }
 
   List<MainFeatureIcon> _autoFillSourceIconsForPage(int pageIndex) {
+    List<MainFeatureIcon> source;
     if (_isStatsReservedPage(pageIndex)) {
-      return MainFeatureIconCatalog.iconsForModuleKey('stats');
-    }
-    if (_isAssetReservedPage(pageIndex)) {
+      source = MainFeatureIconCatalog.iconsForModuleKey('stats');
+    } else if (_isAssetReservedPage(pageIndex)) {
       final out = <MainFeatureIcon>[];
       out.addAll(MainFeatureIconCatalog.iconsForModuleKey('asset'));
       out.addAll(MainFeatureIconCatalog.iconsForModuleKey('income'));
       final seen = <String>{};
-      return out.where((e) => seen.add(e.id)).toList(growable: false);
+      source = out.where((e) => seen.add(e.id)).toList(growable: false);
+    } else if (_isRootReservedPage(pageIndex)) {
+      source = MainFeatureIconCatalog.iconsForModuleKey('root');
+    } else if (_isSettingsOnlyPage(pageIndex)) {
+      source = MainFeatureIconCatalog.iconsForModuleKey('settings');
+    } else {
+      if (pageIndex < 0 || pageIndex >= MainFeatureIconCatalog.pages.length) {
+        return const [];
+      }
+      source = MainFeatureIconCatalog.pages[pageIndex].items;
     }
-    if (_isRootReservedPage(pageIndex)) {
-      return MainFeatureIconCatalog.iconsForModuleKey('root');
+
+    final curatedIds = MainFeatureIconCatalog.defaultIconIdsForPage(pageIndex);
+    if (curatedIds.isEmpty) {
+      return source;
     }
-    if (_isSettingsOnlyPage(pageIndex)) {
-      return MainFeatureIconCatalog.iconsForModuleKey('settings');
+
+    final curated = source
+        .where((icon) => curatedIds.contains(icon.id))
+        .toList(growable: false);
+    if (curated.isEmpty) {
+      return source;
     }
-    if (pageIndex < 0 || pageIndex >= MainFeatureIconCatalog.pages.length) {
-      return const [];
-    }
-    return MainFeatureIconCatalog.pages[pageIndex].items;
+    return curated;
   }
 
   Future<void> _loadAll() async {
@@ -104,11 +116,16 @@ extension IconManagementLoad on _IconManagementScreenState {
 
     if (!mounted) return;
     final normalizedSlots = _normalizeSlotsForCurrentPage(slots);
-    final filledSlots = _fillSlotsKeepingExisting(
-      pageIndex: _pageIndex,
-      slots: normalizedSlots,
-      order: settings.order,
-    );
+    final filledSlots = widget.usePhotoStyleLayout
+        ? _sanitizeSlotsKeepingExisting(
+            pageIndex: _pageIndex,
+            slots: normalizedSlots,
+          )
+        : _fillSlotsKeepingExisting(
+            pageIndex: _pageIndex,
+            slots: normalizedSlots,
+            order: settings.order,
+          );
     setState(() {
       _slots = filledSlots;
       _order = settings.order;
@@ -150,7 +167,28 @@ extension IconManagementLoad on _IconManagementScreenState {
       return -1;
     }
 
+    final toAdd = <String>[];
     for (final id in _pendingIds) {
+      if (id.trim().isEmpty) continue;
+      if (_isBlockedForCurrentPage(id)) continue;
+
+      if (widget.usePhotoStyleLayout) {
+        // Toggle: placed => remove, not placed => add.
+        if (nextSlots.contains(id)) {
+          for (var i = 0; i < nextSlots.length; i++) {
+            if (nextSlots[i] == id) nextSlots[i] = '';
+          }
+        } else {
+          toAdd.add(id);
+        }
+      } else {
+        // Legacy: add-only until slots full.
+        if (nextSlots.contains(id)) continue;
+        toAdd.add(id);
+      }
+    }
+
+    for (final id in toAdd) {
       if (id.trim().isEmpty) continue;
       if (_isBlockedForCurrentPage(id)) continue;
       if (nextSlots.contains(id)) continue;
@@ -181,18 +219,23 @@ extension IconManagementLoad on _IconManagementScreenState {
     if (!mounted) return;
     setState(_pendingIds.clear);
     ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text('적용했습니다')));
+      .showSnackBar(const SnackBar(content: Text('적용했습니다. 앱 재시작 후 반영됩니다.')));
   }
 
   String _catalogSectionTitleForPage(int pageIndex) => 'Index $pageIndex';
 
   Future<void> _saveSlotsDebounced() async {
     var nextSlots = _normalizeSlotsForCurrentPage(_slots);
-    nextSlots = _fillSlotsKeepingExisting(
-      pageIndex: _pageIndex,
-      slots: nextSlots,
-      order: _order,
-    );
+    nextSlots = widget.usePhotoStyleLayout
+        ? _sanitizeSlotsKeepingExisting(
+            pageIndex: _pageIndex,
+            slots: nextSlots,
+          )
+        : _fillSlotsKeepingExisting(
+            pageIndex: _pageIndex,
+            slots: nextSlots,
+            order: _order,
+          );
 
     if (nextSlots.join('|') != _slots.join('|')) {
       if (!mounted) return;

@@ -30,9 +30,8 @@ class CeoPredictionHelper {
     final monthlyTotals = <int, double>{};
     
     for (final transaction in transactions) {
-      if (transaction.dateTime.isAfter(startDate) && 
-          transaction.dateTime.isBefore(endDate)) {
-        final month = transaction.dateTime.month;
+      if (transaction.date.isAfter(startDate) && transaction.date.isBefore(endDate)) {
+        final month = transaction.date.month;
         monthlyTotals[month] = (monthlyTotals[month] ?? 0.0) + transaction.amount;
       }
     }
@@ -53,7 +52,7 @@ class CeoPredictionHelper {
   ) {
     final dataQuality = min(dataPoints / _minDataPointsRequired, 1.0);
     final stabilityScore = max(0.0, 1.0 - (variance / 10.0));
-    final trendReliability = min(abs(trendStrength) / 100.0, 1.0);
+    final trendReliability = min(trendStrength.abs() / 100.0, 1.0);
     
     final confidence = (dataQuality * 0.4) + 
                      (stabilityScore * 0.4) + 
@@ -85,16 +84,16 @@ class CeoPredictionHelper {
     if (assets.isEmpty) return 0.8;
     
     final liquidAssets = assets.where((a) => 
-        a.assetType.toLowerCase().contains('cash') ||
-        a.assetType.toLowerCase().contains('savings')).length;
+      a.category.name.toLowerCase().contains('cash') ||
+      a.category.name.toLowerCase().contains('deposit')).length;
     
     return max(0.0, 1.0 - (liquidAssets / assets.length));
   }
 
   static double _calculateMarketRisk(List<Asset> assets) {
     final marketAssets = assets.where((a) => 
-        a.assetType.toLowerCase().contains('stock') ||
-        a.assetType.toLowerCase().contains('crypto')).length;
+      a.category.name.toLowerCase().contains('stock') ||
+      a.category.name.toLowerCase().contains('crypto')).length;
     
     return min(1.0, marketAssets / max(assets.length, 1) * 1.5);
   }

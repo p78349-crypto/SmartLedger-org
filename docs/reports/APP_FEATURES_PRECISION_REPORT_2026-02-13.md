@@ -756,10 +756,18 @@ lib/
 #### 디스플레이 설정 (`display_settings_screen.dart`)
 - 밝기, 폰트 크기, 레이아웃 밀도
 
-#### 화면 보호기 설정
+#### 월별 통계 (페이지0 아이콘)
+**구현 파일**: `monthly_stats_screen.dart`
+**기능**: 현재 계정의 월별 지출/수입 통계 화면 (계정별 분리)
+
+#### ROOT 지출 분석 (ROOT 전용)
+**구현 파일**: `root_expense_analysis_screen.dart`
+**기능**: 전체 계정의 상위 지출/예금과 고정비용 표시
+
+#### 화면 보호기 설정 (ROOT 메뉴)
 **구현 파일**: 2개 화면
 
-- 루트 설정 (`root_screen_saver_settings_screen.dart`)
+- 루트 설정 (`root_screen_saver_settings_screen.dart`) 
 - 노출 설정 (`root_screen_saver_exposure_settings_screen.dart`)
 
 ### 6.3 언어 및 통화

@@ -5,6 +5,7 @@ import '../services/backup_service.dart';
 import '../utils/account_name_language_tag.dart';
 import '../utils/backup_password_bootstrapper.dart';
 import '../utils/dialog_utils.dart';
+import '../utils/online_password_key_backup_facade.dart';
 import '../utils/snackbar_utils.dart';
 import '../database/db_encryption_key_manager.dart';
 
@@ -21,6 +22,69 @@ class _AccountCreateScreenState extends State<AccountCreateScreen> {
   final TextEditingController _passwordConfirmController = TextEditingController();
   bool _obscurePassword = true;
   bool _obscurePasswordConfirm = true;
+
+  Future<void> _tryBootstrapOnlineKeyBackup({
+    required String accountId,
+    required String password,
+  }) async {
+    if (password.trim().isEmpty) return;
+
+    final result = await OnlinePasswordKeyBackupFacade().bootstrapAccount(
+      accountId: accountId,
+      password: password,
+    );
+
+    if (!mounted) return;
+
+    if (result.isSuccess &&
+        result.recoveryKeyBase64 != null &&
+        result.recoveryKeyBase64!.isNotEmpty) {
+      bool recoveryKeyConfirmed = false;
+      await showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (dialogContext) => StatefulBuilder(
+          builder: (context, setLocalState) => AlertDialog(
+            title: const Text('복구키 보관 안내'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SelectableText(
+                  '아래 복구키는 1회만 표시됩니다.\n안전한 곳에 보관하세요.\n\n'
+                  '${result.recoveryKeyBase64}',
+                ),
+                const SizedBox(height: 16),
+                CheckboxListTile(
+                  value: recoveryKeyConfirmed,
+                  onChanged: (value) {
+                    setLocalState(() {
+                      recoveryKeyConfirmed = value ?? false;
+                    });
+                  },
+                  title: const Text('복구키를 안전한 곳에 보관했습니다'),
+                  dense: true,
+                ),
+              ],
+            ),
+            actions: [
+              FilledButton(
+                onPressed: recoveryKeyConfirmed
+                    ? () => Navigator.of(dialogContext).pop()
+                    : null,
+                child: const Text('확인'),
+              ),
+            ],
+          ),
+        ),
+      );
+      return;
+    }
+
+    final message = result.message;
+    if (message != null && message.isNotEmpty) {
+      SnackbarUtils.showWarning(context, message);
+    }
+  }
 
   @override
   void dispose() {
@@ -257,6 +321,10 @@ class _AccountCreateScreenState extends State<AccountCreateScreen> {
                     BackupPasswordBootstrapper
                         .ensureBackupPasswordConfiguredOnEntry;
                 await ensureBackupPasswordConfiguredOnEntry(context);
+                await _tryBootstrapOnlineKeyBackup(
+                  accountId: name,
+                  password: password,
+                );
                 await BackupService().autoBackupIfNeeded(name);
                 if (!context.mounted) return;
                 SnackbarUtils.showSuccess(context, '계정이 생성되었습니다');

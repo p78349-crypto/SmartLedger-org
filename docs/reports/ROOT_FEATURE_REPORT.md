@@ -1,4 +1,8 @@
 # ROOT 기능(루트/관리자 모드) 상세 보고서
+> ✅ 아이콘/페이지 인덱스/아이콘 관리(ENT) **최신 단일 기준 문서**: `docs/policies/ICON_MANAGEMENT_SINGLE_SOURCE_KO.md`
+>
+> 이 보고서는 기능 설명/역사 기록이며, pageIndex/Reserved 정책의 최종 기준은 단일 기준 문서를 따릅니다.
+
 **작성일:** 2026-01-04  
 **상태:** ✅ 구현 완료  
 **담당 범위:** 전체 계정 통합 관리 및 시스템 레벨 기능
@@ -49,7 +53,7 @@ LaunchScreen (진입 지점)
 | **검색** | `lib/screens/root_search_screen.dart` | 전체 거래 통합 검색 | `/root/search` | ✅ 완료 |
 | **계정 관리** | `lib/screens/root_account_manage_screen.dart` | 계정 생성/삭제/통합 | `/root/accounts` | ✅ 완료 |
 | **월말 정산** | `lib/screens/root_month_end_screen.dart` | 월별 정산 및 이월 관리 | `/root/month-end` | ✅ 완료 |
-| **보호기 설정** | `lib/screens/root_screen_saver_settings_screen.dart` | 앱 잠금/보호 설정 | `/root/screen-saver-settings` | ✅ 완료 |
+| **지출통계** | `lib/screens/root_expense_analysis_screen.dart` | 지출 분석 및 통계 | `/root/expense-analysis` | ✅ 완료 |
 | **노출 제한 설정** | `lib/screens/root_screen_saver_exposure_settings_screen.dart` | 민감 정보 숨김 정책 | `/root/screen-saver-exposure-settings` | ✅ 완료 |
 | **아이콘 관리** | `lib/screens/icon_management_root_screen.dart` | ROOT 페이지 아이콘 커스터마이징 | `/settings/icon-management-root` | ✅ 완료 |
 | **인증 게이트** | `lib/widgets/root_auth_gate.dart` | ROOT 접근 권한 검증 | - | ✅ 완료 |
@@ -79,7 +83,7 @@ RootTransactionManagerScreen (UI 렌더)
 │ [🔍] 검색                          │
 │ [💼] 계정 관리                      │
 │ [📅] 월말 정산                      │
-│ [🛡️] 보호기 설정                    │
+│ [�] 지출통계                    │
 │ [⚙️] 아이콘 관리                    │
 └─────────────────────────────────────┘
 ```
@@ -268,32 +272,30 @@ List<_RootTxEntry> _buildEntries() {
 
 ---
 
-### 5️⃣ 보호기 설정 (RootScreenSaverSettingsScreen)
+### 5️⃣ 지출통계 (RootExpenseAnalysisScreen)
 
-**목적:** 앱 보안 및 개인정보 보호 설정
+**목적:** ROOT 전체 계정의 지출 분석
 
 **기능:**
 
 ```
-보호기 설정 화면
-   ├─ [🔒 앱 잠금 활성화]
-   │  └─ 앱을 백그라운드로 보낼 때 자동 잠금
+지출통계 화면
+   ├─ [📊 상위 지출·예금]
+   │  ├─ 거래 내역 (20개)
+   │  ├─ 계정명 표시
+   │  ├─ 날짜 및 결제수단
+   │  └─ 금액
    │
-   ├─ [🔐 패스코드/생체인증 설정]
-   │  ├─ 패스코드 4자리 설정
-   │  └─ 생체인증(지문/얼굴) 활성화
-   │
-   ├─ [⏱️ 잠금 시간 설정]
-   │  └─ 앱 활동 중단 후 몇 초 후 잠금할지 설정
-   │
-   ├─ [👁️ 민감 정보 숨기기]
-   │  └─ 잠금 상태에서 금액 표시 여부
-   │
-   └─ [🎨 배경 설정]
-      └─ 잠금 화면 배경 이미지/색상
+   └─ [💳 등록된 고정비용]
+      ├─ 항목명 (30개)
+      ├─ 계정 및 업체
+      ├─ 납부일
+      └─ 금액
 ```
 
-**저장 위치:** SharedPreferences (암호화됨)
+**저장 위치:** 거래 데이터 조회 (읽기 전용)
+
+**참고**: 페이지 0의 "월별 통계" 아이콘은 현재 계정의 MonthlyStatsScreen으로 연결됩니다.
 
 ---
 
@@ -423,7 +425,7 @@ Navigator.of(context).pushNamed(
 | **전체 검색** | ✅ 완료 | ✓ | 다중 필터 지원 |
 | **계정 관리** | ✅ 완료 | ✓ | 생성/삭제 기본 구현 |
 | **월말 정산** | ✅ 완료 | ✓ | 이월 처리 기본 구현 |
-| **보호기 설정** | ✅ 완료 | ✓ | 패스코드/생체인증 |
+| **지출통계** | ✅ 완료 | ✓ | 지출 분석 및 통계 |
 | **노출 제한** | ✅ 완료 | ✓ | 민감 정보 마스킹 |
 | **아이콘 관리** | ✅ 완료 | ✓ | Page 5 커스터마이징 |
 | **인증 게이트** | ✅ 완료 | ✓ | 권한 검증 로직 |
@@ -444,7 +446,7 @@ Navigator.of(context).pushNamed(
    - [검색] → RootSearchScreen
    - [계정 관리] → RootAccountManageScreen
    - [월말 정산] → RootMonthEndScreen
-   - [보호기 설정] → RootScreenSaverSettingsScreen
+   - [지출통계] → RootExpenseAnalysisScreen
    - [아이콘 관리] → IconManagementRootScreen
 ```
 
@@ -555,7 +557,7 @@ Navigator.of(context).pushNamed(
 5. 다음 달로 항목이 이동되는지 확인
 ```
 
-### 단계 6: 보호기 설정
+### 단계 6: 지출통계
 
 #### A. 앱 잠금 활성화
 ```

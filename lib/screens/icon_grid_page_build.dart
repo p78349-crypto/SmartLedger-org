@@ -3,6 +3,37 @@ part of 'account_main_screen.dart';
 // ignore_for_file: invalid_use_of_protected_member
 
 extension IconGridPageBuild on _IconGridPageState {
+  int _slotIndexForDisplayPosition({
+    required int displayIndex,
+    required int crossAxisCount,
+    required int totalSlots,
+  }) {
+    final rows = (totalSlots + crossAxisCount - 1) ~/ crossAxisCount;
+    if (rows <= 1) return displayIndex;
+
+    final displayRow = displayIndex ~/ crossAxisCount;
+    final column = displayIndex % crossAxisCount;
+    final mappedRow = _mappedRowForThumbReach(displayRow, rows);
+    return (mappedRow * crossAxisCount) + column;
+  }
+
+  int _mappedRowForThumbReach(int displayRow, int rows) {
+    if (rows <= 1) return 0;
+
+    final orderedRows = <int>[];
+    final secondFromBottom = rows - 2;
+
+    for (int row = secondFromBottom; row >= 0; row--) {
+      orderedRows.add(row);
+    }
+    orderedRows.add(rows - 1);
+
+    if (displayRow < 0 || displayRow >= orderedRows.length) {
+      return displayRow;
+    }
+    return orderedRows[displayRow];
+  }
+
   Widget _buildGridPage(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
@@ -103,17 +134,42 @@ extension IconGridPageBuild on _IconGridPageState {
           child: SizedBox(
             height: gridHeight,
             width: double.infinity,
-            child: GridView.count(
-              padding: const EdgeInsets.all(16),
-              shrinkWrap: true,
+            child: SingleChildScrollView(
               physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 4,
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              childAspectRatio: childAspectRatio,
-              children: List.generate(_defaultSlotCount, (index) {
-                return _buildSlotItem(index, scheme);
-              }),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: List.generate(rows, (displayRow) {
+                    return Padding(
+                      padding: EdgeInsets.only(
+                        bottom: displayRow == rows - 1 ? 0 : mainAxisSpacing,
+                      ),
+                      child: SizedBox(
+                        height: itemHeight,
+                        child: Row(
+                          children: List.generate(crossAxisCount, (column) {
+                            final displayIndex =
+                                (displayRow * crossAxisCount) + column;
+                            final slotIndex = _slotIndexForDisplayPosition(
+                              displayIndex: displayIndex,
+                              crossAxisCount: crossAxisCount,
+                              totalSlots: _defaultSlotCount,
+                            );
+                            return Expanded(
+                              child: Padding(
+                                padding: EdgeInsets.only(
+                                  right: column == crossAxisCount - 1 ? 0 : 12,
+                                ),
+                                child: _buildSlotItem(slotIndex, scheme),
+                              ),
+                            );
+                          }),
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              ),
             ),
           ),
         );
@@ -130,7 +186,7 @@ extension IconGridPageBuild on _IconGridPageState {
     final icon = isEmpty ? null : _iconById(id);
 
     if (!_isEditMode && _hideEmptySlots && (isEmpty || icon == null)) {
-      return SizedBox.expand(key: slotKey);
+      return KeyedSubtree(key: slotKey, child: const SizedBox.expand());
     }
 
     final tile = icon != null
@@ -149,39 +205,45 @@ extension IconGridPageBuild on _IconGridPageState {
           )
         : _EmptySlotTile(isEditMode: _isEditMode);
 
-    if (!_isEditMode) return SizedBox(key: slotKey, child: tile);
+    if (!_isEditMode) {
+      return SizedBox(
+        child: KeyedSubtree(key: slotKey, child: tile),
+      );
+    }
 
     return SizedBox(
-      key: slotKey,
-      child: LongPressDraggable<String>(
-        data: id,
-        feedback: Opacity(
-          opacity: 0.9,
-          child: SizedBox(width: 80, child: tile),
-        ),
-        childWhenDragging: Opacity(
-          opacity: id.isEmpty ? 1.0 : 0.3,
-          child: tile,
-        ),
-        child: DragTarget<String>(
-          onWillAcceptWithDetails: (details) => true,
-          onAcceptWithDetails: (details) {
-            final draggedId = details.data;
-            if (draggedId.isEmpty) return;
-            _assignOrSwap(draggedId, index);
-          },
-          builder: (context, candidateData, rejectedData) {
-            final highlight = candidateData.isNotEmpty;
-            return AnimatedContainer(
-              duration: const Duration(milliseconds: 120),
-              transform: Matrix4.diagonal3Values(
-                highlight ? 1.03 : 1.0,
-                highlight ? 1.03 : 1.0,
-                1.0,
-              ),
-              child: tile,
-            );
-          },
+      child: KeyedSubtree(
+        key: slotKey,
+        child: LongPressDraggable<String>(
+          data: id,
+          feedback: Opacity(
+            opacity: 0.9,
+            child: SizedBox(width: 80, child: tile),
+          ),
+          childWhenDragging: Opacity(
+            opacity: id.isEmpty ? 1.0 : 0.3,
+            child: tile,
+          ),
+          child: DragTarget<String>(
+            onWillAcceptWithDetails: (details) => true,
+            onAcceptWithDetails: (details) {
+              final draggedId = details.data;
+              if (draggedId.isEmpty) return;
+              _assignOrSwap(draggedId, index);
+            },
+            builder: (context, candidateData, rejectedData) {
+              final highlight = candidateData.isNotEmpty;
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 120),
+                transform: Matrix4.diagonal3Values(
+                  highlight ? 1.03 : 1.0,
+                  highlight ? 1.03 : 1.0,
+                  1.0,
+                ),
+                child: tile,
+              );
+            },
+          ),
         ),
       ),
     );

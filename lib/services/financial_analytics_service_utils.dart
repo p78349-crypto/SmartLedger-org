@@ -21,7 +21,13 @@ extension FinancialAnalyticsServiceUtils on FinancialAnalyticsService {
   /// Gets current cash position across all accounts
   Future<double> _getCurrentCashPosition() async {
     final accounts = await _accountService.getAllAccounts();
-    return accounts.fold(0.0, (sum, account) => sum + account.balance);
+    // NOTE: Account model does not track a running balance; approximate using
+    // carryover minus overdraft as a conservative snapshot.
+    var sum = 0.0;
+    for (final account in accounts) {
+      sum += (account.carryoverAmount - account.overdraftAmount);
+    }
+    return sum;
   }
 
   /// Calculates performance metrics for individual asset
@@ -32,12 +38,12 @@ extension FinancialAnalyticsServiceUtils on FinancialAnalyticsService {
   ) async {
     try {
       // For this implementation, we'll use asset's purchase price as initial investment
-      final initialInvestment = asset.purchasePrice ?? asset.currentValue;
-      final currentValue = asset.currentValue;
+      final initialInvestment = asset.costBasis ?? asset.amount;
+      final currentValue = asset.amount;
       
       if (initialInvestment <= 0) return null;
       
-      final purchaseDate = asset.purchaseDate ?? DateTime.now().subtract(const Duration(days: 365));
+      final purchaseDate = asset.date;
       final evaluationDate = endDate ?? DateTime.now();
       final durationDays = evaluationDate.difference(purchaseDate).inDays;
       
@@ -50,7 +56,7 @@ extension FinancialAnalyticsServiceUtils on FinancialAnalyticsService {
       ) * 100;
       
       // Simplified volatility calculation (would need historical prices for accuracy)
-      final estimatedVolatility = _estimateAssetVolatility(asset.assetType);
+      final estimatedVolatility = _estimateAssetVolatility(asset.category.name);
       
       final sharpeRatio = FinancialAnalyticsHelper.calculateSharpeRatio(
         annualizedReturn / 100,

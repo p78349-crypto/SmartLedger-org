@@ -29,6 +29,7 @@
  iconManagement2
  iconManagementAsset
  iconManagementRoot
+ iconManagementSettings
  themeSettings
  page1BottomIconSettings
  privacyPolicy

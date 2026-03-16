@@ -1,3 +1,33 @@
+재시작 메모 (2026-03-03)
+- 완료: Lock 메커니즘 검증 (6개 서비스 + InteractionBlockers + ScreenSaver Lock)
+  - 발견: Lock 타입 오분류 버그 (longLock 10분 경과 시 cooldown으로 표시), 쿨다운 `==` 비교 이슈
+- 완료: Screen Saver 연결 검증 → 15개 파일 잔존 + 13개 활성 연결점 확인
+- 완료: Screen Saver 전체 삭제 (15개 파일 삭제 + 14개 파일 참조 정리, 에러 0건)
+- 완료: Lock 동시성 제어 보강 적용
+  - 적용: `UserPinService`, `UserPasswordService`, `RootPinService`,
+    `AssetPinService`, `AssetPasswordService`에 정책 직렬화 큐 추가
+  - 테스트: `test/services/auth_policy_concurrency_test.dart` 신규 추가
+- 재검증: `flutter analyze` 통과, 동시성 타깃 테스트 2건 통과,
+  전체 테스트 1325건 통과
+- 완료: 순차 오케스트레이션(품질→릴리즈→운영) 진입점 추가
+  - 스크립트: `scripts/orchestrate_lifecycle.ps1`
+  - 문서: `docs/developer/INFRA_ORCHESTRATION_RUNBOOK_KO.md`
+  - 인덱스 연결: `docs/README.md`, `docs/developer/README.md`
+- 검증: `orchestrate_lifecycle.ps1 -Stage full -DryRun` 정상,
+  `-Stage ops -SkipProjectBackup` 실실행 통과
+- 백업: `backups/pre_screensaver_removal_20260303_094713/` (28개 파일)
+- 검증: `flutter analyze` 에러 0건, lib 내 screen_saver grep 0건
+
+재시작 메모 (2026-02-28)
+- 완료: 보안 문서 일괄 업데이트 (CHANGELOG/RELEASE_DRAFT/사용자 매뉴얼/문서 인덱스)
+- 완료: 아이콘 이동 정책문서 업데이트 (하단 2번째 줄 우선 정렬 정책 + 메인/아이콘관리 동기화)
+- 완료: AI 투자 분석 고지/동의 게이트 추가 (미동의 진입 차단)
+- 완료: 설정 > 법적 고지 > 투자 분석 동의 기록 조회/초기화 기능 추가
+- 고정체크: 배포 전 `_consentVersion` 상향 필요 여부 확인 (문구 변경 시 필수)
+- 고정체크: 동의 초기화 후 투자 분석 재진입 시 재동의 강제 동작 확인
+- 반영: 생체인식 공통, PIN/비밀번호 ROOT·USER·ASSET 분리 정책 문구 통일
+- 검증: flutter analyze, flutter build apk --release, flutter install --release 성공
+
 재시작 메모 (2026-01-09)
 - 완료: 혼용(import 스타일) 정리 (lib 내부 import 상대경로 통일)
 - 검증: lib/**/*.dart 81자+ 라인 TOTAL=0, flutter analyze No issues found

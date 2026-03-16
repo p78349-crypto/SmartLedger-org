@@ -1,57 +1,5 @@
 part of user_account_auth_gate;
 
-class _UserAuthChoiceDialog extends StatelessWidget {
-  const _UserAuthChoiceDialog({
-    required this.canPin,
-    required this.canPassword,
-    required this.canBiometric,
-  });
-
-  final bool canPin;
-  final bool canPassword;
-  final bool canBiometric;
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('계정 인증'),
-      content: const Text('사용할 인증 방법을 선택하세요.'),
-      actions: [
-        if (canBiometric)
-          FilledButton.icon(
-            onPressed: () {
-              Navigator.of(context).pop(_UserAuthChoiceResult.biometric);
-            },
-            icon: const Icon(IconCatalog.fingerprint),
-            label: const Text('지문'),
-          ),
-        if (canPin)
-          FilledButton.icon(
-            onPressed: () {
-              Navigator.of(context).pop(_UserAuthChoiceResult.pin);
-            },
-            icon: const Icon(IconCatalog.lockOutline),
-            label: const Text('PIN'),
-          ),
-        if (canPassword)
-          FilledButton.icon(
-            onPressed: () {
-              Navigator.of(context).pop(_UserAuthChoiceResult.password);
-            },
-            icon: const Icon(IconCatalog.passwordOutlined),
-            label: const Text('비번'),
-          ),
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).pop(_UserAuthChoiceResult.exit);
-          },
-          child: const Text('나가기'),
-        ),
-      ],
-    );
-  }
-}
-
 class _UserPinDialog extends StatefulWidget {
   const _UserPinDialog({required this.prefs, required this.service});
 

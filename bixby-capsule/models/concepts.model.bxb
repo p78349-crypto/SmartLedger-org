@@ -95,7 +95,7 @@ enum (FeatureType) {
   symbol (root_search) { description (루트 검색) }
   symbol (root_account_manage) { description (계정 관리) }
   symbol (root_month_end) { description (월말 정산) }
-  symbol (screen_saver_settings) { description (보호기 설정) }
+  symbol (page0_monthly_stats) { description (월별 통계) }
   symbol (icon_management_root) { description (루트 아이콘 관리) }
 
   symbol (application_settings) { description (애플리케이션 설정) }
@@ -107,6 +107,7 @@ enum (FeatureType) {
   symbol (nutrition_report) { description (레시피/식재료 검색) }
   symbol (settings) { description (설정) }
   symbol (backup) { description (백업) }
+  symbol (backup_settings) { description (백업 설정) }
   symbol (trash) { description (휴지통) }
   symbol (voice_shortcuts) { description (음성단축키) }
   symbol (voice_dashboard) { description (음성대시보드) }

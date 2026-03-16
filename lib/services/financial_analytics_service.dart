@@ -124,15 +124,15 @@ class FinancialAnalyticsService {
       final accounts = await _accountService.getAllAccounts();
       final recentTransactions = await _getRecentTransactions(90);
       
-      final totalAssets = assets.fold(0.0, (sum, asset) => sum + asset.currentValue);
+        final totalAssets = assets.fold(0.0, (sum, asset) => sum + asset.amount);
       
       final liquidAssets = assets
-          .where((a) => _isLiquidAsset(a.assetType))
-          .fold(0.0, (sum, asset) => sum + asset.currentValue);
+          .where((a) => _isLiquidAsset(a.category.name))
+          .fold(0.0, (sum, asset) => sum + asset.amount);
       
       final investments = assets
-          .where((a) => _isInvestmentAsset(a.assetType))
-          .fold(0.0, (sum, asset) => sum + asset.currentValue);
+          .where((a) => _isInvestmentAsset(a.category.name))
+          .fold(0.0, (sum, asset) => sum + asset.amount);
       
       final monthlyIncome = _calculateMonthlyIncome(recentTransactions);
       final monthlyExpenses = _calculateMonthlyExpenses(recentTransactions);

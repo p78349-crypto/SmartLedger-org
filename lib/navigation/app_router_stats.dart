@@ -33,7 +33,15 @@ class _StatsRoutes {
         final a = args as AccountArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => AssetRouteAuthGate(
+          builder: (context) => AssetRouteAuthGate(
+            requiresSubscription: true,
+            subscriptionUserId: a.accountName,
+            onSubscriptionAction: () {
+              Navigator.of(context).pushNamed(
+                AppRoutes.subscriptionManage,
+                arguments: a.accountName,
+              );
+            },
             child: MonthlyStatsScreen(accountName: a.accountName),
           ),
         );
@@ -60,13 +68,40 @@ class _StatsRoutes {
               PointsMotivationStatsScreen(accountName: a.accountName),
         );
 
+      case AppRoutes.rewardSystemStats:
+        final a = args as AccountArgs;
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => RewardSystemStatsScreen(accountName: a.accountName),
+        );
+
       case AppRoutes.spendingAnalysis:
         final a = args as AccountArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => AssetRouteAuthGate(
+          builder: (context) => AssetRouteAuthGate(
+            requiresSubscription: true,
+            subscriptionUserId: a.accountName,
+            onSubscriptionAction: () {
+              Navigator.of(context).pushNamed(
+                AppRoutes.subscriptionManage,
+                arguments: a.accountName,
+              );
+            },
             child: SpendingAnalysisScreen(accountName: a.accountName),
           ),
+        );
+
+      case AppRoutes.advancedFinancialAnalytics:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const AdvancedFinancialAnalyticsScreen(),
+        );
+
+      case AppRoutes.ceoPredictionDashboard:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const CeoPredictionDashboardScreen(),
         );
 
       case AppRoutes.weatherPricePrediction:

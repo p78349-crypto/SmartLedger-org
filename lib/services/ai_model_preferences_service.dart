@@ -42,7 +42,7 @@ class AiModelPreferencesService {
     await _prefs?.setBool(_keyUseAiForCeo, value);
   }
 
-  /// 투자 자문에 AI 사용 여부 (🔒 보안 봉인 적용)
+  /// 투자 참고정보에 AI 사용 여부 (🔒 보안 봉인 적용)
   Future<bool> get useAiForInvestment async {
     if (AiSecuritySeal.isSealed && !AiSecuritySeal.isDeveloperModeEnabled) {
       return false; // 보안 봉인으로 인한 강제 비활성화
@@ -51,7 +51,7 @@ class AiModelPreferencesService {
     return _prefs?.getBool(_keyUseAiForInvestment) ?? true;
   }
 
-  /// 투자 자문 AI 사용 설정
+  /// 투자 참고정보 AI 사용 설정
   Future<void> setUseAiForInvestment(bool value) async {
     await initialize();
     await _prefs?.setBool(_keyUseAiForInvestment, value);

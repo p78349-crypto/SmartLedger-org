@@ -19,6 +19,14 @@ class TransactionBenefitMonthlyAggService {
       'tx_benefit_monthly_agg_stamp_v1_transactions_json';
 
   final TransactionDbStore _dbStore = TransactionDbStore();
+  static const int _moneyScale = 6;
+
+  static double _normalizeMoney(double value) {
+    if (value.isNaN || value.isInfinite) return 0.0;
+    final normalized = double.parse(value.toStringAsFixed(_moneyScale));
+    if (normalized == -0.0) return 0.0;
+    return normalized;
+  }
 
   String _ym(DateTime dt) {
     final y = dt.year.toString().padLeft(4, '0');
@@ -69,7 +77,7 @@ class TransactionBenefitMonthlyAggService {
         final ym = _ym(tx.date);
         for (final e in byType.entries) {
           final key = e.key.trim();
-          final amount = e.value;
+          final amount = _normalizeMoney(e.value);
           if (key.isEmpty) continue;
           if (amount.isNaN || amount.isInfinite) continue;
           if (amount <= 0) continue;
@@ -79,7 +87,7 @@ class TransactionBenefitMonthlyAggService {
             k,
             () => _MonthlyAgg(accountId: accountId, ym: ym, benefitType: key),
           );
-          item.total += amount;
+          item.total = _normalizeMoney(item.total + amount);
           item.count += 1;
         }
       }
@@ -123,7 +131,7 @@ class TransactionBenefitMonthlyAggService {
     await db.batch((b) {
       for (final e in byType.entries) {
         final key = e.key.trim();
-        final amount = e.value;
+        final amount = _normalizeMoney(e.value);
         if (key.isEmpty) continue;
         if (amount.isNaN || amount.isInfinite) continue;
         if (amount <= 0) continue;
@@ -159,7 +167,7 @@ class TransactionBenefitMonthlyAggService {
     await db.batch((b) {
       for (final e in byType.entries) {
         final key = e.key.trim();
-        final amount = e.value;
+        final amount = _normalizeMoney(e.value);
         if (key.isEmpty) continue;
         if (amount.isNaN || amount.isInfinite) continue;
         if (amount <= 0) continue;
@@ -227,8 +235,9 @@ class TransactionBenefitMonthlyAggService {
         )
         .getSingle();
 
-    final v = row.read<num>('s').toDouble();
-    return v;
+    // Drift doesn't support mapping to `num` for custom selects.
+    // SUM(...) returns a numeric type; treat it as double for stability.
+    return _normalizeMoney(row.read<double>('s'));
   }
 
   static Future<void> _syncAggStampToPersistStamp() async {

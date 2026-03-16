@@ -21,6 +21,12 @@ class LaunchScreen extends StatefulWidget {
 }
 
 class _LaunchScreenState extends State<LaunchScreen> {
+  static const bool _enableStartupResetPrompt = bool.fromEnvironment(
+    'ENABLE_STARTUP_RESET_PROMPT',
+  );
+  static const String _initialResetPromptShownKey =
+      'initial_reset_prompt_shown_v1';
+
   bool _permissionsGranted = false;
   bool _isCheckingPermissions = true;
 
@@ -60,6 +66,7 @@ class _LaunchScreenState extends State<LaunchScreen> {
             _isCheckingPermissions = false;
           });
         }
+        await _maybeAskInitialReset();
         _goToAccountMain();
       } else {
         debugPrint(
@@ -81,8 +88,71 @@ class _LaunchScreenState extends State<LaunchScreen> {
           _isCheckingPermissions = false;
         });
       }
+      await _maybeAskInitialReset();
       _goToAccountMain();
     }
+  }
+
+  Future<void> _maybeAskInitialReset() async {
+    if (!_enableStartupResetPrompt) {
+      return;
+    }
+    final prefs = await SharedPreferences.getInstance();
+    final alreadyShown = prefs.getBool(_initialResetPromptShownKey) ?? false;
+    if (alreadyShown || !mounted) {
+      return;
+    }
+
+    await Future<void>.delayed(Duration.zero);
+    if (!mounted) return;
+
+    final shouldReset = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('초기화 확인'),
+          content: const Text(
+            '재설치 후 이전 설정이 복원될 수 있습니다.\n'
+            '지금 로컬 설정을 초기화할까요?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('유지'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const Text('초기화'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldReset == true) {
+      await _resetLocalPrefsForFreshStart();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('로컬 설정을 초기화했습니다.')),
+      );
+    }
+
+    final confirmPrefs = await SharedPreferences.getInstance();
+    await confirmPrefs.setBool(_initialResetPromptShownKey, true);
+  }
+
+  Future<void> _resetLocalPrefsForFreshStart() async {
+    final service = AccountService();
+    final accountNames = service.accounts.map((a) => a.name).toList();
+
+    for (final accountName in accountNames) {
+      await UserPrefService.clearAllAccountScopedPrefs(accountName: accountName);
+    }
+    await UserPrefService.resetAllPolicies();
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
   }
 
   Future<void> _goToAccountMain() async {

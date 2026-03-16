@@ -8,6 +8,93 @@ import 'package:smart_ledger/widgets/user_permission_badge.dart';
 /// Phase 1 개선: 감사 로그 표준화 및 템플릿 통일
 class AuditLogService {
   static const String _logFileName = 'audit_log.jsonl';
+  static const Set<String> _reservedTransactionMetadataKeys = {
+    'schemaVersion',
+    'accountId',
+    'amount',
+    'transactionId',
+  };
+
+  /// 거래 이벤트 표준 로그 기록
+  ///
+  /// 필수 메타 필드:
+  /// - accountId
+  /// - amount
+  /// - transactionId
+  /// - schemaVersion
+  static Future<void> logTransactionEvent({
+    required String action,
+    required String accountId,
+    required double amount,
+    required String transactionId,
+    String? transactionType,
+    bool success = true,
+    String? errorMessage,
+    ActionRiskLevel? riskLevel,
+    Map<String, dynamic>? metadata,
+  }) async {
+    await _validateReservedTransactionMetadataKeys(metadata);
+
+    final mergedMetadata = <String, dynamic>{
+      ...?metadata,
+      'schemaVersion': 'transaction_event_v1',
+      'accountId': accountId,
+      'amount': amount,
+      'transactionId': transactionId,
+    };
+    if (transactionType != null) {
+      mergedMetadata['transactionType'] = transactionType;
+    }
+
+    if (success) {
+      return logSuccess(
+        eventType: AuditEventType.dataModification,
+        action: action,
+        userLevel: UserPermissionLevel.operator,
+        targetResource: accountId,
+        metadata: mergedMetadata,
+        riskLevel: riskLevel,
+      );
+    }
+
+    return logFailure(
+      eventType: AuditEventType.dataModification,
+      action: action,
+      userLevel: UserPermissionLevel.operator,
+      targetResource: accountId,
+      metadata: mergedMetadata,
+      riskLevel: riskLevel,
+      errorMessage: errorMessage ?? 'transaction_event_failed',
+    );
+  }
+
+  static Future<void> _validateReservedTransactionMetadataKeys(
+    Map<String, dynamic>? metadata,
+  ) async {
+    if (metadata == null || metadata.isEmpty) {
+      return;
+    }
+
+    final conflicts = metadata.keys
+        .where(_reservedTransactionMetadataKeys.contains)
+        .toList();
+    if (conflicts.isNotEmpty) {
+      final message =
+          '거래 표준 로그의 고정 키는 metadata에서 설정할 수 없습니다. '
+          '충돌 키: ${conflicts.join(', ')}. '
+          '확장 정보는 custom.* 형태의 별도 키를 사용해 주세요.';
+      debugPrint('[AuditLogService] reserved-key conflict: $message');
+      await log(
+        eventType: AuditEventType.policyEnforcement,
+        action: 'reserved_metadata_key_conflict',
+        userLevel: UserPermissionLevel.operator,
+        metadata: {'conflictKeys': conflicts},
+        success: false,
+        errorMessage: message,
+      );
+      throw ArgumentError(message);
+    }
+  }
   
   /// 감사 로그 기록
   static Future<void> log({
@@ -122,6 +209,38 @@ class AuditLogService {
     }
   }
 
+  /// 실시간 상태 계산용 스냅샷 (파일 1회 읽기)
+  static Future<AuditRealtimeSnapshot> getRealtimeSnapshot({
+    int lookback = 30,
+  }) async {
+    final logs = await getRecentLogs(limit: lookback);
+    var hasSecurityViolation = false;
+    var anomalyDetections = 0;
+    var recentFailures = 0;
+
+    for (final log in logs) {
+      if (log.eventType == AuditEventType.securityViolation) {
+        hasSecurityViolation = true;
+      }
+      if (log.success == false) {
+        recentFailures += 1;
+      }
+      if (log.eventType == AuditEventType.policyEnforcement &&
+          log.action.startsWith('anomaly_signal_')) {
+        anomalyDetections += 1;
+      } else if (log.eventType == AuditEventType.securityViolation &&
+          log.action == 'anomaly_detection_summary') {
+        anomalyDetections += 1;
+      }
+    }
+
+    return AuditRealtimeSnapshot(
+      hasSecurityViolation: hasSecurityViolation,
+      anomalyDetections: anomalyDetections,
+      recentFailures: recentFailures,
+    );
+  }
+
   /// 최근 로그 항목들 조회
   static Future<List<AuditLogEntry>> getRecentLogs({int limit = 100}) async {
     try {
@@ -165,6 +284,35 @@ class AuditLogService {
         .take(limit)
         .toList();
   }
+
+  /// 최근 이상 징후 탐지 항목 조회 (대시보드용)
+  static Future<List<AuditLogEntry>> getRecentAnomalyDetections({
+    int limit = 10,
+  }) async {
+    final allLogs = await getRecentLogs(limit: limit * 5);
+    return allLogs
+        .where((log) {
+          if (log.eventType == AuditEventType.policyEnforcement) {
+            return log.action.startsWith('anomaly_signal_');
+          }
+          return log.eventType == AuditEventType.securityViolation &&
+              log.action == 'anomaly_detection_summary';
+        })
+        .take(limit)
+        .toList();
+  }
+}
+
+class AuditRealtimeSnapshot {
+  final bool hasSecurityViolation;
+  final int anomalyDetections;
+  final int recentFailures;
+
+  const AuditRealtimeSnapshot({
+    required this.hasSecurityViolation,
+    required this.anomalyDetections,
+    required this.recentFailures,
+  });
 }
 
 /// 감사 로그 이벤트 타입

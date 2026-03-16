@@ -93,38 +93,12 @@ extension IconGridPageIcons on _IconGridPageState {
     required bool allowAssetOutsideWhenUnlocked,
     required bool assetSessionUnlocked,
   }) {
-    // Screen saver shortcut: only placeable on page 1.
-    if (iconId == ScreenSaverIds.shortcutIconId) {
-      return pageIndex == ScreenSaverIds.shortcutAllowedMainPageIndex;
-    }
-
-    // Hard restrictions: settings and root are dedicated.
-    if (_isSettingsOnlyPage(pageIndex)) {
-      return _settingsIconIds.contains(iconId);
-    }
-    if (_settingsIconIds.contains(iconId)) return false;
-
-    if (_isRootReservedPage(pageIndex)) {
-      return _rootIconIds.contains(iconId);
-    }
-    if (_rootIconIds.contains(iconId)) return false;
-
-    // Asset fixed policy: asset icons must live on index 4.
-    if (_assetIconIds.contains(iconId)) {
-      return _isAssetReservedPage(pageIndex);
-    }
-
     // Optional: when asset lock is enabled, income icons are also restricted
     // outside asset pages unless explicitly allowed and currently unlocked.
     if (assetLockEnabled && _incomeIconIds.contains(iconId)) {
       if (_isAssetReservedPage(pageIndex)) return true;
       final canBypass = allowAssetOutsideWhenUnlocked && assetSessionUnlocked;
       return canBypass;
-    }
-
-    // If a page is reserved for stats, only allow stats module icons.
-    if (_isStatsReservedPage(pageIndex)) {
-      return _statsIconIds.contains(iconId);
     }
 
     return true;

@@ -6,7 +6,7 @@ import '../config/ai_security_seal.dart';
 import '../models/ai_investment_models.dart';
 import '../models/asset.dart';
 
-/// 실제 AI 기반 투자 자문 서비스 (Gemini 모델 활용)
+/// 실제 AI 기반 투자 참고정보 서비스 (Gemini 모델 활용)
 /// 🔒 현재 보안상 이유로 AI 기능 봉인됨 (2026-02-21)
 /// 하이브리드 AI: 수학적 계산 + AI 해석 결합
 /// 사용자 설정에 따라 AI 모델 선택 가능
@@ -18,7 +18,7 @@ class RealAiInvestmentService {
   final GeminiAiService _geminiService = GeminiAiService.instance;
   final AICoreGeminiService _aicoreService = AICoreGeminiService();
 
-  /// 사용자 설정 기반 AI 투자 자문 생성 (🔒 보안 봉인 적용)
+  /// 사용자 설정 기반 AI 투자 참고정보 생성 (🔒 보안 봉인 적용)
   Future<Map<String, dynamic>> generateAiInvestmentAdvice({
     required List<Asset> assets,
     required Map<InvestmentAssetType, double> currentAllocation,
@@ -66,7 +66,7 @@ class RealAiInvestmentService {
     }
   }
 
-  /// 오프라인 AI로 투자 조언 생성
+  /// 오프라인 AI로 투자 참고정보 생성
   Future<Map<String, dynamic>> _getOfflineInvestmentAdvice(
     Map<String, dynamic> portfolioSnapshot) async {
     
@@ -76,11 +76,11 @@ class RealAiInvestmentService {
       final response = await _aicoreService.generateText(prompt);
       return _parseInvestmentResponse(response);
     } catch (e) {
-      throw Exception('Offline AI investment advice failed: $e');
+      throw Exception('Offline AI investment reference information failed: $e');
     }
   }
 
-  /// 온라인 AI로 투자 조언 생성  
+  /// 온라인 AI로 투자 참고정보 생성  
   Future<Map<String, dynamic>> _getOnlineInvestmentAdvice(
     Map<String, dynamic> portfolioSnapshot) async {
     
@@ -94,17 +94,17 @@ class RealAiInvestmentService {
       );
       return _parseInvestmentResponse(response);
     } catch (e) {
-      throw Exception('Online AI investment advice failed: $e');
+      throw Exception('Online AI investment reference information failed: $e');
     }
   }
 
-  /// AI 투자 자문을 위한 프롬프트 구성
+  /// AI 투자 참고정보를 위한 프롬프트 구성
   String _buildInvestmentAdvicePrompt(
     Map<String, dynamic> portfolioSnapshot, 
     {required bool isOffline}) {
     
     return '''
-당신은 SmartLedger의 전문 AI 투자 자문관입니다. 다음 포트폴리오를 분석하여 개인맞춤 투자 조언을 제공하세요.
+당신은 SmartLedger의 AI 투자 정보 분석 도우미입니다. 다음 포트폴리오를 분석하여 개인맞춤 참고정보를 제공하세요.
 
 👤 **투자자 프로필:**
 - 연령: ${portfolioSnapshot['age']}세
@@ -117,10 +117,10 @@ ${portfolioSnapshot['allocationDetails']}
 
 🎯 **요청사항:**
 1. 현재 포트폴리오 평가 (강점/약점)
-2. 맞춤형 자산배분 제안 (구체적 비율)
+2. 현재 자산배분 현황 분석 (집중/분산 관점)
 3. 투자 위험도 분석
-4. 단계별 포트폴리오 개선 방안
-5. 시장 상황 고려한 타이밍 조언
+4. 모니터링이 필요한 점검 항목
+5. 데이터 해석 시 주의할 한계
 
 📋 **응답 형식 (JSON):**
 {
@@ -129,7 +129,7 @@ ${portfolioSnapshot['allocationDetails']}
     "weaknesses": ["약점1", "약점2"],
     "overall_score": 85
   },
-  "recommended_allocation": {
+  "allocation_snapshot": {
     "stocks": 40.0,
     "bonds": 30.0,
     "etf": 20.0,
@@ -137,19 +137,15 @@ ${portfolioSnapshot['allocationDetails']}
   },
   "risk_analysis": {
     "current_risk_level": "medium",
-    "recommended_adjustments": ["조정사항1", "조정사항2"]
+    "monitoring_notes": ["점검사항1", "점검사항2"]
   },
-  "action_plan": {
-    "immediate_actions": ["즉시실행1", "즉시실행2"],
-    "medium_term_goals": ["중기목표1", "중기목표2"]
-  },
-  "market_timing": {
-    "current_market_view": "시장전망",
-    "entry_points": ["진입시점1", "진입시점2"]
+  "analysis_points": {
+    "monitoring_points": ["점검포인트1", "점검포인트2"],
+    "data_limitations": ["한계1", "한계2"]
   },
   "confidence_level": 90,
   "ai_model": "${isOffline ? 'Gemini Nano (오프라인)' : 'Gemini 1.5 Flash (온라인)'}",
-  "disclaimer": "본 조언은 AI 분석 결과이며, 실제 투자 시 전문가 상담을 권장합니다"
+  "disclaimer": "본 내용은 투자 참고정보이며 투자 권유가 아닙니다. 최종 투자 판단과 책임은 사용자 본인에게 있습니다"
 }''';
   }
 
@@ -183,9 +179,15 @@ ${portfolioSnapshot['allocationDetails']}
         'success': true,
         'ai_generated': true,
         'evaluation': jsonResponse['portfolio_evaluation'] ?? {},
-        'recommended_allocation': jsonResponse['recommended_allocation'] ?? {},
+        'recommended_allocation':
+          jsonResponse['recommended_allocation'] ??
+          jsonResponse['allocation_snapshot'] ??
+          {},
         'risk_analysis': jsonResponse['risk_analysis'] ?? {},
-        'action_plan': jsonResponse['action_plan'] ?? {},
+        'action_plan':
+          jsonResponse['action_plan'] ??
+          jsonResponse['analysis_points'] ??
+          {},
         'market_timing': jsonResponse['market_timing'] ?? {},
         'confidence_level': jsonResponse['confidence_level'] ?? 75,
         'ai_model': jsonResponse['ai_model'] ?? 'Unknown',

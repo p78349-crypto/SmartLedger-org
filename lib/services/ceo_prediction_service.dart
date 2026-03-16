@@ -98,3 +98,5 @@ class CeoPredictionService {
       'dateRange': {'start': startDate, 'end': fromDate},
     };
   }
+
+}

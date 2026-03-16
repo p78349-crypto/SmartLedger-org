@@ -52,11 +52,6 @@ extension IconManagementHelpers on _IconManagementScreenState {
       _settingsOnlyPages.contains(pageIndex);
 
   bool _isAllowedOnPage(int pageIndex, String iconId) {
-    // Screen saver shortcut: only placeable on page 1.
-    if (iconId == ScreenSaverIds.shortcutIconId) {
-      return pageIndex == ScreenSaverIds.shortcutAllowedMainPageIndex;
-    }
-
     // Navigation shortcut: only placeable on 2nd page.
     if (iconId == _shortcutSettingsPage10Id) {
       return pageIndex == _shortcutSettingsAllowedPageIndex;
@@ -126,10 +121,49 @@ extension IconManagementHelpers on _IconManagementScreenState {
   // Slot management
   // ---------------------------------------------------------------------------
 
+  int _mappedRowForThumbReach(int displayRow, int rows) {
+    if (rows <= 1) return 0;
+
+    final orderedRows = <int>[];
+    final secondFromBottom = rows - 2;
+
+    for (int row = secondFromBottom; row >= 0; row--) {
+      orderedRows.add(row);
+    }
+    orderedRows.add(rows - 1);
+
+    if (displayRow < 0 || displayRow >= orderedRows.length) {
+      return displayRow;
+    }
+    return orderedRows[displayRow];
+  }
+
+  List<int> _visualSlotIndices({
+    required int totalSlots,
+    int crossAxisCount = 4,
+  }) {
+    if (totalSlots <= 0) return const <int>[];
+
+    final rows = (totalSlots + crossAxisCount - 1) ~/ crossAxisCount;
+    final mapped = <int>[];
+
+    for (int displayIndex = 0; displayIndex < totalSlots; displayIndex++) {
+      final displayRow = displayIndex ~/ crossAxisCount;
+      final column = displayIndex % crossAxisCount;
+      final row = _mappedRowForThumbReach(displayRow, rows);
+      final slotIndex = (row * crossAxisCount) + column;
+      if (slotIndex >= 0 && slotIndex < totalSlots) {
+        mapped.add(slotIndex);
+      }
+    }
+
+    return mapped;
+  }
+
   List<int> _dropZoneSlotIndices() {
-    final n = _slots.length;
-    if (n <= 4) return List<int>.generate(n, (i) => i);
-    return List<int>.generate(4, (i) => n - 4 + i);
+    final visual = _visualSlotIndices(totalSlots: _slots.length);
+    if (visual.length <= 4) return visual;
+    return visual.take(4).toList(growable: false);
   }
 
   void _assignOrSwap(String draggedId, int targetIndex) {
@@ -220,6 +254,49 @@ extension IconManagementHelpers on _IconManagementScreenState {
     return next;
   }
 
+  List<String> _sanitizeSlotsKeepingExisting({
+    required int pageIndex,
+    required List<String> slots,
+  }) {
+    final next = List<String>.from(slots);
+    final editable = List<int>.generate(_slotCount, (i) => i);
+
+    // Dedupe.
+    final seen = <String>{};
+    for (final i in editable) {
+      final id = next[i].trim();
+      if (id.isEmpty) continue;
+      if (!seen.add(id)) {
+        next[i] = '';
+      }
+    }
+
+    // Clear blocked icons.
+    for (final i in editable) {
+      final id = next[i].trim();
+      if (id.isEmpty) continue;
+      if (_isBlockedForPage(pageIndex, id)) next[i] = '';
+    }
+
+    // Reserved page prefill: if all slots are empty, prefill from available icons.
+    final isReservedPage = _isStatsReservedPage(pageIndex) ||
+        _isAssetReservedPage(pageIndex) ||
+        _isRootReservedPage(pageIndex) ||
+        _isSettingsOnlyPage(pageIndex);
+    final allEmpty = next.every((s) => s.trim().isEmpty);
+    if (isReservedPage && allEmpty) {
+      final availableIcons = _autoFillSourceIconsForPage(pageIndex);
+      var writeIndex = 0;
+      for (final icon in availableIcons) {
+        if (writeIndex >= _slotCount) break;
+        next[writeIndex] = icon.id;
+        writeIndex++;
+      }
+    }
+
+    return next;
+  }
+
   void _fillCurrentPageSlotsFull() {
     setState(() {
       _slots = _fillSlotsKeepingExisting(
@@ -238,8 +315,8 @@ extension IconManagementHelpers on _IconManagementScreenState {
         .toList(growable: false);
   }
 
-  List<int> _editableSlotIndices() =>
-      List<int>.generate(_slotCount, (i) => i);
+    List<int> _editableSlotIndices() =>
+      _visualSlotIndices(totalSlots: _slotCount);
 
   bool _isEditableSlotIndex(int slotIndex) => true;
 

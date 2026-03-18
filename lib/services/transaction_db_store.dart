@@ -79,49 +79,53 @@ class TransactionDbStore {
     List<model.Transaction> transactions,
   ) async {
     if (transactions.isEmpty) return;
-    final accountId = await ensureAccountId(accountName);
-    if (accountId == null) return;
 
-    DbTransactionsCompanion mapTx(model.Transaction tx) {
-      final weatherJson = tx.weather == null
-          ? null
-          : jsonEncode(tx.weather!.toJson());
-      final trimmedStore = tx.store?.trim() ?? '';
-      return DbTransactionsCompanion.insert(
-        id: tx.id,
-        accountId: accountId,
-        type: tx.type.name,
-        description: Value(tx.description),
-        amount: tx.amount,
-        cardChargedAmount: Value(tx.cardChargedAmount),
-        date: tx.date,
-        quantity: Value(tx.quantity),
-        unitPrice: Value(tx.unitPrice),
-        paymentMethod: Value(tx.paymentMethod),
-        memo: Value(tx.memo),
-        store: Value(trimmedStore.isEmpty ? null : trimmedStore),
-        mainCategory: Value(tx.mainCategory),
-        subCategory: Value(tx.subCategory),
-        detailCategory: Value(tx.detailCategory),
-        location: Value(tx.location),
-        supplier: Value(tx.supplier),
-        expiryDate: Value(tx.expiryDate),
-        unit: Value(tx.unit),
-        savingsAllocation: Value(tx.savingsAllocation?.name),
-        isRefund: Value(tx.isRefund ? 1 : 0),
-        originalTransactionId: Value(tx.originalTransactionId),
-        weatherJson: Value(weatherJson),
-        benefitJson: Value(
-          tx.benefitJson?.trim().isEmpty ?? true
-              ? null
-              : tx.benefitJson!.trim(),
-        ),
-      );
-    }
+    // R1-2: ensureAccountId + batch를 하나의 트랜잭션으로
+    await _db.transaction(() async {
+      final accountId = await ensureAccountId(accountName);
+      if (accountId == null) return;
 
-    final companions = transactions.map(mapTx).toList();
-    await _db.batch((b) {
-      b.insertAllOnConflictUpdate(_db.dbTransactions, companions);
+      DbTransactionsCompanion mapTx(model.Transaction tx) {
+        final weatherJson = tx.weather == null
+            ? null
+            : jsonEncode(tx.weather!.toJson());
+        final trimmedStore = tx.store?.trim() ?? '';
+        return DbTransactionsCompanion.insert(
+          id: tx.id,
+          accountId: accountId,
+          type: tx.type.name,
+          description: Value(tx.description),
+          amount: tx.amount,
+          cardChargedAmount: Value(tx.cardChargedAmount),
+          date: tx.date,
+          quantity: Value(tx.quantity),
+          unitPrice: Value(tx.unitPrice),
+          paymentMethod: Value(tx.paymentMethod),
+          memo: Value(tx.memo),
+          store: Value(trimmedStore.isEmpty ? null : trimmedStore),
+          mainCategory: Value(tx.mainCategory),
+          subCategory: Value(tx.subCategory),
+          detailCategory: Value(tx.detailCategory),
+          location: Value(tx.location),
+          supplier: Value(tx.supplier),
+          expiryDate: Value(tx.expiryDate),
+          unit: Value(tx.unit),
+          savingsAllocation: Value(tx.savingsAllocation?.name),
+          isRefund: Value(tx.isRefund ? 1 : 0),
+          originalTransactionId: Value(tx.originalTransactionId),
+          weatherJson: Value(weatherJson),
+          benefitJson: Value(
+            tx.benefitJson?.trim().isEmpty ?? true
+                ? null
+                : tx.benefitJson!.trim(),
+          ),
+        );
+      }
+
+      final companions = transactions.map(mapTx).toList();
+      await _db.batch((b) {
+        b.insertAllOnConflictUpdate(_db.dbTransactions, companions);
+      });
     });
   }
 

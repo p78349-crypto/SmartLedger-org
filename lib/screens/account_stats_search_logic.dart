@@ -22,7 +22,8 @@ extension AccountStatsSearchLogic on _AccountStatsSearchScreenState {
         _pointProjectionMonthlyBase6mAvg = null;
         _pointProjectionFiveYear6mAvg = null;
         _pointProjectionTenYear6mAvg = null;
-        _pointProjectionAnnualRateUsed = _AccountStatsSearchScreenState._defaultAnnualRatePercent;
+        _pointProjectionAnnualRateUsed =
+            _AccountStatsSearchScreenState._defaultAnnualRatePercent;
       });
       return;
     }
@@ -56,7 +57,8 @@ extension AccountStatsSearchLogic on _AccountStatsSearchScreenState {
       } else {
         final sorted = List<Transaction>.from(txs)
           ..sort((a, b) => b.date.compareTo(a.date));
-        final limited = sorted.length > _AccountStatsSearchScreenState._fallbackScanMax
+        final limited =
+            sorted.length > _AccountStatsSearchScreenState._fallbackScanMax
             ? sorted.sublist(0, _AccountStatsSearchScreenState._fallbackScanMax)
             : sorted;
         for (final tx in limited) {
@@ -88,7 +90,9 @@ extension AccountStatsSearchLogic on _AccountStatsSearchScreenState {
 
   double _effectiveAnnualRatePercent(TxSearchPlan plan) {
     final v = plan.filters.annualRatePercent;
-    if (v == null) return _AccountStatsSearchScreenState._defaultAnnualRatePercent;
+    if (v == null) {
+      return _AccountStatsSearchScreenState._defaultAnnualRatePercent;
+    }
     if (v < 0) return 0;
     return v;
   }
@@ -119,7 +123,8 @@ extension AccountStatsSearchLogic on _AccountStatsSearchScreenState {
         _pointProjectionMonthlyBase6mAvg = null;
         _pointProjectionFiveYear6mAvg = null;
         _pointProjectionTenYear6mAvg = null;
-        _pointProjectionAnnualRateUsed = _AccountStatsSearchScreenState._defaultAnnualRatePercent;
+        _pointProjectionAnnualRateUsed =
+            _AccountStatsSearchScreenState._defaultAnnualRatePercent;
       });
       return;
     }

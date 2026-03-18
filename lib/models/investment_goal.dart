@@ -81,7 +81,8 @@ class InvestmentGoal {
       orElse: () => InvestmentGoalHorizon.shortTerm,
     );
     return InvestmentGoal(
-      id: json['id'] as String? ??
+      id:
+          json['id'] as String? ??
           DateTime.now().microsecondsSinceEpoch.toString(),
       title: json['title'] as String? ?? '',
       type: type,

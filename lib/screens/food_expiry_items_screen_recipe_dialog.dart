@@ -68,8 +68,8 @@ extension FoodExpiryRecipeDialogExt on _FoodExpiryItemsScreenState {
                       final daysText = daysLeft == 0
                           ? '오늘까지'
                           : daysLeft < 0
-                              ? '${-daysLeft}일 지남'
-                              : '$daysLeft일 남음';
+                          ? '${-daysLeft}일 지남'
+                          : '$daysLeft일 남음';
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 4),
                         child: Row(

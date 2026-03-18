@@ -19,8 +19,25 @@ class QuickStockUseUtils {
   // 한글 초성 테이블
   // ============================================================
   static const List<String> _chosung = [
-    'ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ',
-    'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ',
+    'ㄱ',
+    'ㄲ',
+    'ㄴ',
+    'ㄷ',
+    'ㄸ',
+    'ㄹ',
+    'ㅁ',
+    'ㅂ',
+    'ㅃ',
+    'ㅅ',
+    'ㅆ',
+    'ㅇ',
+    'ㅈ',
+    'ㅉ',
+    'ㅊ',
+    'ㅋ',
+    'ㅌ',
+    'ㅍ',
+    'ㅎ',
   ];
 
   /// 한글 문자의 초성 추출
@@ -128,8 +145,7 @@ class QuickStockUseUtils {
       final qtyFactor = _resolveQuantityFactorFromTrend(trend);
 
       final autoAddDaysThreshold =
-          await UserPrefService
-              .getStockUseAutoAddDepletionDaysHouseholdV1();
+          await UserPrefService.getStockUseAutoAddDepletionDaysHouseholdV1();
       final expectedDaysLeft = _calculateExpectedDepletionDays(updated);
       var addedToCartByPrediction = false;
       if (expectedDaysLeft != null &&

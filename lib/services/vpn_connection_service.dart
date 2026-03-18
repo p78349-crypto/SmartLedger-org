@@ -5,7 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// WireGuard VPN 연결 관리 서비스 (wireguard_vpn 플러그인 사용)
 class VpnConnectionService {
   VpnConnectionService._internal();
-  static final VpnConnectionService _instance = VpnConnectionService._internal();
+  static final VpnConnectionService _instance =
+      VpnConnectionService._internal();
   factory VpnConnectionService() => _instance;
 
   static const String _vpnConfigKey = 'wireguard_config';

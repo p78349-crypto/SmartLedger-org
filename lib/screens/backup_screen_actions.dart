@@ -57,7 +57,7 @@ extension BackupScreenActions on _BackupScreenState {
     if (!mounted || backupType == null) return;
 
     setState(() => _selectedBackupType = backupType);
-    
+
     if (mounted) {
       await _showBackupOptions();
     }
@@ -193,23 +193,27 @@ extension BackupScreenActions on _BackupScreenState {
     });
     try {
       final now = DateTime.now();
-      final fileName = _buildBackupFileName(now, backupType: _selectedBackupType);
+      final fileName = _buildBackupFileName(
+        now,
+        backupType: _selectedBackupType,
+      );
       final pw = await _prepareBackupEncryptionPassword();
       String? hint;
       if (pw != null && pw.isNotEmpty && mounted) {
         hint = await _promptPasswordHint(pw);
       }
-      
+
       final backupTypeStr = _selectedBackupType == _BackupType.transactionsOnly
           ? 'transactions_only'
           : _selectedBackupType == _BackupType.assetsOnly
-              ? 'assets_only'
-              : _selectedBackupType == _BackupType.wmsOnly
-                  ? 'wms_only'
-                  : 'full';
-      
+          ? 'assets_only'
+          : _selectedBackupType == _BackupType.wmsOnly
+          ? 'wms_only'
+          : 'full';
+
       await BackupService().saveBackupToFile(
-        widget.accountName, fileName, 
+        widget.accountName,
+        fileName,
         encryptionPassword: pw,
         passwordHint: hint,
         backupType: backupTypeStr,
@@ -280,17 +284,17 @@ extension BackupScreenActions on _BackupScreenState {
       if (pw != null && pw.isNotEmpty && mounted) {
         hint = await _promptPasswordHint(pw);
       }
-      
+
       final backupTypeStr = _selectedBackupType == _BackupType.transactionsOnly
           ? 'transactions_only'
           : _selectedBackupType == _BackupType.assetsOnly
-              ? 'assets_only'
-              : _selectedBackupType == _BackupType.wmsOnly
-                  ? 'wms_only'
-                  : 'full';
-      
+          ? 'assets_only'
+          : _selectedBackupType == _BackupType.wmsOnly
+          ? 'wms_only'
+          : 'full';
+
       final filePath = await BackupService().saveBackupToDownloads(
-        widget.accountName, 
+        widget.accountName,
         encryptionPassword: pw,
         passwordHint: hint,
         backupType: backupTypeStr,
@@ -326,23 +330,26 @@ extension BackupScreenActions on _BackupScreenState {
       if (pw != null && pw.isNotEmpty && mounted) {
         hint = await _promptPasswordHint(pw);
       }
-      
+
       final backupTypeStr = _selectedBackupType == _BackupType.transactionsOnly
           ? 'transactions_only'
           : _selectedBackupType == _BackupType.assetsOnly
-              ? 'assets_only'
-              : _selectedBackupType == _BackupType.wmsOnly
-                  ? 'wms_only'
-                  : 'full';
-      
+          ? 'assets_only'
+          : _selectedBackupType == _BackupType.wmsOnly
+          ? 'wms_only'
+          : 'full';
+
       await BackupService().shareBackup(
-        widget.accountName, 
+        widget.accountName,
         encryptionPassword: pw,
         passwordHint: hint,
         backupType: backupTypeStr,
       );
       if (!mounted) return;
-      setState(() { _backupStatus = null; _isProcessing = false; });
+      setState(() {
+        _backupStatus = null;
+        _isProcessing = false;
+      });
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -369,19 +376,22 @@ extension BackupScreenActions on _BackupScreenState {
       final backupTypeStr = _selectedBackupType == _BackupType.transactionsOnly
           ? 'transactions_only'
           : _selectedBackupType == _BackupType.assetsOnly
-              ? 'assets_only'
-              : _selectedBackupType == _BackupType.wmsOnly
-                  ? 'wms_only'
-                  : 'full';
-      
+          ? 'assets_only'
+          : _selectedBackupType == _BackupType.wmsOnly
+          ? 'wms_only'
+          : 'full';
+
       await BackupService().composeEmailWithBackup(
-        widget.accountName, 
+        widget.accountName,
         encryptionPassword: pw,
         passwordHint: hint,
         backupType: backupTypeStr,
       );
       if (!mounted) return;
-      setState(() { _backupStatus = null; _isProcessing = false; });
+      setState(() {
+        _backupStatus = null;
+        _isProcessing = false;
+      });
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -395,7 +405,7 @@ extension BackupScreenActions on _BackupScreenState {
   Future<String?> _promptPasswordHint(String password) async {
     final autoMaskedHint = BackupService().generateMaskedPasswordHint(password);
     final hintController = TextEditingController(text: autoMaskedHint);
-    
+
     try {
       return await showDialog<String>(
         context: context,
@@ -409,7 +419,11 @@ extension BackupScreenActions on _BackupScreenState {
                 '앱 재설치 시 암호를 기억하기 위한 유일한 수단입니다.\n'
                 '마스킹된 힌트만으로 암호를 유추할 수 있는지 다시 한번 확인하십시오.\n\n'
                 '※ 암호 분실로 인한 데이터 손실은 본인 책임이며 복구가 절대 불가능합니다.',
-                style: TextStyle(fontSize: 13, color: Colors.redAccent, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.redAccent,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 16),
               const Text(
@@ -442,7 +456,7 @@ extension BackupScreenActions on _BackupScreenState {
                   builder: (ctx) => AlertDialog(
                     title: const Text('힌트 미설정 주의'),
                     content: const Text(
-                      '암호 힌트 없이 진행하면 나중에 암호를 잊었을 때 절대로 복구할 수 없습니다.\n정말 힌트 없이 진행할까요?'
+                      '암호 힌트 없이 진행하면 나중에 암호를 잊었을 때 절대로 복구할 수 없습니다.\n정말 힌트 없이 진행할까요?',
                     ),
                     actions: [
                       TextButton(

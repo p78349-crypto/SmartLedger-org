@@ -51,11 +51,7 @@ class HelpRecipeWorkflowScreen extends StatelessWidget {
       ),
       child: const Column(
         children: [
-          Icon(
-            Icons.star,
-            size: 48,
-            color: Colors.white,
-          ),
+          Icon(Icons.star, size: 48, color: Colors.white),
           SizedBox(height: 12),
           Text(
             '핵심 기능 완벽 마스터',
@@ -69,11 +65,7 @@ class HelpRecipeWorkflowScreen extends StatelessWidget {
           SizedBox(height: 8),
           Text(
             '레시피부터 가계부까지\n한 번에 해결하는 스마트한 방법',
-            style: TextStyle(
-              fontSize: 15,
-              color: Colors.white,
-              height: 1.5,
-            ),
+            style: TextStyle(fontSize: 15, color: Colors.white, height: 1.5),
             textAlign: TextAlign.center,
           ),
         ],
@@ -96,10 +88,7 @@ class HelpRecipeWorkflowScreen extends StatelessWidget {
                 const Expanded(
                   child: Text(
                     '4단계 프로세스 개요',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
@@ -188,10 +177,7 @@ class HelpRecipeWorkflowScreen extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Text(
-            emoji,
-            style: const TextStyle(fontSize: 32),
-          ),
+          Text(emoji, style: const TextStyle(fontSize: 32)),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -207,10 +193,7 @@ class HelpRecipeWorkflowScreen extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   description,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey[700],
-                  ),
+                  style: TextStyle(fontSize: 13, color: Colors.grey[700]),
                 ),
               ],
             ),
@@ -229,9 +212,7 @@ class HelpRecipeWorkflowScreen extends StatelessWidget {
           icon: Icons.menu_book,
           iconColor: Colors.blue,
           content: [
-            TextContent(
-              '맛있는 요리를 계획하고 필요한 재료를 확인하세요.',
-            ),
+            TextContent('맛있는 요리를 계획하고 필요한 재료를 확인하세요.'),
             StepContent([
               '메인 화면 → 재고 → 레시피 관리',
               '만들고 싶은 레시피 선택 (예: 김치찌개, 된장국)',
@@ -249,26 +230,20 @@ class HelpRecipeWorkflowScreen extends StatelessWidget {
           icon: Icons.shopping_cart,
           iconColor: Colors.green,
           content: [
-            TextContent(
-              '부족한 재료를 쇼핑 카트에 자동으로 추가하세요.',
-            ),
+            TextContent('부족한 재료를 쇼핑 카트에 자동으로 추가하세요.'),
             StepContent([
               '레시피 화면에서 "장바구니에 추가" 버튼 탭',
               '부족한 재료가 쇼핑 카트에 자동으로 추가됨',
               '쇼핑 카트 화면으로 자동 이동',
               '추가된 항목 확인 및 수량 조정',
             ]),
-            TextContent(
-              '🎯 **핵심 포인트**: 재고와 연동되어 정말 필요한 것만 추가됩니다!',
-            ),
+            TextContent('🎯 **핵심 포인트**: 재고와 연동되어 정말 필요한 것만 추가됩니다!'),
             BulletListContent([
               '재고에 있는 재료는 자동으로 제외',
               '부족한 수량만큼 정확히 계산',
               '유통기한 임박 재료는 경고 표시',
             ]),
-            TipContent(
-              '장보기 전에 여러 레시피를 선택해서 한 번에 장바구니에 추가하면 편리합니다!',
-            ),
+            TipContent('장보기 전에 여러 레시피를 선택해서 한 번에 장바구니에 추가하면 편리합니다!'),
           ],
         ),
         HelpSection(
@@ -276,21 +251,15 @@ class HelpRecipeWorkflowScreen extends StatelessWidget {
           icon: Icons.store,
           iconColor: Colors.orange,
           content: [
-            TextContent(
-              '쇼핑 카트를 보면서 효율적으로 장을 보세요.',
-            ),
+            TextContent('쇼핑 카트를 보면서 효율적으로 장을 보세요.'),
             StepContent([
               '쇼핑 카트 화면 열기',
               '물품을 장바구니에 담으면서 항목을 "탭"하여 체크',
               '체크된 항목은 자동으로 목록 하단으로 이동',
               '아직 안 산 물품이 상단에 남아 쉽게 확인',
             ]),
-            WarningContent(
-              '계산대에서 반환되거나 품절된 항목은 다시 탭하여 체크 해제하세요!',
-            ),
-            TextContent(
-              '💡 **프로 팁**: 마트 구역별로 정렬하면 동선이 짧아집니다!',
-            ),
+            WarningContent('계산대에서 반환되거나 품절된 항목은 다시 탭하여 체크 해제하세요!'),
+            TextContent('💡 **프로 팁**: 마트 구역별로 정렬하면 동선이 짧아집니다!'),
           ],
         ),
         HelpSection(
@@ -298,9 +267,7 @@ class HelpRecipeWorkflowScreen extends StatelessWidget {
           icon: Icons.receipt_long,
           iconColor: Colors.orange,
           content: [
-            TextContent(
-              '집에 도착하면 구매한 항목을 가계부에 한 번에 입력하세요.',
-            ),
+            TextContent('집에 도착하면 구매한 항목을 가계부에 한 번에 입력하세요.'),
             StepContent([
               '쇼핑 카트 화면에서 "체크 항목 지출입력" 버튼 탭',
               '체크된 각 항목에 대해 입력 화면이 순차적으로 표시',
@@ -308,9 +275,7 @@ class HelpRecipeWorkflowScreen extends StatelessWidget {
               '실제 구매 가격 확인/수정',
               '메모 추가 (예: "이마트 · 세일 상품")',
             ]),
-            TextContent(
-              '⚡ **시간 절약 기능**: 여러 항목 한 번에 입력!',
-            ),
+            TextContent('⚡ **시간 절약 기능**: 여러 항목 한 번에 입력!'),
             BulletListContent([
               '"저장" - 현재 항목만 저장하고 다음 항목으로',
               '"나머지 모두 저장" - 남은 항목 일괄 저장 (중간부터)',
@@ -328,18 +293,14 @@ class HelpRecipeWorkflowScreen extends StatelessWidget {
           icon: Icons.today,
           iconColor: Colors.purple,
           content: [
-            TextContent(
-              '오늘 입력한 거래를 바로 확인하고 검증하세요.',
-            ),
+            TextContent('오늘 입력한 거래를 바로 확인하고 검증하세요.'),
             StepContent([
               '메인 화면 → 통계 → 일일 거래',
               '오늘 날짜의 거래 목록 확인',
               '방금 입력한 쇼핑 내역이 모두 표시됨',
               '잘못 입력된 항목은 바로 수정 가능',
             ]),
-            TextContent(
-              '📊 **즉시 반영**: 통계도 실시간으로 업데이트됩니다!',
-            ),
+            TextContent('📊 **즉시 반영**: 통계도 실시간으로 업데이트됩니다!'),
             BulletListContent([
               '오늘의 총 지출 금액',
               '카테고리별 지출 분포',
@@ -353,9 +314,7 @@ class HelpRecipeWorkflowScreen extends StatelessWidget {
           icon: Icons.inventory,
           iconColor: Colors.teal,
           content: [
-            TextContent(
-              '구매한 식재료가 자동으로 재고에 추가됩니다!',
-            ),
+            TextContent('구매한 식재료가 자동으로 재고에 추가됩니다!'),
             BulletListContent([
               '쇼핑 카트에서 입력한 수량이 재고에 반영',
               '유통기한 자동 설정 (카테고리별 기본값)',
@@ -386,10 +345,7 @@ class HelpRecipeWorkflowScreen extends StatelessWidget {
                 SizedBox(width: 12),
                 Text(
                   '💎 고급 활용 팁',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -397,7 +353,7 @@ class HelpRecipeWorkflowScreen extends StatelessWidget {
             _buildTipItem(
               '🎯 주간 식단 계획',
               '월요일에 한 주 레시피를 미리 선택하고 장바구니에 추가하세요. '
-              '주말 장보기 한 번으로 일주일치 준비 완료!',
+                  '주말 장보기 한 번으로 일주일치 준비 완료!',
             ),
             const Divider(height: 24),
             _buildTipItem(
@@ -440,11 +396,7 @@ class HelpRecipeWorkflowScreen extends StatelessWidget {
         const SizedBox(height: 6),
         Text(
           description,
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey[800],
-            height: 1.5,
-          ),
+          style: TextStyle(fontSize: 14, color: Colors.grey[800], height: 1.5),
         ),
       ],
     );

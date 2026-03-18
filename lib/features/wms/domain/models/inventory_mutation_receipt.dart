@@ -2,29 +2,29 @@
 library;
 
 /// Represents a receipt for inventory stock changes
-/// 
+///
 /// This is returned when stock quantity changes (increase or decrease).
 /// The delta field represents the change amount (negative for decrease).
 class InventoryMutationReceipt {
   /// The item ID that was modified
   final String itemId;
-  
+
   /// The change in stock quantity (negative for decrease, positive for increase)
   final double delta;
-  
+
   /// When the mutation occurred
   final DateTime occurredAt;
-  
+
   /// Optional note about the mutation
   final String? note;
-  
+
   const InventoryMutationReceipt({
     required this.itemId,
     required this.delta,
     required this.occurredAt,
     this.note,
   });
-  
+
   /// Copy with method for creating modified copies
   InventoryMutationReceipt copyWith({
     String? itemId,
@@ -39,7 +39,7 @@ class InventoryMutationReceipt {
       note: note ?? this.note,
     );
   }
-  
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -49,11 +49,11 @@ class InventoryMutationReceipt {
           delta == other.delta &&
           occurredAt == other.occurredAt &&
           note == other.note;
-  
+
   @override
   int get hashCode => Object.hash(itemId, delta, occurredAt, note);
-  
+
   @override
-  String toString() => 
+  String toString() =>
       'InventoryMutationReceipt(itemId: $itemId, delta: $delta, occurredAt: $occurredAt)';
 }

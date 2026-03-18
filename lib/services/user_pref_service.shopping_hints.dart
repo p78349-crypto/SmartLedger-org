@@ -48,8 +48,9 @@ Future<Map<String, CategoryHint>> _getShoppingCategoryHints({
     final out = <String, CategoryHint>{};
     for (final entry in decoded.entries) {
       if (entry.key is! String || entry.value is! Map) continue;
-      out[entry.key as String] =
-          CategoryHint.fromJson(Map<String, dynamic>.from(entry.value as Map));
+      out[entry.key as String] = CategoryHint.fromJson(
+        Map<String, dynamic>.from(entry.value as Map),
+      );
     }
     return out;
   } catch (_) {
@@ -83,14 +84,16 @@ Future<void> _setShoppingQuickExpenseLastCategory({
     return;
   }
   await prefs.setString(
-    _shoppingQuickExpenseLastMainCategoryKey(accountName), main,
+    _shoppingQuickExpenseLastMainCategoryKey(accountName),
+    main,
   );
   final sub = hint.subCategory?.trim() ?? '';
   if (sub.isEmpty) {
     await prefs.remove(_shoppingQuickExpenseLastSubCategoryKey(accountName));
   } else {
     await prefs.setString(
-      _shoppingQuickExpenseLastSubCategoryKey(accountName), sub,
+      _shoppingQuickExpenseLastSubCategoryKey(accountName),
+      sub,
     );
   }
 }
@@ -125,7 +128,8 @@ Future<void> _setShoppingQuickExpenseStoreLastPayment({
     return;
   }
   await prefs.setString(
-    _shoppingQuickExpenseStoreLastPaymentKey(accountName, k), value,
+    _shoppingQuickExpenseStoreLastPaymentKey(accountName, k),
+    value,
   );
 }
 
@@ -165,7 +169,8 @@ Future<void> _setShoppingQuickExpenseStoreLastCategory({
     return;
   }
   await prefs.setString(
-    _shoppingQuickExpenseStoreLastMainCategoryKey(accountName, k), main,
+    _shoppingQuickExpenseStoreLastMainCategoryKey(accountName, k),
+    main,
   );
   final sub = hint.subCategory?.trim() ?? '';
   if (sub.isEmpty) {
@@ -174,7 +179,8 @@ Future<void> _setShoppingQuickExpenseStoreLastCategory({
     );
   } else {
     await prefs.setString(
-      _shoppingQuickExpenseStoreLastSubCategoryKey(accountName, k), sub,
+      _shoppingQuickExpenseStoreLastSubCategoryKey(accountName, k),
+      sub,
     );
   }
 }
@@ -198,7 +204,8 @@ Future<void> _setShoppingCategoryHint({
     for (final e in next.entries) e.key: e.value.toJson(),
   };
   await prefs.setString(
-    _shoppingCategoryHintsKey(accountName), jsonEncode(data),
+    _shoppingCategoryHintsKey(accountName),
+    jsonEncode(data),
   );
 }
 
@@ -223,13 +230,12 @@ Future<void> _setShoppingCategoryHints({
     for (final e in normalized.entries) e.key: e.value.toJson(),
   };
   await prefs.setString(
-    _shoppingCategoryHintsKey(accountName), jsonEncode(data),
+    _shoppingCategoryHintsKey(accountName),
+    jsonEncode(data),
   );
 }
 
-Future<void> _clearShoppingCategoryHints({
-  required String accountName,
-}) async {
+Future<void> _clearShoppingCategoryHints({required String accountName}) async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.remove(_shoppingCategoryHintsKey(accountName));
 }
@@ -247,17 +253,20 @@ Future<int> _bootstrapShoppingCategoryHintsFromTransactions({
   final all = service.getTransactions(accountName);
   if (all.isEmpty) return 0;
   final candidates = all
-      .where((t) =>
-          t.type == TransactionType.expense &&
-          t.description.trim().isNotEmpty &&
-          t.mainCategory != Transaction.defaultMainCategory &&
-          (includeRefunds ? true : !t.isRefund))
+      .where(
+        (t) =>
+            t.type == TransactionType.expense &&
+            t.description.trim().isNotEmpty &&
+            t.mainCategory != Transaction.defaultMainCategory &&
+            (includeRefunds ? true : !t.isRefund),
+      )
       .toList(growable: false);
   if (candidates.isEmpty) return 0;
   candidates.sort((a, b) => b.date.compareTo(a.date));
   final next = <String, CategoryHint>{};
-  final scanLimit =
-      maxScanTransactions <= 0 ? candidates.length : maxScanTransactions;
+  final scanLimit = maxScanTransactions <= 0
+      ? candidates.length
+      : maxScanTransactions;
   for (final t in candidates.take(scanLimit)) {
     if (next.length >= maxItems) break;
     final key = _normalizeShoppingHintKey(t.description);
@@ -270,7 +279,9 @@ Future<int> _bootstrapShoppingCategoryHintsFromTransactions({
   }
   if (next.isEmpty) return 0;
   await _setShoppingCategoryHints(
-    accountName: accountName, hints: next, maxItems: maxItems,
+    accountName: accountName,
+    hints: next,
+    maxItems: maxItems,
   );
   return next.length;
 }

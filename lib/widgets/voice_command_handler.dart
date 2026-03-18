@@ -64,11 +64,26 @@ class VoiceCommandHandler {
     final lowerText = text.toLowerCase().trim();
 
     final isYes = containsAny(lowerText, [
-      '네', '응', '어', '그래', '좋아', '기록해',
-      '맞아', '해줘', '저장', '기록', '확인',
+      '네',
+      '응',
+      '어',
+      '그래',
+      '좋아',
+      '기록해',
+      '맞아',
+      '해줘',
+      '저장',
+      '기록',
+      '확인',
     ]);
     final isNo = containsAny(lowerText, [
-      '아니', '됐어', '취소', '그만', '안 해', '틀려', '아냐',
+      '아니',
+      '됐어',
+      '취소',
+      '그만',
+      '안 해',
+      '틀려',
+      '아냐',
     ]);
 
     switch (currentStep) {
@@ -79,9 +94,7 @@ class VoiceCommandHandler {
           await delegate.speak('네, 입력할 품목을 말씀해 주세요.');
           delegate.startListening();
         } else if (isNo) {
-          await delegate.speak(
-            '알겠습니다. 더 필요하신 작업이 있으면 언제든 말씀해 주세요.',
-          );
+          await delegate.speak('알겠습니다. 더 필요하신 작업이 있으면 언제든 말씀해 주세요.');
           currentStep = 'idle';
           delegate.stopAndExit();
         } else {
@@ -97,9 +110,7 @@ class VoiceCommandHandler {
           await delegate.speak('이제 입력할 품목을 말씀해 주세요.');
           delegate.startListening();
         } else if (isNo) {
-          await delegate.speak(
-            '알겠습니다. 지출 화면을 열지 않고 대화를 마칩니다.',
-          );
+          await delegate.speak('알겠습니다. 지출 화면을 열지 않고 대화를 마칩니다.');
           currentStep = 'idle';
           delegate.stopAndExit();
         } else {
@@ -141,9 +152,7 @@ class VoiceCommandHandler {
           currentStep = 'idle';
           delegate.stopAndExit();
         } else if (isNo) {
-          await delegate.speak(
-            '입력을 취소했습니다. 더 도와드릴 일이 있을까요?',
-          );
+          await delegate.speak('입력을 취소했습니다. 더 도와드릴 일이 있을까요?');
           currentStep = 'idle';
           delegate.stopAndExit();
         }
@@ -203,7 +212,13 @@ class VoiceCommandHandler {
 
     // 4. 지출/기록 의도 확인
     final isExpenseIntent = containsAny(lowerText, [
-      '지출', '기록', '돈', '썼', '결제', '구매', '샀',
+      '지출',
+      '기록',
+      '돈',
+      '썼',
+      '결제',
+      '구매',
+      '샀',
     ]);
 
     if (isExpenseIntent ||
@@ -225,15 +240,11 @@ class VoiceCommandHandler {
             : '$tempExpensePrice원';
         final combined = '$tempExpenseItem $displayPrice';
         VoiceInputBridge.instance.sendInput(combined);
-        await delegate.speak(
-          '확인했습니다. $tempExpenseItem, $displayPrice 저장할까요?',
-        );
+        await delegate.speak('확인했습니다. $tempExpenseItem, $displayPrice 저장할까요?');
       } else if (tempExpenseItem != null) {
         currentStep = 'ask_price';
         VoiceInputBridge.instance.sendInput(tempExpenseItem!);
-        await delegate.speak(
-          '네, $tempExpenseItem(이)군요. 금액은 얼마인가요?',
-        );
+        await delegate.speak('네, $tempExpenseItem(이)군요. 금액은 얼마인가요?');
       } else if (tempExpensePrice != null) {
         currentStep = 'ask_item';
         final displayPrice = tempExpensePrice!.contains('원')
@@ -243,9 +254,7 @@ class VoiceCommandHandler {
         await delegate.speak('$displayPrice 확인했습니다. 어떤 상품인가요?');
       } else {
         currentStep = 'ask_item';
-        await delegate.speak(
-          '네, 지출 내역을 기록하겠습니다. 품목은 무엇인가요?',
-        );
+        await delegate.speak('네, 지출 내역을 기록하겠습니다. 품목은 무엇인가요?');
       }
 
       delegate.startListening();
@@ -269,9 +278,7 @@ class VoiceCommandHandler {
     }
 
     // 이해 못함
-    await delegate.speak(
-      '죄송합니다. 잘 이해하지 못했어요. 지출 기록 또는 조회를 도와드릴 수 있습니다.',
-    );
+    await delegate.speak('죄송합니다. 잘 이해하지 못했어요. 지출 기록 또는 조회를 도와드릴 수 있습니다.');
     delegate.startListening();
   }
 

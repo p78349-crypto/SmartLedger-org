@@ -109,18 +109,14 @@ class OnlinePasswordKeyBackupFacade {
     final mode = await loadPolicyMode();
     if (mode == KeyBackupServerPolicyMode.disabled) {
       return _ResolvedContext(
-        result: PasswordKeyBackupResult.disabled(
-          '서버 연동이 비활성화되어 로컬 모드로 진행합니다.',
-        ),
+        result: PasswordKeyBackupResult.disabled('서버 연동이 비활성화되어 로컬 모드로 진행합니다.'),
       );
     }
 
-    final address =
-        _ledgerBaseUrl?.trim().isNotEmpty == true
+    final address = _ledgerBaseUrl?.trim().isNotEmpty == true
         ? _ledgerBaseUrl!.trim()
         : (await _serverConfigService.getServerAddress())?.trim();
-    final key =
-        _adminKey?.trim().isNotEmpty == true
+    final key = _adminKey?.trim().isNotEmpty == true
         ? _adminKey!.trim()
         : (await _serverConfigService.getAdminKey())?.trim();
 

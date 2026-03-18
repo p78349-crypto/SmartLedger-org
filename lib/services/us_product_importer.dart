@@ -26,11 +26,11 @@ import '../utils/app_logger.dart';
 
 class UsProductJsonParser {
   /// Parse USDA FoodData_Central JSON file
-  /// 
+  ///
   /// Handles large files (GB+) using streaming to avoid memory overflow
   static Future<List<Map<String, dynamic>>> parseJsonFile(
     String filePath, {
-    int maxProducts = -1,  // -1 = all products
+    int maxProducts = -1, // -1 = all products
     void Function(int)? onProgress,
   }) async {
     final file = File(filePath);
@@ -39,7 +39,9 @@ class UsProductJsonParser {
     }
 
     AppLogger.info('[Parser] Reading JSON file: $filePath');
-    AppLogger.info('[Parser] File size: ${(file.lengthSync() / 1024 / 1024).toStringAsFixed(1)}MB');
+    AppLogger.info(
+      '[Parser] File size: ${(file.lengthSync() / 1024 / 1024).toStringAsFixed(1)}MB',
+    );
 
     try {
       // For small-medium files
@@ -82,9 +84,11 @@ class UsProductJsonParser {
           if (product != null) {
             products.add(product);
             count++;
-            
+
             if (maxProducts > 0 && count >= maxProducts) {
-              AppLogger.info('[Parser] Reached max products limit: $maxProducts');
+              AppLogger.info(
+                '[Parser] Reached max products limit: $maxProducts',
+              );
               break;
             }
 
@@ -157,7 +161,9 @@ class UsProductJsonParser {
               count++;
 
               if (maxProducts > 0 && count >= maxProducts) {
-                AppLogger.info('[Parser] Reached max products limit: $maxProducts');
+                AppLogger.info(
+                  '[Parser] Reached max products limit: $maxProducts',
+                );
                 return products;
               }
 
@@ -202,14 +208,12 @@ class UsProductJsonParser {
       final manufacturer = food['manufacturer'] as String?;
 
       // Extract nutrition info
-      final nutrition = _extractNutrition(
-        food['foodNutrients'] as List?
-      );
+      final nutrition = _extractNutrition(food['foodNutrients'] as List?);
 
       return {
         'upc_a': upcA,
         'product_name_en': description,
-        'category_1': 'Food',  // Default, will refine later
+        'category_1': 'Food', // Default, will refine later
         'category_2': _extractCategoryFromDescription(description),
         'manufacturer': manufacturer,
         'country_code': 'US',
@@ -271,25 +275,37 @@ class UsProductJsonParser {
     final lower = description.toLowerCase();
 
     // Common categories
-    if (lower.contains('beverage') || lower.contains('drink') || lower.contains('juice')) {
+    if (lower.contains('beverage') ||
+        lower.contains('drink') ||
+        lower.contains('juice')) {
       return 'Beverages';
     }
-    if (lower.contains('meat') || lower.contains('beef') || lower.contains('chicken')) {
+    if (lower.contains('meat') ||
+        lower.contains('beef') ||
+        lower.contains('chicken')) {
       return 'Meat & Poultry';
     }
-    if (lower.contains('dairy') || lower.contains('milk') || lower.contains('cheese')) {
+    if (lower.contains('dairy') ||
+        lower.contains('milk') ||
+        lower.contains('cheese')) {
       return 'Dairy';
     }
-    if (lower.contains('snack') || lower.contains('chip') || lower.contains('candy')) {
+    if (lower.contains('snack') ||
+        lower.contains('chip') ||
+        lower.contains('candy')) {
       return 'Snacks';
     }
-    if (lower.contains('bread') || lower.contains('cereal') || lower.contains('grain')) {
+    if (lower.contains('bread') ||
+        lower.contains('cereal') ||
+        lower.contains('grain')) {
       return 'Grains & Cereals';
     }
     if (lower.contains('fruit') || lower.contains('vegetable')) {
       return 'Produce';
     }
-    if (lower.contains('sauce') || lower.contains('spice') || lower.contains('seasoning')) {
+    if (lower.contains('sauce') ||
+        lower.contains('spice') ||
+        lower.contains('seasoning')) {
       return 'Condiments & Spices';
     }
 
@@ -333,7 +349,9 @@ class UsProductImporter {
       }
 
       // Batch insert
-      AppLogger.info('[US Importer] Inserting ${products.length} products in batches of $batchSize...');
+      AppLogger.info(
+        '[US Importer] Inserting ${products.length} products in batches of $batchSize...',
+      );
 
       for (int i = 0; i < products.length; i += batchSize) {
         final batch = products.sublist(
@@ -355,7 +373,9 @@ class UsProductImporter {
           final countAfter = await _getProductCount('US');
           result.inserted += countAfter - countBefore;
 
-          AppLogger.info('[US Importer] Batch inserted: ${batch.length} (total: ${result.inserted})');
+          AppLogger.info(
+            '[US Importer] Batch inserted: ${batch.length} (total: ${result.inserted})',
+          );
         } catch (e) {
           AppLogger.error('[US Importer] ✗ Batch failed', error: e);
           result.errors.add('Batch insert failed: $e');
@@ -363,7 +383,9 @@ class UsProductImporter {
       }
 
       final finalCount = await _getProductCount('US');
-      AppLogger.info('[US Importer] ✓ Import complete! US products: $finalCount');
+      AppLogger.info(
+        '[US Importer] ✓ Import complete! US products: $finalCount',
+      );
 
       result.success = true;
       result.finalCount = finalCount;

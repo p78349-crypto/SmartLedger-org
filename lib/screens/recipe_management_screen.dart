@@ -73,8 +73,9 @@ class _RecipeManagementScreenState extends State<RecipeManagementScreen>
     if (_searchQuery.isEmpty) return _myRecipes;
     final q = _searchQuery;
     return _myRecipes.where((r) {
-      final matches = r.localizedNames.values
-          .any((n) => MultilingualSearchUtils.matches(n, q));
+      final matches = r.localizedNames.values.any(
+        (n) => MultilingualSearchUtils.matches(n, q),
+      );
       return matches;
     }).toList();
   }
@@ -83,8 +84,9 @@ class _RecipeManagementScreenState extends State<RecipeManagementScreen>
     if (_searchQuery.isEmpty) return _recommendedRecipes;
     final q = _searchQuery;
     return _recommendedRecipes.where((r) {
-      final matches = r.localizedNames.values
-          .any((n) => MultilingualSearchUtils.matches(n, q));
+      final matches = r.localizedNames.values.any(
+        (n) => MultilingualSearchUtils.matches(n, q),
+      );
       return matches;
     }).toList();
   }
@@ -146,9 +148,7 @@ class _RecipeManagementScreenState extends State<RecipeManagementScreen>
       builder: (context) => AlertDialog(
         title: const Text('레시피 삭제'),
         content: Text(
-          "'${recipe.nameForLocale(
-            Localizations.localeOf(context).languageCode,
-          )}'을(를) 삭제하시겠습니까?",
+          "'${recipe.nameForLocale(Localizations.localeOf(context).languageCode)}'을(를) 삭제하시겠습니까?",
         ),
         actions: [
           TextButton(
@@ -170,9 +170,7 @@ class _RecipeManagementScreenState extends State<RecipeManagementScreen>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              "'${recipe.nameForLocale(
-                Localizations.localeOf(context).languageCode,
-              )}' 삭제됨",
+              "'${recipe.nameForLocale(Localizations.localeOf(context).languageCode)}' 삭제됨",
             ),
           ),
         );
@@ -192,9 +190,7 @@ class _RecipeManagementScreenState extends State<RecipeManagementScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            "'${recipe.nameForLocale(
-              Localizations.localeOf(context).languageCode,
-            )}' 재료가 장바구니에 추가되었습니다",
+            "'${recipe.nameForLocale(Localizations.localeOf(context).languageCode)}' 재료가 장바구니에 추가되었습니다",
           ),
         ),
       );
@@ -283,5 +279,4 @@ class _RecipeManagementScreenState extends State<RecipeManagementScreen>
       ),
     );
   }
-
 }

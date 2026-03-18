@@ -15,10 +15,7 @@ class ActiveModeBadge extends StatelessWidget {
         color: theme.colorScheme.tertiaryContainer,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 4,
-          ),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 4),
         ],
       ),
       child: Row(

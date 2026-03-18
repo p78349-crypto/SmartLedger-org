@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 
 /// 음성 명령 실행 결과 목록 생성
-List<Widget> buildVoiceResultDetails(
-  Map<String, dynamic> result,
-) {
-  final results =
-      result['results'] as Map<String, dynamic>? ?? {};
+List<Widget> buildVoiceResultDetails(Map<String, dynamic> result) {
+  final results = result['results'] as Map<String, dynamic>? ?? {};
   final widgets = <Widget>[];
 
   if (results.containsKey('record')) {
@@ -13,9 +10,7 @@ List<Widget> buildVoiceResultDetails(
       buildVoiceResultItem(
         icon: Icons.save,
         title: '가계부 입력',
-        subtitle: results['record'] == true
-            ? '✅ 저장 완료'
-            : '❌ 저장 실패',
+        subtitle: results['record'] == true ? '✅ 저장 완료' : '❌ 저장 실패',
         color: Colors.blue,
       ),
     );
@@ -26,9 +21,7 @@ List<Widget> buildVoiceResultDetails(
       buildVoiceResultItem(
         icon: Icons.shopping_cart,
         title: '쇼핑앱 실행',
-        subtitle: results['shopping'] == true
-            ? '✅ 앱 실행됨'
-            : '❌ 실행 실패',
+        subtitle: results['shopping'] == true ? '✅ 앱 실행됨' : '❌ 실행 실패',
         color: Colors.orange,
       ),
     );
@@ -39,9 +32,7 @@ List<Widget> buildVoiceResultDetails(
       buildVoiceResultItem(
         icon: Icons.delivery_dining,
         title: '배달앱 실행',
-        subtitle: results['delivery'] == true
-            ? '✅ 앱 실행됨'
-            : '❌ 실행 실패',
+        subtitle: results['delivery'] == true ? '✅ 앱 실행됨' : '❌ 실행 실패',
         color: Colors.purple,
       ),
     );
@@ -52,9 +43,7 @@ List<Widget> buildVoiceResultDetails(
       buildVoiceResultItem(
         icon: Icons.map,
         title: '지도앱 실행',
-        subtitle: results['navigation'] == true
-            ? '✅ 앱 실행됨'
-            : '❌ 실행 실패',
+        subtitle: results['navigation'] == true ? '✅ 앱 실행됨' : '❌ 실행 실패',
         color: Colors.green,
       ),
     );
@@ -87,18 +76,10 @@ Widget buildVoiceResultItem({
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
               Text(
                 subtitle,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey.shade700,
-                ),
+                style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
               ),
             ],
           ),

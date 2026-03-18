@@ -4,14 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:smart_ledger/models/consumable_inventory_item.dart';
 
 /// Card widget for displaying a single inventory item.
-/// 
+///
 /// Shows item name, current stock, threshold, and low stock indicator.
 class InventoryItemCard extends StatelessWidget {
   final ConsumableInventoryItem item;
   final bool isLowStock;
   final VoidCallback? onTap;
   final VoidCallback? onUseStock;
-  
+
   const InventoryItemCard({
     required this.item,
     this.isLowStock = false,
@@ -19,14 +19,14 @@ class InventoryItemCard extends StatelessWidget {
     this.onUseStock,
     super.key,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final stockPercentage = item.threshold > 0 
+    final stockPercentage = item.threshold > 0
         ? (item.currentStock / item.threshold).clamp(0.0, 1.0)
         : 1.0;
-    
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: InkWell(
@@ -49,7 +49,7 @@ class InventoryItemCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  
+
                   // Low stock badge
                   if (isLowStock)
                     Container(
@@ -83,9 +83,9 @@ class InventoryItemCard extends StatelessWidget {
                     ),
                 ],
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               // Stock info row
               Row(
                 children: [
@@ -105,15 +105,15 @@ class InventoryItemCard extends StatelessWidget {
                           '${item.currentStock.toStringAsFixed(1)} ${item.unit}',
                           style: theme.textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: isLowStock 
-                                ? Colors.orange.shade700 
+                            color: isLowStock
+                                ? Colors.orange.shade700
                                 : Colors.green.shade700,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  
+
                   // Threshold
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
@@ -135,9 +135,9 @@ class InventoryItemCard extends StatelessWidget {
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               // Stock level indicator
               ClipRRect(
                 borderRadius: BorderRadius.circular(4),
@@ -150,9 +150,9 @@ class InventoryItemCard extends StatelessWidget {
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               // Bottom row: Category and action button
               Row(
                 children: [
@@ -174,10 +174,14 @@ class InventoryItemCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  
+
                   if (item.location.isNotEmpty) ...[
                     const SizedBox(width: 8),
-                    Icon(Icons.location_on, size: 16, color: Colors.grey.shade600),
+                    Icon(
+                      Icons.location_on,
+                      size: 16,
+                      color: Colors.grey.shade600,
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       item.location,
@@ -186,9 +190,9 @@ class InventoryItemCard extends StatelessWidget {
                       ),
                     ),
                   ],
-                  
+
                   const Spacer(),
-                  
+
                   // Use stock button
                   if (onUseStock != null)
                     TextButton.icon(

@@ -79,10 +79,7 @@ extension RefundTiles on _RefundTransactionsScreenState {
     return ListTile(
       dense: true,
       visualDensity: VisualDensity.compact,
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 4,
-      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       title: Row(
         children: [
           if (queryActive) ...[
@@ -167,10 +164,7 @@ extension RefundTiles on _RefundTransactionsScreenState {
           const SizedBox(width: 10),
           Text(
             cardText,
-            style: const TextStyle(
-              fontSize: 12,
-              color: RefundUtils.color,
-            ),
+            style: const TextStyle(fontSize: 12, color: RefundUtils.color),
           ),
         ],
       ),

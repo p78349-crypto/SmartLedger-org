@@ -14,17 +14,14 @@ extension TransactionDetailMove on _TransactionDetailScreenState {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              '${CurrencyFormatter.format(tx.amount)}을(를) 어디로 이동하시겠습니까?',
-            ),
+            Text('${CurrencyFormatter.format(tx.amount)}을(를) 어디로 이동하시겠습니까?'),
             const SizedBox(height: 16),
             ...[
               (
                 title: '지출 예산',
                 subtitle: '이번 달 지출 예산으로 사용',
                 value: 'expense',
-                isSelected:
-                    tx.savingsAllocation == SavingsAllocation.expense,
+                isSelected: tx.savingsAllocation == SavingsAllocation.expense,
               ),
               (
                 title: '비상금',
@@ -36,8 +33,8 @@ extension TransactionDetailMove on _TransactionDetailScreenState {
                 title: '자산',
                 subtitle: '자산으로 저축',
                 value: 'asset',
-                isSelected: tx.savingsAllocation ==
-                    SavingsAllocation.assetIncrease,
+                isSelected:
+                    tx.savingsAllocation == SavingsAllocation.assetIncrease,
               ),
             ].map(
               (option) => ListTile(
@@ -46,8 +43,7 @@ extension TransactionDetailMove on _TransactionDetailScreenState {
                   option.isSelected
                       ? IconCatalog.radioButtonChecked
                       : IconCatalog.radioButtonOff,
-                  color:
-                      option.isSelected ? theme.colorScheme.primary : null,
+                  color: option.isSelected ? theme.colorScheme.primary : null,
                 ),
                 title: Text(option.title),
                 subtitle: Text(option.subtitle),
@@ -135,8 +131,7 @@ extension TransactionDetailMove on _TransactionDetailScreenState {
       mainCategory: tx.mainCategory,
       subCategory: tx.subCategory,
     );
-    await TransactionService()
-        .updateTransaction(widget.accountName, updatedTx);
+    await TransactionService().updateTransaction(widget.accountName, updatedTx);
 
     if (!mounted) return;
     setState(() {});
@@ -144,13 +139,14 @@ extension TransactionDetailMove on _TransactionDetailScreenState {
     final destination = selectedDestination == 'expense'
         ? '지출 예산'
         : selectedDestination == 'asset'
-            ? '자산'
-            : '비상금';
+        ? '자산'
+        : '비상금';
     final movedMessage =
         '${CurrencyFormatter.format(tx.amount)}이(가) '
         '$destination(으)로 이동되었습니다';
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(movedMessage)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(movedMessage)));
   }
 
   Future<void> _revertMoveSideEffects(
@@ -216,8 +212,7 @@ extension TransactionDetailMove on _TransactionDetailScreenState {
       final assets = assetService.getAssets(widget.accountName);
       Asset? depositAsset;
       for (final a in assets) {
-        if (a.category == AssetCategory.deposit &&
-            a.name.contains('수입 이동')) {
+        if (a.category == AssetCategory.deposit && a.name.contains('수입 이동')) {
           depositAsset = a;
           break;
         }

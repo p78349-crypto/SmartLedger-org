@@ -13,7 +13,7 @@ void main() async {
 
   // Sample data from MEXT format
   // Typical structure: JAN, 商品名, カテゴリ, ...
-  
+
   const sampleData = '''JAN,商品名,カテゴリ,メーカー,詳細説明
 4901000102026,日清ラーメン 醤油,インスタント食品,日清,インスタントラーメン
 4901005102040,マルちゃん正麺 豚骨,インスタント食品,東洋水産,プレミアム正麺
@@ -44,7 +44,7 @@ void main() async {
   // Analyze CSV structure
   print('📋 CSV Structure Analysis\n');
   final lines = sampleData.split('\n');
-  
+
   if (lines.isNotEmpty) {
     final header = lines.first.split(',');
     print('  Headers: ${header.length}');
@@ -55,7 +55,9 @@ void main() async {
     print('\n  Sample Data Rows: ${lines.length - 1}');
     for (int i = 1; i < lines.length && i <= 3; i++) {
       final parts = lines[i].split(',');
-      print('    Row $i: JAN=${parts[0]}, Product="${parts[1]}", Category="${parts[2]}"');
+      print(
+        '    Row $i: JAN=${parts[0]}, Product="${parts[1]}", Category="${parts[2]}"',
+      );
     }
   }
 

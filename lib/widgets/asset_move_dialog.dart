@@ -28,11 +28,11 @@ class _AssetMoveDialogState extends State<AssetMoveDialog> {
 
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _memoController = TextEditingController();
-  
+
   // 📱 커서 자동 이동을 위한 FocusNode 추가
   final FocusNode _amountFocusNode = FocusNode();
   final FocusNode _memoFocusNode = FocusNode();
-  
+
   late DateTime _moveDate;
   String? _selectedToAssetId; // 기존 자산 선택
   AssetCategory? _selectedToCategory; // 새로 생성할 자산 카테고리
@@ -49,11 +49,11 @@ class _AssetMoveDialogState extends State<AssetMoveDialog> {
   void dispose() {
     _amountController.dispose();
     _memoController.dispose();
-    
+
     // FocusNode 리소스 정리
     _amountFocusNode.dispose();
     _memoFocusNode.dispose();
-    
+
     super.dispose();
   }
 
@@ -171,8 +171,8 @@ class _AssetMoveDialogState extends State<AssetMoveDialog> {
                                         (a) => a.id == value,
                                       );
                                       _selectedType = _autoMoveType(
-                                      toAsset.category,
-                                    );
+                                        toAsset.category,
+                                      );
                                     }
                                   });
                                 },
@@ -203,7 +203,7 @@ class _AssetMoveDialogState extends State<AssetMoveDialog> {
                               _selectedToCategory = value;
                               _selectedToAssetId = null; // 카테고리 선택 시 자산 초기화
                               if (value != null) {
-                              _selectedType = _autoMoveType(value);
+                                _selectedType = _autoMoveType(value);
                               }
                             });
                           },

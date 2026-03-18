@@ -27,7 +27,8 @@ class GeminiNanoService {
 
   Map<String, dynamic> _missingApiKeyError() {
     return {
-      'error': 'Gemini API 키가 설정되지 않았습니다. --dart-define=GEMINI_API_KEY=<KEY>로 실행하세요.',
+      'error':
+          'Gemini API 키가 설정되지 않았습니다. --dart-define=GEMINI_API_KEY=<KEY>로 실행하세요.',
       'confidence': 0.0,
     };
   }

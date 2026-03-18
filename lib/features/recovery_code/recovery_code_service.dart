@@ -13,9 +13,10 @@ class RecoveryCodeService {
   String generateRecoveryCode() {
     final random = Random.secure();
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 헷갈리는 O, 0, I, 1 제외
-    
-    String part() => List.generate(4, (index) => chars[random.nextInt(chars.length)]).join();
-    
+
+    String part() =>
+        List.generate(4, (index) => chars[random.nextInt(chars.length)]).join();
+
     return '${part()}-${part()}-${part()}-${part()}-${part()}-${part()}';
   }
 

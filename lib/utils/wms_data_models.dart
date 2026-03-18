@@ -78,10 +78,7 @@ class WmsInventoryInput {
       errors.add('보관 위치를 입력하세요');
     }
 
-    return WmsValidationResult(
-      isValid: errors.isEmpty,
-      errors: errors,
-    );
+    return WmsValidationResult(isValid: errors.isEmpty, errors: errors);
   }
 }
 
@@ -129,10 +126,7 @@ class WmsExpiryInput {
       errors.add('가격은 0 이상이어야 합니다');
     }
 
-    return WmsValidationResult(
-      isValid: errors.isEmpty,
-      errors: errors,
-    );
+    return WmsValidationResult(isValid: errors.isEmpty, errors: errors);
   }
 }
 
@@ -164,10 +158,7 @@ class WmsOperationResult<T> {
   });
 
   factory WmsOperationResult.success(T? data) {
-    return WmsOperationResult._(
-      success: true,
-      data: data,
-    );
+    return WmsOperationResult._(success: true, data: data);
   }
 
   factory WmsOperationResult.failure(String message) {
@@ -197,12 +188,7 @@ class WmsOperationResult<T> {
   }
 }
 
-enum WmsOperationType {
-  success,
-  failure,
-  duplicate,
-  warning,
-}
+enum WmsOperationType { success, failure, duplicate, warning }
 
 /// 입력 소스
 enum WmsInputSource {

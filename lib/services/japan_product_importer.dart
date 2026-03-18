@@ -17,7 +17,7 @@ import '../utils/app_logger.dart';
 
 class JapanExcelParser {
   /// Parse Japanese MEXT XLSX file
-  /// 
+  ///
   /// Japanese file format:
   /// Column A: 食品コード (Food Code - 13 digits, similar to JAN)
   /// Column B: 食品名 (Food Name)
@@ -34,11 +34,15 @@ class JapanExcelParser {
     }
 
     AppLogger.info('[JP Parser] Reading Excel file: $filePath');
-    AppLogger.info('[JP Parser] File size: ${(file.lengthSync() / 1024 / 1024).toStringAsFixed(1)}MB');
+    AppLogger.info(
+      '[JP Parser] File size: ${(file.lengthSync() / 1024 / 1024).toStringAsFixed(1)}MB',
+    );
 
     // For now, return empty - actual parsing requires 'excel' package
     // which may not be available in Flutter
-    AppLogger.warn('[JP Parser] ⚠️  Note: Excel parsing requires external package setup');
+    AppLogger.warn(
+      '[JP Parser] ⚠️  Note: Excel parsing requires external package setup',
+    );
     AppLogger.info('[JP Parser] Recommended: Convert XLSX to CSV first');
 
     return [];
@@ -99,7 +103,9 @@ class JapanExcelParser {
       final parts = _parseCsvRow(line);
 
       if (parts.length < 3) {
-        AppLogger.warn('[JP Parser] Invalid format (${parts.length} columns, need 3+)');
+        AppLogger.warn(
+          '[JP Parser] Invalid format (${parts.length} columns, need 3+)',
+        );
         return null;
       }
 
@@ -120,10 +126,11 @@ class JapanExcelParser {
       return {
         'jan_code': janCode,
         'product_name_ja': productName,
-        'product_name_en': productName,  // Will be improved with translation API later
+        'product_name_en':
+            productName, // Will be improved with translation API later
         'category_1': category['main'],
         'category_2': category['sub'],
-        'default_quantity': 2,  // Japanese default
+        'default_quantity': 2, // Japanese default
         'country_code': 'JP',
         'data_source': 'mext',
         'created_at': timestamp,
@@ -190,10 +197,7 @@ class JapanExcelParser {
       sub = jaSub;
     }
 
-    return {
-      'main': main,
-      'sub': sub ?? main,
-    };
+    return {'main': main, 'sub': sub ?? main};
   }
 }
 
@@ -263,7 +267,9 @@ class JapanProductImporter {
           final countAfter = await _getProductCount('JP');
           result.inserted += countAfter - countBefore;
 
-          AppLogger.info('[JP Importer] Batch inserted: ${batch.length} (total: ${result.inserted})');
+          AppLogger.info(
+            '[JP Importer] Batch inserted: ${batch.length} (total: ${result.inserted})',
+          );
         } catch (e) {
           AppLogger.error('[JP Importer] ✗ Batch failed', error: e);
           result.errors.add('Batch insert failed: $e');
@@ -271,7 +277,9 @@ class JapanProductImporter {
       }
 
       final finalCount = await _getProductCount('JP');
-      AppLogger.info('[JP Importer] ✓ Import complete! JP products: $finalCount');
+      AppLogger.info(
+        '[JP Importer] ✓ Import complete! JP products: $finalCount',
+      );
 
       result.success = true;
       result.finalCount = finalCount;
@@ -296,4 +304,3 @@ class JapanProductImporter {
     return (result.first['count'] as int?) ?? 0;
   }
 }
-

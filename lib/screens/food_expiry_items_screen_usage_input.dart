@@ -96,9 +96,7 @@ class _UsageInputState extends State<_UsageInput> {
           child: TextField(
             controller: _controller,
             textAlign: TextAlign.right,
-            keyboardType: const TextInputType.numberWithOptions(
-              decimal: true,
-            ),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
             decoration: InputDecoration(
               isDense: true,
               contentPadding: const EdgeInsets.symmetric(

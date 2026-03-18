@@ -136,9 +136,7 @@ class _IngredientSearchListScreenState
           if (_isSelectionMode)
             TextButton(
               onPressed: _selectAll,
-              child: Text(
-                _selectedNames.length == totalCount ? '해제' : '전체',
-              ),
+              child: Text(_selectedNames.length == totalCount ? '해제' : '전체'),
             ),
         ],
       ),
@@ -147,10 +145,7 @@ class _IngredientSearchListScreenState
           // 0. 파싱 로직 안내 (간단한 헤더)
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 8,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Row(
                 children: [
                   Icon(
@@ -225,9 +220,7 @@ class _IngredientSearchListScreenState
         decoration: BoxDecoration(
           border: Border(
             top: BorderSide(
-              color: theme.colorScheme.outlineVariant.withValues(
-                alpha: 0.2,
-              ),
+              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.2),
             ),
           ),
         ),

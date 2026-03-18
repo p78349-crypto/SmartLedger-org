@@ -49,15 +49,17 @@ void main() {
         ),
       );
 
-      final graceAllowed = await SubscriptionAccessService.hasPremiumAccessForUser(
-        userId,
-        now: now,
-      );
-      final graceBlocked = await SubscriptionAccessService.hasPremiumAccessForUser(
-        userId,
-        now: now,
-        allowGrace: false,
-      );
+      final graceAllowed =
+          await SubscriptionAccessService.hasPremiumAccessForUser(
+            userId,
+            now: now,
+          );
+      final graceBlocked =
+          await SubscriptionAccessService.hasPremiumAccessForUser(
+            userId,
+            now: now,
+            allowGrace: false,
+          );
 
       expect(graceAllowed, isTrue);
       expect(graceBlocked, isFalse);
@@ -69,7 +71,9 @@ void main() {
         userId: userId,
         state: SubscriptionAccessState(
           status: SubscriptionAccessStatus.expired,
-          expiresAtMs: now.subtract(const Duration(days: 1)).millisecondsSinceEpoch,
+          expiresAtMs: now
+              .subtract(const Duration(days: 1))
+              .millisecondsSinceEpoch,
         ),
       );
 
@@ -88,7 +92,9 @@ void main() {
           status: SubscriptionAccessStatus.active,
           productId: 'premium_yearly',
           platform: 'ios',
-          expiresAtMs: now.add(const Duration(days: 365)).millisecondsSinceEpoch,
+          expiresAtMs: now
+              .add(const Duration(days: 365))
+              .millisecondsSinceEpoch,
         ),
       );
 

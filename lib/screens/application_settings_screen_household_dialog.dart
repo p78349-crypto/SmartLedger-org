@@ -1,7 +1,8 @@
 part of 'application_settings_screen.dart';
 // ignore_for_file: invalid_use_of_protected_member
 
-extension ApplicationSettingsHouseholdDialog on _ApplicationSettingsScreenState {
+extension ApplicationSettingsHouseholdDialog
+    on _ApplicationSettingsScreenState {
   String _buildActivityHouseholdEstimateText({
     required ActivityHouseholdEstimate estimate,
     required ActivityHouseholdTrendComparison? trend,

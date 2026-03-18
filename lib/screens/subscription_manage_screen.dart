@@ -12,11 +12,13 @@ class SubscriptionManageScreen extends StatefulWidget {
   final String? userId;
 
   @override
-  State<SubscriptionManageScreen> createState() => _SubscriptionManageScreenState();
+  State<SubscriptionManageScreen> createState() =>
+      _SubscriptionManageScreenState();
 }
 
 class _SubscriptionManageScreenState extends State<SubscriptionManageScreen> {
-  final SubscriptionBillingService _billingService = SubscriptionBillingService();
+  final SubscriptionBillingService _billingService =
+      SubscriptionBillingService();
   final SubscriptionPurchaseSyncService _purchaseSyncService =
       SubscriptionPurchaseSyncService();
   bool _busy = false;
@@ -43,9 +45,9 @@ class _SubscriptionManageScreenState extends State<SubscriptionManageScreen> {
     try {
       final result = await action(_effectiveUserId);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result.message)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(result.message)));
     } finally {
       if (mounted) {
         setState(() => _busy = false);
@@ -71,10 +73,7 @@ class _SubscriptionManageScreenState extends State<SubscriptionManageScreen> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(
-                  Icons.workspace_premium,
-                  color: theme.colorScheme.primary,
-                ),
+                Icon(Icons.workspace_premium, color: theme.colorScheme.primary),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -95,10 +94,10 @@ class _SubscriptionManageScreenState extends State<SubscriptionManageScreen> {
               onTap: _busy
                   ? null
                   : () => _runAction(
-                        (userId) => _billingService.checkSubscriptionStatus(
-                          userId: userId,
-                        ),
+                      (userId) => _billingService.checkSubscriptionStatus(
+                        userId: userId,
                       ),
+                    ),
             ),
           ),
           Card(
@@ -110,9 +109,9 @@ class _SubscriptionManageScreenState extends State<SubscriptionManageScreen> {
               onTap: _busy
                   ? null
                   : () => _runAction(
-                        (userId) =>
-                            _billingService.startPurchaseFlow(userId: userId),
-                      ),
+                      (userId) =>
+                          _billingService.startPurchaseFlow(userId: userId),
+                    ),
             ),
           ),
           Card(
@@ -124,9 +123,9 @@ class _SubscriptionManageScreenState extends State<SubscriptionManageScreen> {
               onTap: _busy
                   ? null
                   : () => _runAction(
-                        (userId) =>
-                            _billingService.restorePurchases(userId: userId),
-                      ),
+                      (userId) =>
+                          _billingService.restorePurchases(userId: userId),
+                    ),
             ),
           ),
           if (_busy) ...[

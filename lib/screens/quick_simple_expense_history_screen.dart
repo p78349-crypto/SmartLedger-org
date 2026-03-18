@@ -5,10 +5,7 @@ import '../utils/currency_formatter.dart';
 
 /// Screen that shows previously entered quick-expense items.
 class QuickSimpleExpenseHistoryScreen extends StatelessWidget {
-  const QuickSimpleExpenseHistoryScreen({
-    super.key,
-    required this.accountName,
-  });
+  const QuickSimpleExpenseHistoryScreen({super.key, required this.accountName});
 
   final String accountName;
 
@@ -21,8 +18,7 @@ class QuickSimpleExpenseHistoryScreen extends StatelessWidget {
           accountName,
         ),
         builder: (context, snapshot) {
-          final items =
-              snapshot.data ?? const <QuickSimpleExpenseInputEntry>[];
+          final items = snapshot.data ?? const <QuickSimpleExpenseInputEntry>[];
           if (snapshot.connectionState != ConnectionState.done) {
             return const Center(child: CircularProgressIndicator());
           }

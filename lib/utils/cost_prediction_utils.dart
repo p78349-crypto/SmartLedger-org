@@ -6,9 +6,7 @@ class CostPredictionUtils {
   static const int defaultMonthlyBudget = 500000; // 50만원
 
   /// 현재 월의 식재료 총 가격
-  static double getCurrentMonthTotalCost(
-    List<ConsumableInventoryItem> items,
-  ) {
+  static double getCurrentMonthTotalCost(List<ConsumableInventoryItem> items) {
     final now = DateTime.now();
     return items
         .where((item) {
@@ -33,12 +31,10 @@ class CostPredictionUtils {
     for (int i = 0; i < 3; i++) {
       final month = DateTime(targetMonth.year, targetMonth.month - i);
       final monthCost = items
-          .where(
-            (item) {
-              final date = _effectiveDate(item);
-              return date.year == month.year && date.month == month.month;
-            },
-          )
+          .where((item) {
+            final date = _effectiveDate(item);
+            return date.year == month.year && date.month == month.month;
+          })
           .fold(0.0, (sum, item) => sum + (item.price ?? 0.0));
 
       if (monthCost > 0) {
@@ -84,15 +80,10 @@ class CostPredictionUtils {
   }
 
   /// 일일 평균 지출 계산
-  static double getDailyAverageExpense(
-    List<ConsumableInventoryItem> items,
-  ) {
+  static double getDailyAverageExpense(List<ConsumableInventoryItem> items) {
     if (items.isEmpty) return 0;
 
-    final totalCost = items.fold(
-      0.0,
-      (sum, item) => sum + (item.price ?? 0.0),
-    );
+    final totalCost = items.fold(0.0, (sum, item) => sum + (item.price ?? 0.0));
     const daysInMonth = 30;
 
     return totalCost / daysInMonth;
@@ -162,8 +153,7 @@ class CostPredictionUtils {
 
     for (final item in items) {
       final date = _effectiveDate(item);
-      if (date.year == currentMonth.year &&
-          date.month == currentMonth.month) {
+      if (date.year == currentMonth.year && date.month == currentMonth.month) {
         thisMonthCost += item.price ?? 0.0;
       } else if (date.year == currentMonth.year &&
           date.month == currentMonth.month - 1) {

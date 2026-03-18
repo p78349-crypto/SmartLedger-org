@@ -12,6 +12,7 @@ class BackupCrypto {
   static const int _saltLength = 16;
   static const int _nonceLength = 12;
   static const int _keyLengthBytes = 32;
+  // See UserPasswordService.defaultIterations for PBKDF2 rationale.
   static const int _pbkdf2Iterations = 150000;
 
   static final Cipher _cipher = AesGcm.with256bits();
@@ -128,10 +129,12 @@ class BackupCrypto {
       nonce: salt,
     );
   }
+
   static List<int> randomBytes(int length) {
     final random = Random.secure();
     return List<int>.generate(length, (i) => random.nextInt(256));
   }
+
   static List<int> _randomBytes(Random random, int length) {
     return List<int>.generate(length, (_) => random.nextInt(256));
   }

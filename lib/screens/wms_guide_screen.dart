@@ -7,9 +7,7 @@ class WmsGuideScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('WMS 활용 가이드'),
-      ),
+      appBar: AppBar(title: const Text('WMS 활용 가이드')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -43,7 +41,10 @@ class WmsGuideScreen extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           _buildSectionTitle(context, '사용 팁'),
-          _buildTipItem(context, '1. 대형 마트에서 사온 물건은 [WMS 입고] 메뉴에서 묶음 단위로 입력하세요.'),
+          _buildTipItem(
+            context,
+            '1. 대형 마트에서 사온 물건은 [WMS 입고] 메뉴에서 묶음 단위로 입력하세요.',
+          ),
           _buildTipItem(context, '2. 바코드가 있는 상품은 스캐너를 사용하여 1초 만에 정보를 불러오세요.'),
           _buildTipItem(context, '3. 소모품 사용 시 [사용량 기록] 버튼을 통해 즉시 차감하세요.'),
           const SizedBox(height: 40),
@@ -70,9 +71,9 @@ class WmsGuideScreen extends StatelessWidget {
           Text(
             '스마트 홈 창고 관리 (WMS)',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onPrimaryContainer,
-                ),
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.onPrimaryContainer,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
@@ -91,9 +92,9 @@ class WmsGuideScreen extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 12),
       child: Text(
         title,
-        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+        style: Theme.of(
+          context,
+        ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -119,7 +120,11 @@ class WmsGuideScreen extends StatelessWidget {
   }
 
   Widget _buildFeatureItem(
-      BuildContext context, String title, String desc, IconData icon) {
+    BuildContext context,
+    String title,
+    String desc,
+    IconData icon,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -131,7 +136,11 @@ class WmsGuideScreen extends StatelessWidget {
               color: Theme.of(context).colorScheme.secondaryContainer,
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, size: 20, color: Theme.of(context).colorScheme.secondary),
+            child: Icon(
+              icon,
+              size: 20,
+              color: Theme.of(context).colorScheme.secondary,
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -142,10 +151,7 @@ class WmsGuideScreen extends StatelessWidget {
                   title,
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
-                Text(
-                  desc,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
+                Text(desc, style: Theme.of(context).textTheme.bodySmall),
               ],
             ),
           ),

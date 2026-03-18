@@ -106,8 +106,8 @@ class _PeriodDetailStatsScreenState extends State<PeriodDetailStatsScreen> {
                     ),
                   )
                 : isLandscape
-                    ? buildTransactionListLandscape(theme, transactions)
-                    : buildTransactionListPortrait(theme, transactions),
+                ? buildTransactionListLandscape(theme, transactions)
+                : buildTransactionListPortrait(theme, transactions),
           ),
         ],
       ),

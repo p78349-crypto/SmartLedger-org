@@ -181,8 +181,7 @@ extension IncomeSplitChartModal on _IncomeSplitStatusScreenState {
                                 getTooltipItem:
                                     (group, groupIndex, rod, rodIndex) {
                                       final entry = data[group.x.toInt()];
-                                      final label =
-                                          rodIndex == 0 ? '계획' : '집행';
+                                      final label = rodIndex == 0 ? '계획' : '집행';
                                       final value = rodIndex == 0
                                           ? entry.planned
                                           : entry.actual;

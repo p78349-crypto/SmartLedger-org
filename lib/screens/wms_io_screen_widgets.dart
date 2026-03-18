@@ -47,10 +47,7 @@ class WmsHealthTagsSelector extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          '건강 태그 (선택)',
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
+        Text('건강 태그 (선택)', style: Theme.of(context).textTheme.bodyMedium),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -93,17 +90,17 @@ class _WmsOutboundTabState extends State<WmsOutboundTab> {
 
   Future<void> _handleOutbound() async {
     if (_selectedItem == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('품목을 선택하세요')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('품목을 선택하세요')));
       return;
     }
 
     final quantity = double.tryParse(_quantityController.text) ?? 0.0;
     if (quantity <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('출고 수량을 입력하세요')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('출고 수량을 입력하세요')));
       return;
     }
 
@@ -115,11 +112,7 @@ class _WmsOutboundTabState extends State<WmsOutboundTab> {
     if (!mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          '${_selectedItem!.name} $quantity개 출고 완료',
-        ),
-      ),
+      SnackBar(content: Text('${_selectedItem!.name} $quantity개 출고 완료')),
     );
 
     _clearForm();
@@ -167,21 +160,21 @@ class _WmsOutboundTabState extends State<WmsOutboundTab> {
                 },
                 fieldViewBuilder:
                     (context, controller, focusNode, onFieldSubmitted) {
-                  return TextField(
-                    controller: controller,
-                    focusNode: focusNode,
-                    decoration: const InputDecoration(
-                      labelText: '출고 품목 검색 또는 스캔',
-                      hintText: '이름 또는 바코드를 입력하세요',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.search),
-                    ),
-                    textInputAction: TextInputAction.next,
-                    onSubmitted: (val) {
-                      onFieldSubmitted();
+                      return TextField(
+                        controller: controller,
+                        focusNode: focusNode,
+                        decoration: const InputDecoration(
+                          labelText: '출고 품목 검색 또는 스캔',
+                          hintText: '이름 또는 바코드를 입력하세요',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.search),
+                        ),
+                        textInputAction: TextInputAction.next,
+                        onSubmitted: (val) {
+                          onFieldSubmitted();
+                        },
+                      );
                     },
-                  );
-                },
               ),
               if (_selectedItem != null) ...[
                 const SizedBox(height: 16),
@@ -193,9 +186,7 @@ class _WmsOutboundTabState extends State<WmsOutboundTab> {
                       children: [
                         Text(
                           '현재 재고 정보',
-                          style: Theme.of(
-                            context,
-                          ).textTheme.titleSmall,
+                          style: Theme.of(context).textTheme.titleSmall,
                         ),
                         const SizedBox(height: 8),
                         Text('품목: ${_selectedItem!.name}'),
@@ -243,12 +234,8 @@ class _WmsOutboundTabState extends State<WmsOutboundTab> {
                   label: const Text('출고 처리'),
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor: Theme.of(
-                      context,
-                    ).colorScheme.error,
-                    foregroundColor: Theme.of(
-                      context,
-                    ).colorScheme.onError,
+                    backgroundColor: Theme.of(context).colorScheme.error,
+                    foregroundColor: Theme.of(context).colorScheme.onError,
                   ),
                 ),
               ],

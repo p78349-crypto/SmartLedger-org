@@ -22,7 +22,8 @@ class _RootRoutes {
       case AppRoutes.rootExpenseAnalysis:
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => const RootAuthGate(child: RootExpenseAnalysisScreen()),
+          builder: (_) =>
+              const RootAuthGate(child: RootExpenseAnalysisScreen()),
         );
 
       case AppRoutes.rootTransactions:

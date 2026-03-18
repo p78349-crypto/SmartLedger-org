@@ -18,10 +18,10 @@ import '../utils/app_logger.dart';
 class OpenFoodFactsService {
   static const String baseUrl = 'https://world.openfoodfacts.org';
   static const String apiVersion = 'api/v0';
-  
+
   final http.Client _httpClient;
   final Duration _timeout;
-  
+
   // Response cache (simple in-memory cache)
   final Map<String, GlobalProduct?> _cache = {};
   static const int maxCacheSize = 500;
@@ -29,11 +29,11 @@ class OpenFoodFactsService {
   OpenFoodFactsService({
     http.Client? httpClient,
     Duration timeout = const Duration(seconds: 10),
-  })  : _httpClient = httpClient ?? http.Client(),
-        _timeout = timeout;
+  }) : _httpClient = httpClient ?? http.Client(),
+       _timeout = timeout;
 
   /// Search product by barcode (EAN-13, UPC-A, etc.)
-  /// 
+  ///
   /// Returns GlobalProduct if found, null otherwise
   Future<GlobalProduct?> searchByBarcode(String barcode) async {
     if (barcode.isEmpty) return null;
@@ -50,7 +50,7 @@ class OpenFoodFactsService {
 
     try {
       final response = await _makeRequest('/products/$normalized');
-      
+
       if (response == null) {
         _addToCache(normalized, null);
         return null;
@@ -67,7 +67,7 @@ class OpenFoodFactsService {
   }
 
   /// Search by barcode with fallback to local DB
-  /// 
+  ///
   /// This should be called from PDA screen after local search fails
   Future<GlobalProduct?> searchAsFallback(String barcode) async {
     AppLogger.info('[OFF] Using as fallback search for: $barcode');
@@ -84,7 +84,7 @@ class OpenFoodFactsService {
 
       if (response.statusCode == 200) {
         final json = jsonDecode(response.body);
-        
+
         // Check if product was found
         final product = json['product'];
         if (product is! Map || (json['status'] as int?) == 0) {
@@ -144,10 +144,7 @@ class OpenFoodFactsService {
       final categories = <String>[];
       if (categoriesStr != null) {
         categories.addAll(
-          categoriesStr
-              .split(',')
-              .map((c) => c.trim())
-              .take(4),
+          categoriesStr.split(',').map((c) => c.trim()).take(4),
         );
       }
 
@@ -173,7 +170,7 @@ class OpenFoodFactsService {
       final countryCode = _detectCountryFromBarcode(barcode ?? '');
 
       return GlobalProduct(
-        id: 0,  // Will be auto-generated on insert
+        id: 0, // Will be auto-generated on insert
         ean13: ean13,
         upcA: upc,
         productNameKo: nameKo,
@@ -199,7 +196,7 @@ class OpenFoodFactsService {
   }
 
   /// Detect country from barcode prefix
-  /// 
+  ///
   /// EAN-13 prefix rules:
   /// 60-64: UK
   /// 30-37: France
@@ -211,29 +208,26 @@ class OpenFoodFactsService {
   /// 00-09: US/Canada (sometimes)
   static String _detectCountryFromBarcode(String barcode) {
     if (barcode.isEmpty || barcode.length < 2) {
-      return 'XX';  // Unknown
+      return 'XX'; // Unknown
     }
 
     final prefix = int.tryParse(barcode.substring(0, 2)) ?? -1;
 
     return switch (prefix) {
-      >= 60 && <= 64 => 'GB',  // UK
-      >= 30 && <= 37 => 'FR',  // France
-      >= 40 && <= 43 => 'DE',  // Germany
-      45 || 49 => 'JP',        // Japan
-      50 => 'GB',              // UK
-      55 => 'BR',              // Brazil
-      88 => 'KR',              // Korea
-      _ => 'XX'                // Unknown
+      >= 60 && <= 64 => 'GB', // UK
+      >= 30 && <= 37 => 'FR', // France
+      >= 40 && <= 43 => 'DE', // Germany
+      45 || 49 => 'JP', // Japan
+      50 => 'GB', // UK
+      55 => 'BR', // Brazil
+      88 => 'KR', // Korea
+      _ => 'XX', // Unknown
     };
   }
 
   /// Normalize barcode
   String _normalizeBarcode(String barcode) {
-    return barcode
-        .trim()
-        .replaceAll(RegExp(r'[\s\-()]'), '')
-        .toUpperCase();
+    return barcode.trim().replaceAll(RegExp(r'[\s\-()]'), '').toUpperCase();
   }
 
   /// Add to cache (with LRU eviction)

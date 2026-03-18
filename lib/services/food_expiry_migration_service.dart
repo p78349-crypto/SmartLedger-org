@@ -5,8 +5,8 @@ import '../models/consumable_inventory_item.dart';
 import '../models/food_expiry_item.dart';
 
 /// FoodExpiryItem → ConsumableInventoryItem 마이그레이션 서비스
-/// 
-/// 목표: SharedPreferences의 food_expiry_items_v1을 
+///
+/// 목표: SharedPreferences의 food_expiry_items_v1을
 ///       ConsumableInventoryService로 통합
 class FoodExpiryMigrationService {
   FoodExpiryMigrationService._();
@@ -97,7 +97,8 @@ class FoodExpiryMigrationService {
     final raw = prefs.getString(_sourceKey);
     if (raw == null) return null;
 
-    final backupKey = 'food_expiry_backup_${DateTime.now().millisecondsSinceEpoch}';
+    final backupKey =
+        'food_expiry_backup_${DateTime.now().millisecondsSinceEpoch}';
     await prefs.setString(backupKey, raw);
     return backupKey;
   }
@@ -106,7 +107,9 @@ class FoodExpiryMigrationService {
   static Future<void> cleanupOldData() async {
     // 기존 key는 유지 (복원용)
     // 필요시 나중에 수동으로 삭제 가능
-    debugPrint('[FoodExpiryMigration] Old data cleanup skipped (kept for safety)');
+    debugPrint(
+      '[FoodExpiryMigration] Old data cleanup skipped (kept for safety)',
+    );
   }
 
   /// 마이그레이션 상태 리포트

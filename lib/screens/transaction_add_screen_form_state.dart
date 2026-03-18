@@ -122,7 +122,8 @@ class _NO1FormState extends State<NO1Form> {
         _showIncomeCategoryOptions = _selectedMainCategory != _defaultCategory;
       } else {
         _applyIncomeDefaultCategory();
-        _showIncomeCategoryOptions = true; // Changed from false to true to show labels immediately
+        _showIncomeCategoryOptions =
+            true; // Changed from false to true to show labels immediately
       }
     } else {
       _showIncomeCategoryOptions = true;

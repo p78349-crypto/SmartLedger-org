@@ -52,10 +52,7 @@ extension FoodExpiryBuildPanelsExt on _FoodExpiryItemsScreenState {
               if (missingIngredients.isNotEmpty)
                 TextButton.icon(
                   onPressed: () => _addMissingToCart(missingIngredients),
-                  icon: const Icon(
-                    Icons.shopping_cart_outlined,
-                    size: 16,
-                  ),
+                  icon: const Icon(Icons.shopping_cart_outlined, size: 16),
                   label: const Text('재고 0 모두 담기'),
                   style: TextButton.styleFrom(
                     visualDensity: VisualDensity.compact,
@@ -78,9 +75,7 @@ extension FoodExpiryBuildPanelsExt on _FoodExpiryItemsScreenState {
                 : DateFormat('yyyy-MM-dd').format(nearest!.expiryDate);
 
             final subtitle = isMissing
-                ? (matchedAll.isEmpty
-                      ? '재고: 0 (없음)'
-                      : '재고: 0 (수량 0)')
+                ? (matchedAll.isEmpty ? '재고: 0 (없음)' : '재고: 0 (수량 0)')
                 : '총 ${_formatMatchedTotal(matched)} / '
                       '가장 빠른 기한: $nearestExpiry ($leftText)';
 
@@ -115,8 +110,9 @@ extension FoodExpiryBuildPanelsExt on _FoodExpiryItemsScreenState {
                             const SizedBox(height: 2),
                             Text(
                               subtitle,
-                              style: theme.textTheme.bodySmall
-                                  ?.copyWith(color: warnColor),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: warnColor,
+                              ),
                             ),
                           ],
                         ),
@@ -143,8 +139,7 @@ extension FoodExpiryBuildPanelsExt on _FoodExpiryItemsScreenState {
               ),
               const Divider(height: 1),
             ];
-          }).toList()
-            ..removeLast(),
+          }).toList()..removeLast(),
         ],
       ),
     );

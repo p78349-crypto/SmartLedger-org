@@ -1,12 +1,14 @@
 part of 'ai_investment_advisor_screen.dart';
 
 /// AI 투자 참고정보 화면 확장 기능들 (완전 오프라인 기반)
-extension AiInvestmentAdvisorScreenExtensions on _AiInvestmentAdvisorScreenState {
-  
+extension AiInvestmentAdvisorScreenExtensions
+    on _AiInvestmentAdvisorScreenState {
   Widget _buildPortfolioOverviewCard() {
     final riskLevel = _getRiskLevelText(_portfolioAnalysis!.riskScore);
-    final diversificationText = _getDiversificationText(_portfolioAnalysis!.diversificationScore);
-    
+    final diversificationText = _getDiversificationText(
+      _portfolioAnalysis!.diversificationScore,
+    );
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -17,10 +19,16 @@ extension AiInvestmentAdvisorScreenExtensions on _AiInvestmentAdvisorScreenState
               children: [
                 const Icon(Icons.analytics, color: Colors.blue),
                 const SizedBox(width: 8),
-                const Text('포트폴리오 분석', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const Text(
+                  '포트폴리오 분석',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
                 const Spacer(),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.green.shade100,
                     borderRadius: BorderRadius.circular(12),
@@ -30,7 +38,10 @@ extension AiInvestmentAdvisorScreenExtensions on _AiInvestmentAdvisorScreenState
                     children: [
                       Icon(Icons.offline_bolt, size: 16, color: Colors.green),
                       SizedBox(width: 4),
-                      Text('오프라인', style: TextStyle(fontSize: 12, color: Colors.green)),
+                      Text(
+                        '오프라인',
+                        style: TextStyle(fontSize: 12, color: Colors.green),
+                      ),
                     ],
                   ),
                 ),
@@ -40,11 +51,21 @@ extension AiInvestmentAdvisorScreenExtensions on _AiInvestmentAdvisorScreenState
             Row(
               children: [
                 Expanded(
-                  child: _buildMetricCard('전체 위험도', riskLevel, _getRiskColor(_portfolioAnalysis!.riskScore)),
+                  child: _buildMetricCard(
+                    '전체 위험도',
+                    riskLevel,
+                    _getRiskColor(_portfolioAnalysis!.riskScore),
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: _buildMetricCard('다각화 지수', diversificationText, _getDiversificationColor(_portfolioAnalysis!.diversificationScore)),
+                  child: _buildMetricCard(
+                    '다각화 지수',
+                    diversificationText,
+                    _getDiversificationColor(
+                      _portfolioAnalysis!.diversificationScore,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -61,13 +82,19 @@ extension AiInvestmentAdvisorScreenExtensions on _AiInvestmentAdvisorScreenState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('위험 분석', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text(
+              '위험 분석',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 12),
             Text('분석 기준: ${_formatDate(_portfolioAnalysis!.analysisDate)}'),
             const SizedBox(height: 16),
             _buildRiskMeter('전체 위험도', _portfolioAnalysis!.riskScore),
             const SizedBox(height: 8),
-            _buildDiversificationMeter('다각화 수준', _portfolioAnalysis!.diversificationScore),
+            _buildDiversificationMeter(
+              '다각화 수준',
+              _portfolioAnalysis!.diversificationScore,
+            ),
             const SizedBox(height: 16),
             if (_portfolioAnalysis!.rebalanceRequired)
               Container(
@@ -98,14 +125,19 @@ extension AiInvestmentAdvisorScreenExtensions on _AiInvestmentAdvisorScreenState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('현재 자산 배분', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text(
+              '현재 자산 배분',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 16),
-            ..._portfolioAnalysis!.currentAllocation.entries.map((entry) => 
-              _buildAllocationBar(entry.key.name, entry.value)
+            ..._portfolioAnalysis!.currentAllocation.entries.map(
+              (entry) => _buildAllocationBar(entry.key.name, entry.value),
             ),
             const SizedBox(height: 12),
-            const Text('* 자산 배분은 현재 보유 자산을 기준으로 계산됩니다', 
-                       style: TextStyle(fontSize: 12, color: Colors.grey)),
+            const Text(
+              '* 자산 배분은 현재 보유 자산을 기준으로 계산됩니다',
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+            ),
           ],
         ),
       ),
@@ -119,7 +151,10 @@ extension AiInvestmentAdvisorScreenExtensions on _AiInvestmentAdvisorScreenState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('AI 투자 분석 참고자료', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text(
+              'AI 투자 분석 참고자료',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 12),
             if (_portfolioAnalysis!.recommendations.isEmpty)
               const Text('현재 포트폴리오에서 특이 점검 항목이 크지 않습니다.')
@@ -129,7 +164,8 @@ extension AiInvestmentAdvisorScreenExtensions on _AiInvestmentAdvisorScreenState
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: _portfolioAnalysis!.recommendations.length,
                 itemBuilder: (context, index) {
-                  final recommendation = _portfolioAnalysis!.recommendations[index];
+                  final recommendation =
+                      _portfolioAnalysis!.recommendations[index];
                   return _buildRecommendationTile(recommendation);
                 },
               ),
@@ -151,7 +187,14 @@ extension AiInvestmentAdvisorScreenExtensions on _AiInvestmentAdvisorScreenState
               children: [
                 Icon(Icons.warning, color: Colors.red),
                 SizedBox(width: 8),
-                Text('리스크 점검 필요', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.red)),
+                Text(
+                  '리스크 점검 필요',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.red,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 8),
@@ -160,7 +203,10 @@ extension AiInvestmentAdvisorScreenExtensions on _AiInvestmentAdvisorScreenState
             ElevatedButton(
               onPressed: _showRebalanceDialog,
               style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-              child: const Text('분석 포인트 보기', style: TextStyle(color: Colors.white)),
+              child: const Text(
+                '분석 포인트 보기',
+                style: TextStyle(color: Colors.white),
+              ),
             ),
           ],
         ),

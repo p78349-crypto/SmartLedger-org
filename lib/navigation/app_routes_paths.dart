@@ -149,7 +149,7 @@ class AppRoutes {
 
   // Smart voice command (앱 통합 제어)
   static const smartVoiceCommand = '/smart/voice-command';
-  
+
   // 새로 구현된 고급 기능들
   static const incrementalBackup = '/backup/incremental';
   static const ceoPredictionDashboard = '/ceo/prediction-dashboard';

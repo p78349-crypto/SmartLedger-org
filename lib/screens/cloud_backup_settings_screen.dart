@@ -8,12 +8,13 @@ class CloudBackupSettingsScreen extends StatefulWidget {
   const CloudBackupSettingsScreen({super.key});
 
   @override
-  State<CloudBackupSettingsScreen> createState() => _CloudBackupSettingsScreenState;
+  State<CloudBackupSettingsScreen> createState() =>
+      _CloudBackupSettingsScreenState;
 }
 
 class _CloudBackupSettingsScreenState extends State<CloudBackupSettingsScreen> {
   final CloudBackupService _cloudService = CloudBackupService();
-  
+
   bool _autoBackupEnabled = false;
   BackupFrequency _selectedFrequency = BackupFrequency.daily;
   String _selectedProvider = 'firebase_storage';
@@ -52,9 +53,7 @@ class _CloudBackupSettingsScreenState extends State<CloudBackupSettingsScreen> {
           children: [
             Icon(Icons.info, color: Colors.blue),
             SizedBox(width: 12),
-            Expanded(
-              child: Text('이 기능은 시뮬레이션 모드입니다. 실제 클라우드 연결은 구현되지 않았습니다.'),
-            ),
+            Expanded(child: Text('이 기능은 시뮬레이션 모드입니다. 실제 클라우드 연결은 구현되지 않았습니다.')),
           ],
         ),
       ),
@@ -81,10 +80,14 @@ class _CloudBackupSettingsScreenState extends State<CloudBackupSettingsScreen> {
             DropdownButtonFormField<BackupFrequency>(
               value: _selectedFrequency,
               decoration: const InputDecoration(labelText: '백업 주기'),
-              items: BackupFrequency.values.map((freq) => DropdownMenuItem(
-                value: freq,
-                child: Text(_getFrequencyText(freq)),
-              )).toList(),
+              items: BackupFrequency.values
+                  .map(
+                    (freq) => DropdownMenuItem(
+                      value: freq,
+                      child: Text(_getFrequencyText(freq)),
+                    ),
+                  )
+                  .toList(),
               onChanged: (value) => setState(() => _selectedFrequency = value!),
             ),
             const SizedBox(height: 8),
@@ -107,19 +110,21 @@ class _CloudBackupSettingsScreenState extends State<CloudBackupSettingsScreen> {
         onPressed: () => _performManualBackup(),
         icon: const Icon(Icons.cloud_upload),
         label: const Text('수동 백업 실행'),
-        style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.all(16),
-        ),
+        style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(16)),
       ),
     );
   }
 
   String _getFrequencyText(BackupFrequency frequency) {
     switch (frequency) {
-      case BackupFrequency.hourly: return '매시간';
-      case BackupFrequency.daily: return '매일';
-      case BackupFrequency.weekly: return '매주';
-      case BackupFrequency.monthly: return '매월';
+      case BackupFrequency.hourly:
+        return '매시간';
+      case BackupFrequency.daily:
+        return '매일';
+      case BackupFrequency.weekly:
+        return '매주';
+      case BackupFrequency.monthly:
+        return '매월';
     }
   }
 

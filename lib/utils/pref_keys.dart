@@ -31,7 +31,8 @@ class PrefKeys {
 
   // Security audit (글로벌 보안 규정)
   static const String restoreAuditLog = 'restore_audit_log'; // 복원 이력 로그
-  static const String restoredAccountsNeedReauth = 'restored_accounts_need_reauth'; // 재인증 필요 계정
+  static const String restoredAccountsNeedReauth =
+      'restored_accounts_need_reauth'; // 재인증 필요 계정
 
   // UI state
   static const String selectedAccount = 'selected_account';
@@ -93,7 +94,7 @@ class PrefKeys {
   static const String serverType = 'server_type_v1'; // 'cloud' or 'self_hosted'
 
   // Asset projection ("1억 프로젝트")
-    static const String project100mNameV1 = 'project_100m_name_v1';
+  static const String project100mNameV1 = 'project_100m_name_v1';
   static const String project100mYearsV1 = 'project_100m_years_v1';
   static const String project100mTargetAmountV1 =
       'project_100m_target_amount_v1';
@@ -121,25 +122,28 @@ class PrefKeys {
   static const String rootAuthMode = 'root_auth_mode';
   static const String permissionGateBypassed = 'permission_gate_bypassed_v1';
   static const String rootAuthEnabled = 'root_auth_enabled';
-  
+
   // ROOT security mode (pin, biometric, password)
   static const String rootSecurityMode = 'root_security_mode_v1';
-  static const String rootSecurityLevel = 'root_security_level_v1'; // 'single' or 'dual'
+  static const String rootSecurityLevel =
+      'root_security_level_v1'; // 'single' or 'dual'
   static const String rootBiometricEnabled = 'root_biometric_enabled_v1';
   static const String rootPasswordEnabled = 'root_password_enabled_v1';
 
   // User/Asset security mode (mirrored from ROOT)
   static const String userSecurityMode = 'user_security_mode_v1';
-  static const String userSecurityLevel = 'user_security_level_v1'; // 'single' or 'dual'
+  static const String userSecurityLevel =
+      'user_security_level_v1'; // 'single' or 'dual'
   static const String userAuthEnabled = 'user_auth_enabled_v1';
 
-    // Asset security mode (separate from USER/ROOT)
-    static const String assetSecurityMode = 'asset_security_mode_v1';
-    static const String assetSecurityLevel = 'asset_security_level_v1'; // 'single' or 'dual'
-    static const String assetAuthEnabled = 'asset_auth_enabled_v1';
-    static const String assetPinEnabled = 'asset_pin_enabled_v1';
-    static const String assetPasswordEnabled = 'asset_password_enabled_v1';
-    static const String assetBiometricEnabled = 'asset_biometric_enabled_v1';
+  // Asset security mode (separate from USER/ROOT)
+  static const String assetSecurityMode = 'asset_security_mode_v1';
+  static const String assetSecurityLevel =
+      'asset_security_level_v1'; // 'single' or 'dual'
+  static const String assetAuthEnabled = 'asset_auth_enabled_v1';
+  static const String assetPinEnabled = 'asset_pin_enabled_v1';
+  static const String assetPasswordEnabled = 'asset_password_enabled_v1';
+  static const String assetBiometricEnabled = 'asset_biometric_enabled_v1';
 
   // Sensitive: intentionally excluded from backups with PIN/password material.
   static const String rootPinEnabled = 'root_pin_enabled';
@@ -175,14 +179,16 @@ class PrefKeys {
       'asset_password_locked_until_ms_v1';
   static const String rootPinFailedAttempts = 'root_pin_failed_attempts';
   static const String rootPinLockedUntilMs = 'root_pin_locked_until_ms';
-  
+
   // ROOT password (separate from PIN)
   static const String rootPasswordSaltB64 = 'root_password_salt_b64';
   static const String rootPasswordHashB64 = 'root_password_hash_b64';
   static const String rootPasswordIterations = 'root_password_iterations';
-  static const String rootPasswordFailedAttempts = 'root_password_failed_attempts';
-  static const String rootPasswordLockedUntilMs = 'root_password_locked_until_ms';
-  
+  static const String rootPasswordFailedAttempts =
+      'root_password_failed_attempts';
+  static const String rootPasswordLockedUntilMs =
+      'root_password_locked_until_ms';
+
   static const String rootAuthSessionUntilMs = 'root_auth_session_until_ms';
   static const String iconAllowAssetIconsOutsideAssetWhenUnlocked =
       'icon_allow_asset_outside_when_unlocked';
@@ -228,8 +234,7 @@ class PrefKeys {
   static const String subscriptionStatusSuffix = 'subscription_status_v1';
   static const String subscriptionProductIdSuffix =
       'subscription_product_id_v1';
-  static const String subscriptionPlatformSuffix =
-      'subscription_platform_v1';
+  static const String subscriptionPlatformSuffix = 'subscription_platform_v1';
   static const String subscriptionExpiresAtMsSuffix =
       'subscription_expires_at_ms_v1';
   static const String subscriptionUpdatedAtMsSuffix =

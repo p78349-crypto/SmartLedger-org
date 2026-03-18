@@ -203,10 +203,7 @@ class AssetSimpleInputArgs {
 }
 
 class ShoppingCartArgs {
-  const ShoppingCartArgs({
-    required this.accountName,
-    this.initialItems,
-  });
+  const ShoppingCartArgs({required this.accountName, this.initialItems});
   final String accountName;
   final List<ShoppingCartItem>? initialItems;
 }

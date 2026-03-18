@@ -98,8 +98,9 @@ extension InputStatsScreenStoreBenefit on _InputStatsScreenState {
       (sum, e) => sum + e.totalAmount,
     );
 
-    final maxAmount =
-        lookbackItems.isEmpty ? 0.0 : lookbackItems.first.totalAmount;
+    final maxAmount = lookbackItems.isEmpty
+        ? 0.0
+        : lookbackItems.first.totalAmount;
     final denom = maxAmount <= 0 ? 1.0 : maxAmount;
 
     final top = lookbackItems.take(10).toList(growable: false);

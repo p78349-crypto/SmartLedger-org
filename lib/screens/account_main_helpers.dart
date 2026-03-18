@@ -248,8 +248,7 @@ extension AccountMainHelpers on _AccountMainScreenState {
     );
     if (!mounted) return;
 
-    final desired =
-        _pageCount > 0 ? (saved ?? 0).clamp(0, _pageCount - 1) : 0;
+    final desired = _pageCount > 0 ? (saved ?? 0).clamp(0, _pageCount - 1) : 0;
 
     if (desired == _currentIndex) return;
 

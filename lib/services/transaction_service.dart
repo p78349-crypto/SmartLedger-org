@@ -319,9 +319,7 @@ class TransactionService {
       action: 'transaction_deleted',
       accountName: accountName,
       transaction: removed,
-      metadata: {
-        'moveToTrash': moveToTrash,
-      },
+      metadata: {'moveToTrash': moveToTrash},
     );
   }
 
@@ -378,10 +376,7 @@ class TransactionService {
         amount: transaction.amount,
         transactionId: transaction.id,
         transactionType: transaction.type.name,
-        metadata: {
-          'isRefund': transaction.isRefund,
-          ...?metadata,
-        },
+        metadata: {'isRefund': transaction.isRefund, ...?metadata},
       );
     } catch (_) {
       // Audit logging is best-effort and should not break transaction flow.

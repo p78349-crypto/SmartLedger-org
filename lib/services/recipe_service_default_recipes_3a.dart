@@ -218,7 +218,7 @@ final List<Recipe> _defaultRecipesPart3a = [
       'ja': '鶏肉の煮物',
       'nl': 'Geschoofde Kip',
       'pl': 'Duszony kurczak',
-      'pt':' Frango Braiseado',
+      'pt': ' Frango Braiseado',
       'sv': 'Braserad Kyckling',
       'th': 'ไก่นึ่ง',
       'tr': 'Tavuk Güveç',

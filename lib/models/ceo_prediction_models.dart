@@ -23,13 +23,14 @@ class CeoPredictionModel {
     'riskScore': riskScore.toJson(),
   };
 
-  factory CeoPredictionModel.fromJson(Map<String, dynamic> json) => CeoPredictionModel(
-    targetDate: DateTime.parse(json['targetDate']),
-    predictedCashFlow: json['predictedCashFlow'].toDouble(),
-    confidenceLevel: json['confidenceLevel'].toDouble(),
-    keyFactors: List<String>.from(json['keyFactors']),
-    riskScore: RiskScore.fromJson(json['riskScore']),
-  );
+  factory CeoPredictionModel.fromJson(Map<String, dynamic> json) =>
+      CeoPredictionModel(
+        targetDate: DateTime.parse(json['targetDate']),
+        predictedCashFlow: json['predictedCashFlow'].toDouble(),
+        confidenceLevel: json['confidenceLevel'].toDouble(),
+        keyFactors: List<String>.from(json['keyFactors']),
+        riskScore: RiskScore.fromJson(json['riskScore']),
+      );
 }
 
 class RiskScore {

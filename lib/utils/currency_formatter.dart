@@ -64,7 +64,11 @@ class CurrencyFormatter {
   static NumberFormat get compact => _compact();
 
   /// 금액을 통화 문자열로 포맷 (#,##0원)
-  static String format(num amount, {bool showUnit = true, String? currencyCode}) {
+  static String format(
+    num amount, {
+    bool showUnit = true,
+    String? currencyCode,
+  }) {
     final symbol = currencyCode != null
         ? (currencySymbols[currencyCode] ?? currencyCode)
         : _cachedUnit;

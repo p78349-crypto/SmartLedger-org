@@ -121,9 +121,7 @@ class EvacuationRoutePlanner {
         }
         return [...base, ...extra];
       case WeatherCondition.heavyRain:
-        final extra = <String>[
-          '침수 예상 지역 지도 저장, 차량 이동 시 높이 30cm 이상 물길 진입 금지',
-        ];
+        final extra = <String>['침수 예상 지역 지도 저장, 차량 이동 시 높이 30cm 이상 물길 진입 금지'];
         if (environment == EvacuationEnvironment.urban) {
           extra.add('지상 도로 침수 시 건물 옥상/고지대 천공로(스카이워크)로 이동');
         }
@@ -141,16 +139,10 @@ class EvacuationRoutePlanner {
   ) {
     if (environment == EvacuationEnvironment.urban) {
       if (condition == WeatherCondition.typhoon) {
-        return [
-          '지하철 역사/지하 대피소 전광판으로 공식 안내 확인',
-          '지상 광고판, 유리창 인근 대기 금지',
-        ];
+        return ['지하철 역사/지하 대피소 전광판으로 공식 안내 확인', '지상 광고판, 유리창 인근 대기 금지'];
       }
       if (condition == WeatherCondition.heavyRain) {
-        return [
-          '지하차도·지하주차장 출입 통제 확인 후 이용 금지',
-          '옥상 출입문/비상계단 접근 가능 여부 사전 확인',
-        ];
+        return ['지하차도·지하주차장 출입 통제 확인 후 이용 금지', '옥상 출입문/비상계단 접근 가능 여부 사전 확인'];
       }
     }
 

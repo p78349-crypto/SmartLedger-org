@@ -9,7 +9,7 @@ import '../models/incremental_backup_models.dart';
 import '../utils/incremental_backup_helper.dart';
 
 class IncrementalBackupService {
-  static final IncrementalBackupService _instance = 
+  static final IncrementalBackupService _instance =
       IncrementalBackupService._internal();
   factory IncrementalBackupService() => _instance;
   IncrementalBackupService._internal();
@@ -23,7 +23,7 @@ class IncrementalBackupService {
     Map<String, Map<String, dynamic>> currentData,
   ) async {
     final changes = await _detectChanges(currentData);
-    
+
     if (!IncrementalBackupHelper.isBackupNeeded(changes)) {
       return _createEmptySnapshot();
     }
@@ -39,7 +39,7 @@ class IncrementalBackupService {
 
     await _saveIncrementalBackup(accountName, snapshot);
     await _updateChecksums(currentData);
-    
+
     return snapshot.copyWith(
       status: BackupStatus.completed,
       processedItems: snapshot.totalItems,
@@ -81,7 +81,7 @@ class IncrementalBackupService {
     final directory = await getApplicationDocumentsDirectory();
     final fileName = IncrementalBackupHelper.createBackupFileName(accountName);
     final file = File('${directory.path}/$fileName');
-    
+
     await file.writeAsString(json.encode(snapshot.toJson()));
 
     final prefs = await SharedPreferences.getInstance();

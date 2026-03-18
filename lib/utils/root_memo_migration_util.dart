@@ -16,7 +16,7 @@ class RootMemoMigrationUtil {
     try {
       final newService = RootMemoServiceV2.getInstance();
       final stats = await newService.getStats();
-      
+
       // SQLite에 메모가 없으면 마이그레이션 시도
       if (stats['total'] == 0) {
         await _performMigration(context);
@@ -31,12 +31,12 @@ class RootMemoMigrationUtil {
     try {
       final newService = RootMemoServiceV2.getInstance();
       final success = await newService.migrateFromSharedPreferences();
-      
+
       if (success) {
         _migrationCompleted = true;
         if (context.mounted) {
           SnackbarUtils.showSuccess(
-            context, 
+            context,
             '🎉 ROOT 메모 시스템이 새로운 데이터베이스로 업그레이드되었습니다',
           );
         }
@@ -44,10 +44,7 @@ class RootMemoMigrationUtil {
     } catch (e) {
       print('마이그레이션 수행 오류: $e');
       if (context.mounted) {
-        SnackbarUtils.showError(
-          context, 
-          '메모 시스템 업그레이드 중 오류가 발생했습니다',
-        );
+        SnackbarUtils.showError(context, '메모 시스템 업그레이드 중 오류가 발생했습니다');
       }
     }
   }
@@ -80,7 +77,9 @@ ROOT 메모 시스템이 향상된 데이터베이스로 업그레이드됩니�
   }
 
   /// 진행상황 표시와 함께 마이그레이션
-  static Future<void> _performMigrationWithProgress(BuildContext context) async {
+  static Future<void> _performMigrationWithProgress(
+    BuildContext context,
+  ) async {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -98,30 +97,21 @@ ROOT 메모 시스템이 향상된 데이터베이스로 업그레이드됩니�
     try {
       final newService = RootMemoServiceV2.getInstance();
       final success = await newService.migrateFromSharedPreferences();
-      
+
       if (context.mounted) {
         Navigator.pop(context); // 진행 다이얼로그 닫기
-        
+
         if (success) {
           _migrationCompleted = true;
-          SnackbarUtils.showSuccess(
-            context, 
-            '✅ 메모 시스템 업그레이드가 완료되었습니다!',
-          );
+          SnackbarUtils.showSuccess(context, '✅ 메모 시스템 업그레이드가 완료되었습니다!');
         } else {
-          SnackbarUtils.showInfo(
-            context, 
-            '이전할 메모가 없습니다. 새로운 시스템을 사용해보세요!',
-          );
+          SnackbarUtils.showInfo(context, '이전할 메모가 없습니다. 새로운 시스템을 사용해보세요!');
         }
       }
     } catch (e) {
       if (context.mounted) {
         Navigator.pop(context);
-        SnackbarUtils.showError(
-          context, 
-          '업그레이드 중 오류가 발생했습니다: $e',
-        );
+        SnackbarUtils.showError(context, '업그레이드 중 오류가 발생했습니다: $e');
       }
     }
   }
@@ -134,10 +124,7 @@ ROOT 메모 시스템이 향상된 데이터베이스로 업그레이드됩니�
     return {
       'old_system': {
         'name': 'SharedPreferences 기반',
-        'pros': [
-          '간단한 구현',
-          '빠른 초기 설정',
-        ],
+        'pros': ['간단한 구현', '빠른 초기 설정'],
         'cons': [
           '전체 데이터 로딩 필요',
           '검색 성능 저하',
@@ -158,10 +145,7 @@ ROOT 메모 시스템이 향상된 데이터베이스로 업그레이드됩니�
           '색상별 필터링',
           '통계 기능',
         ],
-        'cons': [
-          '초기 설정 복잡',
-          '약간의 학습 곡선',
-        ],
+        'cons': ['초기 설정 복잡', '약간의 학습 곡선'],
       },
     };
   }
@@ -172,13 +156,13 @@ ROOT 메모 시스템이 향상된 데이터베이스로 업그레이드됩니�
       final newService = RootMemoServiceV2.getInstance();
       final memos = await newService.getAllMemos();
       final stats = await newService.getStats();
-      
+
       print('📊 데이터 무결성 확인:');
       print('  • 총 메모 수: ${stats['total']}');
       print('  • 고정된 메모: ${stats['pinned']}');
       print('  • 최근 메모: ${stats['recent']}');
       print('  • 실제 로딩된 메모: ${memos.length}');
-      
+
       return stats['total'] == memos.length;
     } catch (e) {
       print('데이터 무결성 확인 오류: $e');

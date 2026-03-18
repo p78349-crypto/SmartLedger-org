@@ -23,9 +23,7 @@ class ConsumableInventoryDialogs {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              '입력된 단위는 목록에서 -1 버튼이 크게 표시됩니다.',
-            ),
+            const Text('입력된 단위는 목록에서 -1 버튼이 크게 표시됩니다.'),
             const SizedBox(height: 12),
             TextField(
               controller: controller,
@@ -39,8 +37,9 @@ class ConsumableInventoryDialogs {
         actions: [
           TextButton(
             onPressed: () {
-              controller.text = UserPrefService
-                .defaultCountLikeUnitsV1.join(', ');
+              controller.text = UserPrefService.defaultCountLikeUnitsV1.join(
+                ', ',
+              );
             },
             child: const Text('기본값'),
           ),
@@ -69,12 +68,11 @@ class ConsumableInventoryDialogs {
     required BuildContext context,
     ConsumableInventoryItem? item,
     String? initialLocation,
-  }) =>
-      showConsumableItemDialog(
-        context: context,
-        item: item,
-        initialLocation: initialLocation,
-      );
+  }) => showConsumableItemDialog(
+    context: context,
+    item: item,
+    initialLocation: initialLocation,
+  );
 
   /// 사용량/추가량 입력 다이얼로그 표시
   static Future<void> showAmountDialog({
@@ -111,11 +109,9 @@ class ConsumableInventoryDialogs {
               children: [
                 if (item.bundleSize > 1)
                   ActionChip(
-                    label: Text(
-                      '1묶음 (${item.bundleSize.toInt()}${item.unit})',
-                    ),
+                    label: Text('1묶음 (${item.bundleSize.toInt()}${item.unit})'),
                     onPressed: () =>
-                      controller.text = item.bundleSize.toString(),
+                        controller.text = item.bundleSize.toString(),
                   ),
                 ActionChip(
                   label: const Text('9개'),

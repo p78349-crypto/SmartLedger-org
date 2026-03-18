@@ -250,7 +250,10 @@ class AccountService {
 
   /// Updates the password for an account.
   /// Pass null or empty string to remove the password.
-  Future<bool> updateAccountPassword(String accountName, String? password) async {
+  Future<bool> updateAccountPassword(
+    String accountName,
+    String? password,
+  ) async {
     await loadAccounts();
     final index = _accounts.indexWhere((a) => a.name == accountName);
     if (index == -1) {

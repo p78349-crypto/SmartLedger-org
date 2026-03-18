@@ -4,21 +4,21 @@ library;
 import 'package:smart_ledger/shared/result.dart';
 
 /// Base class for use cases that require input parameters
-/// 
+///
 /// Example:
 /// ```dart
 /// class AddStockUseCase extends UseCase<ConsumableInventoryItem, ConsumableInventoryItem> {
 ///   final InventoryRepository repository;
-///   
+///
 ///   AddStockUseCase(this.repository);
-///   
+///
 ///   @override
 ///   Future<Result<ConsumableInventoryItem>> execute(ConsumableInventoryItem input) async {
 ///     // Validation
 ///     if (input.name.trim().isEmpty) {
 ///       return Failure(ValidationError('Name cannot be empty'));
 ///     }
-///     
+///
 ///     // Business logic
 ///     return await repository.addItem(input);
 ///   }
@@ -30,14 +30,14 @@ abstract class UseCase<Input, Output> {
 }
 
 /// Base class for use cases that don't require input parameters
-/// 
+///
 /// Example:
 /// ```dart
 /// class LoadInventoryUseCase extends NoArgUseCase<List<ConsumableInventoryItem>> {
 ///   final InventoryRepository repository;
-///   
+///
 ///   LoadInventoryUseCase(this.repository);
-///   
+///
 ///   @override
 ///   Future<Result<List<ConsumableInventoryItem>>> execute() async {
 ///     return await repository.fetchItems();

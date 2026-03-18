@@ -60,10 +60,7 @@ class _PageQuickMenuButton extends StatelessWidget {
             value: _QuickMenuAction.toggleEdit,
             child: Row(
               children: [
-                Icon(
-                  isEditMode ? Icons.check : Icons.edit,
-                  size: 20,
-                ),
+                Icon(isEditMode ? Icons.check : Icons.edit, size: 20),
                 const SizedBox(width: 12),
                 Text(isEditMode ? '편집 종료' : '편집 모드'),
               ],
@@ -247,7 +244,10 @@ class _IconTile extends StatelessWidget {
                       top: 0,
                       right: 0,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: scheme.error,
                           borderRadius: BorderRadius.circular(10),
@@ -284,15 +284,17 @@ class _IconTile extends StatelessWidget {
                 style:
                     labelStyle?.copyWith(
                       color: labelColor,
-                      fontWeight:
-                          isEditMode ? FontWeight.bold : FontWeight.w500,
+                      fontWeight: isEditMode
+                          ? FontWeight.bold
+                          : FontWeight.w500,
                       fontSize: 11,
                       letterSpacing: -0.4,
                     ) ??
                     TextStyle(
                       color: labelColor,
-                      fontWeight:
-                          isEditMode ? FontWeight.bold : FontWeight.w500,
+                      fontWeight: isEditMode
+                          ? FontWeight.bold
+                          : FontWeight.w500,
                       fontSize: 11,
                       letterSpacing: -0.4,
                     ),

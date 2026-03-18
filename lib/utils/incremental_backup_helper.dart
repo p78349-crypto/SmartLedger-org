@@ -33,7 +33,7 @@ class IncrementalBackupHelper {
   }) {
     final currentChecksum = generateChecksum(data);
     final changeType = detectChangeType(previousChecksum, currentChecksum);
-    
+
     return BackupChange(
       id: id,
       dataType: dataType,
@@ -58,8 +58,10 @@ class IncrementalBackupHelper {
 
   // Calculate backup size estimation
   static int estimateBackupSize(List<BackupChange> changes) {
-    return changes.fold(0, (sum, change) => 
-      sum + json.encode(change.data).length);
+    return changes.fold(
+      0,
+      (sum, change) => sum + json.encode(change.data).length,
+    );
   }
 
   // Filter changes by data type

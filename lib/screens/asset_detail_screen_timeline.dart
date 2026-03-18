@@ -83,7 +83,8 @@ extension AssetDetailTimeline on _AssetDetailScreenState {
                         ),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 2,
+                            horizontal: 8,
+                            vertical: 2,
                           ),
                           decoration: BoxDecoration(
                             color: amountColor.withAlpha(25),
@@ -169,11 +170,9 @@ extension AssetDetailTimeline on _AssetDetailScreenState {
     );
   }
 
-  String _formatAmountWithUnit(num value) =>
-      CurrencyFormatter.format(value);
+  String _formatAmountWithUnit(num value) => CurrencyFormatter.format(value);
 
-  String _formatTimestamp(DateTime date) =>
-      DateFormatter.dateTime.format(date);
+  String _formatTimestamp(DateTime date) => DateFormatter.dateTime.format(date);
 
   /// 자산 최초 생성 항목 표시
   Widget _buildInitialAssetTimeline(BuildContext context, ThemeData theme) {
@@ -220,7 +219,8 @@ extension AssetDetailTimeline on _AssetDetailScreenState {
                     ),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 2,
+                        horizontal: 8,
+                        vertical: 2,
                       ),
                       decoration: BoxDecoration(
                         color: Colors.green.withAlpha(25),

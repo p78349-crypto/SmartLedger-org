@@ -1,12 +1,15 @@
 part of 'ceo_prediction_dashboard_screen.dart';
 
 /// CEO 예측 대시보드 유틸리티 메서드들
-extension CeoPredictionDashboardScreenUtils on _CeoPredictionDashboardScreenState {
-  
+extension CeoPredictionDashboardScreenUtils
+    on _CeoPredictionDashboardScreenState {
   Widget _buildMetricColumn(String label, String value) {
     return Column(
       children: [
-        Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        Text(
+          value,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 4),
         Text(label, style: const TextStyle(fontSize: 14, color: Colors.grey)),
       ],
@@ -17,7 +20,7 @@ extension CeoPredictionDashboardScreenUtils on _CeoPredictionDashboardScreenStat
     final dayNames = ['월', '화', '수', '목', '금', '토', '일'];
     final dayName = dayNames[prediction.targetDate.weekday - 1];
     final isPositiveFlow = prediction.predictedCashFlow >= 0;
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 8.0),
       padding: const EdgeInsets.all(12.0),
@@ -40,7 +43,10 @@ extension CeoPredictionDashboardScreenUtils on _CeoPredictionDashboardScreenStat
             child: Center(
               child: Text(
                 dayName,
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
@@ -54,7 +60,9 @@ extension CeoPredictionDashboardScreenUtils on _CeoPredictionDashboardScreenStat
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: isPositiveFlow ? Colors.green.shade700 : Colors.red.shade700,
+                    color: isPositiveFlow
+                        ? Colors.green.shade700
+                        : Colors.red.shade700,
                   ),
                 ),
                 Text('신뢰도: ${(prediction.confidenceLevel * 100).toInt()}%'),
@@ -63,7 +71,10 @@ extension CeoPredictionDashboardScreenUtils on _CeoPredictionDashboardScreenStat
                     children: [
                       const Icon(Icons.warning, size: 16, color: Colors.orange),
                       const SizedBox(width: 4),
-                      const Text('높은 위험도', style: TextStyle(fontSize: 12, color: Colors.orange)),
+                      const Text(
+                        '높은 위험도',
+                        style: TextStyle(fontSize: 12, color: Colors.orange),
+                      ),
                     ],
                   ),
               ],

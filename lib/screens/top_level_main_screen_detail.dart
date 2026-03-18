@@ -177,8 +177,7 @@ class TopLevelStatsDetailScreen extends StatelessWidget {
                 totalSavings,
                 TransactionType.savings,
               ),
-              valueColor:
-                  Colors.amber[800] ?? theme.colorScheme.secondary,
+              valueColor: Colors.amber[800] ?? theme.colorScheme.secondary,
             ),
             if (hasFixedCosts)
               _buildSummaryRow(

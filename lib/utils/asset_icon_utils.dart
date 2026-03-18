@@ -64,12 +64,10 @@ class AssetIconUtils {
       _categoryIcons.values.toList();
 
   /// 카테고리별 아이콘만 추출
-  static IconData getIconData(AssetCategory category) =>
-      getIcon(category).icon;
+  static IconData getIconData(AssetCategory category) => getIcon(category).icon;
 
   /// 카테고리별 라벨 조회
-  static String getLabel(AssetCategory category) =>
-      getIcon(category).label;
+  static String getLabel(AssetCategory category) => getIcon(category).label;
 }
 
 /// 자산 카테고리 아이콘 메타데이터

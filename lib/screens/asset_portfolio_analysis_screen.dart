@@ -8,10 +8,7 @@ import '../utils/profit_loss_calculator.dart';
 class AssetPortfolioAnalysisScreen extends StatelessWidget {
   final String accountName;
 
-  const AssetPortfolioAnalysisScreen({
-    super.key,
-    required this.accountName,
-  });
+  const AssetPortfolioAnalysisScreen({super.key, required this.accountName});
 
   Future<List<Asset>> _loadAssets() async {
     final service = AssetService();
@@ -80,7 +77,9 @@ class AssetPortfolioAnalysisScreen extends StatelessWidget {
     final rows = <DataRow>[];
 
     for (final category in categories) {
-      final categoryAssets = assets.where((a) => a.category == category).toList();
+      final categoryAssets = assets
+          .where((a) => a.category == category)
+          .toList();
       if (categoryAssets.isEmpty) continue;
 
       final totalAmount = categoryAssets.fold<double>(
@@ -92,15 +91,16 @@ class AssetPortfolioAnalysisScreen extends StatelessWidget {
         (sum, asset) => sum + (asset.costBasis ?? 0),
       );
       final totalProfitLoss = totalAmount - totalCostBasis;
-        final double totalProfitLossRate = totalCostBasis == 0
+      final double totalProfitLossRate = totalCostBasis == 0
           ? 0.0
           : (totalProfitLoss / totalCostBasis) * 100;
       final totalMonthlyIncome = categoryAssets.fold<double>(
         0,
         (sum, asset) => sum + (asset.monthlyIncome ?? 0),
       );
-      final profitLossColor =
-          ProfitLossCalculator.getProfitLossColor(totalProfitLoss);
+      final profitLossColor = ProfitLossCalculator.getProfitLossColor(
+        totalProfitLoss,
+      );
 
       rows.add(
         DataRow(
@@ -117,9 +117,7 @@ class AssetPortfolioAnalysisScreen extends StatelessWidget {
             ),
             DataCell(
               Text(
-                ProfitLossCalculator.formatProfitLossRate(
-                  totalProfitLossRate,
-                ),
+                ProfitLossCalculator.formatProfitLossRate(totalProfitLossRate),
                 style: TextStyle(color: profitLossColor),
               ),
             ),

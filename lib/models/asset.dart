@@ -163,9 +163,7 @@ class Asset {
     AssetRiskLevel? riskLevel;
     if (riskStr != null) {
       try {
-        riskLevel = AssetRiskLevel.values.firstWhere(
-          (e) => e.name == riskStr,
-        );
+        riskLevel = AssetRiskLevel.values.firstWhere((e) => e.name == riskStr);
       } catch (e) {
         riskLevel = null;
       }

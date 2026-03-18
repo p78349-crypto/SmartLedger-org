@@ -204,7 +204,10 @@ class AssetUIWidgets {
                 info.asset.name,
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
-              Text(info.asset.category.label, style: theme.textTheme.labelSmall),
+              Text(
+                info.asset.category.label,
+                style: theme.textTheme.labelSmall,
+              ),
             ],
           ),
         ),

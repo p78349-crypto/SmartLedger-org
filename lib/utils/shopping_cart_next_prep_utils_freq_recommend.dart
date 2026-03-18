@@ -48,25 +48,69 @@ Future<void> _recommendFromPurchaseHistoryFrequency({
     final hint = categoryHints[key];
     final sub = (hint?.subCategory ?? '').trim();
     final freshSubs = <String>{
-      '채소', '야채', '정육', '육류', '수산', '해산물', '반찬', '두부', '계란', '유제품',
+      '채소',
+      '야채',
+      '정육',
+      '육류',
+      '수산',
+      '해산물',
+      '반찬',
+      '두부',
+      '계란',
+      '유제품',
     };
     final fruitSubs = <String>{'과일'};
     final freshKeywords = <String>{
-      '상추', '깻잎', '시금치', '부추', '대파', '쪽파', '파', '양파', '감자', '오이',
-      '당근', '버섯', '토마토', '고추', '마늘', '돼지', '소고기', '닭', '생선',
-      '오징어', '새우', '조개', '두부', '계란', '우유',
+      '상추',
+      '깻잎',
+      '시금치',
+      '부추',
+      '대파',
+      '쪽파',
+      '파',
+      '양파',
+      '감자',
+      '오이',
+      '당근',
+      '버섯',
+      '토마토',
+      '고추',
+      '마늘',
+      '돼지',
+      '소고기',
+      '닭',
+      '생선',
+      '오징어',
+      '새우',
+      '조개',
+      '두부',
+      '계란',
+      '우유',
     };
     final fruitKeywords = <String>{
-      '과일', '사과', '바나나', '오렌지', '귤', '포도', '배', '키위',
-      '파인애플', '멜론', '수박', '복숭아', '자두', '레몬', '망고', '블루베리', '딸기',
+      '과일',
+      '사과',
+      '바나나',
+      '오렌지',
+      '귤',
+      '포도',
+      '배',
+      '키위',
+      '파인애플',
+      '멜론',
+      '수박',
+      '복숭아',
+      '자두',
+      '레몬',
+      '망고',
+      '블루베리',
+      '딸기',
     };
 
-    final isFresh =
-        freshSubs.contains(sub) || matchAny(key, freshKeywords);
+    final isFresh = freshSubs.contains(sub) || matchAny(key, freshKeywords);
     if (isFresh) return 1.25;
 
-    final isFruit =
-        fruitSubs.contains(sub) || matchAny(key, fruitKeywords);
+    final isFruit = fruitSubs.contains(sub) || matchAny(key, fruitKeywords);
     if (isFruit) return 0.85;
 
     return 1.0;
@@ -78,8 +122,23 @@ Future<void> _recommendFromPurchaseHistoryFrequency({
     if (sub == '과일') return true;
 
     final fruitKeywords = <String>{
-      '과일', '사과', '바나나', '오렌지', '귤', '포도', '배', '키위',
-      '파인애플', '멜론', '수박', '복숭아', '자두', '레몬', '망고', '블루베리', '딸기',
+      '과일',
+      '사과',
+      '바나나',
+      '오렌지',
+      '귤',
+      '포도',
+      '배',
+      '키위',
+      '파인애플',
+      '멜론',
+      '수박',
+      '복숭아',
+      '자두',
+      '레몬',
+      '망고',
+      '블루베리',
+      '딸기',
     };
     return matchAny(key, fruitKeywords);
   }
@@ -239,8 +298,6 @@ Future<void> _recommendFromPurchaseHistoryFrequency({
   await saveItems(result.merged);
   if (!context.mounted) return;
   ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text('추천 추가: +${result.added}개 (중복 ${result.skipped}개)'),
-    ),
+    SnackBar(content: Text('추천 추가: +${result.added}개 (중복 ${result.skipped}개)')),
   );
 }

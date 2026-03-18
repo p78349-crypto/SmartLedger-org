@@ -39,6 +39,7 @@ import '../utils/backup_crypto.dart';
 import '../utils/constants.dart';
 import '../utils/pref_keys.dart';
 import '../utils/incremental_backup_helper.dart';
+import '../database/database_provider.dart';
 import 'incremental_backup_service.dart';
 
 part 'backup_service_parse.dart';
@@ -81,6 +82,34 @@ class BackupService {
   static final BackupService _instance = BackupService._internal();
   factory BackupService() => _instance;
   BackupService._internal();
+
+  // R3-4: 앱 시작 시 백업 디렉토리 내 .tmp 잔류 파일 정리
+  static Future<void> cleanupStaleTmpFiles() async {
+    try {
+      final appDir = await getApplicationDocumentsDirectory();
+      final dirs = <Directory>[
+        Directory('${appDir.path}/${AppConstants.backupDownloadsFolderName}'),
+        if (Platform.isAndroid)
+          Directory(
+            '/storage/emulated/0/Download/'
+            '${AppConstants.backupDownloadsFolderName}',
+          ),
+      ];
+      for (final dir in dirs) {
+        if (!dir.existsSync()) continue;
+        final stale = dir.listSync().whereType<File>().where(
+          (f) => f.path.endsWith('.tmp'),
+        );
+        for (final f in stale) {
+          try {
+            f.deleteSync();
+          } catch (_) {}
+        }
+      }
+    } catch (_) {
+      // 정리 실패는 치명적이지 않으므로 무시
+    }
+  }
 
   static const String _secureKeyBackupEncryptionPassword =
       'vccode1_backup_encryption_password_v1';
@@ -144,7 +173,7 @@ class BackupService {
   String generateMaskedPasswordHint(String password) {
     final len = password.length;
     if (len <= 2) return '**';
-    
+
     if (len <= 4) {
       // 3~4자리: 앞 1글자만 노출
       return '${password[0]}${'*' * (len - 1)}';

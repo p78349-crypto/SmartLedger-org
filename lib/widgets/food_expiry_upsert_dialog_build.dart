@@ -16,9 +16,7 @@ extension FoodExpiryUpsertBuild on _FoodExpiryUpsertDialogState {
             final picked = await showDatePicker(
               context: context,
               initialDate: initial,
-              firstDate: DateTime.now().subtract(
-                const Duration(days: 365),
-              ),
+              firstDate: DateTime.now().subtract(const Duration(days: 365)),
               lastDate: DateTime.now().add(const Duration(days: 3650)),
             );
             if (picked != null) {
@@ -26,10 +24,7 @@ extension FoodExpiryUpsertBuild on _FoodExpiryUpsertDialogState {
             }
           },
           child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 12,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               border: Border.all(color: Colors.grey.shade400, width: 1.5),
               borderRadius: BorderRadius.circular(12),
@@ -60,9 +55,7 @@ extension FoodExpiryUpsertBuild on _FoodExpiryUpsertDialogState {
         _buildFieldLabel('가격', theme),
         TextField(
           controller: _priceController,
-          keyboardType: const TextInputType.numberWithOptions(
-            decimal: true,
-          ),
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
           decoration: _formInputDecoration(hintText: '0'),
         ),
         _buildFieldLabel('구입처', theme),

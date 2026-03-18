@@ -8,15 +8,18 @@ import '../../utils/backup_crypto.dart';
 class RecoveryCodeCrypto {
   static final Cipher _cipher = AesGcm.with256bits();
 
-  /// 복구 코드로 데이터를 암호화합니다. 
+  /// 복구 코드로 데이터를 암호화합니다.
   /// 결과물은 기존 SLBK 포맷에 'recovery_ct' 필드로 추가될 수 있도록 설계되었습니다.
   static Future<Map<String, dynamic>> encryptWithRecoveryCode({
     required String plainJson,
     required String recoveryCode,
   }) async {
     // 복구 코드를 정규화 (공백/하이픈 제거)
-    final normalized = recoveryCode.replaceAll('-', '').replaceAll(' ', '').toUpperCase();
-    
+    final normalized = recoveryCode
+        .replaceAll('-', '')
+        .replaceAll(' ', '')
+        .toUpperCase();
+
     // BackupCrypto의 내부 로직을 활용하거나 독자적인 Salt 생성
     final salt = BackupCrypto.randomBytes(16);
     final nonce = BackupCrypto.randomBytes(12);
@@ -25,7 +28,7 @@ class RecoveryCodeCrypto {
     // (주의: 복구 코드는 이미 엔트로피가 어느 정도 확보되어 있으므로 Iteration을 조절 가능)
     final pbkdf2 = Pbkdf2(
       macAlgorithm: Hmac.sha256(),
-      iterations: 100000, 
+      iterations: 100000,
       bits: 256,
     );
 
@@ -53,8 +56,11 @@ class RecoveryCodeCrypto {
     required Map<String, dynamic> envelope,
     required String recoveryCode,
   }) async {
-    final normalized = recoveryCode.replaceAll('-', '').replaceAll(' ', '').toUpperCase();
-    
+    final normalized = recoveryCode
+        .replaceAll('-', '')
+        .replaceAll(' ', '')
+        .toUpperCase();
+
     final salt = base64Decode(envelope['r_salt']);
     final nonce = base64Decode(envelope['r_nonce']);
     final cipherText = base64Decode(envelope['r_ct']);

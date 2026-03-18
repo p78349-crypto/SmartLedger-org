@@ -26,7 +26,7 @@ class _AssetExportScreenState extends State<AssetExportScreen> {
   Future<void> _doExport() async {
     if (_exporting) return;
     setState(() => _exporting = true);
-    
+
     try {
       final assets = AssetService().getAssets(widget.accountName);
       if (assets.isEmpty) {
@@ -38,13 +38,15 @@ class _AssetExportScreenState extends State<AssetExportScreen> {
 
       final rows = [
         ['자산명', '카테고리', '현재가', '원가', '상세타입'],
-        ...assets.map((a) => [
-          a.name,
-          a.category.toString().split('.').last,
-          a.amount.toString(),
-          a.costBasis?.toString() ?? '0',
-          a.inputType.toString().split('.').last,
-        ]),
+        ...assets.map(
+          (a) => [
+            a.name,
+            a.category.toString().split('.').last,
+            a.amount.toString(),
+            a.costBasis?.toString() ?? '0',
+            a.inputType.toString().split('.').last,
+          ],
+        ),
       ];
 
       const csvConverter = ListToCsvConverter();
@@ -53,7 +55,11 @@ class _AssetExportScreenState extends State<AssetExportScreen> {
       final dir = await getDownloadsDirectory();
       if (dir == null) throw Exception('다운로드 디렉토리를 찾을 수 없습니다');
 
-      final timestamp = DateTime.now().toIso8601String().replaceAll(':', '-').split('.').first;
+      final timestamp = DateTime.now()
+          .toIso8601String()
+          .replaceAll(':', '-')
+          .split('.')
+          .first;
       final fileName = 'assets_${widget.accountName}_$timestamp.csv';
       final file = File('${dir.path}/$fileName');
       await file.writeAsString(csv);

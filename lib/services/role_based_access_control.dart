@@ -12,7 +12,7 @@ class RoleBasedAccessControl {
     AppFeature.viewTransactions,
     AppFeature.viewReports,
     AppFeature.viewAuditLogs,
-    
+
     // 데이터 수정
     AppFeature.createTransactions,
     AppFeature.editTransactions,
@@ -20,13 +20,13 @@ class RoleBasedAccessControl {
     AppFeature.createAccounts,
     AppFeature.editAccounts,
     AppFeature.deleteAccounts,
-    
+
     // 시스템 관리
     AppFeature.manageUsers,
     AppFeature.manageSettings,
     AppFeature.manageBackups,
     AppFeature.manageSecurity,
-    
+
     // ROOT 전용
     AppFeature.systemConfiguration,
     AppFeature.auditLogAccess,
@@ -42,7 +42,7 @@ class RoleBasedAccessControl {
     },
     UserPermissionLevel.operator: {
       AppFeature.viewDashboard,
-      AppFeature.viewTransactions,  
+      AppFeature.viewTransactions,
       AppFeature.viewReports,
       AppFeature.createTransactions,
       AppFeature.editTransactions,
@@ -84,7 +84,7 @@ class RoleBasedAccessControl {
 
   /// 권한 검사와 감사 로그 기록을 함께 수행
   static Future<bool> checkAccessWithAudit(
-    AppFeature feature, 
+    AppFeature feature,
     BuildContext context, {
     bool showDeniedMessage = true,
   }) async {
@@ -97,10 +97,7 @@ class RoleBasedAccessControl {
         eventType: AuditEventType.authorization,
         action: '기능 접근: ${feature.displayName}',
         userLevel: currentRole,
-        metadata: {
-          'feature': feature.name,
-          'access_granted': true,
-        },
+        metadata: {'feature': feature.name, 'access_granted': true},
       );
     } else {
       // 권한 거부 로그
@@ -108,10 +105,7 @@ class RoleBasedAccessControl {
         action: '기능 접근 시도: ${feature.displayName}',
         userLevel: currentRole,
         requiredLevel: feature.minimumRole.toActionRisk(),
-        metadata: {
-          'feature': feature.name,
-          'access_denied': true,
-        },
+        metadata: {'feature': feature.name, 'access_denied': true},
       );
 
       // 사용자에게 권한 부족 알림
@@ -155,7 +149,10 @@ class RoleBasedAccessControl {
             Row(
               children: [
                 const Text('필요 권한: '),
-                UserPermissionBadge(level: feature.minimumRole, showLabel: true),
+                UserPermissionBadge(
+                  level: feature.minimumRole,
+                  showLabel: true,
+                ),
               ],
             ),
             const SizedBox(height: 16),
@@ -186,7 +183,8 @@ class RoleBasedAccessControl {
   /// 역할별 접근 가능한 기능 목록 반환
   static List<AppFeature> getPermittedFeatures(UserPermissionLevel role) {
     final permissions = _rolePermissions[role] ?? <AppFeature>{};
-    return permissions.toList()..sort((a, b) => a.displayName.compareTo(b.displayName));
+    return permissions.toList()
+      ..sort((a, b) => a.displayName.compareTo(b.displayName));
   }
 }
 
@@ -197,28 +195,32 @@ enum AppFeature {
   viewTransactions('거래 내역 보기', UserPermissionLevel.observer, Icons.list),
   viewReports('리포트 보기', UserPermissionLevel.observer, Icons.analytics),
   viewAuditLogs('감사 로그 보기', UserPermissionLevel.administrator, Icons.history),
-  
+
   // 데이터 생성
   createTransactions('거래 생성', UserPermissionLevel.operator, Icons.add),
   createAccounts('계정 생성', UserPermissionLevel.operator, Icons.account_circle),
-  
+
   // 데이터 수정
   editTransactions('거래 수정', UserPermissionLevel.operator, Icons.edit),
   editAccounts('계정 수정', UserPermissionLevel.operator, Icons.edit),
-  
+
   // 데이터 삭제
   deleteTransactions('거래 삭제', UserPermissionLevel.administrator, Icons.delete),
   deleteAccounts('계정 삭제', UserPermissionLevel.administrator, Icons.delete),
-  
+
   // 시스템 관리
   manageUsers('사용자 관리', UserPermissionLevel.administrator, Icons.people),
   manageSettings('설정 관리', UserPermissionLevel.administrator, Icons.settings),
   manageBackups('백업 관리', UserPermissionLevel.administrator, Icons.backup),
   manageSecurity('보안 관리', UserPermissionLevel.administrator, Icons.security),
-  
+
   // ROOT 전용
   systemConfiguration('시스템 구성', UserPermissionLevel.root, Icons.build),
-  auditLogAccess('감사 로그 관리', UserPermissionLevel.root, Icons.admin_panel_settings),
+  auditLogAccess(
+    '감사 로그 관리',
+    UserPermissionLevel.root,
+    Icons.admin_panel_settings,
+  ),
   emergencyActions('비상 조치', UserPermissionLevel.root, Icons.emergency);
 
   const AppFeature(this.displayName, this.minimumRole, this.icon);
@@ -256,7 +258,7 @@ class PermissionMatrixWidget extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            
+
             // 현재 사용자 권한 요약
             Container(
               padding: const EdgeInsets.all(12),
@@ -282,18 +284,18 @@ class PermissionMatrixWidget extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // 기능별 접근 권한 표시
             Text(
               '기능별 접근 권한',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            
+
             Expanded(
               child: ListView(
                 children: AppFeature.values.map((feature) {
@@ -304,7 +306,9 @@ class PermissionMatrixWidget extends StatelessWidget {
                       color: hasAccess ? Colors.green : Colors.grey,
                     ),
                     title: Text(feature.displayName),
-                    subtitle: Text('최소 필요 권한: ${feature.minimumRole.displayName}'),
+                    subtitle: Text(
+                      '최소 필요 권한: ${feature.minimumRole.displayName}',
+                    ),
                     trailing: Icon(
                       hasAccess ? Icons.check_circle : Icons.cancel,
                       color: hasAccess ? Colors.green : Colors.red,
@@ -369,11 +373,7 @@ class SecureFeatureGate extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(
-            Icons.lock,
-            size: 48,
-            color: Colors.grey,
-          ),
+          const Icon(Icons.lock, size: 48, color: Colors.grey),
           const SizedBox(height: 8),
           Text(
             '접근 권한 필요',
@@ -385,9 +385,9 @@ class SecureFeatureGate extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             '${requiredFeature.displayName} 기능에 접근하려면 ${requiredFeature.minimumRole.displayName} 권한이 필요합니다.',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Colors.grey,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: Colors.grey),
             textAlign: TextAlign.center,
           ),
         ],
@@ -473,7 +473,7 @@ class PermissionElevationRequest {
           'request_time': DateTime.now().toIso8601String(),
         },
       );
-      
+
       return true;
     }
 

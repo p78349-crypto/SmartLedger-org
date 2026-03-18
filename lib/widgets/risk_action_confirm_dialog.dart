@@ -53,7 +53,8 @@ class RiskActionConfirmDialog extends StatefulWidget {
   }
 
   @override
-  State<RiskActionConfirmDialog> createState() => _RiskActionConfirmDialogState();
+  State<RiskActionConfirmDialog> createState() =>
+      _RiskActionConfirmDialogState();
 }
 
 class _RiskActionConfirmDialogState extends State<RiskActionConfirmDialog> {
@@ -83,7 +84,7 @@ class _RiskActionConfirmDialogState extends State<RiskActionConfirmDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     // 권한 부족 시
     if (!widget.currentUserLevel.canPerformAction(widget.riskLevel)) {
       return AlertDialog(
@@ -110,7 +111,7 @@ class _RiskActionConfirmDialogState extends State<RiskActionConfirmDialog> {
               children: [
                 const Text('현재 권한: '),
                 UserPermissionBadge(
-                  level: widget.currentUserLevel, 
+                  level: widget.currentUserLevel,
                   showLabel: true,
                 ),
               ],
@@ -160,7 +161,7 @@ class _RiskActionConfirmDialogState extends State<RiskActionConfirmDialog> {
                 style: theme.textTheme.bodyMedium,
               ),
             ),
-            
+
             // 영향받는 시스템
             if (widget.affectedSystems?.isNotEmpty == true) ...[
               const SizedBox(height: 16),
@@ -171,16 +172,22 @@ class _RiskActionConfirmDialogState extends State<RiskActionConfirmDialog> {
                 ),
               ),
               const SizedBox(height: 8),
-              ...widget.affectedSystems!.map((system) => Padding(
-                padding: const EdgeInsets.only(left: 16, bottom: 4),
-                child: Row(
-                  children: [
-                    Icon(Icons.warning_amber, size: 16, color: widget.riskLevel.color),
-                    const SizedBox(width: 8),
-                    Text(system),
-                  ],
+              ...widget.affectedSystems!.map(
+                (system) => Padding(
+                  padding: const EdgeInsets.only(left: 16, bottom: 4),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.warning_amber,
+                        size: 16,
+                        color: widget.riskLevel.color,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(system),
+                    ],
+                  ),
                 ),
-              )),
+              ),
             ],
 
             // 영향 설명
@@ -201,9 +208,10 @@ class _RiskActionConfirmDialogState extends State<RiskActionConfirmDialog> {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.info_outline, 
-                          size: 16, 
-                          color: widget.riskLevel.color
+                        Icon(
+                          Icons.info_outline,
+                          size: 16,
+                          color: widget.riskLevel.color,
                         ),
                         const SizedBox(width: 8),
                         Text(
@@ -240,10 +248,12 @@ class _RiskActionConfirmDialogState extends State<RiskActionConfirmDialog> {
           child: const Text('취소'),
         ),
         FilledButton(
-          onPressed: _canProceed ? () {
-            widget.onConfirm?.call();
-            Navigator.pop(context, true);
-          } : null,
+          onPressed: _canProceed
+              ? () {
+                  widget.onConfirm?.call();
+                  Navigator.pop(context, true);
+                }
+              : null,
           style: FilledButton.styleFrom(
             backgroundColor: widget.riskLevel.color,
           ),
@@ -293,7 +303,8 @@ class _RiskActionConfirmDialogState extends State<RiskActionConfirmDialog> {
           CheckboxListTile(
             title: const Text('이 작업의 내용과 영향을 이해했습니다'),
             value: _firstConfirmation,
-            onChanged: (value) => setState(() => _firstConfirmation = value ?? false),
+            onChanged: (value) =>
+                setState(() => _firstConfirmation = value ?? false),
             controlAffinity: ListTileControlAffinity.leading,
             dense: true,
           ),
@@ -303,8 +314,10 @@ class _RiskActionConfirmDialogState extends State<RiskActionConfirmDialog> {
           CheckboxListTile(
             title: const Text('되돌릴 수 없는 작업임을 확인합니다'),
             value: _secondConfirmation,
-            onChanged: _firstConfirmation ? (value) => 
-              setState(() => _secondConfirmation = value ?? false) : null,
+            onChanged: _firstConfirmation
+                ? (value) =>
+                      setState(() => _secondConfirmation = value ?? false)
+                : null,
             controlAffinity: ListTileControlAffinity.leading,
             dense: true,
           ),
@@ -320,15 +333,15 @@ class _RiskActionConfirmDialogState extends State<RiskActionConfirmDialog> {
               ),
             ),
             value: _understandRisk,
-            onChanged: _secondConfirmation ? (value) => 
-              setState(() => _understandRisk = value ?? false) : null,
+            onChanged: _secondConfirmation
+                ? (value) => setState(() => _understandRisk = value ?? false)
+                : null,
             controlAffinity: ListTileControlAffinity.leading,
             dense: true,
           ),
       ],
     );
   }
-
 }
 
 /// 위험 작업 래퍼 유틸리티

@@ -10,16 +10,17 @@ class DarkTheme {
     required Color seedColor,
     UIStyle uiStyle = UIStyle.standard,
   }) {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: seedColor,
-      brightness: Brightness.dark,
-    ).copyWith(
-      surface: AppColorsDark.surface,
-      onSurface: AppColorsDark.textPrimary,
-      surfaceContainerHighest: AppColorsDark.surfaceContainerHighest,
-      error: AppColorsDark.error,
-      onError: Colors.black, // 다크모드에서 에러 바탕 위 텍스트
-    );
+    final scheme =
+        ColorScheme.fromSeed(
+          seedColor: seedColor,
+          brightness: Brightness.dark,
+        ).copyWith(
+          surface: AppColorsDark.surface,
+          onSurface: AppColorsDark.textPrimary,
+          surfaceContainerHighest: AppColorsDark.surfaceContainerHighest,
+          error: AppColorsDark.error,
+          onError: Colors.black, // 다크모드에서 에러 바탕 위 텍스트
+        );
 
     // UI 스타일별 수치 설정
     double borderRadius;
@@ -59,7 +60,7 @@ class DarkTheme {
       brightness: Brightness.dark,
       colorScheme: scheme,
       scaffoldBackgroundColor: AppColorsDark.background,
-      
+
       // 텍스트 테마 적용
       textTheme: ThemeData(brightness: Brightness.dark).textTheme.apply(
         bodyColor: scheme.onSurface,
@@ -142,7 +143,7 @@ class DarkTheme {
           ),
         ),
       ),
-      
+
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: scheme.primary,

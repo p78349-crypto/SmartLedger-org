@@ -65,31 +65,32 @@ class AssetEvaluationScreen extends StatelessWidget {
         final profitColor = netProfit > 0
             ? Colors.green
             : (netProfit < 0
-                ? theme.colorScheme.error
-                : theme.colorScheme.onSurface);
+                  ? theme.colorScheme.error
+                  : theme.colorScheme.onSurface);
         final profitSign = netProfit > 0 ? '+' : '';
         final moveCount = moves.length;
         final lastMoveDate = moves.isNotEmpty
-          ? moves.map((m) => m.date).reduce((a, b) => a.isAfter(b) ? a : b)
-          : null;
+            ? moves.map((m) => m.date).reduce((a, b) => a.isAfter(b) ? a : b)
+            : null;
         final targetAmount = asset.targetAmount;
         final targetProgress = targetAmount != null && targetAmount > 0
-          ? (currentValue / targetAmount) * 100
-          : null;
+            ? (currentValue / targetAmount) * 100
+            : null;
         final expectedRate = asset.expectedAnnualRatePct;
         final projectedValue = expectedRate != null
-          ? currentValue * (1 + expectedRate / 100)
-          : null;
+            ? currentValue * (1 + expectedRate / 100)
+            : null;
         final debtAmount = asset.debtAmount ?? 0;
         final hasDebt = asset.debtAmount != null && asset.debtAmount! > 0;
         final maturityDate = asset.maturityDate;
         final daysToMaturity = maturityDate?.difference(DateTime.now()).inDays;
-        final isMaturitySoon = daysToMaturity != null &&
-          daysToMaturity >= 0 &&
-          daysToMaturity <= 30;
+        final isMaturitySoon =
+            daysToMaturity != null &&
+            daysToMaturity >= 0 &&
+            daysToMaturity <= 30;
         final alertThreshold = asset.alertThreshold;
         final isBelowThreshold =
-          alertThreshold != null && currentValue < alertThreshold;
+            alertThreshold != null && currentValue < alertThreshold;
 
         return Scaffold(
           appBar: AppBar(title: Text('${asset.name} 평가')),
@@ -111,7 +112,10 @@ class AssetEvaluationScreen extends StatelessWidget {
                   theme,
                   rows: [
                     _MetricRow('현재 금액', CurrencyFormatter.format(currentValue)),
-                    _MetricRow('카테고리', '${asset.category.emoji} ${asset.category.label}'),
+                    _MetricRow(
+                      '카테고리',
+                      '${asset.category.emoji} ${asset.category.label}',
+                    ),
                     if (hasCostBasis)
                       _MetricRow('원가', CurrencyFormatter.format(costBasis)),
                     if (asset.monthlyIncome != null)
@@ -163,8 +167,9 @@ class AssetEvaluationScreen extends StatelessWidget {
                       _MetricRow(
                         '만기일',
                         DateFormatter.defaultDate.format(maturityDate),
-                        valueColor:
-                            isMaturitySoon ? theme.colorScheme.error : null,
+                        valueColor: isMaturitySoon
+                            ? theme.colorScheme.error
+                            : null,
                       )
                     else
                       const _MetricRow('만기일', '없음'),
@@ -177,10 +182,7 @@ class AssetEvaluationScreen extends StatelessWidget {
                   theme,
                   rows: [
                     if (targetAmount != null)
-                      _MetricRow(
-                        '목표액',
-                        CurrencyFormatter.format(targetAmount),
-                      ),
+                      _MetricRow('목표액', CurrencyFormatter.format(targetAmount)),
                     if (targetProgress != null)
                       _MetricRow(
                         '달성률',
@@ -189,7 +191,9 @@ class AssetEvaluationScreen extends StatelessWidget {
                     if (expectedRate != null)
                       _MetricRow(
                         '예상 1년 후',
-                        CurrencyFormatter.format(projectedValue ?? currentValue),
+                        CurrencyFormatter.format(
+                          projectedValue ?? currentValue,
+                        ),
                       ),
                   ],
                 ),
@@ -371,9 +375,8 @@ class AssetEvaluationScreen extends StatelessWidget {
                                       isAssetIn
                                           ? (isDeposit ? '납입' : '매수')
                                           : (isDeposit ? '출금/만기' : '매도'),
-                                      style: theme.textTheme.labelSmall?.copyWith(
-                                        fontSize: 10,
-                                      ),
+                                      style: theme.textTheme.labelSmall
+                                          ?.copyWith(fontSize: 10),
                                     ),
                                   ),
                                 ],
@@ -394,13 +397,12 @@ class AssetEvaluationScreen extends StatelessWidget {
                               width: double.infinity,
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: theme.colorScheme.surfaceContainerHighest,
+                                color:
+                                    theme.colorScheme.surfaceContainerHighest,
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(
-                                  color:
-                                      theme.colorScheme.outlineVariant.withValues(
-                                    alpha: 0.3,
-                                  ),
+                                  color: theme.colorScheme.outlineVariant
+                                      .withValues(alpha: 0.3),
                                 ),
                               ),
                               child: Row(
@@ -411,9 +413,10 @@ class AssetEvaluationScreen extends StatelessWidget {
                                   Expanded(
                                     child: Text(
                                       item['memo'],
-                                      style: theme.textTheme.bodySmall?.copyWith(
-                                        fontStyle: FontStyle.italic,
-                                      ),
+                                      style: theme.textTheme.bodySmall
+                                          ?.copyWith(
+                                            fontStyle: FontStyle.italic,
+                                          ),
                                     ),
                                   ),
                                 ],
@@ -451,9 +454,7 @@ class AssetEvaluationScreen extends StatelessWidget {
   Widget _buildSectionTitle(ThemeData theme, String title) {
     return Text(
       title,
-      style: theme.textTheme.titleSmall?.copyWith(
-        fontWeight: FontWeight.bold,
-      ),
+      style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
     );
   }
 
@@ -466,9 +467,7 @@ class AssetEvaluationScreen extends StatelessWidget {
         border: Border.all(color: theme.colorScheme.outlineVariant),
       ),
       child: Column(
-        children: [
-          for (final row in rows) _buildMetricRow(theme, row),
-        ],
+        children: [for (final row in rows) _buildMetricRow(theme, row)],
       ),
     );
   }

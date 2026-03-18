@@ -57,7 +57,9 @@ class ReceiptProcessingService {
           if (kDebugMode) debugPrint('⚠️ Gemma extraction returned null');
         }
       } else {
-        if (kDebugMode) debugPrint('⚠️ Gemma server not available, skipping...');
+        if (kDebugMode) {
+          debugPrint('⚠️ Gemma server not available, skipping...');
+        }
       }
     }
 

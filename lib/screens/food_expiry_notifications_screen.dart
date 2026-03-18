@@ -53,19 +53,21 @@ class _FoodExpiryNotificationsScreenState
     // Convert ConsumableInventoryItems with expiryDate to FoodExpiryItems for notification scheduling
     final items = inventoryItems
         .where((item) => item.expiryDate != null)
-        .map((item) => FoodExpiryItem(
-          id: item.id,
-          name: item.name,
-          purchaseDate: item.purchaseDate ?? item.createdAt,
-          expiryDate: item.expiryDate!,
-          createdAt: item.createdAt,
-          quantity: item.currentStock,
-          unit: item.unit,
-          category: item.category,
-          location: item.location,
-          price: item.price ?? 0.0,
-          supplier: item.supplier ?? '',
-        ))
+        .map(
+          (item) => FoodExpiryItem(
+            id: item.id,
+            name: item.name,
+            purchaseDate: item.purchaseDate ?? item.createdAt,
+            expiryDate: item.expiryDate!,
+            createdAt: item.createdAt,
+            quantity: item.currentStock,
+            unit: item.unit,
+            category: item.category,
+            location: item.location,
+            price: item.price ?? 0.0,
+            supplier: item.supplier ?? '',
+          ),
+        )
         .toList();
     final count = await FoodExpiryNotificationService.instance
         .rescheduleFromPrefs(items);

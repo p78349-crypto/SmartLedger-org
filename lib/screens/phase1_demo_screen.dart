@@ -19,7 +19,7 @@ class Phase1DemoScreen extends StatelessWidget {
             level: PermissionUtils.getCurrentUserLevel(),
             showLabel: true,
             onTap: () => PermissionUtils.showPermissionInfo(
-              context, 
+              context,
               PermissionUtils.getCurrentUserLevel(),
             ),
           ),
@@ -31,7 +31,7 @@ class Phase1DemoScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // 권한 레벨 표시 데모 
+            // 권한 레벨 표시 데모
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -50,9 +50,14 @@ class Phase1DemoScreen extends StatelessWidget {
                     Wrap(
                       spacing: 12,
                       runSpacing: 8,
-                      children: UserPermissionLevel.values.map((level) => 
-                        UserPermissionBadge(level: level, showLabel: true),
-                      ).toList(),
+                      children: UserPermissionLevel.values
+                          .map(
+                            (level) => UserPermissionBadge(
+                              level: level,
+                              showLabel: true,
+                            ),
+                          )
+                          .toList(),
                     ),
                   ],
                 ),
@@ -77,7 +82,7 @@ class Phase1DemoScreen extends StatelessWidget {
                     const SizedBox(height: 12),
                     const Text('위험도별 작업 확인 다이얼로그:'),
                     const SizedBox(height: 12),
-                    
+
                     // 위험도별 버튼들
                     Wrap(
                       spacing: 8,
@@ -219,12 +224,12 @@ class Phase1DemoScreen extends StatelessWidget {
           actionTitle: actionTitle,
           actionDescription: actionDescription,
           riskLevel: riskLevel,
-          impactDescription: riskLevel == ActionRiskLevel.critical 
+          impactDescription: riskLevel == ActionRiskLevel.critical
               ? '이 작업은 되돌릴 수 없으며 모든 데이터가 영구적으로 손실됩니다.'
               : null,
           affectedSystems: affectedSystems,
         );
-        
+
         if (confirmed && context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -232,17 +237,14 @@ class Phase1DemoScreen extends StatelessWidget {
               backgroundColor: riskLevel.color,
             ),
           );
-          
+
           // 작업 실행 로그 기록
           await AuditLogService.logSuccess(
             eventType: AuditEventType.dataModification,
             action: actionTitle,
             userLevel: PermissionUtils.getCurrentUserLevel(),
             riskLevel: riskLevel,
-            metadata: {
-              'demo': true,
-              'affected_systems': affectedSystems ?? [],
-            },
+            metadata: {'demo': true, 'affected_systems': affectedSystems ?? []},
           );
         }
       },
@@ -267,7 +269,7 @@ class Phase1DemoScreen extends StatelessWidget {
           'user_action': 'manual_demo_trigger',
         },
       );
-      
+
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -288,7 +290,7 @@ class Phase1DemoScreen extends StatelessWidget {
           'timestamp': DateTime.now().toIso8601String(),
         },
       );
-      
+
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

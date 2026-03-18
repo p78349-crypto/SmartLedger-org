@@ -84,14 +84,11 @@ extension RootAccountScreenAccounts on RootAccountScreen {
             children: [
               Expanded(
                 flex: 5,
-                child: Text('계정', maxLines: 1, overflow: TextOverflow.ellipsis, style: headerStyle),
-              ),
-              SizedBox(width: 12),
-              Expanded(
-                flex: 4,
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: Text('자산', maxLines: 1, overflow: TextOverflow.ellipsis, style: headerStyle),
+                child: Text(
+                  '계정',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: headerStyle,
                 ),
               ),
               SizedBox(width: 12),
@@ -99,7 +96,12 @@ extension RootAccountScreenAccounts on RootAccountScreen {
                 flex: 4,
                 child: Align(
                   alignment: Alignment.centerRight,
-                  child: Text('월 수입', maxLines: 1, overflow: TextOverflow.ellipsis, style: headerStyle),
+                  child: Text(
+                    '자산',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: headerStyle,
+                  ),
                 ),
               ),
               SizedBox(width: 12),
@@ -107,7 +109,25 @@ extension RootAccountScreenAccounts on RootAccountScreen {
                 flex: 4,
                 child: Align(
                   alignment: Alignment.centerRight,
-                  child: Text('월 지출', maxLines: 1, overflow: TextOverflow.ellipsis, style: headerStyle),
+                  child: Text(
+                    '월 수입',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: headerStyle,
+                  ),
+                ),
+              ),
+              SizedBox(width: 12),
+              Expanded(
+                flex: 4,
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    '월 지출',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: headerStyle,
+                  ),
                 ),
               ),
               SizedBox(width: 12),
@@ -115,13 +135,23 @@ extension RootAccountScreenAccounts on RootAccountScreen {
                 flex: 3,
                 child: Align(
                   alignment: Alignment.centerRight,
-                  child: Text('거래', maxLines: 1, overflow: TextOverflow.ellipsis, style: headerStyle),
+                  child: Text(
+                    '거래',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: headerStyle,
+                  ),
                 ),
               ),
               SizedBox(width: 12),
               Expanded(
                 flex: 4,
-                child: Text('최근 거래', maxLines: 1, overflow: TextOverflow.ellipsis, style: headerStyle),
+                child: Text(
+                  '최근 거래',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: headerStyle,
+                ),
               ),
               SizedBox(width: 88),
             ],

@@ -26,8 +26,7 @@ extension TransactionDetailActions on _TransactionDetailScreenState {
             ),
             const SizedBox(height: 16),
             ListTile(
-              leading:
-                  Icon(IconCatalog.edit, color: theme.colorScheme.primary),
+              leading: Icon(IconCatalog.edit, color: theme.colorScheme.primary),
               title: const Text('편집'),
               onTap: () => Navigator.pop(context, 'edit'),
             ),
@@ -39,8 +38,7 @@ extension TransactionDetailActions on _TransactionDetailScreenState {
               ),
             if (tx.type == TransactionType.income)
               ListTile(
-                leading:
-                    const Icon(IconCatalog.moveDown, color: Colors.blue),
+                leading: const Icon(IconCatalog.moveDown, color: Colors.blue),
                 title: const Text('이동'),
                 subtitle: const Text('수입을 다른 곳으로 이동'),
                 onTap: () => Navigator.pop(context, 'move'),

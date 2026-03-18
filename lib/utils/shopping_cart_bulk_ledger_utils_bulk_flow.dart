@@ -203,7 +203,7 @@ Future<void> _addCheckedItemsToLedgerBulk({
           accountName: accountName,
           initialDay: DateTime.now(),
           savedCount: selected.length,
-          showShoppingPointsInputCta: true,  // ✅ 터치 시에만 포인트 입력 열림
+          showShoppingPointsInputCta: true, // ✅ 터치 시에만 포인트 입력 열림
         ),
       );
       return;

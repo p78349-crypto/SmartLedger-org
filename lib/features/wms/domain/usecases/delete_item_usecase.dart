@@ -31,12 +31,12 @@ class DeleteItemUseCase extends UseCase<String, Unit> {
 
     // Check if item exists before deleting
     final existsResult = await _repository.getItemById(itemId);
-    
+
     // If item doesn't exist, getItemById will return NotFoundError
     if (existsResult.isFailure) {
       return Failure(existsResult.errorOrNull!);
     }
-    
+
     // Item exists, proceed with deletion
     return _repository.deleteItem(itemId);
   }

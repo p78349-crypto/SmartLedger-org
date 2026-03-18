@@ -20,112 +20,138 @@ String _showEditButtonKey(String a) =>
 String _hideEmptySlotsKey(String a) =>
     PrefKeys.accountKey(a, 'hide_empty_slots');
 String _iconLabelOverridesKey(String a, {String? profileKey}) =>
-    PrefKeys.accountKey(
-      a, _withProfile('icon_label_overrides_v1', profileKey));
+    PrefKeys.accountKey(a, _withProfile('icon_label_overrides_v1', profileKey));
 
 // --- PageId-based icon settings ---
 Future<void> _setPageIconSettingsById({
-  required String accountName, required String pageId,
-  int? legacyPageIndex, required List<String> order,
+  required String accountName,
+  required String pageId,
+  int? legacyPageIndex,
+  required List<String> order,
 }) async {
   final prefs = await SharedPreferences.getInstance();
-  await prefs.setStringList(
-    _pageIconOrderKeyById(accountName, pageId), order);
+  await prefs.setStringList(_pageIconOrderKeyById(accountName, pageId), order);
   if (legacyPageIndex != null) {
     await _setPageIconSettings(
-      accountName: accountName, pageIndex: legacyPageIndex, order: order);
+      accountName: accountName,
+      pageIndex: legacyPageIndex,
+      order: order,
+    );
   }
 }
 
 Future<({List<String> order})> _getPageIconSettingsById({
-  required String accountName, required String pageId,
+  required String accountName,
+  required String pageId,
   int? legacyPageIndex,
 }) async {
   final prefs = await SharedPreferences.getInstance();
-  final order = prefs.getStringList(
-    _pageIconOrderKeyById(accountName, pageId));
+  final order = prefs.getStringList(_pageIconOrderKeyById(accountName, pageId));
   if (order != null) return (order: order);
   if (legacyPageIndex != null) {
     return _getPageIconSettings(
-      accountName: accountName, pageIndex: legacyPageIndex);
+      accountName: accountName,
+      pageIndex: legacyPageIndex,
+    );
   }
   return (order: <String>[]);
 }
 
 Future<void> _setPageIconSlotsById({
-  required String accountName, required String pageId,
-  int? legacyPageIndex, required List<String> slots,
+  required String accountName,
+  required String pageId,
+  int? legacyPageIndex,
+  required List<String> slots,
 }) async {
   final prefs = await SharedPreferences.getInstance();
-  await prefs.setStringList(
-    _pageIconSlotsKeyById(accountName, pageId), slots);
+  await prefs.setStringList(_pageIconSlotsKeyById(accountName, pageId), slots);
   if (legacyPageIndex != null) {
     await _setPageIconSlots(
-      accountName: accountName, pageIndex: legacyPageIndex, slots: slots);
+      accountName: accountName,
+      pageIndex: legacyPageIndex,
+      slots: slots,
+    );
   }
 }
 
 Future<List<String>> _getPageIconSlotsById({
-  required String accountName, required String pageId,
+  required String accountName,
+  required String pageId,
   int? legacyPageIndex,
   int slotCount = Page1BottomQuickIcons.slotCount,
 }) async {
   final prefs = await SharedPreferences.getInstance();
-  final saved = prefs.getStringList(
-    _pageIconSlotsKeyById(accountName, pageId));
+  final saved = prefs.getStringList(_pageIconSlotsKeyById(accountName, pageId));
   if (saved != null) {
     if (saved.length >= slotCount) return saved.sublist(0, slotCount);
     return [...saved, ...List<String>.filled(slotCount - saved.length, '')];
   }
   if (legacyPageIndex != null) {
     return _getPageIconSlots(
-      accountName: accountName, pageIndex: legacyPageIndex,
-      slotCount: slotCount);
+      accountName: accountName,
+      pageIndex: legacyPageIndex,
+      slotCount: slotCount,
+    );
   }
   return List<String>.filled(slotCount, '');
 }
 
 Future<void> _setPageSlotGroupsById({
-  required String accountName, required String pageId,
-  int? legacyPageIndex, required List<List<String>> groups,
+  required String accountName,
+  required String pageId,
+  int? legacyPageIndex,
+  required List<List<String>> groups,
 }) async {
   final prefs = await SharedPreferences.getInstance();
   final strings = groups.map((g) => g.join(',')).toList();
   await prefs.setStringList(
-    _pageSlotGroupsKeyById(accountName, pageId), strings);
+    _pageSlotGroupsKeyById(accountName, pageId),
+    strings,
+  );
   if (legacyPageIndex != null) {
     await _setPageSlotGroups(
-      accountName: accountName, pageIndex: legacyPageIndex, groups: groups);
+      accountName: accountName,
+      pageIndex: legacyPageIndex,
+      groups: groups,
+    );
   }
 }
 
 Future<List<List<String>>> _getPageSlotGroupsById({
-  required String accountName, required String pageId,
+  required String accountName,
+  required String pageId,
   int? legacyPageIndex,
   int slotCount = Page1BottomQuickIcons.slotCount,
 }) async {
   final prefs = await SharedPreferences.getInstance();
   final saved = prefs.getStringList(
-    _pageSlotGroupsKeyById(accountName, pageId));
+    _pageSlotGroupsKeyById(accountName, pageId),
+  );
   if (saved != null) {
-    final list = saved.take(slotCount)
-        .map((s) => s.isEmpty ? <String>[] : s.split(',')).toList();
+    final list = saved
+        .take(slotCount)
+        .map((s) => s.isEmpty ? <String>[] : s.split(','))
+        .toList();
     if (list.length >= slotCount) return list.sublist(0, slotCount);
     return [
-      ...list, ...List.generate(slotCount - list.length, (_) => <String>[]),
+      ...list,
+      ...List.generate(slotCount - list.length, (_) => <String>[]),
     ];
   }
   if (legacyPageIndex != null) {
     return _getPageSlotGroups(
-      accountName: accountName, pageIndex: legacyPageIndex,
-      slotCount: slotCount);
+      accountName: accountName,
+      pageIndex: legacyPageIndex,
+      slotCount: slotCount,
+    );
   }
   return List.generate(slotCount, (_) => <String>[]);
 }
 
 // --- Show/hide, label overrides ---
 Future<void> _setShowEditButton({
-  required String accountName, required bool show,
+  required String accountName,
+  required bool show,
 }) async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.setBool(_showEditButtonKey(accountName), show);
@@ -137,7 +163,8 @@ Future<bool> _getShowEditButton({required String accountName}) async {
 }
 
 Future<void> _setHideEmptySlots({
-  required String accountName, required bool hide,
+  required String accountName,
+  required bool hide,
 }) async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.setBool(_hideEmptySlotsKey(accountName), hide);
@@ -149,11 +176,13 @@ Future<bool> _getHideEmptySlots({required String accountName}) async {
 }
 
 Future<Map<String, String>> _getIconLabelOverrides({
-  required String accountName, String? profileKey,
+  required String accountName,
+  String? profileKey,
 }) async {
   final prefs = await SharedPreferences.getInstance();
   final raw = prefs.getString(
-    _iconLabelOverridesKey(accountName, profileKey: profileKey));
+    _iconLabelOverridesKey(accountName, profileKey: profileKey),
+  );
   if (raw == null || raw.isEmpty) return <String, String>{};
   try {
     final decoded = jsonDecode(raw);
@@ -171,12 +200,16 @@ Future<Map<String, String>> _getIconLabelOverrides({
 }
 
 Future<void> _setIconLabelOverride({
-  required String accountName, required String iconId,
-  required String? label, String? profileKey,
+  required String accountName,
+  required String iconId,
+  required String? label,
+  String? profileKey,
 }) async {
   final prefs = await SharedPreferences.getInstance();
   final current = await _getIconLabelOverrides(
-    accountName: accountName, profileKey: profileKey);
+    accountName: accountName,
+    profileKey: profileKey,
+  );
   final next = Map<String, String>.from(current);
   final normalized = label?.trim();
   if (normalized == null || normalized.isEmpty) {
@@ -186,70 +219,94 @@ Future<void> _setIconLabelOverride({
   }
   await prefs.setString(
     _iconLabelOverridesKey(accountName, profileKey: profileKey),
-    jsonEncode(next));
+    jsonEncode(next),
+  );
 }
 
 // --- Legacy index-based icon settings ---
 Future<void> _setPageIconSettings({
-  required String accountName, required int pageIndex,
-  required List<String> order, String? profileKey,
+  required String accountName,
+  required int pageIndex,
+  required List<String> order,
+  String? profileKey,
 }) async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.setStringList(
-    _pageIconOrderKey(accountName, pageIndex, profileKey: profileKey), order);
+    _pageIconOrderKey(accountName, pageIndex, profileKey: profileKey),
+    order,
+  );
 }
 
 Future<({List<String> order})> _getPageIconSettings({
-  required String accountName, required int pageIndex, String? profileKey,
+  required String accountName,
+  required int pageIndex,
+  String? profileKey,
 }) async {
   final prefs = await SharedPreferences.getInstance();
-  final order = prefs.getStringList(
-    _pageIconOrderKey(accountName, pageIndex, profileKey: profileKey)) ?? [];
+  final order =
+      prefs.getStringList(
+        _pageIconOrderKey(accountName, pageIndex, profileKey: profileKey),
+      ) ??
+      [];
   return (order: order);
 }
 
 Future<void> _setPageIconSlots({
-  required String accountName, required int pageIndex,
-  required List<String> slots, String? profileKey,
+  required String accountName,
+  required int pageIndex,
+  required List<String> slots,
+  String? profileKey,
 }) async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.setStringList(
-    _pageIconSlotsKey(accountName, pageIndex, profileKey: profileKey), slots);
+    _pageIconSlotsKey(accountName, pageIndex, profileKey: profileKey),
+    slots,
+  );
 }
 
 Future<List<String>> _getPageIconSlots({
-  required String accountName, required int pageIndex,
-  int slotCount = Page1BottomQuickIcons.slotCount, String? profileKey,
+  required String accountName,
+  required int pageIndex,
+  int slotCount = Page1BottomQuickIcons.slotCount,
+  String? profileKey,
 }) async {
   final prefs = await SharedPreferences.getInstance();
   final saved = prefs.getStringList(
-    _pageIconSlotsKey(accountName, pageIndex, profileKey: profileKey));
+    _pageIconSlotsKey(accountName, pageIndex, profileKey: profileKey),
+  );
   if (saved == null) return List<String>.filled(slotCount, '');
   if (saved.length >= slotCount) return saved.sublist(0, slotCount);
   return [...saved, ...List<String>.filled(slotCount - saved.length, '')];
 }
 
 Future<void> _setPageSlotGroups({
-  required String accountName, required int pageIndex,
+  required String accountName,
+  required int pageIndex,
   required List<List<String>> groups,
 }) async {
   final prefs = await SharedPreferences.getInstance();
   final strings = groups.map((g) => g.join(',')).toList();
-  await prefs.setStringList(_pageSlotGroupsKey(accountName, pageIndex), strings);
+  await prefs.setStringList(
+    _pageSlotGroupsKey(accountName, pageIndex),
+    strings,
+  );
 }
 
 Future<List<List<String>>> _getPageSlotGroups({
-  required String accountName, required int pageIndex,
+  required String accountName,
+  required int pageIndex,
   int slotCount = Page1BottomQuickIcons.slotCount,
 }) async {
   final prefs = await SharedPreferences.getInstance();
-  final saved = prefs.getStringList(
-    _pageSlotGroupsKey(accountName, pageIndex));
+  final saved = prefs.getStringList(_pageSlotGroupsKey(accountName, pageIndex));
   if (saved == null) return List.generate(slotCount, (_) => []);
-  final list = saved.take(slotCount)
-      .map((s) => s.isEmpty ? <String>[] : s.split(',')).toList();
+  final list = saved
+      .take(slotCount)
+      .map((s) => s.isEmpty ? <String>[] : s.split(','))
+      .toList();
   if (list.length >= slotCount) return list.sublist(0, slotCount);
   return [
-    ...list, ...List.generate(slotCount - list.length, (_) => <String>[]),
+    ...list,
+    ...List.generate(slotCount - list.length, (_) => <String>[]),
   ];
 }

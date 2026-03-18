@@ -12,7 +12,8 @@ class ExportOptions {
   final bool includeIncome;
   final bool includeAssets;
   final bool excludePersonalInfo;
-  final List<String> selectedColumns; // ['구분', '날짜', '카테고리', '항목/매장명', '금액', '결제수단/기관', '메모']
+  final List<String>
+  selectedColumns; // ['구분', '날짜', '카테고리', '항목/매장명', '금액', '결제수단/기관', '메모']
   final String accountName;
   final DateTime startDate;
   final DateTime endDate;
@@ -43,7 +44,7 @@ class DataExportService {
   }) async {
     final excel = Excel.createExcel();
     final header = options.selectedColumns;
-    
+
     final List<List<dynamic>> totalRows = [header];
     final List<List<dynamic>> expenseRows = [header];
     final List<List<dynamic>> incomeRows = [header];
@@ -55,8 +56,12 @@ class DataExportService {
       final end = options.endDate.add(const Duration(days: 1));
       final inDate = tx.date.isAfter(start) && tx.date.isBefore(end);
       if (!inDate) return false;
-      if (tx.type == TransactionType.expense && options.includeExpenses) return true;
-      if (tx.type == TransactionType.income && options.includeIncome) return true;
+      if (tx.type == TransactionType.expense && options.includeExpenses) {
+        return true;
+      }
+      if (tx.type == TransactionType.income && options.includeIncome) {
+        return true;
+      }
       return false;
     }).toList();
 
@@ -108,8 +113,12 @@ class DataExportService {
       final end = options.endDate.add(const Duration(days: 1));
       final inDate = tx.date.isAfter(start) && tx.date.isBefore(end);
       if (!inDate) return false;
-      if (tx.type == TransactionType.expense && options.includeExpenses) return true;
-      if (tx.type == TransactionType.income && options.includeIncome) return true;
+      if (tx.type == TransactionType.expense && options.includeExpenses) {
+        return true;
+      }
+      if (tx.type == TransactionType.income && options.includeIncome) {
+        return true;
+      }
       return false;
     }).toList()..sort((a, b) => a.date.compareTo(b.date));
 
@@ -137,13 +146,27 @@ class DataExportService {
     final row = <dynamic>[];
     for (final col in options.selectedColumns) {
       switch (col) {
-        case '구분': row.add(tx.type == TransactionType.expense ? '지출' : '수입'); break;
-        case '날짜': row.add(DateFormat('yyyy-MM-dd').format(tx.date)); break;
-        case '카테고리': row.add(tx.mainCategory); break;
-        case '항목/매장명': row.add(_mask(tx.description, options.excludePersonalInfo)); break;
-        case '금액': row.add(tx.amount); break;
-        case '결제수단/기관': row.add(_mask(tx.paymentMethod, options.excludePersonalInfo)); break;
-        case '메모': row.add(_mask(tx.memo, options.excludePersonalInfo, isMemo: true)); break;
+        case '구분':
+          row.add(tx.type == TransactionType.expense ? '지출' : '수입');
+          break;
+        case '날짜':
+          row.add(DateFormat('yyyy-MM-dd').format(tx.date));
+          break;
+        case '카테고리':
+          row.add(tx.mainCategory);
+          break;
+        case '항목/매장명':
+          row.add(_mask(tx.description, options.excludePersonalInfo));
+          break;
+        case '금액':
+          row.add(tx.amount);
+          break;
+        case '결제수단/기관':
+          row.add(_mask(tx.paymentMethod, options.excludePersonalInfo));
+          break;
+        case '메모':
+          row.add(_mask(tx.memo, options.excludePersonalInfo, isMemo: true));
+          break;
       }
     }
     return row;
@@ -153,13 +176,27 @@ class DataExportService {
     final row = <dynamic>[];
     for (final col in options.selectedColumns) {
       switch (col) {
-        case '구분': row.add('자산'); break;
-        case '날짜': row.add(DateFormat('yyyy-MM-dd').format(asset.date)); break;
-        case '카테고리': row.add(asset.category.toString().split('.').last); break;
-        case '항목/매장명': row.add(_mask(asset.name, options.excludePersonalInfo)); break;
-        case '금액': row.add(asset.amount); break;
-        case '결제수단/기관': row.add(_mask(asset.institution ?? '', options.excludePersonalInfo)); break;
-        case '메모': row.add(options.excludePersonalInfo ? '[비공개]' : asset.memo); break;
+        case '구분':
+          row.add('자산');
+          break;
+        case '날짜':
+          row.add(DateFormat('yyyy-MM-dd').format(asset.date));
+          break;
+        case '카테고리':
+          row.add(asset.category.toString().split('.').last);
+          break;
+        case '항목/매장명':
+          row.add(_mask(asset.name, options.excludePersonalInfo));
+          break;
+        case '금액':
+          row.add(asset.amount);
+          break;
+        case '결제수단/기관':
+          row.add(_mask(asset.institution ?? '', options.excludePersonalInfo));
+          break;
+        case '메모':
+          row.add(options.excludePersonalInfo ? '[비공개]' : asset.memo);
+          break;
       }
     }
     return row;
@@ -181,7 +218,12 @@ class DataExportService {
     }
   }
 
-  void _createSummarySheet(Excel excel, ExportOptions options, List<List<dynamic>> exp, List<List<dynamic>> inc) {
+  void _createSummarySheet(
+    Excel excel,
+    ExportOptions options,
+    List<List<dynamic>> exp,
+    List<List<dynamic>> inc,
+  ) {
     final summarySheet = excel['요약 리포트'];
     final amountIdx = options.selectedColumns.indexOf('금액');
     double totalExp = 0;
@@ -197,22 +239,44 @@ class DataExportService {
     }
 
     final df = DateFormat('yyyy-MM-dd');
-    summarySheet.appendRow([TextCellValue('📊 SmartLedger 요약 리포트'), TextCellValue('')]);
-    summarySheet.appendRow([TextCellValue('기간'), TextCellValue('${df.format(options.startDate)} ~ ${df.format(options.endDate)}')]);
+    summarySheet.appendRow([
+      TextCellValue('📊 SmartLedger 요약 리포트'),
+      TextCellValue(''),
+    ]);
+    summarySheet.appendRow([
+      TextCellValue('기간'),
+      TextCellValue(
+        '${df.format(options.startDate)} ~ ${df.format(options.endDate)}',
+      ),
+    ]);
     summarySheet.appendRow([TextCellValue(''), TextCellValue('')]);
     summarySheet.appendRow([TextCellValue('항목'), TextCellValue('금액')]);
-    summarySheet.appendRow([TextCellValue('총 수입 (+)'), TextCellValue(totalInc.toStringAsFixed(0))]);
-    summarySheet.appendRow([TextCellValue('총 지출 (-)'), TextCellValue(totalExp.toStringAsFixed(0))]);
-    summarySheet.appendRow([TextCellValue('순수익 (잔액)'), TextCellValue((totalInc - totalExp).toStringAsFixed(0))]);
+    summarySheet.appendRow([
+      TextCellValue('총 수입 (+)'),
+      TextCellValue(totalInc.toStringAsFixed(0)),
+    ]);
+    summarySheet.appendRow([
+      TextCellValue('총 지출 (-)'),
+      TextCellValue(totalExp.toStringAsFixed(0)),
+    ]);
+    summarySheet.appendRow([
+      TextCellValue('순수익 (잔액)'),
+      TextCellValue((totalInc - totalExp).toStringAsFixed(0)),
+    ]);
   }
 
-  Future<File?> _saveFile({List<int>? bytes, String? content, required String extension, required String accountName}) async {
+  Future<File?> _saveFile({
+    List<int>? bytes,
+    String? content,
+    required String extension,
+    required String accountName,
+  }) async {
     final dir = await getDownloadsDirectory();
     if (dir == null) return null;
     final timestamp = DateFormat('yyyyMMdd_HHmm').format(DateTime.now());
     final fileName = 'SmartLedger_${accountName}_$timestamp.$extension';
     final file = File('${dir.path}/$fileName');
-    
+
     if (bytes != null) {
       await file.writeAsBytes(bytes);
     } else if (content != null) {

@@ -14,7 +14,7 @@ library;
 ///     return Failure(StorageError('Delete failed'));
 ///   }
 /// }
-/// 
+///
 /// // Usage in UI
 /// final result = await deleteItem('123');
 /// result.when(
@@ -26,35 +26,35 @@ library;
 import 'result.dart';
 
 /// Unit type - a type with exactly one value
-/// 
+///
 /// Unit is a type that has exactly one value, used to represent
 /// "no meaningful value" in a type-safe way.
 class Unit {
   const Unit._();
-  
+
   /// The single instance of Unit (singleton pattern)
   static const instance = Unit._();
-  
+
   @override
   String toString() => '()';
-  
+
   @override
   bool operator ==(Object other) => other is Unit;
-  
+
   @override
   int get hashCode => 0;
 }
 
 /// Helper function to create successful void result
-/// 
+///
 /// This is a convenience function to avoid typing:
 /// `const Success(Unit.instance)` every time.
 Result<Unit> successVoid() => const Success(Unit.instance);
 
 /// Type alias for void results
-/// 
+///
 /// Makes the intent clearer when declaring void operation signatures.
-/// 
+///
 /// Example:
 /// ```dart
 /// Future<VoidResult> clearCache() async {

@@ -19,13 +19,16 @@ import 'package:smart_ledger/shared/result.dart';
 /// - Failure(ValidationError) if input validation fails
 /// - Failure(NotFoundError) if item doesn't exist
 /// - Failure(NetworkError) if repository operation fails
-class UpdateStockUseCase extends UseCase<ConsumableInventoryItem, ConsumableInventoryItem> {
+class UpdateStockUseCase
+    extends UseCase<ConsumableInventoryItem, ConsumableInventoryItem> {
   final InventoryRepository _repository;
 
   UpdateStockUseCase(this._repository);
 
   @override
-  Future<Result<ConsumableInventoryItem>> execute(ConsumableInventoryItem item) async {
+  Future<Result<ConsumableInventoryItem>> execute(
+    ConsumableInventoryItem item,
+  ) async {
     // Validation: name cannot be empty
     if (item.name.trim().isEmpty) {
       return const Failure(ValidationError('Item name cannot be empty'));
@@ -33,26 +36,22 @@ class UpdateStockUseCase extends UseCase<ConsumableInventoryItem, ConsumableInve
 
     // Validation: stock cannot be negative
     if (item.currentStock < 0) {
-      return const Failure(
-        ValidationError('Current stock cannot be negative'),
-      );
+      return const Failure(ValidationError('Current stock cannot be negative'));
     }
 
     // Validation: threshold cannot be negative
     if (item.threshold < 0) {
-      return const Failure(
-        ValidationError('threshold cannot be negative'),
-      );
+      return const Failure(ValidationError('threshold cannot be negative'));
     }
 
     // Check if item exists
     final existsResult = await _repository.getItemById(item.id);
-    
+
     // If item doesn't exist, getItemById will return NotFoundError
     if (existsResult.isFailure) {
       return Failure(existsResult.errorOrNull!);
     }
-    
+
     // All validations passed, update the item
     return _repository.updateItem(item);
   }

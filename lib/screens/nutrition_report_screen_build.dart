@@ -13,8 +13,8 @@ extension NutritionReportBuild on _NutritionReportScreenState {
     final totalLabel = report.items.isEmpty
         ? '합계: -'
         : (report.totalMinWon == report.totalMaxWon
-            ? '합계: $totalMinLabel원'
-            : '합계: $totalMinLabel~$totalMaxLabel원');
+              ? '합계: $totalMinLabel원'
+              : '합계: $totalMinLabel~$totalMaxLabel원');
 
     return Scaffold(
       appBar: AppBar(
@@ -150,8 +150,8 @@ extension NutritionReportBuild on _NutritionReportScreenState {
                                   setState(() {
                                     _foodQuery = item.name;
                                     _foodSearchController.text = item.name;
-                                    _foodSearchController.selection =
-                                        TextSelection.fromPosition(
+                                    _foodSearchController
+                                        .selection = TextSelection.fromPosition(
                                       TextPosition(offset: item.name.length),
                                     );
                                   });
@@ -217,25 +217,35 @@ extension NutritionReportBuild on _NutritionReportScreenState {
         decoration: BoxDecoration(
           color: Colors.green.shade50,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.green.shade200)),
+          border: Border.all(color: Colors.green.shade200),
+        ),
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(children: [
-              Icon(Icons.savings_outlined, color: Colors.green[800]),
-              const SizedBox(width: 8),
-              Text('냉장고 파먹기 챌린지 기간! 🍳',
-                style: TextStyle(fontWeight: FontWeight.bold,
-                  fontSize: 16, color: Colors.green[900])),
-            ]),
+            Row(
+              children: [
+                Icon(Icons.savings_outlined, color: Colors.green[800]),
+                const SizedBox(width: 8),
+                Text(
+                  '냉장고 파먹기 챌린지 기간! 🍳',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: Colors.green[900],
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 8),
             const Text(
               '매달 20일은 냉장고 비우기 챌린지 시작일입니다.\n'
               '남은 10일간 식재료 구입 없이 냉장고 속 재료로만 요리해보세요!\n'
               '식비 절약과 냉장고 정리를 동시에 실천할 수 있습니다.',
-              style: TextStyle(height: 1.5, fontSize: 14)),
-          ]),
+              style: TextStyle(height: 1.5, fontSize: 14),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -260,13 +270,17 @@ extension NutritionReportBuild on _NutritionReportScreenState {
                 final prefs = await SharedPreferences.getInstance();
                 final acct = prefs.getString('selected_account')?.trim() ?? 'A';
                 if (!mounted) return;
-                navigator.pushNamed(AppRoutes.recipeManagement,
-                  arguments: RecipeManagementArgs(accountName: acct));
+                navigator.pushNamed(
+                  AppRoutes.recipeManagement,
+                  arguments: RecipeManagementArgs(accountName: acct),
+                );
               },
               style: FilledButton.styleFrom(
                 backgroundColor: theme.colorScheme.tertiaryContainer,
                 foregroundColor: theme.colorScheme.onTertiaryContainer,
-                padding: btnPad, shape: btnShape),
+                padding: btnPad,
+                shape: btnShape,
+              ),
               child: const Text('나의레시피', style: TextStyle(fontSize: 13)),
             ),
           ),
@@ -278,12 +292,15 @@ extension NutritionReportBuild on _NutritionReportScreenState {
                 final prefs = await SharedPreferences.getInstance();
                 final acct = prefs.getString('selected_account')?.trim() ?? 'A';
                 if (!mounted) return;
-                navigator.pushNamed(AppRoutes.recipeManagement,
+                navigator.pushNamed(
+                  AppRoutes.recipeManagement,
                   arguments: RecipeManagementArgs(
-                    accountName: acct, initialTabIndex: 1));
+                    accountName: acct,
+                    initialTabIndex: 1,
+                  ),
+                );
               },
-              style: FilledButton.styleFrom(
-                padding: btnPad, shape: btnShape),
+              style: FilledButton.styleFrom(padding: btnPad, shape: btnShape),
               child: const Text('레시피추천', style: TextStyle(fontSize: 13)),
             ),
           ),
@@ -295,7 +312,9 @@ extension NutritionReportBuild on _NutritionReportScreenState {
               style: FilledButton.styleFrom(
                 backgroundColor: theme.colorScheme.secondaryContainer,
                 foregroundColor: theme.colorScheme.onSecondaryContainer,
-                padding: btnPad, shape: btnShape),
+                padding: btnPad,
+                shape: btnShape,
+              ),
               child: const Text('재고확인', style: TextStyle(fontSize: 13)),
             ),
           ),

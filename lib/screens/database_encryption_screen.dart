@@ -8,7 +8,8 @@ class DatabaseEncryptionScreen extends StatefulWidget {
   const DatabaseEncryptionScreen({super.key});
 
   @override
-  State<DatabaseEncryptionScreen> createState() => _DatabaseEncryptionScreenState();
+  State<DatabaseEncryptionScreen> createState() =>
+      _DatabaseEncryptionScreenState();
 }
 
 class _DatabaseEncryptionScreenState extends State<DatabaseEncryptionScreen> {
@@ -36,9 +37,9 @@ class _DatabaseEncryptionScreenState extends State<DatabaseEncryptionScreen> {
     if (!mounted) return;
 
     if (key == null || key.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('암호화 키를 찾을 수 없습니다.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('암호화 키를 찾을 수 없습니다.')));
       return;
     }
 
@@ -54,15 +55,18 @@ class _DatabaseEncryptionScreenState extends State<DatabaseEncryptionScreen> {
               const Text(
                 '경고: 이 키는 데이터 복구를 위한 매우 민감한 정보입니다. '
                 '타인에게 노출되면 데이터가 유출될 수 있습니다.',
-                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 12),
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Theme.of(dialogContext)
-                      .colorScheme
-                      .surfaceContainerHighest,
+                  color: Theme.of(
+                    dialogContext,
+                  ).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: SelectableText(
@@ -81,9 +85,9 @@ class _DatabaseEncryptionScreenState extends State<DatabaseEncryptionScreen> {
               onPressed: () {
                 Clipboard.setData(ClipboardData(text: key));
                 Navigator.of(dialogContext).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('클립보드에 복사되었습니다.')),
-                );
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(const SnackBar(content: Text('클립보드에 복사되었습니다.')));
               },
               icon: const Icon(Icons.copy),
               label: const Text('복사'),
@@ -154,9 +158,7 @@ class _DatabaseEncryptionScreenState extends State<DatabaseEncryptionScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          ok
-              ? '암호화 키를 복구했습니다. 앱을 완전히 종료 후 재실행하세요.'
-              : '키 형식이 올바르지 않습니다.',
+          ok ? '암호화 키를 복구했습니다. 앱을 완전히 종료 후 재실행하세요.' : '키 형식이 올바르지 않습니다.',
         ),
       ),
     );

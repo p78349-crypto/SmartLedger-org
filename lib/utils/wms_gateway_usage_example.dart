@@ -56,21 +56,19 @@ Future<void> addItemExample(BuildContext context) async {
   );
 
   // ✅ Gateway를 통한 추가 (유효성 검사 + 중복 체크 자동)
-  final result = await WmsInventoryGateway.instance.addItem(
-    input: input,
-  );
+  final result = await WmsInventoryGateway.instance.addItem(input: input);
 
   if (!context.mounted) return;
 
   // ✅ 결과 처리
   if (result.type == WmsOperationType.success) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('${result.data?.name} 추가 완료')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('${result.data?.name} 추가 완료')));
   } else if (result.type == WmsOperationType.duplicate) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('이미 존재: ${result.data?.name}')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('이미 존재: ${result.data?.name}')));
   } else if (result.type == WmsOperationType.failure) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -124,9 +122,7 @@ Future<void> unifiedSearchExample(String query) async {
   }
 
   for (final item in result.inventoryItems.where((e) => e.expiryDate != null)) {
-    final daysLeft = item.expiryDate!
-        .difference(DateTime.now())
-        .inDays;
+    final daysLeft = item.expiryDate!.difference(DateTime.now()).inDays;
     debugPrint('- [유통기한] ${item.name}: D$daysLeft');
   }
 }
@@ -140,22 +136,21 @@ Future<void> alertSummaryExample(BuildContext context) async {
 
   if (!alerts.hasAlerts) {
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('알림 없음')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('알림 없음')));
     return;
   }
 
-  final message = '''
+  final message =
+      '''
 재고 부족: ${alerts.lowStockItems.length}개
 유통기한 임박: ${alerts.expiringInventoryItems.length}개
 유통기한 경과: ${alerts.expiredInventoryItems.length}개
 ''';
 
   if (!context.mounted) return;
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text(message)),
-  );
+  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
 }
 
 /// ============================================================================

@@ -31,11 +31,9 @@ class MultilingualSearchUtils {
 
   static String extractAcronym(String text) => _extractAcronym(text);
 
-  static String hiraganaToKatakana(String text) =>
-      _hiraganaToKatakana(text);
+  static String hiraganaToKatakana(String text) => _hiraganaToKatakana(text);
 
-  static String katakanaToHiragana(String text) =>
-      _katakanaToHiragana(text);
+  static String katakanaToHiragana(String text) => _katakanaToHiragana(text);
 
   static String normalizeJapanese(String text) => _normalizeJapanese(text);
 
@@ -82,8 +80,7 @@ class MultilingualSearchUtils {
 
   static bool matches(String text, String query) => _matches(text, query);
 
-  static int matchScore(String text, String query) =>
-      _matchScore(text, query);
+  static int matchScore(String text, String query) => _matchScore(text, query);
 
   static List<T> sortByRelevance<T>(
     List<T> items,

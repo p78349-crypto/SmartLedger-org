@@ -97,8 +97,7 @@ extension WeatherPredictionSearch on _WeatherPricePredictionScreenState {
           const SizedBox(height: 16),
 
           // 날씨 상관관계
-          if (correlation != null)
-            buildCorrelationCard(correlation, theme),
+          if (correlation != null) buildCorrelationCard(correlation, theme),
 
           const SizedBox(height: 16),
 

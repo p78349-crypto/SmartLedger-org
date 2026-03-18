@@ -5,40 +5,40 @@
 
 class GlobalProduct {
   final int id;
-  
+
   // Barcode fields
-  final String? ean13;      // EAN-13 (European Article Number)
-  final String? upcA;       // UPC-A (US/Canada)
-  final String? janCode;    // JAN (Japan)
-  final String? kanCode;    // KAN (Korea - 유통 표준 코드)
-  
+  final String? ean13; // EAN-13 (European Article Number)
+  final String? upcA; // UPC-A (US/Canada)
+  final String? janCode; // JAN (Japan)
+  final String? kanCode; // KAN (Korea - 유통 표준 코드)
+
   // Product names
   final String? productNameKo;
   final String? productNameEn;
   final String? productNameJa;
-  
+
   // Categories (hierarchical)
-  final String? category1;  // Large category
-  final String? category2;  // Medium category
-  final String? category3;  // Small category
-  final String? category4;  // Detailed category
-  
+  final String? category1; // Large category
+  final String? category2; // Medium category
+  final String? category3; // Small category
+  final String? category4; // Detailed category
+
   // Product details
   final String? manufacturer;
-  final String? packagingUnit;  // 병, 팩, 상자, etc.
-  final int defaultQuantity;    // Default qty to input (Korea: 2)
-  final String countryCode;     // KR, US, JP, etc.
-  
+  final String? packagingUnit; // 병, 팩, 상자, etc.
+  final int defaultQuantity; // Default qty to input (Korea: 2)
+  final String countryCode; // KR, US, JP, etc.
+
   // Nutrition info (optional)
   final double? caloriesPer100g;
   final double? proteinPer100g;
   final double? fatPer100g;
   final double? carbsPer100g;
-  
+
   // Metadata
-  final String dataSource;  // Origin: 'korean', 'usda', 'openfoodfacts'
+  final String dataSource; // Origin: 'korean', 'usda', 'openfoodfacts'
   final DateTime createdAt;
-  
+
   GlobalProduct({
     required this.id,
     this.ean13,
@@ -63,7 +63,7 @@ class GlobalProduct {
     this.dataSource = 'local',
     required this.createdAt,
   });
-  
+
   /// Get display name based on locale
   String getDisplayName({String locale = 'ko'}) {
     switch (locale.toLowerCase()) {
@@ -80,7 +80,7 @@ class GlobalProduct {
         return productNameEn ?? productNameKo ?? 'Unknown Product';
     }
   }
-  
+
   /// Get category display path
   String getCategoryPath() {
     final parts = <String>[];
@@ -90,12 +90,12 @@ class GlobalProduct {
     if (category4 != null) parts.add(category4!);
     return parts.join(' > ');
   }
-  
+
   /// Get primary barcode (in order of preference)
   String? getPrimaryBarcode() {
     return ean13 ?? upcA ?? janCode ?? kanCode;
   }
-  
+
   /// Create from database map
   factory GlobalProduct.fromMap(Map<String, dynamic> map) {
     return GlobalProduct(
@@ -123,7 +123,7 @@ class GlobalProduct {
       createdAt: DateTime.parse(map['created_at'] as String),
     );
   }
-  
+
   /// Static helper to convert nullable values to double
   static double? _toDouble(dynamic value) {
     if (value == null) return null;
@@ -132,7 +132,7 @@ class GlobalProduct {
     if (value is String) return double.tryParse(value);
     return null;
   }
-  
+
   /// Convert to database map
   Map<String, dynamic> toMap() {
     return {
@@ -160,7 +160,7 @@ class GlobalProduct {
       'created_at': createdAt.toIso8601String(),
     };
   }
-  
+
   @override
   String toString() {
     return 'GlobalProduct('

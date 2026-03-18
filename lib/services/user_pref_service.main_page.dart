@@ -7,71 +7,100 @@ String _mainPageLastIdKey(String a) =>
     PrefKeys.accountKey(a, 'main_page_last_id');
 String _mainPageIndexKey(String a) =>
     PrefKeys.accountKey(a, PrefKeys.mainPageIndexSuffix);
-String _mainPageNamesKey(String a) =>
-    PrefKeys.accountKey(a, 'main_page_names');
+String _mainPageNamesKey(String a) => PrefKeys.accountKey(a, 'main_page_names');
 String _pageTypesKey(String a) => PrefKeys.accountKey(a, 'page_types');
 
 List<MainPageConfig> _defaultMainPageConfigs() {
   return const <MainPageConfig>[
     MainPageConfig(
-      pageId: 'page0', moduleKey: 'dashboard',
-      pageType: 'icons', name: '대시보드',
+      pageId: 'page0',
+      moduleKey: 'dashboard',
+      pageType: 'icons',
+      name: '대시보드',
     ),
     MainPageConfig(
-      pageId: 'page1', moduleKey: 'purchase',
-      pageType: 'icons', name: '요리/쇼핑/지출',
+      pageId: 'page1',
+      moduleKey: 'purchase',
+      pageType: 'icons',
+      name: '요리/쇼핑/지출',
     ),
     MainPageConfig(
-      pageId: 'page2', moduleKey: 'income',
-      pageType: 'icons', name: '수입',
+      pageId: 'page2',
+      moduleKey: 'income',
+      pageType: 'icons',
+      name: '수입',
     ),
     MainPageConfig(
-      pageId: 'page3', moduleKey: 'stats',
-      pageType: 'icons', name: '통계',
+      pageId: 'page3',
+      moduleKey: 'stats',
+      pageType: 'icons',
+      name: '통계',
     ),
     MainPageConfig(
-      pageId: 'page4', moduleKey: 'asset',
-      pageType: 'icons', name: '자산',
+      pageId: 'page4',
+      moduleKey: 'asset',
+      pageType: 'icons',
+      name: '자산',
     ),
     MainPageConfig(
-      pageId: 'page5', moduleKey: 'root',
-      pageType: 'icons', name: 'ROOT',
+      pageId: 'page5',
+      moduleKey: 'root',
+      pageType: 'icons',
+      name: 'ROOT',
     ),
     MainPageConfig(
-      pageId: 'page6', moduleKey: 'settings',
-      pageType: 'icons', name: '설정',
+      pageId: 'page6',
+      moduleKey: 'settings',
+      pageType: 'icons',
+      name: '설정',
     ),
     MainPageConfig(
-      pageId: 'page7', moduleKey: 'page7',
-      pageType: 'icons', name: '페이지7',
+      pageId: 'page7',
+      moduleKey: 'page7',
+      pageType: 'icons',
+      name: '페이지7',
     ),
     MainPageConfig(
-      pageId: 'page8', moduleKey: 'page8',
-      pageType: 'icons', name: '페이지8',
+      pageId: 'page8',
+      moduleKey: 'page8',
+      pageType: 'icons',
+      name: '페이지8',
     ),
     MainPageConfig(
-      pageId: 'page9', moduleKey: 'page9',
-      pageType: 'icons', name: '페이지9',
+      pageId: 'page9',
+      moduleKey: 'page9',
+      pageType: 'icons',
+      name: '페이지9',
     ),
     MainPageConfig(
-      pageId: 'page10', moduleKey: 'page10',
-      pageType: 'icons', name: '페이지10',
+      pageId: 'page10',
+      moduleKey: 'page10',
+      pageType: 'icons',
+      name: '페이지10',
     ),
     MainPageConfig(
-      pageId: 'page11', moduleKey: 'page11',
-      pageType: 'icons', name: '페이지11',
+      pageId: 'page11',
+      moduleKey: 'page11',
+      pageType: 'icons',
+      name: '페이지11',
     ),
     MainPageConfig(
-      pageId: 'page12', moduleKey: 'page12',
-      pageType: 'icons', name: '페이지12',
+      pageId: 'page12',
+      moduleKey: 'page12',
+      pageType: 'icons',
+      name: '페이지12',
     ),
     MainPageConfig(
-      pageId: 'page13', moduleKey: 'page13',
-      pageType: 'icons', name: '페이지13',
+      pageId: 'page13',
+      moduleKey: 'page13',
+      pageType: 'icons',
+      name: '페이지13',
     ),
     MainPageConfig(
-      pageId: 'page14', moduleKey: 'page14',
-      pageType: 'icons', name: '페이지14',
+      pageId: 'page14',
+      moduleKey: 'page14',
+      pageType: 'icons',
+      name: '페이지14',
     ),
   ];
 }
@@ -220,9 +249,7 @@ Future<void> _setMainPageNames({
   await prefs.setStringList(_mainPageNamesKey(accountName), names);
 }
 
-Future<List<String>?> _getMainPageNames({
-  required String accountName,
-}) async {
+Future<List<String>?> _getMainPageNames({required String accountName}) async {
   final prefs = await SharedPreferences.getInstance();
   return prefs.getStringList(_mainPageNamesKey(accountName));
 }

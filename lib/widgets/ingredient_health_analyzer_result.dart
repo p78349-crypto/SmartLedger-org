@@ -32,25 +32,17 @@ class AnalysisResultSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = getDialogScoreColor(
-      analysis.overallScore,
-    );
+    final color = getDialogScoreColor(analysis.overallScore);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Divider(),
         const SizedBox(height: 16),
-        _OverallScoreCard(
-          score: analysis.overallScore,
-          color: color,
-        ),
+        _OverallScoreCard(score: analysis.overallScore, color: color),
         const SizedBox(height: 16),
         _SummaryBox(summary: analysis.summary),
         const SizedBox(height: 16),
-        _DistributionBars(
-          analysis: analysis,
-          total: ingredientCount,
-        ),
+        _DistributionBars(analysis: analysis, total: ingredientCount),
         const SizedBox(height: 16),
         _StatsRow(analysis: analysis),
       ],
@@ -62,32 +54,21 @@ class _OverallScoreCard extends StatelessWidget {
   final int score;
   final Color color;
 
-  const _OverallScoreCard({
-    required this.score,
-    required this.color,
-  });
+  const _OverallScoreCard({required this.score, required this.color});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            color,
-            color.withValues(alpha: 0.7),
-          ],
-        ),
+        gradient: LinearGradient(colors: [color, color.withValues(alpha: 0.7)]),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         children: [
           const Text(
             '전체 건강 점수',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-            ),
+            style: TextStyle(color: Colors.white, fontSize: 14),
           ),
           const SizedBox(height: 8),
           Text(
@@ -99,9 +80,7 @@ class _OverallScoreCard extends StatelessWidget {
             ),
           ),
           Text(
-            IngredientHealthScoreUtils.getScoreLabel(
-              score,
-            ),
+            IngredientHealthScoreUtils.getScoreLabel(score),
             style: const TextStyle(
               color: Colors.white,
               fontSize: 16,
@@ -110,13 +89,9 @@ class _OverallScoreCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            IngredientHealthScoreUtils
-                .getScoreDescription(score),
+            IngredientHealthScoreUtils.getScoreDescription(score),
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 12,
-            ),
+            style: const TextStyle(color: Colors.white, fontSize: 12),
           ),
         ],
       ),
@@ -135,24 +110,13 @@ class _SummaryBox extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.blue.shade50,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: Colors.blue.shade200,
-        ),
+        border: Border.all(color: Colors.blue.shade200),
       ),
       child: Row(
         children: [
-          const Icon(
-            Icons.info,
-            color: Colors.blue,
-            size: 20,
-          ),
+          const Icon(Icons.info, color: Colors.blue, size: 20),
           const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              summary,
-              style: const TextStyle(fontSize: 13),
-            ),
-          ),
+          Expanded(child: Text(summary, style: const TextStyle(fontSize: 13))),
         ],
       ),
     );
@@ -163,10 +127,7 @@ class _DistributionBars extends StatelessWidget {
   final IngredientAnalysis analysis;
   final int total;
 
-  const _DistributionBars({
-    required this.analysis,
-    required this.total,
-  });
+  const _DistributionBars({required this.analysis, required this.total});
 
   @override
   Widget build(BuildContext context) {
@@ -175,22 +136,14 @@ class _DistributionBars extends StatelessWidget {
       children: [
         const Text(
           '건강도 분포',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
-        _bar('💚 매우 건강', analysis.veryHealthyCount,
-            Colors.green),
-        _bar('💚 건강', analysis.healthyCount,
-            Colors.lightGreen),
-        _bar('🟡 보통', analysis.normalCount,
-            Colors.orange),
-        _bar('🟠 주의', analysis.cautionCount,
-            Colors.deepOrange),
-        _bar('🔴 비건강', analysis.unhealthyCount,
-            Colors.red),
+        _bar('💚 매우 건강', analysis.veryHealthyCount, Colors.green),
+        _bar('💚 건강', analysis.healthyCount, Colors.lightGreen),
+        _bar('🟡 보통', analysis.normalCount, Colors.orange),
+        _bar('🟠 주의', analysis.cautionCount, Colors.deepOrange),
+        _bar('🔴 비건강', analysis.unhealthyCount, Colors.red),
       ],
     );
   }
@@ -199,21 +152,14 @@ class _DistributionBars extends StatelessWidget {
     if (count == 0) return const SizedBox.shrink();
     final ratio = count / total;
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        vertical: 4,
-      ),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Expanded(
-                child: Text(
-                  label,
-                  style: const TextStyle(
-                    fontSize: 12,
-                  ),
-                ),
+                child: Text(label, style: const TextStyle(fontSize: 12)),
               ),
               Text(
                 '$count개',
@@ -229,8 +175,7 @@ class _DistributionBars extends StatelessWidget {
           LinearProgressIndicator(
             value: ratio,
             backgroundColor: Colors.grey.shade200,
-            valueColor:
-                AlwaysStoppedAnimation<Color>(color),
+            valueColor: AlwaysStoppedAnimation<Color>(color),
             minHeight: 8,
             borderRadius: BorderRadius.circular(4),
           ),
@@ -247,13 +192,11 @@ class _StatsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment:
-          MainAxisAlignment.spaceAround,
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         _miniCard(
           '평균 점수',
-          analysis.averageScore
-              .toStringAsFixed(1),
+          analysis.averageScore.toStringAsFixed(1),
           Colors.blue,
         ),
         _miniCard(
@@ -265,19 +208,13 @@ class _StatsRow extends StatelessWidget {
     );
   }
 
-  Widget _miniCard(
-    String label,
-    String value,
-    Color color,
-  ) {
+  Widget _miniCard(String label, String value, Color color) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: color.withValues(alpha: 0.3),
-        ),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [
@@ -290,13 +227,7 @@ class _StatsRow extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11,
-              color: color,
-            ),
-          ),
+          Text(label, style: TextStyle(fontSize: 11, color: color)),
         ],
       ),
     );

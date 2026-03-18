@@ -21,8 +21,7 @@ extension TransactionDetailRefund on _TransactionDetailScreenState {
     final refundMethodController = TextEditingController(
       text: tx.paymentMethod,
     );
-    final recentPaymentMethods =
-        await RecentInputService.loadPaymentMethods();
+    final recentPaymentMethods = await RecentInputService.loadPaymentMethods();
     if (!mounted) return;
     String refundChannel = '카드';
     final quantityController = TextEditingController(
@@ -87,13 +86,10 @@ extension TransactionDetailRefund on _TransactionDetailScreenState {
                           _refundChannelSelector(
                             context,
                             refundChannel,
-                            (v) => setState(
-                              () => refundChannel = v,
-                            ),
+                            (v) => setState(() => refundChannel = v),
                           ),
                           const SizedBox(height: 8),
-                          if (refundChannel == '카드' ||
-                              refundChannel == '기타')
+                          if (refundChannel == '카드' || refundChannel == '기타')
                             _refundMethodAutocomplete(
                               refundChannel,
                               refundMethodController,
@@ -103,9 +99,7 @@ extension TransactionDetailRefund on _TransactionDetailScreenState {
                           _refundAccountSelector(
                             context,
                             selectedAccount,
-                            (v) => setState(
-                              () => selectedAccount = v,
-                            ),
+                            (v) => setState(() => selectedAccount = v),
                           ),
                           const SizedBox(height: 24),
                           _refundActionButtons(
@@ -139,7 +133,8 @@ extension TransactionDetailRefund on _TransactionDetailScreenState {
 
   Widget _refundSheetHandle(BuildContext ctx) => Center(
     child: Container(
-      width: 40, height: 4,
+      width: 40,
+      height: 4,
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: Theme.of(ctx).colorScheme.outlineVariant,
@@ -151,8 +146,10 @@ extension TransactionDetailRefund on _TransactionDetailScreenState {
   Widget _refundSheetHeader(BuildContext ctx) => Row(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
-      const Text('반품 처리',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+      const Text(
+        '반품 처리',
+        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+      ),
       IconButton(
         icon: const Icon(IconCatalog.close),
         onPressed: () => Navigator.pop(ctx),
@@ -192,8 +189,7 @@ extension TransactionDetailRefund on _TransactionDetailScreenState {
                 );
               }
               if (tx.unitPrice > 0 || tx.quantity > 0) {
-                amountCtrl.text =
-                    calcDefaultAmount(clamped).toStringAsFixed(0);
+                amountCtrl.text = calcDefaultAmount(clamped).toStringAsFixed(0);
               }
               onChanged(clamped);
             },
@@ -231,5 +227,4 @@ extension TransactionDetailRefund on _TransactionDetailScreenState {
       ),
     );
   }
-
 }

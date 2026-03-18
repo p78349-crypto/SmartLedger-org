@@ -48,10 +48,7 @@ class _WmsIoScreenState extends State<WmsIoScreen>
           tabs: const [
             Tab(icon: Icon(Icons.qr_code_2), text: '🔍 빠른 입출고'),
             Tab(icon: Icon(Icons.add_box), text: '📥 입고'),
-            Tab(
-              icon: Icon(Icons.remove_circle_outline),
-              text: '📤 출고',
-            ),
+            Tab(icon: Icon(Icons.remove_circle_outline), text: '📤 출고'),
           ],
         ),
       ),
@@ -72,9 +69,7 @@ class _WmsIoScreenState extends State<WmsIoScreen>
                 Expanded(
                   child: TabBarView(
                     children: [
-                      WmsPdaQuickInputScreen(
-                        accountName: widget.accountName,
-                      ),
+                      WmsPdaQuickInputScreen(accountName: widget.accountName),
                       WmsPdaQuickInputScreen(
                         accountName: widget.accountName,
                         isInbound: false,
@@ -148,7 +143,9 @@ class _InboundTabState extends State<_InboundTab> {
       _lastScannedBarcode = barcode;
     });
     try {
-      GlobalProduct? product = await _globalProductService?.searchByBarcode(barcode);
+      GlobalProduct? product = await _globalProductService?.searchByBarcode(
+        barcode,
+      );
       product ??= await _offService.searchByBarcode(barcode);
 
       final p = product;
@@ -164,9 +161,9 @@ class _InboundTabState extends State<_InboundTab> {
         );
       } else {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('상품 정보를 찾을 수 없습니다.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('상품 정보를 찾을 수 없습니다.')));
       }
     } finally {
       if (mounted) setState(() => _isSearchingBarcode = false);
@@ -187,19 +184,15 @@ class _InboundTabState extends State<_InboundTab> {
   Future<void> _handleInbound() async {
     final name = _nameController.text.trim();
     if (name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('품목명을 입력하세요')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('품목명을 입력하세요')));
       return;
     }
 
     final stock = double.tryParse(_stockController.text) ?? 0.0;
-    final threshold = double.tryParse(
-      _thresholdController.text,
-    ) ?? 1.0;
-    final bundleSize = double.tryParse(
-      _bundleSizeController.text,
-    ) ?? 1.0;
+    final threshold = double.tryParse(_thresholdController.text) ?? 1.0;
+    final bundleSize = double.tryParse(_bundleSizeController.text) ?? 1.0;
     final unit = _unitController.text.trim();
 
     final input = WmsInventoryInput.full(
@@ -212,16 +205,14 @@ class _InboundTabState extends State<_InboundTab> {
       location: _locationController.text,
     );
 
-    final result = await WmsInventoryGateway.instance.addItem(
-      input: input,
-    );
+    final result = await WmsInventoryGateway.instance.addItem(input: input);
 
     if (!mounted) return;
 
     if (result.success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${result.data?.name} 입고 완료')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('${result.data?.name} 입고 완료')));
       _clearForm();
     } else if (result.type == WmsOperationType.duplicate) {
       _showDuplicateDialog(result.data!);
@@ -248,9 +239,7 @@ class _InboundTabState extends State<_InboundTab> {
     });
   }
 
-  Future<void> _showDuplicateDialog(
-    ConsumableInventoryItem existing,
-  ) async {
+  Future<void> _showDuplicateDialog(ConsumableInventoryItem existing) async {
     final addMore = await showWmsDuplicateDialog(context, existing);
 
     if (addMore == true) {
@@ -261,9 +250,7 @@ class _InboundTabState extends State<_InboundTab> {
       await ConsumableInventoryService.instance.updateItem(updated);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${existing.name}에 $addStock개 추가 완료'),
-        ),
+        SnackBar(content: Text('${existing.name}에 $addStock개 추가 완료')),
       );
       _clearForm();
     }
@@ -293,10 +280,10 @@ class _InboundTabState extends State<_InboundTab> {
                       ),
                     )
                   : IconButton(
-                    icon: const Icon(Icons.search),
-                    onPressed: _lookupBarcode,
-                    tooltip: '바코드로 정보 찾기',
-                  ),
+                      icon: const Icon(Icons.search),
+                      onPressed: _lookupBarcode,
+                      tooltip: '바코드로 정보 찾기',
+                    ),
             ),
             textInputAction: TextInputAction.next,
             onSubmitted: (value) {
@@ -349,15 +336,9 @@ class _InboundTabState extends State<_InboundTab> {
             ),
             items: [
               ...ConsumableInventoryItem.locationOptions.map(
-                (loc) => DropdownMenuItem(
-                  value: loc,
-                  child: Text(loc),
-                ),
+                (loc) => DropdownMenuItem(value: loc, child: Text(loc)),
               ),
-              const DropdownMenuItem(
-                value: '직접 입력',
-                child: Text('직접 입력...'),
-              ),
+              const DropdownMenuItem(value: '직접 입력', child: Text('직접 입력...')),
             ],
             onChanged: (val) {
               if (val != null) {
@@ -390,9 +371,7 @@ class _InboundTabState extends State<_InboundTab> {
               border: OutlineInputBorder(),
               prefixIcon: Icon(Icons.notifications),
             ),
-            keyboardType: const TextInputType.numberWithOptions(
-              decimal: true,
-            ),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
             textInputAction: TextInputAction.next,
           ),
           const SizedBox(height: 16),
@@ -404,9 +383,7 @@ class _InboundTabState extends State<_InboundTab> {
               border: OutlineInputBorder(),
               prefixIcon: Icon(Icons.widgets),
             ),
-            keyboardType: const TextInputType.numberWithOptions(
-              decimal: true,
-            ),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
             textInputAction: TextInputAction.done,
             onSubmitted: (_) => _handleInbound(),
           ),
@@ -424,5 +401,3 @@ class _InboundTabState extends State<_InboundTab> {
     );
   }
 }
-
-

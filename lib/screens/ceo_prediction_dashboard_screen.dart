@@ -11,12 +11,14 @@ class CeoPredictionDashboardScreen extends StatefulWidget {
   const CeoPredictionDashboardScreen({super.key});
 
   @override
-  State<CeoPredictionDashboardScreen> createState() => _CeoPredictionDashboardScreenState();
+  State<CeoPredictionDashboardScreen> createState() =>
+      _CeoPredictionDashboardScreenState();
 }
 
-class _CeoPredictionDashboardScreenState extends State<CeoPredictionDashboardScreen> {
+class _CeoPredictionDashboardScreenState
+    extends State<CeoPredictionDashboardScreen> {
   final CeoPredictionService _predictionService = CeoPredictionService();
-  
+
   bool _isLoading = false;
   CeoWeeklyForecast? _weeklyForecast;
   String? _errorMessage;
@@ -29,9 +31,11 @@ class _CeoPredictionDashboardScreenState extends State<CeoPredictionDashboardScr
 
   Future<void> _loadWeeklyForecast() async {
     setState(() => _isLoading = true);
-    
+
     try {
-      final forecast = await _predictionService.generateWeeklyForecast(DateTime.now());
+      final forecast = await _predictionService.generateWeeklyForecast(
+        DateTime.now(),
+      );
       setState(() {
         _weeklyForecast = forecast;
         _errorMessage = null;
@@ -61,10 +65,10 @@ class _CeoPredictionDashboardScreenState extends State<CeoPredictionDashboardScr
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _errorMessage != null
-              ? _buildErrorWidget()
-              : _weeklyForecast != null
-                  ? _buildForecastContent()
-                  : const Center(child: Text('데이터를 불러오는 중...')),
+          ? _buildErrorWidget()
+          : _weeklyForecast != null
+          ? _buildForecastContent()
+          : const Center(child: Text('데이터를 불러오는 중...')),
     );
   }
 

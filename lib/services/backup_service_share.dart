@@ -43,12 +43,14 @@ extension BackupServiceShare on BackupService {
       encryptionPassword: encryptionPassword,
       passwordHint: passwordHint,
     );
-    
-    final isEncrypted = encryptionPassword != null && encryptionPassword.isNotEmpty;
-    final hintLine = (isEncrypted && passwordHint != null && passwordHint.trim().isNotEmpty)
+
+    final isEncrypted =
+        encryptionPassword != null && encryptionPassword.isNotEmpty;
+    final hintLine =
+        (isEncrypted && passwordHint != null && passwordHint.trim().isNotEmpty)
         ? '\n암호 힌트: $passwordHint'
         : '';
-        
+
     await SharePlus.instance.share(
       ShareParams(
         files: [XFile(filePath)],
@@ -69,15 +71,17 @@ extension BackupServiceShare on BackupService {
       encryptionPassword: encryptionPassword,
       passwordHint: passwordHint,
     );
-    
-    final isEncrypted = encryptionPassword != null && encryptionPassword.isNotEmpty;
-    final hintLine = (isEncrypted && passwordHint != null && passwordHint.trim().isNotEmpty)
+
+    final isEncrypted =
+        encryptionPassword != null && encryptionPassword.isNotEmpty;
+    final hintLine =
+        (isEncrypted && passwordHint != null && passwordHint.trim().isNotEmpty)
         ? '\n암호 힌트: $passwordHint'
         : '';
 
     await SharePlus.instance.share(
       ShareParams(
-        files: [XFile(filePath)], 
+        files: [XFile(filePath)],
         subject: '$accountName 백업 파일',
         text: 'SmartLedger 백업 파일입니다.$hintLine',
       ),
@@ -89,7 +93,8 @@ extension BackupServiceShare on BackupService {
     String accountName, {
     String? encryptionPassword,
     String? passwordHint,
-    String backupType = 'full', // 'full', 'transactions_only', 'assets_only', 'wms_only'
+    String backupType =
+        'full', // 'full', 'transactions_only', 'assets_only', 'wms_only'
   }) async {
     final filePath = await saveBackupToDownloads(
       accountName,
@@ -98,8 +103,10 @@ extension BackupServiceShare on BackupService {
       backupType: backupType,
     );
 
-    final isEncrypted = encryptionPassword != null && encryptionPassword.isNotEmpty;
-    final hintLine = (isEncrypted && passwordHint != null && passwordHint.trim().isNotEmpty)
+    final isEncrypted =
+        encryptionPassword != null && encryptionPassword.isNotEmpty;
+    final hintLine =
+        (isEncrypted && passwordHint != null && passwordHint.trim().isNotEmpty)
         ? '\n암호 힌트: $passwordHint'
         : '';
 
@@ -117,7 +124,8 @@ extension BackupServiceShare on BackupService {
     String accountName, {
     String? encryptionPassword,
     String? passwordHint,
-    String backupType = 'full', // 'full', 'transactions_only', 'assets_only', 'wms_only'
+    String backupType =
+        'full', // 'full', 'transactions_only', 'assets_only', 'wms_only'
   }) async {
     final prefs = await SharedPreferences.getInstance();
     final to = prefs.getString(PrefKeys.backupRegisteredEmail);
@@ -129,14 +137,17 @@ extension BackupServiceShare on BackupService {
       backupType: backupType,
     );
 
-    final isEncrypted = encryptionPassword != null && encryptionPassword.isNotEmpty;
-    final hintLine = (isEncrypted && passwordHint != null && passwordHint.trim().isNotEmpty)
+    final isEncrypted =
+        encryptionPassword != null && encryptionPassword.isNotEmpty;
+    final hintLine =
+        (isEncrypted && passwordHint != null && passwordHint.trim().isNotEmpty)
         ? '\n암호 힌트: $passwordHint\n'
         : '';
 
     final email = Email(
       subject: '$accountName 백업 파일 ${isEncrypted ? "(암호화)" : ""}',
-      body: 'SmartLedger 백업 파일입니다.\n'
+      body:
+          'SmartLedger 백업 파일입니다.\n'
           '$hintLine\n'
           '⚠️ 중요: 설정하신 암호는 기기에만 저장되며 서버에 보관되지 않습니다.\n'
           '따라서 암호 분실 시 개발자를 포함한 누구도 데이터 복구가 절대 불가능합니다.\n'

@@ -3,7 +3,10 @@ part of 'backup_screen.dart';
 // ignore_for_file: invalid_use_of_protected_member
 
 extension BackupScreenSettings on _BackupScreenState {
-  String _buildBackupFileName(DateTime timestamp, {_BackupType backupType = _BackupType.full}) {
+  String _buildBackupFileName(
+    DateTime timestamp, {
+    _BackupType backupType = _BackupType.full,
+  }) {
     final date = [
       timestamp.year.toString(),
       timestamp.month.toString().padLeft(2, '0'),
@@ -14,7 +17,7 @@ extension BackupScreenSettings on _BackupScreenState {
       timestamp.minute.toString().padLeft(2, '0'),
       timestamp.second.toString().padLeft(2, '0'),
     ].join();
-    
+
     String typePrefix = '';
     if (backupType == _BackupType.transactionsOnly) {
       typePrefix = '_transactions';
@@ -23,7 +26,7 @@ extension BackupScreenSettings on _BackupScreenState {
     } else if (backupType == _BackupType.wmsOnly) {
       typePrefix = '_wms';
     }
-    
+
     return '${widget.accountName}${typePrefix}_${date}_$time.json';
   }
 

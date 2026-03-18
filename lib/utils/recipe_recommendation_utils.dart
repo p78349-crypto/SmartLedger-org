@@ -223,10 +223,7 @@ class RecipeRecommendationUtils {
     return '$ingredientList 같은 식재료를\n활용해서 ${recipe.recipeName}을(를)\n만들어보세요! 🍳';
   }
 
-  static int _daysLeft(
-    ConsumableInventoryItem item,
-    DateTime now,
-  ) {
+  static int _daysLeft(ConsumableInventoryItem item, DateTime now) {
     final expiryDate = item.expiryDate;
     if (expiryDate == null) {
       return 99999;

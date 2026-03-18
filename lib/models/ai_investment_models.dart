@@ -32,17 +32,17 @@ class InvestmentRecommendation {
     'timeHorizon': timeHorizon.name,
   };
 
-  factory InvestmentRecommendation.fromJson(Map<String, dynamic> json) => 
-    InvestmentRecommendation(
-      symbol: json['symbol'],
-      assetType: InvestmentAssetType.values.byName(json['assetType']),
-      recommendedAllocation: json['recommendedAllocation'].toDouble(),
-      confidenceScore: json['confidenceScore'].toDouble(),
-      riskLevel: InvestmentRiskLevel.values.byName(json['riskLevel']),
-      expectedReturn: json['expectedReturn'].toDouble(),
-      reasoning: json['reasoning'],
-      timeHorizon: InvestmentTimeHorizon.values.byName(json['timeHorizon']),
-    );
+  factory InvestmentRecommendation.fromJson(Map<String, dynamic> json) =>
+      InvestmentRecommendation(
+        symbol: json['symbol'],
+        assetType: InvestmentAssetType.values.byName(json['assetType']),
+        recommendedAllocation: json['recommendedAllocation'].toDouble(),
+        confidenceScore: json['confidenceScore'].toDouble(),
+        riskLevel: InvestmentRiskLevel.values.byName(json['riskLevel']),
+        expectedReturn: json['expectedReturn'].toDouble(),
+        reasoning: json['reasoning'],
+        timeHorizon: InvestmentTimeHorizon.values.byName(json['timeHorizon']),
+      );
 }
 
 enum InvestmentAssetType {
@@ -55,12 +55,7 @@ enum InvestmentAssetType {
   cash,
 }
 
-enum InvestmentRiskLevel {
-  conservative,
-  moderate,
-  aggressive,
-  speculative,
-}
+enum InvestmentRiskLevel { conservative, moderate, aggressive, speculative }
 
 enum InvestmentTimeHorizon {
   shortTerm, // 1-2 years

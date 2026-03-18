@@ -201,15 +201,11 @@ String? _matchesGlobalEmergencyCode(String query) {
   return null;
 }
 
-List<String> _getEmergencyCodeKeywords(
-  String globalId, {
-  String? language,
-}) {
+List<String> _getEmergencyCodeKeywords(String globalId, {String? language}) {
   if (!_globalEmergencyCodes.containsKey(globalId)) return [];
 
   final keywords =
-      _globalEmergencyCodes[globalId]!['keywords']
-          as Map<String, List<String>>;
+      _globalEmergencyCodes[globalId]!['keywords'] as Map<String, List<String>>;
 
   if (language != null && keywords.containsKey(language)) {
     return keywords[language]!;

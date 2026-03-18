@@ -45,13 +45,11 @@ final List<Recipe> _defaultRecipesWHO = [
       'sv':
           '🌟 Misosoppa med kyckling, svamp och grönsaker '
           '(Rekommenderat av WHO)',
-      'th':
-          '🌟 ซุปมิโสะไก่ เห็ด และผัก (แนะนำโดย WHO)',
+      'th': '🌟 ซุปมิโสะไก่ เห็ด และผัก (แนะนำโดย WHO)',
       'tr':
           '🌟 Tavuk, mantar ve sebzeli miso çorbası '
           '(WHO önerisi)',
-      'vi':
-          '🌟 Súp miso với gà, nấm và rau (Được WHO khuyến nghị)',
+      'vi': '🌟 Súp miso với gà, nấm và rau (Được WHO khuyến nghị)',
       'ru':
           '🌟 Тушёное из курицы, грибов и овощей '
           '(Рекомендовано ВОЗ)',
@@ -118,13 +116,11 @@ final List<Recipe> _defaultRecipesWHO = [
       'sv':
           '🌟 Misosoppa med fläsk, svamp och grönsaker '
           '(Rekommenderat av WHO)',
-      'th':
-          '🌟 ซุปมิโสะหมู เห็ด และผัก (แนะนำโดย WHO)',
+      'th': '🌟 ซุปมิโสะหมู เห็ด และผัก (แนะนำโดย WHO)',
       'tr':
           '🌟 Domuz, mantar ve sebzeli miso çorbası '
           '(WHO önerisi)',
-      'vi':
-          '🌟 Súp miso với heo, nấm và rau (Được WHO khuyến nghị)',
+      'vi': '🌟 Súp miso với heo, nấm và rau (Được WHO khuyến nghị)',
       'ru':
           '🌟 Тушёное из свинины, грибов и овощей '
           '(Рекомендовано ВОЗ)',

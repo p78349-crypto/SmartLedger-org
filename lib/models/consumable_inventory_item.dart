@@ -21,7 +21,7 @@ class ConsumableUsageRecord {
 }
 
 /// 생활용품 재고 관리 통합 모델
-/// 
+///
 /// - 생활용품 + 식료품 수량 추적
 /// - 유통기한 관리 지원 (선택사항)
 /// - 사용 기록 및 부족 알림 포함
@@ -40,12 +40,12 @@ class ConsumableInventoryItem {
   final DateTime createdAt; // FIFO: 구매/등록일 기준 정렬용
   final DateTime lastUpdated;
   final List<ConsumableUsageRecord> usageHistory;
-  
+
   // 식료품 관리용 필드 (유통기한 추적)
-  final DateTime? expiryDate;        // 유통기한
-  final DateTime? purchaseDate;      // 구매일 (FoodExpiry와의 호환성)
-  final double? price;               // 구매 가격
-  final String? supplier;            // 구매처
+  final DateTime? expiryDate; // 유통기한
+  final DateTime? purchaseDate; // 구매일 (FoodExpiry와의 호환성)
+  final double? price; // 구매 가격
+  final String? supplier; // 구매처
 
   // 로케이션 옵션 목록
   static const List<String> locationOptions = [
@@ -179,7 +179,7 @@ class ConsumableInventoryItem {
       supplier: supplier ?? this.supplier,
     );
   }
-  
+
   /// 유통기한 임박 여부 (기본 3일 이내)
   bool isExpiringWithin({int days = 3}) {
     if (expiryDate == null) return false;
@@ -187,7 +187,7 @@ class ConsumableInventoryItem {
     final diff = expiryDate!.difference(now).inDays;
     return diff >= 0 && diff <= days;
   }
-  
+
   /// 유통기한 경과 여부
   bool isExpired() {
     if (expiryDate == null) return false;

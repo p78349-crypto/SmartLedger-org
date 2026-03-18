@@ -34,22 +34,32 @@ class AssetManagementUtils {
   /// 이동 유형 이모지 반환
   static String getMoveTypeEmoji(AssetMoveType type) {
     switch (type) {
-      case AssetMoveType.purchase: return '💰';
-      case AssetMoveType.sale: return '💸';
-      case AssetMoveType.transfer: return '🔄';
-      case AssetMoveType.exchange: return '🔁';
-      case AssetMoveType.deposit: return '📥';
+      case AssetMoveType.purchase:
+        return '💰';
+      case AssetMoveType.sale:
+        return '💸';
+      case AssetMoveType.transfer:
+        return '🔄';
+      case AssetMoveType.exchange:
+        return '🔁';
+      case AssetMoveType.deposit:
+        return '📥';
     }
   }
 
   /// 이동 유형 라벨 반환
   static String getMoveTypeLabel(AssetMoveType type) {
     switch (type) {
-      case AssetMoveType.purchase: return '매수/구매';
-      case AssetMoveType.sale: return '매도/판매';
-      case AssetMoveType.transfer: return '이동/송금';
-      case AssetMoveType.exchange: return '교환/전환';
-      case AssetMoveType.deposit: return '입금';
+      case AssetMoveType.purchase:
+        return '매수/구매';
+      case AssetMoveType.sale:
+        return '매도/판매';
+      case AssetMoveType.transfer:
+        return '이동/송금';
+      case AssetMoveType.exchange:
+        return '교환/전환';
+      case AssetMoveType.deposit:
+        return '입금';
     }
   }
 

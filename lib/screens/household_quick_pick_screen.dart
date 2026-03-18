@@ -15,7 +15,8 @@ class HouseholdQuickPickScreen extends StatefulWidget {
   const HouseholdQuickPickScreen({super.key, required this.accountName});
 
   @override
-  State<HouseholdQuickPickScreen> createState() => _HouseholdQuickPickScreenState();
+  State<HouseholdQuickPickScreen> createState() =>
+      _HouseholdQuickPickScreenState();
 }
 
 class _HouseholdQuickPickScreenState extends State<HouseholdQuickPickScreen> {
@@ -46,7 +47,8 @@ class _HouseholdQuickPickScreenState extends State<HouseholdQuickPickScreen> {
         _isLoading = false;
         if (cats.isNotEmpty) {
           _selectedCategory = cats.first;
-          _displayProducts = HouseholdDataService.instance.getProductsByCategory(_selectedCategory!);
+          _displayProducts = HouseholdDataService.instance
+              .getProductsByCategory(_selectedCategory!);
         }
       });
     }
@@ -57,14 +59,18 @@ class _HouseholdQuickPickScreenState extends State<HouseholdQuickPickScreen> {
     setState(() {
       _selectedCategory = category;
       _searchController.clear();
-      _displayProducts = HouseholdDataService.instance.getProductsByCategory(category);
+      _displayProducts = HouseholdDataService.instance.getProductsByCategory(
+        category,
+      );
     });
   }
 
   void _onSearch(String query) {
     setState(() {
       if (query.isEmpty && _selectedCategory != null) {
-        _displayProducts = HouseholdDataService.instance.getProductsByCategory(_selectedCategory!);
+        _displayProducts = HouseholdDataService.instance.getProductsByCategory(
+          _selectedCategory!,
+        );
       } else {
         _displayProducts = HouseholdDataService.instance.search(query);
       }
@@ -97,22 +103,26 @@ class _HouseholdQuickPickScreenState extends State<HouseholdQuickPickScreen> {
       final now = DateTime.now();
       final newItems = <ShoppingCartItem>[];
 
-      final productsToAdd = _displayProducts.where((p) => _selectedCodes.contains(p.code)).toList();
+      final productsToAdd = _displayProducts
+          .where((p) => _selectedCodes.contains(p.code))
+          .toList();
       // Handle searchable products that might not be in _displayProducts currently
       // simplified: if they were selected and not in _displayProducts, we might need to search again or cache them
       // For now, assume they are in _displayProducts or we can get them from service
-      
+
       for (var i = 0; i < productsToAdd.length; i++) {
         final p = productsToAdd[i];
-        newItems.add(ShoppingCartItem(
-          id: 'quick_${now.millisecondsSinceEpoch}_$i',
-          name: p.name,
-          quantity: _quantities[p.code] ?? 1,
-          unitLabel: p.unit,
-          memo: '${p.category1} > ${p.category4}',
-          createdAt: now,
-          updatedAt: now,
-        ));
+        newItems.add(
+          ShoppingCartItem(
+            id: 'quick_${now.millisecondsSinceEpoch}_$i',
+            name: p.name,
+            quantity: _quantities[p.code] ?? 1,
+            unitLabel: p.unit,
+            memo: '${p.category1} > ${p.category4}',
+            createdAt: now,
+            updatedAt: now,
+          ),
+        );
       }
 
       await UserPrefService.setShoppingCartItems(
@@ -121,7 +131,10 @@ class _HouseholdQuickPickScreenState extends State<HouseholdQuickPickScreen> {
       );
 
       if (mounted) {
-        SnackbarUtils.showSuccess(context, '${newItems.length}개 항목이 장바구니에 추가되었습니다.');
+        SnackbarUtils.showSuccess(
+          context,
+          '${newItems.length}개 항목이 장바구니에 추가되었습니다.',
+        );
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (ctx) => ShoppingCartScreen(
@@ -145,8 +158,10 @@ class _HouseholdQuickPickScreenState extends State<HouseholdQuickPickScreen> {
     }
 
     try {
-      final productsToAdd = _displayProducts.where((p) => _selectedCodes.contains(p.code)).toList();
-      
+      final productsToAdd = _displayProducts
+          .where((p) => _selectedCodes.contains(p.code))
+          .toList();
+
       for (final p in productsToAdd) {
         final qty = _quantities[p.code]?.toDouble() ?? 1.0;
         await ConsumableInventoryService.instance.addItem(
@@ -159,7 +174,10 @@ class _HouseholdQuickPickScreenState extends State<HouseholdQuickPickScreen> {
       }
 
       if (mounted) {
-        SnackbarUtils.showSuccess(context, '${productsToAdd.length}개 항목이 내 생활용품(재고)에 추가되었습니다.');
+        SnackbarUtils.showSuccess(
+          context,
+          '${productsToAdd.length}개 항목이 내 생활용품(재고)에 추가되었습니다.',
+        );
         setState(() {
           _selectedCodes.clear();
           _quantities.clear();
@@ -216,7 +234,14 @@ class _HouseholdQuickPickScreenState extends State<HouseholdQuickPickScreen> {
                       border: OutlineInputBorder(),
                       isDense: true,
                     ),
-                    items: categories.map((c) => DropdownMenuItem(value: c, child: Text(c, overflow: TextOverflow.ellipsis))).toList(),
+                    items: categories
+                        .map(
+                          (c) => DropdownMenuItem(
+                            value: c,
+                            child: Text(c, overflow: TextOverflow.ellipsis),
+                          ),
+                        )
+                        .toList(),
                     onChanged: _onCategoryChanged,
                   ),
                 ),
@@ -250,9 +275,14 @@ class _HouseholdQuickPickScreenState extends State<HouseholdQuickPickScreen> {
                     value: isSelected,
                     onChanged: (_) => _toggleSelection(product),
                   ),
-                  title: Text(product.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text('${product.categoryPath} > ${product.category4}'),
-                  trailing: isSelected 
+                  title: Text(
+                    product.name,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Text(
+                    '${product.categoryPath} > ${product.category4}',
+                  ),
+                  trailing: isSelected
                       ? Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -260,7 +290,11 @@ class _HouseholdQuickPickScreenState extends State<HouseholdQuickPickScreen> {
                               icon: const Icon(Icons.remove_circle_outline),
                               onPressed: () {
                                 final q = _quantities[product.code] ?? 1;
-                                if (q > 1) setState(() => _quantities[product.code] = q - 1);
+                                if (q > 1) {
+                                  setState(
+                                    () => _quantities[product.code] = q - 1,
+                                  );
+                                }
                               },
                             ),
                             Text('${_quantities[product.code] ?? 1}'),
@@ -268,7 +302,9 @@ class _HouseholdQuickPickScreenState extends State<HouseholdQuickPickScreen> {
                               icon: const Icon(Icons.add_circle_outline),
                               onPressed: () {
                                 final q = _quantities[product.code] ?? 1;
-                                setState(() => _quantities[product.code] = q + 1);
+                                setState(
+                                  () => _quantities[product.code] = q + 1,
+                                );
                               },
                             ),
                           ],
@@ -288,8 +324,12 @@ class _HouseholdQuickPickScreenState extends State<HouseholdQuickPickScreen> {
                     height: 50,
                     child: FilledButton.icon(
                       style: FilledButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-                        foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
+                        backgroundColor: Theme.of(
+                          context,
+                        ).colorScheme.secondaryContainer,
+                        foregroundColor: Theme.of(
+                          context,
+                        ).colorScheme.onSecondaryContainer,
                       ),
                       icon: const Icon(IconCatalog.shoppingCart),
                       label: Text('장바구니 (${_selectedCodes.length})'),
@@ -304,7 +344,9 @@ class _HouseholdQuickPickScreenState extends State<HouseholdQuickPickScreen> {
                     child: FilledButton.icon(
                       icon: const Icon(IconCatalog.inventory2),
                       label: Text('내 생품 추가 (${_selectedCodes.length})'),
-                      onPressed: _selectedCodes.isEmpty ? null : _addToInventory,
+                      onPressed: _selectedCodes.isEmpty
+                          ? null
+                          : _addToInventory,
                     ),
                   ),
                 ),

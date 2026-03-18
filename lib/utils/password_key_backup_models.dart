@@ -1,8 +1,4 @@
-enum KeyBackupServerPolicyMode {
-  required,
-  optional,
-  disabled,
-}
+enum KeyBackupServerPolicyMode { required, optional, disabled }
 
 extension KeyBackupServerPolicyModeX on KeyBackupServerPolicyMode {
   String get value {
@@ -29,12 +25,7 @@ extension KeyBackupServerPolicyModeX on KeyBackupServerPolicyMode {
   }
 }
 
-enum PasswordKeyBackupStatus {
-  success,
-  offline,
-  disabled,
-  failed,
-}
+enum PasswordKeyBackupStatus { success, offline, disabled, failed }
 
 class PasswordKeyBackupResult {
   const PasswordKeyBackupResult._(

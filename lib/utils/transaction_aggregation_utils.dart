@@ -34,14 +34,16 @@ class TransactionAggregationUtils {
   }) {
     switch (type) {
       case TransactionType.expense:
-        return tx.type == TransactionType.expense || isSavingsCountedAsExpense(tx);
+        return tx.type == TransactionType.expense ||
+            isSavingsCountedAsExpense(tx);
       case TransactionType.income:
         return tx.type == TransactionType.income ||
             (includeRefundInIncome && tx.type == TransactionType.refund);
       case TransactionType.refund:
         return tx.type == TransactionType.refund;
       case TransactionType.savings:
-        return tx.type == TransactionType.savings && !isSavingsCountedAsExpense(tx);
+        return tx.type == TransactionType.savings &&
+            !isSavingsCountedAsExpense(tx);
     }
   }
 }

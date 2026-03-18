@@ -11,16 +11,16 @@ extension IncrementalBackupPrivateMethods on IncrementalBackupService {
   Future<Map<String, BackupChecksum>> _loadChecksums() async {
     final prefs = await SharedPreferences.getInstance();
     final checksumData = prefs.getString(_checksumKey);
-    
+
     if (checksumData == null) return {};
-    
+
     final Map<String, dynamic> json = jsonDecode(checksumData);
     final checksums = <String, BackupChecksum>{};
-    
+
     for (final entry in json.entries) {
       checksums[entry.key] = BackupChecksum.fromJson(entry.value);
     }
-    
+
     return checksums;
   }
 
@@ -30,12 +30,12 @@ extension IncrementalBackupPrivateMethods on IncrementalBackupService {
   ) async {
     final prefs = await SharedPreferences.getInstance();
     final checksums = <String, BackupChecksum>{};
-    
+
     for (final entry in currentData.entries) {
       final dataType = entry.key;
       final data = entry.value;
       final checksum = IncrementalBackupHelper.generateChecksum(data);
-      
+
       checksums[dataType] = BackupChecksum(
         dataId: dataType,
         dataType: dataType,
@@ -43,7 +43,7 @@ extension IncrementalBackupPrivateMethods on IncrementalBackupService {
         lastModified: DateTime.now(),
       );
     }
-    
+
     final json = checksums.map((k, v) => MapEntry(k, v.toJson()));
     await prefs.setString(_checksumKey, jsonEncode(json));
   }
@@ -63,10 +63,7 @@ extension IncrementalBackupPrivateMethods on IncrementalBackupService {
   // Save last backup timestamp
   Future<void> _saveLastBackupTime() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(
-      _lastBackupKey,
-      DateTime.now().toIso8601String(),
-    );
+    await prefs.setString(_lastBackupKey, DateTime.now().toIso8601String());
   }
 
   // Get last backup time

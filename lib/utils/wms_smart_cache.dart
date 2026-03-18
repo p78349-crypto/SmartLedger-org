@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../models/consumable_inventory_item.dart';
 import '../services/consumable_inventory_service.dart';
-import 'wms_optimization_settings.dart';  // 🚀 최적화 설정 추가
+import 'wms_optimization_settings.dart'; // 🚀 최적화 설정 추가
 
 /// WMS 고성능 캐시 매니저
 class WmsSmartCache {
@@ -17,13 +17,17 @@ class WmsSmartCache {
   final Map<String, List<ConsumableInventoryItem>> _locationCache = {};
   final Map<String, List<ConsumableInventoryItem>> _queryCache = {};
   List<ConsumableInventoryItem>? _allItemsCache;
-  
+
   DateTime? _lastFullRefresh;
   DateTime? _lastLocationRefresh;
-  
+
   // 캐시 설정
-  static const Duration _fullCacheDuration = Duration(minutes: 10); // 전체 캐시: 10분
-  static const Duration _locationCacheDuration = Duration(minutes: 5); // 위치별: 5분  
+  static const Duration _fullCacheDuration = Duration(
+    minutes: 10,
+  ); // 전체 캐시: 10분
+  static const Duration _locationCacheDuration = Duration(
+    minutes: 5,
+  ); // 위치별: 5분
   static const Duration _queryCacheDuration = Duration(minutes: 3); // 검색: 3분
   static const int _maxQueryCache = 50; // 최대 검색 캐시 수
   static const int _maxItemsInMemory = 1000; // 메모리 제한
@@ -40,8 +44,8 @@ class WmsSmartCache {
     final now = DateTime.now();
 
     // 캐시 유효성 검사
-    if (!forceRefresh && 
-        _allItemsCache != null && 
+    if (!forceRefresh &&
+        _allItemsCache != null &&
         _lastFullRefresh != null &&
         now.difference(_lastFullRefresh!) < _fullCacheDuration) {
       return _allItemsCache!;
@@ -85,8 +89,8 @@ class WmsSmartCache {
     final cacheKey = 'location_$location';
 
     // 캐시 확인
-    if (!forceRefresh && 
-        _locationCache.containsKey(cacheKey) && 
+    if (!forceRefresh &&
+        _locationCache.containsKey(cacheKey) &&
         _lastLocationRefresh != null &&
         now.difference(_lastLocationRefresh!) < _locationCacheDuration) {
       return _locationCache[cacheKey]!;
@@ -94,9 +98,9 @@ class WmsSmartCache {
 
     // 전체 아이템에서 필터링
     final allItems = await getAllItems(forceRefresh: forceRefresh);
-    final locationItems = location == '전체' 
-      ? allItems 
-      : allItems.where((item) => item.location == location).toList();
+    final locationItems = location == '전체'
+        ? allItems
+        : allItems.where((item) => item.location == location).toList();
 
     // 위치별 캐시 업데이트
     _locationCache[cacheKey] = List.unmodifiable(locationItems);
@@ -128,7 +132,7 @@ class WmsSmartCache {
 
     for (final item in allItems) {
       final itemName = item.name.toLowerCase();
-      
+
       if (exactMatch) {
         if (itemName == normalizedQuery) {
           results.add(item);
@@ -189,7 +193,9 @@ class WmsSmartCache {
   void _cleanupIfNeeded() {
     // 쿼리 캐시 크기 제한
     if (_queryCache.length > _maxQueryCache) {
-      final keysToRemove = _queryCache.keys.take(_queryCache.length - _maxQueryCache);
+      final keysToRemove = _queryCache.keys.take(
+        _queryCache.length - _maxQueryCache,
+      );
       for (final key in keysToRemove) {
         _queryCache.remove(key);
       }

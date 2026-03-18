@@ -194,9 +194,7 @@ extension QuickStockSheet on _QuickStockUseBodyState {
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      color: isEmpty
-          ? Colors.red.shade50
-          : null,
+      color: isEmpty ? Colors.red.shade50 : null,
       child: ListTile(
         onTap: isEmpty ? null : onTap,
         leading: CircleAvatar(

@@ -8,7 +8,7 @@ class HelpCenterScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('도움말 센터'),
@@ -133,19 +133,15 @@ class HelpCenterScreen extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.help_center,
-                  size: 32,
-                  color: colorScheme.primary,
-                ),
+                Icon(Icons.help_center, size: 32, color: colorScheme.primary),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     'SmartLedger 도움말',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          color: colorScheme.onPrimaryContainer,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      color: colorScheme.onPrimaryContainer,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
@@ -155,8 +151,8 @@ class HelpCenterScreen extends StatelessWidget {
               '원하는 카테고리를 선택하여 상세한 도움말을 확인하세요. '
               '처음 사용하시는 경우 "빠른 시작 가이드"를 추천합니다.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onPrimaryContainer,
-                  ),
+                color: colorScheme.onPrimaryContainer,
+              ),
             ),
           ],
         ),
@@ -175,10 +171,7 @@ class HelpCenterScreen extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [
-                Colors.amber.shade100,
-                Colors.orange.shade100,
-              ],
+              colors: [Colors.amber.shade100, Colors.orange.shade100],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -210,10 +203,7 @@ class HelpCenterScreen extends StatelessWidget {
                         children: [
                           Row(
                             children: [
-                              const Text(
-                                '⭐ ',
-                                style: TextStyle(fontSize: 16),
-                              ),
+                              const Text('⭐ ', style: TextStyle(fontSize: 16)),
                               Text(
                                 '추천',
                                 style: TextStyle(
@@ -264,11 +254,23 @@ class HelpCenterScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       _buildMiniStep('1️⃣', '레시피', Colors.blue.shade400),
-                      Icon(Icons.arrow_forward, size: 16, color: Colors.grey.shade400),
+                      Icon(
+                        Icons.arrow_forward,
+                        size: 16,
+                        color: Colors.grey.shade400,
+                      ),
                       _buildMiniStep('2️⃣', '장바구니', Colors.green.shade400),
-                      Icon(Icons.arrow_forward, size: 16, color: Colors.grey.shade400),
+                      Icon(
+                        Icons.arrow_forward,
+                        size: 16,
+                        color: Colors.grey.shade400,
+                      ),
                       _buildMiniStep('3️⃣', '지출입력', Colors.orange.shade400),
-                      Icon(Icons.arrow_forward, size: 16, color: Colors.grey.shade400),
+                      Icon(
+                        Icons.arrow_forward,
+                        size: 16,
+                        color: Colors.grey.shade400,
+                      ),
                       _buildMiniStep('4️⃣', '일일거래', Colors.purple.shade400),
                     ],
                   ),
@@ -366,18 +368,12 @@ class HelpCenterScreen extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       description,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 13, color: Colors.grey[600]),
                     ),
                   ],
                 ),
               ),
-              Icon(
-                Icons.chevron_right,
-                color: Colors.grey[400],
-              ),
+              Icon(Icons.chevron_right, color: Colors.grey[400]),
             ],
           ),
         ),
@@ -410,10 +406,7 @@ class HelpCenterScreen extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               '설정 → 도움말 → 문의하기를 통해 개발팀에 직접 연락하실 수 있습니다.',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
             ),
           ],
         ),

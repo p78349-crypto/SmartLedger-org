@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/consumable_inventory_item.dart';
 import '../utils/wms_optimized_barcode_service.dart';
 import '../utils/wms_smart_cache.dart';
-import '../utils/wms_performance_monitor.dart';  // 🚀 성능 모니터링 추가
+import '../utils/wms_performance_monitor.dart'; // 🚀 성능 모니터링 추가
 
 /// 📱 WMS 성능 최적화 PDA 화면
 class WmsOptimizedPdaScreen extends StatefulWidget {
@@ -22,28 +22,27 @@ class WmsOptimizedPdaScreen extends StatefulWidget {
 
 class _WmsOptimizedPdaScreenState extends State<WmsOptimizedPdaScreen>
     with TickerProviderStateMixin {
-  
   // 🎯 성능 최적화된 서비스들
   final _barcodeService = WmsOptimizedBarcodeService.instance;
   final _cache = WmsSmartCache.instance;
-  final _performanceMonitor = WmsPerformanceMonitor.instance;  // 🚀 성능 모니터링
-  
+  final _performanceMonitor = WmsPerformanceMonitor.instance; // 🚀 성능 모니터링
+
   // 📱 UI 상태 관리
   final ValueNotifier<WmsAppState> _appState = ValueNotifier(WmsAppState.idle);
   final ValueNotifier<List<WmsQuickItem>> _scannedItems = ValueNotifier([]);
   final ValueNotifier<String?> _statusMessage = ValueNotifier(null);
-  
+
   // 🎮 입력 컨트롤러
   late TextEditingController _barcodeController;
   late TextEditingController _quantityController;
   late FocusNode _barcodeFocus;
   late FocusNode _quantityFocus;
-  
+
   // ⚡ 성능 최적화 변수
   late AnimationController _scanAnimationController;
   Timer? _debounceTimer;
   String _lastBarcode = '';
-  
+
   @override
   void initState() {
     super.initState();
@@ -66,7 +65,7 @@ class _WmsOptimizedPdaScreenState extends State<WmsOptimizedPdaScreen>
     _quantityController = TextEditingController(text: '1');
     _barcodeFocus = FocusNode();
     _quantityFocus = FocusNode();
-    
+
     // 바코드 입력 시 디바운싱 적용
     _barcodeController.addListener(_onBarcodeChanged);
   }
@@ -96,11 +95,11 @@ class _WmsOptimizedPdaScreenState extends State<WmsOptimizedPdaScreen>
   /// 📝 바코드 입력 변경 감지 (디바운싱)
   void _onBarcodeChanged() {
     final barcode = _barcodeController.text.trim();
-    
+
     // 중복 처리 방지
     if (barcode == _lastBarcode) return;
     _lastBarcode = barcode;
-    
+
     // 디바운싱: 500ms 후에 검색 실행
     _debounceTimer?.cancel();
     _debounceTimer = Timer(const Duration(milliseconds: 500), () {
@@ -135,10 +134,7 @@ class _WmsOptimizedPdaScreenState extends State<WmsOptimizedPdaScreen>
         );
         _moveToQuantityInput();
       } else {
-        _updateStatus(
-          result.error ?? '바코드를 찾을 수 없습니다',
-          isError: true,
-        );
+        _updateStatus(result.error ?? '바코드를 찾을 수 없습니다', isError: true);
       }
     } catch (e) {
       _updateStatus('검색 오류: $e', isError: true);
@@ -163,7 +159,7 @@ class _WmsOptimizedPdaScreenState extends State<WmsOptimizedPdaScreen>
     if (currentItems.length >= 100) {
       currentItems.removeAt(0); // 오래된 항목 제거
     }
-    
+
     currentItems.add(newItem);
     _scannedItems.value = currentItems;
   }
@@ -187,7 +183,7 @@ class _WmsOptimizedPdaScreenState extends State<WmsOptimizedPdaScreen>
   /// 💬 상태 메시지 업데이트
   void _updateStatus(String message, {required bool isError}) {
     _statusMessage.value = message;
-    
+
     // 3초 후 메시지 자동 제거
     Timer(const Duration(seconds: 3), () {
       if (_statusMessage.value == message) {
@@ -235,28 +231,26 @@ class _WmsOptimizedPdaScreenState extends State<WmsOptimizedPdaScreen>
         children: [
           // 🎯 입력 영역 (최적화된 레이아웃)
           _buildOptimizedInputSection(),
-          
+
           // 📊 상태 표시 영역
           _buildStatusSection(),
-          
+
           // 📝 스캔된 아이템 목록 (가상화된 리스트)
-          Expanded(
-            child: _buildOptimizedItemList(),
-          ),
+          Expanded(child: _buildOptimizedItemList()),
         ],
       ),
-      
+
       // ⚡ 빠른 저장 플로팅 버튼
       floatingActionButton: ValueListenableBuilder<List<WmsQuickItem>>(
         valueListenable: _scannedItems,
         builder: (context, items, _) {
-          return items.isEmpty 
-            ? const SizedBox.shrink()
-            : FloatingActionButton.extended(
-                onPressed: _processBatchSave,
-                icon: const Icon(Icons.save),
-                label: Text('저장 (${items.length})'),
-              );
+          return items.isEmpty
+              ? const SizedBox.shrink()
+              : FloatingActionButton.extended(
+                  onPressed: _processBatchSave,
+                  icon: const Icon(Icons.save),
+                  label: Text('저장 (${items.length})'),
+                );
         },
       ),
     );
@@ -285,9 +279,9 @@ class _WmsOptimizedPdaScreenState extends State<WmsOptimizedPdaScreen>
                 onEditingComplete: () => _quantityFocus.requestFocus(),
               ),
             ),
-            
+
             const SizedBox(width: 12),
-            
+
             // 수량 입력 필드
             Expanded(
               child: TextField(
@@ -314,7 +308,7 @@ class _WmsOptimizedPdaScreenState extends State<WmsOptimizedPdaScreen>
       valueListenable: _statusMessage,
       builder: (context, message, _) {
         if (message == null) return const SizedBox.shrink();
-        
+
         return Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -364,14 +358,8 @@ class _WmsOptimizedPdaScreenState extends State<WmsOptimizedPdaScreen>
   /// 🎯 최적화된 아이템 타일
   Widget _buildOptimizedItemTile(WmsQuickItem item, int index) {
     return ListTile(
-      leading: CircleAvatar(
-        child: Text('${index + 1}'),
-      ),
-      title: Text(
-        item.name,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
+      leading: CircleAvatar(child: Text('${index + 1}')),
+      title: Text(item.name, maxLines: 1, overflow: TextOverflow.ellipsis),
       subtitle: Text('수량: ${item.quantity} | ${item.barcode}'),
       trailing: IconButton(
         icon: const Icon(Icons.delete),
@@ -413,7 +401,7 @@ class _WmsOptimizedPdaScreenState extends State<WmsOptimizedPdaScreen>
   void _showPerformanceStats() {
     final cacheStats = _cache.getCacheStats();
     final barcodeStats = _barcodeService.getPerformanceStats();
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -442,9 +430,9 @@ class _WmsOptimizedPdaScreenState extends State<WmsOptimizedPdaScreen>
 
 /// 앱 상태 열거형
 enum WmsAppState {
-  idle,       // 대기 중
+  idle, // 대기 중
   processing, // 처리 중
-  error,      // 오류
+  error, // 오류
 }
 
 /// 빠른 입력 아이템 모델

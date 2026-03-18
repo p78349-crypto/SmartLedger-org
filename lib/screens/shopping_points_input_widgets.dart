@@ -195,6 +195,7 @@ class ShoppingDatePickerCard extends StatelessWidget {
     );
   }
 }
+
 /// 할인 정보 입력 섹션
 class ShoppingDiscountInputs extends StatelessWidget {
   const ShoppingDiscountInputs({
@@ -282,8 +283,7 @@ Transaction? createShoppingDiscountTransaction({
     if (martName.isNotEmpty) '마트:$martName',
     if (paymentMethod.isNotEmpty) '결제:$paymentMethod',
     '합계:${CurrencyFormatter.format(totalAmount)}',
-    if (chargedAmount > 0)
-      '카드결제:${CurrencyFormatter.format(chargedAmount)}',
+    if (chargedAmount > 0) '카드결제:${CurrencyFormatter.format(chargedAmount)}',
     if (cardPoint > 0) '카드포인트:${CurrencyFormatter.format(cardPoint)}',
     if (martDiscount > 0) '마트할인:${CurrencyFormatter.format(martDiscount)}',
     if (memo.isNotEmpty) memo,

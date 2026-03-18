@@ -16,8 +16,14 @@ void main() {
   });
   group('TransactionService', () {
     late TransactionService service;
+    late Directory tempDir;
+    late String auditLogPath;
 
     setUp(() async {
+      tempDir = await Directory.systemTemp.createTemp('sl_tx_audit_');
+      auditLogPath = '${tempDir.path}${Platform.pathSeparator}audit_log.jsonl';
+      AuditLogService.setLogFilePathForTesting(auditLogPath);
+
       // Reset mock SharedPreferences for isolation across tests
       SharedPreferences.setMockInitialValues({
         PrefKeys.txStorageBackendV1: 'prefs',
@@ -25,7 +31,7 @@ void main() {
       service = TransactionService();
       service.resetForTesting();
       await service.loadTransactions();
-      final auditFile = File('audit_log.jsonl');
+      final auditFile = File(auditLogPath);
       if (auditFile.existsSync()) {
         await auditFile.delete();
       }
@@ -34,6 +40,13 @@ void main() {
         await service.deleteAccount('test_account');
       }
       await service.createAccount('test_account');
+    });
+
+    tearDown(() async {
+      AuditLogService.setLogFilePathForTesting(null);
+      if (tempDir.existsSync()) {
+        await tempDir.delete(recursive: true);
+      }
     });
 
     test('should create account', () async {
@@ -147,25 +160,29 @@ void main() {
       expect(summary.metadata?['threshold'], equals(3));
     });
 
-    test('scenario A: normal transaction should not emit anomaly signals', () async {
-      final tx = Transaction(
-        id: 'scenario-a-001',
-        type: TransactionType.expense,
-        amount: 12000,
-        date: DateTime.now().copyWith(hour: 14, minute: 20),
-        description: '정상 거래',
-      );
+    test(
+      'scenario A: normal transaction should not emit anomaly signals',
+      () async {
+        final tx = Transaction(
+          id: 'scenario-a-001',
+          type: TransactionType.expense,
+          amount: 12000,
+          date: DateTime.now().copyWith(hour: 14, minute: 20),
+          description: '정상 거래',
+        );
 
-      await service.addTransaction('test_account', tx);
-      final logs = await AuditLogService.getRecentLogs(limit: 30);
+        await service.addTransaction('test_account', tx);
+        final logs = await AuditLogService.getRecentLogs(limit: 30);
 
-      final hasAnomalySignal = logs.any(
-        (e) => e.action.startsWith('anomaly_signal_') ||
-            e.action == 'anomaly_detection_summary',
-      );
+        final hasAnomalySignal = logs.any(
+          (e) =>
+              e.action.startsWith('anomaly_signal_') ||
+              e.action == 'anomaly_detection_summary',
+        );
 
-      expect(hasAnomalySignal, isFalse);
-    });
+        expect(hasAnomalySignal, isFalse);
+      },
+    );
 
     test('scenario B: boundary anomaly should warn without lock', () async {
       final prefs = await SharedPreferences.getInstance();

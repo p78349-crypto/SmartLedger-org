@@ -60,8 +60,9 @@ extension TransactionDetailRefundProcess on _TransactionDetailScreenState {
     // 1. 원본 거래 수량/금액 차감
     final remainingQty = tx.quantity - refundQuantity;
     if (remainingQty > 0) {
-      final perUnit =
-          tx.unitPrice > 0 ? tx.unitPrice : (tx.amount / tx.quantity);
+      final perUnit = tx.unitPrice > 0
+          ? tx.unitPrice
+          : (tx.amount / tx.quantity);
       final remainingAmount = perUnit * remainingQty;
       final refundNote =
           '$refundQuantity개 반품됨 (${refundAmount.toStringAsFixed(0)}원)';
@@ -119,8 +120,9 @@ extension TransactionDetailRefundProcess on _TransactionDetailScreenState {
       final processedMessage =
           '반품이 처리되었습니다 (환불: '
           '${refundAmount.toStringAsFixed(0)}원 → $selectedAccount)';
-      ScaffoldMessenger.of(ctx)
-          .showSnackBar(SnackBar(content: Text(processedMessage)));
+      ScaffoldMessenger.of(
+        ctx,
+      ).showSnackBar(SnackBar(content: Text(processedMessage)));
     }
   }
 
@@ -145,8 +147,7 @@ extension TransactionDetailRefundProcess on _TransactionDetailScreenState {
     final autoMemo =
         '${tx.description} $refundQuantity개 환불받음 '
         '$refundAmountText원 → 지출예산\n';
-    final memoSuffix =
-        '\n원구매일: $origDate, 원결제수단: ${tx.paymentMethod}';
+    final memoSuffix = '\n원구매일: $origDate, 원결제수단: ${tx.paymentMethod}';
     final refundTx = Transaction(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       type: TransactionType.refund,
@@ -156,9 +157,7 @@ extension TransactionDetailRefundProcess on _TransactionDetailScreenState {
       quantity: refundQuantity,
       unitPrice: tx.unitPrice,
       paymentMethod: _resolvedPaymentMethod(methodCtrl, refundChannel),
-      memo: memoCtrl.text.isEmpty
-          ? autoMemo
-          : '${memoCtrl.text}$memoSuffix',
+      memo: memoCtrl.text.isEmpty ? autoMemo : '${memoCtrl.text}$memoSuffix',
       store: tx.store,
       isRefund: true,
       originalTransactionId: tx.id,
@@ -187,8 +186,7 @@ extension TransactionDetailRefundProcess on _TransactionDetailScreenState {
     final refundAmountText = refundAmount.toStringAsFixed(0);
     final origDate = DateFormatter.defaultDate.format(tx.date);
     final refundNote = '$refundAmountText원 → $selectedAccount';
-    final refundDetails =
-        '\n원구매일: $origDate, 원결제수단: ${tx.paymentMethod}';
+    final refundDetails = '\n원구매일: $origDate, 원결제수단: ${tx.paymentMethod}';
     final autoMemo =
         '${tx.description} $refundQuantity개 환불받음 '
         '$refundNote$refundDetails';
@@ -227,18 +225,23 @@ extension TransactionDetailRefundProcess on _TransactionDetailScreenState {
   // --- Refund form widgets --------------------------------------------------
 
   Widget _refundChannelSelector(
-    BuildContext ctx, String refundChannel, void Function(String) onSelect,
+    BuildContext ctx,
+    String refundChannel,
+    void Function(String) onSelect,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('환불 수단을 선택하세요',
-            style: TextStyle(fontWeight: FontWeight.w500)),
+        const Text(
+          '환불 수단을 선택하세요',
+          style: TextStyle(fontWeight: FontWeight.w500),
+        ),
         const SizedBox(height: 8),
         ...['계좌이체', '카드', '현금', '기타'].map((option) {
           final sel = refundChannel == option;
           return ListTile(
-            contentPadding: EdgeInsets.zero, dense: true,
+            contentPadding: EdgeInsets.zero,
+            dense: true,
             leading: Icon(
               sel ? IconCatalog.radioButtonChecked : IconCatalog.radioButtonOff,
               color: sel ? Theme.of(ctx).colorScheme.primary : null,
@@ -252,7 +255,9 @@ extension TransactionDetailRefundProcess on _TransactionDetailScreenState {
   }
 
   Widget _refundMethodAutocomplete(
-    String refundChannel, TextEditingController ctrl, List<String> recentMethods,
+    String refundChannel,
+    TextEditingController ctrl,
+    List<String> recentMethods,
   ) => Autocomplete<String>(
     initialValue: TextEditingValue(text: ctrl.text),
     optionsBuilder: (tv) {
@@ -263,32 +268,41 @@ extension TransactionDetailRefundProcess on _TransactionDetailScreenState {
     },
     onSelected: (selection) => ctrl.text = selection,
     fieldViewBuilder: (ctx, controller, focusNode, onSubmitted) => TextField(
-      controller: controller, focusNode: focusNode,
+      controller: controller,
+      focusNode: focusNode,
       decoration: InputDecoration(
         labelText: refundChannel == '카드' ? '카드사/카드명' : '환불 수단 상세',
-        border: const OutlineInputBorder(), isDense: true,
+        border: const OutlineInputBorder(),
+        isDense: true,
       ),
       onChanged: (v) => ctrl.text = v,
     ),
   );
 
   Widget _refundAccountSelector(
-    BuildContext ctx, String selectedAccount, void Function(String) onSelect,
+    BuildContext ctx,
+    String selectedAccount,
+    void Function(String) onSelect,
   ) {
     final theme = Theme.of(ctx);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('환불금을 어디로 받을까요?',
-            style: TextStyle(fontWeight: FontWeight.w500)),
+        const Text(
+          '환불금을 어디로 받을까요?',
+          style: TextStyle(fontWeight: FontWeight.w500),
+        ),
         const SizedBox(height: 8),
         ...['지출 예산', '비상금', '자산'].map((option) {
           final sel = selectedAccount == option;
           return ListTile(
-            contentPadding: EdgeInsets.zero, dense: true,
+            contentPadding: EdgeInsets.zero,
+            dense: true,
             leading: Icon(
               sel ? IconCatalog.radioButtonChecked : IconCatalog.radioButtonOff,
-              color: sel ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
+              color: sel
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.onSurfaceVariant,
             ),
             title: Text(option),
             onTap: () => onSelect(option),

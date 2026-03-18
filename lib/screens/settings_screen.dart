@@ -52,12 +52,15 @@ class _SettingsScreenState extends State<SettingsScreen>
         prefs.getBool(PrefKeys.zeroQuickButtonsEnabled) ?? false;
     final aiInvestmentConsentAccepted =
         prefs.getBool(PrefKeys.aiInvestmentConsentAccepted) ?? false;
-    final aiInvestmentConsentAcceptedAtMs =
-        prefs.getInt(PrefKeys.aiInvestmentConsentAcceptedAtMs);
-    final aiInvestmentConsentVersion =
-        prefs.getString(PrefKeys.aiInvestmentConsentVersion);
-    final aiInvestmentConsentLocale =
-        prefs.getString(PrefKeys.aiInvestmentConsentLocale);
+    final aiInvestmentConsentAcceptedAtMs = prefs.getInt(
+      PrefKeys.aiInvestmentConsentAcceptedAtMs,
+    );
+    final aiInvestmentConsentVersion = prefs.getString(
+      PrefKeys.aiInvestmentConsentVersion,
+    );
+    final aiInvestmentConsentLocale = prefs.getString(
+      PrefKeys.aiInvestmentConsentLocale,
+    );
     if (!mounted) return;
     setState(() {
       _zeroQuickButtonsEnabled = zeroQuickButtonsEnabled;
@@ -106,7 +109,9 @@ class _SettingsScreenState extends State<SettingsScreen>
                 ],
               ),
               const SizedBox(height: 8),
-              Text('동의 시각: ${_formatConsentDate(_aiInvestmentConsentAcceptedAtMs)}'),
+              Text(
+                '동의 시각: ${_formatConsentDate(_aiInvestmentConsentAcceptedAtMs)}',
+              ),
               const SizedBox(height: 4),
               Text('동의 버전: ${_aiInvestmentConsentVersion ?? '기록 없음'}'),
               const SizedBox(height: 4),

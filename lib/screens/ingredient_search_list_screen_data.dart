@@ -51,8 +51,7 @@ extension IngredientSearchData on _IngredientSearchListScreenState {
     ConsumableInventoryItem? findMatch(String rawName) {
       try {
         return inventoryItems.firstWhere(
-          (item) =>
-              item.name.contains(rawName) || rawName.contains(item.name),
+          (item) => item.name.contains(rawName) || rawName.contains(item.name),
         );
       } catch (_) {
         return null; // 매칭 실패
@@ -76,16 +75,14 @@ extension IngredientSearchData on _IngredientSearchListScreenState {
       final rawNames = entry.value; // 예: ["양파", "양파 1개"]
 
       // 재고 아이템 찾기 (ID로 확실하게)
-      final inventoryItem =
-          inventoryItems.firstWhere((it) => it.id == itemId);
+      final inventoryItem = inventoryItems.firstWhere((it) => it.id == itemId);
 
       String bestRequiredAmount = '-';
       String displayName = inventoryItem.name; // 기본값: 재고명
 
       // 가장 정보량이 많은(긴) 수량 정보 찾기
       for (final raw in rawNames) {
-        final (pName, pAmount) =
-            IngredientParsingUtils.parseNameAndAmount(raw);
+        final (pName, pAmount) = IngredientParsingUtils.parseNameAndAmount(raw);
 
         // 유의미한 수량 정보가 있다면 업데이트 (더 긴 정보를 선호)
         if (pAmount != '(정보 없음)' &&
@@ -113,8 +110,7 @@ extension IngredientSearchData on _IngredientSearchListScreenState {
 
     // 5. 매칭되지 않은 항목 처리
     for (final name in unmatchedNames) {
-      final (pName, pAmount) =
-          IngredientParsingUtils.parseNameAndAmount(name);
+      final (pName, pAmount) = IngredientParsingUtils.parseNameAndAmount(name);
       results.add(
         PairingIngredient(
           name: pName,
@@ -157,8 +153,9 @@ extension IngredientSearchData on _IngredientSearchListScreenState {
       String bestRequiredAmount = '(정보 없음)';
       for (final suggestion in entry.quantitySuggestions) {
         if (suggestion.contains(ing)) {
-          final (_, pAmount) =
-              IngredientParsingUtils.parseNameAndAmount(suggestion);
+          final (_, pAmount) = IngredientParsingUtils.parseNameAndAmount(
+            suggestion,
+          );
           if (pAmount != '(정보 없음)') {
             bestRequiredAmount = pAmount;
             break;

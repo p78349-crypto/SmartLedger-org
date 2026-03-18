@@ -117,8 +117,7 @@ class _AccountStatsPeriodDetailScreenState
       return tx.description.toLowerCase().contains(lower) ||
           tx.memo.toLowerCase().contains(lower) ||
           tx.paymentMethod.toLowerCase().contains(lower);
-    }).toList()
-      ..sort((a, b) => b.date.compareTo(a.date));
+    }).toList()..sort((a, b) => b.date.compareTo(a.date));
   }
 
   String _formatSignedAmount(Transaction tx) =>
@@ -130,8 +129,7 @@ class _AccountStatsPeriodDetailScreenState
         case StatsView.month:
         case StatsView.quarter:
         case StatsView.halfYear:
-          _currentMonth =
-              DateTime(_currentMonth.year, _currentMonth.month - 1);
+          _currentMonth = DateTime(_currentMonth.year, _currentMonth.month - 1);
           _currentYear = _currentMonth.year;
           break;
         case StatsView.year:
@@ -151,8 +149,7 @@ class _AccountStatsPeriodDetailScreenState
         case StatsView.month:
         case StatsView.quarter:
         case StatsView.halfYear:
-          _currentMonth =
-              DateTime(_currentMonth.year, _currentMonth.month + 1);
+          _currentMonth = DateTime(_currentMonth.year, _currentMonth.month + 1);
           _currentYear = _currentMonth.year;
           break;
         case StatsView.year:

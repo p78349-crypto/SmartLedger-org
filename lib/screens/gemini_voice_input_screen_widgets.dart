@@ -40,19 +40,12 @@ class AICoreStatusBanner extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       child: Row(
         children: [
-          const Icon(
-            Icons.info_outline,
-            color: Colors.orange,
-            size: 20,
-          ),
+          const Icon(Icons.info_outline, color: Colors.orange, size: 20),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               'AICore 미지원 (Android 14+ 필요) - 온라인 API 사용 중',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.orange.shade900,
-              ),
+              style: TextStyle(fontSize: 12, color: Colors.orange.shade900),
             ),
           ),
         ],
@@ -101,11 +94,7 @@ class RecordingStatusDisplay extends StatelessWidget {
           else if (parsedData != null)
             Column(
               children: [
-                const Icon(
-                  Icons.check_circle,
-                  color: Colors.green,
-                  size: 40,
-                ),
+                const Icon(Icons.check_circle, color: Colors.green, size: 40),
                 const SizedBox(height: 8),
                 Text(
                   '${parsedData!['store']} - ${parsedData!['total']}원',
@@ -187,10 +176,7 @@ class VoiceInputResultCard extends StatelessWidget {
               Text('상점: ${parsedData['store'] ?? '?'}'),
               Text('날짜: ${parsedData['date'] ?? '오늘'}'),
               const SizedBox(height: 12),
-              const Text(
-                '항목:',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
+              const Text('항목:', style: TextStyle(fontWeight: FontWeight.bold)),
               ...(parsedData['items'] as List?)?.map(
                     (item) => Text(
                       '  • ${item['name']}: ${item['qty']}개 × ${item['unit_price']}원',

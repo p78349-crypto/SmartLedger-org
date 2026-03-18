@@ -11,13 +11,7 @@ import '../widgets/smart_input_field.dart';
 part 'income_input_screen_actions.dart';
 part 'income_input_screen_ui.dart';
 
-const List<String> _paymentOptions = [
-  '계좌이체',
-  '현금',
-  '카드',
-  '암호화폐',
-  '기타',
-];
+const List<String> _paymentOptions = ['계좌이체', '현금', '카드', '암호화폐', '기타'];
 const List<String> _taxStatusOptions = ['과세', '비과세'];
 
 class IncomeInputScreen extends StatefulWidget {

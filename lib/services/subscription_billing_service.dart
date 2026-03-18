@@ -2,12 +2,7 @@ import 'subscription_access_service.dart';
 import 'play_store_subscription_adapter.dart';
 import 'subscription_store_adapter.dart';
 
-enum SubscriptionBillingOutcome {
-  success,
-  blocked,
-  notImplemented,
-  error,
-}
+enum SubscriptionBillingOutcome { success, blocked, notImplemented, error }
 
 class SubscriptionBillingResult {
   const SubscriptionBillingResult({
@@ -24,13 +19,11 @@ class SubscriptionBillingResult {
 class SubscriptionBillingService {
   factory SubscriptionBillingService() => _instance;
 
-  SubscriptionBillingService._internal({
-    SubscriptionStoreAdapter? storeAdapter,
-  }) : _storeAdapter = storeAdapter ?? PlayStoreSubscriptionAdapter();
+  SubscriptionBillingService._internal({SubscriptionStoreAdapter? storeAdapter})
+    : _storeAdapter = storeAdapter ?? PlayStoreSubscriptionAdapter();
 
-  SubscriptionBillingService.withAdapter(
-    SubscriptionStoreAdapter storeAdapter,
-  ) : _storeAdapter = storeAdapter;
+  SubscriptionBillingService.withAdapter(SubscriptionStoreAdapter storeAdapter)
+    : _storeAdapter = storeAdapter;
 
   static final SubscriptionBillingService _instance =
       SubscriptionBillingService._internal();

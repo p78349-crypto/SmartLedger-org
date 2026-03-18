@@ -65,10 +65,7 @@ String titleForEntry(TrashEntry entry) {
   switch (entry.entityType) {
     case TrashEntityType.transaction:
       final tx = Transaction.fromJson(entry.payload);
-      final amount = CurrencyFormatter.format(
-        tx.amount,
-        showUnit: false,
-      );
+      final amount = CurrencyFormatter.format(tx.amount, showUnit: false);
       return '${tx.description} (${tx.type.sign}$amount원)';
     case TrashEntityType.asset:
       final asset = Asset.fromJson(entry.payload);
@@ -85,16 +82,10 @@ class TrashLandscapeHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const headerStyle = TextStyle(
-      fontSize: 12,
-      fontWeight: FontWeight.w600,
-    );
+    const headerStyle = TextStyle(fontSize: 12, fontWeight: FontWeight.w600);
 
     return const Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 8,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: [
           SizedBox(width: 24),

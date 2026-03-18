@@ -30,20 +30,22 @@ extension BackupScreenRestore on _BackupScreenState {
                   valueListenable: controller,
                   builder: (context, value, _) {
                     final locale = Localizations.localeOf(context);
-                    final suffix =
-                        AccountNameLanguageTag.suffixForLocale(locale);
+                    final suffix = AccountNameLanguageTag.suffixForLocale(
+                      locale,
+                    );
                     final baseName = value.text.trim();
-                    final finalName =
-                        AccountNameLanguageTag.applyForcedSuffix(
-                          baseName, locale,
-                        );
+                    final finalName = AccountNameLanguageTag.applyForcedSuffix(
+                      baseName,
+                      locale,
+                    );
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           '언어 태그가 강제 삽입됩니다: $suffix',
                           style: TextStyle(
-                            color: Theme.of(context).hintColor, fontSize: 12,
+                            color: Theme.of(context).hintColor,
+                            fontSize: 12,
                           ),
                         ),
                         if (baseName.isNotEmpty) ...[
@@ -51,7 +53,8 @@ extension BackupScreenRestore on _BackupScreenState {
                           Text(
                             '최종 계정명: $finalName',
                             style: TextStyle(
-                              color: Theme.of(context).hintColor, fontSize: 12,
+                              color: Theme.of(context).hintColor,
+                              fontSize: 12,
                             ),
                           ),
                         ],
@@ -72,7 +75,8 @@ extension BackupScreenRestore on _BackupScreenState {
                 final locale = Localizations.localeOf(context);
                 final baseName = controller.text.trim();
                 final finalName = AccountNameLanguageTag.applyForcedSuffix(
-                  baseName, locale,
+                  baseName,
+                  locale,
                 );
                 Navigator.pop(context, finalName);
               },
@@ -84,24 +88,33 @@ extension BackupScreenRestore on _BackupScreenState {
 
       if (!mounted) return;
       if (newAccountName == null || newAccountName.isEmpty) return;
-      setState(() { _isProcessing = true; _backupStatus = '복원 중...'; });
+      setState(() {
+        _isProcessing = true;
+        _backupStatus = '복원 중...';
+      });
       try {
         final picked = await BackupService().pickBackupFile();
         if (picked == null) {
           if (!mounted) return;
-          setState(() { _backupStatus = '복원이 취소되었습니다'; _isProcessing = false; });
+          setState(() {
+            _backupStatus = '복원이 취소되었습니다';
+            _isProcessing = false;
+          });
           return;
         }
 
         final password = await _prepareRestorePasswordIfNeeded(picked);
         final jsonStr = await BackupService().readBackupFileAsJson(
-          file: picked, password: password,
+          file: picked,
+          password: password,
         );
         final preview = BackupService().parseBackupPreview(jsonStr);
-        final exportedAtText = preview.exportedAt?.toLocal().toString() ?? '알 수 없음';
+        final exportedAtText =
+            preview.exportedAt?.toLocal().toString() ?? '알 수 없음';
         final sourceAccountText =
             preview.sourceAccountName?.trim().isNotEmpty == true
-            ? preview.sourceAccountName! : '알 수 없음';
+            ? preview.sourceAccountName!
+            : '알 수 없음';
 
         if (!mounted) return;
         final ok = await DialogUtils.showConfirmDialog(
@@ -121,16 +134,28 @@ extension BackupScreenRestore on _BackupScreenState {
         );
         if (ok != true) {
           if (!mounted) return;
-          setState(() { _backupStatus = '복원이 취소되었습니다'; _isProcessing = false; });
+          setState(() {
+            _backupStatus = '복원이 취소되었습니다';
+            _isProcessing = false;
+          });
           return;
         }
         await BackupService().importAccountDataAsNew(jsonStr, newAccountName);
         if (!mounted) return;
-        setState(() { _backupStatus = '✅ 복원 완료!\n계정: $newAccountName'; _isProcessing = false; });
-        SnackbarUtils.showSuccess(context, '$newAccountName 계정으로 복원되었습니다\n(보안: 비밀번호는 새로 설정해주세요)');
+        setState(() {
+          _backupStatus = '✅ 복원 완료!\n계정: $newAccountName';
+          _isProcessing = false;
+        });
+        SnackbarUtils.showSuccess(
+          context,
+          '$newAccountName 계정으로 복원되었습니다\n(보안: 비밀번호는 새로 설정해주세요)',
+        );
       } catch (e) {
         if (!mounted) return;
-        setState(() { _backupStatus = '❌ 복원 실패: $e'; _isProcessing = false; });
+        setState(() {
+          _backupStatus = '❌ 복원 실패: $e';
+          _isProcessing = false;
+        });
         SnackbarUtils.showError(context, '복원 실패: $e');
       }
     } finally {
@@ -143,13 +168,16 @@ extension BackupScreenRestore on _BackupScreenState {
     try {
       final password = await _prepareRestorePasswordIfNeeded(file);
       final jsonStr = await BackupService().readBackupFileAsJson(
-        file: file, password: password,
+        file: file,
+        password: password,
       );
       final preview = BackupService().parseBackupPreview(jsonStr);
-      final exportedAtText = preview.exportedAt?.toLocal().toString() ?? '알 수 없음';
+      final exportedAtText =
+          preview.exportedAt?.toLocal().toString() ?? '알 수 없음';
       final sourceAccountText =
           preview.sourceAccountName?.trim().isNotEmpty == true
-          ? preview.sourceAccountName! : '알 수 없음';
+          ? preview.sourceAccountName!
+          : '알 수 없음';
 
       if (!mounted) return;
 
@@ -169,13 +197,12 @@ extension BackupScreenRestore on _BackupScreenState {
                 valueListenable: controller,
                 builder: (context, value, _) {
                   final locale = Localizations.localeOf(dialogContext);
-                  final suffix =
-                      AccountNameLanguageTag.suffixForLocale(locale);
+                  final suffix = AccountNameLanguageTag.suffixForLocale(locale);
                   final baseName = value.text.trim();
-                  final finalName =
-                      AccountNameLanguageTag.applyForcedSuffix(
-                        baseName, locale,
-                      );
+                  final finalName = AccountNameLanguageTag.applyForcedSuffix(
+                    baseName,
+                    locale,
+                  );
                   return Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -204,7 +231,8 @@ extension BackupScreenRestore on _BackupScreenState {
                       Text(
                         '언어 태그가 강제 삽입됩니다: $suffix',
                         style: TextStyle(
-                          color: Theme.of(context).hintColor, fontSize: 12,
+                          color: Theme.of(context).hintColor,
+                          fontSize: 12,
                         ),
                       ),
                       if (baseName.isNotEmpty) ...[
@@ -212,7 +240,8 @@ extension BackupScreenRestore on _BackupScreenState {
                         Text(
                           '최종 계정명: $finalName',
                           style: TextStyle(
-                            color: Theme.of(context).hintColor, fontSize: 12,
+                            color: Theme.of(context).hintColor,
+                            fontSize: 12,
                           ),
                         ),
                       ],
@@ -230,10 +259,10 @@ extension BackupScreenRestore on _BackupScreenState {
                     final baseName = controller.text.trim();
                     if (baseName.isEmpty) return;
                     final locale = Localizations.localeOf(dialogContext);
-                    final finalName =
-                        AccountNameLanguageTag.applyForcedSuffix(
-                          baseName, locale,
-                        );
+                    final finalName = AccountNameLanguageTag.applyForcedSuffix(
+                      baseName,
+                      locale,
+                    );
                     Navigator.pop(dialogContext, finalName);
                   },
                   child: const Text('복원'),
@@ -261,7 +290,10 @@ extension BackupScreenRestore on _BackupScreenState {
         _backupStatus = '✅ 복원 완료!\n계정: $newAccountName';
         _isProcessing = false;
       });
-      SnackbarUtils.showSuccess(context, '$newAccountName 계정으로 복원되었습니다\n(보안: 비밀번호는 새로 설정해주세요)');
+      SnackbarUtils.showSuccess(
+        context,
+        '$newAccountName 계정으로 복원되었습니다\n(보안: 비밀번호는 새로 설정해주세요)',
+      );
     } catch (error) {
       if (!mounted) return;
       setState(() {
@@ -286,7 +318,9 @@ extension BackupScreenRestore on _BackupScreenState {
       if (mounted) SnackbarUtils.showSuccess(context, '삭제되었습니다');
     } catch (e) {
       if (!mounted) return;
-      setState(() { _backupStatus = '❌ 삭제 실패: $e'; });
+      setState(() {
+        _backupStatus = '❌ 삭제 실패: $e';
+      });
       SnackbarUtils.showError(context, '삭제 실패: $e');
     }
   }

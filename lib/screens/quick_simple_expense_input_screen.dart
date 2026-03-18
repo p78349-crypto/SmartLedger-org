@@ -122,9 +122,8 @@ class _QuickSimpleExpenseInputScreenState
 
   Future<void> _openHistory() async => Navigator.of(context).push(
     MaterialPageRoute<void>(
-      builder: (_) => QuickSimpleExpenseHistoryScreen(
-        accountName: widget.accountName,
-      ),
+      builder: (_) =>
+          QuickSimpleExpenseHistoryScreen(accountName: widget.accountName),
     ),
   );
 
@@ -136,15 +135,15 @@ class _QuickSimpleExpenseInputScreenState
 
   Future<void> _goNext() async {
     final isUpdating = _editingIndex != null;
-    final refinedText = QuickExpenseChoseongRefiner.refineInput(_controller.text);
+    final refinedText = QuickExpenseChoseongRefiner.refineInput(
+      _controller.text,
+    );
     final parsed = parseExpenseLine(refinedText);
     if (parsed == null) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text(
-            '금액이 필요합니다. 예: 커피 1잔 3000원 신용카드 프랜차이즈 카페 (결제/매장은 선택)',
-          ),
+          content: Text('금액이 필요합니다. 예: 커피 1잔 3000원 신용카드 프랜차이즈 카페 (결제/매장은 선택)'),
         ),
       );
       return;
@@ -177,8 +176,7 @@ class _QuickSimpleExpenseInputScreenState
       type: TransactionType.expense,
       description: parsed.description,
       amount: parsed.amount,
-      cardChargedAmount:
-          parsed.payment.contains('카드') ? parsed.amount : null,
+      cardChargedAmount: parsed.payment.contains('카드') ? parsed.amount : null,
       date: _dateOnly(widget.initialDate),
       quantity: qty,
       unitPrice: unit,
@@ -226,9 +224,9 @@ class _QuickSimpleExpenseInputScreenState
       _controller.clear();
     });
     FocusScope.of(context).unfocus();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(isUpdating ? '수정되었습니다' : '저장되었습니다')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(isUpdating ? '수정되었습니다' : '저장되었습니다')));
   }
 
   @override

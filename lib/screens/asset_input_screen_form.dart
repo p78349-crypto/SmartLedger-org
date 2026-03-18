@@ -18,8 +18,9 @@ extension _FormExt on _AssetInputScreenState {
                 label: Text(
                   '${category.emoji} ${category.label}',
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight:
-                        isSelected ? FontWeight.bold : FontWeight.normal,
+                    fontWeight: isSelected
+                        ? FontWeight.bold
+                        : FontWeight.normal,
                   ),
                 ),
                 onSelected: (selected) {
@@ -175,10 +176,7 @@ extension _FormExt on _AssetInputScreenState {
             hint: const Text('선택 안 함'),
             isExpanded: true,
             items: AssetRiskLevel.values.map((level) {
-              return DropdownMenuItem(
-                value: level,
-                child: Text(level.label),
-              );
+              return DropdownMenuItem(value: level, child: Text(level.label));
             }).toList(),
             onChanged: (value) {
               setState(() => _riskLevel = value);
@@ -287,8 +285,7 @@ extension _FormExt on _AssetInputScreenState {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
           side: BorderSide(
-            color:
-                theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+            color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
           ),
         ),
         color: theme.colorScheme.surfaceContainerLow,
@@ -299,11 +296,7 @@ extension _FormExt on _AssetInputScreenState {
             children: [
               Row(
                 children: [
-                  Icon(
-                    Icons.flag,
-                    size: 20,
-                    color: theme.colorScheme.primary,
-                  ),
+                  Icon(Icons.flag, size: 20, color: theme.colorScheme.primary),
                   const SizedBox(width: 8),
                   Text(
                     '투자 목표 설정',

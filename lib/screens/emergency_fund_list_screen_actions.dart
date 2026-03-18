@@ -55,10 +55,7 @@ extension EmergencyFundActions on _EmergencyFundListScreenState {
       next[index] = updated;
     }
 
-    await EmergencyFundService().replaceTransactions(
-      widget.accountName,
-      next,
-    );
+    await EmergencyFundService().replaceTransactions(widget.accountName, next);
     await loadTransactions();
   }
 
@@ -66,9 +63,7 @@ extension EmergencyFundActions on _EmergencyFundListScreenState {
     if (_selectedIds.isEmpty) return;
 
     final idsToDelete = _selectedIds.toList(growable: false);
-    final decision = await _showDeleteDecisionDialog(
-      count: idsToDelete.length,
-    );
+    final decision = await _showDeleteDecisionDialog(count: idsToDelete.length);
 
     if (decision == null) return;
 

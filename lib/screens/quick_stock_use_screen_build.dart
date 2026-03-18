@@ -232,9 +232,7 @@ extension QuickStockBuild on _QuickStockUseBodyState {
                   ? Colors.red
                   : Colors.green,
             ),
-            title: Text(
-              '${r.name} -${r.amount.toStringAsFixed(0)}${r.unit}',
-            ),
+            title: Text('${r.name} -${r.amount.toStringAsFixed(0)}${r.unit}'),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

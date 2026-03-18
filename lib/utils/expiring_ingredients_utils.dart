@@ -26,8 +26,7 @@ class ExpiringIngredientsUtils {
         return expiryDate.isBefore(targetDay) ||
             expiryDate.isAtSameMomentAs(targetDay);
       }).toList()
-      ..sort((a, b) =>
-          a.expiryDate!.compareTo(b.expiryDate!)); // 임박한 순서로 정렬
+      ..sort((a, b) => a.expiryDate!.compareTo(b.expiryDate!)); // 임박한 순서로 정렬
   }
 
   /// 3일 이내 유통기한 식재료 필터링

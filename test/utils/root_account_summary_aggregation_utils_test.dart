@@ -86,7 +86,8 @@ void main() {
         accounts: [accountA, accountB],
         transactionsByAccount: {'A': txA, 'B': txB},
         transactionAccountMap: {
-          for (final t in [...txA, ...txB]) t.id: t.id.startsWith('a-') ? 'A' : 'B',
+          for (final t in [...txA, ...txB])
+            t.id: t.id.startsWith('a-') ? 'A' : 'B',
         },
         allTransactions: [...txA, ...txB],
         summaryData: const RootSummaryData(

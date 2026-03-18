@@ -204,7 +204,8 @@ extension AssetDetailPerformance on _AssetDetailScreenState {
                           const SizedBox(width: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 6, vertical: 2,
+                              horizontal: 6,
+                              vertical: 2,
                             ),
                             decoration: BoxDecoration(
                               color: isAssetIn

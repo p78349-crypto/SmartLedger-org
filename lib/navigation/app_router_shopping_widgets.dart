@@ -55,9 +55,7 @@ class _ConsumableInventoryRedirectScreenState
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     if (_selectedAccount != null) {
@@ -90,9 +88,7 @@ class _ConsumableInventoryRedirectScreenState
             onTap: () {
               Navigator.of(context).pushReplacement(
                 MaterialPageRoute(
-                  builder: (_) => ConsumableInventoryScreen(
-                    accountName: name,
-                  ),
+                  builder: (_) => ConsumableInventoryScreen(accountName: name),
                 ),
               );
             },

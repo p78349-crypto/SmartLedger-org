@@ -40,9 +40,7 @@ class SubscriptionPurchaseSyncService {
     _userId = null;
   }
 
-  Future<void> _handlePurchaseUpdates(
-    List<PurchaseDetails> purchases,
-  ) async {
+  Future<void> _handlePurchaseUpdates(List<PurchaseDetails> purchases) async {
     final userId = _userId;
     if (userId == null || userId.isEmpty) return;
 

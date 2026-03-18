@@ -24,7 +24,7 @@ class _RootAuthGateState extends State<RootAuthGate> {
   bool _authorized = false;
   String? _rootSecurityMode;
   String? _rootSecurityLevel; // 'single' or 'dual'
-  
+
   // 활성화된 보안 방식들
   bool _pinEnabled = false;
   bool _biometricEnabled = false;
@@ -68,11 +68,14 @@ class _RootAuthGateState extends State<RootAuthGate> {
 
     final enabled = prefs.getBool(PrefKeys.rootAuthEnabled) ?? false;
     final securityMode = prefs.getString(PrefKeys.rootSecurityMode);
-    final securityLevel = prefs.getString(PrefKeys.rootSecurityLevel) ?? 'single';
-    
+    final securityLevel =
+        prefs.getString(PrefKeys.rootSecurityLevel) ?? 'single';
+
     final pinEnabled = prefs.getBool(PrefKeys.rootPinEnabled) ?? false;
-    final biometricEnabled = prefs.getBool(PrefKeys.rootBiometricEnabled) ?? false;
-    final passwordEnabled = prefs.getBool(PrefKeys.rootPasswordEnabled) ?? false;
+    final biometricEnabled =
+        prefs.getBool(PrefKeys.rootBiometricEnabled) ?? false;
+    final passwordEnabled =
+        prefs.getBool(PrefKeys.rootPasswordEnabled) ?? false;
 
     if (!mounted) return;
     setState(() {
@@ -98,7 +101,7 @@ class _RootAuthGateState extends State<RootAuthGate> {
 
     // 2중 인증 모드인지 확인
     final isDualAuth = _rootSecurityLevel == 'dual';
-    
+
     if (isDualAuth) {
       // 2중 인증: 활성화된 2개 방식을 모두 통과해야 함
       await _authenticateDual(prefs);
@@ -107,7 +110,7 @@ class _RootAuthGateState extends State<RootAuthGate> {
       await _authenticateSingle(prefs);
     }
   }
-  
+
   Future<void> _authenticateSingle(SharedPreferences prefs) async {
     final methods = _enabledMethods();
 
@@ -131,7 +134,7 @@ class _RootAuthGateState extends State<RootAuthGate> {
     final ok = await _runAuth(selected, prefs);
     if (ok) _setAuthorized();
   }
-  
+
   Future<void> _authenticateDual(SharedPreferences prefs) async {
     final methods = _enabledMethods();
 
@@ -168,7 +171,7 @@ class _RootAuthGateState extends State<RootAuthGate> {
       if (mounted) SnackbarUtils.showSuccess(context, '2중 인증 완료');
     }
   }
-  
+
   Future<String?> _showMethodSelectionDialog(List<String> methods) async {
     return showDialog<String>(
       context: context,
@@ -197,7 +200,7 @@ class _RootAuthGateState extends State<RootAuthGate> {
                 label = method;
                 icon = Icons.lock;
             }
-            
+
             return Card(
               child: ListTile(
                 leading: Icon(icon),
@@ -216,8 +219,8 @@ class _RootAuthGateState extends State<RootAuthGate> {
       ),
     );
   }
-  
-  // 기존 _authenticatePin, _authenticateBiometric, _authenticatePassword는 
+
+  // 기존 _authenticatePin, _authenticateBiometric, _authenticatePassword는
   // 내부적으로 성공 시 _authorized = true로 설정하므로
   // 결과를 반환하는 버전을 추가
 
@@ -251,7 +254,7 @@ class _RootAuthGateState extends State<RootAuthGate> {
 
   Future<bool> _authenticatePinWithResult(SharedPreferences prefs) async {
     final pinController = TextEditingController();
-    
+
     final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -317,7 +320,7 @@ class _RootAuthGateState extends State<RootAuthGate> {
     pinController.dispose();
     return result == true;
   }
-  
+
   Future<bool> _authenticateBiometricWithResult(SharedPreferences prefs) async {
     final result = await _authService.authenticateDevice(
       reason: 'ROOT 접근을 위해 인증이 필요합니다',
@@ -339,7 +342,7 @@ class _RootAuthGateState extends State<RootAuthGate> {
       return false;
     }
   }
-  
+
   Future<bool> _authenticatePasswordWithResult(SharedPreferences prefs) async {
     final passwordController = TextEditingController();
 

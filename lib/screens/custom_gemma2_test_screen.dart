@@ -15,7 +15,7 @@ class CustomGemma2TestScreen extends StatefulWidget {
 class _CustomGemma2TestScreenState extends State<CustomGemma2TestScreen> {
   final CustomGemma2TestService _testService = CustomGemma2TestService();
   final TextEditingController _queryController = TextEditingController();
-  
+
   bool _isInitializing = false;
   bool _isModelLoaded = false;
   bool _isTesting = false;
@@ -30,10 +30,10 @@ class _CustomGemma2TestScreenState extends State<CustomGemma2TestScreen> {
 
   Future<void> _checkModelAvailability() async {
     setState(() => _isInitializing = true);
-    
+
     try {
       _modelInfo = _testService.getModelInfo();
-      
+
       if (_testService.isAvailable) {
         _isModelLoaded = await _testService.initializeCustomModel();
       }
@@ -142,7 +142,9 @@ class _CustomGemma2TestScreenState extends State<CustomGemma2TestScreen> {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: isAvailable ? Colors.green.shade700 : Colors.red.shade700,
+                    color: isAvailable
+                        ? Colors.green.shade700
+                        : Colors.red.shade700,
                   ),
                 ),
               ],
@@ -151,7 +153,10 @@ class _CustomGemma2TestScreenState extends State<CustomGemma2TestScreen> {
             _buildStatusRow('모델 경로', customPath),
             _buildStatusRow('체크포인트', checkpoint),
             _buildStatusRow('모델 상태', _isModelLoaded ? '✅ 로드됨' : '⏳ 대기 중'),
-            _buildStatusRow('개발자 모드', AiSecuritySeal.isDeveloperModeEnabled ? '활성화' : '비활성화'),
+            _buildStatusRow(
+              '개발자 모드',
+              AiSecuritySeal.isDeveloperModeEnabled ? '활성화' : '비활성화',
+            ),
             if (!isAvailable) ...[
               const SizedBox(height: 8),
               Container(
@@ -188,8 +193,10 @@ class _CustomGemma2TestScreenState extends State<CustomGemma2TestScreen> {
         children: [
           SizedBox(
             width: 100,
-            child: Text('$label:', 
-                       style: const TextStyle(fontWeight: FontWeight.w500)),
+            child: Text(
+              '$label:',
+              style: const TextStyle(fontWeight: FontWeight.w500),
+            ),
           ),
           Expanded(child: Text(value, style: const TextStyle(fontSize: 12))),
         ],
@@ -226,8 +233,12 @@ class _CustomGemma2TestScreenState extends State<CustomGemma2TestScreen> {
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: _isTesting ? null : _testQuery,
-                    icon: _isTesting 
-                        ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                    icon: _isTesting
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
                         : const Icon(Icons.send),
                     label: Text(_isTesting ? '테스트 중...' : '테스트 실행'),
                   ),
@@ -268,13 +279,19 @@ class _CustomGemma2TestScreenState extends State<CustomGemma2TestScreen> {
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: quickTests.map((test) => ElevatedButton(
-                onPressed: _isTesting ? null : () {
-                  _queryController.text = test['query']!;
-                  _testQuery();
-                },
-                child: Text(test['label']!),
-              )).toList(),
+              children: quickTests
+                  .map(
+                    (test) => ElevatedButton(
+                      onPressed: _isTesting
+                          ? null
+                          : () {
+                              _queryController.text = test['query']!;
+                              _testQuery();
+                            },
+                      child: Text(test['label']!),
+                    ),
+                  )
+                  .toList(),
             ),
           ],
         ),
@@ -313,7 +330,9 @@ class _CustomGemma2TestScreenState extends State<CustomGemma2TestScreen> {
       margin: const EdgeInsets.only(bottom: 12.0),
       child: ExpansionTile(
         leading: CircleAvatar(
-          backgroundColor: isSuccess ? Colors.green.shade100 : Colors.red.shade100,
+          backgroundColor: isSuccess
+              ? Colors.green.shade100
+              : Colors.red.shade100,
           child: Text('${index + 1}'),
         ),
         title: Text(
@@ -335,7 +354,10 @@ class _CustomGemma2TestScreenState extends State<CustomGemma2TestScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('응답:', style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text(
+                  '응답:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 8),
                 Container(
                   width: double.infinity,
@@ -380,7 +402,7 @@ class _CustomGemma2TestScreenState extends State<CustomGemma2TestScreen> {
 
     try {
       final result = await _testService.testFinancialQuery(query);
-      
+
       setState(() {
         _testResults.insert(0, result);
       });
@@ -403,18 +425,18 @@ class _CustomGemma2TestScreenState extends State<CustomGemma2TestScreen> {
 
     try {
       _showInfoSnackBar('성능 벤치마크 실행 중...');
-      
+
       final benchmarkResult = await _testService.runPerformanceTest();
-      
+
       if (benchmarkResult['success']) {
         final testResults = benchmarkResult['testResults'] as List;
         setState(() {
           _testResults.clear();
           _testResults.addAll(testResults.cast<Map<String, dynamic>>());
         });
-        
+
         _showSuccessSnackBar(
-          '벤치마크 완료! 평균 응답시간: ${benchmarkResult['averageTime']}ms'
+          '벤치마크 완료! 평균 응답시간: ${benchmarkResult['averageTime']}ms',
         );
       }
     } catch (e) {

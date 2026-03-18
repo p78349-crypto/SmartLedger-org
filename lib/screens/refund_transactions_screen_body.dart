@@ -107,9 +107,7 @@ extension RefundBody on _RefundTransactionsScreenState {
       child: transactions.isEmpty
           ? Center(
               child: Text(
-                queryActive
-                    ? '검색 결과가 없습니다.'
-                    : '$formattedDate\n반품 내역이 없습니다.',
+                queryActive ? '검색 결과가 없습니다.' : '$formattedDate\n반품 내역이 없습니다.',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyMedium,
               ),
@@ -187,9 +185,7 @@ extension RefundBody on _RefundTransactionsScreenState {
   Widget buildBottomFilterBar(ThemeData theme) {
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
-      color: theme.colorScheme.surfaceContainerHighest.withValues(
-        alpha: 0.08,
-      ),
+      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.08),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -261,7 +257,9 @@ extension RefundBody on _RefundTransactionsScreenState {
     final selectedColor = theme.colorScheme.primary;
     final selectedTextColor = theme.colorScheme.onPrimary;
     final unselectedTextColor = theme.colorScheme.onSurface;
-    final borderColor = selected ? selectedColor : theme.colorScheme.onSurfaceVariant;
+    final borderColor = selected
+        ? selectedColor
+        : theme.colorScheme.onSurfaceVariant;
 
     return GestureDetector(
       onTap: onTap,

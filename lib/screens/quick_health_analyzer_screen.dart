@@ -12,8 +12,7 @@ class QuickHealthAnalyzerScreen extends StatefulWidget {
       _QuickHealthAnalyzerScreenState();
 }
 
-class _QuickHealthAnalyzerScreenState
-    extends State<QuickHealthAnalyzerScreen> {
+class _QuickHealthAnalyzerScreenState extends State<QuickHealthAnalyzerScreen> {
   final List<String> _receiptIngredients = [
     '닭튀김당',
     '느타리버섯',
@@ -86,10 +85,7 @@ class _QuickHealthAnalyzerScreenState
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => showCustomAnalyzer(
-          context,
-          _selectedIngredients,
-        ),
+        onPressed: () => showCustomAnalyzer(context, _selectedIngredients),
         icon: const Icon(Icons.add),
         label: const Text('새 재료 분석'),
       ),
@@ -104,10 +100,7 @@ class _QuickHealthAnalyzerScreenState
           icon: const Icon(Icons.more_vert),
           onSelected: (v) {
             if (v == 'add') {
-              showCustomAnalyzer(
-                context,
-                _selectedIngredients,
-              );
+              showCustomAnalyzer(context, _selectedIngredients);
             } else if (v == 'help') {
               showHealthHelp(context);
             }
@@ -142,16 +135,13 @@ class _QuickHealthAnalyzerScreenState
 
   Widget _buildStats() {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
           Expanded(
             child: HealthStatCard(
               label: '총 재료',
-              value:
-                  '${_selectedIngredients.length}개',
+              value: '${_selectedIngredients.length}개',
               icon: Icons.shopping_basket,
               color: Colors.blue,
             ),
@@ -160,8 +150,7 @@ class _QuickHealthAnalyzerScreenState
           Expanded(
             child: HealthStatCard(
               label: '건강 재료',
-              value:
-                  '${(_analysis!.healthyRatio * 100).toInt()}%',
+              value: '${(_analysis!.healthyRatio * 100).toInt()}%',
               icon: Icons.favorite,
               color: Colors.green,
             ),
@@ -170,8 +159,7 @@ class _QuickHealthAnalyzerScreenState
           Expanded(
             child: HealthStatCard(
               label: '평균',
-              value: _analysis!.averageScore
-                  .toStringAsFixed(1),
+              value: _analysis!.averageScore.toStringAsFixed(1),
               icon: Icons.analytics,
               color: Colors.orange,
             ),
@@ -191,8 +179,7 @@ class _QuickHealthAnalyzerScreenState
           ..._receiptIngredients.map(
             (ing) => IngredientTile(
               ingredient: ing,
-              isSelected: _selectedIngredients
-                  .contains(ing),
+              isSelected: _selectedIngredients.contains(ing),
               onToggle: _toggleIngredient,
             ),
           ),
@@ -203,16 +190,12 @@ class _QuickHealthAnalyzerScreenState
 
   Widget _buildListHeader() {
     final allSelected =
-        _selectedIngredients.length ==
-            _receiptIngredients.length;
+        _selectedIngredients.length == _receiptIngredients.length;
     return Row(
       children: [
         const Text(
           '재료 선택',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const Spacer(),
         TextButton.icon(
@@ -221,24 +204,15 @@ class _QuickHealthAnalyzerScreenState
               if (allSelected) {
                 _selectedIngredients.clear();
               } else {
-                _selectedIngredients =
-                    List.from(_receiptIngredients);
+                _selectedIngredients = List.from(_receiptIngredients);
               }
             });
             _analyzeIngredients();
           },
-          icon: Icon(
-            allSelected
-                ? Icons.deselect
-                : Icons.select_all,
-            size: 16,
-          ),
-          label: Text(
-            allSelected ? '전체 해제' : '전체 선택',
-          ),
+          icon: Icon(allSelected ? Icons.deselect : Icons.select_all, size: 16),
+          label: Text(allSelected ? '전체 해제' : '전체 선택'),
         ),
       ],
     );
   }
-
 }

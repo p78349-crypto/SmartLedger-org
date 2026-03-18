@@ -15,11 +15,11 @@ extension TransactionAddScreenSave on _NO1FormState {
     final parsedAmountText = _amountController.text.trim();
     final parsedUnitText = _unitPriceController.text.trim();
     final unit = isExpense
-      ? TypeConverters.parseCurrency(parsedUnitText)
-      : TypeConverters.parseCurrency(parsedAmountText);
+        ? TypeConverters.parseCurrency(parsedUnitText)
+        : TypeConverters.parseCurrency(parsedAmountText);
     final amount = isExpense
-      ? TypeConverters.parseCurrency(parsedAmountText)
-      : unit;
+        ? TypeConverters.parseCurrency(parsedAmountText)
+        : unit;
 
     final cardChargedRaw = _cardChargedAmountController.text.trim();
     final cardChargedAmount = (!isExpense || cardChargedRaw.isEmpty)

@@ -29,8 +29,8 @@ extension BackupServiceExport on BackupService {
 
     final lastDate = await getLastBackupDate(accountName);
     final now = DateTime.now();
-    final needsBackup = lastDate == null ||
-        now.difference(lastDate) >= const Duration(days: 1);
+    final needsBackup =
+        lastDate == null || now.difference(lastDate) >= const Duration(days: 1);
 
     if (needsBackup) {
       String? hint;
@@ -50,6 +50,10 @@ extension BackupServiceExport on BackupService {
   }
 
   Future<String> exportAccountData(String accountName) async {
+    // R3-2: WAL 체크포인트 — 백업 전 WAL 데이터를 메인 DB로 플러시
+    await DatabaseProvider.instance.database.customStatement(
+      'PRAGMA wal_checkpoint(TRUNCATE)',
+    );
     await AccountService().loadAccounts();
     await TransactionService().loadTransactions();
     await AssetService().loadAssets();
@@ -203,13 +207,13 @@ extension BackupServiceExport on BackupService {
   Future<String> exportTransactionsOnly(String accountName) async {
     await TransactionService().loadTransactions();
     await TrashService().loadEntries();
-    
+
     // 지출만 필터링 (income, savings, refund 제외)
     final allTransactions = TransactionService().getTransactions(accountName);
     final transactions = allTransactions
         .where((t) => t.type == TransactionType.expense)
         .toList();
-    
+
     // 개인정보 제거: 익명화된 거래만 추출
     // GDPR Article 4: 개인식별정보 제거
     // 개인정보보호법: 민감정보 보호
@@ -217,16 +221,16 @@ extension BackupServiceExport on BackupService {
       return {
         'id': t.id,
         'type': t.type.name,
-        'amount': t.amount,  // 금액만 포함 (개인식별 불가)
-        'date': t.date.toIso8601String(),  // 날짜 (개월 정보)
-        'quantity': t.quantity,  // 수량만 (가맹점명 제외)
+        'amount': t.amount, // 금액만 포함 (개인식별 불가)
+        'date': t.date.toIso8601String(), // 날짜 (개월 정보)
+        'quantity': t.quantity, // 수량만 (가맹점명 제외)
         'unitPrice': t.unitPrice,
-        'mainCategory': t.mainCategory,  // 카테고리만 (구체적 상품명 제외)
+        'mainCategory': t.mainCategory, // 카테고리만 (구체적 상품명 제외)
         // ❌ 제외: description, memo, store, paymentMethod
         // ❌ 제외: 가맹점명, 상세정보 (개인식별정보)
       };
     }).toList();
-    
+
     final prefs = await SharedPreferences.getInstance();
     final draftKey = PrefKeys.accountKey(accountName, 'tx_draft_v1');
     final maybeDraftRaw = prefs.getString(draftKey);
@@ -238,21 +242,21 @@ extension BackupServiceExport on BackupService {
     // - recentMemos (가맹점명, 개인기록)
     // - recentPaymentMethods (결제수단 - 민감정보)
     // - 쇼핑카트 데이터 (구매 패턴 - 민감정보)
-    
+
     final now = DateTime.now();
     final data = {
       'backupType': 'transactions_only',
       'accountName': accountName,
       'transactionType': 'expense',
-      'privacyLevel': 'anonymous',  // GDPR/개인정보보호법 준수 표시
-      'transactions': anonymizedTransactions,  // 개인정보 제거됨
+      'privacyLevel': 'anonymous', // GDPR/개인정보보호법 준수 표시
+      'transactions': anonymizedTransactions, // 개인정보 제거됨
       'backupMeta': <String, dynamic>{
         'exportedAt': now.toIso8601String(),
         'backupFormatVersion': _backupFormatVersion,
         'privacyNotice': '이 백업은 개인식별정보를 제외하고 생성되었습니다. GDPR/개인정보보호법 준수.',
       },
     };
-    
+
     if (maybeDraftRaw != null) {
       await prefs.setString(draftKey, maybeDraftRaw);
     }
@@ -264,10 +268,10 @@ extension BackupServiceExport on BackupService {
   Future<String> exportAssetsOnly(String accountName) async {
     await AssetService().loadAssets();
     await AssetMoveService().loadMoves();
-    
+
     final assets = AssetService().getAssets(accountName);
     final assetMoves = AssetMoveService().getMoves(accountName);
-    
+
     final now = DateTime.now();
     final data = {
       'backupType': 'assets_only',
@@ -282,12 +286,13 @@ extension BackupServiceExport on BackupService {
 
     return jsonEncode(data);
   }
+
   /// WMS 재고만 백업 (생활용품 인벤토리)
   Future<String> exportWmsOnly(String accountName) async {
     await ConsumableInventoryService.instance.load();
-    
+
     final items = ConsumableInventoryService.instance.items.value;
-    
+
     final now = DateTime.now();
     final data = {
       'backupType': 'wms_only',

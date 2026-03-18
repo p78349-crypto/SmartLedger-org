@@ -134,13 +134,22 @@ extension AssetDetailFlow on _AssetDetailScreenState {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               _buildStatItem(
-                theme, '총 이동', '${assetMoves.length}회', Icons.swap_horiz,
+                theme,
+                '총 이동',
+                '${assetMoves.length}회',
+                Icons.swap_horiz,
               ),
               _buildStatItem(
-                theme, '이동 유형', _getUniqueMoveTypes(assetMoves), Icons.category,
+                theme,
+                '이동 유형',
+                _getUniqueMoveTypes(assetMoves),
+                Icons.category,
               ),
               _buildStatItem(
-                theme, '기간', _getMoveDateRange(assetMoves), Icons.calendar_today,
+                theme,
+                '기간',
+                _getMoveDateRange(assetMoves),
+                Icons.calendar_today,
               ),
             ],
           ),

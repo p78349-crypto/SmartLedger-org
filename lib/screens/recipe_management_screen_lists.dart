@@ -21,9 +21,7 @@ Widget buildMyRecipesList({
           Icon(Icons.restaurant_menu, size: 64, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
-            searchQuery.isEmpty
-                ? '아직 작성한 레시피가 없습니다'
-                : '검색 결과가 없습니다',
+            searchQuery.isEmpty ? '아직 작성한 레시피가 없습니다' : '검색 결과가 없습니다',
             style: TextStyle(color: Colors.grey[600]),
           ),
         ],

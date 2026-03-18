@@ -203,10 +203,7 @@ class _HouseholdItemsToCartScreenState
       appBar: AppBar(title: const Text('생활용품 선택'), centerTitle: true),
       body: Column(
         children: [
-          HouseholdSearchBar(
-            controller: _searchController,
-            onSearch: _search,
-          ),
+          HouseholdSearchBar(controller: _searchController, onSearch: _search),
           if (_isSearching) ...[
             Expanded(child: _buildSearchResults()),
           ] else ...[

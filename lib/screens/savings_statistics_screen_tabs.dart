@@ -5,8 +5,8 @@ part of 'savings_statistics_screen.dart';
 /// 냉파 성공 / 구조된 식재료 탭 빌더
 extension SavingsStatisticsTabs on _SavingsStatisticsScreenState {
   Widget buildCookingSuccessTab(BuildContext context, ThemeData theme) {
-    final successIndex =
-        SavingsStatisticsService.instance.calculateCookingSuccessIndex();
+    final successIndex = SavingsStatisticsService.instance
+        .calculateCookingSuccessIndex();
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -120,8 +120,8 @@ extension SavingsStatisticsTabs on _SavingsStatisticsScreenState {
   }
 
   Widget buildSavedIngredientsTab(BuildContext context, ThemeData theme) {
-    final savedValue =
-        SavingsStatisticsService.instance.calculateSavedIngredientsValue();
+    final savedValue = SavingsStatisticsService.instance
+        .calculateSavedIngredientsValue();
     final formattedValue = CurrencyFormatter.format(savedValue.toInt());
 
     return ListView(

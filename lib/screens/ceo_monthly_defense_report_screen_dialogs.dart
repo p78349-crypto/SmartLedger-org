@@ -2,8 +2,7 @@
 
 part of 'ceo_monthly_defense_report_screen.dart';
 
-extension CEOMonthlyDefenseDialogs
-    on _CEOMonthlyDefenseReportScreenState {
+extension CEOMonthlyDefenseDialogs on _CEOMonthlyDefenseReportScreenState {
   Future<void> _openTtsDialog() async {
     final prefs = await SharedPreferences.getInstance();
     var rate = prefs.getDouble(PrefKeys.ttsSpeechRate) ?? 0.5;

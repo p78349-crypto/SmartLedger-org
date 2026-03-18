@@ -68,8 +68,9 @@ class DailyTransactionsBottomBar extends StatelessWidget {
                   onPressed: () {
                     Navigator.of(context).pushNamed(
                       AppRoutes.shoppingPointsInput,
-                      arguments:
-                          ShoppingPointsInputArgs(accountName: accountName),
+                      arguments: ShoppingPointsInputArgs(
+                        accountName: accountName,
+                      ),
                     );
                   },
                   // padding intentionally specified for visual balance
@@ -239,21 +240,47 @@ class DailyTransactionDateHeader extends StatelessWidget {
                     const SizedBox(width: 12),
                   ],
                   if (totalExpense > 0) ...[
-                    const Text('지출 ', style: TextStyle(color: AppColors.expense, fontSize: 12)),
-                    Text('-${numberFormat.format(totalExpense)}원',
-                      style: theme.textTheme.titleMedium?.copyWith(color: AppColors.expense, fontWeight: FontWeight.w700)),
+                    const Text(
+                      '지출 ',
+                      style: TextStyle(color: AppColors.expense, fontSize: 12),
+                    ),
+                    Text(
+                      '-${numberFormat.format(totalExpense)}원',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: AppColors.expense,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                     const SizedBox(width: 12),
                   ],
                   if (totalSavings > 0) ...[
-                    const Text('예금 ', style: TextStyle(color: AppColors.savings, fontSize: 12)),
-                    Text('⊕${numberFormat.format(totalSavings)}원',
-                      style: const TextStyle(color: AppColors.savings, fontWeight: FontWeight.w700, fontSize: 12)),
+                    const Text(
+                      '예금 ',
+                      style: TextStyle(color: AppColors.savings, fontSize: 12),
+                    ),
+                    Text(
+                      '⊕${numberFormat.format(totalSavings)}원',
+                      style: const TextStyle(
+                        color: AppColors.savings,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12,
+                      ),
+                    ),
                   ],
                   if (totalRefund > 0) ...[
                     const SizedBox(width: 12),
-                    const Text('환급 ', style: TextStyle(color: RefundUtils.color, fontSize: 12)),
-                    Text('⊕${numberFormat.format(totalRefund)}원',
-                      style: const TextStyle(color: RefundUtils.color, fontWeight: FontWeight.w700, fontSize: 12)),
+                    const Text(
+                      '환급 ',
+                      style: TextStyle(color: RefundUtils.color, fontSize: 12),
+                    ),
+                    Text(
+                      '⊕${numberFormat.format(totalRefund)}원',
+                      style: const TextStyle(
+                        color: RefundUtils.color,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12,
+                      ),
+                    ),
                   ],
                 ],
               ),

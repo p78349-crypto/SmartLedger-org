@@ -36,7 +36,7 @@ class OperationalKPIDashboard extends StatelessWidget {
                       Icons.analytics,
                       color: Theme.of(context).colorScheme.primary,
                     ),
-                    const SizedBox(width: 8), 
+                    const SizedBox(width: 8),
                     Text(
                       '운영 KPI 대시보드',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -47,13 +47,15 @@ class OperationalKPIDashboard extends StatelessWidget {
                     Text(
                       DateFormat('MM월 dd일 HH:mm').format(DateTime.now()),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.6),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 16),
-                
+
                 // KPI 메트릭 그리드
                 GridView.count(
                   shrinkWrap: true,
@@ -67,8 +69,11 @@ class OperationalKPIDashboard extends StatelessWidget {
                       context,
                       '성공률',
                       '${metrics.successRate.toStringAsFixed(1)}%',
-                      metrics.successRate >= 95 ? Colors.green : 
-                      metrics.successRate >= 85 ? Colors.orange : Colors.red,
+                      metrics.successRate >= 95
+                          ? Colors.green
+                          : metrics.successRate >= 85
+                          ? Colors.orange
+                          : Colors.red,
                       Icons.check_circle,
                       'SLA 목표: 95%',
                     ),
@@ -76,8 +81,11 @@ class OperationalKPIDashboard extends StatelessWidget {
                       context,
                       '평균 응답시간',
                       '${metrics.avgResponseTime.toStringAsFixed(1)}ms',
-                      metrics.avgResponseTime <= 200 ? Colors.green :
-                      metrics.avgResponseTime <= 500 ? Colors.orange : Colors.red,
+                      metrics.avgResponseTime <= 200
+                          ? Colors.green
+                          : metrics.avgResponseTime <= 500
+                          ? Colors.orange
+                          : Colors.red,
                       Icons.speed,
                       '목표: <200ms',
                     ),
@@ -85,7 +93,9 @@ class OperationalKPIDashboard extends StatelessWidget {
                       context,
                       '보안 위반',
                       '${metrics.securityViolations}건',
-                      metrics.securityViolations == 0 ? Colors.green : Colors.red,
+                      metrics.securityViolations == 0
+                          ? Colors.green
+                          : Colors.red,
                       Icons.security,
                       '목표: 0건',
                     ),
@@ -99,9 +109,9 @@ class OperationalKPIDashboard extends StatelessWidget {
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // 빠른 상태 표시등
                 Row(
                   children: [
@@ -116,17 +126,19 @@ class OperationalKPIDashboard extends StatelessWidget {
                     const SizedBox(width: 8),
                     _buildStatusIndicator('백업', SystemStatus.healthy),
                     const SizedBox(width: 8),
-                    _buildStatusIndicator('보안', 
+                    _buildStatusIndicator(
+                      '보안',
                       metrics.anomalyDetections >= 3
                           ? SystemStatus.critical
                           : metrics.anomalyDetections > 0
-                              ? SystemStatus.warning
-                              : SystemStatus.healthy),
+                          ? SystemStatus.warning
+                          : SystemStatus.healthy,
+                    ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 12),
-                
+
                 // 최근 알림 요약
                 if (metrics.recentAlerts.isNotEmpty) ...[
                   Text(
@@ -137,45 +149,65 @@ class OperationalKPIDashboard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  ...metrics.recentAlerts.take(3).map((alert) => 
-                    Container(
-                      margin: const EdgeInsets.only(bottom: 4),
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: alert.severity.color.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(4),
-                        border: Border.all(color: alert.severity.color.withValues(alpha: 0.3)),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            alert.severity == AlertSeverity.critical ? Icons.error :
-                            alert.severity == AlertSeverity.warning ? Icons.warning : Icons.info,
-                            size: 16,
-                            color: alert.severity.color,
+                  ...metrics.recentAlerts
+                      .take(3)
+                      .map(
+                        (alert) => Container(
+                          margin: const EdgeInsets.only(bottom: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
                           ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  alert.message,
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                ),
-                                Text(
-                                  '${DateFormat('HH:mm').format(alert.timestamp)} · ${alert.reason} · ${alert.severity.label}',
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                                  ),
-                                ),
-                              ],
+                          decoration: BoxDecoration(
+                            color: alert.severity.color.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(
+                              color: alert.severity.color.withValues(
+                                alpha: 0.3,
+                              ),
                             ),
                           ),
-                        ],
+                          child: Row(
+                            children: [
+                              Icon(
+                                alert.severity == AlertSeverity.critical
+                                    ? Icons.error
+                                    : alert.severity == AlertSeverity.warning
+                                    ? Icons.warning
+                                    : Icons.info,
+                                size: 16,
+                                color: alert.severity.color,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      alert.message,
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.bodySmall,
+                                    ),
+                                    Text(
+                                      '${DateFormat('HH:mm').format(alert.timestamp)} · ${alert.reason} · ${alert.severity.label}',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSurface
+                                                .withValues(alpha: 0.6),
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
                 ],
               ],
             ),
@@ -188,7 +220,7 @@ class OperationalKPIDashboard extends StatelessWidget {
   Widget _buildKPITile(
     BuildContext context,
     String title,
-    String value, 
+    String value,
     Color color,
     IconData icon,
     String subtitle,
@@ -210,9 +242,9 @@ class OperationalKPIDashboard extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
                 ),
               ),
             ],
@@ -228,7 +260,9 @@ class OperationalKPIDashboard extends StatelessWidget {
           Text(
             subtitle,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
           ),
         ],
@@ -249,13 +283,7 @@ class OperationalKPIDashboard extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: status.color,
-          ),
-        ),
+        Text(label, style: TextStyle(fontSize: 12, color: status.color)),
       ],
     );
   }
@@ -265,14 +293,20 @@ class OperationalKPIDashboard extends StatelessWidget {
     // 감사 로그에서 실제 데이터 수집
     final recentLogs = await AuditLogService.getRecentLogs();
     final failedLogs = await AuditLogService.getFailedActions();
-    final securityViolations = await AuditLogService.getSecurityViolations(limit: 10);
+    final securityViolations = await AuditLogService.getSecurityViolations(
+      limit: 10,
+    );
     final anomalyDetections =
-      await AuditLogService.getRecentAnomalyDetections();
+        await AuditLogService.getRecentAnomalyDetections();
 
     // 성공률 계산
     final totalActions = recentLogs.length;
-    final successfulActions = recentLogs.where((log) => log.success == true).length;
-    final successRate = totalActions > 0 ? (successfulActions / totalActions * 100) : 100.0;
+    final successfulActions = recentLogs
+        .where((log) => log.success == true)
+        .length;
+    final successRate = totalActions > 0
+        ? (successfulActions / totalActions * 100)
+        : 100.0;
 
     // 평균 응답시간 (시뮬레이션)
     final avgResponseTime = 150.0 + (math.Random().nextDouble() * 100);
@@ -283,52 +317,64 @@ class OperationalKPIDashboard extends StatelessWidget {
 
     // 최근 알림 생성
     final recentAlerts = <Alert>[];
-    
+
     if (failedLogs.isNotEmpty) {
-      recentAlerts.add(Alert(
-        message: '최근 ${failedLogs.length}건의 실패한 작업이 있습니다',
-        severity: failedLogs.length > 5 ? AlertSeverity.critical : AlertSeverity.warning,
-        timestamp: DateTime.now(),
-        reason: '실패 작업 집계',
-      ));
+      recentAlerts.add(
+        Alert(
+          message: '최근 ${failedLogs.length}건의 실패한 작업이 있습니다',
+          severity: failedLogs.length > 5
+              ? AlertSeverity.critical
+              : AlertSeverity.warning,
+          timestamp: DateTime.now(),
+          reason: '실패 작업 집계',
+        ),
+      );
     }
-    
+
     if (securityViolations.isNotEmpty) {
-      recentAlerts.add(Alert(
-        message: '보안 위반 ${securityViolations.length}건 감지됨',
-        severity: AlertSeverity.critical,
-        timestamp: DateTime.now(),
-        reason: '보안 위반 요약',
-      ));
+      recentAlerts.add(
+        Alert(
+          message: '보안 위반 ${securityViolations.length}건 감지됨',
+          severity: AlertSeverity.critical,
+          timestamp: DateTime.now(),
+          reason: '보안 위반 요약',
+        ),
+      );
     }
 
     if (anomalyDetections.isNotEmpty) {
-      recentAlerts.add(Alert(
-        message: '최근 이상 징후 ${anomalyDetections.length}건 탐지됨',
-        severity: anomalyDetections.length >= 3
-            ? AlertSeverity.critical
-            : AlertSeverity.warning,
-        timestamp: DateTime.now(),
-        reason: '탐지 임계치 기반',
-      ));
+      recentAlerts.add(
+        Alert(
+          message: '최근 이상 징후 ${anomalyDetections.length}건 탐지됨',
+          severity: anomalyDetections.length >= 3
+              ? AlertSeverity.critical
+              : AlertSeverity.warning,
+          timestamp: DateTime.now(),
+          reason: '탐지 임계치 기반',
+        ),
+      );
     }
-    
+
     if (avgResponseTime > 500) {
-      recentAlerts.add(Alert(
-        message: '평균 응답시간이 목표치를 초과했습니다',
-        severity: AlertSeverity.warning,
-        timestamp: DateTime.now(),
-        reason: '성능 임계치 초과',
-      ));
+      recentAlerts.add(
+        Alert(
+          message: '평균 응답시간이 목표치를 초과했습니다',
+          severity: AlertSeverity.warning,
+          timestamp: DateTime.now(),
+          reason: '성능 임계치 초과',
+        ),
+      );
     }
 
     for (final detection in anomalyDetections.take(3)) {
-      recentAlerts.add(Alert(
-        message: _buildDetectionMessage(detection),
-        severity: _severityFromDetection(detection),
-        timestamp: detection.timestamp,
-        reason: _reasonFromDetection(detection),
-      ));
+      recentAlerts.add(
+        Alert(
+          message: _buildDetectionMessage(detection),
+          severity: _severityFromDetection(detection),
+          timestamp: detection.timestamp,
+          reason: _reasonFromDetection(detection),
+        ),
+      );
     }
 
     return OperationalMetrics(
@@ -442,7 +488,8 @@ class RealTimeStatusIndicator extends StatefulWidget {
   const RealTimeStatusIndicator({super.key});
 
   @override
-  State<RealTimeStatusIndicator> createState() => _RealTimeStatusIndicatorState();
+  State<RealTimeStatusIndicator> createState() =>
+      _RealTimeStatusIndicatorState();
 }
 
 class _RealTimeStatusIndicatorState extends State<RealTimeStatusIndicator>
@@ -460,14 +507,10 @@ class _RealTimeStatusIndicatorState extends State<RealTimeStatusIndicator>
       duration: const Duration(seconds: 2),
       vsync: this,
     );
-    _pulseAnimation = Tween<double>(
-      begin: 0.8,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _pulseController,
-      curve: Curves.easeInOut,
-    ));
-    
+    _pulseAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+
     _pulseController.repeat(reverse: true);
     _updateStatus();
     _refreshTimer = Timer.periodic(
@@ -562,9 +605,9 @@ class SimpleTrendChart extends StatelessWidget {
         children: [
           Text(
             label,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 4),
           Expanded(
@@ -601,7 +644,9 @@ class _TrendChartPainter extends CustomPainter {
 
     for (int i = 0; i < data.length; i++) {
       final x = (i / (data.length - 1)) * size.width;
-      final normalizedValue = valueRange > 0 ? (data[i] - minValue) / valueRange : 0.5;
+      final normalizedValue = valueRange > 0
+          ? (data[i] - minValue) / valueRange
+          : 0.5;
       final y = size.height - (normalizedValue * size.height);
 
       if (i == 0) {

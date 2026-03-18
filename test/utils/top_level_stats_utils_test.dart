@@ -114,52 +114,55 @@ void main() {
       expect(summary.topTransactions.first.transaction.id, 's1');
     });
 
-    test('buildTopOutflowEntries excludes assetIncrease savings and maps account', () {
-      final txs = <Transaction>[
-        Transaction(
-          id: 'expense-1',
-          type: TransactionType.expense,
-          description: 'expense',
-          amount: 100,
-          date: DateTime(2026, 2),
-        ),
-        Transaction(
-          id: 'save-asset-1',
-          type: TransactionType.savings,
-          description: 'asset saving',
-          amount: 500,
-          date: DateTime(2026, 2, 2),
-          savingsAllocation: SavingsAllocation.assetIncrease,
-        ),
-        Transaction(
-          id: 'save-expense-1',
-          type: TransactionType.savings,
-          description: 'expense saving',
-          amount: 300,
-          date: DateTime(2026, 2, 3),
-          savingsAllocation: SavingsAllocation.expense,
-        ),
-      ];
+    test(
+      'buildTopOutflowEntries excludes assetIncrease savings and maps account',
+      () {
+        final txs = <Transaction>[
+          Transaction(
+            id: 'expense-1',
+            type: TransactionType.expense,
+            description: 'expense',
+            amount: 100,
+            date: DateTime(2026, 2),
+          ),
+          Transaction(
+            id: 'save-asset-1',
+            type: TransactionType.savings,
+            description: 'asset saving',
+            amount: 500,
+            date: DateTime(2026, 2, 2),
+            savingsAllocation: SavingsAllocation.assetIncrease,
+          ),
+          Transaction(
+            id: 'save-expense-1',
+            type: TransactionType.savings,
+            description: 'expense saving',
+            amount: 300,
+            date: DateTime(2026, 2, 3),
+            savingsAllocation: SavingsAllocation.expense,
+          ),
+        ];
 
-      final result = TopLevelStatsUtils.buildTopOutflowEntries(
-        allTransactions: txs,
-        transactionAccountMap: const {
-          'expense-1': 'A',
-          'save-asset-1': 'A',
-          'save-expense-1': 'B',
-        },
-        limit: 10,
-      );
+        final result = TopLevelStatsUtils.buildTopOutflowEntries(
+          allTransactions: txs,
+          transactionAccountMap: const {
+            'expense-1': 'A',
+            'save-asset-1': 'A',
+            'save-expense-1': 'B',
+          },
+          limit: 10,
+        );
 
-      final ids = result.map((e) => e.transaction.id).toList();
-      expect(ids, containsAll(<String>['expense-1', 'save-expense-1']));
-      expect(ids, isNot(contains('save-asset-1')));
+        final ids = result.map((e) => e.transaction.id).toList();
+        expect(ids, containsAll(<String>['expense-1', 'save-expense-1']));
+        expect(ids, isNot(contains('save-asset-1')));
 
-      final savingsExpenseEntry = result.firstWhere(
-        (entry) => entry.transaction.id == 'save-expense-1',
-      );
-      expect(savingsExpenseEntry.accountName, 'B');
-    });
+        final savingsExpenseEntry = result.firstWhere(
+          (entry) => entry.transaction.id == 'save-expense-1',
+        );
+        expect(savingsExpenseEntry.accountName, 'B');
+      },
+    );
 
     test('summary totals stay consistent with mixed flow matrix', () {
       final txs = <Transaction>[

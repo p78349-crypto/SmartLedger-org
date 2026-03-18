@@ -38,21 +38,19 @@ extension FoodExpiryBuildBodyExt on _FoodExpiryItemsScreenState {
       ),
       floatingActionButton:
           (_isUsageMode || _activeUsageItems.isNotEmpty) && _usageMap.isNotEmpty
-              ? FloatingActionButton.extended(
-                  onPressed: _applyBulkUsage,
-                  icon: const Icon(Icons.check),
-                  label: Text('${_usageMap.length}개 적용'),
-                )
-              : null,
+          ? FloatingActionButton.extended(
+              onPressed: _applyBulkUsage,
+              icon: const Icon(Icons.check),
+              label: Text('${_usageMap.length}개 적용'),
+            )
+          : null,
       body: ValueListenableBuilder<List<FoodExpiryItem>>(
         valueListenable: FoodExpiryService.instance.items,
         builder: (context, allItems, child) {
           // 로케이션 필터 적용
           final items = _locationFilter == null || _locationFilter == '전체'
               ? allItems
-              : allItems
-                    .where((it) => it.location == _locationFilter)
-                    .toList();
+              : allItems.where((it) => it.location == _locationFilter).toList();
 
           final ingredientNames = _normalizeIngredientNames(
             widget.initialIngredients,
@@ -94,8 +92,9 @@ extension FoodExpiryBuildBodyExt on _FoodExpiryItemsScreenState {
                   vertical: 8,
                 ),
                 child: Row(
-                  children:
-                      _FoodExpiryItemsScreenState._locationOptions.map((loc) {
+                  children: _FoodExpiryItemsScreenState._locationOptions.map((
+                    loc,
+                  ) {
                     final isSelected = (_locationFilter ?? '전체') == loc;
                     return Padding(
                       padding: const EdgeInsets.only(right: 8),
@@ -187,8 +186,7 @@ extension FoodExpiryBuildBodyExt on _FoodExpiryItemsScreenState {
                   itemCount: items.length,
                   separatorBuilder: (context, index) =>
                       const Divider(height: 1),
-                  itemBuilder: (context, i) =>
-                      buildItemTile(items[i], theme),
+                  itemBuilder: (context, i) => buildItemTile(items[i], theme),
                 ),
               ),
             ],

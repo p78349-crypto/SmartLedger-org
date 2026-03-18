@@ -46,10 +46,7 @@ extension QuickStockSelectedItem on _QuickStockUseBodyState {
         last,
       ).difference(startOfDay(first)).inDays.abs();
       final denomDays = spanDays < 1 ? 1 : spanDays;
-      final totalUsed = sorted.fold<double>(
-        0.0,
-        (sum, r) => sum + r.amount,
-      );
+      final totalUsed = sorted.fold<double>(0.0, (sum, r) => sum + r.amount);
       final avgPerDay = totalUsed / denomDays;
 
       if (avgPerDay > 0 && item.currentStock > 0) {
@@ -67,8 +64,7 @@ extension QuickStockSelectedItem on _QuickStockUseBodyState {
         if (delta > 0) intervals.add(delta);
       }
       if (intervals.isNotEmpty) {
-        final avg =
-            intervals.reduce((a, b) => a + b) / intervals.length;
+        final avg = intervals.reduce((a, b) => a + b) / intervals.length;
         avgIntervalDays = avg.round();
       }
     }
@@ -118,12 +114,9 @@ extension QuickStockSelectedItem on _QuickStockUseBodyState {
                         '${_formatQty(item.currentStock)}'
                         '${item.unit} '
                         '남음',
-                        style: Theme.of(context).textTheme.bodySmall
-                            ?.copyWith(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onSurfaceVariant,
-                            ),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     ),
                   ),
@@ -131,26 +124,20 @@ extension QuickStockSelectedItem on _QuickStockUseBodyState {
                 if (item.currentStock > 0)
                   TextButton(
                     onPressed: () {
-                      _amountController.text = _formatQty(
-                        item.currentStock,
-                      );
+                      _amountController.text = _formatQty(item.currentStock);
                       FocusScope.of(context).unfocus();
                     },
                     style: TextButton.styleFrom(
                       visualDensity: VisualDensity.compact,
-                      tapTargetSize:
-                          MaterialTapTargetSize.shrinkWrap,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
                     child: const Text('전량'),
                   ),
                 Text(
                   '최근 차감: ${relativeLastUpdated()}',
-                  style: Theme.of(context).textTheme.bodySmall
-                      ?.copyWith(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurfaceVariant,
-                      ),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ],
             ),
@@ -158,8 +145,9 @@ extension QuickStockSelectedItem on _QuickStockUseBodyState {
               const SizedBox(height: 4),
               Text(
                 secondaryLine,
-                style: Theme.of(context).textTheme.bodySmall
-                    ?.copyWith(color: secondaryColor),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: secondaryColor),
               ),
             ],
             const SizedBox(height: 6),
@@ -169,15 +157,17 @@ extension QuickStockSelectedItem on _QuickStockUseBodyState {
                   child: Text(
                     '차감 후 예상 남은 재고: '
                     '${_formatQty(remainingClamped)}${item.unit}',
-                    style: Theme.of(context).textTheme.bodyMedium
-                        ?.copyWith(fontWeight: FontWeight.w600),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
                 if (shortageClamped > 0)
                   Text(
                     '부족 ${_formatQty(shortageClamped)}${item.unit}',
-                    style: Theme.of(context).textTheme.bodySmall
-                        ?.copyWith(color: Colors.orange),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: Colors.orange),
                   ),
               ],
             ),

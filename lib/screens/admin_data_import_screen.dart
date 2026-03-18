@@ -136,18 +136,12 @@ class _AdminDataImportScreenState extends State<AdminDataImportScreen> {
           children: [
             Text(
               title,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
             Text(
               description,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey.shade600,
-              ),
+              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
             ),
             const SizedBox(height: 12),
             SizedBox(
@@ -252,9 +246,7 @@ class _AdminDataImportScreenState extends State<AdminDataImportScreen> {
       // Parse and import US data
       final db = await _openGlobalProductDb();
       final importer = UsProductImporter(db: db);
-      final importResult = await importer.importUsProductsFromJson(
-        filePath,
-      );
+      final importResult = await importer.importUsProductsFromJson(filePath);
 
       if (importResult.success) {
         _showMessage(
@@ -291,8 +283,10 @@ class _AdminDataImportScreenState extends State<AdminDataImportScreen> {
       );
 
       if (result == null || result.files.isEmpty) {
-        _showMessage('파일을 선택하지 않았습니다.\n\n'
-            '주의: Excel 파일을 CSV로 먼저 변환하세요.');
+        _showMessage(
+          '파일을 선택하지 않았습니다.\n\n'
+          '주의: Excel 파일을 CSV로 먼저 변환하세요.',
+        );
         return;
       }
 
@@ -331,22 +325,22 @@ class _AdminDataImportScreenState extends State<AdminDataImportScreen> {
     // Sequential import: Korean → US → Japan
     await _importKoreanData();
     if (!mounted) return;
-    
+
     await Future.delayed(const Duration(seconds: 1));
     if (!mounted) return;
-    
+
     await _importUsData();
     if (!mounted) return;
-    
+
     await Future.delayed(const Duration(seconds: 1));
     if (!mounted) return;
-    
+
     await _importJapanData();
   }
 
   void _showMessage(String message, {bool isError = false}) {
     if (!mounted) return;
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),

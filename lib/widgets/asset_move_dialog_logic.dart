@@ -51,32 +51,21 @@ Future<bool> executeAssetMove({
   }
 
   if (amount > fromAsset.amount) {
-    final formatted =
-        CurrencyFormatter.format(fromAsset.amount);
-    SnackbarUtils.showError(
-      context,
-      '잔액 부족 (보유: $formatted)',
-    );
+    final formatted = CurrencyFormatter.format(fromAsset.amount);
+    SnackbarUtils.showError(context, '잔액 부족 (보유: $formatted)');
     return false;
   }
 
   if (memo.isEmpty) {
-    SnackbarUtils.showError(
-      context,
-      '메모는 필수입니다 (판단 사유를 입력해주세요)',
-    );
+    SnackbarUtils.showError(context, '메모는 필수입니다 (판단 사유를 입력해주세요)');
     return false;
   }
   if (memo.length < 5) {
-    SnackbarUtils.showError(
-      context,
-      '메모는 최소 5자 이상 입력하세요 (판단 사유를 명확히)',
-    );
+    SnackbarUtils.showError(context, '메모는 최소 5자 이상 입력하세요 (판단 사유를 명확히)');
     return false;
   }
 
-  if (selectedToAssetId == null &&
-      selectedToCategory == null) {
+  if (selectedToAssetId == null && selectedToCategory == null) {
     SnackbarUtils.showError(context, '이동 대상을 선택하세요');
     return false;
   }
@@ -89,16 +78,15 @@ Future<bool> executeAssetMove({
     // 1. From 자산 감소
     final fromBeforeAmount = fromAsset.amount;
     final fromBeforeCostBasis = fromAsset.costBasis;
-    final ratio = fromBeforeAmount > 0
-        ? (amount / fromBeforeAmount)
+    final ratio = fromBeforeAmount > 0 ? (amount / fromBeforeAmount) : 0.0;
+    final transferredCostBasis = (fromBeforeCostBasis != null && ratio > 0)
+        ? (fromBeforeCostBasis * ratio)
         : 0.0;
-    final transferredCostBasis =
-        (fromBeforeCostBasis != null && ratio > 0)
-            ? (fromBeforeCostBasis * ratio)
-            : 0.0;
     final nextFromCostBasis = (fromBeforeCostBasis != null)
-        ? (fromBeforeCostBasis - transferredCostBasis)
-            .clamp(0.0, double.infinity)
+        ? (fromBeforeCostBasis - transferredCostBasis).clamp(
+            0.0,
+            double.infinity,
+          )
         : null;
 
     final updatedFrom = fromAsset.copyWith(
@@ -116,58 +104,42 @@ Future<bool> executeAssetMove({
           "${moveDate.month.toString().padLeft(2, '0')}-"
           "${moveDate.day.toString().padLeft(2, '0')}";
       final newAsset = Asset(
-        id: DateTime.now()
-            .microsecondsSinceEpoch
-            .toString(),
-        name:
-            '${selectedToCategory.label} ($moveDateLabel)',
+        id: DateTime.now().microsecondsSinceEpoch.toString(),
+        name: '${selectedToCategory.label} ($moveDateLabel)',
         amount: amount,
         category: selectedToCategory,
         date: moveDate,
         memo: memo,
-        costBasis:
-            selectedToCategory == AssetCategory.cash
-                ? null
-                : (transferredCostBasis > 0
-                    ? transferredCostBasis
-                    : amount),
+        costBasis: selectedToCategory == AssetCategory.cash
+            ? null
+            : (transferredCostBasis > 0 ? transferredCostBasis : amount),
       );
       await assetService.addAsset(accountName, newAsset);
       toAssetId = newAsset.id;
     } else if (selectedToAssetId != null) {
       final assets = assetService.getAssets(accountName);
-      final toAsset = assets.firstWhere(
-        (a) => a.id == selectedToAssetId,
-      );
-      final addedCostBasis =
-          toAsset.category == AssetCategory.cash
-              ? 0.0
-              : (fromAsset.category == AssetCategory.cash
-                    ? amount
-                    : (transferredCostBasis > 0
-                        ? transferredCostBasis
-                        : amount));
-      final newCostBasis =
-          (toAsset.costBasis ?? 0) + addedCostBasis;
+      final toAsset = assets.firstWhere((a) => a.id == selectedToAssetId);
+      final addedCostBasis = toAsset.category == AssetCategory.cash
+          ? 0.0
+          : (fromAsset.category == AssetCategory.cash
+                ? amount
+                : (transferredCostBasis > 0 ? transferredCostBasis : amount));
+      final newCostBasis = (toAsset.costBasis ?? 0) + addedCostBasis;
       final updatedTo = toAsset.copyWith(
         amount: toAsset.amount + amount,
-        costBasis: (toAsset.category == AssetCategory.cash &&
+        costBasis:
+            (toAsset.category == AssetCategory.cash &&
                 toAsset.costBasis == null)
             ? null
             : newCostBasis,
       );
-      await assetService.updateAsset(
-        accountName,
-        updatedTo,
-      );
+      await assetService.updateAsset(accountName, updatedTo);
       toAssetId = toAsset.id;
     }
 
     // 3. 이동 기록 저장
     final move = AssetMove(
-      id: DateTime.now()
-          .microsecondsSinceEpoch
-          .toString(),
+      id: DateTime.now().microsecondsSinceEpoch.toString(),
       accountName: accountName,
       fromAssetId: fromAsset.id,
       toAssetId: selectedToAssetId ?? toAssetId,

@@ -1,14 +1,13 @@
 import 'package:flutter/foundation.dart';
 
 /// Parsed result from a single-line quick expense input.
-typedef ParsedExpenseLine =
-    ({
-      String description,
-      int quantity,
-      double amount,
-      String payment,
-      String store,
-    });
+typedef ParsedExpenseLine = ({
+  String description,
+  int quantity,
+  double amount,
+  String payment,
+  String store,
+});
 
 /// Parse a free-form Korean expense string into structured fields.
 ///
@@ -48,8 +47,7 @@ ParsedExpenseLine? parseExpenseLine(String input) {
         .substring(amountMatch.start, amountMatch.end)
         .replaceAll(',', '');
     text =
-        (text.substring(0, amountMatch.start) +
-                text.substring(amountMatch.end))
+        (text.substring(0, amountMatch.start) + text.substring(amountMatch.end))
             .trim();
   }
 
@@ -145,9 +143,7 @@ ParsedExpenseLine? parseExpenseLine(String input) {
   if (aggressive && tokens.isNotEmpty) {
     for (var i = 0; i < tokens.length; i++) {
       final t = tokens[i];
-      if (t.startsWith('매장:') ||
-          t.startsWith('가게:') ||
-          t.startsWith('상호:')) {
+      if (t.startsWith('매장:') || t.startsWith('가게:') || t.startsWith('상호:')) {
         taggedStore = t.split(':').skip(1).join(':').trim();
         tokens.removeAt(i);
         break;
@@ -176,8 +172,10 @@ ParsedExpenseLine? parseExpenseLine(String input) {
     store = '미지정';
   }
 
-  debugPrint('[Parser] parsed: $description, qty=$quantity, '
-      'amount=$amount, payment=$payment, store=$store');
+  debugPrint(
+    '[Parser] parsed: $description, qty=$quantity, '
+    'amount=$amount, payment=$payment, store=$store',
+  );
 
   return (
     description: description,

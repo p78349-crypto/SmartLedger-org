@@ -26,7 +26,7 @@ class DataImportTestHelper {
     AppLogger.info('[TEST] Starting Korean data import test...');
     AppLogger.info('[TEST] File: $filePath');
     AppLogger.info('[TEST] File exists: ${File(filePath).existsSync()}');
-    
+
     try {
       final db = await _openGlobalProductDb();
       final importer = ProductDataImporter(db: db);
@@ -38,7 +38,7 @@ class DataImportTestHelper {
           }
         },
       );
-      
+
       AppLogger.info('[TEST] ✓ Korean import result:');
       AppLogger.info('[TEST]   Success: ${result.success}');
       AppLogger.info('[TEST]   Items inserted: ${result.inserted}');
@@ -54,13 +54,15 @@ class DataImportTestHelper {
     AppLogger.info('[TEST] Starting US data import test...');
     AppLogger.info('[TEST] File: $filePath');
     AppLogger.info('[TEST] File exists: ${File(filePath).existsSync()}');
-    AppLogger.info('[TEST] File size: ${File(filePath).lengthSync() / (1024 * 1024)} MB');
-    
+    AppLogger.info(
+      '[TEST] File size: ${File(filePath).lengthSync() / (1024 * 1024)} MB',
+    );
+
     try {
       final db = await _openGlobalProductDb();
       final importer = UsProductImporter(db: db);
       final result = await importer.importUsProductsFromJson(filePath);
-      
+
       AppLogger.info('[TEST] ✓ US import result:');
       AppLogger.info('[TEST]   Success: ${result.success}');
       AppLogger.info('[TEST]   Items inserted: ${result.inserted}');
@@ -76,12 +78,12 @@ class DataImportTestHelper {
     AppLogger.info('[TEST] Starting Japan data import test...');
     AppLogger.info('[TEST] File: $filePath');
     AppLogger.info('[TEST] File exists: ${File(filePath).existsSync()}');
-    
+
     try {
       final db = await _openGlobalProductDb();
       final importer = JapanProductImporter(db: db);
       final result = await importer.importJapaneseProductsFromCsv(filePath);
-      
+
       AppLogger.info('[TEST] ✓ Japan import result:');
       AppLogger.info('[TEST]   Success: ${result.success}');
       AppLogger.info('[TEST]   Items inserted: ${result.inserted}');
@@ -107,7 +109,7 @@ class DataImportTestHelper {
     AppLogger.info('[1/3] Korean Data Import');
     AppLogger.info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     await testKoreanImport(koreanFilePath);
-    
+
     await Future.delayed(const Duration(seconds: 1));
 
     // Test US
@@ -115,7 +117,7 @@ class DataImportTestHelper {
     AppLogger.info('[2/3] US Data Import');
     AppLogger.info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     await testUsImport(usFilePath);
-    
+
     await Future.delayed(const Duration(seconds: 1));
 
     // Test Japan

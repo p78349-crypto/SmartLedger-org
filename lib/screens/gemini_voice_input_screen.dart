@@ -139,10 +139,7 @@ class _GeminiVoiceInputScreenState extends State<GeminiVoiceInputScreen> {
 
   /// OCR 텍스트 입력 다이얼로그 표시
   void _showTextInputDialog() {
-    showGeminiTextInputDialog(
-      context: context,
-      onSubmit: _processTextInput,
-    );
+    showGeminiTextInputDialog(context: context, onSubmit: _processTextInput);
   }
 
   /// 텍스트 입력 처리 (AICore)
@@ -231,9 +228,7 @@ class _GeminiVoiceInputScreenState extends State<GeminiVoiceInputScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('🎙️ AI 음성 입력'),
-        actions: [
-          AICoreStatusChip(aicoreAvailable: _aicoreAvailable),
-        ],
+        actions: [AICoreStatusChip(aicoreAvailable: _aicoreAvailable)],
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -266,8 +261,7 @@ class _GeminiVoiceInputScreenState extends State<GeminiVoiceInputScreen> {
               VoiceInputResultCard(parsedData: _parsedData!),
 
             // 에러 로그
-            if (_errorLogs.isNotEmpty)
-              ErrorLogCard(errorLogs: _errorLogs),
+            if (_errorLogs.isNotEmpty) ErrorLogCard(errorLogs: _errorLogs),
           ],
         ),
       ),

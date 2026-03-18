@@ -122,8 +122,7 @@ class _AssetRouteAuthGateState extends State<AssetRouteAuthGate> {
 
     // 새 키 우선, 레거시 키 폴백
     final assetAuthEnabled = prefs.getBool(PrefKeys.assetAuthEnabled) ?? false;
-    final legacyEnabled =
-        prefs.getBool(PrefKeys.biometricAuthEnabled) ?? false;
+    final legacyEnabled = prefs.getBool(PrefKeys.biometricAuthEnabled) ?? false;
     final enabled = assetAuthEnabled || legacyEnabled;
 
     // 세션 체크
@@ -132,17 +131,18 @@ class _AssetRouteAuthGateState extends State<AssetRouteAuthGate> {
     );
 
     final securityLevel =
-      prefs.getString(PrefKeys.assetSecurityLevel) ?? 'single';
+        prefs.getString(PrefKeys.assetSecurityLevel) ?? 'single';
 
     final pinEnabled = prefs.getBool(PrefKeys.assetPinEnabled) ?? false;
     final biometricEnabled =
-      prefs.getBool(PrefKeys.assetBiometricEnabled) ?? false;
+        prefs.getBool(PrefKeys.assetBiometricEnabled) ?? false;
     final passwordEnabled =
-      prefs.getBool(PrefKeys.assetPasswordEnabled) ?? false;
+        prefs.getBool(PrefKeys.assetPasswordEnabled) ?? false;
 
     final pinConfigured = _assetPinService.isPinConfigured(prefs);
-    final passwordConfigured =
-      _assetPasswordService.isPasswordConfigured(prefs);
+    final passwordConfigured = _assetPasswordService.isPasswordConfigured(
+      prefs,
+    );
 
     final effectivePinEnabled = pinEnabled && pinConfigured;
     final effectivePasswordEnabled = passwordEnabled && passwordConfigured;
@@ -363,12 +363,8 @@ class _AssetRouteAuthGateState extends State<AssetRouteAuthGate> {
         true;
   }
 
-  Future<bool> _authenticateBiometricWithResult(
-    SharedPreferences prefs,
-  ) async {
-    final result = await _authService.authenticateDevice(
-      reason: widget.reason,
-    );
+  Future<bool> _authenticateBiometricWithResult(SharedPreferences prefs) async {
+    final result = await _authService.authenticateDevice(reason: widget.reason);
 
     if (result.ok) return true;
 
@@ -386,9 +382,7 @@ class _AssetRouteAuthGateState extends State<AssetRouteAuthGate> {
     return false;
   }
 
-  Future<bool> _authenticatePasswordWithResult(
-    SharedPreferences prefs,
-  ) async {
+  Future<bool> _authenticatePasswordWithResult(SharedPreferences prefs) async {
     if (!mounted) return false;
     return (await showDialog<bool>(
           context: context,

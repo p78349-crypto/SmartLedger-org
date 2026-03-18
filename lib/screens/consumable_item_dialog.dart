@@ -17,7 +17,7 @@ Future<void> showConsumableItemDialog({
   // Database & Services for barcode lookup
   GlobalProductService? globalProductService;
   final offService = OpenFoodFactsService();
-  
+
   try {
     final dbPath = await getDatabasesPath();
     final path = p.join(dbPath, 'global_products.db');
@@ -27,12 +27,10 @@ Future<void> showConsumableItemDialog({
 
   if (!context.mounted) return;
 
-  final nameController = TextEditingController(
-    text: item?.name ?? '',
-  );
+  final nameController = TextEditingController(text: item?.name ?? '');
   String? lastScannedBarcode = item?.barcode;
   bool isSearchingBarcode = false;
-  
+
   final stockController = TextEditingController(
     text: item?.currentStock.toString() ?? '0',
   );
@@ -42,21 +40,20 @@ Future<void> showConsumableItemDialog({
   final bundleSizeController = TextEditingController(
     text: item?.bundleSize.toString() ?? '1',
   );
-  final unitController = TextEditingController(
-    text: item?.unit ?? '개',
-  );
+  final unitController = TextEditingController(text: item?.unit ?? '개');
   final locationController = TextEditingController(
     text: item?.location ?? initialLocation ?? '주방',
   );
-  String selectedDropdownLocation = (item != null &&
+  String selectedDropdownLocation =
+      (item != null &&
           ConsumableInventoryItem.locationOptions.contains(item.location))
       ? item.location
       : (initialLocation != null &&
-              ConsumableInventoryItem.locationOptions.contains(initialLocation))
-          ? initialLocation
-          : (item == null && initialLocation == null)
-              ? '주방'
-              : '직접 입력';
+            ConsumableInventoryItem.locationOptions.contains(initialLocation))
+      ? initialLocation
+      : (item == null && initialLocation == null)
+      ? '주방'
+      : '직접 입력';
 
   await showDialog(
     context: context,
@@ -86,8 +83,9 @@ Future<void> showConsumableItemDialog({
                               child: SizedBox(
                                 width: 20,
                                 height: 20,
-                                child:
-                                    CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               ),
                             )
                           : IconButton(
@@ -105,8 +103,9 @@ Future<void> showConsumableItemDialog({
                                   GlobalProduct? product =
                                       await globalProductService
                                           ?.searchByBarcode(barcode);
-                                  product ??=
-                                      await offService.searchByBarcode(barcode);
+                                  product ??= await offService.searchByBarcode(
+                                    barcode,
+                                  );
 
                                   if (product != null) {
                                     final p = product;
@@ -114,8 +113,9 @@ Future<void> showConsumableItemDialog({
                                       nameController.text = p.getDisplayName();
                                       unitController.text =
                                           p.packagingUnit ?? '개';
-                                      bundleSizeController.text =
-                                          p.defaultQuantity.toString();
+                                      bundleSizeController.text = p
+                                          .defaultQuantity
+                                          .toString();
                                     });
                                   }
                                 } finally {
@@ -143,8 +143,8 @@ Future<void> showConsumableItemDialog({
                             setDialogState(() {
                               nameController.text = p.getDisplayName();
                               unitController.text = p.packagingUnit ?? '개';
-                              bundleSizeController.text =
-                                  p.defaultQuantity.toString();
+                              bundleSizeController.text = p.defaultQuantity
+                                  .toString();
                             });
                           }
                         } finally {
@@ -160,13 +160,10 @@ Future<void> showConsumableItemDialog({
                       Expanded(
                         child: TextField(
                           controller: stockController,
-                          decoration: const InputDecoration(
-                            labelText: '현재고',
+                          decoration: const InputDecoration(labelText: '현재고'),
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
                           ),
-                          keyboardType:
-                            const TextInputType.numberWithOptions(
-                              decimal: true,
-                            ),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -189,10 +186,7 @@ Future<void> showConsumableItemDialog({
                     ),
                     items: [
                       ...ConsumableInventoryItem.locationOptions.map(
-                        (loc) => DropdownMenuItem(
-                          value: loc,
-                          child: Text(loc),
-                        ),
+                        (loc) => DropdownMenuItem(value: loc, child: Text(loc)),
                       ),
                       const DropdownMenuItem(
                         value: '직접 입력',
@@ -227,10 +221,9 @@ Future<void> showConsumableItemDialog({
                     decoration: const InputDecoration(
                       labelText: '알림 기준 (이하일 때 알림)',
                     ),
-                    keyboardType:
-                      const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                   ),
                   TextField(
                     controller: bundleSizeController,
@@ -238,10 +231,9 @@ Future<void> showConsumableItemDialog({
                       labelText: '묶음 단위 (예: 30롤 묶음이면 30)',
                       hintText: '휴지 대형 묶음은 보통 30입니다.',
                     ),
-                    keyboardType:
-                      const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                   ),
                 ],
               ),
@@ -250,14 +242,10 @@ Future<void> showConsumableItemDialog({
               if (item != null)
                 TextButton(
                   onPressed: () {
-                    ConsumableInventoryService
-                      .instance.deleteItem(item.id);
+                    ConsumableInventoryService.instance.deleteItem(item.id);
                     Navigator.pop(ctx);
                   },
-                  child: const Text(
-                    '삭제',
-                    style: TextStyle(color: Colors.red),
-                  ),
+                  child: const Text('삭제', style: TextStyle(color: Colors.red)),
                 ),
               TextButton(
                 onPressed: () => Navigator.pop(ctx),
@@ -302,12 +290,8 @@ Future<void> _handleConsumableItemSave({
   if (name.isEmpty) return;
 
   final stock = double.tryParse(stockController.text) ?? 0.0;
-  final threshold = double.tryParse(
-    thresholdController.text,
-  ) ?? 1.0;
-  final bundleSize = double.tryParse(
-    bundleSizeController.text,
-  ) ?? 1.0;
+  final threshold = double.tryParse(thresholdController.text) ?? 1.0;
+  final bundleSize = double.tryParse(bundleSizeController.text) ?? 1.0;
   final unit = unitController.text.trim();
 
   if (item == null) {
@@ -321,17 +305,15 @@ Future<void> _handleConsumableItemSave({
       location: location,
     );
 
-    final result = await WmsInventoryGateway.instance.addItem(
-      input: input,
-    );
+    final result = await WmsInventoryGateway.instance.addItem(input: input);
 
     if (!context.mounted) return;
 
     if (result.success) {
       Navigator.pop(dialogContext);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${result.data?.name} 추가 완료')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('${result.data?.name} 추가 완료')));
     } else if (result.type == WmsOperationType.duplicate) {
       showDialog<void>(
         context: context,
@@ -369,17 +351,15 @@ Future<void> _handleConsumableItemSave({
       location: location,
     );
 
-    final result = await WmsInventoryGateway.instance.updateItem(
-      item: updated,
-    );
+    final result = await WmsInventoryGateway.instance.updateItem(item: updated);
 
     if (!context.mounted) return;
 
     if (result.success) {
       Navigator.pop(dialogContext);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${updated.name} 수정 완료')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('${updated.name} 수정 완료')));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

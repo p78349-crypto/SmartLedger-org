@@ -54,6 +54,7 @@ class AssetPasswordPolicyResult {
 class AssetPasswordService {
   AssetPasswordService({Random? random}) : _random = random ?? Random.secure();
 
+  // See UserPasswordService.defaultIterations for PBKDF2 rationale.
   static const int defaultIterations = 150000;
   static const int saltLengthBytes = 16;
   static const int derivedKeyBits = 256;
@@ -90,14 +91,8 @@ class AssetPasswordService {
       final salt = _randomBytes(_random, saltLengthBytes);
       final hash = await _derive(password, salt: salt, iterations: iterations);
 
-      await prefs.setString(
-        PrefKeys.assetPasswordSaltB64,
-        base64Encode(salt),
-      );
-      await prefs.setString(
-        PrefKeys.assetPasswordHashB64,
-        base64Encode(hash),
-      );
+      await prefs.setString(PrefKeys.assetPasswordSaltB64, base64Encode(salt));
+      await prefs.setString(PrefKeys.assetPasswordHashB64, base64Encode(hash));
       await prefs.setInt(PrefKeys.assetPasswordIterations, iterations);
     });
   }
@@ -145,8 +140,9 @@ class AssetPasswordService {
         final type = remaining.inMinutes >= 5
             ? AssetPasswordLockType.longLock
             : AssetPasswordLockType.cooldown;
-        final failedAttempts =
-            prefs.getInt(PrefKeys.assetPasswordFailedAttempts);
+        final failedAttempts = prefs.getInt(
+          PrefKeys.assetPasswordFailedAttempts,
+        );
         return AssetPasswordPolicyResult.locked(
           lockType: type,
           lockRemaining: remaining,

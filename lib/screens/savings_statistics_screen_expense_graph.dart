@@ -4,19 +4,12 @@ part of 'savings_statistics_screen.dart';
 
 /// 월별 식비 지출 변화 그래프 탭
 extension SavingsStatisticsExpenseGraph on _SavingsStatisticsScreenState {
-  Widget buildExpenseGraphTab(
-    BuildContext context,
-    ThemeData theme,
-  ) {
+  Widget buildExpenseGraphTab(BuildContext context, ThemeData theme) {
     return FutureBuilder<Result<Map<String, double>>>(
-      future: SavingsStatisticsService.instance
-          .calculateMonthlyFoodExpenses(),
+      future: SavingsStatisticsService.instance.calculateMonthlyFoodExpenses(),
       builder: (context, snapshot) {
-        if (snapshot.connectionState ==
-            ConnectionState.waiting) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
         }
 
         if (!snapshot.hasData) {
@@ -124,23 +117,17 @@ extension SavingsStatisticsExpenseGraph on _SavingsStatisticsScreenState {
                 })
               >
             >(
-              future: SavingsStatisticsService
-                  .instance
+              future: SavingsStatisticsService.instance
                   .calculateSavingsCompare(),
-              builder: (
-                context,
-                compareSnapshot,
-              ) {
+              builder: (context, compareSnapshot) {
                 if (!compareSnapshot.hasData) {
                   return const SizedBox.shrink();
                 }
-                final compareResult =
-                    compareSnapshot.data!;
+                final compareResult = compareSnapshot.data!;
                 if (compareResult.isFailure) {
                   return const SizedBox.shrink();
                 }
-                final compare =
-                    compareResult.dataOrNull!;
+                final compare = compareResult.dataOrNull!;
 
                 return Card(
                   color: Colors.green.shade50,
@@ -288,16 +275,13 @@ extension SavingsStatisticsExpenseGraph on _SavingsStatisticsScreenState {
           Icon(
             Icons.bar_chart_outlined,
             size: 48,
-            color: theme
-                .colorScheme.onSurfaceVariant,
+            color: theme.colorScheme.onSurfaceVariant,
           ),
           const SizedBox(height: 16),
           Text(
             '식비 기록이 아직 없습니다.',
-            style:
-                theme.textTheme.bodyLarge?.copyWith(
-              color: theme
-                  .colorScheme.onSurfaceVariant,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 8),
@@ -305,10 +289,8 @@ extension SavingsStatisticsExpenseGraph on _SavingsStatisticsScreenState {
             '식비 카테고리의 거래를 추가하면\n'
             '그래프가 표시됩니다.',
             textAlign: TextAlign.center,
-            style:
-                theme.textTheme.bodySmall?.copyWith(
-              color: theme
-                  .colorScheme.onSurfaceVariant,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
         ],

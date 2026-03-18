@@ -17,18 +17,18 @@ import '../utils/app_logger.dart';
 /// 3. Initializes sample Korean data (optional)
 Future<void> migrationGlobalProductDatabase(Database db) async {
   AppLogger.info('[Migration] Starting global product database setup...');
-  
+
   try {
     // Check if table already exists
     final tables = await db.rawQuery(
-      "SELECT name FROM sqlite_master WHERE type='table' AND name='global_product_master'"
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='global_product_master'",
     );
-    
+
     if (tables.isNotEmpty) {
       AppLogger.info('[Migration] Table already exists, skipping creation');
       return;
     }
-    
+
     // Create main table
     await db.execute('''
       CREATE TABLE global_product_master (
@@ -76,38 +76,49 @@ Future<void> migrationGlobalProductDatabase(Database db) async {
         UNIQUE(ean13, upc_a, jan_code, kan_code)
       )
     ''');
-    
+
     AppLogger.info('[Migration] ✓ Table created: global_product_master');
-    
+
     // Create indexes for fast lookups
     await db.execute('CREATE INDEX idx_ean13 ON global_product_master(ean13)');
     AppLogger.info('[Migration] ✓ Index created: idx_ean13');
-    
-    await db.execute('CREATE INDEX idx_upc_a ON global_product_master(upc_a)');  
+
+    await db.execute('CREATE INDEX idx_upc_a ON global_product_master(upc_a)');
     AppLogger.info('[Migration] ✓ Index created: idx_upc_a');
-    
-    await db.execute('CREATE INDEX idx_jan_code ON global_product_master(jan_code)');
+
+    await db.execute(
+      'CREATE INDEX idx_jan_code ON global_product_master(jan_code)',
+    );
     AppLogger.info('[Migration] ✓ Index created: idx_jan_code');
-    
-    await db.execute('CREATE INDEX idx_kan_code ON global_product_master(kan_code)');
+
+    await db.execute(
+      'CREATE INDEX idx_kan_code ON global_product_master(kan_code)',
+    );
     AppLogger.info('[Migration] ✓ Index created: idx_kan_code');
-    
+
     // Additional indexes for searching
-    await db.execute('CREATE INDEX idx_product_name_ko ON global_product_master(product_name_ko)');
+    await db.execute(
+      'CREATE INDEX idx_product_name_ko ON global_product_master(product_name_ko)',
+    );
     AppLogger.info('[Migration] ✓ Index created: idx_product_name_ko');
-    
-    await db.execute('CREATE INDEX idx_category_1 ON global_product_master(category_1)');
+
+    await db.execute(
+      'CREATE INDEX idx_category_1 ON global_product_master(category_1)',
+    );
     AppLogger.info('[Migration] ✓ Index created: idx_category_1');
-    
-    await db.execute('CREATE INDEX idx_country_code ON global_product_master(country_code)');
+
+    await db.execute(
+      'CREATE INDEX idx_country_code ON global_product_master(country_code)',
+    );
     AppLogger.info('[Migration] ✓ Index created: idx_country_code');
-    
+
     // Composite index for common searches
-    await db.execute('CREATE INDEX idx_country_active ON global_product_master(country_code, is_active)');
+    await db.execute(
+      'CREATE INDEX idx_country_active ON global_product_master(country_code, is_active)',
+    );
     AppLogger.info('[Migration] ✓ Index created: idx_country_active');
-    
+
     AppLogger.info('[Migration] ✓ Global product database setup complete!');
-    
   } catch (e) {
     AppLogger.error('[Migration] ✗ Error', error: e);
     rethrow;
@@ -156,31 +167,35 @@ const List<Map<String, dynamic>> koreanProductSamples = [
 /// Only inserts if table is empty (development/testing only)
 Future<void> insertSampleKoreanProducts(Database db) async {
   AppLogger.info('[Migration] Checking for existing data...');
-  
+
   try {
     final result = await db.rawQuery(
-      'SELECT COUNT(*) as count FROM global_product_master'
+      'SELECT COUNT(*) as count FROM global_product_master',
     );
-    
+
     final count = (result.first['count'] as int?) ?? 0;
-    
+
     if (count == 0) {
       AppLogger.info('[Migration] Database empty, inserting sample data...');
-      
+
       for (final sample in koreanProductSamples) {
         sample['created_at'] = DateTime.now().toIso8601String();
         sample['updated_at'] = DateTime.now().toIso8601String();
-        
+
         await db.insert(
           'global_product_master',
           sample,
           conflictAlgorithm: ConflictAlgorithm.ignore,
         );
       }
-      
-      AppLogger.info('[Migration] ✓ Sample Korean products inserted: ${koreanProductSamples.length}');
+
+      AppLogger.info(
+        '[Migration] ✓ Sample Korean products inserted: ${koreanProductSamples.length}',
+      );
     } else {
-      AppLogger.info('[Migration] Database already has $count products, skipping sample insert');
+      AppLogger.info(
+        '[Migration] Database already has $count products, skipping sample insert',
+      );
     }
   } catch (e) {
     AppLogger.error('[Migration] ✗ Error inserting sample data', error: e);
@@ -193,34 +208,32 @@ Future<bool> verifyGlobalProductDatabase(Database db) async {
   try {
     // Check table exists
     final tables = await db.rawQuery(
-      "SELECT name FROM sqlite_master WHERE type='table' AND name='global_product_master'"
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='global_product_master'",
     );
-    
+
     if (tables.isEmpty) {
       AppLogger.warn('[Verify] ✗ Table does not exist');
       return false;
     }
-    
+
     // Check indexes
     final indexes = await db.rawQuery(
-      "SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='global_product_master'"
+      "SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='global_product_master'",
     );
-    
-    final indexNames = indexes
-        .map((i) => i['name'] as String)
-        .toList();
-    
+
+    final indexNames = indexes.map((i) => i['name'] as String).toList();
+
     AppLogger.info('[Verify] ✓ Table exists with ${indexNames.length} indexes');
     AppLogger.info('[Verify] Indexes: ${indexNames.join(", ")}');
-    
+
     // Check data
     final result = await db.rawQuery(
-      'SELECT COUNT(*) as count FROM global_product_master'
+      'SELECT COUNT(*) as count FROM global_product_master',
     );
-    
+
     final productCount = (result.first['count'] as int?) ?? 0;
     AppLogger.info('[Verify] ✓ Products in database: $productCount');
-    
+
     return true;
   } catch (e) {
     AppLogger.error('[Verify] ✗ Verification failed', error: e);

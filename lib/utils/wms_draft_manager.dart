@@ -125,7 +125,7 @@ class WmsDraftManager {
 
   /// 여러 임시저장을 일괄 변환
   Future<List<WmsOperationResult<ConsumableInventoryItem>>>
-      convertMultipleDrafts({
+  convertMultipleDrafts({
     required String accountName,
     required List<WmsInventoryDraftEntry> drafts,
   }) async {

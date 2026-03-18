@@ -82,8 +82,9 @@ class _RecipePickerDialogState extends State<RecipePickerDialog> {
       if (_searchQuery.isEmpty) return true;
       final query = _searchQuery;
       // Match against all localized names
-      final matchesName = r.localizedNames.values
-          .any((n) => MultilingualSearchUtils.matches(n, query));
+      final matchesName = r.localizedNames.values.any(
+        (n) => MultilingualSearchUtils.matches(n, query),
+      );
       final matchesIngredient = r.ingredients.any(
         (ing) => MultilingualSearchUtils.matches(ing.name, query),
       );
@@ -245,8 +246,7 @@ class _RecipePickerDialogState extends State<RecipePickerDialog> {
                             onPressed: () async {
                               await showDialog(
                                 context: context,
-                                builder: (c) =>
-                                    RecipeUpsertDialog(existing: r),
+                                builder: (c) => RecipeUpsertDialog(existing: r),
                               );
                               setState(() {});
                             },

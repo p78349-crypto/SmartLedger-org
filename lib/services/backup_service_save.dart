@@ -10,14 +10,68 @@ extension BackupServiceSave on BackupService {
     // ignore: avoid_slow_async_io
     await tmp.writeAsString(content, flush: true);
 
+    // R3-3: 크래시 안전 — 기존 파일을 .bak으로 보존 후 교체
+    final bak = File('${destination.path}.bak');
     // ignore: avoid_slow_async_io
     if (await destination.exists()) {
-      // ignore: avoid_slow_async_io
-      await destination.delete();
+      try {
+        // ignore: avoid_slow_async_io
+        if (await bak.exists()) await bak.delete();
+        // ignore: avoid_slow_async_io
+        await destination.rename(bak.path);
+      } catch (_) {
+        // rename 실패 시 직접 삭제 후 진행
+        // ignore: avoid_slow_async_io
+        await destination.delete();
+      }
     }
 
     // ignore: avoid_slow_async_io
     await tmp.rename(destination.path);
+
+    // 성공 후 .bak 정리
+    // ignore: avoid_slow_async_io
+    if (await bak.exists()) {
+      try {
+        await bak.delete();
+      } catch (_) {
+        // .bak 삭제 실패는 무시 (다음 백업 시 덮어씀)
+      }
+    }
+  }
+
+  // R3-1: 백업 전 가용 용량 확인 — 쓰기 데이터의 2배 미만이면 중단
+  Future<void> _checkAvailableStorage(int payloadBytes) async {
+    try {
+      if (!Platform.isAndroid && !Platform.isIOS) return;
+      final dir = await getApplicationDocumentsDirectory();
+      // Android: df 명령어로 가용 블록 확인
+      if (Platform.isAndroid) {
+        final result = await Process.run('df', [dir.path]);
+        if (result.exitCode == 0) {
+          final lines = (result.stdout as String).split('\n');
+          if (lines.length >= 2) {
+            // df 출력: Filesystem 1K-blocks Used Available ...
+            final parts = lines[1].trim().split(RegExp(r'\s+'));
+            if (parts.length >= 4) {
+              final availableKB = int.tryParse(parts[3]);
+              if (availableKB != null) {
+                final requiredKB = (payloadBytes * 2) ~/ 1024;
+                if (availableKB < requiredKB) {
+                  throw const FileSystemException(
+                    '저장 공간 부족: 백업에 필요한 여유 공간이 없습니다.',
+                  );
+                }
+              }
+            }
+          }
+        }
+      }
+      // iOS: StatFS 접근 불가이므로 생략 (iOS는 시스템이 관리)
+    } catch (e) {
+      if (e is FileSystemException) rethrow;
+      // df 실패 등은 무시하고 백업 속행
+    }
   }
 
   /// Downloads 폴더에 백업 저장
@@ -56,7 +110,7 @@ extension BackupServiceSave on BackupService {
     }
 
     var json = '';
-    
+
     if (backupType == 'transactions_only') {
       json = await exportTransactionsOnly(accountName);
     } else if (backupType == 'assets_only') {
@@ -66,7 +120,7 @@ extension BackupServiceSave on BackupService {
     } else {
       json = await exportAccountData(accountName);
     }
-    
+
     if (encryptionPassword != null && encryptionPassword.trim().isNotEmpty) {
       json = await BackupCrypto.encryptJsonPayload(
         plainJson: json,
@@ -83,7 +137,7 @@ extension BackupServiceSave on BackupService {
     final ss = now.second.toString().padLeft(2, '0');
     final dateStamp = '$y$m$d';
     final timeStamp = '$hh$mm$ss';
-    
+
     // 백업 타입에 따라 파일명 구성
     String typePrefix = '';
     if (backupType == 'transactions_only') {
@@ -93,16 +147,20 @@ extension BackupServiceSave on BackupService {
     } else if (backupType == 'wms_only') {
       typePrefix = '_wms';
     }
-    
-    final fileName = (StringBuffer()
-          ..write(accountName)
-          ..write(typePrefix)
-          ..write('_')
-          ..write(dateStamp)
-          ..write('_')
-          ..write(timeStamp)
-          ..write('.json'))
-        .toString();
+
+    final fileName =
+        (StringBuffer()
+              ..write(accountName)
+              ..write(typePrefix)
+              ..write('_')
+              ..write(dateStamp)
+              ..write('_')
+              ..write(timeStamp)
+              ..write('.json'))
+            .toString();
+
+    // R3-1: 백업 데이터 크기 대비 디스크 여유 공간 사전 확인
+    await _checkAvailableStorage(json.length);
 
     // Attempt Downloads first on Android when permission is available.
     // Fallback: app documents folder (always works, but removed on uninstall).
@@ -227,10 +285,11 @@ extension BackupServiceSave on BackupService {
     String fileNameOrPath, {
     String? encryptionPassword,
     String? passwordHint,
-    String backupType = 'full', // 'full', 'transactions_only', 'assets_only', 'wms_only'
+    String backupType =
+        'full', // 'full', 'transactions_only', 'assets_only', 'wms_only'
   }) async {
     var json = '';
-    
+
     if (backupType == 'transactions_only') {
       json = await exportTransactionsOnly(accountName);
     } else if (backupType == 'assets_only') {
@@ -240,7 +299,7 @@ extension BackupServiceSave on BackupService {
     } else {
       json = await exportAccountData(accountName);
     }
-    
+
     if (encryptionPassword != null && encryptionPassword.trim().isNotEmpty) {
       json = await BackupCrypto.encryptJsonPayload(
         plainJson: json,

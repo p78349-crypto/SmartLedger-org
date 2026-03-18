@@ -13,35 +13,20 @@ class RecipeIngredientDialog extends StatefulWidget {
   final void Function(RecipeIngredient) onSave;
 
   @override
-  State<RecipeIngredientDialog> createState() =>
-      _RecipeIngredientDialogState();
+  State<RecipeIngredientDialog> createState() => _RecipeIngredientDialogState();
 }
 
-class _RecipeIngredientDialogState
-    extends State<RecipeIngredientDialog> {
+class _RecipeIngredientDialogState extends State<RecipeIngredientDialog> {
   late TextEditingController _nameController;
   late TextEditingController _quantityController;
   late String _unit;
 
-  static const _units = [
-    'g',
-    'kg',
-    'ml',
-    'L',
-    '개',
-    '장',
-    '줌',
-    '큰술',
-    '작은술',
-    '컵',
-  ];
+  static const _units = ['g', 'kg', 'ml', 'L', '개', '장', '줌', '큰술', '작은술', '컵'];
 
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(
-      text: widget.existing?.name ?? '',
-    );
+    _nameController = TextEditingController(text: widget.existing?.name ?? '');
     _quantityController = TextEditingController(
       text: widget.existing?.quantity.toString() ?? '',
     );
@@ -57,32 +42,23 @@ class _RecipeIngredientDialogState
 
   void _save() {
     final name = _nameController.text.trim();
-    final quantity =
-        double.tryParse(_quantityController.text) ?? 0;
+    final quantity = double.tryParse(_quantityController.text) ?? 0;
 
     if (name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('재료 이름을 입력해주세요'),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('재료 이름을 입력해주세요')));
       return;
     }
     if (quantity <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('수량을 올바르게 입력해주세요'),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('수량을 올바르게 입력해주세요')));
       return;
     }
 
     widget.onSave(
-      RecipeIngredient(
-        name: name,
-        quantity: quantity,
-        unit: _unit,
-      ),
+      RecipeIngredient(name: name, quantity: quantity, unit: _unit),
     );
     Navigator.of(context).pop();
   }
@@ -90,9 +66,7 @@ class _RecipeIngredientDialogState
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(
-        widget.existing == null ? '재료 추가' : '재료 수정',
-      ),
+      title: Text(widget.existing == null ? '재료 추가' : '재료 수정'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -115,8 +89,7 @@ class _RecipeIngredientDialogState
                     labelText: '수량',
                     hintText: '예: 200',
                   ),
-                  keyboardType:
-                      const TextInputType.numberWithOptions(
+                  keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
                 ),
@@ -125,16 +98,9 @@ class _RecipeIngredientDialogState
               Expanded(
                 child: DropdownButtonFormField<String>(
                   initialValue: _unit,
-                  decoration: const InputDecoration(
-                    labelText: '단위',
-                  ),
+                  decoration: const InputDecoration(labelText: '단위'),
                   items: _units
-                      .map(
-                        (u) => DropdownMenuItem(
-                          value: u,
-                          child: Text(u),
-                        ),
-                      )
+                      .map((u) => DropdownMenuItem(value: u, child: Text(u)))
                       .toList(),
                   onChanged: (value) {
                     if (value != null) {
@@ -152,10 +118,7 @@ class _RecipeIngredientDialogState
           onPressed: () => Navigator.of(context).pop(),
           child: const Text('취소'),
         ),
-        FilledButton(
-          onPressed: _save,
-          child: const Text('확인'),
-        ),
+        FilledButton(onPressed: _save, child: const Text('확인')),
       ],
     );
   }

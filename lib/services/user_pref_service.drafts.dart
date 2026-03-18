@@ -16,8 +16,10 @@ Future<List<ShoppingPointsDraftEntry>> _getShoppingPointsDrafts({
     if (decoded is! List) return const [];
     return decoded
         .whereType<Map>()
-        .map((m) => ShoppingPointsDraftEntry.fromJson(
-              Map<String, dynamic>.from(m)))
+        .map(
+          (m) =>
+              ShoppingPointsDraftEntry.fromJson(Map<String, dynamic>.from(m)),
+        )
         .toList(growable: false);
   } catch (_) {
     return const [];
@@ -44,8 +46,9 @@ Future<void> _addShoppingPointsDraft({
     for (final d in current)
       if (d.id != draft.id) d,
   ];
-  final trimmed =
-      next.length <= maxEntries ? next : next.take(maxEntries).toList();
+  final trimmed = next.length <= maxEntries
+      ? next
+      : next.take(maxEntries).toList();
   await _setShoppingPointsDrafts(accountName: accountName, drafts: trimmed);
 }
 
@@ -54,8 +57,9 @@ Future<void> _updateShoppingPointsDraft({
   required ShoppingPointsDraftEntry draft,
 }) async {
   final current = await _getShoppingPointsDrafts(accountName: accountName);
-  final next =
-      current.map((d) => d.id == draft.id ? draft : d).toList(growable: false);
+  final next = current
+      .map((d) => d.id == draft.id ? draft : d)
+      .toList(growable: false);
   await _setShoppingPointsDrafts(accountName: accountName, drafts: next);
 }
 
@@ -84,8 +88,9 @@ Future<List<WmsInventoryDraftEntry>> _getWmsInventoryDrafts({
     if (decoded is! List) return const [];
     return decoded
         .whereType<Map>()
-        .map((m) => WmsInventoryDraftEntry.fromJson(
-              Map<String, dynamic>.from(m)))
+        .map(
+          (m) => WmsInventoryDraftEntry.fromJson(Map<String, dynamic>.from(m)),
+        )
         .toList(growable: false);
   } catch (_) {
     return const [];
@@ -112,8 +117,9 @@ Future<void> _addWmsInventoryDraft({
     for (final d in current)
       if (d.id != draft.id) d,
   ];
-  final trimmed =
-      next.length <= maxEntries ? next : next.take(maxEntries).toList();
+  final trimmed = next.length <= maxEntries
+      ? next
+      : next.take(maxEntries).toList();
   await _setWmsInventoryDrafts(accountName: accountName, drafts: trimmed);
 }
 
@@ -122,8 +128,9 @@ Future<void> _updateWmsInventoryDraft({
   required WmsInventoryDraftEntry draft,
 }) async {
   final current = await _getWmsInventoryDrafts(accountName: accountName);
-  final next =
-      current.map((d) => d.id == draft.id ? draft : d).toList(growable: false);
+  final next = current
+      .map((d) => d.id == draft.id ? draft : d)
+      .toList(growable: false);
   await _setWmsInventoryDrafts(accountName: accountName, drafts: next);
 }
 
@@ -136,8 +143,6 @@ Future<void> _removeWmsInventoryDraft({
   await _setWmsInventoryDrafts(accountName: accountName, drafts: next);
 }
 
-Future<void> _clearAllWmsInventoryDrafts({
-  required String accountName,
-}) async {
+Future<void> _clearAllWmsInventoryDrafts({required String accountName}) async {
   await _setWmsInventoryDrafts(accountName: accountName, drafts: const []);
 }

@@ -77,7 +77,9 @@ void main() {
         userId: userId,
         state: SubscriptionAccessState(
           status: SubscriptionAccessStatus.grace,
-          expiresAtMs: now.add(const Duration(hours: 12)).millisecondsSinceEpoch,
+          expiresAtMs: now
+              .add(const Duration(hours: 12))
+              .millisecondsSinceEpoch,
         ),
       );
 
@@ -85,60 +87,70 @@ void main() {
       expect(result.outcome, SubscriptionBillingOutcome.success);
     });
 
-    test('startPurchaseFlow maps success adapter result when status is expired', () async {
-      final now = DateTime.now();
-      await SubscriptionAccessService.saveState(
-        userId: userId,
-        state: SubscriptionAccessState(
-          status: SubscriptionAccessStatus.expired,
-          expiresAtMs: now.subtract(const Duration(days: 1)).millisecondsSinceEpoch,
-        ),
-      );
-
-      service = SubscriptionBillingService.withAdapter(
-        _FakeSubscriptionStoreAdapter(
-          purchaseResult: const SubscriptionStoreActionResult(
-            outcome: SubscriptionStoreActionOutcome.success,
-            message: 'purchase started',
+    test(
+      'startPurchaseFlow maps success adapter result when status is expired',
+      () async {
+        final now = DateTime.now();
+        await SubscriptionAccessService.saveState(
+          userId: userId,
+          state: SubscriptionAccessState(
+            status: SubscriptionAccessStatus.expired,
+            expiresAtMs: now
+                .subtract(const Duration(days: 1))
+                .millisecondsSinceEpoch,
           ),
-          restoreResult: const SubscriptionStoreActionResult(
-            outcome: SubscriptionStoreActionOutcome.notAvailable,
-            message: 'restore n/a',
+        );
+
+        service = SubscriptionBillingService.withAdapter(
+          _FakeSubscriptionStoreAdapter(
+            purchaseResult: const SubscriptionStoreActionResult(
+              outcome: SubscriptionStoreActionOutcome.success,
+              message: 'purchase started',
+            ),
+            restoreResult: const SubscriptionStoreActionResult(
+              outcome: SubscriptionStoreActionOutcome.notAvailable,
+              message: 'restore n/a',
+            ),
           ),
-        ),
-      );
+        );
 
-      final result = await service.startPurchaseFlow(userId: userId);
-      expect(result.outcome, SubscriptionBillingOutcome.success);
-      expect(result.message, 'purchase started');
-    });
+        final result = await service.startPurchaseFlow(userId: userId);
+        expect(result.outcome, SubscriptionBillingOutcome.success);
+        expect(result.message, 'purchase started');
+      },
+    );
 
-    test('restorePurchases maps failed adapter result when status is expired', () async {
-      final now = DateTime.now();
-      await SubscriptionAccessService.saveState(
-        userId: userId,
-        state: SubscriptionAccessState(
-          status: SubscriptionAccessStatus.expired,
-          expiresAtMs: now.subtract(const Duration(days: 1)).millisecondsSinceEpoch,
-        ),
-      );
-
-      service = SubscriptionBillingService.withAdapter(
-        _FakeSubscriptionStoreAdapter(
-          purchaseResult: const SubscriptionStoreActionResult(
-            outcome: SubscriptionStoreActionOutcome.notAvailable,
-            message: 'purchase n/a',
+    test(
+      'restorePurchases maps failed adapter result when status is expired',
+      () async {
+        final now = DateTime.now();
+        await SubscriptionAccessService.saveState(
+          userId: userId,
+          state: SubscriptionAccessState(
+            status: SubscriptionAccessStatus.expired,
+            expiresAtMs: now
+                .subtract(const Duration(days: 1))
+                .millisecondsSinceEpoch,
           ),
-          restoreResult: const SubscriptionStoreActionResult(
-            outcome: SubscriptionStoreActionOutcome.failed,
-            message: 'restore failed',
-          ),
-        ),
-      );
+        );
 
-      final result = await service.restorePurchases(userId: userId);
-      expect(result.outcome, SubscriptionBillingOutcome.error);
-      expect(result.message, 'restore failed');
-    });
+        service = SubscriptionBillingService.withAdapter(
+          _FakeSubscriptionStoreAdapter(
+            purchaseResult: const SubscriptionStoreActionResult(
+              outcome: SubscriptionStoreActionOutcome.notAvailable,
+              message: 'purchase n/a',
+            ),
+            restoreResult: const SubscriptionStoreActionResult(
+              outcome: SubscriptionStoreActionOutcome.failed,
+              message: 'restore failed',
+            ),
+          ),
+        );
+
+        final result = await service.restorePurchases(userId: userId);
+        expect(result.outcome, SubscriptionBillingOutcome.error);
+        expect(result.message, 'restore failed');
+      },
+    );
   });
 }

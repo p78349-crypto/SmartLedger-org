@@ -112,7 +112,7 @@ Future<void> _addCheckedItemsToLedgerMartShopping({
           accountName: accountName,
           initialDay: commonInfo.date,
           savedCount: selected.length,
-          showShoppingPointsInputCta: true,  // ✅ 터치 시에만 포인트 입력 열림
+          showShoppingPointsInputCta: true, // ✅ 터치 시에만 포인트 입력 열림
         ),
       );
       return; // ✅ 포인트 입력 화면 자동 열기 제거, 터치 시에만 열림

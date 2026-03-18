@@ -4,7 +4,10 @@ part of 'asset_detail_screen.dart';
 extension AssetDetailWidgets on _AssetDetailScreenState {
   /// 통계 항목 빌드
   Widget _buildStatItem(
-    ThemeData theme, String label, String value, IconData icon,
+    ThemeData theme,
+    String label,
+    String value,
+    IconData icon,
   ) {
     return Column(
       mainAxisSize: MainAxisSize.min,

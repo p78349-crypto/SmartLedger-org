@@ -119,7 +119,9 @@ class AccountSelectScreen extends StatelessWidget {
                           child: const Text('취소'),
                         ),
                         FilledButton(
-                          onPressed: () => Navigator.of(dialogContext).pop(controller.text.trim()),
+                          onPressed: () => Navigator.of(
+                            dialogContext,
+                          ).pop(controller.text.trim()),
                           child: const Text('복구'),
                         ),
                       ],
@@ -127,7 +129,8 @@ class AccountSelectScreen extends StatelessWidget {
                   );
 
                   if (key != null && key.isNotEmpty) {
-                    final success = await DbEncryptionKeyManager.restoreKeyFromBackup(key);
+                    final success =
+                        await DbEncryptionKeyManager.restoreKeyFromBackup(key);
                     if (!context.mounted) return;
                     if (success) {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -200,15 +203,18 @@ class AccountSelectScreen extends StatelessWidget {
                     final accountName = accounts[index];
                     final label = labels[accountName];
                     final isRoot = accountName.trim().toUpperCase() == 'ROOT';
-                    final account = accountService.getAccountByName(accountName);
-                    final hasPassword = account?.password != null &&
+                    final account = accountService.getAccountByName(
+                      accountName,
+                    );
+                    final hasPassword =
+                        account?.password != null &&
                         account!.password!.isNotEmpty;
 
                     return ListTile(
                       leading: Icon(
-                        isRoot 
-                          ? Icons.admin_panel_settings
-                          : (hasPassword ? Icons.lock : Icons.person),
+                        isRoot
+                            ? Icons.admin_panel_settings
+                            : (hasPassword ? Icons.lock : Icons.person),
                         color: isRoot ? Colors.amber : null,
                       ),
                       title: Text(accountName),
@@ -227,7 +233,7 @@ class AccountSelectScreen extends StatelessWidget {
                           );
                           return;
                         }
-                        
+
                         final account = accountService.getAccountByName(
                           accountName,
                         );
@@ -269,12 +275,12 @@ class AccountSelectScreen extends StatelessWidget {
                                 ],
                               ),
                             );
-                            
+
                             if (confirmed != true) {
                               passwordController.dispose();
                               return;
                             }
-                            
+
                             if (passwordController.text != account.password) {
                               passwordController.dispose();
                               if (!context.mounted) return;
@@ -286,27 +292,32 @@ class AccountSelectScreen extends StatelessWidget {
                               );
                               return;
                             }
-                            
+
                             final password = passwordController.text;
                             passwordController.dispose();
-                            final restoreResult = await OnlinePasswordKeyBackupFacade()
-                                .restoreWithPassword(
-                                  accountId: account.name,
-                                  password: password,
-                                );
-                            
+                            final restoreResult =
+                                await OnlinePasswordKeyBackupFacade()
+                                    .restoreWithPassword(
+                                      accountId: account.name,
+                                      password: password,
+                                    );
+
                             if (!context.mounted) return;
-                            
-                            if (!restoreResult.isSuccess && !restoreResult.isDisabled && !restoreResult.isOffline) {
+
+                            if (!restoreResult.isSuccess &&
+                                !restoreResult.isDisabled &&
+                                !restoreResult.isOffline) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text(restoreResult.message ?? 'DEK 복구에 실패했습니다'),
+                                  content: Text(
+                                    restoreResult.message ?? 'DEK 복구에 실패했습니다',
+                                  ),
                                   backgroundColor: Colors.orange,
                                 ),
                               );
                             }
                           }
-                          
+
                           if (!context.mounted) return;
                           Navigator.of(context).pushReplacementNamed(
                             AppRoutes.accountMain,

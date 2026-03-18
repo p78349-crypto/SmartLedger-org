@@ -13,7 +13,9 @@ extension AssetTabScreenAuth on _AssetTabScreenState {
     SharedPreferences.getInstance().then((prefs) {
       prefs.setInt(
         PrefKeys.assetAuthSessionUntilMs,
-        DateTime.now().add(_AssetTabScreenState._autoLockIdleTimeout).millisecondsSinceEpoch,
+        DateTime.now()
+            .add(_AssetTabScreenState._autoLockIdleTimeout)
+            .millisecondsSinceEpoch,
       );
     });
 

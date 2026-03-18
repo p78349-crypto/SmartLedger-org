@@ -99,7 +99,18 @@ String _extractAcronym(String text) {
 
 bool _isStopWord(String word) {
   const stopWords = {
-    'a', 'an', 'the', 'of', 'and', 'or', 'to', 'for', 'in', 'on', 'at', 'by',
+    'a',
+    'an',
+    'the',
+    'of',
+    'and',
+    'or',
+    'to',
+    'for',
+    'in',
+    'on',
+    'at',
+    'by',
   };
   return stopWords.contains(word.toLowerCase());
 }

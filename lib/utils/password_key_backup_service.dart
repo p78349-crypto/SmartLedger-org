@@ -97,10 +97,7 @@ class PasswordKeyBackupService {
       throw ArgumentError('password is empty');
     }
 
-    return {
-      'accountId': accountId,
-      'password': normalizedPassword,
-    };
+    return {'accountId': accountId, 'password': normalizedPassword};
   }
 
   Future<Map<String, dynamic>> buildRecoverPayloadWithRecoveryKey({
@@ -114,10 +111,7 @@ class PasswordKeyBackupService {
       throw ArgumentError('recovery key is empty');
     }
 
-    return {
-      'accountId': accountId,
-      'recoveryKey': recoveryKeyBase64.trim(),
-    };
+    return {'accountId': accountId, 'recoveryKey': recoveryKeyBase64.trim()};
   }
 
   Future<Map<String, dynamic>> buildRotatePayload({

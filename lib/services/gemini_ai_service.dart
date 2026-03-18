@@ -24,10 +24,7 @@ class GeminiAiService {
     _model = GenerativeModel(
       model: 'sealed',
       apiKey: apiKey,
-      generationConfig: GenerationConfig(
-        temperature: 0.0,
-        maxOutputTokens: 1,
-      ),
+      generationConfig: GenerationConfig(temperature: 0.0, maxOutputTokens: 1),
     );
     _isInitialized = true;
     debugPrint('🔒 Gemini AI 봉인 모드 초기화');
@@ -83,16 +80,15 @@ class GenerativeModel {
     GenerationConfig? generationConfig,
   });
 
-  Future<_SealedGenerateResponse> generateContent(List<dynamic> contents) async {
+  Future<_SealedGenerateResponse> generateContent(
+    List<dynamic> contents,
+  ) async {
     return const _SealedGenerateResponse(null);
   }
 }
 
 class GenerationConfig {
-  GenerationConfig({
-    double? temperature,
-    int? maxOutputTokens,
-  });
+  GenerationConfig({double? temperature, int? maxOutputTokens});
 }
 
 class Content {

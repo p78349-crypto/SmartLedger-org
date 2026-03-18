@@ -87,8 +87,8 @@ class RewardBadgeService {
     final prefs = await SharedPreferences.getInstance();
 
     // Dedupe: keep a bounded list of awarded keys for each type.
-    final awardedRaw = prefs.getStringList(_awardedKey(accountName, t)) ??
-        <String>[];
+    final awardedRaw =
+        prefs.getStringList(_awardedKey(accountName, t)) ?? <String>[];
     if (awardedRaw.contains(dk)) return false;
 
     final nextAwarded = <String>[...awardedRaw, dk];

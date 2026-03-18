@@ -67,17 +67,13 @@ const List<FoodKnowledgeEntry> _entriesMeatDairy = <FoodKnowledgeEntry>[
   FoodKnowledgeEntry(
     primaryName: '두부',
     keywords: <String>['두부', 'tofu'],
-    dailyIntakeText:
-        '성인(대략): 1/2~1모(약 150~300g)/일 범위로 나눠 먹는 경우가 흔합니다.',
+    dailyIntakeText: '성인(대략): 1/2~1모(약 150~300g)/일 범위로 나눠 먹는 경우가 흔합니다.',
     pairings: <FoodPairingSuggestion>[
       FoodPairingSuggestion(
         ingredient: '김치/파/마늘',
         why: '담백한 맛을 보완해 조리 만족도를 올리기 쉬움(염분은 주의).',
       ),
-      FoodPairingSuggestion(
-        ingredient: '버섯',
-        why: '식이섬유·감칠맛으로 포만감에 도움.',
-      ),
+      FoodPairingSuggestion(ingredient: '버섯', why: '식이섬유·감칠맛으로 포만감에 도움.'),
       FoodPairingSuggestion(
         ingredient: '현미/잡곡',
         why: '식물성 단백질과 곡류 조합으로 한 끼 구성이 쉬움.',
@@ -88,8 +84,7 @@ const List<FoodKnowledgeEntry> _entriesMeatDairy = <FoodKnowledgeEntry>[
   FoodKnowledgeEntry(
     primaryName: '연어(등푸른 생선)',
     keywords: <String>['연어', 'salmon'],
-    dailyIntakeText:
-        '성인(대략): 조리된 생선 100~150g/회, 주 1~3회 정도로 섭취하는 경우가 많습니다.',
+    dailyIntakeText: '성인(대략): 조리된 생선 100~150g/회, 주 1~3회 정도로 섭취하는 경우가 많습니다.',
     pairings: <FoodPairingSuggestion>[
       FoodPairingSuggestion(
         ingredient: '레몬/식초(산미)',
@@ -99,10 +94,7 @@ const List<FoodKnowledgeEntry> _entriesMeatDairy = <FoodKnowledgeEntry>[
         ingredient: '브로콜리/시금치',
         why: '채소 곁들이면 한 끼 균형과 포만감에 도움.',
       ),
-      FoodPairingSuggestion(
-        ingredient: '버섯',
-        why: '감칠맛을 더해 간을 과하게 하지 않게 도움.',
-      ),
+      FoodPairingSuggestion(ingredient: '버섯', why: '감칠맛을 더해 간을 과하게 하지 않게 도움.'),
     ],
     quantitySuggestions: <String>[
       '연어 1토막(약 120~150g)',
@@ -118,8 +110,7 @@ const List<FoodKnowledgeEntry> _entriesMeatDairy = <FoodKnowledgeEntry>[
   FoodKnowledgeEntry(
     primaryName: '소고기(살코기)',
     keywords: <String>['소고기', '소', 'beef'],
-    dailyIntakeText:
-        '성인(대략): 조리된 살코기 80~120g/회 정도를 한 끼 단백질로 활용하는 경우가 많습니다.',
+    dailyIntakeText: '성인(대략): 조리된 살코기 80~120g/회 정도를 한 끼 단백질로 활용하는 경우가 많습니다.',
     pairings: <FoodPairingSuggestion>[
       FoodPairingSuggestion(
         ingredient: '버섯',
@@ -148,8 +139,7 @@ const List<FoodKnowledgeEntry> _entriesMeatDairy = <FoodKnowledgeEntry>[
   FoodKnowledgeEntry(
     primaryName: '돼지고기(살코기)',
     keywords: <String>['돼지고기', '돼지', 'pork'],
-    dailyIntakeText:
-        '성인(대략): 조리된 살코기 80~120g/회 정도를 한 끼 단백질로 활용하는 경우가 많습니다.',
+    dailyIntakeText: '성인(대략): 조리된 살코기 80~120g/회 정도를 한 끼 단백질로 활용하는 경우가 많습니다.',
     pairings: <FoodPairingSuggestion>[
       FoodPairingSuggestion(
         ingredient: '양배추/상추(쌈)',
@@ -159,10 +149,7 @@ const List<FoodKnowledgeEntry> _entriesMeatDairy = <FoodKnowledgeEntry>[
         ingredient: '마늘/생강',
         why: '향미로 기름진 느낌을 줄이고 과한 소스 사용을 줄이기 쉬움.',
       ),
-      FoodPairingSuggestion(
-        ingredient: '버섯',
-        why: '감칠맛 + 식이섬유로 만족도를 올리기 쉬움.',
-      ),
+      FoodPairingSuggestion(ingredient: '버섯', why: '감칠맛 + 식이섬유로 만족도를 올리기 쉬움.'),
     ],
     quantitySuggestions: <String>[
       '돼지고기(살코기) 120g',

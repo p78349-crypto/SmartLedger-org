@@ -36,7 +36,7 @@ void main() {
     // ============================================================================
     // STEP 1: Local Database Lookup Tests
     // ============================================================================
-    
+
     group('Step 1: Local Database Lookup (<1ms)', () {
       test('Korean barcode (KAN_CODE) lookup', () {
         // Test data: Korea milk product
@@ -123,7 +123,7 @@ void main() {
     // ============================================================================
     // STEP 2: OpenFoodFacts API Fallback Tests
     // ============================================================================
-    
+
     group('Step 2: OpenFoodFacts API Fallback (100-500ms)', () {
       test('API barcode country detection - EAN-13', () {
         const expectedPrefix = '5901001001001';
@@ -165,7 +165,7 @@ void main() {
     // ============================================================================
     // STEP 3: Local Inventory Fallback Tests
     // ============================================================================
-    
+
     group('Step 3: Local Inventory Fallback', () {
       test('Unknown barcode fallback to inventory', () {
         const unknownBarcode = '9999999999999'; // Non-existent
@@ -178,7 +178,7 @@ void main() {
 
       test('Inventory item creation with scanned barcode', () {
         const scannedBarcode = '9999999999999';
-        
+
         // Simulate inventory item creation
         final inventoryItem = <String, dynamic>{
           'name': scannedBarcode,
@@ -195,11 +195,11 @@ void main() {
     // ============================================================================
     // INTEGRATION TESTS: 3-Step Barcode Lookup Flow
     // ============================================================================
-    
+
     group('Integration: 3-Step Barcode Lookup Flow', () {
       test('Korean product: Local DB success, no API/inventory needed', () {
         const barcode = '8801040234515';
-        
+
         // Step 1: Local DB search
         final dbResult = MockGlobalProduct(
           id: '1',
@@ -219,7 +219,7 @@ void main() {
 
       test('US product: Local DB success, auto quantity 1', () {
         const barcode = '033674006253';
-        
+
         final dbResult = MockGlobalProduct(
           id: '2',
           upcA: barcode,
@@ -237,7 +237,7 @@ void main() {
 
       test('Japan product: Local DB success, auto quantity 2', () {
         const barcode = '4901000102026';
-        
+
         final dbResult = MockGlobalProduct(
           id: '3',
           janCode: barcode,
@@ -255,11 +255,11 @@ void main() {
 
       test('Unknown product: API → Inventory fallback', () {
         const unknownBarcode = '1234567890123';
-        
+
         // Step 1: Local DB - MISS
         // Step 2: API - MISS (hypothetically)
         // Step 3: Inventory fallback
-        
+
         final inventoryItem = <String, dynamic>{
           'name': unknownBarcode,
           'quantity': 1,
@@ -273,17 +273,17 @@ void main() {
     // ============================================================================
     // PERFORMANCE TESTS
     // ============================================================================
-    
+
     group('Performance Benchmarks', () {
       test('L1 Cache: Local memory lookup <1ms', () {
         final stopwatch = Stopwatch()..start();
-        
+
         // Simulate fast memory lookup
         final memoryCache = <String, dynamic>{'8801040234515': 'Jongno Milk'};
         final result = memoryCache['8801040234515'];
-        
+
         stopwatch.stop();
-        
+
         expect(result, isNotNull);
         // In real app, this should be <1ms
         // Here we just verify it's fast
@@ -293,14 +293,14 @@ void main() {
       test('L3 Cache: Database query <100ms', () {
         // Simulated DB query time
         const estimatedDbQueryTimeMs = 50;
-        
+
         expect(estimatedDbQueryTimeMs, lessThan(100));
       });
 
       test('API Query: 100-500ms with cache', () {
         const apiResponseTimeMs = 250;
         const cachedResponseTimeMs = 1;
-        
+
         expect(apiResponseTimeMs, greaterThanOrEqualTo(100));
         expect(apiResponseTimeMs, lessThanOrEqualTo(500));
         expect(cachedResponseTimeMs, lessThan(10));
@@ -309,7 +309,7 @@ void main() {
       test('Total response time: Entry to quantity input <600ms', () {
         // Typical flow: L1 (0.5ms) → L3 (50ms) → Quantity input (5ms)
         const totalTimeMs = 55;
-        
+
         expect(totalTimeMs, lessThan(600));
       });
     });
@@ -317,35 +317,31 @@ void main() {
     // ============================================================================
     // DATA VALIDATION TESTS
     // ============================================================================
-    
+
     group('Data Validation', () {
       test('Barcode length validation: KAN 13 digits', () {
         const kanCode = '8801040234515';
-        
+
         expect(kanCode.length, equals(13));
         expect(int.tryParse(kanCode), isNotNull);
       });
 
       test('Barcode length validation: UPC-A 12 digits', () {
         const upcCode = '033674006253';
-        
+
         expect(upcCode.length, equals(12));
         expect(int.tryParse(upcCode), isNotNull);
       });
 
       test('Barcode length validation: JAN 13 digits', () {
         const janCode = '4901000102026';
-        
+
         expect(janCode.length, equals(13));
         expect(int.tryParse(janCode), isNotNull);
       });
 
       test('Country-specific default quantity', () {
-        final quantities = {
-          'KR': 2,
-          'US': 1,
-          'JP': 2,
-        };
+        final quantities = {'KR': 2, 'US': 1, 'JP': 2};
 
         expect(quantities['KR'], equals(2));
         expect(quantities['US'], equals(1));
@@ -353,11 +349,7 @@ void main() {
       });
 
       test('Multi-language product names', () {
-        final languages = {
-          'ko': '종로우유',
-          'en': 'Jongno Milk',
-          'ja': '牛乳',
-        };
+        final languages = {'ko': '종로우유', 'en': 'Jongno Milk', 'ja': '牛乳'};
 
         expect(languages['ko'], isNotEmpty);
         expect(languages['en'], isNotEmpty);
@@ -368,7 +360,7 @@ void main() {
     // ============================================================================
     // END-TO-END SCENARIO TESTS
     // ============================================================================
-    
+
     group('End-to-End Scenarios', () {
       test('Workflow: Scan Korean milk → Auto quantity 2', () {
         // Expected output
@@ -411,7 +403,7 @@ void main() {
         // Step 1: DB - MISS
         // Step 2: API - MISS
         // Step 3: Fallback
-        
+
         final fallbackOutput = {
           'name': 'UNKNOWN_BARCODE',
           'quantity': 1,

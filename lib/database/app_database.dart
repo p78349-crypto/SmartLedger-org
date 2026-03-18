@@ -7,6 +7,7 @@ import 'package:sqlite3/sqlite3.dart';
 import 'db_encryption_key_manager.dart';
 
 part 'app_database.g.dart';
+part 'app_database_migration.dart';
 
 class DbAccounts extends Table {
   IntColumn get id => integer().autoIncrement()();
@@ -66,6 +67,9 @@ class DbTransactions extends Table {
   BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
   BoolColumn get isSynced => boolean().withDefault(const Constant(false))();
 
+  /// SHA-256 해시 체인 — 이전 레코드의 해시를 포함하여 변조 감지.
+  TextColumn get integrityHash => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -105,15 +109,40 @@ class DbRootMemos extends Table {
   TextColumn get content => text()(); // 메모 내용
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
-  BoolColumn get isPinned => boolean().withDefault(const Constant(false))(); // 상단 고정 여부
-  TextColumn get color => text().nullable()(); // 메모 색상 (red, blue, green, yellow, purple)
-  IntColumn get sortOrder => integer().withDefault(const Constant(0))(); // 정렬 순서
-  
+  BoolColumn get isPinned =>
+      boolean().withDefault(const Constant(false))(); // 상단 고정 여부
+  TextColumn get color =>
+      text().nullable()(); // 메모 색상 (red, blue, green, yellow, purple)
+  IntColumn get sortOrder =>
+      integer().withDefault(const Constant(0))(); // 정렬 순서
+
   @override
   Set<Column> get primaryKey => {id};
 }
 
-@DriftDatabase(tables: [DbAccounts, DbTransactions, DbAssets, DbFixedCosts, DbRootMemos])
+/// 멱등성(Idempotency) 키 테이블 — 중복 요청 차단.
+///
+/// 동일한 operationKey로 들어온 요청은 24시간 내 재실행되지 않음.
+class DbIdempotencyKeys extends Table {
+  TextColumn get operationKey => text()();
+  TextColumn get result => text().nullable()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get expiresAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {operationKey};
+}
+
+@DriftDatabase(
+  tables: [
+    DbAccounts,
+    DbTransactions,
+    DbAssets,
+    DbFixedCosts,
+    DbRootMemos,
+    DbIdempotencyKeys,
+  ],
+)
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
@@ -124,226 +153,10 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.connect(super.executor);
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   @override
-  MigrationStrategy get migration => MigrationStrategy(
-    onCreate: (migrator) async {
-      await migrator.createAll();
-
-      // FTS index for fast long-term memo/description search.
-      // Stored as a virtual table (FTS5) because it is optimized for text.
-      await customStatement(
-        'CREATE VIRTUAL TABLE IF NOT EXISTS tx_fts USING fts5('
-        'transaction_id UNINDEXED,'
-        'account_name UNINDEXED,'
-        'description,'
-        'memo,'
-        'payment_method,'
-        'store,'
-        'main_category,'
-        'sub_category,'
-        'detail_category,'
-        'location,'
-        'supplier,'
-        'amount_text,'
-        'date_ymd,'
-        'date_ym,'
-        'year_text,'
-        'month_text,'
-        'tokenize=\'unicode61\''
-        ')',
-      );
-
-      // Monthly benefit aggregation for fast long-term totals.
-      await customStatement(
-        'CREATE TABLE IF NOT EXISTS tx_benefit_monthly('
-        'account_id INTEGER NOT NULL,'
-        'ym TEXT NOT NULL,'
-        'benefit_type TEXT NOT NULL,'
-        'total_amount REAL NOT NULL DEFAULT 0,'
-        'tx_count INTEGER NOT NULL DEFAULT 0,'
-        'PRIMARY KEY(account_id, ym, benefit_type),'
-        'FOREIGN KEY(account_id) REFERENCES db_accounts(id) ON DELETE CASCADE'
-        ')',
-      );
-      await customStatement(
-        'CREATE INDEX IF NOT EXISTS idx_benefit_monthly_account_ym '
-        'ON tx_benefit_monthly(account_id, ym)',
-      );
-    },
-    
-    onUpgrade: (migrator, from, to) async {
-      if (from < 10) {
-        await migrator.addColumn(dbAccounts, dbAccounts.syncId);
-        await migrator.addColumn(dbAccounts, dbAccounts.updatedAt);
-        await migrator.addColumn(dbAccounts, dbAccounts.isDeleted);
-        await migrator.addColumn(dbAccounts, dbAccounts.isSynced);
-
-        await migrator.addColumn(dbTransactions, dbTransactions.syncId);
-        await migrator.addColumn(dbTransactions, dbTransactions.updatedAt);
-        await migrator.addColumn(dbTransactions, dbTransactions.isDeleted);
-        await migrator.addColumn(dbTransactions, dbTransactions.isSynced);
-
-        await migrator.addColumn(dbAssets, dbAssets.syncId);
-        await migrator.addColumn(dbAssets, dbAssets.isDeleted);
-        await migrator.addColumn(dbAssets, dbAssets.isSynced);
-
-        await migrator.addColumn(dbFixedCosts, dbFixedCosts.syncId);
-        await migrator.addColumn(dbFixedCosts, dbFixedCosts.updatedAt);
-        await migrator.addColumn(dbFixedCosts, dbFixedCosts.isDeleted);
-        await migrator.addColumn(dbFixedCosts, dbFixedCosts.isSynced);
-      }
-
-      // FTS is a cache. For schema changes, we can safely drop and recreate.
-      if (from < 3) {
-        await customStatement('DROP TABLE IF EXISTS tx_fts');
-        await customStatement(
-          'CREATE VIRTUAL TABLE IF NOT EXISTS tx_fts USING fts5('
-          'transaction_id UNINDEXED,'
-          'account_name UNINDEXED,'
-          'description,'
-          'memo,'
-          'payment_method,'
-          'store,'
-          'main_category,'
-          'sub_category,'
-          'amount_text,'
-          'date_ymd,'
-          'date_ym,'
-          'year_text,'
-          'month_text,'
-          'tokenize=\'unicode61\''
-          ')',
-        );
-      }
-
-      if (from < 4) {
-        await migrator.addColumn(
-          dbTransactions,
-          dbTransactions.cardChargedAmount,
-        );
-        await migrator.addColumn(dbTransactions, dbTransactions.store);
-        await migrator.addColumn(dbTransactions, dbTransactions.mainCategory);
-        await migrator.addColumn(dbTransactions, dbTransactions.subCategory);
-        await migrator.addColumn(
-          dbTransactions,
-          dbTransactions.savingsAllocation,
-        );
-        await migrator.addColumn(dbTransactions, dbTransactions.isRefund);
-        await migrator.addColumn(
-          dbTransactions,
-          dbTransactions.originalTransactionId,
-        );
-        await migrator.addColumn(dbTransactions, dbTransactions.weatherJson);
-
-        // Recreate FTS to ensure schema stays consistent.
-        await customStatement('DROP TABLE IF EXISTS tx_fts');
-        await customStatement(
-          'CREATE VIRTUAL TABLE IF NOT EXISTS tx_fts USING fts5('
-          'transaction_id UNINDEXED,'
-          'account_name UNINDEXED,'
-          'description,'
-          'memo,'
-          'payment_method,'
-          'store,'
-          'main_category,'
-          'sub_category,'
-          'amount_text,'
-          'date_ymd,'
-          'date_ym,'
-          'year_text,'
-          'month_text,'
-          'tokenize=\'unicode61\''
-          ')',
-        );
-
-        // Helpful indexes for large data (safe to run repeatedly).
-        await customStatement(
-          'CREATE INDEX IF NOT EXISTS idx_tx_account_date '
-          'ON db_transactions(account_id, date)',
-        );
-        await customStatement(
-          'CREATE INDEX IF NOT EXISTS idx_tx_account_type_date '
-          'ON db_transactions(account_id, type, date)',
-        );
-      }
-
-      if (from < 5) {
-        await migrator.addColumn(dbTransactions, dbTransactions.benefitJson);
-      }
-
-      if (from < 6) {
-        await customStatement(
-          'CREATE TABLE IF NOT EXISTS tx_benefit_monthly('
-          'account_id INTEGER NOT NULL,'
-          'ym TEXT NOT NULL,'
-          'benefit_type TEXT NOT NULL,'
-          'total_amount REAL NOT NULL DEFAULT 0,'
-          'tx_count INTEGER NOT NULL DEFAULT 0,'
-          'PRIMARY KEY(account_id, ym, benefit_type),'
-          'FOREIGN KEY(account_id) REFERENCES db_accounts(id) ON DELETE CASCADE'
-          ')',
-        );
-        await customStatement(
-          'CREATE INDEX IF NOT EXISTS idx_benefit_monthly_account_ym '
-          'ON tx_benefit_monthly(account_id, ym)',
-        );
-      }
-
-      if (from < 7) {
-        await migrator.addColumn(dbTransactions, dbTransactions.detailCategory);
-        await migrator.addColumn(dbTransactions, dbTransactions.location);
-        await migrator.addColumn(dbTransactions, dbTransactions.supplier);
-        await migrator.addColumn(dbTransactions, dbTransactions.expiryDate);
-        await migrator.addColumn(dbTransactions, dbTransactions.unit);
-
-        // Recreate FTS to include new fields.
-        await customStatement('DROP TABLE IF EXISTS tx_fts');
-        await customStatement(
-          'CREATE VIRTUAL TABLE IF NOT EXISTS tx_fts USING fts5('
-          'transaction_id UNINDEXED,'
-          'account_name UNINDEXED,'
-          'description,'
-          'memo,'
-          'payment_method,'
-          'store,'
-          'main_category,'
-          'sub_category,'
-          'detail_category,'
-          'location,'
-          'supplier,'
-          'amount_text,'
-          'date_ymd,'
-          'date_ym,'
-          'year_text,'
-          'month_text,'
-          'tokenize=\'unicode61\''
-          ')',
-        );
-      }
-
-      if (from < 8) {
-        await migrator.addColumn(dbTransactions, dbTransactions.currency);
-        await migrator.addColumn(dbTransactions, dbTransactions.exchangeRate);
-        await migrator.addColumn(dbTransactions, dbTransactions.originalAmount);
-        await migrator.addColumn(dbTransactions, dbTransactions.vatAmount);
-      }
-    },
-    beforeOpen: (details) async {
-      // Ensure foreign keys are enforced (SQLite defaults to OFF).
-      await customStatement('PRAGMA foreign_keys = ON');
-
-      // High-throughput integrity profile.
-      // - WAL improves writer/reader concurrency.
-      // - FULL synchronous prioritizes durability on crash/power loss.
-      // - busy_timeout reduces transient lock failures under burst writes.
-      await customStatement('PRAGMA journal_mode = WAL');
-      await customStatement('PRAGMA synchronous = FULL');
-      await customStatement('PRAGMA busy_timeout = 5000');
-      await customStatement('PRAGMA wal_autocheckpoint = 1000');
-    },
-  );
+  MigrationStrategy get migration => migrationStrategy;
 
   Future<List<DbAccount>> getAllAccounts() {
     return (select(
@@ -366,6 +179,11 @@ class AppDatabase extends _$AppDatabase {
   }
 }
 
+// R2-2: 메인 DB 초기화 순서
+// 1. FlutterSecureStorage → 256-bit AES 키 로드/생성
+// 2. NativeDatabase.createInBackground(file, setup: PRAGMA key)
+// 3. Drift 마이그레이션 (version 1→8)
+// 4. beforeOpen → foreign_keys, WAL, synchronous=FULL, busy_timeout
 LazyDatabase _openConnection() {
   return LazyDatabase(() async {
     final dbFolder = await getApplicationDocumentsDirectory();
@@ -378,6 +196,10 @@ LazyDatabase _openConnection() {
     return NativeDatabase.createInBackground(
       file,
       setup: (db) {
+        // R4-5: key is base64Url-encoded (A-Z, a-z, 0-9, -, _)
+        // so it cannot contain ' and is safe from SQL injection.
+        // Assertion guards against future key-format changes.
+        assert(!key.contains("'"), 'DB key must not contain single quotes');
         db.execute("PRAGMA key = '$key';");
       },
     );

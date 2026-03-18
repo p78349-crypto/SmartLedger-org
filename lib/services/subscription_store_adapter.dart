@@ -1,9 +1,4 @@
-enum SubscriptionStoreActionOutcome {
-  success,
-  cancelled,
-  notAvailable,
-  failed,
-}
+enum SubscriptionStoreActionOutcome { success, cancelled, notAvailable, failed }
 
 class SubscriptionStoreActionResult {
   const SubscriptionStoreActionResult({

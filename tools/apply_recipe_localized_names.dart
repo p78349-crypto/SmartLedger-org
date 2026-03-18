@@ -46,7 +46,8 @@ void main(List<String> args) async {
   }
 
   final inputPath = argMap['input'] ?? 'recipes.json';
-  final templatePath = argMap['template'] ??
+  final templatePath =
+      argMap['template'] ??
       'lib/migrations/recipe_localized_names_template.json';
   final outputPath = argMap['output'] ?? inputPath; // in-place by default
   final dryRun = flags.contains('dry-run') || flags.contains('dryrun');
@@ -138,4 +139,3 @@ void main(List<String> args) async {
     print('📊 Total recipes: ${migrated.length}');
   }
 }
-

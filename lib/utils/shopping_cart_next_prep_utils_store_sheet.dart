@@ -42,9 +42,9 @@ Future<void> _showStoreRecommendSheet({
               incoming: incoming,
             );
             if (result.added <= 0) {
-              ScaffoldMessenger.of(sheetContext).showSnackBar(
-                const SnackBar(content: Text('이미 목록에 있습니다.')),
-              );
+              ScaffoldMessenger.of(
+                sheetContext,
+              ).showSnackBar(const SnackBar(content: Text('이미 목록에 있습니다.')));
               setSheetState(() {
                 addedKeys.add(key);
               });
@@ -59,9 +59,9 @@ Future<void> _showStoreRecommendSheet({
               addedKeys.add(key);
             });
 
-            ScaffoldMessenger.of(sheetContext).showSnackBar(
-              SnackBar(content: Text('추가됨: ${item.name}')),
-            );
+            ScaffoldMessenger.of(
+              sheetContext,
+            ).showSnackBar(SnackBar(content: Text('추가됨: ${item.name}')));
           }
 
           return SafeArea(

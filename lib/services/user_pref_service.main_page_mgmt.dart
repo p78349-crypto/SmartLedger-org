@@ -14,9 +14,7 @@ bool _isMainPageUiPrefSuffix(String suffix) {
   return false;
 }
 
-Future<void> _clearAllAccountScopedPrefs({
-  required String accountName,
-}) async {
+Future<void> _clearAllAccountScopedPrefs({required String accountName}) async {
   final prefs = await SharedPreferences.getInstance();
   final prefix = '${accountName}_';
   final keys = prefs.getKeys().where((k) => k.startsWith(prefix)).toList();
@@ -30,13 +28,14 @@ Future<List<Map<String, dynamic>>> _exportMainPageUiPrefsSnapshot({
 }) async {
   final prefs = await SharedPreferences.getInstance();
   final prefix = '${accountName}_';
-  final keys = prefs
-      .getKeys()
-      .where((k) => k.startsWith(prefix))
-      .map((k) => k.substring(prefix.length))
-      .where(_isMainPageUiPrefSuffix)
-      .toList()
-    ..sort();
+  final keys =
+      prefs
+          .getKeys()
+          .where((k) => k.startsWith(prefix))
+          .map((k) => k.substring(prefix.length))
+          .where(_isMainPageUiPrefSuffix)
+          .toList()
+        ..sort();
 
   final out = <Map<String, dynamic>>[];
   for (final suffix in keys) {
@@ -155,9 +154,11 @@ Future<void> _resetAccountMainPages({
   final allKeys = prefs.getKeys();
   for (final key in allKeys) {
     if (!key.startsWith(accountPrefix)) continue;
-    final isIndexBased = key.contains('_page_') &&
+    final isIndexBased =
+        key.contains('_page_') &&
         (key.contains('_icon_slots') || key.contains('_icon_order'));
-    final isPageIdBased = key.contains('_pageId_') &&
+    final isPageIdBased =
+        key.contains('_pageId_') &&
         (key.contains('_icon_slots') ||
             key.contains('_icon_order') ||
             key.contains('_slot_groups'));

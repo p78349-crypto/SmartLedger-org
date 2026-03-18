@@ -84,10 +84,12 @@ Future<List<ShoppingCartHistoryEntry>> _getShoppingCartHistory({
     final entries = decoded
         .whereType<Map<String, dynamic>>()
         .map(ShoppingCartHistoryEntry.fromJson)
-        .where((e) =>
-            e.id.trim().isNotEmpty &&
-            e.itemId.trim().isNotEmpty &&
-            e.name.trim().isNotEmpty)
+        .where(
+          (e) =>
+              e.id.trim().isNotEmpty &&
+              e.itemId.trim().isNotEmpty &&
+              e.name.trim().isNotEmpty,
+        )
         .toList();
     entries.sort((a, b) => b.at.compareTo(a.at));
     return entries.take(limit).toList(growable: false);
@@ -103,13 +105,12 @@ Future<void> _addShoppingCartHistoryEntry({
 }) async {
   final prefs = await SharedPreferences.getInstance();
   final current = await _getShoppingCartHistory(
-    accountName: accountName, limit: maxItems,
+    accountName: accountName,
+    limit: maxItems,
   );
   final next = [entry, ...current];
   final data = next.take(maxItems).map((e) => e.toJson()).toList();
-  await prefs.setString(
-    _shoppingCartHistoryKey(accountName), jsonEncode(data),
-  );
+  await prefs.setString(_shoppingCartHistoryKey(accountName), jsonEncode(data));
 }
 
 Future<void> _clearShoppingCartHistory({required String accountName}) async {
@@ -125,9 +126,7 @@ Future<void> _setShoppingCartHistory({
   final prefs = await SharedPreferences.getInstance();
   final trimmed = entries.take(maxItems).toList(growable: false);
   final data = trimmed.map((e) => e.toJson()).toList(growable: false);
-  await prefs.setString(
-    _shoppingCartHistoryKey(accountName), jsonEncode(data),
-  );
+  await prefs.setString(_shoppingCartHistoryKey(accountName), jsonEncode(data));
 }
 
 Future<List<ShoppingTemplateItem>> _getShoppingGroceryTemplateItems({
@@ -163,7 +162,8 @@ Future<void> _setShoppingGroceryTemplateItems({
       .toList(growable: false);
   final data = trimmed.map((i) => i.toJson()).toList(growable: false);
   await prefs.setString(
-    _shoppingGroceryTemplateKey(accountName), jsonEncode(data),
+    _shoppingGroceryTemplateKey(accountName),
+    jsonEncode(data),
   );
 }
 
@@ -177,7 +177,8 @@ Future<void> _clearShoppingGroceryTemplateItems({
 Future<List<String>> _getRecentStores(String accountName) async {
   final prefs = await SharedPreferences.getInstance();
   return prefs.getStringList(
-        PrefKeys.accountKey(accountName, 'recent_stores')) ??
+        PrefKeys.accountKey(accountName, 'recent_stores'),
+      ) ??
       [];
 }
 
@@ -196,7 +197,8 @@ Future<void> _saveRecentStore(String accountName, String store) async {
 Future<List<String>> _getRecentPayments(String accountName) async {
   final prefs = await SharedPreferences.getInstance();
   return prefs.getStringList(
-        PrefKeys.accountKey(accountName, 'recent_payments')) ??
+        PrefKeys.accountKey(accountName, 'recent_payments'),
+      ) ??
       [];
 }
 

@@ -139,9 +139,7 @@ class GlobalFoodCartBottomButton extends StatelessWidget {
                   )
                 : const Icon(Icons.shopping_cart),
             label: Text(
-              selectedCount == 0
-                  ? '항목을 선택해주세요'
-                  : '$selectedCount개 항목 장바구니에 추가',
+              selectedCount == 0 ? '항목을 선택해주세요' : '$selectedCount개 항목 장바구니에 추가',
             ),
           ),
         ),

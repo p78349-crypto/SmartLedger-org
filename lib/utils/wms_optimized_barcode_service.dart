@@ -1,13 +1,14 @@
 import 'dart:async';
 import '../models/global_product.dart';
-import '../services/global_product_service.dart';  
+import '../services/global_product_service.dart';
 import '../services/openfoodfacts_service.dart';
 import 'wms_database_pool.dart';
 
 /// WMS 바코드 검색 최적화 서비스
 class WmsOptimizedBarcodeService {
   WmsOptimizedBarcodeService._();
-  static final WmsOptimizedBarcodeService instance = WmsOptimizedBarcodeService._();
+  static final WmsOptimizedBarcodeService instance =
+      WmsOptimizedBarcodeService._();
 
   GlobalProductService? _globalService;
   late OpenFoodFactsService _offService;
@@ -58,7 +59,7 @@ class WmsOptimizedBarcodeService {
     }
 
     final stopwatch = Stopwatch()..start();
-    
+
     try {
       // 🚀 병렬 검색 (로컬 DB + OpenFoodFacts)
       final searchResults = await Future.wait([
@@ -82,7 +83,7 @@ class WmsOptimizedBarcodeService {
       } else if (offProduct != null) {
         finalProduct = offProduct;
         source = 'openfoodfacts';
-        
+
         // OFF에서 찾은 경우 로컬 DB에 캐시
         await _cacheToLocalDb(finalProduct);
       }
@@ -97,7 +98,6 @@ class WmsOptimizedBarcodeService {
         source: source,
         searchTimeMs: stopwatch.elapsedMilliseconds,
       );
-
     } on TimeoutException {
       return WmsBarcodeSearchResult(
         product: null,
@@ -131,7 +131,7 @@ class WmsOptimizedBarcodeService {
     for (final barcode in barcodes) {
       if (barcode.trim().isNotEmpty) {
         searchTasks[barcode] = searchBarcode(
-          barcode, 
+          barcode,
           timeout: Duration(seconds: 2), // 배치에서는 개별 타임아웃 단축
         );
       }
@@ -192,11 +192,11 @@ class WmsOptimizedBarcodeService {
     }
   }
 
-  /// 📝 메모리 캐시 업데이트  
+  /// 📝 메모리 캐시 업데이트
   void _updateMemoryCache(String barcode, GlobalProduct product) {
     _barcodeCache[barcode] = product;
     _cacheTimestamps[barcode] = DateTime.now();
-    
+
     // 캐시 크기 제한 (최대 500개)
     if (_barcodeCache.length > 500) {
       _cleanOldCache();
@@ -206,10 +206,10 @@ class WmsOptimizedBarcodeService {
   /// ✅ 캐시 유효성 확인
   bool _isCacheValid(String barcode) {
     if (!_barcodeCache.containsKey(barcode)) return false;
-    
+
     final timestamp = _cacheTimestamps[barcode];
     if (timestamp == null) return false;
-    
+
     return DateTime.now().difference(timestamp) < _cacheValidDuration;
   }
 
@@ -217,13 +217,13 @@ class WmsOptimizedBarcodeService {
   void _cleanOldCache() {
     final now = DateTime.now();
     final oldEntries = <String>[];
-    
+
     _cacheTimestamps.forEach((barcode, timestamp) {
       if (now.difference(timestamp) > _cacheValidDuration) {
         oldEntries.add(barcode);
       }
     });
-    
+
     for (final barcode in oldEntries) {
       _barcodeCache.remove(barcode);
       _cacheTimestamps.remove(barcode);

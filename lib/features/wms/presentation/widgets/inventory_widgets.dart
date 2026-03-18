@@ -3,7 +3,7 @@ library;
 import 'package:flutter/material.dart';
 
 /// Empty state widget for inventory list.
-/// 
+///
 /// Shows when there are no items or search results.
 class InventoryEmptyState extends StatelessWidget {
   final String title;
@@ -11,7 +11,7 @@ class InventoryEmptyState extends StatelessWidget {
   final IconData icon;
   final VoidCallback? onAction;
   final String? actionLabel;
-  
+
   const InventoryEmptyState({
     required this.title,
     required this.message,
@@ -20,22 +20,18 @@ class InventoryEmptyState extends StatelessWidget {
     this.actionLabel,
     super.key,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              size: 80,
-              color: Colors.grey.shade300,
-            ),
+            Icon(icon, size: 80, color: Colors.grey.shade300),
             const SizedBox(height: 24),
             Text(
               title,
@@ -71,12 +67,9 @@ class InventoryEmptyState extends StatelessWidget {
 /// Loading overlay widget for operations.
 class InventoryLoadingOverlay extends StatelessWidget {
   final String message;
-  
-  const InventoryLoadingOverlay({
-    this.message = 'Processing...',
-    super.key,
-  });
-  
+
+  const InventoryLoadingOverlay({this.message = 'Processing...', super.key});
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -91,10 +84,7 @@ class InventoryLoadingOverlay extends StatelessWidget {
               children: [
                 const CircularProgressIndicator(),
                 const SizedBox(height: 16),
-                Text(
-                  message,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
+                Text(message, style: Theme.of(context).textTheme.bodyLarge),
               ],
             ),
           ),
@@ -108,13 +98,13 @@ class InventoryLoadingOverlay extends StatelessWidget {
 class LowStockBanner extends StatelessWidget {
   final int itemCount;
   final VoidCallback onViewTap;
-  
+
   const LowStockBanner({
     required this.itemCount,
     required this.onViewTap,
     super.key,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -122,11 +112,7 @@ class LowStockBanner extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.orange.shade100,
-        border: Border(
-          bottom: BorderSide(
-            color: Colors.orange.shade200,
-          ),
-        ),
+        border: Border(bottom: BorderSide(color: Colors.orange.shade200)),
       ),
       child: Row(
         children: [
@@ -151,10 +137,7 @@ class LowStockBanner extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   '$itemCount item${itemCount > 1 ? 's' : ''} need${itemCount > 1 ? '' : 's'} restocking',
-                  style: TextStyle(
-                    color: Colors.orange.shade700,
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: Colors.orange.shade700, fontSize: 12),
                 ),
               ],
             ),
@@ -177,23 +160,23 @@ class StockLevelBadge extends StatelessWidget {
   final double currentStock;
   final double threshold;
   final String unit;
-  
+
   const StockLevelBadge({
     required this.currentStock,
     required this.threshold,
     required this.unit,
     super.key,
   });
-  
+
   @override
   Widget build(BuildContext context) {
-    final percentage = threshold > 0 
-        ? (currentStock / threshold).clamp(0.0, 1.0) 
+    final percentage = threshold > 0
+        ? (currentStock / threshold).clamp(0.0, 1.0)
         : 1.0;
-    
+
     final isLow = currentStock <= threshold;
     final color = isLow ? Colors.orange : Colors.green;
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(

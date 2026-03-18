@@ -175,9 +175,7 @@ extension TransactionAddScreenDialogs on _NO1FormState {
     );
     final canShowShoppingCompare = isExpense && isShoppingCategory;
     final Future<String?>? shoppingCompareFuture = canShowShoppingCompare
-        ? _buildShoppingSpendComparisonTooltip(
-            accountName: widget.accountName,
-          )
+        ? _buildShoppingSpendComparisonTooltip(accountName: widget.accountName)
         : null;
 
     if (!mounted) return false;

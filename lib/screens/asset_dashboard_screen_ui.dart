@@ -197,8 +197,9 @@ extension _AssetDashboardScreenUi on _AssetDashboardScreenState {
   }
 
   Widget _buildDashboardSummary(ThemeData theme) {
-    final summary =
-        AssetManagementUtils.generateDashboardSummary(_internalAssets);
+    final summary = AssetManagementUtils.generateDashboardSummary(
+      _internalAssets,
+    );
     return AssetUIWidgets.buildDashboardSummary(
       theme: theme,
       summary: summary,
@@ -207,9 +208,8 @@ extension _AssetDashboardScreenUi on _AssetDashboardScreenState {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => OneHundredMillionProjectScreen(
-              accountName: widget.accountName,
-            ),
+            builder: (_) =>
+                OneHundredMillionProjectScreen(accountName: widget.accountName),
           ),
         );
       },
@@ -340,10 +340,7 @@ extension _AssetDashboardScreenUi on _AssetDashboardScreenState {
           for (final item in items)
             Padding(
               padding: const EdgeInsets.only(bottom: 6),
-              child: Text(
-                item,
-                style: theme.textTheme.bodySmall,
-              ),
+              child: Text(item, style: theme.textTheme.bodySmall),
             ),
         ],
       ),

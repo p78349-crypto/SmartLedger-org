@@ -19,12 +19,18 @@ Future<bool> showQuickRecordDialog(
   required String description,
   required String memoTag,
 }) async {
-  final List<TextEditingController> amountControllers =
-      List.generate(5, (_) => TextEditingController());
-  final List<TextEditingController> memoControllers =
-      List.generate(5, (_) => TextEditingController());
+  final List<TextEditingController> amountControllers = List.generate(
+    5,
+    (_) => TextEditingController(),
+  );
+  final List<TextEditingController> memoControllers = List.generate(
+    5,
+    (_) => TextEditingController(),
+  );
   final List<FocusNode> amountFocusNodes = List.generate(5, (_) => FocusNode());
-  final TextEditingController targetController = TextEditingController(text: '100,000,000');
+  final TextEditingController targetController = TextEditingController(
+    text: '100,000,000',
+  );
 
   final prefs = await SharedPreferences.getInstance();
   final projectSafeRatePct =
@@ -41,8 +47,12 @@ Future<bool> showQuickRecordDialog(
       return StatefulBuilder(
         builder: (ctx, setDialogState) {
           // 동적으로 입력된 목표 금액 파싱
-          final targetInput = CurrencyFormatter.parse(targetController.text.trim())?.toDouble() ?? selectedTarget;
-          
+          final targetInput =
+              CurrencyFormatter.parse(
+                targetController.text.trim(),
+              )?.toDouble() ??
+              selectedTarget;
+
           double totalInput = 0;
           for (var c in amountControllers) {
             final val = CurrencyFormatter.parse(c.text.trim());
@@ -66,7 +76,8 @@ Future<bool> showQuickRecordDialog(
                 monthsToTarget = math.log(val) / math.log(1 + r);
               }
               // 3. 10년안에 목표 달성하려면 월 얼마 필요한가
-              requiredMonthlyFor10y = targetInput * r / ((math.pow(1 + r, n10) - 1) * (1 + r));
+              requiredMonthlyFor10y =
+                  targetInput * r / ((math.pow(1 + r, n10) - 1) * (1 + r));
             } else {
               fv10 = totalInput * n10;
               monthsToTarget = targetInput / totalInput;
@@ -86,7 +97,13 @@ Future<bool> showQuickRecordDialog(
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('목표 설정:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                        const Text(
+                          '목표 설정:',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
+                        ),
                         const SizedBox(height: 8),
                         SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
@@ -94,7 +111,9 @@ Future<bool> showQuickRecordDialog(
                             children: [
                               ChoiceChip(
                                 label: const Text('1,000만'),
-                                selected: targetController.text == '10,000,000' || selectedTarget == 10000000,
+                                selected:
+                                    targetController.text == '10,000,000' ||
+                                    selectedTarget == 10000000,
                                 onSelected: (val) => setDialogState(() {
                                   selectedTarget = 10000000;
                                   targetController.text = '10,000,000';
@@ -103,7 +122,9 @@ Future<bool> showQuickRecordDialog(
                               const SizedBox(width: 4),
                               ChoiceChip(
                                 label: const Text('3,000만'),
-                                selected: targetController.text == '30,000,000' || selectedTarget == 30000000,
+                                selected:
+                                    targetController.text == '30,000,000' ||
+                                    selectedTarget == 30000000,
                                 onSelected: (val) => setDialogState(() {
                                   selectedTarget = 30000000;
                                   targetController.text = '30,000,000';
@@ -112,7 +133,9 @@ Future<bool> showQuickRecordDialog(
                               const SizedBox(width: 4),
                               ChoiceChip(
                                 label: const Text('5,000만'),
-                                selected: targetController.text == '50,000,000' || selectedTarget == 50000000,
+                                selected:
+                                    targetController.text == '50,000,000' ||
+                                    selectedTarget == 50000000,
                                 onSelected: (val) => setDialogState(() {
                                   selectedTarget = 50000000;
                                   targetController.text = '50,000,000';
@@ -121,7 +144,9 @@ Future<bool> showQuickRecordDialog(
                               const SizedBox(width: 4),
                               ChoiceChip(
                                 label: const Text('1억'),
-                                selected: targetController.text == '100,000,000' || selectedTarget == 100000000,
+                                selected:
+                                    targetController.text == '100,000,000' ||
+                                    selectedTarget == 100000000,
                                 onSelected: (val) => setDialogState(() {
                                   selectedTarget = 100000000;
                                   targetController.text = '100,000,000';
@@ -162,7 +187,11 @@ Future<bool> showQuickRecordDialog(
                                 keyboardType: TextInputType.number,
                                 textInputAction: TextInputAction.next,
                                 onChanged: (_) {
-                                  if (showCalculation) setDialogState(() => showCalculation = false);
+                                  if (showCalculation) {
+                                    setDialogState(
+                                      () => showCalculation = false,
+                                    );
+                                  }
                                 },
                               ),
                             ),
@@ -188,7 +217,7 @@ Future<bool> showQuickRecordDialog(
                     const SizedBox(height: 8),
                     if (!showCalculation)
                       OutlinedButton.icon(
-                        onPressed: totalInput > 0 
+                        onPressed: totalInput > 0
                             ? () => setDialogState(() => showCalculation = true)
                             : null,
                         icon: const Icon(Icons.calculate_outlined),
@@ -198,19 +227,24 @@ Future<bool> showQuickRecordDialog(
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Theme.of(ctx)
-                              .colorScheme
-                              .primaryContainer
-                              .withValues(alpha: 0.3),
+                          color: Theme.of(
+                            ctx,
+                          ).colorScheme.primaryContainer.withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Theme.of(ctx).colorScheme.primary.withValues(alpha: 0.5)),
+                          border: Border.all(
+                            color: Theme.of(
+                              ctx,
+                            ).colorScheme.primary.withValues(alpha: 0.5),
+                          ),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             Text(
                               '💰 월 합계: ${CurrencyFormatter.format(totalInput)}',
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             const Divider(height: 16),
                             Text(
@@ -220,7 +254,10 @@ Future<bool> showQuickRecordDialog(
                             Text(
                               '🚀 목표(${CurrencyFormatter.format(selectedTarget)}) 달성까지: '
                               '${monthsToTarget > 0 ? (monthsToTarget / 12).toStringAsFixed(1) : "?? "}년',
-                              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             const SizedBox(height: 8),
                             Text(
@@ -238,8 +275,8 @@ Future<bool> showQuickRecordDialog(
                     Text(
                       description,
                       style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(ctx).colorScheme.onSurfaceVariant,
-                          ),
+                        color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ],
                 ),
@@ -362,9 +399,7 @@ Future<bool> showRoundUpDialog(
 
       return StatefulBuilder(
         builder: (ctx, setDialogState) {
-          final parsed = CurrencyFormatter.parse(
-            amountController.text.trim(),
-          );
+          final parsed = CurrencyFormatter.parse(amountController.text.trim());
           final base = (parsed ?? 0).toDouble();
           computed = computeRoundUp(base);
 
@@ -401,9 +436,9 @@ Future<bool> showRoundUpDialog(
                 const SizedBox(height: 10),
                 Text(
                   '저축 금액(잔돈): ${CurrencyFormatter.format(computed ?? 0)}',
-                  style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: Theme.of(
+                    ctx,
+                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -471,9 +506,7 @@ Future<bool> showRoundUpDialog(
   if (!context.mounted) return true;
 
   ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text('잔돈 ${CurrencyFormatter.format(diff)} 저축 저장 완료'),
-    ),
+    SnackBar(content: Text('잔돈 ${CurrencyFormatter.format(diff)} 저축 저장 완료')),
   );
 
   return true;

@@ -42,28 +42,19 @@ mixin TrashScreenRestoreMixin<T extends StatefulWidget> on State<T> {
         );
         if (!added) {
           if (!mounted) return;
-          SnackbarUtils.showError(
-            context,
-            '계정을 생성할 수 없습니다: $accountName',
-          );
+          SnackbarUtils.showError(context, '계정을 생성할 수 없습니다: $accountName');
           return;
         }
       }
       final transaction = Transaction.fromJson(entry.payload);
-      await TransactionService().addTransaction(
-        accountName,
-        transaction,
-      );
+      await TransactionService().addTransaction(accountName, transaction);
       await TrashService().removeEntry(entry.id);
       await loadEntries();
       if (!mounted) return;
       SnackbarUtils.showSuccess(context, '거래가 복원되었습니다.');
     } catch (e) {
       if (!mounted) return;
-      SnackbarUtils.showError(
-        context,
-        '거래 복원 중 오류가 발생했습니다: $e',
-      );
+      SnackbarUtils.showError(context, '거래 복원 중 오류가 발생했습니다: $e');
     }
   }
 
@@ -78,10 +69,7 @@ mixin TrashScreenRestoreMixin<T extends StatefulWidget> on State<T> {
         );
         if (!added) {
           if (!mounted) return;
-          SnackbarUtils.showError(
-            context,
-            '계정을 생성할 수 없습니다: $accountName',
-          );
+          SnackbarUtils.showError(context, '계정을 생성할 수 없습니다: $accountName');
           return;
         }
       }
@@ -93,10 +81,7 @@ mixin TrashScreenRestoreMixin<T extends StatefulWidget> on State<T> {
       SnackbarUtils.showSuccess(context, '자산이 복원되었습니다.');
     } catch (e) {
       if (!mounted) return;
-      SnackbarUtils.showError(
-        context,
-        '자산 복원 중 오류가 발생했습니다: $e',
-      );
+      SnackbarUtils.showError(context, '자산 복원 중 오류가 발생했습니다: $e');
     }
   }
 
@@ -109,9 +94,7 @@ mixin TrashScreenRestoreMixin<T extends StatefulWidget> on State<T> {
         context: context,
         builder: (ctx) => AlertDialog(
           title: const Text('계정 복원'),
-          content: AccountRestoreDialogContent(
-            controller: controller,
-          ),
+          content: AccountRestoreDialogContent(controller: controller),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
@@ -122,11 +105,10 @@ mixin TrashScreenRestoreMixin<T extends StatefulWidget> on State<T> {
                 final baseName = controller.text.trim();
                 if (baseName.isNotEmpty) {
                   final locale = Localizations.localeOf(ctx);
-                  final finalName =
-                      AccountNameLanguageTag.applyForcedSuffix(
-                        baseName,
-                        locale,
-                      );
+                  final finalName = AccountNameLanguageTag.applyForcedSuffix(
+                    baseName,
+                    locale,
+                  );
                   Navigator.of(ctx).pop(finalName);
                 }
               },
@@ -145,19 +127,13 @@ mixin TrashScreenRestoreMixin<T extends StatefulWidget> on State<T> {
     await accountService.loadAccounts();
     if (accountService.getAccountByName(confirmedName) != null) {
       if (!mounted) return;
-      SnackbarUtils.showError(
-        context,
-        '이미 존재하는 계정입니다: $confirmedName',
-      );
+      SnackbarUtils.showError(context, '이미 존재하는 계정입니다: $confirmedName');
       return;
     }
     try {
       final snapshot = Map<String, dynamic>.from(entry.payload);
       final encoded = jsonEncode(snapshot);
-      await BackupService().importAccountDataAsNew(
-        encoded,
-        confirmedName,
-      );
+      await BackupService().importAccountDataAsNew(encoded, confirmedName);
       await TrashService().removeEntry(entry.id);
       await loadEntries();
       if (!mounted) return;
@@ -167,20 +143,14 @@ mixin TrashScreenRestoreMixin<T extends StatefulWidget> on State<T> {
       );
     } catch (e) {
       if (!mounted) return;
-      SnackbarUtils.showError(
-        context,
-        '계정 복원 중 오류가 발생했습니다: $e',
-      );
+      SnackbarUtils.showError(context, '계정 복원 중 오류가 발생했습니다: $e');
     }
   }
 }
 
 /// Dialog content for account restore name input.
 class AccountRestoreDialogContent extends StatelessWidget {
-  const AccountRestoreDialogContent({
-    super.key,
-    required this.controller,
-  });
+  const AccountRestoreDialogContent({super.key, required this.controller});
 
   final TextEditingController controller;
 
@@ -190,8 +160,7 @@ class AccountRestoreDialogContent extends StatelessWidget {
       valueListenable: controller,
       builder: (context, value, _) {
         final locale = Localizations.localeOf(context);
-        final suffix =
-            AccountNameLanguageTag.suffixForLocale(locale);
+        final suffix = AccountNameLanguageTag.suffixForLocale(locale);
         final baseName = value.text.trim();
         final finalName = AccountNameLanguageTag.applyForcedSuffix(
           baseName,
@@ -206,9 +175,7 @@ class AccountRestoreDialogContent extends StatelessWidget {
             const SizedBox(height: 12),
             TextField(
               controller: controller,
-              decoration: const InputDecoration(
-                labelText: '계정명',
-              ),
+              decoration: const InputDecoration(labelText: '계정명'),
               autofocus: true,
             ),
             const SizedBox(height: 8),

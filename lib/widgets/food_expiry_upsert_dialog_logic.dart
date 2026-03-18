@@ -7,7 +7,9 @@ extension FoodExpiryUpsertLogic on _FoodExpiryUpsertDialogState {
 
   Future<void> _loadLastCategory() async {
     final prefs = await SharedPreferences.getInstance();
-    final last = prefs.getString(_FoodExpiryUpsertDialogState._kLastCategory)?.trim();
+    final last = prefs
+        .getString(_FoodExpiryUpsertDialogState._kLastCategory)
+        ?.trim();
     if (!mounted) return;
     if (last == null || last.isEmpty) return;
     if (!_categories.contains(last)) return;
@@ -25,7 +27,9 @@ extension FoodExpiryUpsertLogic on _FoodExpiryUpsertDialogState {
 
   Future<void> _loadLastLocation() async {
     final prefs = await SharedPreferences.getInstance();
-    final last = prefs.getString(_FoodExpiryUpsertDialogState._kLastLocation)?.trim();
+    final last = prefs
+        .getString(_FoodExpiryUpsertDialogState._kLastLocation)
+        ?.trim();
     if (!mounted) return;
     if (last == null || last.isEmpty) return;
     if (!_locations.contains(last)) return;
@@ -43,7 +47,9 @@ extension FoodExpiryUpsertLogic on _FoodExpiryUpsertDialogState {
 
   Future<void> _loadLastUnit() async {
     final prefs = await SharedPreferences.getInstance();
-    final last = prefs.getString(_FoodExpiryUpsertDialogState._kLastUnit)?.trim();
+    final last = prefs
+        .getString(_FoodExpiryUpsertDialogState._kLastUnit)
+        ?.trim();
     if (!mounted) return;
     if (last == null || last.isEmpty) return;
 
@@ -145,8 +151,9 @@ extension FoodExpiryUpsertLogic on _FoodExpiryUpsertDialogState {
                 _nameController.text = latestTx['name'] ?? '';
               }
               if (latestTx['amount'] != null) {
-                _priceController.text =
-                    (latestTx['amount'] as num).toInt().toString();
+                _priceController.text = (latestTx['amount'] as num)
+                    .toInt()
+                    .toString();
               }
               if (latestTx['quantity'] != null) {
                 _quantityController.text = latestTx['quantity'].toString();

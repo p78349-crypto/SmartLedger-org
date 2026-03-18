@@ -53,6 +53,11 @@ class UserPasswordPolicyResult {
 class UserPasswordService {
   UserPasswordService({Random? random}) : _random = random ?? Random.secure();
 
+  // OWASP 2024 recommends 600K for PBKDF2-SHA256, but on mobile
+  // devices PIN entry must complete within ~500ms. 150K balances
+  // brute-force resistance with acceptable UX latency on low-end
+  // Android devices (tested on Snapdragon 4-series). Server-side
+  // hashing is not applicable here — all computation is local.
   static const int defaultIterations = 150000;
   static const int saltLengthBytes = 16;
   static const int derivedKeyBits = 256;
@@ -138,7 +143,9 @@ class UserPasswordService {
         final type = remaining.inMinutes >= 5
             ? UserPasswordLockType.longLock
             : UserPasswordLockType.cooldown;
-        final failedAttempts = prefs.getInt(PrefKeys.userPasswordFailedAttempts);
+        final failedAttempts = prefs.getInt(
+          PrefKeys.userPasswordFailedAttempts,
+        );
         return UserPasswordPolicyResult.locked(
           lockType: type,
           lockRemaining: remaining,

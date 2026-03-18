@@ -3,14 +3,13 @@ import 'package:flutter/material.dart';
 import '../utils/currency_formatter.dart';
 
 /// Displayed-item record used by the quick-expense input screen.
-typedef QuickExpenseDisplayedItem =
-    ({
-      String id,
-      String description,
-      double amount,
-      String payment,
-      String store,
-    });
+typedef QuickExpenseDisplayedItem = ({
+  String id,
+  String description,
+  double amount,
+  String payment,
+  String store,
+});
 
 /// Bottom action bar with "최근 입력" and "지출 상위20" buttons.
 class QuickExpenseBottomBar extends StatelessWidget {
@@ -43,10 +42,7 @@ class QuickExpenseBottomBar extends StatelessWidget {
           children: [
             Divider(height: 1, thickness: 1, color: theme.dividerColor),
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 12,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
               child: Row(
                 children: [
                   Expanded(
@@ -145,10 +141,8 @@ class QuickExpenseItemList extends StatelessWidget {
       itemBuilder: (context, index) {
         final item = items[index];
         final amountLabel = CurrencyFormatter.format(item.amount);
-        final paymentLabel =
-            item.payment != '미지정' ? ' · ${item.payment}' : '';
-        final storeLabel =
-            item.store != '미지정' ? ' · ${item.store}' : '';
+        final paymentLabel = item.payment != '미지정' ? ' · ${item.payment}' : '';
+        final storeLabel = item.store != '미지정' ? ' · ${item.store}' : '';
         final itemText =
             '${item.description} · $amountLabel$paymentLabel$storeLabel';
         return Card(
@@ -159,10 +153,7 @@ class QuickExpenseItemList extends StatelessWidget {
           child: InkWell(
             onTap: () => onEdit(index),
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 10,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               child: Row(
                 children: [
                   Expanded(
@@ -175,11 +166,7 @@ class QuickExpenseItemList extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Icon(
-                    Icons.edit,
-                    size: 16,
-                    color: theme.colorScheme.primary,
-                  ),
+                  Icon(Icons.edit, size: 16, color: theme.colorScheme.primary),
                 ],
               ),
             ),

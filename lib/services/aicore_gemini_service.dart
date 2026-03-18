@@ -113,24 +113,30 @@ JSON 형식:
   }
 
   /// 카테고리 자동 분류 (Gemma 2 2B 온디바이스 모델 활용)
-  Future<String?> predictCategory(String itemName, {List<String>? candidateCategories}) async {
+  Future<String?> predictCategory(
+    String itemName, {
+    List<String>? candidateCategories,
+  }) async {
     try {
       // 기본 카테고리 목록 (기본은 지출용)
-      final categories = candidateCategories ?? [
-        '식비',
-        '식품·음료비',
-        '주거비',
-        '교통비',
-        '통신비',
-        '생활용품비',
-        '의료비',
-        '문화/여가/자기개발',
-        '용돈/경조사비',
-        '의류/잡화',
-        '저축/투자'
-      ];
+      final categories =
+          candidateCategories ??
+          [
+            '식비',
+            '식품·음료비',
+            '주거비',
+            '교통비',
+            '통신비',
+            '생활용품비',
+            '의료비',
+            '문화/여가/자기개발',
+            '용돈/경조사비',
+            '의류/잡화',
+            '저축/투자',
+          ];
 
-      final prompt = '''
+      final prompt =
+          '''
 상품명: "$itemName"
 
 위 상품에 가장 적절한 가계부 카테고리를 다음 목록 중에서 하나만 선택하여 답변하세요.
@@ -144,12 +150,12 @@ JSON 형식:
       });
 
       final prediction = result?.trim() ?? '';
-      
+
       // 결과 중 유효한 카테고리가 포함되어 있는지 확인
       for (final cat in categories) {
         if (prediction.contains(cat)) return cat;
       }
-      
+
       return null;
     } catch (e) {
       debugPrint('[AICore] 카테고리 예측 실패: $e');

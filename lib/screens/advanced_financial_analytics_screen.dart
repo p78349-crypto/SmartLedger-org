@@ -8,12 +8,15 @@ class AdvancedFinancialAnalyticsScreen extends StatefulWidget {
   const AdvancedFinancialAnalyticsScreen({super.key});
 
   @override
-  State<AdvancedFinancialAnalyticsScreen> createState() => _AdvancedFinancialAnalyticsScreenState();
+  State<AdvancedFinancialAnalyticsScreen> createState() =>
+      _AdvancedFinancialAnalyticsScreenState();
 }
 
-class _AdvancedFinancialAnalyticsScreenState extends State<AdvancedFinancialAnalyticsScreen> {
-  final FinancialAnalyticsService _analyticsService = FinancialAnalyticsService();
-  
+class _AdvancedFinancialAnalyticsScreenState
+    extends State<AdvancedFinancialAnalyticsScreen> {
+  final FinancialAnalyticsService _analyticsService =
+      FinancialAnalyticsService();
+
   bool _isLoading = false;
   List<CashFlowForecast>? _cashFlowForecast;
   List<InvestmentPerformance>? _investmentPerformance;
@@ -27,7 +30,7 @@ class _AdvancedFinancialAnalyticsScreenState extends State<AdvancedFinancialAnal
 
   Future<void> _loadAnalytics() async {
     setState(() => _isLoading = true);
-    
+
     try {
       final futures = await Future.wait([
         _analyticsService.generateCashFlowForecast(
@@ -38,7 +41,7 @@ class _AdvancedFinancialAnalyticsScreenState extends State<AdvancedFinancialAnal
         _analyticsService.analyzeInvestmentPerformance(),
         _analyticsService.calculateFinancialRatios(),
       ]);
-      
+
       setState(() {
         _cashFlowForecast = futures[0] as List<CashFlowForecast>;
         _investmentPerformance = futures[1] as List<InvestmentPerformance>;
@@ -48,9 +51,9 @@ class _AdvancedFinancialAnalyticsScreenState extends State<AdvancedFinancialAnal
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('분석 로딩 실패: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('분석 로딩 실패: $e')));
       }
     }
   }
@@ -80,7 +83,8 @@ class _AdvancedFinancialAnalyticsScreenState extends State<AdvancedFinancialAnal
                   const SizedBox(height: 16),
                   if (_cashFlowForecast != null) _buildCashFlowForecastCard(),
                   const SizedBox(height: 16),
-                  if (_investmentPerformance != null) _buildInvestmentPerformanceCard(),
+                  if (_investmentPerformance != null)
+                    _buildInvestmentPerformanceCard(),
                 ],
               ),
             ),
@@ -110,12 +114,19 @@ class _AdvancedFinancialAnalyticsScreenState extends State<AdvancedFinancialAnal
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('재무비율 분석', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text(
+              '재무비율 분석',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 12),
             _buildRatioRow('유동성 비율', _financialRatios!.liquidityRatio, '배'),
             _buildRatioRow('저축률', _financialRatios!.savingsRate, '%'),
             _buildRatioRow('투자비율', _financialRatios!.investmentRatio, '%'),
-            _buildRatioRow('비상자금 비율', _financialRatios!.emergencyFundRatio, '배'),
+            _buildRatioRow(
+              '비상자금 비율',
+              _financialRatios!.emergencyFundRatio,
+              '배',
+            ),
           ],
         ),
       ),
@@ -129,7 +140,10 @@ class _AdvancedFinancialAnalyticsScreenState extends State<AdvancedFinancialAnal
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label),
-          Text('${value.toStringAsFixed(2)}$unit', style: const TextStyle(fontWeight: FontWeight.bold)),
+          Text(
+            '${value.toStringAsFixed(2)}$unit',
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
         ],
       ),
     );
@@ -137,14 +151,17 @@ class _AdvancedFinancialAnalyticsScreenState extends State<AdvancedFinancialAnal
 
   Widget _buildCashFlowForecastCard() {
     final weeklyForecast = _cashFlowForecast!.take(7).toList();
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('현금흐름 예측 (7일)', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text(
+              '현금흐름 예측 (7일)',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 12),
             ...weeklyForecast.map(_buildForecastRow),
           ],
@@ -155,14 +172,16 @@ class _AdvancedFinancialAnalyticsScreenState extends State<AdvancedFinancialAnal
 
   Widget _buildForecastRow(CashFlowForecast forecast) {
     final isPositive = forecast.netCashFlow >= 0;
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
         children: [
           SizedBox(
             width: 60,
-            child: Text('${forecast.forecastDate.month}/${forecast.forecastDate.day}'),
+            child: Text(
+              '${forecast.forecastDate.month}/${forecast.forecastDate.day}',
+            ),
           ),
           Expanded(
             child: LinearProgressIndicator(
@@ -194,7 +213,10 @@ class _AdvancedFinancialAnalyticsScreenState extends State<AdvancedFinancialAnal
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('투자 성과 분석', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text(
+              '투자 성과 분석',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 12),
             if (_investmentPerformance!.isEmpty)
               const Text('투자 자산이 없습니다')
@@ -208,7 +230,7 @@ class _AdvancedFinancialAnalyticsScreenState extends State<AdvancedFinancialAnal
 
   Widget _buildPerformanceRow(InvestmentPerformance performance) {
     final isPositive = performance.totalReturn >= 0;
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -227,8 +249,10 @@ class _AdvancedFinancialAnalyticsScreenState extends State<AdvancedFinancialAnal
   }
 
   String _formatAmount(double amount) {
-    if (amount.abs() >= 1000000) return '${(amount/1000000).toStringAsFixed(1)}M';
-    if (amount.abs() >= 1000) return '${(amount/1000).toStringAsFixed(0)}K';
+    if (amount.abs() >= 1000000) {
+      return '${(amount / 1000000).toStringAsFixed(1)}M';
+    }
+    if (amount.abs() >= 1000) return '${(amount / 1000).toStringAsFixed(0)}K';
     return amount.toStringAsFixed(0);
   }
 }

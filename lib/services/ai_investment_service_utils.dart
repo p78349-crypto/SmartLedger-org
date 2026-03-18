@@ -41,7 +41,7 @@ extension AiInvestmentServiceUtils on AiInvestmentService {
       InvestmentAssetType.realEstate: 'VNQ',
       InvestmentAssetType.cash: 'USD',
     };
-    
+
     return symbols[assetType] ?? 'MIXED';
   }
 
@@ -56,12 +56,15 @@ extension AiInvestmentServiceUtils on AiInvestmentService {
       InvestmentAssetType.commodities: InvestmentRiskLevel.aggressive,
       InvestmentAssetType.cryptocurrency: InvestmentRiskLevel.speculative,
     };
-    
+
     return riskLevels[assetType] ?? InvestmentRiskLevel.moderate;
   }
 
   /// Calculates expected return for asset type and time horizon
-  double _getExpectedReturn(InvestmentAssetType assetType, InvestmentTimeHorizon timeHorizon) {
+  double _getExpectedReturn(
+    InvestmentAssetType assetType,
+    InvestmentTimeHorizon timeHorizon,
+  ) {
     const baseReturns = {
       InvestmentAssetType.cash: 2.0,
       InvestmentAssetType.bonds: 4.0,
@@ -71,9 +74,9 @@ extension AiInvestmentServiceUtils on AiInvestmentService {
       InvestmentAssetType.commodities: 6.0,
       InvestmentAssetType.cryptocurrency: 15.0,
     };
-    
+
     final baseReturn = baseReturns[assetType] ?? 5.0;
-    
+
     // Adjust for time horizon
     switch (timeHorizon) {
       case InvestmentTimeHorizon.shortTerm:
@@ -86,10 +89,14 @@ extension AiInvestmentServiceUtils on AiInvestmentService {
   }
 
   /// Generates reasoning text for investment reference information
-  String _generateReasoning(InvestmentAssetType assetType, String action, double percentage) {
+  String _generateReasoning(
+    InvestmentAssetType assetType,
+    String action,
+    double percentage,
+  ) {
     final assetName = assetType.name.replaceAll('_', ' ');
     final direction = action == 'increase' ? '높은 편' : '낮은 편';
     return '$assetName 비중이 기준 대비 $direction으로 관찰됩니다 '
-           '(${percentage.toStringAsFixed(1)}%p 차이). 분산도와 변동성 관점의 점검 참고자료입니다.';
+        '(${percentage.toStringAsFixed(1)}%p 차이). 분산도와 변동성 관점의 점검 참고자료입니다.';
   }
 }

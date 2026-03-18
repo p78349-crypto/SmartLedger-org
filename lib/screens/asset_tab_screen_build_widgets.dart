@@ -12,21 +12,14 @@ extension AssetTabScreenBuildWidgets on _AssetTabScreenState {
           Row(
             children: [
               Icon(
-                _biometricAuthEnabled
-                    ? IconCatalog.lock
-                    : IconCatalog.lockOpen,
+                _biometricAuthEnabled ? IconCatalog.lock : IconCatalog.lockOpen,
                 size: 20,
-                color: _biometricAuthEnabled
-                    ? Colors.green
-                    : Colors.grey,
+                color: _biometricAuthEnabled ? Colors.green : Colors.grey,
               ),
               const SizedBox(width: 4),
               Text(
                 '보안',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
               ),
               Switch(
                 value: _biometricAuthEnabled,
@@ -55,10 +48,7 @@ extension AssetTabScreenBuildWidgets on _AssetTabScreenState {
   Widget _buildRootSecurityCard(ThemeData theme) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 8,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -67,14 +57,8 @@ extension AssetTabScreenBuildWidgets on _AssetTabScreenState {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'ROOT 잠금',
-                  style: theme.textTheme.bodyMedium,
-                ),
-                Switch(
-                  value: _rootAuthEnabled,
-                  onChanged: _setRootAuthEnabled,
-                ),
+                Text('ROOT 잠금', style: theme.textTheme.bodyMedium),
+                Switch(value: _rootAuthEnabled, onChanged: _setRootAuthEnabled),
               ],
             ),
             if (!_rootAuthEnabled)
@@ -102,9 +86,7 @@ extension AssetTabScreenBuildWidgets on _AssetTabScreenState {
                         RadioListTile<String>(
                           dense: true,
                           contentPadding: EdgeInsets.zero,
-                          title: Text(
-                            '통합 사용 (자산 인증으로 ROOT 통과)',
-                          ),
+                          title: Text('통합 사용 (자산 인증으로 ROOT 통과)'),
                           value: 'integrated',
                         ),
                         RadioListTile<String>(
@@ -118,13 +100,9 @@ extension AssetTabScreenBuildWidgets on _AssetTabScreenState {
                   ),
                   const Divider(height: 16),
                   Row(
-                    mainAxisAlignment:
-                        MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'ROOT PIN 사용',
-                        style: theme.textTheme.bodyMedium,
-                      ),
+                      Text('ROOT PIN 사용', style: theme.textTheme.bodyMedium),
                       Switch(
                         value: _rootPinEnabled,
                         onChanged: _setRootPinEnabled,
@@ -136,12 +114,9 @@ extension AssetTabScreenBuildWidgets on _AssetTabScreenState {
                       padding: const EdgeInsets.only(top: 4),
                       child: Text(
                         '별도 사용 모드에서는 2단계가 PIN으로 진행됩니다.',
-                        style: theme.textTheme.bodySmall
-                            ?.copyWith(
-                              color: theme
-                                  .colorScheme
-                                  .onSurfaceVariant,
-                            ),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     ),
                   Align(
@@ -149,9 +124,7 @@ extension AssetTabScreenBuildWidgets on _AssetTabScreenState {
                     child: TextButton(
                       onPressed: _showSetRootPinDialog,
                       child: Text(
-                        _rootPinConfigured
-                            ? 'ROOT PIN 변경'
-                            : 'ROOT PIN 설정',
+                        _rootPinConfigured ? 'ROOT PIN 변경' : 'ROOT PIN 설정',
                       ),
                     ),
                   ),
@@ -180,13 +153,13 @@ extension AssetTabScreenBuildWidgets on _AssetTabScreenState {
               const SizedBox(width: 16),
               Expanded(
                 child: Row(
-                  mainAxisAlignment:
-                      MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
                       '간단 입력',
-                      style: theme.textTheme.titleMedium
-                          ?.copyWith(fontWeight: FontWeight.bold),
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     Text(
                       CurrencyFormatter.format(simpleTotal),
@@ -226,13 +199,13 @@ extension AssetTabScreenBuildWidgets on _AssetTabScreenState {
               const SizedBox(width: 16),
               Expanded(
                 child: Row(
-                  mainAxisAlignment:
-                      MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
                       '상세 입력',
-                      style: theme.textTheme.titleMedium
-                          ?.copyWith(fontWeight: FontWeight.bold),
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     Text(
                       CurrencyFormatter.format(detailTotal),

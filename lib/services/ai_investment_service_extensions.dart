@@ -13,19 +13,20 @@ extension AiInvestmentServiceExtensions on AiInvestmentService {
     double diversificationScore,
   ) async {
     final recommendations = <InvestmentRecommendation>[];
-    
+
     final optimalAllocation = AiInvestmentHelper.suggestOptimalAllocation(
       riskLevel,
       timeHorizon,
       userAge,
     );
-    
+
     // Compare current vs optimal allocation and generate reference information
     optimalAllocation.forEach((assetType, optimalPercentage) {
       final currentPercentage = currentAllocation[assetType] ?? 0.0;
       final difference = optimalPercentage - currentPercentage;
-      
-      if (difference.abs() > 5.0) { // Significant deviation threshold
+
+      if (difference.abs() > 5.0) {
+        // Significant deviation threshold
         final recommendation = _createRecommendation(
           assetType,
           difference,
@@ -33,13 +34,13 @@ extension AiInvestmentServiceExtensions on AiInvestmentService {
           timeHorizon,
           riskScore,
         );
-        
+
         if (recommendation != null) {
           recommendations.add(recommendation);
         }
       }
     });
-    
+
     return recommendations;
   }
 
@@ -52,14 +53,14 @@ extension AiInvestmentServiceExtensions on AiInvestmentService {
     double portfolioRisk,
   ) {
     if (allocationDifference == 0) return null;
-    
+
     final action = allocationDifference > 0 ? 'increase' : 'decrease';
     final confidenceScore = _calculateRecommendationConfidence(
       assetType,
       riskLevel,
       portfolioRisk,
     );
-    
+
     return InvestmentRecommendation(
       symbol: _getDefaultSymbol(assetType),
       assetType: assetType,
@@ -67,7 +68,11 @@ extension AiInvestmentServiceExtensions on AiInvestmentService {
       confidenceScore: confidenceScore,
       riskLevel: _getAssetRiskLevel(assetType),
       expectedReturn: _getExpectedReturn(assetType, timeHorizon),
-      reasoning: _generateReasoning(assetType, action, allocationDifference.abs()),
+      reasoning: _generateReasoning(
+        assetType,
+        action,
+        allocationDifference.abs(),
+      ),
       timeHorizon: timeHorizon,
     );
   }
@@ -83,15 +88,20 @@ extension AiInvestmentServiceExtensions on AiInvestmentService {
       final assetType = entry.key;
       final percentage = entry.value;
       final amount = (totalAmount * percentage / 100.0);
-      
+
       return InvestmentRecommendation(
         symbol: _getDefaultSymbol(assetType),
         assetType: assetType,
         recommendedAllocation: percentage,
-        confidenceScore: _calculateRecommendationConfidence(assetType, riskLevel, 0.5),
+        confidenceScore: _calculateRecommendationConfidence(
+          assetType,
+          riskLevel,
+          0.5,
+        ),
         riskLevel: _getAssetRiskLevel(assetType),
         expectedReturn: _getExpectedReturn(assetType, timeHorizon),
-        reasoning: 'Optimal allocation for ${riskLevel.name} investor with ${timeHorizon.name} horizon',
+        reasoning:
+            'Optimal allocation for ${riskLevel.name} investor with ${timeHorizon.name} horizon',
         timeHorizon: timeHorizon,
       );
     }).toList();
@@ -112,10 +122,10 @@ extension AiInvestmentServiceExtensions on AiInvestmentService {
       InvestmentAssetType.cryptocurrency: 0.4,
       InvestmentAssetType.cash: 0.95,
     };
-    
+
     final base = baseConfidence[assetType] ?? 0.5;
     final riskAdjustment = 1.0 - (portfolioRisk * 0.2);
-    
+
     return (base * riskAdjustment).clamp(0.3, 1.0);
   }
 }

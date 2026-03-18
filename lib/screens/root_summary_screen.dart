@@ -56,56 +56,53 @@ class _RootSummaryScreenState extends State<RootSummaryScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _context == null
-              ? const Center(child: Text('데이터를 불러올 수 없습니다.'))
-              : RefreshIndicator(
-                  onRefresh: _loadData,
-                  child: SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        RootSummaryCard(
-                          data: _context!.summaryData,
-                          onViewDetail: () {},
-                        ),
-                        const SizedBox(height: 16),
-                        Card(
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '통계 정보',
-                                  style: theme.textTheme.titleMedium,
-                                ),
-                                const SizedBox(height: 12),
-                                _buildInfoRow(
-                                  '전체 계정 수',
-                                  '${_context!.accounts.length}개',
-                                  theme,
-                                ),
-                                const Divider(height: 16),
-                                _buildInfoRow(
-                                  '전체 거래 건수',
-                                  '${_context!.allTransactions.length}건',
-                                  theme,
-                                ),
-                                const Divider(height: 16),
-                                _buildInfoRow(
-                                  '전체 고정비',
-                                  '${_context!.allFixedCosts.length}개',
-                                  theme,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
+          ? const Center(child: Text('데이터를 불러올 수 없습니다.'))
+          : RefreshIndicator(
+              onRefresh: _loadData,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    RootSummaryCard(
+                      data: _context!.summaryData,
+                      onViewDetail: () {},
                     ),
-                  ),
+                    const SizedBox(height: 16),
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('통계 정보', style: theme.textTheme.titleMedium),
+                            const SizedBox(height: 12),
+                            _buildInfoRow(
+                              '전체 계정 수',
+                              '${_context!.accounts.length}개',
+                              theme,
+                            ),
+                            const Divider(height: 16),
+                            _buildInfoRow(
+                              '전체 거래 건수',
+                              '${_context!.allTransactions.length}건',
+                              theme,
+                            ),
+                            const Divider(height: 16),
+                            _buildInfoRow(
+                              '전체 고정비',
+                              '${_context!.allFixedCosts.length}개',
+                              theme,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
+              ),
+            ),
     );
   }
 

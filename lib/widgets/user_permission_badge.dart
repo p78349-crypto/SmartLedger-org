@@ -31,11 +31,7 @@ class UserPermissionBadge extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              config.icon,
-              size: 16,
-              color: config.iconColor,
-            ),
+            Icon(config.icon, size: 16, color: config.iconColor),
             if (showLabel) ...[
               const SizedBox(width: 4),
               Text(
@@ -52,7 +48,10 @@ class UserPermissionBadge extends StatelessWidget {
     );
   }
 
-  _PermissionConfig _getPermissionConfig(UserPermissionLevel level, ThemeData theme) {
+  _PermissionConfig _getPermissionConfig(
+    UserPermissionLevel level,
+    ThemeData theme,
+  ) {
     switch (level) {
       case UserPermissionLevel.observer:
         return _PermissionConfig(
@@ -97,12 +96,12 @@ class UserPermissionBadge extends StatelessWidget {
 /// 사용자 권한 레벨 열거형
 enum UserPermissionLevel {
   observer('관찰자', 1),
-  operator('운영자', 2), 
+  operator('운영자', 2),
   administrator('관리자', 3),
   root('ROOT', 4);
 
   const UserPermissionLevel(this.displayName, this.level);
-  
+
   final String displayName;
   final int level;
 
@@ -114,7 +113,7 @@ enum UserPermissionLevel {
       case ActionRiskLevel.warning:
         return level >= 2; // 운영자 이상
       case ActionRiskLevel.danger:
-        return level >= 3; // 관리자 이상  
+        return level >= 3; // 관리자 이상
       case ActionRiskLevel.critical:
         return level >= 4; // ROOT만
     }
@@ -129,7 +128,7 @@ enum ActionRiskLevel {
   critical('치명적', Colors.deepPurple);
 
   const ActionRiskLevel(this.displayName, this.color);
-  
+
   final String displayName;
   final Color color;
 }
@@ -160,7 +159,10 @@ class PermissionUtils {
     return UserPermissionLevel.root;
   }
 
-  static void showPermissionInfo(BuildContext context, UserPermissionLevel level) {
+  static void showPermissionInfo(
+    BuildContext context,
+    UserPermissionLevel level,
+  ) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -178,15 +180,19 @@ class PermissionUtils {
             Text('현재 권한 레벨: ${level.displayName}'),
             const SizedBox(height: 8),
             const Text('허용 작업:'),
-            ...ActionRiskLevel.values.map((risk) => ListTile(
-              leading: Icon(
-                level.canPerformAction(risk) ? Icons.check : Icons.close,
-                color: level.canPerformAction(risk) ? Colors.green : Colors.red,
-                size: 16,
+            ...ActionRiskLevel.values.map(
+              (risk) => ListTile(
+                leading: Icon(
+                  level.canPerformAction(risk) ? Icons.check : Icons.close,
+                  color: level.canPerformAction(risk)
+                      ? Colors.green
+                      : Colors.red,
+                  size: 16,
+                ),
+                title: Text(risk.displayName),
+                dense: true,
               ),
-              title: Text(risk.displayName),
-              dense: true,
-            )),
+            ),
           ],
         ),
         actions: [

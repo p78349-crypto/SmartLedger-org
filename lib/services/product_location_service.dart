@@ -84,14 +84,12 @@ class ProductLocationService {
     required String accountName,
     required String productName,
   }) async {
-    final normalized =
-        _normalizeProductName(productName);
+    final normalized = _normalizeProductName(productName);
     if (normalized.isEmpty) {
       return const Success(null);
     }
 
-    final prefs =
-        await SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
     final key = _locationMapKey(accountName);
     final raw = prefs.getString(key);
 
@@ -110,25 +108,19 @@ class ProductLocationService {
         return const Success(null);
       }
 
-      return Success(
-        (entry['location'] as String?)?.trim(),
-      );
+      return Success((entry['location'] as String?)?.trim());
     } catch (e) {
-      return Failure(StorageError(
-        '위치 조회 실패: $e',
-      ));
+      return Failure(StorageError('위치 조회 실패: $e'));
     }
   }
 
   /// 모든 저장된 위치 정보 조회
   ///
   /// Returns: `Result<Map<String, String>>`
-  Future<Result<Map<String, String>>>
-      getAllLocations({
+  Future<Result<Map<String, String>>> getAllLocations({
     required String accountName,
   }) async {
-    final prefs =
-        await SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
     final key = _locationMapKey(accountName);
     final raw = prefs.getString(key);
 
@@ -146,12 +138,8 @@ class ProductLocationService {
       decoded.forEach((normalizedName, value) {
         if (value is Map) {
           final originalName =
-              (value['originalName']
-                      as String?) ??
-                  normalizedName;
-          final location =
-              (value['location'] as String?) ??
-                  '';
+              (value['originalName'] as String?) ?? normalizedName;
+          final location = (value['location'] as String?) ?? '';
           if (location.isNotEmpty) {
             result[originalName] = location;
           }
@@ -160,9 +148,7 @@ class ProductLocationService {
 
       return Success(result);
     } catch (e) {
-      return Failure(StorageError(
-        '위치 목록 조회 실패: $e',
-      ));
+      return Failure(StorageError('위치 목록 조회 실패: $e'));
     }
   }
 
@@ -171,14 +157,12 @@ class ProductLocationService {
     required String accountName,
     required String productName,
   }) async {
-    final normalized =
-        _normalizeProductName(productName);
+    final normalized = _normalizeProductName(productName);
     if (normalized.isEmpty) {
       return const Success(null);
     }
 
-    final prefs =
-        await SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
     final key = _locationMapKey(accountName);
     final raw = prefs.getString(key);
 
@@ -193,15 +177,10 @@ class ProductLocationService {
       }
 
       decoded.remove(normalized);
-      await prefs.setString(
-        key,
-        jsonEncode(decoded),
-      );
+      await prefs.setString(key, jsonEncode(decoded));
       return const Success(null);
     } catch (e) {
-      return Failure(StorageError(
-        '위치 삭제 실패: $e',
-      ));
+      return Failure(StorageError('위치 삭제 실패: $e'));
     }
   }
 

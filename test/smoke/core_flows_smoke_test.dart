@@ -83,23 +83,34 @@ void main() {
     );
 
     await pumpMain(tester, accountName: accountName, pageIndex: pageIndex);
-    expect(find.byKey(const ValueKey<String>('main_icon_slot_0_1')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey<String>('main_icon_slot_0_1')),
+      findsOneWidget,
+    );
   });
 
-  testWidgets('SMOKE: Reserved pages (3,6) render safely with slot configs', (tester) async {
+  testWidgets('SMOKE: Reserved pages (3,6) render safely with slot configs', (
+    tester,
+  ) async {
     SharedPreferences.setMockInitialValues(<String, Object>{
       PrefKeys.bypassSecurityForTesting: true,
     });
 
-    final scenarios = <({
-      String account,
-      int page,
-      String first,
-      String second,
-    })>[
-      (account: 'smoke_stats_p3', page: 3, first: 'accountStats', second: 'reward_system_stats'),
-      (account: 'smoke_settings_p6', page: 6, first: 'application_settings', second: 'theme_settings'),
-    ];
+    final scenarios =
+        <({String account, int page, String first, String second})>[
+          (
+            account: 'smoke_stats_p3',
+            page: 3,
+            first: 'accountStats',
+            second: 'reward_system_stats',
+          ),
+          (
+            account: 'smoke_settings_p6',
+            page: 6,
+            first: 'application_settings',
+            second: 'theme_settings',
+          ),
+        ];
 
     for (final scenario in scenarios) {
       await setSingleSlotConfig(

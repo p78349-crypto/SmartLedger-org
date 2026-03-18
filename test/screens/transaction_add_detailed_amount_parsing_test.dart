@@ -7,11 +7,7 @@ import 'package:smart_ledger/screens/transaction_add_detailed_screen.dart';
 import 'package:smart_ledger/services/transaction_service.dart';
 import 'package:smart_ledger/utils/pref_keys.dart';
 
-Future<void> _enterByKey(
-  WidgetTester tester,
-  String key,
-  String value,
-) async {
+Future<void> _enterByKey(WidgetTester tester, String key, String value) async {
   final field = find.byKey(Key(key));
   expect(field, findsOneWidget);
   final editable = find.descendant(
@@ -37,42 +33,43 @@ String _readTextByKey(WidgetTester tester, String key) {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('detailed expense comma unit input auto-calculates and saves consistently', (
-    tester,
-  ) async {
-    SharedPreferences.setMockInitialValues(<String, Object>{
-      PrefKeys.txStorageBackendV1: 'prefs',
-    });
+  testWidgets(
+    'detailed expense comma unit input auto-calculates and saves consistently',
+    (tester) async {
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        PrefKeys.txStorageBackendV1: 'prefs',
+      });
 
-    final service = TransactionService();
-    await service.loadTransactions();
-    final accountName =
-        'detailed_parse_${DateTime.now().microsecondsSinceEpoch}';
+      final service = TransactionService();
+      await service.loadTransactions();
+      final accountName =
+          'detailed_parse_${DateTime.now().microsecondsSinceEpoch}';
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: TransactionAddDetailedScreen(accountName: accountName),
-      ),
-    );
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: TransactionAddDetailedScreen(accountName: accountName),
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    await _enterByKey(tester, 'tx_desc', '우유');
-    await _enterByKey(tester, 'tx_unit_price', '1,300');
-    await _enterByKey(tester, 'tx_qty', '3');
-    await _enterByKey(tester, 'tx_payment', '카드');
+      await _enterByKey(tester, 'tx_desc', '우유');
+      await _enterByKey(tester, 'tx_unit_price', '1,300');
+      await _enterByKey(tester, 'tx_qty', '3');
+      await _enterByKey(tester, 'tx_payment', '카드');
 
-    expect(_readTextByKey(tester, 'tx_amount'), '3900');
+      expect(_readTextByKey(tester, 'tx_amount'), '3900');
 
-    await tester.tap(find.byTooltip('저장').first);
-    await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('저장').first);
+      await tester.pumpAndSettle();
 
-    final saved = service.getTransactions(accountName);
-    expect(saved.length, 1);
-    expect(saved.first.amount, 3900);
-    expect(saved.first.unitPrice, 1300);
-    expect(saved.first.quantity, 3);
-    expect(saved.first.paymentMethod, '카드');
-  });
+      final saved = service.getTransactions(accountName);
+      expect(saved.length, 1);
+      expect(saved.first.amount, 3900);
+      expect(saved.first.unitPrice, 1300);
+      expect(saved.first.quantity, 3);
+      expect(saved.first.paymentMethod, '카드');
+    },
+  );
 
   testWidgets('detailed draft card amount parses and saves consistently', (
     tester,
@@ -100,9 +97,7 @@ void main() {
     await service.loadTransactions();
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: TransactionAddDetailedScreen(accountName: accountName),
-      ),
+      MaterialApp(home: TransactionAddDetailedScreen(accountName: accountName)),
     );
     await tester.pumpAndSettle();
 
@@ -121,56 +116,55 @@ void main() {
     expect(saved.first.cardChargedAmount, 10000);
   });
 
-  testWidgets('detailed draft card amount with currency symbols saves consistently', (
-    tester,
-  ) async {
-    final accountName =
-        'detailed_card_symbol_${DateTime.now().microsecondsSinceEpoch}';
-    final draftKey = PrefKeys.accountKey(accountName, 'tx_draft_v1');
-    final draft = <String, dynamic>{
-      'ts': DateTime.now().millisecondsSinceEpoch,
-      'desc': '치즈',
-      'qty': '1',
-      'unitPrice': '5,000',
-      'amount': '5000',
-      'card': '₩ 10,000원',
-      'payment': '카드',
-      'type': 'expense',
-    };
+  testWidgets(
+    'detailed draft card amount with currency symbols saves consistently',
+    (tester) async {
+      final accountName =
+          'detailed_card_symbol_${DateTime.now().microsecondsSinceEpoch}';
+      final draftKey = PrefKeys.accountKey(accountName, 'tx_draft_v1');
+      final draft = <String, dynamic>{
+        'ts': DateTime.now().millisecondsSinceEpoch,
+        'desc': '치즈',
+        'qty': '1',
+        'unitPrice': '5,000',
+        'amount': '5000',
+        'card': '₩ 10,000원',
+        'payment': '카드',
+        'type': 'expense',
+      };
 
-    SharedPreferences.setMockInitialValues(<String, Object>{
-      PrefKeys.txStorageBackendV1: 'prefs',
-      draftKey: jsonEncode(draft),
-    });
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        PrefKeys.txStorageBackendV1: 'prefs',
+        draftKey: jsonEncode(draft),
+      });
 
-    final service = TransactionService();
-    await service.loadTransactions();
+      final service = TransactionService();
+      await service.loadTransactions();
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: TransactionAddDetailedScreen(accountName: accountName),
-      ),
-    );
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: TransactionAddDetailedScreen(accountName: accountName),
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    expect(_readTextByKey(tester, 'tx_desc'), '치즈');
-    expect(_readTextByKey(tester, 'tx_amount'), '5000');
-    expect(_readTextByKey(tester, 'tx_payment'), '카드');
+      expect(_readTextByKey(tester, 'tx_desc'), '치즈');
+      expect(_readTextByKey(tester, 'tx_amount'), '5000');
+      expect(_readTextByKey(tester, 'tx_payment'), '카드');
 
-    await tester.tap(find.byTooltip('저장').first);
-    await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('저장').first);
+      await tester.pumpAndSettle();
 
-    final saved = service.getTransactions(accountName);
-    expect(saved.length, 1);
-    expect(saved.first.amount, 5000);
-    expect(saved.first.unitPrice, 5000);
-    expect(saved.first.quantity, 1);
-    expect(saved.first.cardChargedAmount, 10000);
-  });
+      final saved = service.getTransactions(accountName);
+      expect(saved.length, 1);
+      expect(saved.first.amount, 5000);
+      expect(saved.first.unitPrice, 5000);
+      expect(saved.first.quantity, 1);
+      expect(saved.first.cardChargedAmount, 10000);
+    },
+  );
 
-  testWidgets('detailed draft invalid card amounts block save', (
-    tester,
-  ) async {
+  testWidgets('detailed draft invalid card amounts block save', (tester) async {
     for (final invalidCard in ['0', '-100', 'abc']) {
       final accountName =
           'detailed_card_invalid_${invalidCard}_${DateTime.now().microsecondsSinceEpoch}';
@@ -205,7 +199,11 @@ void main() {
       await tester.pumpAndSettle();
 
       final saved = service.getTransactions(accountName);
-      expect(saved, isEmpty, reason: 'invalid card=$invalidCard should block save');
+      expect(
+        saved,
+        isEmpty,
+        reason: 'invalid card=$invalidCard should block save',
+      );
     }
   });
 }

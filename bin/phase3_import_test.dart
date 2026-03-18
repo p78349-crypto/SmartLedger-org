@@ -1,6 +1,6 @@
 // Phase 3 Data Import Test
 // SmartLedger Global Barcode System
-// 
+//
 // 실제 데이터 파일로 import 테스트
 // Date: 2026-02-14
 
@@ -16,12 +16,15 @@ void main() async {
   print('║     SmartLedger WMS System                                 ║');
   print('╚════════════════════════════════════════════════════════════╝\n');
 
-  const dataDir = r'C:\Users\plain\GemmaFineTuning\archive\korean_reference\글로벌 식료품 데이터';
+  const dataDir =
+      r'C:\Users\plain\GemmaFineTuning\archive\korean_reference\글로벌 식료품 데이터';
 
   // Step 1: 한국 데이터 파일 확인
   print('🗂️ [Step 1] 데이터 파일 확인\n');
   final koreanFile = File(path.join(dataDir, '식료품 데이터.xlsx'));
-  final usdaFile = File(path.join(dataDir, 'FoodData_Central_branded_food_json_2025-12-18.json'));
+  final usdaFile = File(
+    path.join(dataDir, 'FoodData_Central_branded_food_json_2025-12-18.json'),
+  );
   const japanDir = dataDir;
 
   _printFileInfo('한국', koreanFile);
@@ -43,15 +46,19 @@ void main() async {
   final japanFiles = <File>[];
   final directory = Directory(japanDir);
   final entities = directory.listSync();
-  
+
   for (var entity in entities) {
-    if (entity is File && entity.path.contains('mxt') && entity.path.endsWith('.xlsx')) {
+    if (entity is File &&
+        entity.path.contains('mxt') &&
+        entity.path.endsWith('.xlsx')) {
       japanFiles.add(entity);
       final sizeMB = entity.lengthSync() / (1024 * 1024);
-      print('  ✓ ${path.basename(entity.path)} (${sizeMB.toStringAsFixed(2)} MB)');
+      print(
+        '  ✓ ${path.basename(entity.path)} (${sizeMB.toStringAsFixed(2)} MB)',
+      );
     }
   }
-  
+
   if (japanFiles.isNotEmpty) {
     print('\n  발견된 파일: ${japanFiles.length}개');
     print('  예상 상품 수: 10,000+');
@@ -133,7 +140,7 @@ void _printFileInfo(String country, File file) {
   if (file.existsSync()) {
     final sizeKB = file.lengthSync() / 1024;
     final sizeMB = file.lengthSync() / (1024 * 1024);
-    
+
     if (sizeKB < 1024) {
       print('  ✅ [$country] ${file.path}');
       print('     크기: ${sizeKB.toStringAsFixed(1)} KB');

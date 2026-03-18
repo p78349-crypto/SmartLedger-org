@@ -6,15 +6,12 @@ import 'package:smart_ledger/features/wms/presentation/state/inventory_state.dar
 import 'package:smart_ledger/features/wms/presentation/widgets/inventory_item_card.dart';
 
 /// Main inventory list screen showing all items.
-/// 
+///
 /// Displays inventory items in a list with filtering and sorting options.
 class InventoryListScreen extends StatefulWidget {
   final InventoryNotifier notifier;
-  
-  const InventoryListScreen({
-    required this.notifier,
-    super.key,
-  });
+
+  const InventoryListScreen({required this.notifier, super.key});
 
   @override
   State<InventoryListScreen> createState() => _InventoryListScreenState();
@@ -23,7 +20,7 @@ class InventoryListScreen extends StatefulWidget {
 class _InventoryListScreenState extends State<InventoryListScreen> {
   bool _showLowStockOnly = false;
   String _sortBy = 'name'; // 'name', 'stock', 'category'
-  
+
   @override
   void initState() {
     super.initState();
@@ -33,22 +30,22 @@ class _InventoryListScreenState extends State<InventoryListScreen> {
       widget.notifier.loadInventory();
     });
   }
-  
+
   @override
   void dispose() {
     widget.notifier.removeListener(_onStateChanged);
     super.dispose();
   }
-  
+
   void _onStateChanged() {
     setState(() {});
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final state = widget.notifier.state;
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Inventory Management'),
@@ -56,9 +53,7 @@ class _InventoryListScreenState extends State<InventoryListScreen> {
           // Filter button
           IconButton(
             icon: Icon(
-              _showLowStockOnly 
-                  ? Icons.filter_alt 
-                  : Icons.filter_alt_outlined,
+              _showLowStockOnly ? Icons.filter_alt : Icons.filter_alt_outlined,
             ),
             onPressed: () {
               setState(() {
@@ -76,10 +71,7 @@ class _InventoryListScreenState extends State<InventoryListScreen> {
               });
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'name',
-                child: Text('Sort by Name'),
-              ),
+              const PopupMenuItem(value: 'name', child: Text('Sort by Name')),
               const PopupMenuItem(
                 value: 'stock',
                 child: Text('Sort by Stock Level'),
@@ -111,73 +103,67 @@ class _InventoryListScreenState extends State<InventoryListScreen> {
       ),
     );
   }
-  
+
   Widget _buildBody(InventoryState state, ThemeData theme) {
     return switch (state) {
       InventoryInitial() => const Center(
-          child: Text('Press refresh to load inventory'),
-        ),
-      
-      InventoryLoading() => const Center(
-          child: CircularProgressIndicator(),
-        ),
-      
+        child: Text('Press refresh to load inventory'),
+      ),
+
+      InventoryLoading() => const Center(child: CircularProgressIndicator()),
+
       InventoryError(:final message) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.error_outline,
-                size: 64,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, size: 64, color: theme.colorScheme.error),
+            const SizedBox(height: 16),
+            Text(
+              'Error',
+              style: theme.textTheme.headlineSmall?.copyWith(
                 color: theme.colorScheme.error,
               ),
-              const SizedBox(height: 16),
-              Text(
-                'Error',
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  color: theme.colorScheme.error,
-                ),
+            ),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Text(
+                message,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium,
               ),
-              const SizedBox(height: 8),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32),
-                child: Text(
-                  message,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyMedium,
-                ),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton.icon(
-                onPressed: () => widget.notifier.refresh(),
-                icon: const Icon(Icons.refresh),
-                label: const Text('Try Again'),
-              ),
-            ],
-          ),
-        ),
-      
-      InventoryLoaded(:final items, :final lowStockItems) => 
-        _buildLoadedList(items, lowStockItems, theme),
-      
-      InventoryOperating(:final items) => 
-        Stack(
-          children: [
-            _buildLoadedList(items, [], theme),
-            Container(
-              color: Colors.black26,
-              child: const Center(
-                child: CircularProgressIndicator(),
-              ),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: () => widget.notifier.refresh(),
+              icon: const Icon(Icons.refresh),
+              label: const Text('Try Again'),
             ),
           ],
         ),
-      
-      InventoryOperationSuccess(:final items, :final message) => 
+      ),
+
+      InventoryLoaded(:final items, :final lowStockItems) => _buildLoadedList(
+        items,
+        lowStockItems,
+        theme,
+      ),
+
+      InventoryOperating(:final items) => Stack(
+        children: [
+          _buildLoadedList(items, [], theme),
+          Container(
+            color: Colors.black26,
+            child: const Center(child: CircularProgressIndicator()),
+          ),
+        ],
+      ),
+
+      InventoryOperationSuccess(:final items, :final message) =>
         _buildSuccessState(items, message, theme),
     };
   }
-  
+
   Widget _buildLoadedList(
     List<dynamic> items,
     List<dynamic> lowStockItems,
@@ -211,14 +197,16 @@ class _InventoryListScreenState extends State<InventoryListScreen> {
         ),
       );
     }
-    
+
     // Filter items
     var filteredItems = items;
     if (_showLowStockOnly) {
       final lowStockIds = lowStockItems.map((item) => item.id).toSet();
-      filteredItems = items.where((item) => lowStockIds.contains(item.id)).toList();
+      filteredItems = items
+          .where((item) => lowStockIds.contains(item.id))
+          .toList();
     }
-    
+
     // Sort items
     filteredItems = List.from(filteredItems);
     switch (_sortBy) {
@@ -229,17 +217,13 @@ class _InventoryListScreenState extends State<InventoryListScreen> {
       case 'category':
         filteredItems.sort((a, b) => a.category.compareTo(b.category));
     }
-    
+
     if (filteredItems.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.filter_alt_off,
-              size: 64,
-              color: Colors.grey.shade400,
-            ),
+            Icon(Icons.filter_alt_off, size: 64, color: Colors.grey.shade400),
             const SizedBox(height: 16),
             Text(
               'No items match filter',
@@ -251,7 +235,7 @@ class _InventoryListScreenState extends State<InventoryListScreen> {
         ),
       );
     }
-    
+
     return RefreshIndicator(
       onRefresh: () => widget.notifier.refresh(),
       child: Column(
@@ -289,7 +273,7 @@ class _InventoryListScreenState extends State<InventoryListScreen> {
                 ],
               ),
             ),
-          
+
           // Items list
           Expanded(
             child: ListView.builder(
@@ -298,7 +282,7 @@ class _InventoryListScreenState extends State<InventoryListScreen> {
                 final item = filteredItems[index];
                 final lowStockIds = lowStockItems.map((i) => i.id).toSet();
                 final isLowStock = lowStockIds.contains(item.id);
-                
+
                 return InventoryItemCard(
                   item: item,
                   isLowStock: isLowStock,
@@ -322,7 +306,7 @@ class _InventoryListScreenState extends State<InventoryListScreen> {
       ),
     );
   }
-  
+
   Widget _buildSuccessState(
     List<dynamic> items,
     String message,
@@ -331,14 +315,11 @@ class _InventoryListScreenState extends State<InventoryListScreen> {
     // Show success message and reload
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: Colors.green,
-        ),
+        SnackBar(content: Text(message), backgroundColor: Colors.green),
       );
       widget.notifier.refresh();
     });
-    
+
     return _buildLoadedList(items, [], theme);
   }
 }

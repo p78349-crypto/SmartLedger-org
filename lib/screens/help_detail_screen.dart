@@ -46,8 +46,8 @@ class HelpDetailScreen extends StatelessWidget {
                   child: Text(
                     section.title,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
@@ -58,9 +58,9 @@ class HelpDetailScreen extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 12),
             child: Text(
               section.title,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
         ...section.content.map((item) {
@@ -69,9 +69,9 @@ class HelpDetailScreen extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 12),
               child: Text(
                 item.text,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      height: 1.6,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(height: 1.6),
               ),
             );
           } else if (item is StepContent) {
@@ -169,10 +169,7 @@ class HelpDetailScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  text,
-                  style: TextStyle(color: Colors.blue[900]),
-                ),
+                Text(text, style: TextStyle(color: Colors.blue[900])),
               ],
             ),
           ),
@@ -206,10 +203,7 @@ class HelpDetailScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  text,
-                  style: TextStyle(color: Colors.orange[900]),
-                ),
+                Text(text, style: TextStyle(color: Colors.orange[900])),
               ],
             ),
           ),

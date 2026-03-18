@@ -175,10 +175,7 @@ class WmsInventoryGateway {
         return WmsOperationResult.failure('Amount must be positive');
       }
 
-      await ConsumableInventoryService.instance.useItem(
-        id,
-        amount,
-      );
+      await ConsumableInventoryService.instance.useItem(id, amount);
       _invalidateCache();
 
       _logWrite('Used item: $id (amount: $amount)');

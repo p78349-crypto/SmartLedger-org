@@ -69,9 +69,7 @@ extension FoodExpiryUpsertForm on _FoodExpiryUpsertDialogState {
               IconButton.outlined(
                 onPressed: _toggleVoiceInput,
                 icon: Icon(
-                  _isVoiceListening
-                      ? IconCatalog.stopCircle
-                      : IconCatalog.mic,
+                  _isVoiceListening ? IconCatalog.stopCircle : IconCatalog.mic,
                 ),
                 tooltip: _isVoiceListening ? '음성 입력 중지' : '음성 입력',
                 style: OutlinedButton.styleFrom(

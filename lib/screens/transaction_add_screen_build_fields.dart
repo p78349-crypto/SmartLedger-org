@@ -137,8 +137,7 @@ extension TransactionAddScreenBuildFields on _NO1FormState {
           keyboardType: TextInputType.number,
           textInputAction: TextInputAction.next,
           onFieldSubmitted: (_) => _paymentFocusNode.requestFocus(),
-          validator: (value) =>
-              _validatePositiveAmount(value, '수입 금액을 입력하세요.'),
+          validator: (value) => _validatePositiveAmount(value, '수입 금액을 입력하세요.'),
           label: '수입 금액',
         ),
       ),

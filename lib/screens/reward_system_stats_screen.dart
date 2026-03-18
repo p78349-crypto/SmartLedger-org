@@ -22,9 +22,7 @@ class _RewardSystemStatsScreenState extends State<RewardSystemStatsScreen> {
     final scheme = theme.colorScheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('보상 시스템'),
-      ),
+      appBar: AppBar(title: const Text('보상 시스템')),
       body: FutureBuilder<Map<String, int>>(
         future: RewardBadgeService.instance.getCounts(widget.accountName),
         builder: (context, snapshot) {

@@ -45,8 +45,7 @@ extension ShoppingCartBuild on _ShoppingCartScreenState {
                       controller: _nameController,
                       focusNode: _nameFocusNode,
                       textInputAction: TextInputAction.done,
-                      onFieldSubmitted: (_) =>
-                          _addItem(keepKeyboardOpen: true),
+                      onFieldSubmitted: (_) => _addItem(keepKeyboardOpen: true),
                     ),
                   ),
                 ),
@@ -76,9 +75,7 @@ extension ShoppingCartBuild on _ShoppingCartScreenState {
         child: Column(
           children: [
             if (_isLoading)
-              const Expanded(
-                child: Center(child: CircularProgressIndicator()),
-              )
+              const Expanded(child: Center(child: CircularProgressIndicator()))
             else if (ordered.isEmpty)
               Expanded(
                 child: Center(
@@ -199,9 +196,10 @@ extension ShoppingCartBuild on _ShoppingCartScreenState {
   }) {
     if (_items.isEmpty) return const SizedBox.shrink();
 
-    final checkedTotal = _items
-        .where((i) => i.isChecked)
-        .fold<double>(0, (sum, item) {
+    final checkedTotal = _items.where((i) => i.isChecked).fold<double>(0, (
+      sum,
+      item,
+    ) {
       final qty = item.quantity < 0 ? 0 : item.quantity;
       return sum + (item.unitPrice * qty);
     });
@@ -214,7 +212,8 @@ extension ShoppingCartBuild on _ShoppingCartScreenState {
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(24),
-            topRight: Radius.circular(24)),
+            topRight: Radius.circular(24),
+          ),
         ),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
@@ -223,9 +222,11 @@ extension ShoppingCartBuild on _ShoppingCartScreenState {
               // 레시피 메뉴로 돌아가기 버튼
               IconButton(
                 onPressed: () => Navigator.pushNamed(
-                  context, AppRoutes.recipeManagement,
+                  context,
+                  AppRoutes.recipeManagement,
                   arguments: RecipeManagementArgs(
-                    accountName: widget.accountName),
+                    accountName: widget.accountName,
+                  ),
                 ),
                 icon: const Icon(Icons.restaurant_menu),
                 tooltip: '레시피 메뉴',
@@ -233,7 +234,8 @@ extension ShoppingCartBuild on _ShoppingCartScreenState {
                   backgroundColor: theme.colorScheme.tertiaryContainer,
                   foregroundColor: theme.colorScheme.onTertiaryContainer,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               ),
               const SizedBox(width: 8),

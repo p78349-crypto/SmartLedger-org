@@ -24,28 +24,26 @@ class AssetAuthChoiceDialog extends StatelessWidget {
       actions: [
         if (canBiometric)
           FilledButton.icon(
-            onPressed: () => Navigator.of(context)
-                .pop(AssetAuthChoice.biometric),
+            onPressed: () =>
+                Navigator.of(context).pop(AssetAuthChoice.biometric),
             icon: const Icon(Icons.fingerprint),
             label: const Text('지문'),
           ),
         if (canPin)
           FilledButton.icon(
-            onPressed: () => Navigator.of(context)
-                .pop(AssetAuthChoice.pin),
+            onPressed: () => Navigator.of(context).pop(AssetAuthChoice.pin),
             icon: const Icon(Icons.lock_outline),
             label: const Text('PIN'),
           ),
         if (canPassword)
           FilledButton.icon(
-            onPressed: () => Navigator.of(context)
-                .pop(AssetAuthChoice.password),
+            onPressed: () =>
+                Navigator.of(context).pop(AssetAuthChoice.password),
             icon: const Icon(Icons.password_outlined),
             label: const Text('비번'),
           ),
         TextButton(
-          onPressed: () => Navigator.of(context)
-              .pop(AssetAuthChoice.exit),
+          onPressed: () => Navigator.of(context).pop(AssetAuthChoice.exit),
           child: const Text('취소'),
         ),
       ],

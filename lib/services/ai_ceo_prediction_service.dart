@@ -11,7 +11,8 @@ import '../models/asset.dart';
 /// 하이브리드 접근: 로컬 계산 + AI 인사이트 결합
 /// 사용자 설정에 따라 AI 모델 선택 가능
 class AiCeoPredictionService {
-  static final AiCeoPredictionService _instance = AiCeoPredictionService._internal();
+  static final AiCeoPredictionService _instance =
+      AiCeoPredictionService._internal();
   factory AiCeoPredictionService() => _instance;
   AiCeoPredictionService._internal();
 
@@ -31,14 +32,18 @@ class AiCeoPredictionService {
     }
     final prefs = AiModelPreferencesService.instance;
     final shouldUseAi = await prefs.shouldUseAiFor(AiFeature.ceoPrediction);
-    
+
     if (!shouldUseAi) {
       return _getFallbackInsights(transactions, assets, weeklyTrend);
     }
 
-    final dataSnapshot = _prepareDataSnapshot(transactions, assets, weeklyTrend);
+    final dataSnapshot = _prepareDataSnapshot(
+      transactions,
+      assets,
+      weeklyTrend,
+    );
     final modelPriority = await prefs.getModelPriority();
-    
+
     for (final model in modelPriority) {
       try {
         switch (model) {
@@ -63,9 +68,11 @@ class AiCeoPredictionService {
   }
 
   /// 오프라인 AI (Gemini Nano)로 인사이트 생성
-  Future<Map<String, dynamic>> _getOfflineAiInsights(Map<String, dynamic> dataSnapshot) async {
+  Future<Map<String, dynamic>> _getOfflineAiInsights(
+    Map<String, dynamic> dataSnapshot,
+  ) async {
     final prompt = _buildCeoInsightPrompt(dataSnapshot, isOffline: true);
-    
+
     try {
       // AiCore를 통한 온디바이스 AI 호출
       final response = await _aicoreService.generateText(prompt);
@@ -76,9 +83,11 @@ class AiCeoPredictionService {
   }
 
   /// 온라인 AI (Gemini 1.5 Flash)로 인사이트 생성
-  Future<Map<String, dynamic>> _getOnlineAiInsights(Map<String, dynamic> dataSnapshot) async {
+  Future<Map<String, dynamic>> _getOnlineAiInsights(
+    Map<String, dynamic> dataSnapshot,
+  ) async {
     final prompt = _buildCeoInsightPrompt(dataSnapshot, isOffline: false);
-    
+
     try {
       final response = await _geminiService.analyzeBusiness(
         prompt: prompt,
@@ -91,8 +100,12 @@ class AiCeoPredictionService {
   }
 
   /// CEO를 위한 AI 프롬프트 구성
-  String _buildCeoInsightPrompt(Map<String, dynamic> dataSnapshot, {required bool isOffline}) {
-    final basePrompt = '''
+  String _buildCeoInsightPrompt(
+    Map<String, dynamic> dataSnapshot, {
+    required bool isOffline,
+  }) {
+    final basePrompt =
+        '''
 당신은 SmartLedger의 CEO 전용 AI 비서입니다. 다음 재무 데이터를 분석하여 경영진 수준의 인사이트를 제공하세요.
 
 📊 **현재 데이터 스냅샷:**
@@ -121,18 +134,23 @@ class AiCeoPredictionService {
   }
 
   Map<String, dynamic> _prepareDataSnapshot(
-    List<Transaction> transactions, 
-    List<Asset> assets, 
+    List<Transaction> transactions,
+    List<Asset> assets,
     double weeklyTrend,
   ) {
-    final totalAssets = assets.fold(0.0, (sum, asset) => sum + asset.currentValue);
+    final totalAssets = assets.fold(
+      0.0,
+      (sum, asset) => sum + asset.currentValue,
+    );
     final weeklyFlow = transactions.fold(0.0, (sum, tx) => sum + tx.amount);
-    
+
     return {
       'transactionCount': transactions.length,
       'weeklyFlow': weeklyFlow.toStringAsFixed(0),
       'totalAssets': totalAssets.toStringAsFixed(0),
-      'trend': weeklyTrend > 0 ? '상승 (+${weeklyTrend.toStringAsFixed(1)})' : '하락 (${weeklyTrend.toStringAsFixed(1)})',
+      'trend': weeklyTrend > 0
+          ? '상승 (+${weeklyTrend.toStringAsFixed(1)})'
+          : '하락 (${weeklyTrend.toStringAsFixed(1)})',
     };
   }
 
@@ -146,7 +164,8 @@ class AiCeoPredictionService {
         'insights': jsonResponse['insights'] ?? [],
         'risks': jsonResponse['risks'] ?? [],
         'recommendations': jsonResponse['recommendations'] ?? [],
-        'investment_opportunities': jsonResponse['investment_opportunities'] ?? [],
+        'investment_opportunities':
+            jsonResponse['investment_opportunities'] ?? [],
         'confidence_level': jsonResponse['confidence_level'] ?? 75,
         'ai_model': jsonResponse['ai_model'] ?? 'Unknown',
       };
@@ -164,8 +183,8 @@ class AiCeoPredictionService {
   }
 
   Map<String, dynamic> _getFallbackInsights(
-    List<Transaction> transactions, 
-    List<Asset> assets, 
+    List<Transaction> transactions,
+    List<Asset> assets,
     double weeklyTrend,
   ) {
     return {
@@ -174,7 +193,7 @@ class AiCeoPredictionService {
       'insights': [
         '전통적 알고리즘 기반 분석 결과',
         '${transactions.length}건의 거래 데이터 처리 완료',
-        '${assets.length}개 자산 포트폴리오 분석 완료'
+        '${assets.length}개 자산 포트폴리오 분석 완료',
       ],
       'risks': ['AI 서비스 일시 사용불가'],
       'recommendations': ['AI 모델 상태를 확인하고 다시 시도하세요'],

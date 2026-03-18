@@ -145,10 +145,7 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
         : '새 레시피 작성';
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: Text(title), centerTitle: true),
       body: Form(
         key: _formKey,
         child: ListView(
@@ -238,7 +235,10 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
                       ),
                       child: Text(
                         _saving ? '저장중' : 'ENT',
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ),
@@ -250,9 +250,7 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
             // 건강 점수
             HealthScoreSelector(
               score: _healthScore,
-              onChanged: (s) => setState(
-                () => _healthScore = s,
-              ),
+              onChanged: (s) => setState(() => _healthScore = s),
             ),
 
             const Divider(height: 32),

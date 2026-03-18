@@ -158,13 +158,13 @@ class _PointsMotivationStatsScreenState
     final body = _loading
         ? const Center(child: CircularProgressIndicator())
         : (_error != null)
-            ? Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Text('불러오기 실패: $_error'),
-                ),
-              )
-            : _buildContent(theme);
+        ? Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text('불러오기 실패: $_error'),
+            ),
+          )
+        : _buildContent(theme);
 
     return Scaffold(
       appBar: AppBar(

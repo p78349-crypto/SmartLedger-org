@@ -11,9 +11,7 @@ extension ShoppingCartControllers on _ShoppingCartScreenState {
       _qtyControllers.remove(k)?.dispose();
     }
 
-    final qtyFocusRemoved = _qtyFocusNodes.keys.where(
-      (k) => !ids.contains(k),
-    );
+    final qtyFocusRemoved = _qtyFocusNodes.keys.where((k) => !ids.contains(k));
     for (final k in qtyFocusRemoved.toList(growable: false)) {
       _qtyFocusNodes.remove(k)?.dispose();
     }

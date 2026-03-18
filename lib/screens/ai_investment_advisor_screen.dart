@@ -14,13 +14,14 @@ class AiInvestmentAdvisorScreen extends StatefulWidget {
   const AiInvestmentAdvisorScreen({super.key});
 
   @override
-  State<AiInvestmentAdvisorScreen> createState() => _AiInvestmentAdvisorScreenState();
+  State<AiInvestmentAdvisorScreen> createState() =>
+      _AiInvestmentAdvisorScreenState();
 }
 
 class _AiInvestmentAdvisorScreenState extends State<AiInvestmentAdvisorScreen> {
   final AiInvestmentService _investmentService = AiInvestmentService();
   static const String _consentVersion = 'ai_investment_notice_2026_02_28_v1';
-  
+
   bool _isLoading = false;
   bool _consentChecked = false;
   PortfolioAnalysis? _portfolioAnalysis;
@@ -49,8 +50,10 @@ class _AiInvestmentAdvisorScreenState extends State<AiInvestmentAdvisorScreen> {
 
   Future<bool> _ensureInvestmentConsent() async {
     final prefs = await SharedPreferences.getInstance();
-    final accepted = prefs.getBool(PrefKeys.aiInvestmentConsentAccepted) ?? false;
-    final savedVersion = prefs.getString(PrefKeys.aiInvestmentConsentVersion) ?? '';
+    final accepted =
+        prefs.getBool(PrefKeys.aiInvestmentConsentAccepted) ?? false;
+    final savedVersion =
+        prefs.getString(PrefKeys.aiInvestmentConsentVersion) ?? '';
 
     if (accepted && savedVersion == _consentVersion) {
       return true;
@@ -76,7 +79,9 @@ class _AiInvestmentAdvisorScreenState extends State<AiInvestmentAdvisorScreen> {
                     const SizedBox(height: 8),
                     const Text('개별 종목 추천, 매수/매도 지시, 진입시점 제시는 제공하지 않습니다.'),
                     const SizedBox(height: 8),
-                    const Text('최종 투자 판단과 결과 책임은 사용자 본인에게 있으며, 관련 법령 허용 범위에서 앱 판매자/제공자는 직접·간접 손해 책임을 지지 않습니다.'),
+                    const Text(
+                      '최종 투자 판단과 결과 책임은 사용자 본인에게 있으며, 관련 법령 허용 범위에서 앱 판매자/제공자는 직접·간접 손해 책임을 지지 않습니다.',
+                    ),
                     const SizedBox(height: 12),
                     CheckboxListTile(
                       contentPadding: EdgeInsets.zero,
@@ -128,7 +133,7 @@ class _AiInvestmentAdvisorScreenState extends State<AiInvestmentAdvisorScreen> {
 
   Future<void> _loadPortfolioAnalysis() async {
     setState(() => _isLoading = true);
-    
+
     try {
       final analysis = await _investmentService.analyzePortfolio();
       setState(() {
@@ -170,10 +175,10 @@ class _AiInvestmentAdvisorScreenState extends State<AiInvestmentAdvisorScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _errorMessage != null
-              ? _buildErrorWidget()
-              : _portfolioAnalysis != null
-                  ? _buildAnalysisContent()
-                  : const Center(child: Text('분석 중...')),
+          ? _buildErrorWidget()
+          : _portfolioAnalysis != null
+          ? _buildAnalysisContent()
+          : const Center(child: Text('분석 중...')),
     );
   }
 
@@ -186,8 +191,10 @@ class _AiInvestmentAdvisorScreenState extends State<AiInvestmentAdvisorScreen> {
           children: [
             const Icon(Icons.error_outline, size: 64, color: Colors.red),
             const SizedBox(height: 16),
-            Text('분석 중 오류가 발생했습니다:\n$_errorMessage', 
-                 textAlign: TextAlign.center),
+            Text(
+              '분석 중 오류가 발생했습니다:\n$_errorMessage',
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _loadPortfolioAnalysis,

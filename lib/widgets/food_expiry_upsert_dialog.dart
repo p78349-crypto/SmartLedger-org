@@ -38,8 +38,7 @@ class FoodExpiryUpsertDialog extends StatefulWidget {
   });
 
   @override
-  State<FoodExpiryUpsertDialog> createState() =>
-      _FoodExpiryUpsertDialogState();
+  State<FoodExpiryUpsertDialog> createState() => _FoodExpiryUpsertDialogState();
 }
 
 class _UpsertVoiceParseResult {
@@ -176,8 +175,9 @@ class _FoodExpiryUpsertDialogState extends State<FoodExpiryUpsertDialog> {
         }
         if (p.quantity != null) {
           final v = p.quantity!;
-          _quantityController.text =
-              v == v.roundToDouble() ? v.toStringAsFixed(0) : v.toString();
+          _quantityController.text = v == v.roundToDouble()
+              ? v.toStringAsFixed(0)
+              : v.toString();
         }
         if (p.unit != null && p.unit!.trim().isNotEmpty) {
           _unitController.text = p.unit!.trim();
@@ -193,8 +193,9 @@ class _FoodExpiryUpsertDialogState extends State<FoodExpiryUpsertDialog> {
         }
         if (p.price != null) {
           final v = p.price!;
-          _priceController.text =
-              v == v.roundToDouble() ? v.toStringAsFixed(0) : v.toString();
+          _priceController.text = v == v.roundToDouble()
+              ? v.toStringAsFixed(0)
+              : v.toString();
         }
         if (p.supplier != null && p.supplier!.trim().isNotEmpty) {
           _supplierController.text = p.supplier!.trim();

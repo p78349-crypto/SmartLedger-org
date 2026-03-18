@@ -36,9 +36,37 @@ class _FixedCostTabScreenState extends State<FixedCostTabScreen> {
   int? _editingIndex;
   int? _dueDay;
   static const List<int> _dayOptions = [
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-    11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-    21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
   ];
 
   String get _paymentPrefsKey =>
@@ -234,10 +262,7 @@ class _FixedCostTabScreenState extends State<FixedCostTabScreen> {
             else
               SliverList(
                 delegate: SliverChildBuilderDelegate(
-                  (context, index) => _buildCostListItem(
-                    _costs[index],
-                    index,
-                  ),
+                  (context, index) => _buildCostListItem(_costs[index], index),
                   childCount: _costs.length,
                 ),
               ),

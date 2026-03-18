@@ -150,9 +150,9 @@ extension EvacuationSafetyHealthCards on _EvacuationRouteScreenState {
             Text(
               snapshot.isOperational
                   ? '네트워크 · GPS 체인이 정상입니다. '
-                    '지도/경로 데이터가 실시간으로 유지됩니다.'
+                        '지도/경로 데이터가 실시간으로 유지됩니다.'
                   : '문제 감지: ${issues.join(', ')}. '
-                    '복구 즉시 위치/지도 레이어가 재계산됩니다.',
+                        '복구 즉시 위치/지도 레이어가 재계산됩니다.',
               style: TextStyle(
                 color: snapshot.isOperational ? Colors.green : Colors.red,
                 fontSize: 13,

@@ -26,10 +26,7 @@ class RecipeCard extends StatelessWidget {
     final ingredientCount = recipe.ingredients.length;
 
     return Card(
-      margin: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 6,
-      ),
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: onTap,
@@ -38,11 +35,7 @@ class RecipeCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildHeader(
-                context,
-                theme,
-                ingredientCount,
-              ),
+              _buildHeader(context, theme, ingredientCount),
               const SizedBox(height: 12),
               _buildIngredientPreview(),
               const Divider(height: 24),
@@ -68,8 +61,7 @@ class RecipeCard extends StatelessWidget {
             children: [
               Text(
                 recipe.nameForLocale(lang),
-                style: theme.textTheme.titleMedium
-                    ?.copyWith(
+                style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -107,10 +99,7 @@ class RecipeCard extends StatelessWidget {
               .take(5)
               .map(
                 (ing) => Chip(
-                  label: Text(
-                    ing.name,
-                    style: const TextStyle(fontSize: 12),
-                  ),
+                  label: Text(ing.name, style: const TextStyle(fontSize: 12)),
                   visualDensity: VisualDensity.compact,
                   padding: EdgeInsets.zero,
                 ),
@@ -122,10 +111,7 @@ class RecipeCard extends StatelessWidget {
             padding: const EdgeInsets.only(top: 4),
             child: Text(
               '+${recipe.ingredients.length - 5}개 더',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
             ),
           ),
       ],
@@ -140,10 +126,7 @@ class RecipeCard extends StatelessWidget {
           Expanded(
             child: OutlinedButton.icon(
               onPressed: onCopyToMy,
-              icon: const Icon(
-                Icons.content_copy,
-                size: 18,
-              ),
+              icon: const Icon(Icons.content_copy, size: 18),
               label: const Text('내 레시피로 복사'),
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 12),
@@ -158,10 +141,7 @@ class RecipeCard extends StatelessWidget {
         Expanded(
           child: FilledButton.icon(
             onPressed: onSendToCart,
-            icon: const Icon(
-              Icons.shopping_cart,
-              size: 18,
-            ),
+            icon: const Icon(Icons.shopping_cart, size: 18),
             label: const Text('장바구니에 추가'),
             style: FilledButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 12),
@@ -177,20 +157,14 @@ class RecipeCard extends StatelessWidget {
 
   static Widget _tag(String text) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 8,
-        vertical: 2,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
         color: Colors.grey[200],
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
         text,
-        style: TextStyle(
-          fontSize: 11,
-          color: Colors.grey[700],
-        ),
+        style: TextStyle(fontSize: 11, color: Colors.grey[700]),
       ),
     );
   }
@@ -199,17 +173,14 @@ class RecipeCard extends StatelessWidget {
     final color = score >= 4
         ? Colors.green
         : score >= 3
-            ? Colors.orange
-            : Colors.red;
+        ? Colors.orange
+        : Colors.red;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(Icons.favorite, size: 14, color: color),
         const SizedBox(width: 2),
-        Text(
-          '$score',
-          style: TextStyle(fontSize: 11, color: color),
-        ),
+        Text('$score', style: TextStyle(fontSize: 11, color: color)),
       ],
     );
   }

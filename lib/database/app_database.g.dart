@@ -816,6 +816,17 @@ class $DbTransactionsTable extends DbTransactions
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _integrityHashMeta = const VerificationMeta(
+    'integrityHash',
+  );
+  @override
+  late final GeneratedColumn<String> integrityHash = GeneratedColumn<String>(
+    'integrity_hash',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -850,6 +861,7 @@ class $DbTransactionsTable extends DbTransactions
     updatedAt,
     isDeleted,
     isSynced,
+    integrityHash,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1098,6 +1110,15 @@ class $DbTransactionsTable extends DbTransactions
         isSynced.isAcceptableOrUnknown(data['is_synced']!, _isSyncedMeta),
       );
     }
+    if (data.containsKey('integrity_hash')) {
+      context.handle(
+        _integrityHashMeta,
+        integrityHash.isAcceptableOrUnknown(
+          data['integrity_hash']!,
+          _integrityHashMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1235,6 +1256,10 @@ class $DbTransactionsTable extends DbTransactions
         DriftSqlType.bool,
         data['${effectivePrefix}is_synced'],
       )!,
+      integrityHash: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}integrity_hash'],
+      ),
     );
   }
 
@@ -1289,6 +1314,9 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
   final DateTime? updatedAt;
   final bool isDeleted;
   final bool isSynced;
+
+  /// SHA-256 해시 체인 — 이전 레코드의 해시를 포함하여 변조 감지.
+  final String? integrityHash;
   const DbTransaction({
     required this.id,
     required this.accountId,
@@ -1322,6 +1350,7 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
     this.updatedAt,
     required this.isDeleted,
     required this.isSynced,
+    this.integrityHash,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1388,6 +1417,9 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
     }
     map['is_deleted'] = Variable<bool>(isDeleted);
     map['is_synced'] = Variable<bool>(isSynced);
+    if (!nullToAbsent || integrityHash != null) {
+      map['integrity_hash'] = Variable<String>(integrityHash);
+    }
     return map;
   }
 
@@ -1453,6 +1485,9 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
           : Value(updatedAt),
       isDeleted: Value(isDeleted),
       isSynced: Value(isSynced),
+      integrityHash: integrityHash == null && nullToAbsent
+          ? const Value.absent()
+          : Value(integrityHash),
     );
   }
 
@@ -1500,6 +1535,7 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
       updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
       isDeleted: serializer.fromJson<bool>(json['isDeleted']),
       isSynced: serializer.fromJson<bool>(json['isSynced']),
+      integrityHash: serializer.fromJson<String?>(json['integrityHash']),
     );
   }
   @override
@@ -1540,6 +1576,7 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
       'updatedAt': serializer.toJson<DateTime?>(updatedAt),
       'isDeleted': serializer.toJson<bool>(isDeleted),
       'isSynced': serializer.toJson<bool>(isSynced),
+      'integrityHash': serializer.toJson<String?>(integrityHash),
     };
   }
 
@@ -1576,6 +1613,7 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
     Value<DateTime?> updatedAt = const Value.absent(),
     bool? isDeleted,
     bool? isSynced,
+    Value<String?> integrityHash = const Value.absent(),
   }) => DbTransaction(
     id: id ?? this.id,
     accountId: accountId ?? this.accountId,
@@ -1619,6 +1657,9 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
     updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
     isDeleted: isDeleted ?? this.isDeleted,
     isSynced: isSynced ?? this.isSynced,
+    integrityHash: integrityHash.present
+        ? integrityHash.value
+        : this.integrityHash,
   );
   DbTransaction copyWithCompanion(DbTransactionsCompanion data) {
     return DbTransaction(
@@ -1680,6 +1721,9 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       isDeleted: data.isDeleted.present ? data.isDeleted.value : this.isDeleted,
       isSynced: data.isSynced.present ? data.isSynced.value : this.isSynced,
+      integrityHash: data.integrityHash.present
+          ? data.integrityHash.value
+          : this.integrityHash,
     );
   }
 
@@ -1717,7 +1761,8 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
           ..write('syncId: $syncId, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('isDeleted: $isDeleted, ')
-          ..write('isSynced: $isSynced')
+          ..write('isSynced: $isSynced, ')
+          ..write('integrityHash: $integrityHash')
           ..write(')'))
         .toString();
   }
@@ -1756,6 +1801,7 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
     updatedAt,
     isDeleted,
     isSynced,
+    integrityHash,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -1792,7 +1838,8 @@ class DbTransaction extends DataClass implements Insertable<DbTransaction> {
           other.syncId == this.syncId &&
           other.updatedAt == this.updatedAt &&
           other.isDeleted == this.isDeleted &&
-          other.isSynced == this.isSynced);
+          other.isSynced == this.isSynced &&
+          other.integrityHash == this.integrityHash);
 }
 
 class DbTransactionsCompanion extends UpdateCompanion<DbTransaction> {
@@ -1828,6 +1875,7 @@ class DbTransactionsCompanion extends UpdateCompanion<DbTransaction> {
   final Value<DateTime?> updatedAt;
   final Value<bool> isDeleted;
   final Value<bool> isSynced;
+  final Value<String?> integrityHash;
   final Value<int> rowid;
   const DbTransactionsCompanion({
     this.id = const Value.absent(),
@@ -1862,6 +1910,7 @@ class DbTransactionsCompanion extends UpdateCompanion<DbTransaction> {
     this.updatedAt = const Value.absent(),
     this.isDeleted = const Value.absent(),
     this.isSynced = const Value.absent(),
+    this.integrityHash = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   DbTransactionsCompanion.insert({
@@ -1897,6 +1946,7 @@ class DbTransactionsCompanion extends UpdateCompanion<DbTransaction> {
     this.updatedAt = const Value.absent(),
     this.isDeleted = const Value.absent(),
     this.isSynced = const Value.absent(),
+    this.integrityHash = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        accountId = Value(accountId),
@@ -1936,6 +1986,7 @@ class DbTransactionsCompanion extends UpdateCompanion<DbTransaction> {
     Expression<DateTime>? updatedAt,
     Expression<bool>? isDeleted,
     Expression<bool>? isSynced,
+    Expression<String>? integrityHash,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1972,6 +2023,7 @@ class DbTransactionsCompanion extends UpdateCompanion<DbTransaction> {
       if (updatedAt != null) 'updated_at': updatedAt,
       if (isDeleted != null) 'is_deleted': isDeleted,
       if (isSynced != null) 'is_synced': isSynced,
+      if (integrityHash != null) 'integrity_hash': integrityHash,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2009,6 +2061,7 @@ class DbTransactionsCompanion extends UpdateCompanion<DbTransaction> {
     Value<DateTime?>? updatedAt,
     Value<bool>? isDeleted,
     Value<bool>? isSynced,
+    Value<String?>? integrityHash,
     Value<int>? rowid,
   }) {
     return DbTransactionsCompanion(
@@ -2045,6 +2098,7 @@ class DbTransactionsCompanion extends UpdateCompanion<DbTransaction> {
       updatedAt: updatedAt ?? this.updatedAt,
       isDeleted: isDeleted ?? this.isDeleted,
       isSynced: isSynced ?? this.isSynced,
+      integrityHash: integrityHash ?? this.integrityHash,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2150,6 +2204,9 @@ class DbTransactionsCompanion extends UpdateCompanion<DbTransaction> {
     if (isSynced.present) {
       map['is_synced'] = Variable<bool>(isSynced.value);
     }
+    if (integrityHash.present) {
+      map['integrity_hash'] = Variable<String>(integrityHash.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2191,6 +2248,7 @@ class DbTransactionsCompanion extends UpdateCompanion<DbTransaction> {
           ..write('updatedAt: $updatedAt, ')
           ..write('isDeleted: $isDeleted, ')
           ..write('isSynced: $isSynced, ')
+          ..write('integrityHash: $integrityHash, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -3997,6 +4055,329 @@ class DbRootMemosCompanion extends UpdateCompanion<DbRootMemo> {
   }
 }
 
+class $DbIdempotencyKeysTable extends DbIdempotencyKeys
+    with TableInfo<$DbIdempotencyKeysTable, DbIdempotencyKey> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DbIdempotencyKeysTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _operationKeyMeta = const VerificationMeta(
+    'operationKey',
+  );
+  @override
+  late final GeneratedColumn<String> operationKey = GeneratedColumn<String>(
+    'operation_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _resultMeta = const VerificationMeta('result');
+  @override
+  late final GeneratedColumn<String> result = GeneratedColumn<String>(
+    'result',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _expiresAtMeta = const VerificationMeta(
+    'expiresAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> expiresAt = GeneratedColumn<DateTime>(
+    'expires_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    operationKey,
+    result,
+    createdAt,
+    expiresAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'db_idempotency_keys';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<DbIdempotencyKey> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('operation_key')) {
+      context.handle(
+        _operationKeyMeta,
+        operationKey.isAcceptableOrUnknown(
+          data['operation_key']!,
+          _operationKeyMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_operationKeyMeta);
+    }
+    if (data.containsKey('result')) {
+      context.handle(
+        _resultMeta,
+        result.isAcceptableOrUnknown(data['result']!, _resultMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('expires_at')) {
+      context.handle(
+        _expiresAtMeta,
+        expiresAt.isAcceptableOrUnknown(data['expires_at']!, _expiresAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_expiresAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {operationKey};
+  @override
+  DbIdempotencyKey map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DbIdempotencyKey(
+      operationKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}operation_key'],
+      )!,
+      result: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}result'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      expiresAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}expires_at'],
+      )!,
+    );
+  }
+
+  @override
+  $DbIdempotencyKeysTable createAlias(String alias) {
+    return $DbIdempotencyKeysTable(attachedDatabase, alias);
+  }
+}
+
+class DbIdempotencyKey extends DataClass
+    implements Insertable<DbIdempotencyKey> {
+  final String operationKey;
+  final String? result;
+  final DateTime createdAt;
+  final DateTime expiresAt;
+  const DbIdempotencyKey({
+    required this.operationKey,
+    this.result,
+    required this.createdAt,
+    required this.expiresAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['operation_key'] = Variable<String>(operationKey);
+    if (!nullToAbsent || result != null) {
+      map['result'] = Variable<String>(result);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['expires_at'] = Variable<DateTime>(expiresAt);
+    return map;
+  }
+
+  DbIdempotencyKeysCompanion toCompanion(bool nullToAbsent) {
+    return DbIdempotencyKeysCompanion(
+      operationKey: Value(operationKey),
+      result: result == null && nullToAbsent
+          ? const Value.absent()
+          : Value(result),
+      createdAt: Value(createdAt),
+      expiresAt: Value(expiresAt),
+    );
+  }
+
+  factory DbIdempotencyKey.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DbIdempotencyKey(
+      operationKey: serializer.fromJson<String>(json['operationKey']),
+      result: serializer.fromJson<String?>(json['result']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      expiresAt: serializer.fromJson<DateTime>(json['expiresAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'operationKey': serializer.toJson<String>(operationKey),
+      'result': serializer.toJson<String?>(result),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'expiresAt': serializer.toJson<DateTime>(expiresAt),
+    };
+  }
+
+  DbIdempotencyKey copyWith({
+    String? operationKey,
+    Value<String?> result = const Value.absent(),
+    DateTime? createdAt,
+    DateTime? expiresAt,
+  }) => DbIdempotencyKey(
+    operationKey: operationKey ?? this.operationKey,
+    result: result.present ? result.value : this.result,
+    createdAt: createdAt ?? this.createdAt,
+    expiresAt: expiresAt ?? this.expiresAt,
+  );
+  DbIdempotencyKey copyWithCompanion(DbIdempotencyKeysCompanion data) {
+    return DbIdempotencyKey(
+      operationKey: data.operationKey.present
+          ? data.operationKey.value
+          : this.operationKey,
+      result: data.result.present ? data.result.value : this.result,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      expiresAt: data.expiresAt.present ? data.expiresAt.value : this.expiresAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DbIdempotencyKey(')
+          ..write('operationKey: $operationKey, ')
+          ..write('result: $result, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('expiresAt: $expiresAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(operationKey, result, createdAt, expiresAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DbIdempotencyKey &&
+          other.operationKey == this.operationKey &&
+          other.result == this.result &&
+          other.createdAt == this.createdAt &&
+          other.expiresAt == this.expiresAt);
+}
+
+class DbIdempotencyKeysCompanion extends UpdateCompanion<DbIdempotencyKey> {
+  final Value<String> operationKey;
+  final Value<String?> result;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> expiresAt;
+  final Value<int> rowid;
+  const DbIdempotencyKeysCompanion({
+    this.operationKey = const Value.absent(),
+    this.result = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.expiresAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  DbIdempotencyKeysCompanion.insert({
+    required String operationKey,
+    this.result = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    required DateTime expiresAt,
+    this.rowid = const Value.absent(),
+  }) : operationKey = Value(operationKey),
+       expiresAt = Value(expiresAt);
+  static Insertable<DbIdempotencyKey> custom({
+    Expression<String>? operationKey,
+    Expression<String>? result,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? expiresAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (operationKey != null) 'operation_key': operationKey,
+      if (result != null) 'result': result,
+      if (createdAt != null) 'created_at': createdAt,
+      if (expiresAt != null) 'expires_at': expiresAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  DbIdempotencyKeysCompanion copyWith({
+    Value<String>? operationKey,
+    Value<String?>? result,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? expiresAt,
+    Value<int>? rowid,
+  }) {
+    return DbIdempotencyKeysCompanion(
+      operationKey: operationKey ?? this.operationKey,
+      result: result ?? this.result,
+      createdAt: createdAt ?? this.createdAt,
+      expiresAt: expiresAt ?? this.expiresAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (operationKey.present) {
+      map['operation_key'] = Variable<String>(operationKey.value);
+    }
+    if (result.present) {
+      map['result'] = Variable<String>(result.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (expiresAt.present) {
+      map['expires_at'] = Variable<DateTime>(expiresAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DbIdempotencyKeysCompanion(')
+          ..write('operationKey: $operationKey, ')
+          ..write('result: $result, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('expiresAt: $expiresAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -4005,6 +4386,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $DbAssetsTable dbAssets = $DbAssetsTable(this);
   late final $DbFixedCostsTable dbFixedCosts = $DbFixedCostsTable(this);
   late final $DbRootMemosTable dbRootMemos = $DbRootMemosTable(this);
+  late final $DbIdempotencyKeysTable dbIdempotencyKeys =
+      $DbIdempotencyKeysTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -4015,6 +4398,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     dbAssets,
     dbFixedCosts,
     dbRootMemos,
+    dbIdempotencyKeys,
   ];
 }
 
@@ -4589,6 +4973,7 @@ typedef $$DbTransactionsTableCreateCompanionBuilder =
       Value<DateTime?> updatedAt,
       Value<bool> isDeleted,
       Value<bool> isSynced,
+      Value<String?> integrityHash,
       Value<int> rowid,
     });
 typedef $$DbTransactionsTableUpdateCompanionBuilder =
@@ -4625,6 +5010,7 @@ typedef $$DbTransactionsTableUpdateCompanionBuilder =
       Value<DateTime?> updatedAt,
       Value<bool> isDeleted,
       Value<bool> isSynced,
+      Value<String?> integrityHash,
       Value<int> rowid,
     });
 
@@ -4820,6 +5206,11 @@ class $$DbTransactionsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get integrityHash => $composableBuilder(
+    column: $table.integrityHash,
+    builder: (column) => ColumnFilters(column),
+  );
+
   $$DbAccountsTableFilterComposer get accountId {
     final $$DbAccountsTableFilterComposer composer = $composerBuilder(
       composer: this,
@@ -5008,6 +5399,11 @@ class $$DbTransactionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get integrityHash => $composableBuilder(
+    column: $table.integrityHash,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$DbAccountsTableOrderingComposer get accountId {
     final $$DbAccountsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -5160,6 +5556,11 @@ class $$DbTransactionsTableAnnotationComposer
   GeneratedColumn<bool> get isSynced =>
       $composableBuilder(column: $table.isSynced, builder: (column) => column);
 
+  GeneratedColumn<String> get integrityHash => $composableBuilder(
+    column: $table.integrityHash,
+    builder: (column) => column,
+  );
+
   $$DbAccountsTableAnnotationComposer get accountId {
     final $$DbAccountsTableAnnotationComposer composer = $composerBuilder(
       composer: this,
@@ -5246,6 +5647,7 @@ class $$DbTransactionsTableTableManager
                 Value<DateTime?> updatedAt = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
                 Value<bool> isSynced = const Value.absent(),
+                Value<String?> integrityHash = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => DbTransactionsCompanion(
                 id: id,
@@ -5280,6 +5682,7 @@ class $$DbTransactionsTableTableManager
                 updatedAt: updatedAt,
                 isDeleted: isDeleted,
                 isSynced: isSynced,
+                integrityHash: integrityHash,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -5316,6 +5719,7 @@ class $$DbTransactionsTableTableManager
                 Value<DateTime?> updatedAt = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
                 Value<bool> isSynced = const Value.absent(),
+                Value<String?> integrityHash = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => DbTransactionsCompanion.insert(
                 id: id,
@@ -5350,6 +5754,7 @@ class $$DbTransactionsTableTableManager
                 updatedAt: updatedAt,
                 isDeleted: isDeleted,
                 isSynced: isSynced,
+                integrityHash: integrityHash,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -6533,6 +6938,202 @@ typedef $$DbRootMemosTableProcessedTableManager =
       DbRootMemo,
       PrefetchHooks Function()
     >;
+typedef $$DbIdempotencyKeysTableCreateCompanionBuilder =
+    DbIdempotencyKeysCompanion Function({
+      required String operationKey,
+      Value<String?> result,
+      Value<DateTime> createdAt,
+      required DateTime expiresAt,
+      Value<int> rowid,
+    });
+typedef $$DbIdempotencyKeysTableUpdateCompanionBuilder =
+    DbIdempotencyKeysCompanion Function({
+      Value<String> operationKey,
+      Value<String?> result,
+      Value<DateTime> createdAt,
+      Value<DateTime> expiresAt,
+      Value<int> rowid,
+    });
+
+class $$DbIdempotencyKeysTableFilterComposer
+    extends Composer<_$AppDatabase, $DbIdempotencyKeysTable> {
+  $$DbIdempotencyKeysTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get operationKey => $composableBuilder(
+    column: $table.operationKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get result => $composableBuilder(
+    column: $table.result,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get expiresAt => $composableBuilder(
+    column: $table.expiresAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$DbIdempotencyKeysTableOrderingComposer
+    extends Composer<_$AppDatabase, $DbIdempotencyKeysTable> {
+  $$DbIdempotencyKeysTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get operationKey => $composableBuilder(
+    column: $table.operationKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get result => $composableBuilder(
+    column: $table.result,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get expiresAt => $composableBuilder(
+    column: $table.expiresAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$DbIdempotencyKeysTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DbIdempotencyKeysTable> {
+  $$DbIdempotencyKeysTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get operationKey => $composableBuilder(
+    column: $table.operationKey,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get result =>
+      $composableBuilder(column: $table.result, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get expiresAt =>
+      $composableBuilder(column: $table.expiresAt, builder: (column) => column);
+}
+
+class $$DbIdempotencyKeysTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $DbIdempotencyKeysTable,
+          DbIdempotencyKey,
+          $$DbIdempotencyKeysTableFilterComposer,
+          $$DbIdempotencyKeysTableOrderingComposer,
+          $$DbIdempotencyKeysTableAnnotationComposer,
+          $$DbIdempotencyKeysTableCreateCompanionBuilder,
+          $$DbIdempotencyKeysTableUpdateCompanionBuilder,
+          (
+            DbIdempotencyKey,
+            BaseReferences<
+              _$AppDatabase,
+              $DbIdempotencyKeysTable,
+              DbIdempotencyKey
+            >,
+          ),
+          DbIdempotencyKey,
+          PrefetchHooks Function()
+        > {
+  $$DbIdempotencyKeysTableTableManager(
+    _$AppDatabase db,
+    $DbIdempotencyKeysTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DbIdempotencyKeysTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DbIdempotencyKeysTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$DbIdempotencyKeysTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> operationKey = const Value.absent(),
+                Value<String?> result = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> expiresAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DbIdempotencyKeysCompanion(
+                operationKey: operationKey,
+                result: result,
+                createdAt: createdAt,
+                expiresAt: expiresAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String operationKey,
+                Value<String?> result = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                required DateTime expiresAt,
+                Value<int> rowid = const Value.absent(),
+              }) => DbIdempotencyKeysCompanion.insert(
+                operationKey: operationKey,
+                result: result,
+                createdAt: createdAt,
+                expiresAt: expiresAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$DbIdempotencyKeysTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $DbIdempotencyKeysTable,
+      DbIdempotencyKey,
+      $$DbIdempotencyKeysTableFilterComposer,
+      $$DbIdempotencyKeysTableOrderingComposer,
+      $$DbIdempotencyKeysTableAnnotationComposer,
+      $$DbIdempotencyKeysTableCreateCompanionBuilder,
+      $$DbIdempotencyKeysTableUpdateCompanionBuilder,
+      (
+        DbIdempotencyKey,
+        BaseReferences<
+          _$AppDatabase,
+          $DbIdempotencyKeysTable,
+          DbIdempotencyKey
+        >,
+      ),
+      DbIdempotencyKey,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -6547,4 +7148,6 @@ class $AppDatabaseManager {
       $$DbFixedCostsTableTableManager(_db, _db.dbFixedCosts);
   $$DbRootMemosTableTableManager get dbRootMemos =>
       $$DbRootMemosTableTableManager(_db, _db.dbRootMemos);
+  $$DbIdempotencyKeysTableTableManager get dbIdempotencyKeys =>
+      $$DbIdempotencyKeysTableTableManager(_db, _db.dbIdempotencyKeys);
 }

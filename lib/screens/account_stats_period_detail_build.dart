@@ -41,10 +41,7 @@ extension AccountStatsPeriodDetailBuild
               Expanded(
                 child: Column(
                   children: [
-                    Text(
-                      _rangeLabel(range),
-                      style: theme.textTheme.bodyMedium,
-                    ),
+                    Text(_rangeLabel(range), style: theme.textTheme.bodyMedium),
                     const SizedBox(height: 4),
                     Text(
                       referenceLabel,

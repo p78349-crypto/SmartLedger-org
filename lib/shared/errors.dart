@@ -7,19 +7,19 @@ library;
 sealed class AppError {
   final String message;
   final Object? cause;
-  
+
   const AppError(this.message, [this.cause]);
-  
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is AppError &&
           runtimeType == other.runtimeType &&
           message == other.message;
-  
+
   @override
   int get hashCode => message.hashCode;
-  
+
   @override
   String toString() => '$runtimeType: $message';
 }
@@ -32,11 +32,11 @@ class ValidationError extends AppError {
 /// Network error for HTTP/API failures
 class NetworkError extends AppError {
   final int? statusCode;
-  
+
   const NetworkError(super.message, {this.statusCode});
-  
+
   @override
-  String toString() => 
+  String toString() =>
       'NetworkError: $message${statusCode != null ? ' (Status: $statusCode)' : ''}';
 }
 
@@ -58,7 +58,7 @@ class PermissionError extends AppError {
 /// Unknown error for unexpected failures
 class UnknownError extends AppError {
   const UnknownError(Object cause) : super('Unknown error occurred', cause);
-  
+
   @override
   String toString() => 'UnknownError: $message (${cause.toString()})';
 }

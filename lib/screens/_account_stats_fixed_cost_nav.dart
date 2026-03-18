@@ -5,8 +5,7 @@ part of 'account_stats_screen.dart';
 extension AccountStatsFixedCostNav on _AccountStatsScreenState {
   double _fixedCostTotalForMonth(DateTime _) {
     if (_fixedCosts.isEmpty) return 0.0;
-    return _fixedCosts.fold<double>(
-        0.0, (prev, cost) => prev + cost.amount);
+    return _fixedCosts.fold<double>(0.0, (prev, cost) => prev + cost.amount);
   }
 
   List<FixedCost> _sortedFixedCosts() {
@@ -20,8 +19,7 @@ extension AccountStatsFixedCostNav on _AccountStatsScreenState {
     return list;
   }
 
-  Widget _buildFixedCostSection(ThemeData theme,
-      {bool annual = false}) {
+  Widget _buildFixedCostSection(ThemeData theme, {bool annual = false}) {
     final costs = _sortedFixedCosts();
     final ref = annual ? DateTime(_currentYear) : _currentMonth;
     final monthlyTotal = _fixedCostTotalForMonth(ref);
@@ -33,19 +31,23 @@ extension AccountStatsFixedCostNav on _AccountStatsScreenState {
         Text(
           '$titlePrefix 고정비용 '
           '(${_formatAmountByType(total, TransactionType.expense)})',
-          style: theme.textTheme.titleMedium),
+          style: theme.textTheme.titleMedium,
+        ),
         const SizedBox(height: 8),
         Card(
           child: Column(
             children: costs
-                .map((cost) => ListTile(
-                      dense: true,
-                      leading: const Icon(Icons.receipt_long),
-                      title: Text(cost.name),
-                      subtitle: Text(_fixedCostSubtitle(cost)),
-                      trailing: Text(_formatAmountByType(
-                          cost.amount, TransactionType.expense)),
-                    ))
+                .map(
+                  (cost) => ListTile(
+                    dense: true,
+                    leading: const Icon(Icons.receipt_long),
+                    title: Text(cost.name),
+                    subtitle: Text(_fixedCostSubtitle(cost)),
+                    trailing: Text(
+                      _formatAmountByType(cost.amount, TransactionType.expense),
+                    ),
+                  ),
+                )
                 .toList(),
           ),
         ),
@@ -73,8 +75,7 @@ extension AccountStatsFixedCostNav on _AccountStatsScreenState {
       decoration: BoxDecoration(
         color: scheme.surfaceContainerLow.withValues(alpha: 0.8),
         borderRadius: BorderRadius.circular(32),
-        border: Border.all(
-            color: scheme.outlineVariant.withValues(alpha: 0.5)),
+        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.5)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -84,21 +85,28 @@ extension AccountStatsFixedCostNav on _AccountStatsScreenState {
             icon: const Icon(Icons.chevron_left),
             onPressed: () => setState(() {
               _currentMonth = DateTime(
-                  _currentMonth.year, _currentMonth.month - 1);
+                _currentMonth.year,
+                _currentMonth.month - 1,
+              );
             }),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text(_monthLabelFormat.format(_currentMonth),
-                style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: scheme.primary)),
+            child: Text(
+              _monthLabelFormat.format(_currentMonth),
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: scheme.primary,
+              ),
+            ),
           ),
           IconButton(
             icon: const Icon(Icons.chevron_right),
             onPressed: () => setState(() {
               _currentMonth = DateTime(
-                  _currentMonth.year, _currentMonth.month + 1);
+                _currentMonth.year,
+                _currentMonth.month + 1,
+              );
             }),
           ),
         ],
@@ -113,8 +121,7 @@ extension AccountStatsFixedCostNav on _AccountStatsScreenState {
       decoration: BoxDecoration(
         color: scheme.surfaceContainerLow.withValues(alpha: 0.8),
         borderRadius: BorderRadius.circular(32),
-        border: Border.all(
-            color: scheme.outlineVariant.withValues(alpha: 0.5)),
+        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.5)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -125,25 +132,26 @@ extension AccountStatsFixedCostNav on _AccountStatsScreenState {
             onPressed: () => setState(() {
               _currentYear -= 1;
               if (_selectedView == StatsView.decade) {
-                _currentMonth =
-                    DateTime(_currentYear, _currentMonth.month);
+                _currentMonth = DateTime(_currentYear, _currentMonth.month);
               }
             }),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text(label ?? '$_currentYear년',
-                style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: scheme.primary)),
+            child: Text(
+              label ?? '$_currentYear년',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: scheme.primary,
+              ),
+            ),
           ),
           IconButton(
             icon: const Icon(Icons.chevron_right),
             onPressed: () => setState(() {
               _currentYear += 1;
               if (_selectedView == StatsView.decade) {
-                _currentMonth =
-                    DateTime(_currentYear, _currentMonth.month);
+                _currentMonth = DateTime(_currentYear, _currentMonth.month);
               }
             }),
           ),
@@ -152,8 +160,7 @@ extension AccountStatsFixedCostNav on _AccountStatsScreenState {
     );
   }
 
-  Widget _buildChartNavigator(
-      ThemeData theme, DateTime start, DateTime end) {
+  Widget _buildChartNavigator(ThemeData theme, DateTime start, DateTime end) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -161,20 +168,23 @@ extension AccountStatsFixedCostNav on _AccountStatsScreenState {
           icon: const Icon(Icons.chevron_left),
           onPressed: () => setState(() {
             _chartAnchorMonth = DateTime(
-                _chartAnchorMonth.year,
-                _chartAnchorMonth.month - 12);
+              _chartAnchorMonth.year,
+              _chartAnchorMonth.month - 12,
+            );
           }),
         ),
         Text(
           '${_rangeMonthFormat.format(start)} ~ '
           '${_rangeMonthFormat.format(end)}',
-          style: theme.textTheme.titleMedium),
+          style: theme.textTheme.titleMedium,
+        ),
         IconButton(
           icon: const Icon(Icons.chevron_right),
           onPressed: () => setState(() {
             _chartAnchorMonth = DateTime(
-                _chartAnchorMonth.year,
-                _chartAnchorMonth.month + 12);
+              _chartAnchorMonth.year,
+              _chartAnchorMonth.month + 12,
+            );
           }),
         ),
       ],

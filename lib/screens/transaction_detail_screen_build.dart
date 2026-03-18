@@ -25,9 +25,7 @@ extension TransactionDetailBuild on _TransactionDetailScreenState {
               tx.date.isAfter(
                 startOfMonth.subtract(const Duration(seconds: 1)),
               ) &&
-              tx.date.isBefore(
-                endOfMonth.add(const Duration(seconds: 1)),
-              ) &&
+              tx.date.isBefore(endOfMonth.add(const Duration(seconds: 1))) &&
               tx.type == _selectedType,
         )
         .toList();
@@ -57,11 +55,7 @@ extension TransactionDetailBuild on _TransactionDetailScreenState {
           Expanded(
             child: transactions.isEmpty
                 ? _buildEmptyState(theme)
-                : _buildDateGroupedList(
-                    theme,
-                    sortedDates,
-                    groupedByDate,
-                  ),
+                : _buildDateGroupedList(theme, sortedDates, groupedByDate),
           ),
         ],
       ),
@@ -170,10 +164,7 @@ extension TransactionDetailBuild on _TransactionDetailScreenState {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildDateHeader(theme, date, dayTotal),
-              ..._buildTransactionListWithRefunds(
-                dayTransactions,
-                theme,
-              ),
+              ..._buildTransactionListWithRefunds(dayTransactions, theme),
             ],
           ),
         );
@@ -181,11 +172,7 @@ extension TransactionDetailBuild on _TransactionDetailScreenState {
     );
   }
 
-  Widget _buildDateHeader(
-    ThemeData theme,
-    DateTime date,
-    double dayTotal,
-  ) {
+  Widget _buildDateHeader(ThemeData theme, DateTime date, double dayTotal) {
     return InkWell(
       onTap: () {
         setState(() {
@@ -196,9 +183,7 @@ extension TransactionDetailBuild on _TransactionDetailScreenState {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: theme.colorScheme.surfaceContainerHighest.withAlpha(128),
-          borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(12),
-          ),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
         ),
         child: Row(
           children: [

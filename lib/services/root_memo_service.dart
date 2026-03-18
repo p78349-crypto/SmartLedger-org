@@ -80,16 +80,16 @@ class RootMemo {
 class RootMemoService {
   static const String _storageKey = 'root_memos_data';
   static RootMemoService? _instance;
-  
+
   RootMemoService._();
-  
+
   static RootMemoService getInstance() {
     _instance ??= RootMemoService._();
     return _instance!;
   }
 
   List<RootMemo> _memos = [];
-  
+
   /// 모든 메모 조회 (고정된 것부터)
   List<RootMemo> getAllMemos() {
     _memos.sort((a, b) {
@@ -120,7 +120,7 @@ class RootMemoService {
       isPinned: isPinned,
       color: color,
     );
-    
+
     _memos.add(memo);
     await _saveMemos();
   }
@@ -135,7 +135,7 @@ class RootMemoService {
   }) async {
     final index = _memos.indexWhere((m) => m.id == id);
     if (index == -1) return;
-    
+
     final updated = _memos[index].copyWith(
       title: title?.trim(),
       content: content?.trim(),
@@ -143,7 +143,7 @@ class RootMemoService {
       isPinned: isPinned,
       color: color,
     );
-    
+
     _memos[index] = updated;
     await _saveMemos();
   }
@@ -158,7 +158,7 @@ class RootMemoService {
   Future<void> togglePin(String id) async {
     final index = _memos.indexWhere((m) => m.id == id);
     if (index == -1) return;
-    
+
     _memos[index] = _memos[index].copyWith(
       isPinned: !_memos[index].isPinned,
       updatedAt: DateTime.now(),
@@ -178,12 +178,14 @@ class RootMemoService {
   /// 검색
   List<RootMemo> searchMemos(String query) {
     if (query.trim().isEmpty) return getAllMemos();
-    
+
     final lowerQuery = query.toLowerCase();
     return _memos
-        .where((m) => 
-          m.title.toLowerCase().contains(lowerQuery) ||
-          m.content.toLowerCase().contains(lowerQuery))
+        .where(
+          (m) =>
+              m.title.toLowerCase().contains(lowerQuery) ||
+              m.content.toLowerCase().contains(lowerQuery),
+        )
         .toList();
   }
 
@@ -192,54 +194,38 @@ class RootMemoService {
     return {
       'total': _memos.length,
       'pinned': _memos.where((m) => m.isPinned).length,
-      'recent': _memos.where((m) => 
-        DateTime.now().difference(m.updatedAt).inDays < 7).length,
+      'recent': _memos
+          .where((m) => DateTime.now().difference(m.updatedAt).inDays < 7)
+          .length,
     };
   }
 
   /// 데이터 로드
   Future<Result<void>> loadMemos() async {
     try {
-      final prefs =
-          await SharedPreferences.getInstance();
-      final jsonString =
-          prefs.getString(_storageKey);
+      final prefs = await SharedPreferences.getInstance();
+      final jsonString = prefs.getString(_storageKey);
 
       if (jsonString != null) {
-        final List<dynamic> jsonList =
-            jsonDecode(jsonString);
-        _memos = jsonList
-            .map(
-              (json) => RootMemo.fromJson(json),
-            )
-            .toList();
+        final List<dynamic> jsonList = jsonDecode(jsonString);
+        _memos = jsonList.map((json) => RootMemo.fromJson(json)).toList();
       }
       return const Success(null);
     } catch (e) {
       _memos = [];
-      return Failure(StorageError(
-        '메모 데이터 로드 실패: $e',
-      ));
+      return Failure(StorageError('메모 데이터 로드 실패: $e'));
     }
   }
 
   /// 데이터 저장
   Future<Result<void>> _saveMemos() async {
     try {
-      final prefs =
-          await SharedPreferences.getInstance();
-      final jsonString = jsonEncode(
-        _memos.map((m) => m.toJson()).toList(),
-      );
-      await prefs.setString(
-        _storageKey,
-        jsonString,
-      );
+      final prefs = await SharedPreferences.getInstance();
+      final jsonString = jsonEncode(_memos.map((m) => m.toJson()).toList());
+      await prefs.setString(_storageKey, jsonString);
       return const Success(null);
     } catch (e) {
-      return Failure(StorageError(
-        '메모 저장 실패: $e',
-      ));
+      return Failure(StorageError('메모 저장 실패: $e'));
     }
   }
 
@@ -264,23 +250,14 @@ class RootMemoService {
   }
 
   /// 백업 데이터 복원
-  Future<Result<void>> importData(
-    Map<String, dynamic> data,
-  ) async {
+  Future<Result<void>> importData(Map<String, dynamic> data) async {
     try {
-      final List<dynamic> memosList =
-          data['memos'] as List<dynamic>;
-      _memos = memosList
-          .map(
-            (json) => RootMemo.fromJson(json),
-          )
-          .toList();
+      final List<dynamic> memosList = data['memos'] as List<dynamic>;
+      _memos = memosList.map((json) => RootMemo.fromJson(json)).toList();
       await _saveMemos();
       return const Success(null);
     } catch (e) {
-      return Failure(StorageError(
-        '메모 데이터 복원 실패: $e',
-      ));
+      return Failure(StorageError('메모 데이터 복원 실패: $e'));
     }
   }
 }

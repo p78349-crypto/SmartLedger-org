@@ -126,11 +126,9 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
 
   TransactionType get _currentType => _typeOrder[_typeIndex];
 
-  String _typeLabel([TransactionType? type]) =>
-      (type ?? _currentType).label;
+  String _typeLabel([TransactionType? type]) => (type ?? _currentType).label;
 
-  Color _typeColor(ThemeData theme) =>
-      statsColorForType(_currentType, theme);
+  Color _typeColor(ThemeData theme) => statsColorForType(_currentType, theme);
 
   Color _typeColorFor(TransactionType type, ThemeData theme) =>
       statsColorForType(type, theme);
@@ -202,13 +200,22 @@ class _AccountStatsScreenState extends State<AccountStatsScreen> {
         return _buildChartView(transactions, theme);
       case StatsView.expenseDetail:
         return _buildTypeDetailView(
-          transactions, theme, TransactionType.expense);
+          transactions,
+          theme,
+          TransactionType.expense,
+        );
       case StatsView.incomeDetail:
         return _buildTypeDetailView(
-          transactions, theme, TransactionType.income);
+          transactions,
+          theme,
+          TransactionType.income,
+        );
       case StatsView.savingsDetail:
         return _buildTypeDetailView(
-          transactions, theme, TransactionType.savings);
+          transactions,
+          theme,
+          TransactionType.savings,
+        );
     }
   }
 

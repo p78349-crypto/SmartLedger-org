@@ -40,30 +40,33 @@ extension FinancialAnalyticsServiceUtils on FinancialAnalyticsService {
       // For this implementation, we'll use asset's purchase price as initial investment
       final initialInvestment = asset.costBasis ?? asset.amount;
       final currentValue = asset.amount;
-      
+
       if (initialInvestment <= 0) return null;
-      
+
       final purchaseDate = asset.date;
       final evaluationDate = endDate ?? DateTime.now();
       final durationDays = evaluationDate.difference(purchaseDate).inDays;
-      
+
       if (durationDays <= 0) return null;
-      
-      final totalReturn = ((currentValue - initialInvestment) / initialInvestment) * 100;
-      final annualizedReturn = FinancialAnalyticsHelper.calculateAnnualizedReturn(
-        totalReturn,
-        durationDays,
-      ) * 100;
-      
+
+      final totalReturn =
+          ((currentValue - initialInvestment) / initialInvestment) * 100;
+      final annualizedReturn =
+          FinancialAnalyticsHelper.calculateAnnualizedReturn(
+            totalReturn,
+            durationDays,
+          ) *
+          100;
+
       // Simplified volatility calculation (would need historical prices for accuracy)
       final estimatedVolatility = _estimateAssetVolatility(asset.category.name);
-      
+
       final sharpeRatio = FinancialAnalyticsHelper.calculateSharpeRatio(
         annualizedReturn / 100,
         estimatedVolatility,
         0.02,
       );
-      
+
       return InvestmentPerformance(
         assetId: asset.id,
         assetName: asset.name,
@@ -79,7 +82,6 @@ extension FinancialAnalyticsServiceUtils on FinancialAnalyticsService {
           durationDays: durationDays,
         ),
       );
-      
     } catch (_) {
       return null;
     }
@@ -96,38 +98,46 @@ extension FinancialAnalyticsServiceUtils on FinancialAnalyticsService {
       'cash': 0.01,
       'etf': 0.12,
     };
-    
+
     final type = assetType.toLowerCase();
     for (final entry in volatilityMap.entries) {
       if (type.contains(entry.key)) {
         return entry.value;
       }
     }
-    
+
     return 0.15; // Default moderate volatility
   }
 
   /// Calculates average monthly income from transactions
   double _calculateMonthlyIncome(List<Transaction> transactions) {
     final incomeTransactions = transactions.where((t) => t.amount > 0).toList();
-    
+
     if (incomeTransactions.isEmpty) return 0.0;
-    
-    final totalIncome = incomeTransactions.fold(0.0, (sum, t) => sum + t.amount);
+
+    final totalIncome = incomeTransactions.fold(
+      0.0,
+      (sum, t) => sum + t.amount,
+    );
     final daysSpanned = _getDaysSpanned(incomeTransactions);
-    
+
     return (totalIncome / daysSpanned) * 30.44; // Average days per month
   }
 
   /// Calculates average monthly expenses from transactions
   double _calculateMonthlyExpenses(List<Transaction> transactions) {
-    final expenseTransactions = transactions.where((t) => t.amount < 0).toList();
-    
+    final expenseTransactions = transactions
+        .where((t) => t.amount < 0)
+        .toList();
+
     if (expenseTransactions.isEmpty) return 0.0;
-    
-    final totalExpenses = expenseTransactions.fold(0.0, (sum, t) => sum + t.amount.abs());
+
+    final totalExpenses = expenseTransactions.fold(
+      0.0,
+      (sum, t) => sum + t.amount.abs(),
+    );
     final daysSpanned = _getDaysSpanned(expenseTransactions);
-    
+
     return (totalExpenses / daysSpanned) * 30.44; // Average days per month
   }
 
@@ -139,7 +149,16 @@ extension FinancialAnalyticsServiceUtils on FinancialAnalyticsService {
 
   /// Determines if asset type is considered an investment
   bool _isInvestmentAsset(String assetType) {
-    const investmentTypes = ['stock', 'bond', 'etf', 'mutual_fund', 'crypto', 'real_estate'];
-    return investmentTypes.any((type) => assetType.toLowerCase().contains(type));
+    const investmentTypes = [
+      'stock',
+      'bond',
+      'etf',
+      'mutual_fund',
+      'crypto',
+      'real_estate',
+    ];
+    return investmentTypes.any(
+      (type) => assetType.toLowerCase().contains(type),
+    );
   }
 }

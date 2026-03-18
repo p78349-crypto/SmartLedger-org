@@ -17,7 +17,7 @@ class AiModelPreferencesService {
     _instance ??= AiModelPreferencesService._();
     return _instance!;
   }
-  
+
   AiModelPreferencesService._();
 
   SharedPreferences? _prefs;
@@ -108,7 +108,7 @@ class AiModelPreferencesService {
       isCompliant: false, // AI 기능 비활성화로 인한 준수 상태
       details: 'AI feature disabled for regulatory compliance',
     );
-    
+
     final aiEnabled = await this.aiEnabled;
     if (!aiEnabled) return false;
 
@@ -127,11 +127,19 @@ class AiModelPreferencesService {
   /// 온라인 우선이면 Gemini Flash -> Gemini Nano 순서
   Future<List<AiModelType>> getModelPriority() async {
     final preferOffline = await preferOfflineAi;
-    
+
     if (preferOffline) {
-      return [AiModelType.geminiNano, AiModelType.geminiFlasch, AiModelType.traditional];
+      return [
+        AiModelType.geminiNano,
+        AiModelType.geminiFlasch,
+        AiModelType.traditional,
+      ];
     } else {
-      return [AiModelType.geminiFlasch, AiModelType.geminiNano, AiModelType.traditional];
+      return [
+        AiModelType.geminiFlasch,
+        AiModelType.geminiNano,
+        AiModelType.traditional,
+      ];
     }
   }
 
@@ -159,11 +167,7 @@ class AiModelPreferencesService {
 }
 
 /// AI 기능 유형
-enum AiFeature {
-  ceoPrediction,
-  investment,
-  analytics,
-}
+enum AiFeature { ceoPrediction, investment, analytics }
 
 /// AI 모델 유형
 enum AiModelType {

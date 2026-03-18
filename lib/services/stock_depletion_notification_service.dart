@@ -219,7 +219,8 @@ class StockDepletionNotificationService {
     }
 
     // 생활용품 전용 (기본 threshold 사용)
-    final thresholdDays = await UserPrefService.getStockUseAutoAddDepletionDaysHouseholdV1();
+    final thresholdDays =
+        await UserPrefService.getStockUseAutoAddDepletionDaysHouseholdV1();
 
     final now = DateTime.now();
     final expectedDepletionDate = _startOfDay(

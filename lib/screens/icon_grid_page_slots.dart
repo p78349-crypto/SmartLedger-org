@@ -89,8 +89,7 @@ extension IconGridPageSlots on _IconGridPageState {
 
     const preferredIndex = 0;
     final preferredEmpty =
-        preferredIndex < validated.length &&
-        validated[preferredIndex].isEmpty;
+        preferredIndex < validated.length && validated[preferredIndex].isEmpty;
     if (preferredEmpty) {
       validated[preferredIndex] = _voiceShortcutsIconId;
     } else {
@@ -179,9 +178,9 @@ extension IconGridPageSlots on _IconGridPageState {
         .catchError((error) {
           debugPrint('🔴 Navigation error: $error');
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('화면 이동 실패: $error')),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text('화면 이동 실패: $error')));
           }
           return null;
         });
@@ -190,7 +189,7 @@ extension IconGridPageSlots on _IconGridPageState {
   Future<void> _showAccountSwitchDialog() async {
     final accountService = AccountService();
     final accounts = accountService.accounts;
-    
+
     // ROOT 포함한 계정 목록
     final accountNames = accounts.map((a) => a.name).toList();
     if (!accountNames.contains('ROOT')) {
@@ -224,8 +223,8 @@ extension IconGridPageSlots on _IconGridPageState {
               final label = labels[accountName];
               final isRoot = accountName.trim().toUpperCase() == 'ROOT';
               final account = accountService.getAccountByName(accountName);
-              final hasPassword = account?.password != null &&
-                  account!.password!.isNotEmpty;
+              final hasPassword =
+                  account?.password != null && account!.password!.isNotEmpty;
 
               return ListTile(
                 leading: Icon(
@@ -263,12 +262,14 @@ extension IconGridPageSlots on _IconGridPageState {
     // 글로벌 보안 규정: 복원된 계정 확인 (재인증 필요)
     if (!isRoot) {
       final prefs = await SharedPreferences.getInstance();
-      final reauthJson = prefs.getString(PrefKeys.restoredAccountsNeedReauth) ?? '[]';
-      final List<String> reauthAccounts = 
+      final reauthJson =
+          prefs.getString(PrefKeys.restoredAccountsNeedReauth) ?? '[]';
+      final List<String> reauthAccounts =
           (json.decode(reauthJson) as List<dynamic>?)
               ?.map((e) => e.toString())
-              .toList() ?? [];
-      
+              .toList() ??
+          [];
+
       if (reauthAccounts.contains(selected)) {
         // 복원된 계정: 보안 경고
         if (!mounted) return;
@@ -297,7 +298,7 @@ extension IconGridPageSlots on _IconGridPageState {
         );
 
         if (!mounted) return;
-        
+
         if (confirmed != true) {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
@@ -308,7 +309,7 @@ extension IconGridPageSlots on _IconGridPageState {
           );
           return;
         }
-        
+
         // 재인증 플래그 제거 (이번 로그인부터는 경고 안 함)
         reauthAccounts.remove(selected);
         await prefs.setString(
@@ -327,10 +328,7 @@ extension IconGridPageSlots on _IconGridPageState {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (_) => const RootAuthGate(
-            child: AccountMainScreen(
-              accountName: 'ROOT',
-              initialIndex: 5,
-            ),
+            child: AccountMainScreen(accountName: 'ROOT', initialIndex: 5),
           ),
         ),
       );
@@ -406,10 +404,7 @@ extension IconGridPageSlots on _IconGridPageState {
     if (!mounted) return;
     Navigator.of(context).pushReplacementNamed(
       AppRoutes.accountMain,
-      arguments: AccountMainArgs(
-        accountName: account.name,
-      ),
+      arguments: AccountMainArgs(accountName: account.name),
     );
   }
-
 }

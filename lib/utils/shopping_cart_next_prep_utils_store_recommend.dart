@@ -82,8 +82,23 @@ Future<void> _recommendFromTransactionsFrequencyByStoreMemo({
     if (sub == '과일') return true;
 
     final fruitKeywords = <String>{
-      '과일', '사과', '바나나', '오렌지', '귤', '포도', '배', '키위',
-      '파인애플', '멜론', '수박', '복숭아', '자두', '레몬', '망고', '블루베리', '딸기',
+      '과일',
+      '사과',
+      '바나나',
+      '오렌지',
+      '귤',
+      '포도',
+      '배',
+      '키위',
+      '파인애플',
+      '멜론',
+      '수박',
+      '복숭아',
+      '자두',
+      '레몬',
+      '망고',
+      '블루베리',
+      '딸기',
     };
     return matchAny(key, fruitKeywords);
   }
@@ -92,21 +107,67 @@ Future<void> _recommendFromTransactionsFrequencyByStoreMemo({
     final hint = categoryHints[key];
     final sub = (hint?.subCategory ?? '').trim();
     final freshSubs = <String>{
-      '채소', '야채', '정육', '육류', '수산', '해산물', '반찬', '두부', '계란', '유제품',
+      '채소',
+      '야채',
+      '정육',
+      '육류',
+      '수산',
+      '해산물',
+      '반찬',
+      '두부',
+      '계란',
+      '유제품',
     };
     final fruitSubs = <String>{'과일'};
 
     final key0 = ShoppingPrepUtils.normalizeName(rawName);
 
     final freshKeywords = <String>{
-      '상추', '깻잎', '시금치', '부추', '대파', '쪽파', '파', '양파', '감자', '오이',
-      '당근', '버섯', '토마토', '고추', '마늘', '돼지', '소고기', '닭', '생선',
-      '오징어', '새우', '조개', '두부', '계란', '우유',
+      '상추',
+      '깻잎',
+      '시금치',
+      '부추',
+      '대파',
+      '쪽파',
+      '파',
+      '양파',
+      '감자',
+      '오이',
+      '당근',
+      '버섯',
+      '토마토',
+      '고추',
+      '마늘',
+      '돼지',
+      '소고기',
+      '닭',
+      '생선',
+      '오징어',
+      '새우',
+      '조개',
+      '두부',
+      '계란',
+      '우유',
     };
 
     final fruitKeywords = <String>{
-      '과일', '사과', '바나나', '오렌지', '귤', '포도', '배', '키위',
-      '파인애플', '멜론', '수박', '복숭아', '자두', '레몬', '망고', '블루베리', '딸기',
+      '과일',
+      '사과',
+      '바나나',
+      '오렌지',
+      '귤',
+      '포도',
+      '배',
+      '키위',
+      '파인애플',
+      '멜론',
+      '수박',
+      '복숭아',
+      '자두',
+      '레몬',
+      '망고',
+      '블루베리',
+      '딸기',
     };
 
     final isFresh = freshSubs.contains(sub) || matchAny(key0, freshKeywords);
@@ -223,4 +284,3 @@ Future<void> _recommendFromTransactionsFrequencyByStoreMemo({
     qtyFactor: qtyFactor,
   );
 }
-

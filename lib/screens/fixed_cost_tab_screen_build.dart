@@ -55,9 +55,8 @@ extension FixedCostTabBuildUI on _FixedCostTabScreenState {
                       (method) => ChoiceChip(
                         label: Text(method),
                         selected: _paymentController.text == method,
-                        onSelected: (_) => setState(
-                          () => _paymentController.text = method,
-                        ),
+                        onSelected: (_) =>
+                            setState(() => _paymentController.text = method),
                       ),
                     )
                     .toList(),
@@ -74,10 +73,8 @@ extension FixedCostTabBuildUI on _FixedCostTabScreenState {
             items: [
               const DropdownMenuItem<int?>(child: Text('선택 안 함')),
               ..._FixedCostTabScreenState._dayOptions.map(
-                (day) => DropdownMenuItem<int?>(
-                  value: day,
-                  child: Text('매월 $day일'),
-                ),
+                (day) =>
+                    DropdownMenuItem<int?>(value: day, child: Text('매월 $day일')),
               ),
             ],
             onChanged: (value) => setState(() => _dueDay = value),
@@ -96,10 +93,8 @@ extension FixedCostTabBuildUI on _FixedCostTabScreenState {
                         setState(() => _memoController.text = value),
                     itemBuilder: (context) => _recentMemos
                         .map(
-                          (memo) => PopupMenuItem(
-                            value: memo,
-                            child: Text(memo),
-                          ),
+                          (memo) =>
+                              PopupMenuItem(value: memo, child: Text(memo)),
                         )
                         .toList(),
                   ),
@@ -157,9 +152,7 @@ extension FixedCostTabBuildUI on _FixedCostTabScreenState {
               context: context,
               builder: (ctx) => AlertDialog(
                 title: const Text('편집 방법'),
-                content: const Text(
-                  '목록 항목 오른쪽 ⋮ 메뉴에서 고정비용을 수정하거나 삭제할 수 있습니다.',
-                ),
+                content: const Text('목록 항목 오른쪽 ⋮ 메뉴에서 고정비용을 수정하거나 삭제할 수 있습니다.'),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.of(ctx).pop(),
@@ -203,9 +196,9 @@ extension FixedCostTabBuildUI on _FixedCostTabScreenState {
             children: [
               Text(
                 CurrencyFormatter.format(cost.amount),
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
               ),
               PopupMenuButton<_FixedCostAction>(
                 onSelected: (action) {

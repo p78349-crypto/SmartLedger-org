@@ -50,11 +50,7 @@ class _DailyTransactionsScreenState extends State<DailyTransactionsScreen> {
       final messenger = ScaffoldMessenger.of(context);
       messenger.hideCurrentSnackBar();
 
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text('저장 완료: $count건'),
-        ),
-      );
+      messenger.showSnackBar(SnackBar(content: Text('저장 완료: $count건')));
     });
   }
 
@@ -96,10 +92,7 @@ class _DailyTransactionsScreenState extends State<DailyTransactionsScreen> {
         currentIndex >= 0 && currentIndex < _eventDays.length - 1;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('일일 거래'),
-        actions: const [],
-      ),
+      appBar: AppBar(title: const Text('일일 거래'), actions: const []),
       bottomNavigationBar: DailyTransactionsBottomBar(
         accountName: widget.accountName,
       ),

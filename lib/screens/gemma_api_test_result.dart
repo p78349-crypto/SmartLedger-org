@@ -12,8 +12,7 @@ class GemmaTestResultView extends StatelessWidget {
   });
 
   final ReceiptProcessingResult? result;
-  final void Function(String msg, {required bool isError})
-      onMessage;
+  final void Function(String msg, {required bool isError}) onMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -30,10 +29,7 @@ class GemmaTestResultView extends StatelessWidget {
       return _ErrorView(error: result!.error);
     }
 
-    return _SuccessView(
-      result: result!,
-      onMessage: onMessage,
-    );
+    return _SuccessView(result: result!, onMessage: onMessage);
   }
 }
 
@@ -47,11 +43,7 @@ class _ErrorView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
-            Icons.error_outline,
-            size: 48,
-            color: Colors.red,
-          ),
+          const Icon(Icons.error_outline, size: 48, color: Colors.red),
           const SizedBox(height: 16),
           Text(
             '추출 실패',
@@ -74,14 +66,10 @@ class _ErrorView extends StatelessWidget {
 }
 
 class _SuccessView extends StatelessWidget {
-  const _SuccessView({
-    required this.result,
-    required this.onMessage,
-  });
+  const _SuccessView({required this.result, required this.onMessage});
 
   final ReceiptProcessingResult result;
-  final void Function(String msg, {required bool isError})
-      onMessage;
+  final void Function(String msg, {required bool isError}) onMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -109,18 +97,13 @@ class _SuccessView extends StatelessWidget {
               const SizedBox(height: 4),
             ],
             if (data.totalAmount != null) ...[
-              _infoRow(
-                '💰 총액',
-                '${_formatMoney(data.totalAmount!)}원',
-              ),
+              _infoRow('💰 총액', '${_formatMoney(data.totalAmount!)}원'),
               const SizedBox(height: 8),
             ],
             if (data.items.isNotEmpty) ...[
               const Text(
                 '📦 항목:',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               ...data.items.map(_buildItemCard),
@@ -134,29 +117,18 @@ class _SuccessView extends StatelessWidget {
   Widget _buildHeader(ReceiptExtractionResult data) {
     return Row(
       children: [
-        const Icon(
-          Icons.check_circle,
-          color: Colors.green,
-          size: 20,
-        ),
+        const Icon(Icons.check_circle, color: Colors.green, size: 20),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
             '추출 성공 (${result.model})',
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
           ),
         ),
         IconButton(
           icon: const Icon(Icons.copy, size: 18),
           onPressed: () {
-            Clipboard.setData(
-              ClipboardData(
-                text: data.toJson().toString(),
-              ),
-            );
+            Clipboard.setData(ClipboardData(text: data.toJson().toString()));
             onMessage('결과 복사됨', isError: false);
           },
           tooltip: '결과 복사',
@@ -175,23 +147,16 @@ class _SuccessView extends StatelessWidget {
           children: [
             Text(
               item.name,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             ),
             const SizedBox(height: 4),
             Row(
-              mainAxisAlignment:
-                  MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   '${_formatMoney(item.unitPrice)}원'
                   ' x ${item.quantity}개',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade700,
-                  ),
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
                 ),
                 Text(
                   '${_formatMoney(item.totalPrice)}원',
@@ -212,27 +177,19 @@ class _SuccessView extends StatelessWidget {
   static Widget _infoRow(String label, String value) {
     return Row(
       children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontWeight: FontWeight.w500,
-          ),
-        ),
+        Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
         const SizedBox(width: 8),
         Expanded(
-          child: Text(
-            value,
-            style: const TextStyle(
-              color: Colors.black87,
-            ),
-          ),
+          child: Text(value, style: const TextStyle(color: Colors.black87)),
         ),
       ],
     );
   }
 
   static String _formatMoney(double amount) {
-    return amount.toStringAsFixed(0).replaceAllMapped(
+    return amount
+        .toStringAsFixed(0)
+        .replaceAllMapped(
           RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
           (match) => '${match[1]},',
         );

@@ -6,20 +6,24 @@ extension AccountStatsDecadeChart on _AccountStatsScreenState {
   Widget _buildDecadeView(List<Transaction> transactions, ThemeData theme) {
     const totalMonths = 120;
     final range = _rangeForMonths(totalMonths);
-    final aggSummary =
-        _tryCalculateRangeSummaryFromMonthlyAgg(range, totalMonths);
+    final aggSummary = _tryCalculateRangeSummaryFromMonthlyAgg(
+      range,
+      totalMonths,
+    );
     final canUseAgg = aggSummary != null && _monthlyAggCache != null;
 
     final rangeTransactions = canUseAgg
         ? const <Transaction>[]
         : transactions
-              .where((tx) =>
-                  !tx.date.isBefore(range.start) &&
-                  !tx.date.isAfter(range.end))
+              .where(
+                (tx) =>
+                    !tx.date.isBefore(range.start) &&
+                    !tx.date.isAfter(range.end),
+              )
               .toList();
 
-    final summary = aggSummary ??
-        _calculateRangeSummary(rangeTransactions, totalMonths);
+    final summary =
+        aggSummary ?? _calculateRangeSummary(rangeTransactions, totalMonths);
 
     final startYear = range.start.year;
     final endYear = range.end.year;
@@ -41,75 +45,81 @@ extension AccountStatsDecadeChart on _AccountStatsScreenState {
         if (_includeFixedCosts &&
             _fixedCosts.isNotEmpty &&
             _currentType == TransactionType.expense) {
-          total += _fixedCostTotalForMonth(DateTime(year)) *
+          total +=
+              _fixedCostTotalForMonth(DateTime(year)) *
               _monthsInYearWithinRange(year, range.start, range.end);
         }
-        yearSummaries.add(
-            YearSummary(year: year, total: total, count: count));
+        yearSummaries.add(YearSummary(year: year, total: total, count: count));
         continue;
       }
-      final yearTxs = rangeTransactions.where((tx) =>
-          tx.date.year == year &&
-          _shouldAggregateForType(tx, _currentType));
+      final yearTxs = rangeTransactions.where(
+        (tx) =>
+            tx.date.year == year && _shouldAggregateForType(tx, _currentType),
+      );
       var total = _sumAmounts(yearTxs);
       if (_includeFixedCosts &&
           _fixedCosts.isNotEmpty &&
           _currentType == TransactionType.expense) {
-        total += _fixedCostTotalForMonth(DateTime(year)) *
+        total +=
+            _fixedCostTotalForMonth(DateTime(year)) *
             _monthsInYearWithinRange(year, range.start, range.end);
       }
-      yearSummaries.add(YearSummary(
-          year: year, total: total, count: yearTxs.length));
+      yearSummaries.add(
+        YearSummary(year: year, total: total, count: yearTxs.length),
+      );
     }
 
     final filtered = _showEmptyYears
         ? yearSummaries
-        : yearSummaries
-              .where((s) => s.total != 0 || s.count != 0)
-              .toList();
-    final infoMsg = _showEmptyYears
-        ? '모든 연도를 표시하는 중입니다.'
-        : '거래가 있는 연도만 표시합니다.';
+        : yearSummaries.where((s) => s.total != 0 || s.count != 0).toList();
+    final infoMsg = _showEmptyYears ? '모든 연도를 표시하는 중입니다.' : '거래가 있는 연도만 표시합니다.';
     final rangeLabel = _formatRangeLabel(range.start, range.end);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildYearNavigator(theme,
-            label: '$startYear년 ~ $endYear년'),
+        _buildYearNavigator(theme, label: '$startYear년 ~ $endYear년'),
         const SizedBox(height: 8),
         Center(
-          child: Text(rangeLabel,
-              style: theme.textTheme.bodySmall
-                  ?.copyWith(color: theme.colorScheme.outline)),
+          child: Text(
+            rangeLabel,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.outline,
+            ),
+          ),
         ),
         const SizedBox(height: 16),
         StatsSummaryGrid(children: _buildSummaryCards(summary, theme)),
         const SizedBox(height: 24),
         Text('연도별 ${_typeLabel()}', style: theme.textTheme.titleMedium),
         const SizedBox(height: 8),
-        Row(children: [
-          Expanded(
-            child: Text(infoMsg,
-                style: theme.textTheme.bodySmall
-                    ?.copyWith(color: theme.colorScheme.outline)),
-          ),
-          TextButton(
-            onPressed: () =>
-                setState(() => _showEmptyYears = !_showEmptyYears),
-            child: Text(
-                _showEmptyYears ? '기록 없는 연도 숨기기' : '기록 없는 연도 표시'),
-          ),
-        ]),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                infoMsg,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.outline,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () =>
+                  setState(() => _showEmptyYears = !_showEmptyYears),
+              child: Text(_showEmptyYears ? '기록 없는 연도 숨기기' : '기록 없는 연도 표시'),
+            ),
+          ],
+        ),
         const SizedBox(height: 8),
         if (filtered.isEmpty)
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Text(
-                  '표시할 연도가 없습니다. '
-                  '기록 없는 연도를 표시하려면 버튼을 눌러주세요.',
-                  style: theme.textTheme.bodyMedium),
+                '표시할 연도가 없습니다. '
+                '기록 없는 연도를 표시하려면 버튼을 눌러주세요.',
+                style: theme.textTheme.bodyMedium,
+              ),
             ),
           )
         else
@@ -118,13 +128,16 @@ extension AccountStatsDecadeChart on _AccountStatsScreenState {
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Column(
                 children: filtered
-                    .map((s) => ListTile(
-                          title: Text('${s.year}년'),
-                          subtitle: Text('${s.count}건'),
-                          trailing: Text(
-                            _formatAmountByType(s.total, _currentType),
-                            style: TextStyle(color: _typeColor(theme))),
-                        ))
+                    .map(
+                      (s) => ListTile(
+                        title: Text('${s.year}년'),
+                        subtitle: Text('${s.count}건'),
+                        trailing: Text(
+                          _formatAmountByType(s.total, _currentType),
+                          style: TextStyle(color: _typeColor(theme)),
+                        ),
+                      ),
+                    )
                     .toList(),
               ),
             ),
@@ -140,8 +153,7 @@ extension AccountStatsDecadeChart on _AccountStatsScreenState {
   List<DateTime> _chartMonths() {
     return List.generate(12, (i) {
       final offset = 11 - i;
-      return DateTime(
-          _chartAnchorMonth.year, _chartAnchorMonth.month - offset);
+      return DateTime(_chartAnchorMonth.year, _chartAnchorMonth.month - offset);
     });
   }
 
@@ -151,10 +163,12 @@ extension AccountStatsDecadeChart on _AccountStatsScreenState {
     List<DateTime> months,
   ) {
     return months.map((month) {
-      final monthTxs = transactions.where((tx) =>
-          tx.type == type &&
-          tx.date.year == month.year &&
-          tx.date.month == month.month);
+      final monthTxs = transactions.where(
+        (tx) =>
+            tx.type == type &&
+            tx.date.year == month.year &&
+            tx.date.month == month.month,
+      );
       var total = _sumAmounts(monthTxs);
       if (_includeFixedCosts &&
           _fixedCosts.isNotEmpty &&
@@ -165,13 +179,13 @@ extension AccountStatsDecadeChart on _AccountStatsScreenState {
     }).toList();
   }
 
-  Widget _buildChartView(
-      List<Transaction> transactions, ThemeData theme) {
+  Widget _buildChartView(List<Transaction> transactions, ThemeData theme) {
     final months = _chartMonths();
-    final points =
-        _chartPointsForType(transactions, _currentType, months);
+    final points = _chartPointsForType(transactions, _currentType, months);
     final maxValue = points.fold<double>(
-        0, (prev, p) => p.total > prev ? p.total : prev);
+      0,
+      (prev, p) => p.total > prev ? p.total : prev,
+    );
     final hasData = points.any((p) => p.total > 0);
     final safeMax = maxValue == 0 ? 1.0 : maxValue;
     final rangeStart = months.first;
@@ -190,8 +204,7 @@ extension AccountStatsDecadeChart on _AccountStatsScreenState {
             child: SizedBox(
               height: 260,
               child: hasData
-                  ? _buildChartForDisplay(
-                      points, theme, safeMax, _currentType)
+                  ? _buildChartForDisplay(points, theme, safeMax, _currentType)
                   : _buildNoChartData(theme),
             ),
           ),
@@ -205,14 +218,16 @@ extension AccountStatsDecadeChart on _AccountStatsScreenState {
       alignment: WrapAlignment.center,
       spacing: 8,
       children: ChartDisplayType.values
-          .map((d) => ChoiceChip(
-                label: Text(_chartDisplayLabel(d)),
-                selected: _chartDisplay == d,
-                onSelected: (sel) {
-                  if (!sel) return;
-                  setState(() => _chartDisplay = d);
-                },
-              ))
+          .map(
+            (d) => ChoiceChip(
+              label: Text(_chartDisplayLabel(d)),
+              selected: _chartDisplay == d,
+              onSelected: (sel) {
+                if (!sel) return;
+                setState(() => _chartDisplay = d);
+              },
+            ),
+          )
           .toList(),
     );
   }

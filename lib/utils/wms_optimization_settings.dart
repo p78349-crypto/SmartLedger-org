@@ -9,7 +9,7 @@ class WmsOptimizationSettings {
 
   // 🎛️ 최적화 기능 개별 제어
   bool _enableSmartCache = true;
-  bool _enableDatabasePool = true; 
+  bool _enableDatabasePool = true;
   bool _enableOptimizedBarcode = true;
   bool _enablePerformanceMonitoring = true;
   bool _enableParallelProcessing = true;
@@ -44,7 +44,7 @@ class WmsOptimizationSettings {
         _maxCacheMemoryMB = 100;
         _dbConnectionPoolSize = 8;
         break;
-        
+
       case WmsOptimizationMode.balanced:
         _enableSmartCache = true;
         _enableDatabasePool = true;
@@ -54,7 +54,7 @@ class WmsOptimizationSettings {
         _maxCacheMemoryMB = 50;
         _dbConnectionPoolSize = 5;
         break;
-        
+
       case WmsOptimizationMode.minimal:
         _enableSmartCache = true;
         _enableDatabasePool = false;
@@ -64,7 +64,7 @@ class WmsOptimizationSettings {
         _maxCacheMemoryMB = 20;
         _dbConnectionPoolSize = 2;
         break;
-        
+
       case WmsOptimizationMode.disabled:
         _enableSmartCache = false;
         _enableDatabasePool = false;
@@ -73,7 +73,7 @@ class WmsOptimizationSettings {
         _enableParallelProcessing = false;
         break;
     }
-    
+
     _notifySettingsChanged();
   }
 
@@ -96,7 +96,7 @@ class WmsOptimizationSettings {
   /// ⚡ 성능 기반 자동 조정
   void adjustBasedOnPerformance(Duration lastOperationTime) {
     final ms = lastOperationTime.inMilliseconds;
-    
+
     if (ms > _performanceAlertThresholdMs * 3) {
       // 성능이 너무 느림 - 최적화 단계적 증가
       if (!_enableSmartCache) {
@@ -141,28 +141,26 @@ class WmsOptimizationSettings {
   /// 🎯 예상 성능 향상률 계산
   int _calculateEstimatedGain() {
     int gain = 0;
-    
+
     if (_enableSmartCache) gain += 90;
     if (_enableDatabasePool) gain += 85;
     if (_enableOptimizedBarcode) gain += 75;
     if (_enableParallelProcessing) gain += 40;
     if (_enablePerformanceMonitoring) gain += 5;
-    
+
     return (gain * 0.7).round(); // 현실적인 값으로 조정
   }
 
   void _notifySettingsChanged() {
     // 설정 변경 시 관련 컴포넌트들에게 알림
     if (_enableSmartCache) {
-      WmsSmartCache.instance.updateSettings(
-        maxMemoryMB: _maxCacheMemoryMB,
-      );
+      WmsSmartCache.instance.updateSettings(maxMemoryMB: _maxCacheMemoryMB);
     }
-    
+
     if (_enableDatabasePool) {
       // WmsDatabasePool는 런타임 설정 API가 없어 연결 유지 정책만 사용
     }
-    
+
     if (_enableOptimizedBarcode) {
       // WmsOptimizedBarcodeService는 런타임 설정 API가 없어 기본값 사용
     }
@@ -171,17 +169,17 @@ class WmsOptimizationSettings {
   /// 🔧 문제 상황 감지 시 안전 모드
   void enableSafeMode() {
     print('⚠️ 안전 모드 활성화 - 최적화 기능 단계적 비활성화');
-    
+
     _enablePerformanceMonitoring = false;
     _enableParallelProcessing = false;
     _enableOptimizedBarcode = false;
-    
+
     // 기본 최적화만 유지
     _enableSmartCache = true;
     _enableDatabasePool = true;
     _maxCacheMemoryMB = 20;
     _dbConnectionPoolSize = 2;
-    
+
     _notifySettingsChanged();
   }
 
@@ -194,10 +192,10 @@ class WmsOptimizationSettings {
 
 /// 📋 최적화 모드 열거형
 enum WmsOptimizationMode {
-  maximum,   // 최대 성능 (모든 최적화 활성화)
-  balanced,  // 균형 모드 (메모리-성능 균형)
-  minimal,   // 최소 모드 (기본 캐시만)
-  disabled,  // 비활성화 (원본 상태)
+  maximum, // 최대 성능 (모든 최적화 활성화)
+  balanced, // 균형 모드 (메모리-성능 균형)
+  minimal, // 최소 모드 (기본 캐시만)
+  disabled, // 비활성화 (원본 상태)
 }
 
 /// 🎛️ WMS 최적화 제어 위젯
@@ -205,10 +203,12 @@ class WmsOptimizationControlWidget extends StatefulWidget {
   const WmsOptimizationControlWidget({Key? key}) : super(key: key);
 
   @override
-  State<WmsOptimizationControlWidget> createState() => _WmsOptimizationControlWidgetState();
+  State<WmsOptimizationControlWidget> createState() =>
+      _WmsOptimizationControlWidgetState();
 }
 
-class _WmsOptimizationControlWidgetState extends State<WmsOptimizationControlWidget> {
+class _WmsOptimizationControlWidgetState
+    extends State<WmsOptimizationControlWidget> {
   final _settings = WmsOptimizationSettings.instance;
 
   @override
@@ -223,22 +223,38 @@ class _WmsOptimizationControlWidgetState extends State<WmsOptimizationControlWid
               '🚀 WMS 최적화 제어',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // 최적화 모드 선택
             const Text('최적화 모드', style: TextStyle(fontWeight: FontWeight.w600)),
             Row(
               children: [
-                _buildModeButton('최대', WmsOptimizationMode.maximum, Colors.green),
-                _buildModeButton('균형', WmsOptimizationMode.balanced, Colors.blue),
-                _buildModeButton('최소', WmsOptimizationMode.minimal, Colors.orange),
-                _buildModeButton('끄기', WmsOptimizationMode.disabled, Colors.red),
+                _buildModeButton(
+                  '최대',
+                  WmsOptimizationMode.maximum,
+                  Colors.green,
+                ),
+                _buildModeButton(
+                  '균형',
+                  WmsOptimizationMode.balanced,
+                  Colors.blue,
+                ),
+                _buildModeButton(
+                  '최소',
+                  WmsOptimizationMode.minimal,
+                  Colors.orange,
+                ),
+                _buildModeButton(
+                  '끄기',
+                  WmsOptimizationMode.disabled,
+                  Colors.red,
+                ),
               ],
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // 개별 기능 제어
             const Text('개별 기능', style: TextStyle(fontWeight: FontWeight.w600)),
             _buildToggle(
@@ -259,9 +275,9 @@ class _WmsOptimizationControlWidgetState extends State<WmsOptimizationControlWid
               _settings.setOptimizedBarcodeEnabled,
               '85% 성능 향상',
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // 현재 성능 예측
             Container(
               padding: const EdgeInsets.all(12),
@@ -280,9 +296,9 @@ class _WmsOptimizationControlWidgetState extends State<WmsOptimizationControlWid
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 12),
-            
+
             // 빠른 액션 버튼
             Row(
               children: [
@@ -290,14 +306,18 @@ class _WmsOptimizationControlWidgetState extends State<WmsOptimizationControlWid
                   onPressed: _settings.enableSafeMode,
                   icon: const Icon(Icons.security, size: 16),
                   label: const Text('안전모드'),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                  ),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton.icon(
                   onPressed: _settings.enableMaxPerformanceMode,
                   icon: const Icon(Icons.rocket_launch, size: 16),
                   label: const Text('최고성능'),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                  ),
                 ),
               ],
             ),

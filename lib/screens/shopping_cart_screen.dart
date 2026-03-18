@@ -22,9 +22,7 @@ part 'shopping_cart_screen_wide_tile.dart';
 // -- Library-level constants (accessible from all part files) --
 
 const double _inlineFieldHeight = 36.0;
-const BorderRadius _inlineFieldRadius = BorderRadius.all(
-  Radius.circular(12),
-);
+const BorderRadius _inlineFieldRadius = BorderRadius.all(Radius.circular(12));
 const Color _inlineFieldBorderColor = Color(0xFFD8C5CA);
 const Color _inlineFieldFocusedBorderColor = Color(0xFF884A5E);
 const Color _inlineFieldFillColor = Color(0xFFF8EFF2);

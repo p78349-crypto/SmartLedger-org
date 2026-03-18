@@ -26,7 +26,7 @@ class TransactionByDateUtils {
     // 최신 날짜가 위로 오도록 정렬하기 위해, 일단 리스트로 모으거나 Map에 넣고 나중에 정렬
     // 여기서는 Map 구성 후 저장 시점에 정렬 여부는 사용하는 쪽이나 JSON 구조상 순서 보장이 안될 수 있음을 감안.
     // 하지만 Dart Map은 삽입 순서를 유지하므로 날짜 순서대로 넣으면 됨. (또는 정렬해서 넣음)
-    
+
     // 날짜별 정렬 (최신순)
     final sortedTxs = List<Transaction>.from(allTxs)
       ..sort((a, b) => b.date.compareTo(a.date));
@@ -72,13 +72,13 @@ class TransactionByDateUtils {
       final decoded = jsonDecode(raw) as Map<String, dynamic>;
       // JSON 디코딩 결과는 Map<String, dynamic>이지만 값 부분이 List<dynamic>일 수 있으므로 캐스팅
       final result = <String, List<Map<String, dynamic>>>{};
-      
+
       decoded.forEach((key, value) {
         if (value is List) {
           result[key] = value.map((e) => Map<String, dynamic>.from(e)).toList();
         }
       });
-      
+
       return result;
     } catch (e) {
       return {};

@@ -32,9 +32,7 @@ extension EmergencyFundListUI on _EmergencyFundListScreenState {
               color: isDeposit ? Colors.green : Colors.red,
             ),
           ),
-          onTap: _isSelectionMode
-              ? () => _toggleSelection(tx.id)
-              : null,
+          onTap: _isSelectionMode ? () => _toggleSelection(tx.id) : null,
         );
       },
     );
@@ -56,15 +54,9 @@ extension EmergencyFundListUI on _EmergencyFundListScreenState {
             child: Row(
               children: [
                 SizedBox(width: 40),
-                Expanded(
-                  flex: 7,
-                  child: Text('설명', style: headerStyle),
-                ),
+                Expanded(flex: 7, child: Text('설명', style: headerStyle)),
                 SizedBox(width: 12),
-                Expanded(
-                  flex: 3,
-                  child: Text('날짜', style: headerStyle),
-                ),
+                Expanded(flex: 3, child: Text('날짜', style: headerStyle)),
                 SizedBox(width: 12),
                 Expanded(
                   flex: 4,
@@ -89,14 +81,9 @@ extension EmergencyFundListUI on _EmergencyFundListScreenState {
         );
 
         return InkWell(
-          onTap: _isSelectionMode
-              ? () => _toggleSelection(tx.id)
-              : null,
+          onTap: _isSelectionMode ? () => _toggleSelection(tx.id) : null,
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 8,
-              vertical: 10,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
             child: Row(
               children: [
                 SizedBox(
@@ -107,9 +94,7 @@ extension EmergencyFundListUI on _EmergencyFundListScreenState {
                           onChanged: (_) => _toggleSelection(tx.id),
                         )
                       : Icon(
-                          isDeposit
-                              ? Icons.arrow_downward
-                              : Icons.arrow_upward,
+                          isDeposit ? Icons.arrow_downward : Icons.arrow_upward,
                           color: isDeposit ? Colors.green : Colors.red,
                         ),
                 ),

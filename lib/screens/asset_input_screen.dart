@@ -31,24 +31,23 @@ class _AssetInputScreenState extends State<AssetInputScreen> {
   final TextEditingController _expectedAnnualRateController =
       TextEditingController();
   final TextEditingController _costBasisController = TextEditingController();
-      final TextEditingController _tickerController = TextEditingController();
-      final TextEditingController _institutionController = TextEditingController();
-      final TextEditingController _currencyController = TextEditingController();
-      final TextEditingController _unitsController = TextEditingController();
-      final TextEditingController _unitPriceController = TextEditingController();
-      final TextEditingController _appraisalValueController =
-        TextEditingController();
-      final TextEditingController _monthlyIncomeController =
-        TextEditingController();
-      final TextEditingController _debtAmountController =
-        TextEditingController();
-      final TextEditingController _alertThresholdController =
-        TextEditingController();
+  final TextEditingController _tickerController = TextEditingController();
+  final TextEditingController _institutionController = TextEditingController();
+  final TextEditingController _currencyController = TextEditingController();
+  final TextEditingController _unitsController = TextEditingController();
+  final TextEditingController _unitPriceController = TextEditingController();
+  final TextEditingController _appraisalValueController =
+      TextEditingController();
+  final TextEditingController _monthlyIncomeController =
+      TextEditingController();
+  final TextEditingController _debtAmountController = TextEditingController();
+  final TextEditingController _alertThresholdController =
+      TextEditingController();
   late DateTime _assetDate;
   DateTime? _maturityDate;
   AssetCategory _selectedCategory = AssetCategory.stock;
   bool _isInvestment = false;
-    AssetRiskLevel? _riskLevel;
+  AssetRiskLevel? _riskLevel;
   bool get _isEdit => widget.initialAsset != null;
 
   _InitialAssetFormSnapshot? _initialSnapshot;
@@ -83,8 +82,8 @@ class _AssetInputScreenState extends State<AssetInputScreen> {
         );
       }
       if (initial.expectedAnnualRatePct != null) {
-        _expectedAnnualRateController.text =
-            initial.expectedAnnualRatePct!.toString();
+        _expectedAnnualRateController.text = initial.expectedAnnualRatePct!
+            .toString();
       }
       if (initial.ticker != null && initial.ticker!.isNotEmpty) {
         _tickerController.text = initial.ticker!;
@@ -178,8 +177,9 @@ class _AssetInputScreenState extends State<AssetInputScreen> {
             : null;
 
         final expectedRateRaw = _expectedAnnualRateController.text.trim();
-        final expectedRate =
-            expectedRateRaw.isEmpty ? null : double.tryParse(expectedRateRaw);
+        final expectedRate = expectedRateRaw.isEmpty
+            ? null
+            : double.tryParse(expectedRateRaw);
 
         final tickerRaw = _tickerController.text.trim();
         final institutionRaw = _institutionController.text.trim();
@@ -201,7 +201,8 @@ class _AssetInputScreenState extends State<AssetInputScreen> {
         if (name.isEmpty) name = '새 자산';
 
         final asset = Asset(
-          id: widget.initialAsset?.id ??
+          id:
+              widget.initialAsset?.id ??
               DateTime.now().microsecondsSinceEpoch.toString(),
           name: name,
           amount: amount,
@@ -274,10 +275,12 @@ class _AssetInputScreenState extends State<AssetInputScreen> {
                     _buildOriginalCard(theme),
                   Form(
                     key: _formKey,
-                    child: Column(children: [
-                      ..._buildFormFields(theme),
-                      const SizedBox(height: 80),
-                    ]),
+                    child: Column(
+                      children: [
+                        ..._buildFormFields(theme),
+                        const SizedBox(height: 80),
+                      ],
+                    ),
                   ),
                 ],
               ),

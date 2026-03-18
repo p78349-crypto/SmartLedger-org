@@ -7,7 +7,7 @@ import 'package:flutter/foundation.dart';
 class AiAuditLogger {
   static const String _auditVersion = '2026.02.21-COMPLIANCE';
   static const String _logPath = './audit_logs/ai_compliance_log.json';
-  
+
   static final List<AuditEntry> _auditLog = [];
 
   /// AI 기능 비활성화 로그 기록
@@ -60,11 +60,13 @@ class AiAuditLogger {
       timestamp: DateTime.now().toUtc(),
       eventType: 'SECURITY_SEAL',
       component: 'AiSecuritySeal',
-      action: isSealed ? 'AI security seal activated' : 'AI security seal deactivated',
+      action: isSealed
+          ? 'AI security seal activated'
+          : 'AI security seal deactivated',
       reason: trigger,
       complianceStatus: 'COMPLIANT',
       regulationReference: 'International Security Requirements',
-      userImpact: isSealed 
+      userImpact: isSealed
           ? 'All AI features sealed, traditional algorithms only'
           : 'AI features available with compliance checks',
     );
@@ -75,7 +77,7 @@ class AiAuditLogger {
   /// 감사 엔트리 기록
   static Future<void> _recordAuditEntry(AuditEntry entry) async {
     _auditLog.add(entry);
-    
+
     // 릴리즈 모드에서는 파일 저장 비활성화 (파일 시스템 권한 문제)
     if (kReleaseMode) {
       if (kDebugMode) {
@@ -83,7 +85,7 @@ class AiAuditLogger {
       }
       return;
     }
-    
+
     try {
       final file = File(_logPath);
       if (!file.existsSync()) {
@@ -134,11 +136,14 @@ class AiAuditLogger {
     return {
       'total_entries': _auditLog.length,
       'ai_disabled_events': _auditLog
-          .where((e) => e.eventType == 'AI_DISABLED').length,
+          .where((e) => e.eventType == 'AI_DISABLED')
+          .length,
       'compliance_checks': _auditLog
-          .where((e) => e.eventType == 'COMPLIANCE_CHECK').length,
+          .where((e) => e.eventType == 'COMPLIANCE_CHECK')
+          .length,
       'security_seals': _auditLog
-          .where((e) => e.eventType == 'SECURITY_SEAL').length,
+          .where((e) => e.eventType == 'SECURITY_SEAL')
+          .length,
     };
   }
 }

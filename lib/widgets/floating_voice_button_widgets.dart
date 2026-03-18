@@ -63,9 +63,7 @@ class VoiceAssistantPanel extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            isProcessing
-                ? '생각 중...'
-                : (isSpeaking ? '알려드려요' : '듣고 있어요'),
+            isProcessing ? '생각 중...' : (isSpeaking ? '알려드려요' : '듣고 있어요'),
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.primary.withValues(alpha: 0.8),
               letterSpacing: 1.2,
@@ -117,8 +115,7 @@ class ColorfulWaveIndicator extends StatelessWidget {
         children: List.generate(4, (index) {
           double level = 8.0;
           if (isListening) {
-            level =
-                (soundLevel * (1.0 - (index * 0.1))).clamp(2.0, 10.0) * 2.5;
+            level = (soundLevel * (1.0 - (index * 0.1))).clamp(2.0, 10.0) * 2.5;
           } else if (isSpeaking || isProcessing) {
             level = 8.0 + (5.0 * (1.0 + (index * 0.2)));
           }

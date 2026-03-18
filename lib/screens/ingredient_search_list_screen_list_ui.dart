@@ -23,9 +23,7 @@ extension IngredientSearchListUi on _IngredientSearchListScreenState {
             Icon(
               Icons.search_off,
               size: 64,
-              color: theme.colorScheme.onSurfaceVariant.withValues(
-                alpha: 0.5,
-              ),
+              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
@@ -41,8 +39,7 @@ extension IngredientSearchListUi on _IngredientSearchListScreenState {
 
   /// 빈 목록 화면
   Scaffold _buildEmptyListView(ThemeData theme, bool isCustomMode) {
-    final title =
-        isCustomMode ? '식재료 목록' : _mainIngredient!.primaryName;
+    final title = isCustomMode ? '식재료 목록' : _mainIngredient!.primaryName;
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -60,9 +57,7 @@ extension IngredientSearchListUi on _IngredientSearchListScreenState {
             Icon(
               Icons.info_outline,
               size: 64,
-              color: theme.colorScheme.onSurfaceVariant.withValues(
-                alpha: 0.5,
-              ),
+              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
@@ -79,10 +74,7 @@ extension IngredientSearchListUi on _IngredientSearchListScreenState {
   }
 
   /// 재료 목록 SliverList 빌더
-  SliverList _buildSliverList(
-    ThemeData theme,
-    List<PairingIngredient> list,
-  ) {
+  SliverList _buildSliverList(ThemeData theme, List<PairingIngredient> list) {
     return SliverList(
       delegate: SliverChildBuilderDelegate((context, index) {
         final pairing = list[index];
@@ -107,8 +99,7 @@ extension IngredientSearchListUi on _IngredientSearchListScreenState {
               leading: _isSelectionMode
                   ? Checkbox(
                       value: isSelected,
-                      onChanged: (_) =>
-                          _toggleItemSelection(pairing.name),
+                      onChanged: (_) => _toggleItemSelection(pairing.name),
                     )
                   : null,
               title: Text(

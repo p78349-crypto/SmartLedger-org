@@ -115,7 +115,11 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
     final prefs = await SharedPreferences.getInstance();
     final x = prefs.getDouble(_prefKeyX);
     final y = prefs.getDouble(_prefKeyY);
-    if (mounted) setState(() { _buttonX = x; _buttonY = y; });
+    if (mounted)
+      setState(() {
+        _buttonX = x;
+        _buttonY = y;
+      });
   }
 
   Future<void> _saveButtonPosition() async {
@@ -140,7 +144,10 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
     if (_isProcessing) return;
     HapticFeedback.mediumImpact();
     _cmd.reset();
-    if (_speech.isListening) { _stopAndExitFull(); return; }
+    if (_speech.isListening) {
+      _stopAndExitFull();
+      return;
+    }
     _startConversation();
   }
 
@@ -222,8 +229,7 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
     final bottomPadding = MediaQuery.of(context).padding.bottom;
     final buttonX = _buttonX ?? (screenSize.width - 56);
     final buttonY = _buttonY ?? (screenSize.height / 2 - 28);
-    final isActive =
-        _speech.isListening || _isProcessing || _speech.isSpeaking;
+    final isActive = _speech.isListening || _isProcessing || _speech.isSpeaking;
 
     return Stack(
       children: [
@@ -279,15 +285,18 @@ class _FloatingVoiceButtonState extends State<FloatingVoiceButton>
             child: GestureDetector(
               onPanUpdate: (details) {
                 setState(() {
-                  _buttonX = (buttonX + details.delta.dx)
-                      .clamp(0.0, screenSize.width - 56);
-                  _buttonY = (buttonY + details.delta.dy)
-                      .clamp(0.0, screenSize.height - 56 - bottomPadding);
+                  _buttonX = (buttonX + details.delta.dx).clamp(
+                    0.0,
+                    screenSize.width - 56,
+                  );
+                  _buttonY = (buttonY + details.delta.dy).clamp(
+                    0.0,
+                    screenSize.height - 56 - bottomPadding,
+                  );
                 });
               },
               onPanEnd: (_) => _saveButtonPosition(),
-              onLongPress:
-                  _speech.isActiveMode ? _onLongPressStopActive : null,
+              onLongPress: _speech.isActiveMode ? _onLongPressStopActive : null,
               child: FloatingMicButton(
                 isListening: _speech.isListening,
                 isSpeaking: _speech.isSpeaking,

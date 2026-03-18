@@ -43,7 +43,8 @@ void main() {
   setUp(() async {
     SharedPreferences.setMockInitialValues(<String, Object>{});
     originalRepository = AppRepositories.consumableInventory;
-    AppRepositories.consumableInventory = _InMemoryConsumableInventoryRepository();
+    AppRepositories.consumableInventory =
+        _InMemoryConsumableInventoryRepository();
     service.items.value = <ConsumableInventoryItem>[];
   });
 

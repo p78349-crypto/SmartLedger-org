@@ -1,19 +1,11 @@
 import 'dart:async';
-import 'dart:ui';
+import 'app.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'l10n/app_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
-import 'package:provider/single_child_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'navigation/app_router.dart';
 import 'navigation/deep_link_handler.dart';
-import 'navigation/global_navigator_key.dart';
-import 'screens/launch_screen.dart';
 import 'services/account_service.dart';
 import 'services/asset_service.dart';
 import 'services/budget_service.dart';
@@ -25,18 +17,16 @@ import 'services/user_pref_service.dart';
 import 'services/consumable_inventory_service.dart';
 import 'services/recipe_service.dart';
 import 'services/recipe_knowledge_service.dart';
+import 'services/backup_service.dart';
+import 'services/integrity_hash_chain_service.dart';
 import 'services/voice_assistant_settings.dart';
-import 'theme/app_theme.dart';
 import 'theme/app_theme_mode_controller.dart';
 import 'theme/app_theme_seed_controller.dart';
 import 'utils/app_locale_controller.dart';
 import 'utils/currency_formatter.dart';
-import 'utils/constants.dart';
 import 'utils/main_feature_icon_catalog.dart';
 import 'utils/main_page_migration.dart';
-import 'config/feature_flags.dart';
 import 'widgets/background_widget.dart';
-import 'widgets/floating_voice_button.dart';
 
 Future<void> main() async {
   FlutterError.onError = (FlutterErrorDetails details) {
@@ -63,7 +53,10 @@ Future<void> main() async {
       const releaseFromEnv = String.fromEnvironment('SENTRY_RELEASE');
       if (releaseFromEnv.isNotEmpty) options.release = releaseFromEnv;
       // Environment (production, staging) can be set via --dart-define=FLAVOR=<env>
-      const envName = String.fromEnvironment('FLAVOR', defaultValue: 'production');
+      const envName = String.fromEnvironment(
+        'FLAVOR',
+        defaultValue: 'production',
+      );
       options.environment = envName;
       const double tracesSampleRate = 0.0; // adjust as needed
       options.tracesSampleRate = tracesSampleRate;
@@ -82,106 +75,123 @@ Future<void> main() async {
           // Locale policy (정석): default follow system; optional override via prefs.
           await AppLocaleController.instance.loadFromPrefs(prefs);
 
-      // Ensure date symbols exist for supported locales.
-      await Future.wait([
-        initializeDateFormatting('en_US'),
-        initializeDateFormatting('ko_KR'),
-        initializeDateFormatting('ja_JP'),
-      ]);
+          // Ensure date symbols exist for supported locales.
+          await Future.wait([
+            initializeDateFormatting('en_US'),
+            initializeDateFormatting('ko_KR'),
+            initializeDateFormatting('ja_JP'),
+          ]);
 
-      await AppThemeModeController.instance.loadFromPrefs(prefs);
-      await AppThemeSeedController.instance.loadFromPrefs(prefs);
-      await BackgroundHelper.initialize();
+          await AppThemeModeController.instance.loadFromPrefs(prefs);
+          await AppThemeSeedController.instance.loadFromPrefs(prefs);
+          await BackgroundHelper.initialize();
 
-      await Future.wait([
-        AccountService().loadAccounts(),
-        TransactionService().loadTransactions(),
-        BudgetService().loadBudgets(),
-        AssetService().loadAssets(),
-        FixedCostService().loadFixedCosts(),
-        CurrencyFormatter.initCurrencyUnit(),
-        NotificationService().initialize(),
-        ConsumableInventoryService.instance.load(),
-        RecipeService.instance.load(),
-        RecipeKnowledgeService.instance.loadData(),
-        VoiceAssistantSettings.instance.initialize(),
-      ]);
+          await Future.wait([
+            AccountService().loadAccounts(),
+            TransactionService().loadTransactions(),
+            BudgetService().loadBudgets(),
+            AssetService().loadAssets(),
+            FixedCostService().loadFixedCosts(),
+            CurrencyFormatter.initCurrencyUnit(),
+            NotificationService().initialize(),
+            ConsumableInventoryService.instance.load(),
+            RecipeService.instance.load(),
+            RecipeKnowledgeService.instance.loadData(),
+            VoiceAssistantSettings.instance.initialize(),
+          ]);
 
-      // Monthly routine: auto-record fixed costs (local-only).
-      // Note: runs when the app starts (or restarts). If the app isn't opened
-      // on the due day, it will be recorded on the next launch after the date.
-      try {
-        await FixedCostAutoRecordService().runForAllAccounts(backfillMonths: 6);
-      } catch (_) {
-        // Best-effort; never block startup.
-      }
+          // R3-4: 백업 디렉토리 내 .tmp 잔류 파일 정리 (non-blocking)
+          unawaited(BackupService.cleanupStaleTmpFiles());
 
-      // One-off forced relayout (2026-02-23) per updated page policy.
-      try {
-        await MainPageMigration.applyRelayout20260223IfNeeded();
-      } catch (_) {
-        // ignore
-      }
-      // Fix-up: split ROOT and Settings (ROOT -> index 4, Settings -> index 5).
-      try {
-        await MainPageMigration.applyRelayout20260223SplitRootToPage4IfNeeded();
-      } catch (_) {
-        // ignore
-      }
-      // Main-page icon placement policy is unified: no forced startup re-layout.
-      // Maintenance: if compiled with `-DMAINTENANCE_RECREATE_PAGES=true`
-      // then list page-related SharedPreferences keys and recreate pages
-      // with a fresh 15 empty pages (clearing existing prefs first).
-      const doMaintenance = bool.fromEnvironment('MAINTENANCE_RECREATE_PAGES');
-      if (doMaintenance) {
-        try {
-          final keys = await MainFeatureIconCatalog.listPagePrefKeys();
-          if (kDebugMode) {
-            debugPrint('PAGE PREF KEYS (audit): ${keys.join(', ')}');
-          }
-          await MainFeatureIconCatalog.recreatePages(
-            15,
-            clearExistingPrefs: true,
+          // R4-4: 해시 체인 무결성 검증 (non-blocking)
+          unawaited(
+            IntegrityHashChainService.instance.runStartupVerification(),
           );
-          if (kDebugMode) {
-            debugPrint('Main pages recreated (15) and prefs cleared.');
-          }
-        } catch (e, st) {
-          if (kDebugMode) {
-            debugPrint('Maintenance error: $e');
-            debugPrintStack(stackTrace: st);
-          }
-        }
-      }
-      // (Removed) Forced main pages reset/create on startup.
-      // FORCED POLICIES RESET: clear security/policy prefs on startup.
-      // Toggle using the compile-time environment variable
-      // `FORCE_RESET_POLICIES`. Default: false.
-      const forceResetPolicies = bool.fromEnvironment(
-        'FORCE_RESET_POLICIES',
-      );
-      if (forceResetPolicies) {
-        try {
-          await UserPrefService.resetAllPolicies();
-        } catch (_) {
-          // ignore
-        }
-      }
-      // Initialize deep link handler for App Actions / Bixby integration
-      try {
-        await DeepLinkHandler.instance.init();
-      } catch (e) {
-        if (kDebugMode) debugPrint('DeepLinkHandler init failed: $e');
-      }
-      runApp(const MyApp());
 
-      // Optional: send a test Sentry event when explicitly requested via dart-define
-      const sendTest = String.fromEnvironment('SENTRY_SEND_TEST_EVENT', defaultValue: 'false');
-      if (sendTest.toLowerCase() == 'true') {
-        try {
-          await Sentry.captureMessage('Sentry test event from CI/local (SENTRY_SEND_TEST_EVENT)');
-        } catch (_) {}
-      }
+          // Monthly routine: auto-record fixed costs (local-only).
+          // Note: runs when the app starts (or restarts). If the app isn't opened
+          // on the due day, it will be recorded on the next launch after the date.
+          try {
+            await FixedCostAutoRecordService().runForAllAccounts(
+              backfillMonths: 6,
+            );
+          } catch (_) {
+            // Best-effort; never block startup.
+          }
+
+          // One-off forced relayout (2026-02-23) per updated page policy.
+          try {
+            await MainPageMigration.applyRelayout20260223IfNeeded();
+          } catch (_) {
+            // ignore
+          }
+          // Fix-up: split ROOT and Settings (ROOT -> index 4, Settings -> index 5).
+          try {
+            await MainPageMigration.applyRelayout20260223SplitRootToPage4IfNeeded();
+          } catch (_) {
+            // ignore
+          }
+          // Main-page icon placement policy is unified: no forced startup re-layout.
+          // Maintenance: if compiled with `-DMAINTENANCE_RECREATE_PAGES=true`
+          // then list page-related SharedPreferences keys and recreate pages
+          // with a fresh 15 empty pages (clearing existing prefs first).
+          const doMaintenance = bool.fromEnvironment(
+            'MAINTENANCE_RECREATE_PAGES',
+          );
+          if (doMaintenance) {
+            try {
+              final keys = await MainFeatureIconCatalog.listPagePrefKeys();
+              if (kDebugMode) {
+                debugPrint('PAGE PREF KEYS (audit): ${keys.join(', ')}');
+              }
+              await MainFeatureIconCatalog.recreatePages(
+                15,
+                clearExistingPrefs: true,
+              );
+              if (kDebugMode) {
+                debugPrint('Main pages recreated (15) and prefs cleared.');
+              }
+            } catch (e, st) {
+              if (kDebugMode) {
+                debugPrint('Maintenance error: $e');
+                debugPrintStack(stackTrace: st);
+              }
+            }
+          }
+          // (Removed) Forced main pages reset/create on startup.
+          // FORCED POLICIES RESET: clear security/policy prefs on startup.
+          // Toggle using the compile-time environment variable
+          // `FORCE_RESET_POLICIES`. Default: false.
+          const forceResetPolicies = bool.fromEnvironment(
+            'FORCE_RESET_POLICIES',
+          );
+          if (forceResetPolicies) {
+            try {
+              await UserPrefService.resetAllPolicies();
+            } catch (_) {
+              // ignore
+            }
+          }
+          // Initialize deep link handler for App Actions / Bixby integration
+          try {
+            await DeepLinkHandler.instance.init();
+          } catch (e) {
+            if (kDebugMode) debugPrint('DeepLinkHandler init failed: $e');
+          }
+          runApp(const MyApp());
+
+          // Optional: send a test Sentry event when explicitly requested via dart-define
+          const sendTest = String.fromEnvironment(
+            'SENTRY_SEND_TEST_EVENT',
+            defaultValue: 'false',
+          );
+          if (sendTest.toLowerCase() == 'true') {
+            try {
+              await Sentry.captureMessage(
+                'Sentry test event from CI/local (SENTRY_SEND_TEST_EVENT)',
+              );
+            } catch (_) {}
+          }
         },
         (Object error, StackTrace stack) {
           if (kDebugMode) {
@@ -196,139 +206,4 @@ Future<void> main() async {
       );
     },
   );
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-  @override
-  Widget build(BuildContext context) {
-    const minimalUi = bool.fromEnvironment('MINIMAL_UI');
-    final app = ListenableBuilder(
-      listenable: Listenable.merge([
-        AppThemeModeController.instance.themeMode,
-        AppThemeSeedController.instance.presetId,
-        AppThemeSeedController.instance.uiStyle,
-        AppLocaleController.instance.locale,
-      ]),
-      builder: (context, _) {
-        final presetId = AppThemeSeedController.instance.presetId.value;
-        final uiStyle = AppThemeSeedController.instance.uiStyle.value;
-        final localeOverride = AppLocaleController.instance.locale.value;
-
-        // Resolve actual ThemeMode and Preset using the controller
-        final resolution = AppThemeModeController.instance.resolve(presetId);
-        final themeMode = resolution.mode;
-        final preset = resolution.preset;
-
-        // Keep Intl default locale in sync for any legacy Intl usages.
-        final systemLocale = PlatformDispatcher.instance.locale;
-        final intlLocaleName = (localeOverride ?? systemLocale)
-            .toLanguageTag()
-            .replaceAll('-', '_');
-        Intl.defaultLocale = intlLocaleName;
-
-        return MaterialApp(
-          navigatorKey: appNavigatorKey,
-          title: 'SmartLedger',
-          debugShowCheckedModeBanner: false,
-          locale: localeOverride,
-          supportedLocales: const [
-            Locale('en'),
-            Locale('ko'),
-            Locale('ja'),
-            Locale('it'),
-            Locale('fr'),
-            Locale('es'),
-            Locale('pl'),
-            Locale('ru'),
-          ],
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          theme: AppTheme.buildSmartTheme(
-            seedColor: preset.seedColor,
-            brightness: Brightness.light,
-            uiStyle: uiStyle,
-          ),
-          darkTheme: AppTheme.buildSmartTheme(
-            seedColor: preset.seedColor,
-            brightness: Brightness.dark,
-            uiStyle: uiStyle,
-            backgroundColor: preset.backgroundColor,
-          ),
-          themeMode: themeMode,
-          builder: (context, child) {
-            final mediaQuery = MediaQuery.of(context);
-            final textScaler = mediaQuery.textScaler.clamp(
-              minScaleFactor: 1.0,
-              maxScaleFactor: 1.15,
-            );
-            return MediaQuery(
-              data: mediaQuery.copyWith(textScaler: textScaler),
-              child: child ?? const SizedBox.shrink(),
-            );
-          },
-          home: minimalUi ? const _MinimalBootScreen() : const LaunchScreen(),
-          onGenerateRoute: minimalUi ? null : AppRouter.onGenerateRoute,
-        );
-      },
-    );
-
-    // MultiProvider asserts when the provider list is empty.
-    // Keep this guard so tests/builds don't crash when no providers are used.
-    final providers = <SingleChildWidget>[];
-    if (providers.isEmpty) {
-      final runtimeVoiceEnabled = VoiceAssistantSettings.instance.enabled;
-      return (AppConstants.voiceInputEnabled &&
-              (kEnableVoice || runtimeVoiceEnabled))
-          ? FloatingVoiceButton(child: app)
-          : app;
-    }
-
-    final wrapped = MultiProvider(providers: providers, child: app);
-    final runtimeVoiceEnabled = VoiceAssistantSettings.instance.enabled;
-    return (AppConstants.voiceInputEnabled &&
-            (kEnableVoice || runtimeVoiceEnabled))
-        ? FloatingVoiceButton(child: wrapped)
-        : wrapped;
-  }
-}
-
-class _MinimalBootScreen extends StatelessWidget {
-  const _MinimalBootScreen();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Scaffold(
-      appBar: AppBar(title: const Text('MINIMAL_UI'), centerTitle: true),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'UI 연결 임시 차단 상태',
-                style: theme.textTheme.titleLarge,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                '빌드/설치 및 상태 점검용으로\nLaunchScreen/라우터를 우회했습니다.',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }

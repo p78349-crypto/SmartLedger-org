@@ -45,8 +45,9 @@ class WeatherPricePredictionUtils {
     if (records.length < 3) return null;
 
     final recentDate = now.subtract(const Duration(days: 30));
-    final recentRecords =
-        records.where((r) => r.date.isAfter(recentDate)).toList();
+    final recentRecords = records
+        .where((r) => r.date.isAfter(recentDate))
+        .toList();
     if (recentRecords.isEmpty) return null;
 
     final currentPrice =

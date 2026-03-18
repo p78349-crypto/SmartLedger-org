@@ -38,7 +38,7 @@ part 'food_expiry_items_screen_build_body.dart';
 
 class FoodExpiryItemsScreen extends StatefulWidget {
   final Future<void> Function(BuildContext, {FoodExpiryItem? existing})?
-      onUpsert;
+  onUpsert;
   final List<String>? initialIngredients;
   final bool autoUsageMode;
   final bool openCookableRecipePickerOnStart;
@@ -107,4 +107,3 @@ class _FoodExpiryItemsScreenState extends State<FoodExpiryItemsScreen> {
   @override
   Widget build(BuildContext context) => buildBody(context);
 }
-

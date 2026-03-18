@@ -151,7 +151,9 @@ class _RecipeToCartScreenState extends State<RecipeToCartScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        widget.recipe.nameForLocale(Localizations.localeOf(context).languageCode),
+                        widget.recipe.nameForLocale(
+                          Localizations.localeOf(context).languageCode,
+                        ),
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -273,8 +275,10 @@ class _RecipeToCartScreenState extends State<RecipeToCartScreen> {
                   style: FilledButton.styleFrom(
                     backgroundColor: theme.colorScheme.primary,
                     foregroundColor: theme.colorScheme.onPrimary,
-                    disabledBackgroundColor: theme.colorScheme.surfaceContainerHighest,
-                    disabledForegroundColor: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    disabledBackgroundColor:
+                        theme.colorScheme.surfaceContainerHighest,
+                    disabledForegroundColor: theme.colorScheme.onSurface
+                        .withValues(alpha: 0.6),
                     minimumSize: const Size.fromHeight(52),
                     textStyle: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w700,

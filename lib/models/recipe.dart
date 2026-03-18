@@ -1,5 +1,6 @@
 class Recipe {
   final String id;
+
   /// Localized names by language code (non-null).
   /// e.g. { 'ko': '김치찌개', 'en': 'Kimchi Stew' }
   final Map<String, String> localizedNames;
@@ -14,8 +15,8 @@ class Recipe {
     this.cuisine = '한식',
     required this.ingredients,
     this.healthScore = 3,
-  }) : localizedNames = localizedNames ??
-           (name != null ? {'ko': name} : <String, String>{});
+  }) : localizedNames =
+           localizedNames ?? (name != null ? {'ko': name} : <String, String>{});
 
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -30,8 +31,8 @@ class Recipe {
     final Map<String, String> localized = rawLocalized != null
         ? Map<String, String>.from(rawLocalized as Map)
         : (json['name'] != null
-            ? <String, String>{'en': json['name'] as String}
-            : <String, String>{});
+              ? <String, String>{'en': json['name'] as String}
+              : <String, String>{});
 
     return Recipe(
       id: json['id'] as String,

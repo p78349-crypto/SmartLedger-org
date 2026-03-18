@@ -13,7 +13,8 @@ import 'server_config_service.dart';
 /// 🏠 홈 서버(WireGuard VPN 내부)와의 데이터 동기화 서비스
 class HomeServerSyncService {
   HomeServerSyncService._internal();
-  static final HomeServerSyncService _instance = HomeServerSyncService._internal();
+  static final HomeServerSyncService _instance =
+      HomeServerSyncService._internal();
   factory HomeServerSyncService() => _instance;
 
   static const String _pullPath = '/api/ledger/sync/pull';
@@ -107,7 +108,10 @@ class HomeServerSyncService {
   }
 
   /// 테이블별 변경분 Push
-  Future<SyncResult> pushTableDelta(String accountName, String tableName) async {
+  Future<SyncResult> pushTableDelta(
+    String accountName,
+    String tableName,
+  ) async {
     if (!await isServerAvailable()) {
       return SyncResult.failed('홈 서버에 연결할 수 없습니다. VPN 상태를 확인하세요.');
     }
@@ -157,7 +161,10 @@ class HomeServerSyncService {
       if (response.statusCode >= 200 && response.statusCode < 300) {
         final nowMs = DateTime.now().millisecondsSinceEpoch;
         await prefs.setInt(lastPushKey, nowMs);
-        return SyncResult.success(items.length, 'Push 동기화 완료 (${items.length}건 전송)');
+        return SyncResult.success(
+          items.length,
+          'Push 동기화 완료 (${items.length}건 전송)',
+        );
       }
 
       return SyncResult.failed('Push 응답 오류 (HTTP ${response.statusCode})');
@@ -180,7 +187,10 @@ class HomeServerSyncService {
 
   /// 계정 단위 전체 동기화: Push(각 테이블) 후 Pull(Delta 병합)
   Future<SyncBatchResult> syncAllForAccount(String accountName) async {
-    final pushTransactions = await pushTableDelta(accountName, tableTransactions);
+    final pushTransactions = await pushTableDelta(
+      accountName,
+      tableTransactions,
+    );
     final pushAssets = await pushTableDelta(accountName, tableAssets);
     final pushFixedCosts = await pushTableDelta(accountName, tableFixedCosts);
     final pushMemos = await pushTableDelta(accountName, tableMemos);
@@ -222,10 +232,7 @@ class HomeServerSyncService {
     for (final key in keys) {
       final raw = payload[key];
       if (raw is List) {
-        return raw
-            .whereType<Map>()
-            .map(Map<String, dynamic>.from)
-            .toList();
+        return raw.whereType<Map>().map(Map<String, dynamic>.from).toList();
       }
     }
     return const <Map<String, dynamic>>[];
@@ -446,15 +453,19 @@ class HomeServerSyncService {
 
   Map<String, dynamic> _normalizeTransactionRow(Map<String, dynamic> row) {
     final normalized = Map<String, dynamic>.from(row);
-    normalized['cardChargedAmount'] = row['card_charged_amount'] ?? row['cardChargedAmount'];
+    normalized['cardChargedAmount'] =
+        row['card_charged_amount'] ?? row['cardChargedAmount'];
     normalized['unitPrice'] = row['unit_price'] ?? row['unitPrice'];
     normalized['paymentMethod'] = row['payment_method'] ?? row['paymentMethod'];
     normalized['mainCategory'] = row['main_category'] ?? row['mainCategory'];
     normalized['subCategory'] = row['sub_category'] ?? row['subCategory'];
-    normalized['detailCategory'] = row['detail_category'] ?? row['detailCategory'];
-    normalized['originalTransactionId'] = row['original_transaction_id'] ?? row['originalTransactionId'];
+    normalized['detailCategory'] =
+        row['detail_category'] ?? row['detailCategory'];
+    normalized['originalTransactionId'] =
+        row['original_transaction_id'] ?? row['originalTransactionId'];
     normalized['isRefund'] = row['is_refund'] ?? row['isRefund'];
-    normalized['savingsAllocation'] = row['savings_allocation'] ?? row['savingsAllocation'];
+    normalized['savingsAllocation'] =
+        row['savings_allocation'] ?? row['savingsAllocation'];
     normalized['benefitJson'] = row['benefit_json'] ?? row['benefitJson'];
     normalized['expiryDate'] = row['expiry_date'] ?? row['expiryDate'];
     final weatherJson = row['weather_json'];
@@ -472,7 +483,8 @@ class HomeServerSyncService {
     final normalized = Map<String, dynamic>.from(row);
     normalized['targetAmount'] = row['target_amount'] ?? row['targetAmount'];
     normalized['isInvestment'] = row['is_investment'] ?? row['isInvestment'];
-    normalized['conversionDate'] = row['conversion_date'] ?? row['conversionDate'];
+    normalized['conversionDate'] =
+        row['conversion_date'] ?? row['conversionDate'];
     normalized['costBasis'] = row['cost_basis'] ?? row['costBasis'];
     normalized['currencyCode'] = row['currency_code'] ?? row['currencyCode'];
     normalized['unitPrice'] = row['unit_price'] ?? row['unitPrice'];
@@ -521,7 +533,9 @@ class HomeServerSyncService {
       'is_refund': tx.isRefund ? 1 : 0,
       'original_transaction_id': tx.originalTransactionId,
       'benefit_json': tx.benefitJson,
-      'weather_json': tx.weather != null ? jsonEncode(tx.weather!.toJson()) : null,
+      'weather_json': tx.weather != null
+          ? jsonEncode(tx.weather!.toJson())
+          : null,
       'created_at': tx.date.toUtc().toIso8601String(),
       'updated_at': DateTime.now().toUtc().toIso8601String(),
       'is_deleted': 0,

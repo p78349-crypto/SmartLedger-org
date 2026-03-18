@@ -208,9 +208,7 @@ extension EvacuationLocationShare on _EvacuationRouteScreenState {
     final subject = '안전 이동 경로 - ${_activePlan.location}';
 
     try {
-      await SharePlus.instance.share(
-        ShareParams(text: text, subject: subject),
-      );
+      await SharePlus.instance.share(ShareParams(text: text, subject: subject));
     } catch (error) {
       if (!mounted) return;
       messenger.showSnackBar(
@@ -234,9 +232,7 @@ extension EvacuationLocationShare on _EvacuationRouteScreenState {
     final uri = Uri.parse(buffer.toString());
     final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!launched && mounted) {
-      messenger.showSnackBar(
-        const SnackBar(content: Text('지도 앱을 열 수 없습니다.')),
-      );
+      messenger.showSnackBar(const SnackBar(content: Text('지도 앱을 열 수 없습니다.')));
     }
   }
 

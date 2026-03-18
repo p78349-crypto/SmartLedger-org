@@ -115,15 +115,26 @@ class _FoodSearchResultState extends State<_FoodSearchResult> {
             color: sel ? theme.colorScheme.surface : null,
             borderRadius: BorderRadius.circular(6),
             boxShadow: sel
-                ? [BoxShadow(color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 2, offset: const Offset(0, 1))]
-                : null),
+                ? [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 2,
+                      offset: const Offset(0, 1),
+                    ),
+                  ]
+                : null,
+          ),
           alignment: Alignment.center,
-          child: Text(label, style: TextStyle(fontSize: 13,
-            fontWeight: sel ? FontWeight.bold : FontWeight.normal,
-            color: sel
-                ? theme.colorScheme.primary
-                : theme.colorScheme.onSurfaceVariant)),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: sel ? FontWeight.bold : FontWeight.normal,
+              color: sel
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
         ),
       ),
     );
@@ -148,23 +159,34 @@ class _FoodSearchResultState extends State<_FoodSearchResult> {
       key: const ValueKey('intake'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(children: [
-          Icon(Icons.info_outline, size: 16,
-            color: theme.colorScheme.primary),
-          const SizedBox(width: 8),
-          Text('1인 하루 섭취 권장량',
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.bold)),
-        ]),
+        Row(
+          children: [
+            Icon(
+              Icons.info_outline,
+              size: 16,
+              color: theme.colorScheme.primary,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              '1인 하루 섭취 권장량',
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
         const SizedBox(height: 8),
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: theme.colorScheme.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(12)),
-          child: Text(entry.dailyIntakeText,
-            style: theme.textTheme.bodyMedium?.copyWith(height: 1.6)),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            entry.dailyIntakeText,
+            style: theme.textTheme.bodyMedium?.copyWith(height: 1.6),
+          ),
         ),
       ],
     );
@@ -173,9 +195,11 @@ class _FoodSearchResultState extends State<_FoodSearchResult> {
   Widget _buildPairings(BuildContext context, FoodKnowledgeEntry entry) {
     final theme = Theme.of(context);
     if (entry.pairings.isEmpty) {
-      return Container(padding: const EdgeInsets.all(24),
+      return Container(
+        padding: const EdgeInsets.all(24),
         alignment: Alignment.center,
-        child: const Text('추천 조합 데이터가 없습니다.'));
+        child: const Text('추천 조합 데이터가 없습니다.'),
+      );
     }
     return Column(
       key: const ValueKey('pairings'),
@@ -188,24 +212,39 @@ class _FoodSearchResultState extends State<_FoodSearchResult> {
             decoration: BoxDecoration(
               color: theme.colorScheme.surface,
               border: Border.all(color: theme.colorScheme.outlineVariant),
-              borderRadius: BorderRadius.circular(12)),
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(children: [
-                      const Icon(Icons.restaurant, size: 14,
-                        color: Colors.orange),
-                      const SizedBox(width: 6),
-                      Text(p.ingredient,
-                        style: const TextStyle(fontWeight: FontWeight.bold)),
-                    ]),
-                    const SizedBox(height: 4),
-                    Text(p.why, style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant)),
-                  ])),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.restaurant,
+                            size: 14,
+                            color: Colors.orange,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            p.ingredient,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        p.why,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 if (widget.onAdd != null) ...[
                   const SizedBox(width: 8),
                   IconButton.filledTonal(
@@ -213,10 +252,14 @@ class _FoodSearchResultState extends State<_FoodSearchResult> {
                     onPressed: () => widget.onAdd?.call(p.ingredient),
                     tooltip: '장바구니 담기',
                     constraints: const BoxConstraints(
-                      minWidth: 32, minHeight: 32),
-                    style: IconButton.styleFrom(padding: EdgeInsets.zero)),
+                      minWidth: 32,
+                      minHeight: 32,
+                    ),
+                    style: IconButton.styleFrom(padding: EdgeInsets.zero),
+                  ),
                 ],
-              ]),
+              ],
+            ),
           ),
       ],
     );
@@ -225,9 +268,11 @@ class _FoodSearchResultState extends State<_FoodSearchResult> {
   Widget _buildQuantities(BuildContext context, FoodKnowledgeEntry entry) {
     final theme = Theme.of(context);
     if (entry.quantitySuggestions.isEmpty) {
-      return Container(padding: const EdgeInsets.all(24),
+      return Container(
+        padding: const EdgeInsets.all(24),
         alignment: Alignment.center,
-        child: const Text('추천 수량 데이터가 없습니다.'));
+        child: const Text('추천 수량 데이터가 없습니다.'),
+      );
     }
     return Column(
       key: const ValueKey('quantities'),
@@ -237,28 +282,50 @@ class _FoodSearchResultState extends State<_FoodSearchResult> {
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: theme.colorScheme.secondaryContainer.withValues(alpha: 0.5),
-            borderRadius: BorderRadius.circular(8)),
-          child: Row(children: [
-            Icon(Icons.lightbulb_outline, size: 16,
-              color: theme.colorScheme.onSecondaryContainer),
-            const SizedBox(width: 8),
-            Expanded(child: Text('인원과 취향에 따라 조절하세요.',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSecondaryContainer))),
-          ]),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.lightbulb_outline,
+                size: 16,
+                color: theme.colorScheme.onSecondaryContainer,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  '인원과 취향에 따라 조절하세요.',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSecondaryContainer,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 12),
         for (final line in entry.quantitySuggestions)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 6),
-            child: Row(children: [
-              Icon(Icons.check_circle, size: 18,
-                color: theme.colorScheme.primary),
-              const SizedBox(width: 12),
-              Expanded(child: Text(line,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w500))),
-            ])),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.check_circle,
+                  size: 18,
+                  color: theme.colorScheme.primary,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    line,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
       ],
     );
   }

@@ -180,8 +180,7 @@ extension ShoppingCartPortraitTile on _ShoppingCartScreenState {
                         _applyInlineEdits(item);
                         FocusScope.of(context).unfocus();
                       },
-                      onEditingCompleteOverride: () =>
-                          _applyInlineEdits(item),
+                      onEditingCompleteOverride: () => _applyInlineEdits(item),
                     ),
                     const SizedBox(width: 8),
                     // Stock display

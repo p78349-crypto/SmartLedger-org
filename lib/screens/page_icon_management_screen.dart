@@ -26,7 +26,9 @@ class PageIconManagementScreen extends StatelessWidget {
       titleOverride: '$pageTitle 아이콘 관리',
       showCurrentPageIndicator: false, // 현재 페이지 표시 안함 (고정 페이지)
       hiddenPageIndices: _getHiddenPageIndices(pageIndex), // 다른 페이지 숨김
-      catalogHiddenPageIndices: _getHiddenPageIndices(pageIndex), // 카탈로그에서도 다른 페이지 숨김
+      catalogHiddenPageIndices: _getHiddenPageIndices(
+        pageIndex,
+      ), // 카탈로그에서도 다른 페이지 숨김
       showCatalogSectionTitles: false,
       usePhotoStyleLayout: true,
     );
@@ -36,13 +38,13 @@ class PageIconManagementScreen extends StatelessWidget {
   Set<int> _getHiddenPageIndices(int currentPageIndex) {
     final totalPages = MainFeatureIconCatalog.pageCount;
     final hiddenPages = <int>{};
-    
+
     for (int i = 0; i < totalPages; i++) {
       if (i != currentPageIndex) {
         hiddenPages.add(i);
       }
     }
-    
+
     return hiddenPages;
   }
 }

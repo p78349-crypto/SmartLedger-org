@@ -154,21 +154,27 @@ extension ApplicationSettingsBuild on _ApplicationSettingsScreenState {
                 onPressed: _requestPermissions,
                 icon: const Icon(Icons.security, size: 16),
                 label: const Text('허용'),
-                    style: FilledButton.styleFrom(
-                        backgroundColor: scheme.error,
-                        foregroundColor: scheme.onError,
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
+                style: FilledButton.styleFrom(
+                  backgroundColor: scheme.error,
+                  foregroundColor: scheme.onError,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 8,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
               ),
               const SizedBox(height: 6),
               TextButton(
                 onPressed: () async => await openAppSettings(),
                 child: Text(
                   '앱 설정',
-                  style: TextStyle(color: scheme.onErrorContainer, fontSize: 12),
+                  style: TextStyle(
+                    color: scheme.onErrorContainer,
+                    fontSize: 12,
+                  ),
                 ),
               ),
             ],

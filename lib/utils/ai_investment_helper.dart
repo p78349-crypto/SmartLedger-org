@@ -9,7 +9,9 @@ class AiInvestmentHelper {
   static const double _minDiversificationScore = 0.6;
 
   /// Calculates portfolio risk score based on asset allocation
-  static double calculatePortfolioRisk(Map<InvestmentAssetType, double> allocation) {
+  static double calculatePortfolioRisk(
+    Map<InvestmentAssetType, double> allocation,
+  ) {
     const riskWeights = {
       InvestmentAssetType.cash: 0.0,
       InvestmentAssetType.bonds: 0.2,
@@ -33,7 +35,9 @@ class AiInvestmentHelper {
   }
 
   /// Evaluates portfolio diversification score
-  static double calculateDiversificationScore(Map<InvestmentAssetType, double> allocation) {
+  static double calculateDiversificationScore(
+    Map<InvestmentAssetType, double> allocation,
+  ) {
     if (allocation.isEmpty) return 0.0;
 
     // Calculate Herfindahl-Hirschman Index (HHI) for concentration
@@ -48,9 +52,10 @@ class AiInvestmentHelper {
     });
 
     // Convert HHI to diversification score (0 = concentrated, 1 = diversified)
-    final normalizedHhi = 1.0 - ((hhi - (1.0 / allocation.length)) / 
-                                 (1.0 - (1.0 / allocation.length)));
-    
+    final normalizedHhi =
+        1.0 -
+        ((hhi - (1.0 / allocation.length)) / (1.0 - (1.0 / allocation.length)));
+
     return max(0.0, min(1.0, normalizedHhi));
   }
 
@@ -75,7 +80,9 @@ class AiInvestmentHelper {
     }
   }
 
-  static Map<InvestmentAssetType, double> _getConservativeAllocation(double stockPct) {
+  static Map<InvestmentAssetType, double> _getConservativeAllocation(
+    double stockPct,
+  ) {
     final stocks = min(stockPct, 40.0);
     return {
       InvestmentAssetType.bonds: 50.0,
@@ -88,7 +95,9 @@ class AiInvestmentHelper {
     };
   }
 
-  static Map<InvestmentAssetType, double> _getModerateAllocation(double stockPct) {
+  static Map<InvestmentAssetType, double> _getModerateAllocation(
+    double stockPct,
+  ) {
     final stocks = min(stockPct, 60.0);
     return {
       InvestmentAssetType.stocks: stocks,
@@ -101,7 +110,9 @@ class AiInvestmentHelper {
     };
   }
 
-  static Map<InvestmentAssetType, double> _getAggressiveAllocation(double stockPct) {
+  static Map<InvestmentAssetType, double> _getAggressiveAllocation(
+    double stockPct,
+  ) {
     return {
       InvestmentAssetType.stocks: min(stockPct, 70.0),
       InvestmentAssetType.etf: 20.0,
@@ -113,7 +124,9 @@ class AiInvestmentHelper {
     };
   }
 
-  static Map<InvestmentAssetType, double> _getSpeculativeAllocation(double stockPct) {
+  static Map<InvestmentAssetType, double> _getSpeculativeAllocation(
+    double stockPct,
+  ) {
     return {
       InvestmentAssetType.stocks: min(stockPct, 50.0),
       InvestmentAssetType.cryptocurrency: 20.0,

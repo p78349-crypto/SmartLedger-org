@@ -17,18 +17,13 @@ class IngredientTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final score =
-        IngredientHealthScoreUtils.getScore(
-      ingredient,
-    );
+    final score = IngredientHealthScoreUtils.getScore(ingredient);
     final scoreColor = getHealthScoreColor(score);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       elevation: isSelected ? 2 : 0,
-      color: isSelected
-          ? null
-          : Colors.grey.shade100,
+      color: isSelected ? null : Colors.grey.shade100,
       child: CheckboxListTile(
         value: isSelected,
         onChanged: (_) => onToggle(ingredient),
@@ -38,31 +33,20 @@ class IngredientTile extends StatelessWidget {
               child: Text(
                 ingredient,
                 style: TextStyle(
-                  fontWeight: isSelected
-                      ? FontWeight.w600
-                      : FontWeight.normal,
-                  color: isSelected
-                      ? Colors.black
-                      : Colors.grey,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                  color: isSelected ? Colors.black : Colors.grey,
                 ),
               ),
             ),
-            _ScoreBadge(
-              score: score,
-              color: scoreColor,
-            ),
+            _ScoreBadge(score: score, color: scoreColor),
           ],
         ),
         subtitle: isSelected
             ? Padding(
-                padding:
-                    const EdgeInsets.only(top: 4),
+                padding: const EdgeInsets.only(top: 4),
                 child: Text(
-                  IngredientHealthScoreUtils
-                      .getScoreDescription(score),
-                  style: const TextStyle(
-                    fontSize: 11,
-                  ),
+                  IngredientHealthScoreUtils.getScoreDescription(score),
+                  style: const TextStyle(fontSize: 11),
                 ),
               )
             : null,
@@ -75,18 +59,12 @@ class _ScoreBadge extends StatelessWidget {
   final int score;
   final Color color;
 
-  const _ScoreBadge({
-    required this.score,
-    required this.color,
-  });
+  const _ScoreBadge({required this.score, required this.color});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 8,
-        vertical: 4,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(12),
@@ -105,14 +83,8 @@ class _ScoreBadge extends StatelessWidget {
           ),
           const SizedBox(width: 4),
           Text(
-            IngredientHealthScoreUtils
-                .getScoreLabel(score)
-                .split(' ')
-                .first,
-            style: TextStyle(
-              color: color,
-              fontSize: 11,
-            ),
+            IngredientHealthScoreUtils.getScoreLabel(score).split(' ').first,
+            style: TextStyle(color: color, fontSize: 11),
           ),
         ],
       ),

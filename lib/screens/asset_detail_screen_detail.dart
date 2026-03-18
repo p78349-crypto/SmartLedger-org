@@ -10,9 +10,9 @@ extension AssetDetailDetail on _AssetDetailScreenState {
         _currentAsset.unitPrice != null ||
         _currentAsset.appraisalValue != null ||
         _currentAsset.monthlyIncome != null ||
-      _currentAsset.riskLevel != null ||
-      _currentAsset.debtAmount != null ||
-      _currentAsset.maturityDate != null;
+        _currentAsset.riskLevel != null ||
+        _currentAsset.debtAmount != null ||
+        _currentAsset.maturityDate != null;
   }
 
   Widget _buildInfoRow(ThemeData theme, String label, String value) {
@@ -80,24 +80,24 @@ extension AssetDetailDetail on _AssetDetailScreenState {
     final tickerText = _currentAsset.ticker ?? '';
     final institutionText = _currentAsset.institution ?? '';
     final unitsText = _currentAsset.units != null
-      ? _currentAsset.units!.toStringAsFixed(4)
-      : '';
+        ? _currentAsset.units!.toStringAsFixed(4)
+        : '';
     final unitPriceText = _currentAsset.unitPrice != null
-      ? CurrencyFormatter.format(_currentAsset.unitPrice!)
-      : '';
+        ? CurrencyFormatter.format(_currentAsset.unitPrice!)
+        : '';
     final appraisalText = _currentAsset.appraisalValue != null
-      ? CurrencyFormatter.format(_currentAsset.appraisalValue!)
-      : '';
+        ? CurrencyFormatter.format(_currentAsset.appraisalValue!)
+        : '';
     final monthlyIncomeText = _currentAsset.monthlyIncome != null
-      ? CurrencyFormatter.format(_currentAsset.monthlyIncome!)
-      : '';
+        ? CurrencyFormatter.format(_currentAsset.monthlyIncome!)
+        : '';
     final riskText = _currentAsset.riskLevel?.label ?? '';
     final debtText = _currentAsset.debtAmount != null
-      ? CurrencyFormatter.format(_currentAsset.debtAmount!)
-      : '';
+        ? CurrencyFormatter.format(_currentAsset.debtAmount!)
+        : '';
     final maturityText = _currentAsset.maturityDate != null
-      ? DateFormatter.defaultDate.format(_currentAsset.maturityDate!)
-      : '';
+        ? DateFormatter.defaultDate.format(_currentAsset.maturityDate!)
+        : '';
 
     return Scaffold(
       appBar: AppBar(
@@ -346,7 +346,10 @@ extension AssetDetailDetail on _AssetDetailScreenState {
                         final isOutgoing = isFromCurrent;
                         final isLastMove = index == moves.length - 1;
                         return _buildMoveTimeline(
-                          context, move, isOutgoing, isLastMove,
+                          context,
+                          move,
+                          isOutgoing,
+                          isLastMove,
                         );
                       },
                     ),

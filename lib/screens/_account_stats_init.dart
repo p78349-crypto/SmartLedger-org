@@ -49,7 +49,8 @@ extension AccountStatsInit on _AccountStatsScreenState {
   }
 
   String? _pickDefaultStore(
-    List<Transaction> txs, Map<String, String> aliasMap,
+    List<Transaction> txs,
+    Map<String, String> aliasMap,
   ) {
     final now = DateTime.now();
     final scanStart = now.subtract(const Duration(days: 183));
@@ -77,7 +78,8 @@ extension AccountStatsInit on _AccountStatsScreenState {
   }
 
   SummaryTotals? _tryCalculateRangeSummaryFromMonthlyAgg(
-    DateTimeRange range, int months,
+    DateTimeRange range,
+    int months,
   ) {
     final cache = _monthlyAggCache;
     if (cache == null || cache.months.isEmpty) return null;
@@ -98,13 +100,19 @@ extension AccountStatsInit on _AccountStatsScreenState {
     final expenseDisplay = expenseOnly + (includeFixed ? fixedCostTotal : 0.0);
     final net = income - expenseDisplay;
     final baseTitle = _fixedCostTitleForMonths(months);
-    final fixedCostTitle =
-        hasFixed && !_includeFixedCosts ? '$baseTitle(미포함)' : baseTitle;
+    final fixedCostTitle = hasFixed && !_includeFixedCosts
+        ? '$baseTitle(미포함)'
+        : baseTitle;
     final expenseTitle = includeFixed ? '지출(고정비 포함)' : '지출';
     return SummaryTotals(
-      income: income, expense: expenseOnly, savings: savings,
-      fixedCost: fixedCostTotal, expenseDisplay: expenseDisplay, net: net,
-      expenseTitle: expenseTitle, fixedCostTitle: fixedCostTitle,
+      income: income,
+      expense: expenseOnly,
+      savings: savings,
+      fixedCost: fixedCostTotal,
+      expenseDisplay: expenseDisplay,
+      net: net,
+      expenseTitle: expenseTitle,
+      fixedCostTitle: fixedCostTitle,
     );
   }
 

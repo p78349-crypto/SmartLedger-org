@@ -49,8 +49,7 @@ extension IconManagementDropzone on _IconManagementScreenState {
             return GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              gridDelegate:
-                  const SliverGridDelegateWithFixedCrossAxisCount(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 4,
                 mainAxisSpacing: 10,
                 crossAxisSpacing: 10,
@@ -75,8 +74,7 @@ extension IconManagementDropzone on _IconManagementScreenState {
     final isValidSlot = slotIndex >= 0 && slotIndex < _slots.length;
     final slotId = isValidSlot ? _slots[slotIndex] : '';
     final isEmpty = slotId.trim().isEmpty;
-    final icon =
-        (!isEmpty && isValidSlot) ? _iconById[slotId] : null;
+    final icon = (!isEmpty && isValidSlot) ? _iconById[slotId] : null;
 
     Widget tileContent;
     if (isEmpty) {
@@ -176,23 +174,22 @@ extension IconManagementDropzone on _IconManagementScreenState {
       final msg = _settingsIconIds.contains(draggedId)
           ? '설정 아이콘은 Index 6에서만 노출할 수 있습니다'
           : (_rootIconIds.contains(draggedId)
-              ? 'ROOT 아이콘은 Index 5에서만 노출할 수 있습니다'
-              : (_isStatsReservedPage(_pageIndex)
-                  ? 'Index 3은 통계 아이콘 전용입니다'
-                  : (_isAssetReservedPage(_pageIndex)
-                      ? 'Index 4는 자산 아이콘 전용입니다'
-                      : '현재 페이지 정책상 배치할 수 없습니다')));
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(msg)));
+                ? 'ROOT 아이콘은 Index 5에서만 노출할 수 있습니다'
+                : (_isStatsReservedPage(_pageIndex)
+                      ? 'Index 3은 통계 아이콘 전용입니다'
+                      : (_isAssetReservedPage(_pageIndex)
+                            ? 'Index 4는 자산 아이콘 전용입니다'
+                            : '현재 페이지 정책상 배치할 수 없습니다')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
       return;
     }
     if (!isValid) return;
     if (draggedId.trim().isEmpty) return;
 
     if (!_isEditableSlotIndex(slotIndex)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('이 슬롯에는 배치할 수 없습니다')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('이 슬롯에는 배치할 수 없습니다')));
       return;
     }
 

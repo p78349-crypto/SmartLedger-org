@@ -9,23 +9,16 @@ import '../utils/korean_search_utils.dart';
 /// 식료품/생활용품 추가 다이얼로그
 class IngredientUpsertDialog extends StatefulWidget {
   final Function(RecipeIngredient) onAdd;
-  const IngredientUpsertDialog({
-    super.key,
-    required this.onAdd,
-  });
+  const IngredientUpsertDialog({super.key, required this.onAdd});
 
   @override
-  State<IngredientUpsertDialog> createState() =>
-      _IngredientUpsertDialogState();
+  State<IngredientUpsertDialog> createState() => _IngredientUpsertDialogState();
 }
 
-class _IngredientUpsertDialogState
-    extends State<IngredientUpsertDialog> {
+class _IngredientUpsertDialogState extends State<IngredientUpsertDialog> {
   final _nameController = TextEditingController();
-  final _qtyController =
-      TextEditingController(text: '1');
-  final _unitController =
-      TextEditingController(text: '개');
+  final _qtyController = TextEditingController(text: '1');
+  final _unitController = TextEditingController(text: '개');
   final Debouncer _suggestionDebouncer = Debouncer(
     delay: const Duration(milliseconds: 120),
   );
@@ -39,23 +32,19 @@ class _IngredientUpsertDialogState
   }
 
   Future<void> _loadSuggestions() async {
-    final inventory = ConsumableInventoryService
-        .instance.items.value
+    final inventory = ConsumableInventoryService.instance.items.value
         .map((e) => e.name)
         .toList();
-    final accountName =
-        await UserPrefService.getLastAccountName();
+    final accountName = await UserPrefService.getLastAccountName();
     List<String> history = [];
     if (accountName != null) {
-      final h =
-          await UserPrefService.getShoppingCartHistory(
+      final h = await UserPrefService.getShoppingCartHistory(
         accountName: accountName,
       );
       history = h.map((e) => e.name).toList();
     }
     setState(() {
-      _allPossibleNames =
-          {...inventory, ...history}.toList();
+      _allPossibleNames = {...inventory, ...history}.toList();
     });
   }
 
@@ -67,12 +56,7 @@ class _IngredientUpsertDialogState
     }
     setState(() {
       _suggestions = _allPossibleNames
-          .where(
-            (name) => MultilingualSearchUtils.matches(
-              name,
-              query,
-            ),
-          )
+          .where((name) => MultilingualSearchUtils.matches(name, query))
           .take(5)
           .toList();
     });
@@ -102,14 +86,12 @@ class _IngredientUpsertDialogState
             ),
             autofocus: true,
             onChanged: (query) {
-              _suggestionDebouncer
-                  .run(() => _updateSuggestions(query));
+              _suggestionDebouncer.run(() => _updateSuggestions(query));
             },
           ),
           if (_suggestions.isNotEmpty)
             Container(
-              constraints:
-                  const BoxConstraints(maxHeight: 150),
+              constraints: const BoxConstraints(maxHeight: 150),
               child: ListView.builder(
                 shrinkWrap: true,
                 itemCount: _suggestions.length,
@@ -133,11 +115,8 @@ class _IngredientUpsertDialogState
               Expanded(
                 child: TextField(
                   controller: _qtyController,
-                  decoration: const InputDecoration(
-                    labelText: '수량',
-                  ),
-                  keyboardType:
-                      const TextInputType.numberWithOptions(
+                  decoration: const InputDecoration(labelText: '수량'),
+                  keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
                 ),
@@ -146,9 +125,7 @@ class _IngredientUpsertDialogState
               Expanded(
                 child: TextField(
                   controller: _unitController,
-                  decoration: const InputDecoration(
-                    labelText: '단위',
-                  ),
+                  decoration: const InputDecoration(labelText: '단위'),
                 ),
               ),
             ],
@@ -163,17 +140,11 @@ class _IngredientUpsertDialogState
         FilledButton(
           onPressed: () {
             final name = _nameController.text.trim();
-            final qty =
-                double.tryParse(_qtyController.text) ??
-                    0;
+            final qty = double.tryParse(_qtyController.text) ?? 0;
             final unit = _unitController.text.trim();
             if (name.isNotEmpty && qty > 0) {
               widget.onAdd(
-                RecipeIngredient(
-                  name: name,
-                  quantity: qty,
-                  unit: unit,
-                ),
+                RecipeIngredient(name: name, quantity: qty, unit: unit),
               );
               Navigator.pop(context);
             }
@@ -188,18 +159,13 @@ class _IngredientUpsertDialogState
 /// 쇼핑 기록에서 재료 선택 피커
 class RecipeHistoryPicker extends StatefulWidget {
   final List<ShoppingCartHistoryEntry> history;
-  const RecipeHistoryPicker({
-    super.key,
-    required this.history,
-  });
+  const RecipeHistoryPicker({super.key, required this.history});
 
   @override
-  State<RecipeHistoryPicker> createState() =>
-      _RecipeHistoryPickerState();
+  State<RecipeHistoryPicker> createState() => _RecipeHistoryPickerState();
 }
 
-class _RecipeHistoryPickerState
-    extends State<RecipeHistoryPicker> {
+class _RecipeHistoryPickerState extends State<RecipeHistoryPicker> {
   final Set<ShoppingCartHistoryEntry> _selected = {};
 
   @override
@@ -216,10 +182,7 @@ class _RecipeHistoryPickerState
               automaticallyImplyLeading: false,
               actions: [
                 TextButton(
-                  onPressed: () => Navigator.pop(
-                    context,
-                    _selected.toList(),
-                  ),
+                  onPressed: () => Navigator.pop(context, _selected.toList()),
                   child: const Text('Done'),
                 ),
               ],
@@ -230,18 +193,12 @@ class _RecipeHistoryPickerState
                 itemCount: widget.history.length,
                 itemBuilder: (context, index) {
                   final item = widget.history[index];
-                  final isSelected =
-                      _selected.contains(item);
+                  final isSelected = _selected.contains(item);
                   return ListTile(
                     title: Text(item.name),
                     trailing: isSelected
-                        ? const Icon(
-                            Icons.check_circle,
-                            color: Colors.green,
-                          )
-                        : const Icon(
-                            Icons.circle_outlined,
-                          ),
+                        ? const Icon(Icons.check_circle, color: Colors.green)
+                        : const Icon(Icons.circle_outlined),
                     onTap: () {
                       setState(() {
                         if (isSelected) {

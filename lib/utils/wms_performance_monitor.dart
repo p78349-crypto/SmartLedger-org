@@ -12,22 +12,25 @@ class WmsPerformanceMonitor {
   final Map<String, Stopwatch> _activeTimers = {};
   final Map<String, int> _operationCounts = {};
   final Map<String, List<int>> _operationTimes = {};
-  
+
   // 📈 실시간 통계
-  final ValueNotifier<WmsPerformanceStats> _currentStats = 
-      ValueNotifier(WmsPerformanceStats.empty());
-  
+  final ValueNotifier<WmsPerformanceStats> _currentStats = ValueNotifier(
+    WmsPerformanceStats.empty(),
+  );
+
   // ⚙️ 설정
   static const int _maxMetrics = 1000; // 최대 메트릭 수
-  static const Duration _statsUpdateInterval = Duration(seconds: 5); // 통계 업데이트 간격
-  
+  static const Duration _statsUpdateInterval = Duration(
+    seconds: 5,
+  ); // 통계 업데이트 간격
+
   Timer? _statsUpdateTimer;
   bool _isInitialized = false;
 
   /// 🚀 모니터링 시작
   void initialize() {
     if (_isInitialized) return;
-    
+
     _startStatsUpdateTimer();
     _isInitialized = true;
     _log('WMS 성능 모니터링 시작');
@@ -37,7 +40,7 @@ class WmsPerformanceMonitor {
   void startOperation(String operationName) {
     final timer = Stopwatch()..start();
     _activeTimers[operationName] = timer;
-    
+
     _log('작업 시작: $operationName');
   }
 
@@ -53,12 +56,14 @@ class WmsPerformanceMonitor {
     final elapsedMs = timer.elapsedMilliseconds;
 
     // 📊 메트릭 기록
-    _recordMetric(PerformanceMetric(
-      operationName: operationName,
-      elapsedMs: elapsedMs,
-      timestamp: DateTime.now(),
-      metadata: metadata,
-    ));
+    _recordMetric(
+      PerformanceMetric(
+        operationName: operationName,
+        elapsedMs: elapsedMs,
+        timestamp: DateTime.now(),
+        metadata: metadata,
+      ),
+    );
 
     // 📈 통계 업데이트
     _updateOperationStats(operationName, elapsedMs);
@@ -70,7 +75,7 @@ class WmsPerformanceMonitor {
   /// 📝 메트릭 기록
   void _recordMetric(PerformanceMetric metric) {
     _metrics.add(metric);
-    
+
     // 📊 메모리 관리: 오래된 메트릭 정리
     while (_metrics.length > _maxMetrics) {
       _metrics.removeFirst();
@@ -80,15 +85,15 @@ class WmsPerformanceMonitor {
   /// 📈 작업별 통계 업데이트
   void _updateOperationStats(String operationName, int elapsedMs) {
     // 📊 카운트 증가
-    _operationCounts[operationName] = 
+    _operationCounts[operationName] =
         (_operationCounts[operationName] ?? 0) + 1;
-    
+
     // ⏱️ 시간 기록
     if (!_operationTimes.containsKey(operationName)) {
       _operationTimes[operationName] = [];
     }
     _operationTimes[operationName]!.add(elapsedMs);
-    
+
     // 📚 메모리 관리: 최근 100개만 유지
     if (_operationTimes[operationName]!.length > 100) {
       _operationTimes[operationName]!.removeAt(0);
@@ -121,13 +126,13 @@ class WmsPerformanceMonitor {
   /// 📊 작업별 상세 통계 계산
   Map<String, OperationStats> _calculateOperationStats() {
     final stats = <String, OperationStats>{};
-    
+
     for (final entry in _operationTimes.entries) {
       final operationName = entry.key;
       final times = entry.value;
-      
+
       if (times.isEmpty) continue;
-      
+
       times.sort();
       final count = times.length;
       final total = times.fold(0, (a, b) => a + b);
@@ -136,7 +141,7 @@ class WmsPerformanceMonitor {
       final p95 = times[(count * 0.95).round() - 1].toDouble();
       final min = times.first.toDouble();
       final max = times.last.toDouble();
-      
+
       stats[operationName] = OperationStats(
         operationName: operationName,
         count: count,
@@ -148,7 +153,7 @@ class WmsPerformanceMonitor {
         totalMs: total,
       );
     }
-    
+
     return stats;
   }
 
@@ -162,26 +167,28 @@ class WmsPerformanceMonitor {
   /// 🐌 느린 작업 식별
   List<SlowOperation> _identifySlowOperations() {
     final slowOps = <SlowOperation>[];
-    
+
     for (final entry in _operationTimes.entries) {
       final operationName = entry.key;
       final times = entry.value;
-      
+
       if (times.isEmpty) continue;
-      
+
       final average = times.fold(0, (a, b) => a + b) / times.length;
       final threshold = _getSlowThreshold(operationName);
-      
+
       if (average > threshold) {
-        slowOps.add(SlowOperation(
-          operationName: operationName,
-          averageMs: average,
-          threshold: threshold,
-          severity: _calculateSeverity(average, threshold),
-        ));
+        slowOps.add(
+          SlowOperation(
+            operationName: operationName,
+            averageMs: average,
+            threshold: threshold,
+            severity: _calculateSeverity(average, threshold),
+          ),
+        );
       }
     }
-    
+
     // 심각도 순으로 정렬
     slowOps.sort((a, b) => b.severity.compareTo(a.severity));
     return slowOps.take(10).toList(); // 상위 10개만
@@ -190,11 +197,16 @@ class WmsPerformanceMonitor {
   /// 🎯 작업별 임계값 설정
   double _getSlowThreshold(String operationName) {
     switch (operationName) {
-      case 'barcode_search': return 1000; // 1초
-      case 'cache_load': return 500; // 0.5초
-      case 'db_query': return 300; // 0.3초
-      case 'api_call': return 2000; // 2초
-      default: return 1000; // 기본 1초
+      case 'barcode_search':
+        return 1000; // 1초
+      case 'cache_load':
+        return 500; // 0.5초
+      case 'db_query':
+        return 300; // 0.3초
+      case 'api_call':
+        return 2000; // 2초
+      default:
+        return 1000; // 기본 1초
     }
   }
 
@@ -210,12 +222,12 @@ class WmsPerformanceMonitor {
       return SystemHealth.unknown;
     }
 
-    final averageTime = recentMetrics
-        .map((m) => m.elapsedMs)
-        .fold(0, (a, b) => a + b) / recentMetrics.length;
-    
+    final averageTime =
+        recentMetrics.map((m) => m.elapsedMs).fold(0, (a, b) => a + b) /
+        recentMetrics.length;
+
     final errorRate = _calculateErrorRate();
-    
+
     if (averageTime < 500 && errorRate < 0.05) {
       return SystemHealth.excellent;
     } else if (averageTime < 1000 && errorRate < 0.1) {
@@ -237,11 +249,12 @@ class WmsPerformanceMonitor {
   MemoryUsage _calculateMemoryUsage() {
     final metricsSize = _metrics.length * 200; // 대략적인 메트릭 크기
     final timersSize = _activeTimers.length * 100; // 타이머 크기
-    final statsSize = _operationTimes.values
-        .fold(0, (total, times) => total + times.length) * 4; // int 크기
-    
+    final statsSize =
+        _operationTimes.values.fold(0, (total, times) => total + times.length) *
+        4; // int 크기
+
     final totalBytes = metricsSize + timersSize + statsSize;
-    
+
     return MemoryUsage(
       totalBytes: totalBytes,
       metricsBytes: metricsSize,
@@ -254,13 +267,13 @@ class WmsPerformanceMonitor {
   String generateReport() {
     final stats = _currentStats.value;
     final buffer = StringBuffer();
-    
+
     buffer.writeln('=== WMS 성능 리포트 ===');
     buffer.writeln('생성 시간: ${DateTime.now()}');
     buffer.writeln('총 작업 수: ${stats.totalOperations}');
     buffer.writeln('시스템 건강도: ${stats.systemHealth}');
     buffer.writeln();
-    
+
     buffer.writeln('=== 작업별 통계 ===');
     for (final entry in stats.operationStats.entries) {
       final opStat = entry.value;
@@ -268,17 +281,21 @@ class WmsPerformanceMonitor {
       buffer.writeln('  • 실행 횟수: ${opStat.count}');
       buffer.writeln('  • 평균 시간: ${opStat.averageMs.toStringAsFixed(1)}ms');
       buffer.writeln('  • 중간값: ${opStat.medianMs.toStringAsFixed(1)}ms');
-      buffer.writeln('  • 95th percentile: ${opStat.p95Ms.toStringAsFixed(1)}ms');
+      buffer.writeln(
+        '  • 95th percentile: ${opStat.p95Ms.toStringAsFixed(1)}ms',
+      );
       buffer.writeln();
     }
-    
+
     if (stats.slowOperations.isNotEmpty) {
       buffer.writeln('=== 느린 작업 ===');
       for (final slowOp in stats.slowOperations) {
-        buffer.writeln('${slowOp.operationName}: ${slowOp.averageMs.toStringAsFixed(1)}ms (기준: ${slowOp.threshold}ms)');
+        buffer.writeln(
+          '${slowOp.operationName}: ${slowOp.averageMs.toStringAsFixed(1)}ms (기준: ${slowOp.threshold}ms)',
+        );
       }
     }
-    
+
     return buffer.toString();
   }
 
@@ -392,11 +409,11 @@ class SlowOperation {
 
 /// 💚 시스템 건강도
 enum SystemHealth {
-  excellent,  // 우수
-  good,      // 양호
-  fair,      // 보통
-  poor,      // 나쁨
-  unknown,   // 알 수 없음
+  excellent, // 우수
+  good, // 양호
+  fair, // 보통
+  poor, // 나쁨
+  unknown, // 알 수 없음
 }
 
 /// 💾 메모리 사용량

@@ -78,9 +78,9 @@ class RootMemo {
 /// ROOT 전용 메모 서비스 (SQLite 기반)
 class RootMemoServiceV2 {
   static RootMemoServiceV2? _instance;
-  
+
   RootMemoServiceV2._();
-  
+
   static RootMemoServiceV2 getInstance() {
     _instance ??= RootMemoServiceV2._();
     return _instance!;
@@ -100,7 +100,7 @@ class RootMemoServiceV2 {
           // 최신 업데이트 순
           (t) => OrderingTerm(expression: t.updatedAt, mode: OrderingMode.desc),
         ]);
-      
+
       final rows = await query.get();
       return rows.map((row) => RootMemo.fromDbRow(row)).toList();
     } catch (e) {
@@ -120,7 +120,7 @@ class RootMemoServiceV2 {
     try {
       final now = DateTime.now();
       final id = _generateId();
-      
+
       final companion = DbRootMemosCompanion(
         id: Value(id),
         title: Value(title.trim()),
@@ -159,9 +159,10 @@ class RootMemoServiceV2 {
         sortOrder: sortOrder != null ? Value(sortOrder) : const Value.absent(),
       );
 
-      final rowsUpdated = await (_db.update(_db.dbRootMemos)
-            ..where((t) => t.id.equals(id))).write(companion);
-      
+      final rowsUpdated = await (_db.update(
+        _db.dbRootMemos,
+      )..where((t) => t.id.equals(id))).write(companion);
+
       return rowsUpdated > 0;
     } catch (e) {
       print('메모 수정 오류: $e');
@@ -172,9 +173,10 @@ class RootMemoServiceV2 {
   /// 메모 삭제
   Future<bool> deleteMemo(String id) async {
     try {
-      final rowsDeleted = await (_db.delete(_db.dbRootMemos)
-            ..where((t) => t.id.equals(id))).go();
-      
+      final rowsDeleted = await (_db.delete(
+        _db.dbRootMemos,
+      )..where((t) => t.id.equals(id))).go();
+
       return rowsDeleted > 0;
     } catch (e) {
       print('메모 삭제 오류: $e');
@@ -186,9 +188,10 @@ class RootMemoServiceV2 {
   Future<bool> togglePin(String id) async {
     try {
       // 현재 상태 조회
-      final memo = await (_db.select(_db.dbRootMemos)
-            ..where((t) => t.id.equals(id))).getSingleOrNull();
-      
+      final memo = await (_db.select(
+        _db.dbRootMemos,
+      )..where((t) => t.id.equals(id))).getSingleOrNull();
+
       if (memo == null) return false;
 
       return await updateMemo(id: id, isPinned: !memo.isPinned);
@@ -201,17 +204,16 @@ class RootMemoServiceV2 {
   /// 메모 검색 (제목 + 내용)
   Future<List<RootMemo>> searchMemos(String query) async {
     if (query.trim().isEmpty) return await getAllMemos();
-    
+
     try {
       final searchQuery = '%${query.trim()}%';
       final dbQuery = _db.select(_db.dbRootMemos)
-        ..where((t) => 
-          t.title.like(searchQuery) | t.content.like(searchQuery))
+        ..where((t) => t.title.like(searchQuery) | t.content.like(searchQuery))
         ..orderBy([
           (t) => OrderingTerm(expression: t.isPinned, mode: OrderingMode.desc),
           (t) => OrderingTerm(expression: t.updatedAt, mode: OrderingMode.desc),
         ]);
-      
+
       final rows = await dbQuery.get();
       return rows.map((row) => RootMemo.fromDbRow(row)).toList();
     } catch (e) {
@@ -225,20 +227,20 @@ class RootMemoServiceV2 {
     try {
       final totalQuery = _db.selectOnly(_db.dbRootMemos)
         ..addColumns([_db.dbRootMemos.id.count()]);
-      
+
       final pinnedQuery = _db.selectOnly(_db.dbRootMemos)
         ..addColumns([_db.dbRootMemos.id.count()])
         ..where(_db.dbRootMemos.isPinned.equals(true));
-      
+
       final recentDate = DateTime.now().subtract(const Duration(days: 7));
       final recentQuery = _db.selectOnly(_db.dbRootMemos)
         ..addColumns([_db.dbRootMemos.id.count()])
         ..where(_db.dbRootMemos.updatedAt.isBiggerThanValue(recentDate));
-      
+
       final totalResult = await totalQuery.getSingle();
       final pinnedResult = await pinnedQuery.getSingle();
       final recentResult = await recentQuery.getSingle();
-      
+
       return {
         'total': totalResult.read(_db.dbRootMemos.id.count()) ?? 0,
         'pinned': pinnedResult.read(_db.dbRootMemos.id.count()) ?? 0,
@@ -254,18 +256,18 @@ class RootMemoServiceV2 {
   Future<List<RootMemo>> getMemosByColor(String? color) async {
     try {
       final query = _db.select(_db.dbRootMemos);
-      
+
       if (color == null) {
         query.where((t) => t.color.isNull());
       } else {
         query.where((t) => t.color.equals(color));
       }
-      
+
       query.orderBy([
         (t) => OrderingTerm(expression: t.isPinned, mode: OrderingMode.desc),
         (t) => OrderingTerm(expression: t.updatedAt, mode: OrderingMode.desc),
       ]);
-      
+
       final rows = await query.get();
       return rows.map((row) => RootMemo.fromDbRow(row)).toList();
     } catch (e) {
@@ -283,12 +285,13 @@ class RootMemoServiceV2 {
             sortOrder: Value(i),
             updatedAt: Value(DateTime.now()),
           );
-          
-          await (_db.update(_db.dbRootMemos)
-                ..where((t) => t.id.equals(orderedIds[i]))).write(companion);
+
+          await (_db.update(
+            _db.dbRootMemos,
+          )..where((t) => t.id.equals(orderedIds[i]))).write(companion);
         }
       });
-      
+
       return true;
     } catch (e) {
       print('메모 순서 재정렬 오류: $e');
@@ -314,18 +317,22 @@ class RootMemoServiceV2 {
       final jsonData = {
         'version': '2.0',
         'exportDate': DateTime.now().toIso8601String(),
-        'memos': memos.map((memo) => {
-          'id': memo.id,
-          'title': memo.title,
-          'content': memo.content,
-          'createdAt': memo.createdAt.toIso8601String(),
-          'updatedAt': memo.updatedAt.toIso8601String(),
-          'isPinned': memo.isPinned,
-          'color': memo.color,
-          'sortOrder': memo.sortOrder,
-        }).toList(),
+        'memos': memos
+            .map(
+              (memo) => {
+                'id': memo.id,
+                'title': memo.title,
+                'content': memo.content,
+                'createdAt': memo.createdAt.toIso8601String(),
+                'updatedAt': memo.updatedAt.toIso8601String(),
+                'isPinned': memo.isPinned,
+                'color': memo.color,
+                'sortOrder': memo.sortOrder,
+              },
+            )
+            .toList(),
       };
-      
+
       return jsonEncode(jsonData);
     } catch (e) {
       print('백업 생성 오류: $e');
@@ -338,7 +345,7 @@ class RootMemoServiceV2 {
     try {
       final data = jsonDecode(jsonData);
       final memos = data['memos'] as List;
-      
+
       await _db.transaction(() async {
         for (final memoData in memos) {
           final companion = DbRootMemosCompanion(
@@ -351,11 +358,11 @@ class RootMemoServiceV2 {
             color: Value(memoData['color']),
             sortOrder: Value(memoData['sortOrder'] ?? 0),
           );
-          
+
           await _db.into(_db.dbRootMemos).insertOnConflictUpdate(companion);
         }
       });
-      
+
       return true;
     } catch (e) {
       print('백업 복원 오류: $e');
@@ -375,10 +382,10 @@ class RootMemoServiceV2 {
     try {
       final query = _db.selectOnly(_db.dbRootMemos)
         ..addColumns([_db.dbRootMemos.sortOrder.max()]);
-      
+
       final result = await query.getSingle();
       final maxOrder = result.read(_db.dbRootMemos.sortOrder.max());
-      
+
       return (maxOrder ?? 0) + 1;
     } catch (e) {
       return 0;
@@ -392,10 +399,10 @@ class RootMemoServiceV2 {
       final oldService = RootMemoService.getInstance();
       await oldService.loadMemos();
       final oldMemos = oldService.getAllMemos();
-      
+
       if (oldMemos.isNotEmpty) {
         print('기존 메모 ${oldMemos.length}개 마이그레이션 시작...');
-        
+
         await _db.transaction(() async {
           for (final oldMemo in oldMemos) {
             final companion = DbRootMemosCompanion(
@@ -408,15 +415,15 @@ class RootMemoServiceV2 {
               color: Value(oldMemo.color),
               sortOrder: Value(0), // 기존에는 정렬 순서가 없었으므로 0으로 설정
             );
-            
+
             await _db.into(_db.dbRootMemos).insertOnConflictUpdate(companion);
           }
         });
-        
+
         print('마이그레이션 완료: ${oldMemos.length}개 메모');
         return true;
       }
-      
+
       return false;
     } catch (e) {
       print('마이그레이션 오류: $e');
@@ -429,35 +436,39 @@ class RootMemoServiceV2 {
 class RootMemoService {
   static const String _storageKey = 'root_memos';
   static RootMemoService? _instance;
-  
+
   RootMemoService._();
-  
+
   static RootMemoService getInstance() {
     _instance ??= RootMemoService._();
     return _instance!;
   }
 
   List<RootMemo> _memos = [];
-  
+
   List<RootMemo> getAllMemos() => List.unmodifiable(_memos);
 
   Future<void> loadMemos() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final jsonString = prefs.getString(_storageKey);
-      
+
       if (jsonString != null) {
         final List<dynamic> jsonList = jsonDecode(jsonString);
-        _memos = jsonList.map((json) => RootMemo(
-          id: json['id'],
-          title: json['title'],
-          content: json['content'],
-          createdAt: DateTime.parse(json['createdAt']),
-          updatedAt: DateTime.parse(json['updatedAt']),
-          isPinned: json['isPinned'] ?? false,
-          color: json['color'],
-          sortOrder: json['sortOrder'] ?? 0,
-        )).toList();
+        _memos = jsonList
+            .map(
+              (json) => RootMemo(
+                id: json['id'],
+                title: json['title'],
+                content: json['content'],
+                createdAt: DateTime.parse(json['createdAt']),
+                updatedAt: DateTime.parse(json['updatedAt']),
+                isPinned: json['isPinned'] ?? false,
+                color: json['color'],
+                sortOrder: json['sortOrder'] ?? 0,
+              ),
+            )
+            .toList();
       }
     } catch (e) {
       _memos = [];

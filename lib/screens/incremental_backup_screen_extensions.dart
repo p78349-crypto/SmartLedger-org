@@ -2,14 +2,17 @@ part of 'incremental_backup_screen.dart';
 
 /// 점진적 백업 화면 확장 기능들
 extension IncrementalBackupScreenExtensions on _IncrementalBackupScreenState {
-  
   Widget _buildBackupButton() {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
         onPressed: _isLoading ? null : _performIncrementalBackup,
-        icon: _isLoading 
-            ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+        icon: _isLoading
+            ? const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
             : const Icon(Icons.backup),
         label: Text(_isLoading ? '백업 중...' : '점진적 백업 실행'),
         style: ElevatedButton.styleFrom(
@@ -23,7 +26,7 @@ extension IncrementalBackupScreenExtensions on _IncrementalBackupScreenState {
 
   Widget _buildResultCard() {
     final isSuccess = _lastBackupResult!.startsWith('성공');
-    
+
     return Card(
       color: isSuccess ? Colors.green.shade50 : Colors.red.shade50,
       child: Padding(
@@ -38,7 +41,10 @@ extension IncrementalBackupScreenExtensions on _IncrementalBackupScreenState {
                   color: isSuccess ? Colors.green : Colors.red,
                 ),
                 const SizedBox(width: 8),
-                const Text('백업 결과', style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text(
+                  '백업 결과',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
               ],
             ),
             const SizedBox(height: 8),
@@ -56,6 +62,6 @@ extension IncrementalBackupScreenExtensions on _IncrementalBackupScreenState {
 
   String _formatDateTime(DateTime dateTime) {
     return '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')} '
-           '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+        '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
 }

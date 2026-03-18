@@ -69,102 +69,102 @@ class _RootAccountSummaryScreenState extends State<RootAccountSummaryScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _context == null
-              ? const Center(child: Text('데이터를 불러올 수 없습니다.'))
-              : RefreshIndicator(
-                  onRefresh: _loadData,
-                  child: _accountSummaries.isEmpty
-                      ? ListView(
-                          padding: const EdgeInsets.all(16),
-                          children: const [
-                            Card(
-                              child: Padding(
-                                padding: EdgeInsets.all(16),
-                                child: Text('등록된 계정이 없습니다.'),
-                              ),
-                            ),
-                          ],
-                        )
-                      : ListView(
-                          padding: const EdgeInsets.all(16),
-                          children: [
-                            Text(
-                              '계정별 현황',
-                              style: theme.textTheme.titleMedium,
-                            ),
-                            const SizedBox(height: 8),
-                            Card(
-                              child: Column(
-                                children: [
-                                  if (isLandscape)
-                                    Padding(
-                                      padding: const EdgeInsets.fromLTRB(
-                                        16,
-                                        12,
-                                        16,
-                                        8,
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Expanded(
-                                            flex: 3,
-                                            child: Text(
-                                              '계정',
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: theme.textTheme.labelLarge
-                                                  ?.copyWith(
-                                                color: theme.colorScheme
-                                                    .onSurfaceVariant,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                          ),
-                                          Expanded(
-                                            flex: 7,
-                                            child: Text(
-                                              '요약',
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: theme.textTheme.labelLarge
-                                                  ?.copyWith(
-                                                color: theme.colorScheme
-                                                    .onSurfaceVariant,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                          ),
-                                          Expanded(
-                                            flex: 3,
-                                            child: Text(
-                                              '순이익',
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              textAlign: TextAlign.end,
-                                              style: theme.textTheme.labelLarge
-                                                  ?.copyWith(
-                                                color: theme.colorScheme
-                                                    .onSurfaceVariant,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ..._accountSummaries.map((summary) {
-                                    return _buildAccountRow(
-                                      summary,
-                                      theme,
-                                      isLandscape,
-                                      currencyFormat,
-                                    );
-                                  }),
-                                ],
-                              ),
-                            ),
-                          ],
+          ? const Center(child: Text('데이터를 불러올 수 없습니다.'))
+          : RefreshIndicator(
+              onRefresh: _loadData,
+              child: _accountSummaries.isEmpty
+                  ? ListView(
+                      padding: const EdgeInsets.all(16),
+                      children: const [
+                        Card(
+                          child: Padding(
+                            padding: EdgeInsets.all(16),
+                            child: Text('등록된 계정이 없습니다.'),
+                          ),
                         ),
-                ),
+                      ],
+                    )
+                  : ListView(
+                      padding: const EdgeInsets.all(16),
+                      children: [
+                        Text('계정별 현황', style: theme.textTheme.titleMedium),
+                        const SizedBox(height: 8),
+                        Card(
+                          child: Column(
+                            children: [
+                              if (isLandscape)
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    16,
+                                    12,
+                                    16,
+                                    8,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        flex: 3,
+                                        child: Text(
+                                          '계정',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: theme.textTheme.labelLarge
+                                              ?.copyWith(
+                                                color: theme
+                                                    .colorScheme
+                                                    .onSurfaceVariant,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                        ),
+                                      ),
+                                      Expanded(
+                                        flex: 7,
+                                        child: Text(
+                                          '요약',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: theme.textTheme.labelLarge
+                                              ?.copyWith(
+                                                color: theme
+                                                    .colorScheme
+                                                    .onSurfaceVariant,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                        ),
+                                      ),
+                                      Expanded(
+                                        flex: 3,
+                                        child: Text(
+                                          '순이익',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          textAlign: TextAlign.end,
+                                          style: theme.textTheme.labelLarge
+                                              ?.copyWith(
+                                                color: theme
+                                                    .colorScheme
+                                                    .onSurfaceVariant,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ..._accountSummaries.map((summary) {
+                                return _buildAccountRow(
+                                  summary,
+                                  theme,
+                                  isLandscape,
+                                  currencyFormat,
+                                );
+                              }),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+            ),
     );
   }
 
@@ -262,8 +262,7 @@ class _RootAccountSummaryScreenState extends State<RootAccountSummaryScreen> {
                       style: TextStyle(color: AppColors.savingsText),
                     ),
                     TextSpan(text: value),
-                    if (i < detailParts.length - 1)
-                      const TextSpan(text: ' · '),
+                    if (i < detailParts.length - 1) const TextSpan(text: ' · '),
                   ];
                 }
                 return [

@@ -2,8 +2,23 @@ part of 'user_pref_service.dart';
 
 // --- Default count-like units constant ---
 const List<String> _kDefaultCountLikeUnitsV1 = [
-  '개', '알', '롤', '팩', '봉', '봉지', '캔', '병',
-  '장', '매', '줄', '통', '박스', '포', '조각', '세트', '줄기',
+  '개',
+  '알',
+  '롤',
+  '팩',
+  '봉',
+  '봉지',
+  '캔',
+  '병',
+  '장',
+  '매',
+  '줄',
+  '통',
+  '박스',
+  '포',
+  '조각',
+  '세트',
+  '줄기',
 ];
 
 List<String> _normalizeUnitList(Iterable<String> raw) {

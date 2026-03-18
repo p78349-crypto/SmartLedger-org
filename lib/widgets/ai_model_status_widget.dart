@@ -15,7 +15,8 @@ class AiModelStatusWidget extends StatefulWidget {
 }
 
 class _AiModelStatusWidgetState extends State<AiModelStatusWidget> {
-  final AiModelPreferencesService _prefsService = AiModelPreferencesService.instance;
+  final AiModelPreferencesService _prefsService =
+      AiModelPreferencesService.instance;
   final GeminiAiService _geminiService = GeminiAiService.instance;
   final AICoreGeminiService _aicoreService = AICoreGeminiService();
 
@@ -32,13 +33,13 @@ class _AiModelStatusWidgetState extends State<AiModelStatusWidget> {
     setState(() => _isLoading = true);
 
     final futures = <Future>[];
-    
+
     // Gemini Nano 상태 확인
     futures.add(_checkGeminiNanoStatus());
-    
-    // Gemini Flash 상태 확인  
+
+    // Gemini Flash 상태 확인
     futures.add(_checkGeminiFlashStatus());
-    
+
     // 전통적 알고리즘 (항상 사용 가능)
     _modelStatuses[AiModelType.traditional] = ModelStatus(
       isAvailable: true,
@@ -56,7 +57,7 @@ class _AiModelStatusWidgetState extends State<AiModelStatusWidget> {
       final startTime = DateTime.now();
       final isAvailable = await _aicoreService.isAvailable();
       final responseTime = DateTime.now().difference(startTime).inMilliseconds;
-      
+
       _modelStatuses[AiModelType.geminiNano] = ModelStatus(
         isAvailable: isAvailable,
         responseTime: responseTime,
@@ -79,7 +80,7 @@ class _AiModelStatusWidgetState extends State<AiModelStatusWidget> {
       // 간단한 연결 테스트
       await _geminiService.generateText('test');
       final responseTime = DateTime.now().difference(startTime).inMilliseconds;
-      
+
       _modelStatuses[AiModelType.geminiFlasch] = ModelStatus(
         isAvailable: true,
         responseTime: responseTime,
@@ -111,14 +112,16 @@ class _AiModelStatusWidgetState extends State<AiModelStatusWidget> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('🤖 AI 모델 상태', 
-                           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const Text(
+                  '🤖 AI 모델 상태',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
                 IconButton(
                   onPressed: _isLoading ? null : _checkModelStatuses,
-                  icon: _isLoading 
+                  icon: _isLoading
                       ? const SizedBox(
-                          width: 20, 
-                          height: 20, 
+                          width: 20,
+                          height: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.refresh),
@@ -129,8 +132,9 @@ class _AiModelStatusWidgetState extends State<AiModelStatusWidget> {
             if (_modelStatuses.isEmpty && !_isLoading)
               const Text('모델 상태를 확인하려면 새로고침 버튼을 누르세요.')
             else
-              ..._modelStatuses.entries.map((entry) => 
-                _buildModelStatusRow(entry.key, entry.value)),
+              ..._modelStatuses.entries.map(
+                (entry) => _buildModelStatusRow(entry.key, entry.value),
+              ),
             const SizedBox(height: 12),
             _buildStatusLegend(),
           ],
@@ -141,7 +145,7 @@ class _AiModelStatusWidgetState extends State<AiModelStatusWidget> {
 
   Widget _buildModelStatusRow(AiModelType modelType, ModelStatus status) {
     final isOnline = modelType == AiModelType.geminiFlasch;
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: Row(
@@ -151,7 +155,9 @@ class _AiModelStatusWidgetState extends State<AiModelStatusWidget> {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: status.isAvailable ? Colors.green.shade100 : Colors.red.shade100,
+              color: status.isAvailable
+                  ? Colors.green.shade100
+                  : Colors.red.shade100,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
@@ -161,7 +167,7 @@ class _AiModelStatusWidgetState extends State<AiModelStatusWidget> {
             ),
           ),
           const SizedBox(width: 12),
-          
+
           // 모델 정보
           Expanded(
             child: Column(
@@ -169,13 +175,20 @@ class _AiModelStatusWidgetState extends State<AiModelStatusWidget> {
               children: [
                 Row(
                   children: [
-                    Text(modelType.displayName, 
-                         style: const TextStyle(fontWeight: FontWeight.w500)),
+                    Text(
+                      modelType.displayName,
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    ),
                     const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
-                        color: isOnline ? Colors.blue.shade100 : Colors.green.shade100,
+                        color: isOnline
+                            ? Colors.blue.shade100
+                            : Colors.green.shade100,
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -192,25 +205,37 @@ class _AiModelStatusWidgetState extends State<AiModelStatusWidget> {
                 Row(
                   children: [
                     if (status.responseTime >= 0)
-                      Text('${status.responseTime}ms', 
-                           style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
-                    if (status.responseTime >= 0) const Text(' • ', 
-                                                              style: TextStyle(fontSize: 12)),
-                    Text('정확도 ${status.accuracy}%', 
-                         style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                      Text(
+                        '${status.responseTime}ms',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                    if (status.responseTime >= 0)
+                      const Text(' • ', style: TextStyle(fontSize: 12)),
+                    Text(
+                      '정확도 ${status.accuracy}%',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
                   ],
                 ),
               ],
             ),
           ),
-          
+
           // 상태 표시
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               color: _getStatusColor(status).withOpacity(0.2),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: _getStatusColor(status).withOpacity(0.5)),
+              border: Border.all(
+                color: _getStatusColor(status).withOpacity(0.5),
+              ),
             ),
             child: Text(
               _getStatusText(status),
@@ -239,8 +264,10 @@ class _AiModelStatusWidgetState extends State<AiModelStatusWidget> {
               children: [
                 Icon(Icons.security, color: Colors.red.shade700),
                 const SizedBox(width: 8),
-                const Text('🔒 AI 모델 상태 (봉인됨)', 
-                           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const Text(
+                  '🔒 AI 모델 상태 (봉인됨)',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
               ],
             ),
             const SizedBox(height: 16),
@@ -258,15 +285,25 @@ class _AiModelStatusWidgetState extends State<AiModelStatusWidget> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('전통적 알고리즘만 사용 가능', 
-                             style: TextStyle(fontWeight: FontWeight.w500)),
-                        Text('AI 기능은 보안상 이유로 비활성화됨', 
-                             style: TextStyle(fontSize: 12, color: Colors.grey)),
+                        Text(
+                          '전통적 알고리즘만 사용 가능',
+                          style: TextStyle(fontWeight: FontWeight.w500),
+                        ),
+                        Text(
+                          'AI 기능은 보안상 이유로 비활성화됨',
+                          style: TextStyle(fontSize: 12, color: Colors.grey),
+                        ),
                       ],
                     ),
                   ),
-                  Text('OK', 
-                       style: TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.w500)),
+                  Text(
+                    'OK',
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -291,7 +328,10 @@ class _AiModelStatusWidgetState extends State<AiModelStatusWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('상태 범례:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
+          const Text(
+            '상태 범례:',
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+          ),
           const SizedBox(height: 4),
           Row(
             children: [
@@ -314,10 +354,7 @@ class _AiModelStatusWidgetState extends State<AiModelStatusWidget> {
         Container(
           width: 8,
           height: 8,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 4),
         Text(label, style: const TextStyle(fontSize: 11)),

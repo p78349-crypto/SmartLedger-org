@@ -187,7 +187,8 @@ class _IncomeSplitScreenState extends State<IncomeSplitScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('확인')),
+            child: const Text('확인'),
+          ),
         ],
       ),
     );
@@ -201,7 +202,8 @@ class _IncomeSplitScreenState extends State<IncomeSplitScreen> {
 class _CurrencyInputFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue, TextEditingValue newValue,
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
   ) {
     if (newValue.text.isEmpty) return newValue;
     final onlyDigits = newValue.text.replaceAll(RegExp(r'\D'), '');
@@ -220,7 +222,8 @@ class _CurrencyInputFormatter extends TextInputFormatter {
     }
     return newValue.copyWith(
       text: formatted,
-      selection: TextSelection.collapsed(offset: cursorPosition));
+      selection: TextSelection.collapsed(offset: cursorPosition),
+    );
   }
 
   String _formatWithCommas(String text) {

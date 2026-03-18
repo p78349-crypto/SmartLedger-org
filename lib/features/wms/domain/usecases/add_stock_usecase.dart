@@ -8,13 +8,13 @@ import 'package:smart_ledger/shared/errors.dart';
 import 'package:smart_ledger/shared/result.dart';
 
 /// Add a new inventory item with validation
-/// 
+///
 /// This use case validates the input item before adding it to the repository.
 /// Validation rules:
 /// - Item name cannot be empty
 /// - Current stock cannot be negative
 /// - Min threshold must be non-negative
-/// 
+///
 /// Example:
 /// ```dart
 /// final useCase = AddStockUseCase(repository);
@@ -24,7 +24,7 @@ import 'package:smart_ledger/shared/result.dart';
 ///   currentStock: 10.0,
 ///   createdAt: DateTime.now(),
 /// );
-/// 
+///
 /// final result = await useCase.execute(item);
 /// result.when(
 ///   success: (added) => print('Added: ${added.name}'),
@@ -34,7 +34,7 @@ import 'package:smart_ledger/shared/result.dart';
 class AddStockUseCase
     extends UseCase<ConsumableInventoryItem, ConsumableInventoryItem> {
   final InventoryRepository _repository;
-  
+
   AddStockUseCase(this._repository);
 
   @override
@@ -45,21 +45,17 @@ class AddStockUseCase
     if (item.name.trim().isEmpty) {
       return const Failure(ValidationError('Item name cannot be empty'));
     }
-    
+
     // Validation: stock cannot be negative
     if (item.currentStock < 0) {
-      return const Failure(
-        ValidationError('Current stock cannot be negative'),
-      );
+      return const Failure(ValidationError('Current stock cannot be negative'));
     }
-    
+
     // Validation: threshold must be non-negative
     if (item.threshold < 0) {
-      return const Failure(
-        ValidationError('threshold cannot be negative'),
-      );
+      return const Failure(ValidationError('threshold cannot be negative'));
     }
-    
+
     // Call repository to persist the item
     return await _repository.addItem(item);
   }

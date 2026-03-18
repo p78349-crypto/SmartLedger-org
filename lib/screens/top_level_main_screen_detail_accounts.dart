@@ -68,9 +68,7 @@ extension TopLevelDetailAccounts on TopLevelStatsDetailScreen {
                   ),
                 ),
               ...accountSummaries.map((summary) {
-                final accountName = summary.name.isEmpty
-                    ? '미분류'
-                    : summary.name;
+                final accountName = summary.name.isEmpty ? '미분류' : summary.name;
                 final incomeLabel = _formatCurrency(
                   currencyFormat,
                   summary.income,

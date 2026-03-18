@@ -129,8 +129,7 @@ extension AccountMainBuild on _AccountMainScreenState {
               },
             ),
             // Page quick-jump indicator (bottom center)
-            if (_pageCount > 0)
-              _buildPageLabel(context, isLandscape),
+            if (_pageCount > 0) _buildPageLabel(context, isLandscape),
           ],
         );
       },
@@ -147,8 +146,7 @@ extension AccountMainBuild on _AccountMainScreenState {
         child: Builder(
           builder: (context) {
             final showLabel =
-                _currentIndex >= 0 &&
-                _currentIndex < _pageNameLabels.length;
+                _currentIndex >= 0 && _currentIndex < _pageNameLabels.length;
             if (!showLabel) return const SizedBox.shrink();
             final label = _pageNameLabels[_currentIndex];
             final scheme = Theme.of(context).colorScheme;

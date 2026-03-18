@@ -22,21 +22,11 @@ const List<WeatherConditionItem> weatherConditions = [
   ),
   WeatherConditionItem('cloudy', '흐림', Icons.cloud, Colors.grey),
   WeatherConditionItem('rain', '비', Icons.umbrella, Colors.blue),
-  WeatherConditionItem(
-    'heavy_rain',
-    '폭우',
-    Icons.thunderstorm,
-    Colors.indigo,
-  ),
+  WeatherConditionItem('heavy_rain', '폭우', Icons.thunderstorm, Colors.indigo),
   WeatherConditionItem('snow', '눈', Icons.ac_unit, Colors.cyan),
   WeatherConditionItem('fog', '안개', Icons.blur_on, Colors.blueGrey),
   WeatherConditionItem('windy', '바람', Icons.air, Colors.teal),
-  WeatherConditionItem(
-    'hot',
-    '무더위',
-    Icons.local_fire_department,
-    Colors.red,
-  ),
+  WeatherConditionItem('hot', '무더위', Icons.local_fire_department, Colors.red),
   WeatherConditionItem('cold', '한파', Icons.severe_cold, Colors.blue),
 ];
 

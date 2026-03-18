@@ -120,7 +120,11 @@ extension BackupScreenAuth on _BackupScreenState {
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.help_outline, size: 16, color: Colors.orange),
+                      const Icon(
+                        Icons.help_outline,
+                        size: 16,
+                        color: Colors.orange,
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -265,9 +269,9 @@ extension BackupScreenAuth on _BackupScreenState {
         content: Text(
           _backupEncryptionEnabled
               ? '백업 암호를 설정하면 백업 파일이 강력하게 암호화됩니다.\n\n'
-                '⚠️ 주의: 암호 분실 시 개발자를 포함해 누구도 데이터를 복구할 수 없습니다. 반드시 암호와 힌트를 안전하게 보관해 주세요.'
+                    '⚠️ 주의: 암호 분실 시 개발자를 포함해 누구도 데이터를 복구할 수 없습니다. 반드시 암호와 힌트를 안전하게 보관해 주세요.'
               : '이번 백업을 암호화할 수 있습니다.\n\n'
-                '⚠️ 주의: 암호를 잊어버리면 백업 파일을 절대 열 수 없으며, 추후 복구 요청이 불가능합니다.',
+                    '⚠️ 주의: 암호를 잊어버리면 백업 파일을 절대 열 수 없으며, 추후 복구 요청이 불가능합니다.',
         ),
         actions: [
           TextButton(
@@ -306,7 +310,7 @@ extension BackupScreenAuth on _BackupScreenState {
       await _authenticateForBackupProtection(reason: '복원을 위해 인증을 진행합니다.');
     }
     return _promptBackupPassword(
-      title: '암호화 백업 복원', 
+      title: '암호화 백업 복원',
       confirmText: '복원',
       passwordHint: hint,
     );

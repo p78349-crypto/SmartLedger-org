@@ -7,12 +7,12 @@ import 'package:smart_ledger/features/wms/presentation/widgets/use_stock_dialog.
 import 'package:intl/intl.dart';
 
 /// Detail screen for viewing a single inventory item.
-/// 
+///
 /// Shows all information about an item with actions to edit, delete, or use stock.
 class InventoryDetailScreen extends StatelessWidget {
   final ConsumableInventoryItem item;
   final InventoryNotifier notifier;
-  
+
   const InventoryDetailScreen({
     required this.item,
     required this.notifier,
@@ -24,7 +24,7 @@ class InventoryDetailScreen extends StatelessWidget {
     final theme = Theme.of(context);
     final dateFormat = DateFormat('MMM dd, yyyy');
     final isLowStock = item.currentStock <= item.threshold;
-    
+
     return Scaffold(
       appBar: AppBar(
         title: Text(item.name),
@@ -86,8 +86,8 @@ class InventoryDetailScreen extends StatelessWidget {
                             '${item.currentStock.toStringAsFixed(1)} ${item.unit}',
                             style: theme.textTheme.headlineMedium?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: isLowStock 
-                                  ? Colors.orange.shade700 
+                              color: isLowStock
+                                  ? Colors.orange.shade700
                                   : Colors.green.shade700,
                             ),
                           ),
@@ -117,106 +117,90 @@ class InventoryDetailScreen extends StatelessWidget {
               ),
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Basic information
-          _buildSection(
-            context,
-            'Basic Information',
-            [
-              _buildInfoRow(context, 'Name', item.name),
-              _buildInfoRow(context, 'Category', item.category),
-              if (item.detailCategory != null)
-                _buildInfoRow(context, 'Subcategory', item.detailCategory!),
-              _buildInfoRow(context, 'Unit', item.unit),
-              _buildInfoRow(context, 'Bundle Size', item.bundleSize.toString()),
-            ],
-          ),
-          
+          _buildSection(context, 'Basic Information', [
+            _buildInfoRow(context, 'Name', item.name),
+            _buildInfoRow(context, 'Category', item.category),
+            if (item.detailCategory != null)
+              _buildInfoRow(context, 'Subcategory', item.detailCategory!),
+            _buildInfoRow(context, 'Unit', item.unit),
+            _buildInfoRow(context, 'Bundle Size', item.bundleSize.toString()),
+          ]),
+
           const SizedBox(height: 16),
-          
+
           // Location and supplier
-          _buildSection(
-            context,
-            'Storage & Supply',
-            [
-              _buildInfoRow(context, 'Location', item.location),
-              if (item.supplier != null)
-                _buildInfoRow(context, 'Supplier', item.supplier!),
-              if (item.price != null)
-                _buildInfoRow(
-                  context, 
-                  'Price', 
-                  '\$${item.price!.toStringAsFixed(2)}',
-                ),
-            ],
-          ),
-          
+          _buildSection(context, 'Storage & Supply', [
+            _buildInfoRow(context, 'Location', item.location),
+            if (item.supplier != null)
+              _buildInfoRow(context, 'Supplier', item.supplier!),
+            if (item.price != null)
+              _buildInfoRow(
+                context,
+                'Price',
+                '\$${item.price!.toStringAsFixed(2)}',
+              ),
+          ]),
+
           const SizedBox(height: 16),
-          
+
           // Dates
-          _buildSection(
-            context,
-            'Dates',
-            [
+          _buildSection(context, 'Dates', [
+            _buildInfoRow(
+              context,
+              'Created',
+              dateFormat.format(item.createdAt),
+            ),
+            _buildInfoRow(
+              context,
+              'Last Updated',
+              dateFormat.format(item.lastUpdated),
+            ),
+            if (item.purchaseDate != null)
               _buildInfoRow(
-                context, 
-                'Created', 
-                dateFormat.format(item.createdAt),
+                context,
+                'Purchase Date',
+                dateFormat.format(item.purchaseDate!),
               ),
+            if (item.expiryDate != null)
               _buildInfoRow(
-                context, 
-                'Last Updated', 
-                dateFormat.format(item.lastUpdated),
+                context,
+                'Expiry Date',
+                dateFormat.format(item.expiryDate!),
+                highlight: item.expiryDate!.isBefore(DateTime.now()),
               ),
-              if (item.purchaseDate != null)
-                _buildInfoRow(
-                  context, 
-                  'Purchase Date', 
-                  dateFormat.format(item.purchaseDate!),
-                ),
-              if (item.expiryDate != null)
-                _buildInfoRow(
-                  context, 
-                  'Expiry Date', 
-                  dateFormat.format(item.expiryDate!),
-                  highlight: item.expiryDate!.isBefore(DateTime.now()),
-                ),
-            ],
-          ),
-          
+          ]),
+
           const SizedBox(height: 16),
-          
+
           // Predicted Depletion
-          
+
           // Usage history
           if (item.usageHistory.isNotEmpty)
-            _buildSection(
-              context,
-              'Usage History',
-              [
-                ...item.usageHistory.take(5).map((record) {
-                  return ListTile(
-                    leading: const Icon(Icons.history),
-                    title: Text('${record.amount} ${item.unit}'),
-                    subtitle: Text(dateFormat.format(record.timestamp)),
-                    dense: true,
-                  );
-                }),
-                if (item.usageHistory.length > 5)
-                  Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: Text(
-                      '+ ${item.usageHistory.length - 5} more entries',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: Colors.grey.shade600,
-                      ),
-                      textAlign: TextAlign.center,
+            _buildSection(context, 'Usage History', [
+              ...item.usageHistory.take(5).map((record) {
+                return ListTile(
+                  leading: const Icon(Icons.history),
+                  title: Text('${record.amount} ${item.unit}'),
+                  subtitle: Text(dateFormat.format(record.timestamp)),
+                  dense: true,
+                );
+              }),
+              if (item.usageHistory.length > 5)
+                Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Text(
+                    '+ ${item.usageHistory.length - 5} more entries',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: Colors.grey.shade600,
                     ),
+                    textAlign: TextAlign.center,
                   ),
-              ],
-            ),
+                ),
+            ]),
         ],
       ),
       bottomNavigationBar: SafeArea(
@@ -226,15 +210,13 @@ class InventoryDetailScreen extends StatelessWidget {
             onPressed: () => _handleUseStock(context),
             icon: const Icon(Icons.remove_circle_outline),
             label: const Text('Use Stock'),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.all(16),
-            ),
+            style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(16)),
           ),
         ),
       ),
     );
   }
-  
+
   Widget _buildSection(
     BuildContext context,
     String title,
@@ -248,9 +230,9 @@ class InventoryDetailScreen extends StatelessWidget {
           children: [
             Text(
               title,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const Divider(),
             ...children,
@@ -259,7 +241,7 @@ class InventoryDetailScreen extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildInfoRow(
     BuildContext context,
     String label,
@@ -275,9 +257,9 @@ class InventoryDetailScreen extends StatelessWidget {
             width: 120,
             child: Text(
               label,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey.shade600,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: Colors.grey.shade600),
             ),
           ),
           Expanded(
@@ -293,27 +275,26 @@ class InventoryDetailScreen extends StatelessWidget {
       ),
     );
   }
-  
+
   Future<void> _handleUseStock(BuildContext context) async {
-    final result = await showUseStockDialog(
-      context,
-      item,
-      (amount, purpose) async {
-        await notifier.useStock(item.id, amount, purpose: purpose);
-      },
-    );
-    
+    final result = await showUseStockDialog(context, item, (
+      amount,
+      purpose,
+    ) async {
+      await notifier.useStock(item.id, amount, purpose: purpose);
+    });
+
     if (result == true && context.mounted) {
       Navigator.of(context).pop(); // Go back after using stock
     }
   }
-  
+
   void _handleEdit(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Edit screen - Coming soon')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Edit screen - Coming soon')));
   }
-  
+
   Future<void> _handleDelete(BuildContext context) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -336,7 +317,7 @@ class InventoryDetailScreen extends StatelessWidget {
         ],
       ),
     );
-    
+
     if (confirmed == true && context.mounted) {
       await notifier.deleteItem(item.id);
       if (context.mounted) {

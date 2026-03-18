@@ -8,7 +8,7 @@ import '../utils/icon_catalog.dart';
 import '../utils/pref_keys.dart';
 
 /// 자산 관리 화면 (입력/편집/삭제) - 완전 독립형
-/// 
+///
 /// 기능:
 /// - 생체인증 (지문/PIN/비밀번호)
 /// - 자산 간편 입력 (5초)
@@ -18,10 +18,7 @@ import '../utils/pref_keys.dart';
 class AssetManagementScreen extends StatefulWidget {
   final String accountName;
 
-  const AssetManagementScreen({
-    super.key,
-    required this.accountName,
-  });
+  const AssetManagementScreen({super.key, required this.accountName});
 
   @override
   State<AssetManagementScreen> createState() => _AssetManagementScreenState();
@@ -65,12 +62,13 @@ class _AssetManagementScreenState extends State<AssetManagementScreen> {
 
   Future<void> _loadBiometricSettings() async {
     final prefs = await SharedPreferences.getInstance();
-    final bioEnabled = prefs.getBool(
-      PrefKeys.accountKey(
-        widget.accountName,
-        'asset_biometric_auth_enabled',
-      ),
-    ) ??
+    final bioEnabled =
+        prefs.getBool(
+          PrefKeys.accountKey(
+            widget.accountName,
+            'asset_biometric_auth_enabled',
+          ),
+        ) ??
         false;
     if (!mounted) return;
     setState(() => _biometricAuthEnabled = bioEnabled);
@@ -92,16 +90,16 @@ class _AssetManagementScreenState extends State<AssetManagementScreen> {
       setState(() => _isAuthenticated = authenticated);
       if (!authenticated) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('인증에 실패했습니다')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('인증에 실패했습니다')));
       }
     } catch (e) {
       debugPrint('Authentication error: $e');
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('인증 오류: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('인증 오류: $e')));
     }
   }
 
@@ -147,15 +145,9 @@ class _AssetManagementScreenState extends State<AssetManagementScreen> {
                 color: theme.colorScheme.onSurface,
               ),
               const SizedBox(height: 16),
-              Text(
-                '자산 관리 잠금',
-                style: theme.textTheme.titleLarge,
-              ),
+              Text('자산 관리 잠금', style: theme.textTheme.titleLarge),
               const SizedBox(height: 8),
-              Text(
-                '인증하여 자산 정보에 접근하세요',
-                style: theme.textTheme.bodyMedium,
-              ),
+              Text('인증하여 자산 정보에 접근하세요', style: theme.textTheme.bodyMedium),
               const SizedBox(height: 24),
               FilledButton.icon(
                 onPressed: _authenticateIfNeeded,
@@ -169,10 +161,7 @@ class _AssetManagementScreenState extends State<AssetManagementScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('자산 관리'),
-        elevation: 0,
-      ),
+      appBar: AppBar(title: const Text('자산 관리'), elevation: 0),
       body: Listener(
         behavior: HitTestBehavior.translucent,
         onPointerDown: (_) => _resetAutoLockTimer(),
@@ -199,10 +188,7 @@ class _AssetManagementScreenState extends State<AssetManagementScreen> {
                                   : Icons.lock_outline,
                             ),
                             const SizedBox(width: 8),
-                            Text(
-                              '보안 잠금',
-                              style: theme.textTheme.bodyMedium,
-                            ),
+                            Text('보안 잠금', style: theme.textTheme.bodyMedium),
                           ],
                         ),
                         Switch(
@@ -219,9 +205,7 @@ class _AssetManagementScreenState extends State<AssetManagementScreen> {
                                     value,
                                   );
                                   if (!mounted) return;
-                                  setState(
-                                    () => _biometricAuthEnabled = value,
-                                  );
+                                  setState(() => _biometricAuthEnabled = value);
                                   if (value && _isAuthenticated) {
                                     setState(() => _isAuthenticated = false);
                                   }
@@ -237,7 +221,10 @@ class _AssetManagementScreenState extends State<AssetManagementScreen> {
 
               // 📌 안내 문구 (기능들이 대시보드로 이동됨)
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
                 child: Text(
                   '자산 관련 주요 기능(입력, 분석, 내보내기)은 이제 자산 페이지의 아이콘으로 바로 이용하실 수 있습니다.',
                   textAlign: TextAlign.center,

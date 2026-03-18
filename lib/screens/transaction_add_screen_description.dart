@@ -101,5 +101,4 @@ extension TransactionAddScreenDescription on _NO1FormState {
       _amountFocusNode.requestFocus();
     });
   }
-
 }

@@ -71,9 +71,7 @@ extension IconGridPageBuild on _IconGridPageState {
         color: scheme.surfaceContainerLow,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(
-            color: scheme.primary.withValues(alpha: 0.1),
-          ),
+          side: BorderSide(color: scheme.primary.withValues(alpha: 0.1)),
         ),
         child: ListTile(
           contentPadding: const EdgeInsets.symmetric(
@@ -86,10 +84,7 @@ extension IconGridPageBuild on _IconGridPageState {
               color: scheme.primary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              IconCatalog.insightsOutlined,
-              color: scheme.primary,
-            ),
+            child: Icon(IconCatalog.insightsOutlined, color: scheme.primary),
           ),
           title: Text(
             'CEO 비서 대시보드',
@@ -98,12 +93,8 @@ extension IconGridPageBuild on _IconGridPageState {
             ),
           ),
           subtitle: const Text('전략 지표 및 복구 계획 보기'),
-          trailing: Icon(
-            Icons.chevron_right,
-            color: scheme.onSurfaceVariant,
-          ),
-          onTap: () =>
-              Navigator.of(context).pushNamed(AppRoutes.ceoAssistant),
+          trailing: Icon(Icons.chevron_right, color: scheme.onSurfaceVariant),
+          onTap: () => Navigator.of(context).pushNamed(AppRoutes.ceoAssistant),
         ),
       ),
     );
@@ -113,8 +104,7 @@ extension IconGridPageBuild on _IconGridPageState {
     return LayoutBuilder(
       builder: (context, constraints) {
         const crossAxisCount = 4;
-        const rows =
-            (_defaultSlotCount + crossAxisCount - 1) ~/ crossAxisCount;
+        const rows = (_defaultSlotCount + crossAxisCount - 1) ~/ crossAxisCount;
         const mainAxisSpacing = 12.0;
         const horizontalPadding = 16.0 * 2;
         const verticalPadding = 16.0 * 2;

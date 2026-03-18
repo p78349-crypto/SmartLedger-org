@@ -5,8 +5,7 @@ part of 'food_expiry_items_screen.dart';
 /// Build helper for individual item list tiles.
 extension FoodExpiryBuildItemTileExt on _FoodExpiryItemsScreenState {
   Widget buildItemTile(FoodExpiryItem it, ThemeData theme) {
-    final displayName =
-        it.name.trim().isEmpty ? '(이름 없음)' : it.name.trim();
+    final displayName = it.name.trim().isEmpty ? '(이름 없음)' : it.name.trim();
     final left = it.daysLeft(DateTime.now());
     final leftText = left < 0
         ? '지남 ${-left}일'
@@ -14,9 +13,7 @@ extension FoodExpiryBuildItemTileExt on _FoodExpiryItemsScreenState {
               '일';
     final color = left < 0
         ? theme.colorScheme.error
-        : (left <= 2
-              ? theme.colorScheme.tertiary
-              : theme.colorScheme.primary);
+        : (left <= 2 ? theme.colorScheme.tertiary : theme.colorScheme.primary);
 
     final isMatched =
         widget.initialIngredients?.any(
@@ -27,8 +24,7 @@ extension FoodExpiryBuildItemTileExt on _FoodExpiryItemsScreenState {
         ) ??
         false;
 
-    final isItemUsageActive =
-        _isUsageMode || _activeUsageItems.contains(it.id);
+    final isItemUsageActive = _isUsageMode || _activeUsageItems.contains(it.id);
 
     return Container(
       color: isMatched
@@ -71,9 +67,7 @@ extension FoodExpiryBuildItemTileExt on _FoodExpiryItemsScreenState {
                           displayName,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
                       const SizedBox(width: 4),
@@ -101,8 +95,7 @@ extension FoodExpiryBuildItemTileExt on _FoodExpiryItemsScreenState {
                           ),
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),
-                          onPressed: () =>
-                              _adjustQuantity(context, it, -1.0),
+                          onPressed: () => _adjustQuantity(context, it, -1.0),
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -126,14 +119,10 @@ extension FoodExpiryBuildItemTileExt on _FoodExpiryItemsScreenState {
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(
-                            Icons.add_circle_outline,
-                            size: 20,
-                          ),
+                          icon: const Icon(Icons.add_circle_outline, size: 20),
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),
-                          onPressed: () =>
-                              _adjustQuantity(context, it, 1.0),
+                          onPressed: () => _adjustQuantity(context, it, 1.0),
                         ),
                       ],
                     )

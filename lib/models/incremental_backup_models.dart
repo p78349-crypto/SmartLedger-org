@@ -74,8 +74,8 @@ class IncrementalBackupSnapshot {
     'processedItems': processedItems,
   };
 
-  double get progressPercentage => 
-    totalItems > 0 ? (processedItems / totalItems) * 100 : 0;
+  double get progressPercentage =>
+      totalItems > 0 ? (processedItems / totalItems) * 100 : 0;
 
   IncrementalBackupSnapshot copyWith({
     String? id,

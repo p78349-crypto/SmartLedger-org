@@ -13,9 +13,7 @@ extension IconManagementBuild on _IconManagementScreenState {
   }) {
     final scheme = theme.colorScheme;
     final borderColor = scheme.onSurface;
-    final bg = selected
-        ? scheme.surfaceContainerHighest
-        : scheme.surface;
+    final bg = selected ? scheme.surfaceContainerHighest : scheme.surface;
 
     return Expanded(
       child: InkWell(
@@ -109,8 +107,7 @@ extension IconManagementBuild on _IconManagementScreenState {
               for (final idx in visible)
                 ListTile(
                   title: Text('Index $idx: ${_pageLabel(idx)}'),
-                  trailing:
-                      idx == _pageIndex ? const Icon(Icons.check) : null,
+                  trailing: idx == _pageIndex ? const Icon(Icons.check) : null,
                   onTap: () => Navigator.of(context).pop(idx),
                 ),
             ],
@@ -132,8 +129,9 @@ extension IconManagementBuild on _IconManagementScreenState {
       final icons = _autoFillSourceIconsForPage(_pageIndex)
           .where((icon) => !_isBlockedForCurrentPage(icon.id))
           .toList(growable: false);
-      icons.sort((a, b) => _effectiveLabelFor(a.id)
-          .compareTo(_effectiveLabelFor(b.id)));
+      icons.sort(
+        (a, b) => _effectiveLabelFor(a.id).compareTo(_effectiveLabelFor(b.id)),
+      );
       return icons;
     }
 
@@ -202,11 +200,7 @@ extension IconManagementBuild on _IconManagementScreenState {
                 children: [
                   Align(
                     alignment: Alignment.topRight,
-                    child: Icon(
-                      icon.icon,
-                      size: 26,
-                      color: scheme.onSurface,
-                    ),
+                    child: Icon(icon.icon, size: 26, color: scheme.onSurface),
                   ),
                   const Spacer(),
                   Text(
@@ -386,23 +380,18 @@ extension IconManagementBuild on _IconManagementScreenState {
     );
   }
 
-  void _onCatalogTileTap(
-    MainFeatureIcon icon,
-    bool blocked,
-    bool isSelected,
-  ) {
+  void _onCatalogTileTap(MainFeatureIcon icon, bool blocked, bool isSelected) {
     if (blocked) {
       final msg = _settingsIconIds.contains(icon.id)
           ? '설정 아이콘은 Index 6에서만 노출할 수 있습니다'
           : (_rootIconIds.contains(icon.id)
-              ? 'ROOT 아이콘은 Index 5에서만 노출할 수 있습니다'
-              : (_isStatsReservedPage(_pageIndex)
-                  ? 'Index 3은 통계 아이콘 전용입니다'
-                  : (_isAssetReservedPage(_pageIndex)
-                      ? 'Index 4는 자산 아이콘 전용입니다'
-                      : '현재 페이지 정책상 배치할 수 없습니다')));
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(msg)));
+                ? 'ROOT 아이콘은 Index 5에서만 노출할 수 있습니다'
+                : (_isStatsReservedPage(_pageIndex)
+                      ? 'Index 3은 통계 아이콘 전용입니다'
+                      : (_isAssetReservedPage(_pageIndex)
+                            ? 'Index 4는 자산 아이콘 전용입니다'
+                            : '현재 페이지 정책상 배치할 수 없습니다')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
       return;
     }
     setState(() {
@@ -459,10 +448,7 @@ extension IconManagementBuild on _IconManagementScreenState {
         appBar: AppBar(
           title: Text(title),
           actions: [
-            Tooltip(
-              message: '적용',
-              child: _buildApplyEnterKeyButton(theme),
-            ),
+            Tooltip(message: '적용', child: _buildApplyEnterKeyButton(theme)),
             IconButton(
               tooltip: '닫기',
               onPressed: () => Navigator.of(context).maybePop(),
@@ -480,7 +466,8 @@ extension IconManagementBuild on _IconManagementScreenState {
                       _photoTopBoxButton(
                         theme,
                         title: '페이지선택',
-                        subtitle: '$_pageIndex: ${_pageLabel(_pageIndex)} · ${_pendingIds.length}개',
+                        subtitle:
+                            '$_pageIndex: ${_pageLabel(_pageIndex)} · ${_pendingIds.length}개',
                         onTap: _openPhotoPagePicker,
                       ),
                       const SizedBox(width: 10),
@@ -517,10 +504,10 @@ extension IconManagementBuild on _IconManagementScreenState {
                     physics: const NeverScrollableScrollPhysics(),
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      mainAxisSpacing: 10,
-                      crossAxisSpacing: 10,
-                    ),
+                          crossAxisCount: 3,
+                          mainAxisSpacing: 10,
+                          crossAxisSpacing: 10,
+                        ),
                     itemCount: icons.length,
                     itemBuilder: (context, index) =>
                         _buildPhotoCatalogIconTile(theme, icons[index]),
@@ -544,18 +531,14 @@ extension IconManagementBuild on _IconManagementScreenState {
                     ? 'Index $_pageIndex · 선택: ${_pendingIds.length}'
                     : '선택: ${_pendingIds.length}',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color:
-                      Theme.of(context).colorScheme.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
           ),
         ),
         actions: [
-          Tooltip(
-            message: '적용',
-            child: _buildApplyEnterKeyButton(theme),
-          ),
+          Tooltip(message: '적용', child: _buildApplyEnterKeyButton(theme)),
           if (widget.showClearSelectionAction)
             IconButton(
               tooltip: '선택해제',

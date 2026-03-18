@@ -16,8 +16,7 @@ extension IconManagementLoad on _IconManagementScreenState {
     if (_maybeRedirectToDedicatedScreen(_pageIndex)) return;
 
     _iconById = {
-      for (final icon
-          in MainFeatureIconCatalog.pages.expand((p) => p.items))
+      for (final icon in MainFeatureIconCatalog.pages.expand((p) => p.items))
         icon.id: icon,
     };
     _iconPageIndexById = {
@@ -25,21 +24,21 @@ extension IconManagementLoad on _IconManagementScreenState {
         for (final icon in page.items) icon.id: page.index,
     };
 
-    _incomeIconIds = MainFeatureIconCatalog.iconsForModuleKey('income')
-        .map((e) => e.id)
-        .toSet();
-    _assetIconIds = MainFeatureIconCatalog.iconsForModuleKey('asset')
-        .map((e) => e.id)
-        .toSet();
-    _rootIconIds = MainFeatureIconCatalog.iconsForModuleKey('root')
-        .map((e) => e.id)
-        .toSet();
-    _statsIconIds = MainFeatureIconCatalog.iconsForModuleKey('stats')
-        .map((e) => e.id)
-        .toSet();
-    _settingsIconIds = MainFeatureIconCatalog.iconsForModuleKey('settings')
-        .map((e) => e.id)
-        .toSet();
+    _incomeIconIds = MainFeatureIconCatalog.iconsForModuleKey(
+      'income',
+    ).map((e) => e.id).toSet();
+    _assetIconIds = MainFeatureIconCatalog.iconsForModuleKey(
+      'asset',
+    ).map((e) => e.id).toSet();
+    _rootIconIds = MainFeatureIconCatalog.iconsForModuleKey(
+      'root',
+    ).map((e) => e.id).toSet();
+    _statsIconIds = MainFeatureIconCatalog.iconsForModuleKey(
+      'stats',
+    ).map((e) => e.id).toSet();
+    _settingsIconIds = MainFeatureIconCatalog.iconsForModuleKey(
+      'settings',
+    ).map((e) => e.id).toSet();
 
     _loadAll();
   }
@@ -87,8 +86,8 @@ extension IconManagementLoad on _IconManagementScreenState {
     final prefs = await SharedPreferences.getInstance();
     final biometricEnabled =
         prefs.getBool(PrefKeys.biometricAuthEnabled) ?? false;
-    final allowAssetOutside = prefs.getBool(
-            PrefKeys.iconAllowAssetIconsOutsideAssetWhenUnlocked) ??
+    final allowAssetOutside =
+        prefs.getBool(PrefKeys.iconAllowAssetIconsOutsideAssetWhenUnlocked) ??
         false;
     final untilMs = prefs.getInt(PrefKeys.assetAuthSessionUntilMs);
     final unlockedNow =
@@ -218,8 +217,9 @@ extension IconManagementLoad on _IconManagementScreenState {
 
     if (!mounted) return;
     setState(_pendingIds.clear);
-    ScaffoldMessenger.of(context)
-      .showSnackBar(const SnackBar(content: Text('적용했습니다. 앱 재시작 후 반영됩니다.')));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('적용했습니다. 앱 재시작 후 반영됩니다.')));
   }
 
   String _catalogSectionTitleForPage(int pageIndex) => 'Index $pageIndex';
@@ -227,10 +227,7 @@ extension IconManagementLoad on _IconManagementScreenState {
   Future<void> _saveSlotsDebounced() async {
     var nextSlots = _normalizeSlotsForCurrentPage(_slots);
     nextSlots = widget.usePhotoStyleLayout
-        ? _sanitizeSlotsKeepingExisting(
-            pageIndex: _pageIndex,
-            slots: nextSlots,
-          )
+        ? _sanitizeSlotsKeepingExisting(pageIndex: _pageIndex, slots: nextSlots)
         : _fillSlotsKeepingExisting(
             pageIndex: _pageIndex,
             slots: nextSlots,

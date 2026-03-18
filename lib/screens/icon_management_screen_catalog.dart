@@ -32,8 +32,8 @@ extension IconManagementCatalog on _IconManagementScreenState {
       }
       final icons = <MainFeatureIcon>[];
       final seen = <String>{};
-      final includeIncomeInAsset = entry.key == 'asset' &&
-          !widget.redirectAssetRootToDedicatedScreens;
+      final includeIncomeInAsset =
+          entry.key == 'asset' && !widget.redirectAssetRootToDedicatedScreens;
       final sources = <MainFeatureIcon>[
         ...MainFeatureIconCatalog.iconsForModuleKey(entry.key),
         if (includeIncomeInAsset)
@@ -45,8 +45,7 @@ extension IconManagementCatalog on _IconManagementScreenState {
         if (_isExcludedByDedicatedCatalogPolicy(icon.id)) continue;
         if (_isBlockedForCurrentPage(icon.id)) continue;
         final pageIndex = _iconPageIndexById[icon.id];
-        if (pageIndex != null &&
-            _catalogHiddenPages.contains(pageIndex)) {
+        if (pageIndex != null && _catalogHiddenPages.contains(pageIndex)) {
           continue;
         }
         icons.add(icon);
@@ -108,22 +107,21 @@ extension IconManagementCatalog on _IconManagementScreenState {
       if (_catalogHiddenPages.contains(page.index)) continue;
       if (page.items.isEmpty) continue;
 
-      final visible = List<MainFeatureIcon>.from(
-        page.items.where(
-          (icon) =>
-              !_isBlockedForCurrentPage(icon.id) &&
-              !_isExcludedByDedicatedCatalogPolicy(icon.id),
-        ),
-      )..sort((a, b) {
-          final al = _effectiveLabelFor(a.id);
-          final bl = _effectiveLabelFor(b.id);
-          return al.compareTo(bl);
-        });
+      final visible =
+          List<MainFeatureIcon>.from(
+            page.items.where(
+              (icon) =>
+                  !_isBlockedForCurrentPage(icon.id) &&
+                  !_isExcludedByDedicatedCatalogPolicy(icon.id),
+            ),
+          )..sort((a, b) {
+            final al = _effectiveLabelFor(a.id);
+            final bl = _effectiveLabelFor(b.id);
+            return al.compareTo(bl);
+          });
 
       if (visible.isEmpty) continue;
-      sections.add(
-        (_catalogSectionTitleForPage(page.index), visible),
-      );
+      sections.add((_catalogSectionTitleForPage(page.index), visible));
     }
 
     if (sections.isEmpty) return const SizedBox.shrink();
@@ -151,8 +149,7 @@ extension IconManagementCatalog on _IconManagementScreenState {
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            gridDelegate:
-                const SliverGridDelegateWithFixedCrossAxisCount(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 3,
               mainAxisSpacing: 10,
               crossAxisSpacing: 10,

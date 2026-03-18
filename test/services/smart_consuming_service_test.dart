@@ -98,31 +98,41 @@ void main() {
       }
     });
 
-    test('Tactical Shift - High Fixed Cost reduces recommended limit', () async {
-      // 100만원 예산
-      await budgetService.setBudget(testAccount, 1000000);
+    test(
+      'Tactical Shift - High Fixed Cost reduces recommended limit',
+      () async {
+        // 100만원 예산
+        await budgetService.setBudget(testAccount, 1000000);
 
-      final reportWithoutFixedCost = await smartService.analyzeWeeklyStatus(testAccount);
-
-      final now = DateTime.now();
-      final lastDay = DateTime(now.year, now.month + 1, 0).day;
-
-      if (now.day < lastDay) {
-        await fixedCostService.addFixedCost(
+        final reportWithoutFixedCost = await smartService.analyzeWeeklyStatus(
           testAccount,
-          FixedCost(
-            id: 'fc1',
-            name: 'Future Rent',
-            amount: 300000,
-            dueDay: lastDay, // end of month
-          ),
         );
 
-        final reportWithFixedCost = await smartService.analyzeWeeklyStatus(testAccount);
+        final now = DateTime.now();
+        final lastDay = DateTime(now.year, now.month + 1, 0).day;
 
-        expect(reportWithFixedCost.recommendedLimit, lessThan(reportWithoutFixedCost.recommendedLimit));
-      }
-    });
+        if (now.day < lastDay) {
+          await fixedCostService.addFixedCost(
+            testAccount,
+            FixedCost(
+              id: 'fc1',
+              name: 'Future Rent',
+              amount: 300000,
+              dueDay: lastDay, // end of month
+            ),
+          );
+
+          final reportWithFixedCost = await smartService.analyzeWeeklyStatus(
+            testAccount,
+          );
+
+          expect(
+            reportWithFixedCost.recommendedLimit,
+            lessThan(reportWithoutFixedCost.recommendedLimit),
+          );
+        }
+      },
+    );
 
     test('Tactical Shift - Emergency Stop (Over Budget)', () async {
       await budgetService.setBudget(testAccount, 1000000);

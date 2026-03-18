@@ -101,7 +101,8 @@ class SubscriptionAccessService {
       );
     }
 
-    final updatedAtMs = state.updatedAtMs ?? DateTime.now().millisecondsSinceEpoch;
+    final updatedAtMs =
+        state.updatedAtMs ?? DateTime.now().millisecondsSinceEpoch;
     await prefs.setInt(
       PrefKeys.userKey(userId, PrefKeys.subscriptionUpdatedAtMsSuffix),
       updatedAtMs,
@@ -142,7 +143,9 @@ class SubscriptionAccessService {
 
   static Future<void> clearState(String userId) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(PrefKeys.userKey(userId, PrefKeys.subscriptionStatusSuffix));
+    await prefs.remove(
+      PrefKeys.userKey(userId, PrefKeys.subscriptionStatusSuffix),
+    );
     await prefs.remove(
       PrefKeys.userKey(userId, PrefKeys.subscriptionProductIdSuffix),
     );

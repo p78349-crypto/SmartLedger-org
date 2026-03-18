@@ -216,15 +216,17 @@ class _HouseholdRecommendedScreenState
                       },
                       onIncrement: () {
                         setState(() {
-                          item.quantity =
-                              (item.quantity + 1).clamp(1, 999).toDouble();
+                          item.quantity = (item.quantity + 1)
+                              .clamp(1, 999)
+                              .toDouble();
                         });
                         _saveMyItems();
                       },
                       onDecrement: () {
                         setState(() {
-                          item.quantity =
-                              (item.quantity - 1).clamp(1, 999).toDouble();
+                          item.quantity = (item.quantity - 1)
+                              .clamp(1, 999)
+                              .toDouble();
                         });
                         _saveMyItems();
                       },
@@ -282,5 +284,3 @@ class _HouseholdRecommendedScreenState
     );
   }
 }
-
-

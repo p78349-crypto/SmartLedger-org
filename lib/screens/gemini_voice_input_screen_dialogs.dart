@@ -13,8 +13,8 @@ void showGeminiConfirmDialog({
       final confidenceColor = confidence > 0.9
           ? Colors.green
           : confidence > 0.7
-              ? Colors.orange
-              : Colors.red;
+          ? Colors.orange
+          : Colors.red;
 
       return AlertDialog(
         title: const Text('거래 기록 확인'),
@@ -60,10 +60,7 @@ void showGeminiConfirmDialog({
               const SizedBox(height: 12),
 
               // 항목 목록
-              const Text(
-                '항목:',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
+              const Text('항목:', style: TextStyle(fontWeight: FontWeight.bold)),
               ...(data['items'] as List?)?.map(
                     (item) => Padding(
                       padding: const EdgeInsets.only(left: 16, top: 8),

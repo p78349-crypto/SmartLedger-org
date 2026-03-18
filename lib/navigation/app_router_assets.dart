@@ -148,9 +148,8 @@ class _AssetRoutes {
       case AppRoutes.aiInvestmentAdvisor:
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => const AssetRouteAuthGate(
-            child: AiInvestmentAdvisorScreen(),
-          ),
+          builder: (_) =>
+              const AssetRouteAuthGate(child: AiInvestmentAdvisorScreen()),
         );
 
       case AppRoutes.assetSecuritySettings:

@@ -10,10 +10,7 @@ import '../utils/date_formatter.dart';
 class AssetInvestmentRoadmapScreen extends StatefulWidget {
   final String accountName;
 
-  const AssetInvestmentRoadmapScreen({
-    super.key,
-    required this.accountName,
-  });
+  const AssetInvestmentRoadmapScreen({super.key, required this.accountName});
 
   @override
   State<AssetInvestmentRoadmapScreen> createState() =>
@@ -68,9 +65,7 @@ class _AssetInvestmentRoadmapScreenState
                   children: [
                     TextField(
                       controller: titleController,
-                      decoration: const InputDecoration(
-                        labelText: '목표명',
-                      ),
+                      decoration: const InputDecoration(labelText: '목표명'),
                     ),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<InvestmentGoalType>(
@@ -109,20 +104,18 @@ class _AssetInvestmentRoadmapScreenState
                     const SizedBox(height: 8),
                     TextField(
                       controller: targetController,
-                      decoration: const InputDecoration(
-                        labelText: '목표 금액',
+                      decoration: const InputDecoration(labelText: '목표 금액'),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
                       ),
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
                     ),
                     const SizedBox(height: 8),
                     TextField(
                       controller: currentController,
-                      decoration: const InputDecoration(
-                        labelText: '현재 금액',
+                      decoration: const InputDecoration(labelText: '현재 금액'),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
                       ),
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
                     ),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<int>(
@@ -130,10 +123,8 @@ class _AssetInvestmentRoadmapScreenState
                       decoration: const InputDecoration(labelText: '우선순위'),
                       items: [1, 2, 3, 4, 5]
                           .map(
-                            (t) => DropdownMenuItem(
-                              value: t,
-                              child: Text('P$t'),
-                            ),
+                            (t) =>
+                                DropdownMenuItem(value: t, child: Text('P$t')),
                           )
                           .toList(),
                       onChanged: (value) {
@@ -224,9 +215,7 @@ class _AssetInvestmentRoadmapScreenState
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     if (_isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return Scaffold(
@@ -261,8 +250,10 @@ class _AssetInvestmentRoadmapScreenState
   }
 
   Widget _buildOverviewSection(ThemeData theme) {
-    final totalAssets =
-        _assets.fold<double>(0, (sum, asset) => sum + asset.amount);
+    final totalAssets = _assets.fold<double>(
+      0,
+      (sum, asset) => sum + asset.amount,
+    );
     return _buildSectionCard(
       theme,
       title: '1. 현재 상태 분석',
@@ -271,10 +262,7 @@ class _AssetInvestmentRoadmapScreenState
           theme,
           rows: [
             _MetricRow('총 자산', CurrencyFormatter.format(totalAssets)),
-            const _MetricRow(
-              '구성/수익률',
-              '자산 분석/대시보드에서 확인',
-            ),
+            const _MetricRow('구성/수익률', '자산 분석/대시보드에서 확인'),
           ],
         ),
       ],
@@ -290,10 +278,7 @@ class _AssetInvestmentRoadmapScreenState
       title: '목표: ${horizon.label}',
       children: [
         if (goals.isEmpty)
-          Text(
-            '등록된 목표가 없습니다.',
-            style: theme.textTheme.bodySmall,
-          )
+          Text('등록된 목표가 없습니다.', style: theme.textTheme.bodySmall)
         else
           ...goals.map((goal) => _buildGoalTile(theme, goal)),
       ],
@@ -302,7 +287,9 @@ class _AssetInvestmentRoadmapScreenState
 
   Widget _buildGoalTile(ThemeData theme, InvestmentGoal goal) {
     final progress = goal.progressPct;
-    final progressText = progress.isNaN ? '0%' : '${progress.toStringAsFixed(1)}%';
+    final progressText = progress.isNaN
+        ? '0%'
+        : '${progress.toStringAsFixed(1)}%';
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
@@ -351,7 +338,9 @@ class _AssetInvestmentRoadmapScreenState
           ),
           const SizedBox(height: 6),
           LinearProgressIndicator(
-            value: goal.targetAmount <= 0 ? 0 : (goal.currentAmount / goal.targetAmount),
+            value: goal.targetAmount <= 0
+                ? 0
+                : (goal.currentAmount / goal.targetAmount),
           ),
           const SizedBox(height: 6),
           Text('달성률: $progressText', style: theme.textTheme.bodySmall),
@@ -381,8 +370,10 @@ class _AssetInvestmentRoadmapScreenState
     final cashTotal = _assets
         .where((a) => a.category == AssetCategory.cash)
         .fold<double>(0, (sum, asset) => sum + asset.amount);
-    final totalAssets =
-        _assets.fold<double>(0, (sum, asset) => sum + asset.amount);
+    final totalAssets = _assets.fold<double>(
+      0,
+      (sum, asset) => sum + asset.amount,
+    );
     final cashRatio = totalAssets <= 0 ? 0 : (cashTotal / totalAssets) * 100;
     if (cashRatio < 10) {
       insights.add('현금 비중이 낮습니다. 비상금 비중을 점검하세요.');
@@ -405,12 +396,13 @@ class _AssetInvestmentRoadmapScreenState
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
         children: [
-          Icon(Icons.notifications_active,
-              size: 16, color: theme.colorScheme.primary),
-          const SizedBox(width: 6),
-          Expanded(
-            child: Text(text, style: theme.textTheme.bodySmall),
+          Icon(
+            Icons.notifications_active,
+            size: 16,
+            color: theme.colorScheme.primary,
           ),
+          const SizedBox(width: 6),
+          Expanded(child: Text(text, style: theme.textTheme.bodySmall)),
         ],
       ),
     );

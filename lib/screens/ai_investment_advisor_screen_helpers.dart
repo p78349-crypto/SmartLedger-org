@@ -2,7 +2,6 @@ part of 'ai_investment_advisor_screen.dart';
 
 /// AI 투자 참고정보 화면 추가 유틸리티들
 extension AiInvestmentAdvisorScreenHelpers on _AiInvestmentAdvisorScreenState {
-  
   String _getRiskLevelText(double riskScore) {
     if (riskScore < 0.3) return '낮음';
     if (riskScore < 0.6) return '보통';
@@ -111,7 +110,10 @@ extension AiInvestmentAdvisorScreenHelpers on _AiInvestmentAdvisorScreenState {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('현재 포트폴리오 점검 포인트:', style: TextStyle(fontWeight: FontWeight.bold)),
+                Text(
+                  '현재 포트폴리오 점검 포인트:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 SizedBox(height: 8),
                 Text('1. 위험도가 높은 자산 비중 변화 여부를 우선 점검하세요'),
                 Text('2. 자산군 집중도와 분산 수준을 함께 확인하세요'),

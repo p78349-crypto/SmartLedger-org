@@ -39,7 +39,7 @@ class _RecipeUpsertDialogState extends State<RecipeUpsertDialog> {
   void initState() {
     super.initState();
     _localeControllers = {
-      for (var l in _supportedLocales) l: TextEditingController()
+      for (var l in _supportedLocales) l: TextEditingController(),
     };
     if (widget.existing != null) {
       for (var e in widget.existing!.localizedNames.entries) {

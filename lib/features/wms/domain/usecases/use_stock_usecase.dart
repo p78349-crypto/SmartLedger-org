@@ -51,20 +51,18 @@ class UseStockUseCase extends UseCase<UseStockInput, Unit> {
 
     // Validation: amount must be positive
     if (input.amount <= 0) {
-      return const Failure(
-        ValidationError('Amount must be greater than 0'),
-      );
+      return const Failure(ValidationError('Amount must be greater than 0'));
     }
 
     // Check if item exists and has sufficient stock
     final itemResult = await _repository.getItemById(input.itemId);
-    
+
     // Handle item not found or get the item
     final item = itemResult.when(
       success: (item) => item,
       failure: (error) => null,
     );
-    
+
     if (item == null) {
       return itemResult.map((_) => Unit.instance);
     }
@@ -80,11 +78,8 @@ class UseStockUseCase extends UseCase<UseStockInput, Unit> {
 
     // All validations passed, use the stock
     // Convert Result<InventoryMutationReceipt> to Result<Unit>
-    final useResult = await _repository.useStock(
-      input.itemId,
-      input.amount,
-    );
-    
+    final useResult = await _repository.useStock(input.itemId, input.amount);
+
     return useResult.map((_) => Unit.instance);
   }
 }

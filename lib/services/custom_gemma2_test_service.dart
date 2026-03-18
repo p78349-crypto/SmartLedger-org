@@ -6,20 +6,21 @@ import '../config/ai_security_seal.dart';
 /// 커스텀 파인튜닝 Gemma2 2b 모델 테스트 서비스
 /// 🔓 개발자 모드에서만 작동하는 로컬 커스텀 모델 테스트
 class CustomGemma2TestService {
-  static final CustomGemma2TestService _instance = CustomGemma2TestService._internal();
+  static final CustomGemma2TestService _instance =
+      CustomGemma2TestService._internal();
   factory CustomGemma2TestService() => _instance;
   CustomGemma2TestService._internal();
 
-  static const String _customModelPath = r'C:\Users\plain\GemmaFineTuning\Gemma2 2bf\outputs';
+  static const String _customModelPath =
+      r'C:\Users\plain\GemmaFineTuning\Gemma2 2bf\outputs';
   static const String _latestCheckpoint = 'checkpoint-13794'; // 최신 체크포인트
-  
+
   bool _isModelLoaded = false;
   Map<String, dynamic>? _modelInfo;
 
   /// 🔓 개발자 모드 체크 및 커스텀 모델 가용성 확인
   bool get isAvailable {
-    return AiSecuritySeal.isDeveloperModeEnabled && 
-           _checkCustomModelExists();
+    return AiSecuritySeal.isDeveloperModeEnabled && _checkCustomModelExists();
   }
 
   /// 커스텀 모델 경로 존재 확인
@@ -42,18 +43,17 @@ class CustomGemma2TestService {
 
     try {
       print('🔬 커스텀 Gemma2 2b 파인튜닝 모델 초기화 중...');
-      
+
       // 모델 정보 수집
       await _loadModelInfo();
-      
+
       // TODO: 실제 모델 로딩 로직 (Python 스크립트 호출 또는 FFI)
       // 현재는 시뮬레이션
       await Future.delayed(const Duration(seconds: 2));
-      
+
       _isModelLoaded = true;
       print('✅ 커스텀 Gemma2 모델 로딩 완료!');
       return true;
-      
     } catch (e) {
       print('❌ 커스텀 모델 초기화 실패: $e');
       return false;
@@ -65,7 +65,7 @@ class CustomGemma2TestService {
     try {
       final configPath = '$_customModelPath\\$_latestCheckpoint\\config.json';
       final configFile = File(configPath);
-      
+
       _modelInfo = {
         'modelPath': '$_customModelPath\\$_latestCheckpoint',
         'checkpoint': _latestCheckpoint,
@@ -75,7 +75,7 @@ class CustomGemma2TestService {
         'configExists': configFile.existsSync(),
         'loadTime': DateTime.now().toIso8601String(),
       };
-      
+
       print('📋 모델 정보: $_modelInfo');
     } catch (e) {
       print('모델 정보 로딩 실패: $e');
@@ -98,11 +98,11 @@ class CustomGemma2TestService {
 
     try {
       print('🤖 커스텀 Gemma2 질문 처리: "$query"');
-      
+
       // TODO: 실제 모델 추론 로직
       // 현재는 파인튜닝된 모델의 특성을 시뮬레이션
       final response = await _simulateCustomModelResponse(query);
-      
+
       return {
         'success': true,
         'query': query,
@@ -112,13 +112,8 @@ class CustomGemma2TestService {
         'responseTime': '${DateTime.now().millisecondsSinceEpoch}ms',
         'confidence': 0.92, // 파인튜닝된 모델의 높은 신뢰도
       };
-      
     } catch (e) {
-      return {
-        'success': false,
-        'error': '커스텀 모델 응답 생성 실패: $e',
-        'query': query,
-      };
+      return {'success': false, 'error': '커스텀 모델 응답 생성 실패: $e', 'query': query};
     }
   }
 
@@ -126,9 +121,9 @@ class CustomGemma2TestService {
   Future<String> _simulateCustomModelResponse(String query) async {
     // 실제 모델 호출 대신 파인튜닝 특성을 반영한 응답 시뮬레이션
     await Future.delayed(const Duration(milliseconds: 800));
-    
+
     final lowercaseQuery = query.toLowerCase();
-    
+
     if (lowercaseQuery.contains('지출') || lowercaseQuery.contains('expense')) {
       return '''📊 **SmartLedger 파인튜닝 분석 결과**
       
@@ -140,7 +135,7 @@ class CustomGemma2TestService {
 
 *이 분석은 SmartLedger 전용 파인튜닝 모델(Gemma2-2B)로 생성되었습니다.*''';
     }
-    
+
     if (lowercaseQuery.contains('투자') || lowercaseQuery.contains('invest')) {
       return '''💰 **SmartLedger 투자 참고정보 (파인튜닝)**
       
@@ -152,7 +147,7 @@ class CustomGemma2TestService {
 
 *SmartLedger 재무 데이터로 특별 훈련된 AI 모델의 분석 참고정보입니다.*''';
     }
-    
+
     if (lowercaseQuery.contains('예산') || lowercaseQuery.contains('budget')) {
       return '''📋 **SmartLedger 예산 관리 (커스텀 AI)**
       
@@ -164,7 +159,7 @@ class CustomGemma2TestService {
 
 *이는 당신의 과거 거래 데이터로 훈련된 개인화 모델의 분석 참고정보입니다.*''';
     }
-    
+
     // 기본 응답
     return '''🤖 **SmartLedger 커스텀 Gemma2 응답**
     
@@ -186,7 +181,7 @@ class CustomGemma2TestService {
 
     final testQueries = [
       '이번 달 지출이 너무 많은 것 같아',
-      '투자 포트폴리오 분석해줘',  
+      '투자 포트폴리오 분석해줘',
       '예산 관리 어떻게 해야 할까',
       '저축 계획 세워줘',
       '카드 사용 패턴 분석해줘',
@@ -199,7 +194,7 @@ class CustomGemma2TestService {
       final queryStart = DateTime.now();
       final result = await testFinancialQuery(query);
       final queryEnd = DateTime.now();
-      
+
       results.add({
         ...result,
         'queryTime': queryEnd.difference(queryStart).inMilliseconds,
@@ -231,7 +226,7 @@ class CustomGemma2TestService {
     };
   }
 
-  /// 🧹 테스트 세션 정리  
+  /// 🧹 테스트 세션 정리
   void cleanup() {
     _isModelLoaded = false;
     _modelInfo = null;

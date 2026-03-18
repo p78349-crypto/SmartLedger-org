@@ -38,12 +38,8 @@ class IngredientsRecommendationUtils {
     // 유통기한 임박순 + 저가순 정렬
     final sorted = List<ConsumableInventoryItem>.from(items);
     sorted.sort((a, b) {
-      final daysA = _expiryDateOrFarFuture(a)
-          .difference(DateTime.now())
-          .inDays;
-      final daysB = _expiryDateOrFarFuture(b)
-          .difference(DateTime.now())
-          .inDays;
+      final daysA = _expiryDateOrFarFuture(a).difference(DateTime.now()).inDays;
+      final daysB = _expiryDateOrFarFuture(b).difference(DateTime.now()).inDays;
 
       // 유통기한 임박 우선 (음수인 것도 포함)
       if (daysA != daysB) {
@@ -139,9 +135,7 @@ class IngredientsRecommendationUtils {
       }
       final daysLeft = expiryDate.difference(now).inDays;
       return daysLeft >= 0 && daysLeft <= 7;
-    }).toList()
-      ..sort((a, b) =>
-          a.expiryDate!.compareTo(b.expiryDate!));
+    }).toList()..sort((a, b) => a.expiryDate!.compareTo(b.expiryDate!));
   }
 
   /// 카테고리별 영양 밸런스 분석

@@ -14,12 +14,15 @@ class TestBarcodeDataset {
   /// Generate test barcode data in CSV format
   static String generateCSV() {
     final buffer = StringBuffer();
-    
+
     // Header
-    buffer.writeln('barcode,product_name_ko,product_name_en,product_name_ja,country_code,barcode_type,expected_quantity,category_ko,use_case');
-    
+    buffer.writeln(
+      'barcode,product_name_ko,product_name_en,product_name_ja,country_code,barcode_type,expected_quantity,category_ko,use_case',
+    );
+
     // Test Data - Korean Products (KAN_CODE)
-    _addRow(buffer, 
+    _addRow(
+      buffer,
       barcode: '8801040234515',
       nameKo: '종로우유',
       nameEn: 'Jongno Milk 1L',
@@ -28,10 +31,11 @@ class TestBarcodeDataset {
       type: 'KAN',
       qty: '2',
       category: '음료',
-      useCase: 'Unit·Test·1·Korean·Local·DB'
+      useCase: 'Unit·Test·1·Korean·Local·DB',
     );
-    
-    _addRow(buffer,
+
+    _addRow(
+      buffer,
       barcode: '8801000010061',
       nameKo: '동풍 우유',
       nameEn: 'Dongpung Milk',
@@ -40,10 +44,11 @@ class TestBarcodeDataset {
       type: 'KAN',
       qty: '2',
       category: '음료',
-      useCase: 'Cache·performance·test'
+      useCase: 'Cache·performance·test',
     );
-    
-    _addRow(buffer,
+
+    _addRow(
+      buffer,
       barcode: '8801001000088',
       nameKo: '남양 요거트',
       nameEn: 'Namyang Yogurt',
@@ -52,10 +57,11 @@ class TestBarcodeDataset {
       type: 'KAN',
       qty: '2',
       category: '유제품',
-      useCase: 'Multi-language·test'
+      useCase: 'Multi-language·test',
     );
-    
-    _addRow(buffer,
+
+    _addRow(
+      buffer,
       barcode: '8801093100017',
       nameKo: '오뚜기 고추장',
       nameEn: 'Ottogi Gochujang',
@@ -64,11 +70,12 @@ class TestBarcodeDataset {
       type: 'KAN',
       qty: '2',
       category: '조미료',
-      useCase: 'Normalization·test'
+      useCase: 'Normalization·test',
     );
-    
+
     // Test Data - US Products (UPC-A)
-    _addRow(buffer,
+    _addRow(
+      buffer,
       barcode: '033674006253',
       nameKo: '코카콜라 제로',
       nameEn: 'Coca-Cola Zero Sugar 12oz',
@@ -77,10 +84,11 @@ class TestBarcodeDataset {
       type: 'UPC',
       qty: '1',
       category: '음료',
-      useCase: 'Unit·Test·2·US·Local·DB'
+      useCase: 'Unit·Test·2·US·Local·DB',
     );
-    
-    _addRow(buffer,
+
+    _addRow(
+      buffer,
       barcode: '012345678905',
       nameKo: '펩시',
       nameEn: 'Pepsi Cola 12oz',
@@ -89,10 +97,11 @@ class TestBarcodeDataset {
       type: 'UPC',
       qty: '1',
       category: '음료',
-      useCase: 'US·validation'
+      useCase: 'US·validation',
     );
-    
-    _addRow(buffer,
+
+    _addRow(
+      buffer,
       barcode: '036000291962',
       nameKo: '캠벨 토마토 수프',
       nameEn: 'Campbell Tomato Soup 10.75oz',
@@ -101,10 +110,11 @@ class TestBarcodeDataset {
       type: 'UPC',
       qty: '1',
       category: '통조림',
-      useCase: 'US·product·variety'
+      useCase: 'US·product·variety',
     );
-    
-    _addRow(buffer,
+
+    _addRow(
+      buffer,
       barcode: '078742105594',
       nameKo: '스킨 로션',
       nameEn: 'Cetaphil Lotion 16oz',
@@ -113,11 +123,12 @@ class TestBarcodeDataset {
       type: 'UPC',
       qty: '1',
       category: '생활용품',
-      useCase: 'Non-food·product'
+      useCase: 'Non-food·product',
     );
-    
+
     // Test Data - Japan Products (JAN)
-    _addRow(buffer,
+    _addRow(
+      buffer,
       barcode: '4901000102026',
       nameKo: '일청라면',
       nameEn: 'Nissin Instant Ramen',
@@ -126,10 +137,11 @@ class TestBarcodeDataset {
       type: 'JAN',
       qty: '2',
       category: '면류',
-      useCase: 'Unit·Test·3·Japan·Local·DB'
+      useCase: 'Unit·Test·3·Japan·Local·DB',
     );
-    
-    _addRow(buffer,
+
+    _addRow(
+      buffer,
       barcode: '4549160900127',
       nameKo: '마루짱 라면',
       nameEn: 'Maruchan Ramen',
@@ -138,10 +150,11 @@ class TestBarcodeDataset {
       type: 'JAN',
       qty: '2',
       category: '면류',
-      useCase: 'Japan·product·variety'
+      useCase: 'Japan·product·variety',
     );
-    
-    _addRow(buffer,
+
+    _addRow(
+      buffer,
       barcode: '4902105073803',
       nameKo: '산토리 우롱차',
       nameEn: 'Suntory Oolong Tea',
@@ -150,10 +163,11 @@ class TestBarcodeDataset {
       type: 'JAN',
       qty: '2',
       category: '음료',
-      useCase: 'Japan·beverage'
+      useCase: 'Japan·beverage',
     );
-    
-    _addRow(buffer,
+
+    _addRow(
+      buffer,
       barcode: '4560365451961',
       nameKo: '유키지루시 우유',
       nameEn: 'Yukijirushi Milk',
@@ -162,11 +176,12 @@ class TestBarcodeDataset {
       type: 'JAN',
       qty: '2',
       category: '유제품',
-      useCase: 'Japan·dairy'
+      useCase: 'Japan·dairy',
     );
-    
+
     // Test Data - Unknown/Edge Cases
-    _addRow(buffer,
+    _addRow(
+      buffer,
       barcode: '9999999999999',
       nameKo: '테스트상품',
       nameEn: 'Test Product',
@@ -175,10 +190,11 @@ class TestBarcodeDataset {
       type: 'UNKNOWN',
       qty: '1',
       category: '기타',
-      useCase: 'Unknown·barcode·fallback'
+      useCase: 'Unknown·barcode·fallback',
     );
-    
-    _addRow(buffer,
+
+    _addRow(
+      buffer,
       barcode: '1234567890123',
       nameKo: '임시상품',
       nameEn: 'Temporary Product',
@@ -187,12 +203,12 @@ class TestBarcodeDataset {
       type: 'UNKNOWN',
       qty: '1',
       category: '기타',
-      useCase: 'API·fallback·test'
+      useCase: 'API·fallback·test',
     );
-    
+
     return buffer.toString();
   }
-  
+
   /// Generate test barcode data in JSON format
   static String generateJSON() {
     final testData = [
@@ -206,7 +222,7 @@ class TestBarcodeDataset {
         'barcode_type': 'KAN',
         'default_quantity': 2,
         'test_category': 'Local_DB_Lookup',
-        'performance_target_ms': '<1'
+        'performance_target_ms': '<1',
       },
       {
         'barcode': '8801000010061',
@@ -217,9 +233,9 @@ class TestBarcodeDataset {
         'barcode_type': 'KAN',
         'default_quantity': 2,
         'test_category': 'Cache_Performance',
-        'performance_target_ms': '<0.5'
+        'performance_target_ms': '<0.5',
       },
-      
+
       // US Products
       {
         'barcode': '033674006253',
@@ -230,7 +246,7 @@ class TestBarcodeDataset {
         'barcode_type': 'UPC',
         'default_quantity': 1,
         'test_category': 'Local_DB_Lookup',
-        'performance_target_ms': '<1'
+        'performance_target_ms': '<1',
       },
       {
         'barcode': '012345678905',
@@ -241,9 +257,9 @@ class TestBarcodeDataset {
         'barcode_type': 'UPC',
         'default_quantity': 1,
         'test_category': 'US_Variety',
-        'performance_target_ms': '<1'
+        'performance_target_ms': '<1',
       },
-      
+
       // Japan Products
       {
         'barcode': '4901000102026',
@@ -254,7 +270,7 @@ class TestBarcodeDataset {
         'barcode_type': 'JAN',
         'default_quantity': 2,
         'test_category': 'Local_DB_Lookup',
-        'performance_target_ms': '<1'
+        'performance_target_ms': '<1',
       },
       {
         'barcode': '4549160900127',
@@ -265,9 +281,9 @@ class TestBarcodeDataset {
         'barcode_type': 'JAN',
         'default_quantity': 2,
         'test_category': 'Japan_Variety',
-        'performance_target_ms': '<1'
+        'performance_target_ms': '<1',
       },
-      
+
       // Edge Cases
       {
         'barcode': '9999999999999',
@@ -278,13 +294,13 @@ class TestBarcodeDataset {
         'barcode_type': 'UNKNOWN',
         'default_quantity': 1,
         'test_category': 'Unknown_Fallback',
-        'performance_target_ms': '<10000'
-      }
+        'performance_target_ms': '<10000',
+      },
     ];
-    
+
     return jsonEncode(testData);
   }
-  
+
   /// Generate test scenario checklist
   static String generateScenarios() {
     return '''
@@ -349,7 +365,7 @@ class TestBarcodeDataset {
 ✅ UI indicators show correct color (🟢 green for local)
 ''';
   }
-  
+
   /// Helper method to add a CSV row
   static void _addRow(
     StringBuffer buffer, {
@@ -374,7 +390,7 @@ class TestBarcodeDataset {
       category,
       useCase.replaceAll('·', '_'),
     ].map((v) => '"$v"').join(',');
-    
+
     buffer.writeln(csvRow);
   }
 }
@@ -383,7 +399,7 @@ class TestBarcodeDataset {
 void main() async {
   print('📊 Phase 4: Test Barcode Dataset Generator');
   print('=========================================\n');
-  
+
   // Generate CSV
   final csvData = TestBarcodeDataset.generateCSV();
   final csvFile = File('data/test_barcodes.csv');
@@ -391,19 +407,19 @@ void main() async {
   await csvFile.writeAsString(csvData);
   print('✅ CSV dataset created: ${csvFile.path}');
   print('   Rows: ${csvData.split('\n').length - 1} (excludes header)');
-  
+
   // Generate JSON
   final jsonData = TestBarcodeDataset.generateJSON();
   final jsonFile = File('data/test_barcodes.json');
   await jsonFile.writeAsString(jsonData);
   print('✅ JSON dataset created: ${jsonFile.path}');
-  
+
   // Generate scenarios
   final scenarios = TestBarcodeDataset.generateScenarios();
   final scenariosFile = File('data/TEST_BARCODE_SCENARIOS.md');
   await scenariosFile.writeAsString(scenarios);
   print('✅ Test scenarios created: ${scenariosFile.path}');
-  
+
   print('\n📄 Dataset Summary');
   print('==================');
   print('• Korean products (KAN):  4 barcodes');
@@ -411,7 +427,7 @@ void main() async {
   print('• Japan products (JAN):   4 barcodes');
   print('• Edge cases:             2 barcodes (unknown)');
   print('• Total test cases:       14 scenarios');
-  
+
   print('\n🧪 Test Coverage');
   print('=================');
   print('✓ Local DB lookup (all 3 countries)');
@@ -420,7 +436,7 @@ void main() async {
   print('✓ Multi-language display');
   print('✓ Country-specific quantity defaults');
   print('✓ Performance benchmarking');
-  
+
   print('\n✅ Dataset generation completed successfully!');
   print('   Use CSV for admin import UI testing');
   print('   Use JSON for API mock testing');

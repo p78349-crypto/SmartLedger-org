@@ -11,13 +11,15 @@ class IncrementalBackupScreen extends StatefulWidget {
   const IncrementalBackupScreen({super.key});
 
   @override
-  State<IncrementalBackupScreen> createState() => _IncrementalBackupScreenState();
+  State<IncrementalBackupScreen> createState() =>
+      _IncrementalBackupScreenState();
 }
 
 class _IncrementalBackupScreenState extends State<IncrementalBackupScreen> {
-  final IncrementalBackupService _incrementalService = IncrementalBackupService();
+  final IncrementalBackupService _incrementalService =
+      IncrementalBackupService();
   final BackupService _backupService = BackupService();
-  
+
   bool _isLoading = false;
   String? _lastBackupResult;
   Map<String, dynamic>? _changesSummary;
@@ -47,18 +49,17 @@ class _IncrementalBackupScreenState extends State<IncrementalBackupScreen> {
 
   Future<void> _performIncrementalBackup() async {
     setState(() => _isLoading = true);
-    
+
     try {
       final result = await _backupService.performIncrementalBackup();
       setState(() {
-        _lastBackupResult = result['success'] 
+        _lastBackupResult = result['success']
             ? '성공: ${result['changes']}개 변경사항 백업 완료'
             : '실패: ${result['error']}';
         _isLoading = false;
       });
-      
+
       await _loadChangesSummary(); // 백업 후 변경사항 다시 체크
-      
     } catch (e) {
       setState(() {
         _lastBackupResult = '오류: $e';
@@ -99,17 +100,28 @@ class _IncrementalBackupScreenState extends State<IncrementalBackupScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('변경사항 감지', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text(
+              '변경사항 감지',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 12),
             if (_changesSummary != null) ...[
               if (_changesSummary!['error'] != null)
-                Text('오류: ${_changesSummary!['error']}', style: const TextStyle(color: Colors.red))
+                Text(
+                  '오류: ${_changesSummary!['error']}',
+                  style: const TextStyle(color: Colors.red),
+                )
               else ...[
                 Text('총 변경사항: ${_changesSummary!['total']}개'),
-                if (_changesSummary!['modules'] != null && _changesSummary!['modules'].isNotEmpty)
-                  Text('변경된 모듈: ${(_changesSummary!['modules'] as List).join(", ")}'),
-                Text('마지막 확인: ${_formatDateTime(_changesSummary!['lastCheck'])}'),
-              ]
+                if (_changesSummary!['modules'] != null &&
+                    _changesSummary!['modules'].isNotEmpty)
+                  Text(
+                    '변경된 모듈: ${(_changesSummary!['modules'] as List).join(", ")}',
+                  ),
+                Text(
+                  '마지막 확인: ${_formatDateTime(_changesSummary!['lastCheck'])}',
+                ),
+              ],
             ] else
               const CircularProgressIndicator(),
           ],

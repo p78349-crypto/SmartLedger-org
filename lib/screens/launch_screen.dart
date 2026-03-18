@@ -133,9 +133,9 @@ class _LaunchScreenState extends State<LaunchScreen> {
     if (shouldReset == true) {
       await _resetLocalPrefsForFreshStart();
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('로컬 설정을 초기화했습니다.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('로컬 설정을 초기화했습니다.')));
     }
 
     final confirmPrefs = await SharedPreferences.getInstance();
@@ -147,7 +147,9 @@ class _LaunchScreenState extends State<LaunchScreen> {
     final accountNames = service.accounts.map((a) => a.name).toList();
 
     for (final accountName in accountNames) {
-      await UserPrefService.clearAllAccountScopedPrefs(accountName: accountName);
+      await UserPrefService.clearAllAccountScopedPrefs(
+        accountName: accountName,
+      );
     }
     await UserPrefService.resetAllPolicies();
 
@@ -169,7 +171,7 @@ class _LaunchScreenState extends State<LaunchScreen> {
 
       final service = AccountService();
       final accounts = service.accounts;
-      
+
       // 계정이 2개 이상이면 ROOT 포함한 계정 선택 화면 표시
       if (accounts.length >= 2) {
         debugPrint('[LaunchScreen] 계정이 ${accounts.length}개 존재 - 계정 선택 화면으로 이동');

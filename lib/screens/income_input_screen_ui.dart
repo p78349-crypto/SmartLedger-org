@@ -16,8 +16,7 @@ extension IncomeInputUI on _IncomeInputScreenState {
               label: '수입명',
               controller: _nameController,
               prefixIcon: const Icon(Icons.label),
-              validator: (v) =>
-                  v == null || v.isEmpty ? '수입명을 입력하세요' : null,
+              validator: (v) => v == null || v.isEmpty ? '수입명을 입력하세요' : null,
             ),
             const SizedBox(height: 12),
             SmartInputField(
@@ -97,10 +96,8 @@ extension IncomeInputUI on _IncomeInputScreenState {
                           setState(() => _memoController.text = value),
                       itemBuilder: (context) => _recentMemos
                           .map(
-                            (memo) => PopupMenuItem(
-                              value: memo,
-                              child: Text(memo),
-                            ),
+                            (memo) =>
+                                PopupMenuItem(value: memo, child: Text(memo)),
                           )
                           .toList(),
                     ),
@@ -122,9 +119,9 @@ extension IncomeInputUI on _IncomeInputScreenState {
                 childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 title: Text(
                   '고급 설정',
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 children: [
                   DropdownButtonFormField<String>(
@@ -175,8 +172,7 @@ extension IncomeInputUI on _IncomeInputScreenState {
                           ),
                         )
                         .toList(),
-                    onChanged: (v) =>
-                        setState(() => _taxStatus = v ?? '과세'),
+                    onChanged: (v) => setState(() => _taxStatus = v ?? '과세'),
                     decoration: const InputDecoration(
                       labelText: '세금 처리',
                       prefixIcon: Icon(Icons.receipt_long),
@@ -240,8 +236,7 @@ extension IncomeInputUI on _IncomeInputScreenState {
                               (tag) => Chip(
                                 label: Text(tag),
                                 onDeleted: () => _removeTag(tag),
-                                deleteIcon:
-                                    const Icon(Icons.close, size: 16),
+                                deleteIcon: const Icon(Icons.close, size: 16),
                               ),
                             )
                             .toList(),

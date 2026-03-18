@@ -54,18 +54,12 @@ const List<FoodKnowledgeEntry> _entriesSnack = <FoodKnowledgeEntry>[
         ingredient: '플레인 요구르트',
         why: '추천 조합! 건강한 지방/식이섬유 + 유산균으로 장 건강.',
       ),
-      FoodPairingSuggestion(
-        ingredient: '우유',
-        why: '영양 완벽 조합으로 포만감/에너지 상승.',
-      ),
+      FoodPairingSuggestion(ingredient: '우유', why: '영양 완벽 조합으로 포만감/에너지 상승.'),
       FoodPairingSuggestion(
         ingredient: '베리류(블루베리/딸기)',
         why: '항산화 성분 극대화로 건강한 후식 완성.',
       ),
-      FoodPairingSuggestion(
-        ingredient: '꿀(소량)',
-        why: '단맛 조절용으로 후식 완성도 높임.',
-      ),
+      FoodPairingSuggestion(ingredient: '꿀(소량)', why: '단맛 조절용으로 후식 완성도 높임.'),
     ],
     quantitySuggestions: <String>[
       '아몬드 분말(100%) 1~2스푼',
@@ -132,18 +126,12 @@ const List<FoodKnowledgeEntry> _entriesSnack = <FoodKnowledgeEntry>[
         '성인(대략): 중간 크기 5~10개(약 50~100g)/주 정도를 간식이나 반찬으로 섭취하는 경우가 많습니다.\n'
         '포만감이 높고 미네랄(칼륨, 아연)이 풍부합니다.',
     pairings: <FoodPairingSuggestion>[
-      FoodPairingSuggestion(
-        ingredient: '우유',
-        why: '밤의 포만감 + 우유의 칼슘으로 완벽한 조합.',
-      ),
+      FoodPairingSuggestion(ingredient: '우유', why: '밤의 포만감 + 우유의 칼슘으로 완벽한 조합.'),
       FoodPairingSuggestion(
         ingredient: '플레인 요구르트',
         why: '부드러운 식감으로 활용하기 좋은 간식 조합.',
       ),
-      FoodPairingSuggestion(
-        ingredient: '꿀(소량)',
-        why: '단맛 조화로 더욱 맛있는 후식 완성.',
-      ),
+      FoodPairingSuggestion(ingredient: '꿀(소량)', why: '단맛 조화로 더욱 맛있는 후식 완성.'),
     ],
     quantitySuggestions: <String>[
       '밤 5~10개(약 50-100g)',

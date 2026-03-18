@@ -79,7 +79,9 @@ class _BucketAccumulator {
         savingsTotalAmount = _normalizeMoney(savingsTotalAmount + tx.amount);
         savingsTotalCount += 1;
         if (_isSavingsCountedAsExpense(tx)) {
-          savingsExpenseAmount = _normalizeMoney(savingsExpenseAmount + tx.amount);
+          savingsExpenseAmount = _normalizeMoney(
+            savingsExpenseAmount + tx.amount,
+          );
           savingsExpenseCount += 1;
           expenseAggAmount = _normalizeMoney(expenseAggAmount + tx.amount);
           expenseAggCount += 1;
@@ -90,7 +92,9 @@ class _BucketAccumulator {
     final memo = tx.memo.trim();
     if (memo.isNotEmpty && tx.type.isOutflow) {
       memoOutflowCount += 1;
-      memoOutflowAmountAbs = _normalizeMoney(memoOutflowAmountAbs + tx.amount.abs());
+      memoOutflowAmountAbs = _normalizeMoney(
+        memoOutflowAmountAbs + tx.amount.abs(),
+      );
     }
   }
 

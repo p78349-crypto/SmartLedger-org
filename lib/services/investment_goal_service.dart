@@ -46,10 +46,7 @@ class InvestmentGoalService {
     return goals;
   }
 
-  Future<List<InvestmentGoal>> removeGoal(
-    String accountName,
-    String id,
-  ) async {
+  Future<List<InvestmentGoal>> removeGoal(String accountName, String id) async {
     final goals = await getGoals(accountName);
     goals.removeWhere((g) => g.id == id);
     await setGoals(accountName, goals);

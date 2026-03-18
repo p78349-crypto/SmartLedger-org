@@ -28,9 +28,7 @@ class _TrashScreenState extends State<TrashScreen>
   Future<void> loadEntries() async {
     setState(() => _loading = true);
     await TrashService().loadEntries();
-    final entries = TrashService().getEntries(
-      entityType: _filterType,
-    );
+    final entries = TrashService().getEntries(entityType: _filterType);
     if (!mounted) return;
     setState(() {
       _entries = entries;
@@ -91,10 +89,8 @@ class _TrashScreenState extends State<TrashScreen>
         child: _loading
             ? const Center(child: CircularProgressIndicator())
             : _entries.isEmpty
-                ? const Center(
-                    child: Text('휴지통이 비어 있습니다.'),
-                  )
-                : _buildList(isLandscape),
+            ? const Center(child: Text('휴지통이 비어 있습니다.'))
+            : _buildList(isLandscape),
       ),
     );
   }
@@ -105,10 +101,7 @@ class _TrashScreenState extends State<TrashScreen>
       itemCount: _entries.length + 1,
       itemBuilder: (context, index) {
         if (index == 0) return _buildHeader(isLandscape);
-        return _buildEntryCard(
-          _entries[index - 1],
-          isLandscape,
-        );
+        return _buildEntryCard(_entries[index - 1], isLandscape);
       },
     );
   }
@@ -129,18 +122,12 @@ class _TrashScreenState extends State<TrashScreen>
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        chips,
-        const TrashLandscapeHeader(),
-        const Divider(height: 1),
-      ],
+      children: [chips, const TrashLandscapeHeader(), const Divider(height: 1)],
     );
   }
 
   Widget _buildEntryCard(TrashEntry entry, bool isLandscape) {
-    final deletedAtStr = DateFormatter.formatDateTime(
-      entry.deletedAt,
-    );
+    final deletedAtStr = DateFormatter.formatDateTime(entry.deletedAt);
     final trailingActions = Wrap(
       spacing: 4,
       children: [
@@ -161,10 +148,7 @@ class _TrashScreenState extends State<TrashScreen>
       margin: const EdgeInsets.only(bottom: 12),
       child: isLandscape
           ? Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 10,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: Row(
                 children: [
                   Icon(iconForType(entry.entityType)),

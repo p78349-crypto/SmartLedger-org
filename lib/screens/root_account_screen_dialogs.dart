@@ -51,25 +51,30 @@ extension RootAccountScreenDialogs on RootAccountScreen {
                           DataCell(Text(s.accountName)),
                           DataCell(
                             Text(
-                              _formatCurrency(s.totalAssets).replaceAll('원', ''),
+                              _formatCurrency(
+                                s.totalAssets,
+                              ).replaceAll('원', ''),
                             ),
                           ),
                           DataCell(
                             Text(
-                              _formatCurrency(s.monthlyIncome)
-                                  .replaceAll('원', ''),
+                              _formatCurrency(
+                                s.monthlyIncome,
+                              ).replaceAll('원', ''),
                             ),
                           ),
                           DataCell(
                             Text(
-                              _formatCurrency(s.monthlyExpense)
-                                  .replaceAll('원', ''),
+                              _formatCurrency(
+                                s.monthlyExpense,
+                              ).replaceAll('원', ''),
                             ),
                           ),
                           DataCell(
                             Text(
-                              _formatCurrency(s.monthlyNetCashFlow)
-                                  .replaceAll('원', ''),
+                              _formatCurrency(
+                                s.monthlyNetCashFlow,
+                              ).replaceAll('원', ''),
                               style: TextStyle(
                                 color: s.monthlyNetCashFlow >= 0
                                     ? Colors.green
@@ -80,8 +85,9 @@ extension RootAccountScreenDialogs on RootAccountScreen {
                           ),
                           DataCell(
                             Text(
-                              _formatCurrency(s.totalFixedCosts)
-                                  .replaceAll('원', ''),
+                              _formatCurrency(
+                                s.totalFixedCosts,
+                              ).replaceAll('원', ''),
                             ),
                           ),
                         ],

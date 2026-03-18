@@ -29,24 +29,19 @@ class CloudBackupConfiguration {
     'maxBackupSize': maxBackupSize,
   };
 
-  factory CloudBackupConfiguration.fromJson(Map<String, dynamic> json) => 
-    CloudBackupConfiguration(
-      providerId: json['providerId'],
-      accountId: json['accountId'],
-      encryptionEnabled: json['encryptionEnabled'],
-      autoBackupEnabled: json['autoBackupEnabled'],
-      backupFrequency: BackupFrequency.values.byName(json['backupFrequency']),
-      retentionDays: json['retentionDays'],
-      maxBackupSize: json['maxBackupSize'],
-    );
+  factory CloudBackupConfiguration.fromJson(Map<String, dynamic> json) =>
+      CloudBackupConfiguration(
+        providerId: json['providerId'],
+        accountId: json['accountId'],
+        encryptionEnabled: json['encryptionEnabled'],
+        autoBackupEnabled: json['autoBackupEnabled'],
+        backupFrequency: BackupFrequency.values.byName(json['backupFrequency']),
+        retentionDays: json['retentionDays'],
+        maxBackupSize: json['maxBackupSize'],
+      );
 }
 
-enum BackupFrequency {
-  hourly,
-  daily,
-  weekly,
-  monthly,
-}
+enum BackupFrequency { hourly, daily, weekly, monthly }
 
 class CloudBackupStatus {
   const CloudBackupStatus({
@@ -78,13 +73,7 @@ class CloudBackupStatus {
   };
 }
 
-enum BackupStatusType {
-  pending,
-  inProgress,
-  completed,
-  failed,
-  cancelled,
-}
+enum BackupStatusType { pending, inProgress, completed, failed, cancelled }
 
 class CloudRestoreRequest {
   const CloudRestoreRequest({
@@ -107,8 +96,4 @@ class CloudRestoreRequest {
   };
 }
 
-enum RestoreType {
-  full,
-  selective,
-  merge,
-}
+enum RestoreType { full, selective, merge }

@@ -20,7 +20,10 @@ class FinancialAnalyticsHelper {
   }
 
   /// Calculates annualized return from total return and time period
-  static double calculateAnnualizedReturn(double totalReturn, int durationDays) {
+  static double calculateAnnualizedReturn(
+    double totalReturn,
+    int durationDays,
+  ) {
     if (durationDays <= 0) return 0.0;
     final years = durationDays / 365.25;
     return pow(1 + totalReturn / 100.0, 1 / years) - 1.0;
@@ -29,11 +32,12 @@ class FinancialAnalyticsHelper {
   /// Calculates volatility (standard deviation) of returns
   static double calculateVolatility(List<double> returns) {
     if (returns.length < 2) return 0.0;
-    
+
     final mean = returns.reduce((a, b) => a + b) / returns.length;
     final squaredDifferences = returns.map((r) => pow(r - mean, 2));
-    final variance = squaredDifferences.reduce((a, b) => a + b) / (returns.length - 1);
-    
+    final variance =
+        squaredDifferences.reduce((a, b) => a + b) / (returns.length - 1);
+
     return sqrt(variance);
   }
 
@@ -49,23 +53,24 @@ class FinancialAnalyticsHelper {
     final n = xValues.length;
     final sumX = xValues.reduce((a, b) => a + b);
     final sumY = yValues.reduce((a, b) => a + b);
-    final sumXY = List.generate(n, (i) => xValues[i] * yValues[i]).reduce((a, b) => a + b);
+    final sumXY = List.generate(
+      n,
+      (i) => xValues[i] * yValues[i],
+    ).reduce((a, b) => a + b);
     final sumXX = xValues.map((x) => x * x).reduce((a, b) => a + b);
     final sumYY = yValues.map((y) => y * y).reduce((a, b) => a + b);
 
     final slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
     final intercept = (sumY - slope * sumX) / n;
-    
+
     // Calculate correlation coefficient
     final numerator = n * sumXY - sumX * sumY;
-    final denominator = sqrt((n * sumXX - sumX * sumX) * (n * sumYY - sumY * sumY));
+    final denominator = sqrt(
+      (n * sumXX - sumX * sumX) * (n * sumYY - sumY * sumY),
+    );
     final correlation = denominator != 0 ? numerator / denominator : 0.0;
 
-    return {
-      'slope': slope,
-      'intercept': intercept,
-      'correlation': correlation,
-    };
+    return {'slope': slope, 'intercept': intercept, 'correlation': correlation};
   }
 
   /// Creates confidence interval for predictions
@@ -77,7 +82,7 @@ class FinancialAnalyticsHelper {
     // Using normal distribution approximation
     final zScore = _getZScore(confidenceLevel);
     final margin = zScore * standardError;
-    
+
     return ConfidenceInterval(
       lowerBound: predictedValue - margin,
       upperBound: predictedValue + margin,
@@ -97,29 +102,35 @@ class FinancialAnalyticsHelper {
     // Simple moving average for trend
     final trend = <double>[];
     for (int i = 0; i < timeSeries.length; i++) {
-      if (i < seasonalPeriod ~/ 2 || i >= timeSeries.length - seasonalPeriod ~/ 2) {
+      if (i < seasonalPeriod ~/ 2 ||
+          i >= timeSeries.length - seasonalPeriod ~/ 2) {
         trend.add(timeSeries[i]);
       } else {
         final start = i - seasonalPeriod ~/ 2;
         final end = i + seasonalPeriod ~/ 2;
-        final avg = timeSeries.sublist(start, end + 1).reduce((a, b) => a + b) / seasonalPeriod;
+        final avg =
+            timeSeries.sublist(start, end + 1).reduce((a, b) => a + b) /
+            seasonalPeriod;
         trend.add(avg);
       }
     }
 
     // Calculate seasonal components
     final seasonal = List<double>.filled(timeSeries.length, 0.0);
-    final detrended = List.generate(timeSeries.length, (i) => timeSeries[i] - trend[i]);
-    
+    final detrended = List.generate(
+      timeSeries.length,
+      (i) => timeSeries[i] - trend[i],
+    );
+
     for (int s = 0; s < seasonalPeriod; s++) {
       final seasonalValues = <double>[];
       for (int i = s; i < detrended.length; i += seasonalPeriod) {
         seasonalValues.add(detrended[i]);
       }
-      final avgSeasonal = seasonalValues.isNotEmpty 
-          ? seasonalValues.reduce((a, b) => a + b) / seasonalValues.length 
+      final avgSeasonal = seasonalValues.isNotEmpty
+          ? seasonalValues.reduce((a, b) => a + b) / seasonalValues.length
           : 0.0;
-      
+
       for (int i = s; i < seasonal.length; i += seasonalPeriod) {
         seasonal[i] = avgSeasonal;
       }
@@ -127,15 +138,11 @@ class FinancialAnalyticsHelper {
 
     // Calculate residual
     final residual = List.generate(
-      timeSeries.length, 
+      timeSeries.length,
       (i) => timeSeries[i] - trend[i] - seasonal[i],
     );
 
-    return {
-      'trend': trend,
-      'seasonal': seasonal,
-      'residual': residual,
-    };
+    return {'trend': trend, 'seasonal': seasonal, 'residual': residual};
   }
 
   static double _getZScore(double confidenceLevel) {

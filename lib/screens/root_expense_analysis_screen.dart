@@ -316,9 +316,11 @@ class _RootExpenseAnalysisScreenState extends State<RootExpenseAnalysisScreen> {
                   ),
                 ),
               ...allFixedCosts.take(30).map((entry) {
-                final accountName =
-                    entry.accountName.isEmpty ? '미분류' : entry.accountName;
-                final subtitle = '$accountName · ${_fixedCostSubtitle(entry.cost)}';
+                final accountName = entry.accountName.isEmpty
+                    ? '미분류'
+                    : entry.accountName;
+                final subtitle =
+                    '$accountName · ${_fixedCostSubtitle(entry.cost)}';
                 final amount = currencyFormat.format(entry.cost.amount);
 
                 if (isLandscape) {

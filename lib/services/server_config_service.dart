@@ -104,12 +104,12 @@ class ServerConfigService {
 
     final client = await createHttpClient();
     try {
-      final response = await client.get(
-        Uri.parse('$address/api/ledger/health'),
-        headers: {
-          'X-Admin-Key': key,
-        },
-      ).timeout(const Duration(seconds: 3));
+      final response = await client
+          .get(
+            Uri.parse('$address/api/ledger/health'),
+            headers: {'X-Admin-Key': key},
+          )
+          .timeout(const Duration(seconds: 3));
 
       return response.statusCode == 200;
     } catch (e) {

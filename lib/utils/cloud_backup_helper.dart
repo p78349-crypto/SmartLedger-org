@@ -20,11 +20,23 @@ class CloudBackupHelper {
       case BackupFrequency.hourly:
         return lastBackup.add(const Duration(hours: 1));
       case BackupFrequency.daily:
-        return DateTime(lastBackup.year, lastBackup.month, lastBackup.day + 1, 2, 0);
+        return DateTime(
+          lastBackup.year,
+          lastBackup.month,
+          lastBackup.day + 1,
+          2,
+          0,
+        );
       case BackupFrequency.weekly:
         return lastBackup.add(const Duration(days: 7));
       case BackupFrequency.monthly:
-        return DateTime(lastBackup.year, lastBackup.month + 1, lastBackup.day, 2, 0);
+        return DateTime(
+          lastBackup.year,
+          lastBackup.month + 1,
+          lastBackup.day,
+          2,
+          0,
+        );
     }
   }
 
@@ -32,14 +44,14 @@ class CloudBackupHelper {
   static Future<bool> validateBackupIntegrity(File backupFile) async {
     try {
       if (!await backupFile.exists()) return false;
-      
+
       final size = await backupFile.length();
       if (size < 100) return false; // Minimum viable backup size
-      
+
       // Read first few bytes to validate format
       final bytes = await backupFile.openRead(0, 50).first;
       final header = String.fromCharCodes(bytes);
-      
+
       return header.contains('"version"') || header.contains('smartledger');
     } catch (_) {
       return false;
@@ -49,7 +61,8 @@ class CloudBackupHelper {
   /// Calculates optimal chunk size for file upload
   static int calculateChunkSize(int fileSize) {
     if (fileSize < 1024 * 1024) return 64 * 1024; // 64KB for small files
-    if (fileSize < 10 * 1024 * 1024) return 256 * 1024; // 256KB for medium files
+    if (fileSize < 10 * 1024 * 1024)
+      return 256 * 1024; // 256KB for medium files
     return 1024 * 1024; // 1MB for large files
   }
 
@@ -61,7 +74,10 @@ class CloudBackupHelper {
   }
 
   /// Estimates upload time based on file size and connection speed
-  static Duration estimateUploadTime(int fileSizeBytes, double connectionSpeedMbps) {
+  static Duration estimateUploadTime(
+    int fileSizeBytes,
+    double connectionSpeedMbps,
+  ) {
     final fileSizeMb = fileSizeBytes / (1024 * 1024);
     final uploadTimeSeconds = (fileSizeMb * 8) / connectionSpeedMbps;
     return Duration(seconds: uploadTimeSeconds.ceil());
@@ -74,7 +90,7 @@ class CloudBackupHelper {
     CloudBackupStatus? lastStatus,
   ) {
     if (!config.autoBackupEnabled) return false;
-    
+
     // Don't backup if last backup failed recently (within last hour)
     if (lastStatus?.status == BackupStatusType.failed) {
       final failTime = lastStatus?.endTime;
@@ -82,8 +98,11 @@ class CloudBackupHelper {
         return false;
       }
     }
-    
-    final nextBackupTime = calculateNextBackupTime(config.backupFrequency, lastBackupTime);
+
+    final nextBackupTime = calculateNextBackupTime(
+      config.backupFrequency,
+      lastBackupTime,
+    );
     return DateTime.now().isAfter(nextBackupTime);
   }
 
@@ -96,12 +115,15 @@ class CloudBackupHelper {
   static String formatFileSize(int bytes) {
     if (bytes < 1024) return '$bytes B';
     if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
-    if (bytes < 1024 * 1024 * 1024) return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+    if (bytes < 1024 * 1024 * 1024)
+      return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
     return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB';
   }
 
   /// Validates cloud provider configuration
-  static Map<String, bool> validateConfiguration(CloudBackupConfiguration config) {
+  static Map<String, bool> validateConfiguration(
+    CloudBackupConfiguration config,
+  ) {
     return {
       'validProvider': _isValidProvider(config.providerId),
       'validAccount': config.accountId.isNotEmpty,

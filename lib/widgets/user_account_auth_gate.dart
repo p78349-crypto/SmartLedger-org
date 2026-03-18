@@ -277,9 +277,7 @@ class _UserAccountAuthGateState extends State<UserAccountAuthGate> {
         true;
   }
 
-  Future<bool> _authenticateBiometricWithResult(
-    SharedPreferences prefs,
-  ) async {
+  Future<bool> _authenticateBiometricWithResult(SharedPreferences prefs) async {
     final result = await _authService.authenticateDevice(
       reason: '사용자 계정에 접근하려면 인증이 필요합니다',
     );
@@ -298,18 +296,13 @@ class _UserAccountAuthGateState extends State<UserAccountAuthGate> {
     return false;
   }
 
-  Future<bool> _authenticatePasswordWithResult(
-    SharedPreferences prefs,
-  ) async {
+  Future<bool> _authenticatePasswordWithResult(SharedPreferences prefs) async {
     if (!mounted) return false;
     return (await showDialog<bool>(
           context: context,
           barrierDismissible: false,
           builder: (dialogContext) {
-            return _UserPasswordDialog(
-              prefs: prefs,
-              service: _passwordService,
-            );
+            return _UserPasswordDialog(prefs: prefs, service: _passwordService);
           },
         )) ==
         true;

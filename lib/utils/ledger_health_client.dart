@@ -21,12 +21,14 @@ class LedgerHealthClient {
     final client =
         _explicitClient ?? await ServerConfigService().createHttpClient();
     try {
-      final response = await client.get(
-        Uri.parse(healthUrl),
-        headers: {
-          if (adminKey.trim().isNotEmpty) 'X-Admin-Key': adminKey.trim(),
-        },
-      ).timeout(const Duration(seconds: 4));
+      final response = await client
+          .get(
+            Uri.parse(healthUrl),
+            headers: {
+              if (adminKey.trim().isNotEmpty) 'X-Admin-Key': adminKey.trim(),
+            },
+          )
+          .timeout(const Duration(seconds: 4));
 
       if (response.statusCode != 200) return false;
 

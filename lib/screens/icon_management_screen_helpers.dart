@@ -64,8 +64,7 @@ extension IconManagementHelpers on _IconManagementScreenState {
       return _statsIconIds.contains(iconId);
     }
     if (_isAssetReservedPage(pageIndex)) {
-      return _incomeIconIds.contains(iconId) ||
-          _assetIconIds.contains(iconId);
+      return _incomeIconIds.contains(iconId) || _assetIconIds.contains(iconId);
     }
     if (_isRootReservedPage(pageIndex)) {
       return _rootIconIds.contains(iconId);
@@ -79,10 +78,8 @@ extension IconManagementHelpers on _IconManagementScreenState {
     // non-asset pages, unless user explicitly allows it AND the asset session
     // is currently unlocked.
     if (_assetBiometricLockEnabled &&
-        (_incomeIconIds.contains(iconId) ||
-            _assetIconIds.contains(iconId))) {
-      final canBypass =
-          _allowAssetOutsideWhenUnlocked && _assetSessionUnlocked;
+        (_incomeIconIds.contains(iconId) || _assetIconIds.contains(iconId))) {
+      final canBypass = _allowAssetOutsideWhenUnlocked && _assetSessionUnlocked;
       if (!canBypass) return false;
     }
 
@@ -98,8 +95,7 @@ extension IconManagementHelpers on _IconManagementScreenState {
   bool _isExcludedByDedicatedCatalogPolicy(String iconId) {
     if (!widget.redirectAssetRootToDedicatedScreens) return false;
     if (_rootIconIds.contains(iconId)) return true;
-    if (_assetIconIds.contains(iconId) ||
-        _incomeIconIds.contains(iconId)) {
+    if (_assetIconIds.contains(iconId) || _incomeIconIds.contains(iconId)) {
       return true;
     }
     return false;
@@ -279,7 +275,8 @@ extension IconManagementHelpers on _IconManagementScreenState {
     }
 
     // Reserved page prefill: if all slots are empty, prefill from available icons.
-    final isReservedPage = _isStatsReservedPage(pageIndex) ||
+    final isReservedPage =
+        _isStatsReservedPage(pageIndex) ||
         _isAssetReservedPage(pageIndex) ||
         _isRootReservedPage(pageIndex) ||
         _isSettingsOnlyPage(pageIndex);
@@ -310,12 +307,13 @@ extension IconManagementHelpers on _IconManagementScreenState {
 
   List<int> _visiblePageIndices() {
     final hidden = widget.hiddenPageIndices;
-    return List<int>.generate(_pageCount, (i) => i)
-        .where((i) => !hidden.contains(i))
-        .toList(growable: false);
+    return List<int>.generate(
+      _pageCount,
+      (i) => i,
+    ).where((i) => !hidden.contains(i)).toList(growable: false);
   }
 
-    List<int> _editableSlotIndices() =>
+  List<int> _editableSlotIndices() =>
       _visualSlotIndices(totalSlots: _slotCount);
 
   bool _isEditableSlotIndex(int slotIndex) => true;

@@ -16,10 +16,7 @@ class RecipeLocalizedNamesInput extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text(
-          '레시피 이름 *',
-          style: TextStyle(fontWeight: FontWeight.w600),
-        ),
+        const Text('레시피 이름 *', style: TextStyle(fontWeight: FontWeight.w600)),
         const SizedBox(height: 8),
         // Create input for each supported locale
         ...localeControllers.entries.map((e) {
@@ -34,25 +31,24 @@ class RecipeLocalizedNamesInput extends StatelessWidget {
             ),
           );
         }),
-        Builder(builder: (ctx) {
-          return TextButton(
-            onPressed: () {
-              // validation: at least one non-empty name
-              final has = localeControllers.values
-                  .any((c) => c.text.trim().isNotEmpty);
-              if (!has) {
-                ScaffoldMessenger.of(ctx).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      '레시피 이름을 하나 이상 입력해주세요',
-                    ),
-                  ),
+        Builder(
+          builder: (ctx) {
+            return TextButton(
+              onPressed: () {
+                // validation: at least one non-empty name
+                final has = localeControllers.values.any(
+                  (c) => c.text.trim().isNotEmpty,
                 );
-              }
-            },
-            child: const Text('이름 입력 확인'),
-          );
-        }),
+                if (!has) {
+                  ScaffoldMessenger.of(ctx).showSnackBar(
+                    const SnackBar(content: Text('레시피 이름을 하나 이상 입력해주세요')),
+                  );
+                }
+              },
+              child: const Text('이름 입력 확인'),
+            );
+          },
+        ),
       ],
     );
   }

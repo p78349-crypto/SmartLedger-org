@@ -100,10 +100,7 @@ class _EmergencyFundListScreenState extends State<EmergencyFundListScreen> {
               children: [
                 const Text(
                   '비상금 거래',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 TextButton(
                   onPressed: _toggleSelectionMode,
@@ -140,10 +137,7 @@ class _EmergencyFundListScreenState extends State<EmergencyFundListScreen> {
     );
   }
 
-  Widget _buildListContent(
-    List<EmergencyTransaction> items,
-    bool isLandscape,
-  ) {
+  Widget _buildListContent(List<EmergencyTransaction> items, bool isLandscape) {
     if (_isLoading) {
       return const Padding(
         padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -157,9 +151,7 @@ class _EmergencyFundListScreenState extends State<EmergencyFundListScreen> {
       final hasQuery = _searchController.text.trim().isNotEmpty;
       return EmptyState(
         title: hasQuery ? '검색 결과가 없습니다' : '비상금 거래가 없습니다',
-        message: hasQuery
-            ? '검색어를 바꾸거나 초기화하세요.'
-            : '입금/출금을 추가해 비상금을 관리하세요.',
+        message: hasQuery ? '검색어를 바꾸거나 초기화하세요.' : '입금/출금을 추가해 비상금을 관리하세요.',
         secondaryLabel: hasQuery ? '검색 초기화' : null,
         onSecondary: hasQuery
             ? () {
@@ -170,19 +162,14 @@ class _EmergencyFundListScreenState extends State<EmergencyFundListScreen> {
       );
     }
 
-    return isLandscape
-        ? buildLandscapeList(items)
-        : buildPortraitList(items);
+    return isLandscape ? buildLandscapeList(items) : buildPortraitList(items);
   }
 
   Widget? _buildBottomBar() {
     if (!_isSelectionMode || _selectedIds.isEmpty) return null;
     return BottomAppBar(
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16.0,
-          vertical: 8.0,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -200,8 +187,7 @@ class _EmergencyFundListScreenState extends State<EmergencyFundListScreen> {
             const SizedBox(width: 16),
             Expanded(
               child: ElevatedButton.icon(
-                onPressed:
-                    _selectedIds.length == 1 ? editSelected : null,
+                onPressed: _selectedIds.length == 1 ? editSelected : null,
                 icon: const Icon(Icons.edit),
                 label: const Text('수정'),
               ),

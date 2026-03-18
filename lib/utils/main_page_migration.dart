@@ -7,7 +7,8 @@ import 'main_feature_icon_catalog_stats_settings.dart';
 import 'page1_bottom_quick_icons.dart';
 
 class MainPageMigration {
-  static const String _relayout20260223Flag = 'main_pages_relayout_20260223_done';
+  static const String _relayout20260223Flag =
+      'main_pages_relayout_20260223_done';
   static const String _relayout20260223RootSplitFlag =
       'main_pages_relayout_20260223_root_to_page4_done';
 

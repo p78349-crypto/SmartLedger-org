@@ -91,21 +91,24 @@ void main() {
       expect(attempts, 2);
     });
 
-    test('RootPinService serializes password policy across instances', () async {
-      final prefs = await SharedPreferences.getInstance();
-      final serviceA = RootPinService();
-      final serviceB = RootPinService();
+    test(
+      'RootPinService serializes password policy across instances',
+      () async {
+        final prefs = await SharedPreferences.getInstance();
+        final serviceA = RootPinService();
+        final serviceB = RootPinService();
 
-      await serviceA.setPassword(prefs, password: 'root', iterations: 1);
+        await serviceA.setPassword(prefs, password: 'root', iterations: 1);
 
-      await Future.wait([
-        serviceA.verifyPasswordWithPolicy(prefs, password: 'wrong'),
-        serviceB.verifyPasswordWithPolicy(prefs, password: 'wrong'),
-      ]);
+        await Future.wait([
+          serviceA.verifyPasswordWithPolicy(prefs, password: 'wrong'),
+          serviceB.verifyPasswordWithPolicy(prefs, password: 'wrong'),
+        ]);
 
-      final attempts = prefs.getInt(PrefKeys.rootPasswordFailedAttempts);
-      expect(attempts, 2);
-    });
+        final attempts = prefs.getInt(PrefKeys.rootPasswordFailedAttempts);
+        expect(attempts, 2);
+      },
+    );
 
     test('AssetPinService serializes pin policy across instances', () async {
       final prefs = await SharedPreferences.getInstance();
@@ -130,11 +133,7 @@ void main() {
         final serviceA = AssetPasswordService();
         final serviceB = AssetPasswordService();
 
-        await serviceA.setPassword(
-          prefs,
-          password: 'asset',
-          iterations: 1,
-        );
+        await serviceA.setPassword(prefs, password: 'asset', iterations: 1);
 
         await Future.wait([
           serviceA.verifyPasswordWithPolicy(prefs, password: 'wrong'),

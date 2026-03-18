@@ -15,9 +15,11 @@ class HouseholdDataService {
     if (isLoaded) return;
 
     try {
-      final jsonString = await rootBundle.loadString('assets/data/household_products_3089.json');
+      final jsonString = await rootBundle.loadString(
+        'assets/data/household_products_3089.json',
+      );
       final List<dynamic> jsonList = json.decode(jsonString);
-      
+
       _allProducts = jsonList.map((e) => HouseholdProduct.fromJson(e)).toList();
 
       // 카테고리별 그룹화 (Category1 기준)
@@ -44,10 +46,10 @@ class HouseholdDataService {
     final q = query.toLowerCase().trim();
     return _allProducts!.where((p) {
       return p.name.toLowerCase().contains(q) ||
-             p.category1.toLowerCase().contains(q) ||
-             p.category2.toLowerCase().contains(q) ||
-             p.category3.toLowerCase().contains(q) ||
-             p.category4.toLowerCase().contains(q);
+          p.category1.toLowerCase().contains(q) ||
+          p.category2.toLowerCase().contains(q) ||
+          p.category3.toLowerCase().contains(q) ||
+          p.category4.toLowerCase().contains(q);
     }).toList();
   }
 }

@@ -14,10 +14,7 @@ class ConsumableFilterChipRow extends StatelessWidget {
     required this.options,
     required this.selected,
     required this.onSelected,
-    this.padding = const EdgeInsets.symmetric(
-      horizontal: 16,
-      vertical: 8,
-    ),
+    this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
   });
 
   @override
@@ -86,8 +83,8 @@ class ConsumableItemCard extends StatelessWidget {
           color: isSelected
               ? theme.colorScheme.primary
               : (isEmpty || isLow
-                  ? accentColor.withValues(alpha: 0.5)
-                  : theme.colorScheme.outlineVariant),
+                    ? accentColor.withValues(alpha: 0.5)
+                    : theme.colorScheme.outlineVariant),
           width: isSelected || isEmpty || isLow ? 2 : 1,
         ),
       ),
@@ -151,10 +148,7 @@ class ConsumableItemCard extends StatelessWidget {
         ),
         if (isLow)
           Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 8,
-              vertical: 4,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               color: isEmpty
                   ? theme.colorScheme.errorContainer
@@ -211,10 +205,7 @@ class ConsumableItemCard extends StatelessWidget {
             onPressed: onQuickDecrement,
             style: FilledButton.styleFrom(
               visualDensity: VisualDensity.standard,
-              padding: const EdgeInsets.symmetric(
-                horizontal: 14,
-                vertical: 10,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             ),
             child: const Text(
               '-1',
@@ -223,17 +214,9 @@ class ConsumableItemCard extends StatelessWidget {
           ),
           const SizedBox(width: 8),
         ],
-        ActionButton(
-          icon: Icons.remove,
-          label: '사용',
-          onPressed: onUse,
-        ),
+        ActionButton(icon: Icons.remove, label: '사용', onPressed: onUse),
         const SizedBox(width: 8),
-        ActionButton(
-          icon: Icons.add,
-          label: '추가',
-          onPressed: onRefill,
-        ),
+        ActionButton(icon: Icons.add, label: '추가', onPressed: onRefill),
         const Spacer(),
         ElevatedButton.icon(
           onPressed: onSendToCart,

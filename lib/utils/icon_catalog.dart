@@ -175,12 +175,14 @@ class IconCatalog {
   // Root/Statistics: overspending diagnosis indicator
   static const IconData overspendingDiagnosis = Icons.analytics;
   static const IconData emojiEvents = Icons.emoji_events_outlined;
-  static const IconData accountBalanceWalletRounded = Icons.account_balance_wallet_rounded;
+  static const IconData accountBalanceWalletRounded =
+      Icons.account_balance_wallet_rounded;
 
   // Added 2026-02-14 for Icon Policy Correction
   static const IconData flagOutlined = Icons.flag_outlined;
   static const IconData cleaningServices = Icons.cleaning_services;
-  static const IconData playlistAddCheckCircle = Icons.playlist_add_check_circle;
+  static const IconData playlistAddCheckCircle =
+      Icons.playlist_add_check_circle;
   static const IconData helpOutline = Icons.help_outline;
   static const IconData bolt = Icons.bolt;
   static const IconData rocketLaunch = Icons.rocket_launch;
@@ -197,7 +199,7 @@ class IconCatalog {
   static const IconData microSavings = Icons.rocket_launch;
   static const IconData weatherPricePrediction = Icons.wb_cloudy;
   static const IconData weatherInput = Icons.wb_sunny_outlined;
-  
+
   // Help Center icons (2026-02-27)
   static const IconData helpCenter = Icons.help_center;
   static const IconData questionAnswerOutlined = Icons.question_answer_outlined;

@@ -26,25 +26,17 @@ class HealthScoreSelector extends StatelessWidget {
               child: GestureDetector(
                 onTap: () => onChanged(s),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 12,
-                  ),
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 2,
-                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  margin: const EdgeInsets.symmetric(horizontal: 2),
                   decoration: BoxDecoration(
                     color: score >= s
                         ? theme.colorScheme.primary
                         : Colors.grey[200],
-                    borderRadius: BorderRadius.circular(
-                      8,
-                    ),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
                     Icons.favorite,
-                    color: score >= s
-                        ? Colors.white
-                        : Colors.grey[400],
+                    color: score >= s ? Colors.white : Colors.grey[400],
                     size: 24,
                   ),
                 ),
@@ -57,12 +49,9 @@ class HealthScoreSelector extends StatelessWidget {
           score >= 4
               ? '매우 건강해요!'
               : score >= 3
-                  ? '적당해요'
-                  : '가끔 먹어요',
-          style: TextStyle(
-            color: Colors.grey[600],
-            fontSize: 12,
-          ),
+              ? '적당해요'
+              : '가끔 먹어요',
+          style: TextStyle(color: Colors.grey[600], fontSize: 12),
         ),
       ],
     );
@@ -84,23 +73,13 @@ class EmptyIngredientsPlaceholder extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Icon(
-            Icons.egg_alt_outlined,
-            size: 48,
-            color: Colors.grey[400],
-          ),
+          Icon(Icons.egg_alt_outlined, size: 48, color: Colors.grey[400]),
           const SizedBox(height: 8),
-          Text(
-            '아직 재료가 없습니다',
-            style: TextStyle(color: Colors.grey[600]),
-          ),
+          Text('아직 재료가 없습니다', style: TextStyle(color: Colors.grey[600])),
           const SizedBox(height: 4),
           Text(
             '재료 추가 버튼을 눌러 추가해주세요',
-            style: TextStyle(
-              color: Colors.grey[500],
-              fontSize: 12,
-            ),
+            style: TextStyle(color: Colors.grey[500], fontSize: 12),
           ),
         ],
       ),

@@ -16,10 +16,7 @@ extension AssetListScreenListBuilders on _AssetListScreenState {
           );
 
           return const Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: 8,
-              vertical: 10,
-            ),
+            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 10),
             child: Row(
               children: [
                 SizedBox(width: 40),
@@ -84,15 +81,17 @@ extension AssetListScreenListBuilders on _AssetListScreenState {
           asset.amount,
           asset.costBasis,
         );
-        final profitLossColor =
-            ProfitLossCalculator.getProfitLossColor(profitLoss);
-        final profitLossLabel =
-            ProfitLossCalculator.formatProfitLoss(profitLoss);
-        final profitLossRateLabel =
-            ProfitLossCalculator.formatProfitLossRate(profitLossRate);
+        final profitLossColor = ProfitLossCalculator.getProfitLossColor(
+          profitLoss,
+        );
+        final profitLossLabel = ProfitLossCalculator.formatProfitLoss(
+          profitLoss,
+        );
+        final profitLossRateLabel = ProfitLossCalculator.formatProfitLossRate(
+          profitLossRate,
+        );
 
-        final hasProfitLoss =
-            asset.costBasis != null && asset.costBasis! > 0;
+        final hasProfitLoss = asset.costBasis != null && asset.costBasis! > 0;
         final profitLossText = hasProfitLoss
             ? '$profitLossLabel ($profitLossRateLabel)'
             : '';
@@ -108,10 +107,7 @@ extension AssetListScreenListBuilders on _AssetListScreenState {
               ? () => _toggleSelection(asset.id)
               : () => _showAssetActionSheet(asset),
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 8,
-              vertical: 10,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
             child: Row(
               children: [
                 SizedBox(
@@ -154,9 +150,7 @@ extension AssetListScreenListBuilders on _AssetListScreenState {
                       amountLabel,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),
@@ -169,10 +163,7 @@ extension AssetListScreenListBuilders on _AssetListScreenState {
                       _getAssetTypeLabel(asset),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                     ),
                   ),
                 ),
@@ -200,12 +191,15 @@ extension AssetListScreenListBuilders on _AssetListScreenState {
           asset.amount,
           asset.costBasis,
         );
-        final profitLossColor =
-            ProfitLossCalculator.getProfitLossColor(profitLoss);
-        final profitLossLabel =
-            ProfitLossCalculator.formatProfitLoss(profitLoss);
-        final profitLossRateLabel =
-            ProfitLossCalculator.formatProfitLossRate(profitLossRate);
+        final profitLossColor = ProfitLossCalculator.getProfitLossColor(
+          profitLoss,
+        );
+        final profitLossLabel = ProfitLossCalculator.formatProfitLoss(
+          profitLoss,
+        );
+        final profitLossRateLabel = ProfitLossCalculator.formatProfitLossRate(
+          profitLossRate,
+        );
 
         return ListTile(
           leading: _isSelectionMode
@@ -247,10 +241,7 @@ extension AssetListScreenListBuilders on _AssetListScreenState {
               ),
               Text(
                 _getAssetTypeLabel(asset),
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
               ),
             ],
           ),

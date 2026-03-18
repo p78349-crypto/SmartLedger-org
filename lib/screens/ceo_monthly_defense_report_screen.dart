@@ -212,8 +212,7 @@ Future<_ReportData> _fetchReportData(String accountName) async {
       totalAssets += asset.amount;
     }
   }
-  final progressPct =
-      (totalAssets / _kDefenseGoalWon * 100).clamp(0.0, 999.9);
+  final progressPct = (totalAssets / _kDefenseGoalWon * 100).clamp(0.0, 999.9);
 
   final monthKey = '${now.year}-${now.month.toString().padLeft(2, '0')}';
   final monthAgg = cache.months[monthKey];

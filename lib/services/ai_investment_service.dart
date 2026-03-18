@@ -28,14 +28,17 @@ class AiInvestmentService {
     try {
       final assets = await _assetService.getAllAssets();
       final userAge = await _getUserAge();
-      
+
       riskPreference ??= await _getUserRiskPreference();
       timeHorizon ??= await _getUserTimeHorizon();
-      
+
       final currentAllocation = _calculateCurrentAllocation(assets);
-      final riskScore = AiInvestmentHelper.calculatePortfolioRisk(currentAllocation);
-      final diversificationScore = AiInvestmentHelper.calculateDiversificationScore(currentAllocation);
-      
+      final riskScore = AiInvestmentHelper.calculatePortfolioRisk(
+        currentAllocation,
+      );
+      final diversificationScore =
+          AiInvestmentHelper.calculateDiversificationScore(currentAllocation);
+
       final recommendations = await _generateRecommendations(
         currentAllocation,
         riskPreference,
@@ -44,13 +47,13 @@ class AiInvestmentService {
         riskScore,
         diversificationScore,
       );
-      
+
       final rebalanceRequired = _shouldRebalance(
         currentAllocation,
         riskScore,
         diversificationScore,
       );
-      
+
       return PortfolioAnalysis(
         currentAllocation: currentAllocation,
         riskScore: riskScore,
@@ -59,7 +62,6 @@ class AiInvestmentService {
         rebalanceRequired: rebalanceRequired,
         analysisDate: DateTime.now(),
       );
-      
     } catch (e) {
       throw Exception('Failed to analyze portfolio: $e');
     }
@@ -73,46 +75,50 @@ class AiInvestmentService {
   }) async {
     try {
       final userAge = await _getUserAge();
-      
+
       riskLevel ??= await _getUserRiskPreference();
       timeHorizon ??= await _getUserTimeHorizon();
-      
+
       final optimalAllocation = AiInvestmentHelper.suggestOptimalAllocation(
         riskLevel,
         timeHorizon,
         userAge,
       );
-      
+
       return _createRecommendationsFromAllocation(
         optimalAllocation,
         investmentAmount,
         riskLevel,
         timeHorizon,
       );
-      
     } catch (e) {
-      throw Exception('Failed to generate investment reference information: $e');
+      throw Exception(
+        'Failed to generate investment reference information: $e',
+      );
     }
   }
 
-  Map<InvestmentAssetType, double> _calculateCurrentAllocation(List<Asset> assets) {
+  Map<InvestmentAssetType, double> _calculateCurrentAllocation(
+    List<Asset> assets,
+  ) {
     final allocation = <InvestmentAssetType, double>{};
     double totalValue = 0.0;
-    
+
     // Calculate total portfolio value
     for (final asset in assets) {
       totalValue += asset.amount;
     }
-    
+
     if (totalValue == 0) return allocation;
-    
+
     // Map assets to investment types and calculate percentages
     for (final asset in assets) {
       final investmentType = _mapAssetToInvestmentType(asset.category);
       final percentage = (asset.amount / totalValue) * 100.0;
-      allocation[investmentType] = (allocation[investmentType] ?? 0.0) + percentage;
+      allocation[investmentType] =
+          (allocation[investmentType] ?? 0.0) + percentage;
     }
-    
+
     return allocation;
   }
 

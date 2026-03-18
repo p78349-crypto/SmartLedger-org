@@ -9,9 +9,7 @@ extension FoodExpiryRecipePickerExt on _FoodExpiryItemsScreenState {
 
     final selectedRecipe = await showDialog<Recipe>(
       context: context,
-      builder: (ctx) => RecipePickerDialog(
-        onlyCookable: onlyCookable,
-      ),
+      builder: (ctx) => RecipePickerDialog(onlyCookable: onlyCookable),
     );
 
     if (selectedRecipe != null) {
@@ -146,10 +144,7 @@ extension FoodExpiryRecipePickerExt on _FoodExpiryItemsScreenState {
             '💡 빅스비가 이 선택을 기억합니다',
           ),
           behavior: SnackBarBehavior.floating,
-          action: SnackBarAction(
-            label: '통계 보기',
-            onPressed: _showLearningStats,
-          ),
+          action: SnackBarAction(label: '통계 보기', onPressed: _showLearningStats),
         ),
       );
     }

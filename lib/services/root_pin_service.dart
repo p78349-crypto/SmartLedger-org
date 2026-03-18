@@ -244,7 +244,10 @@ class RootPinService {
     });
   }
 
-  Future<bool> verifyPassword(SharedPreferences prefs, {required String password}) async {
+  Future<bool> verifyPassword(
+    SharedPreferences prefs, {
+    required String password,
+  }) async {
     final saltB64 = prefs.getString(PrefKeys.rootPasswordSaltB64);
     final hashB64 = prefs.getString(PrefKeys.rootPasswordHashB64);
     if (saltB64 == null || hashB64 == null) return false;
@@ -268,7 +271,9 @@ class RootPinService {
         final type = remaining.inMinutes >= 5
             ? RootPinLockType.longLock
             : RootPinLockType.cooldown;
-        final failedAttempts = prefs.getInt(PrefKeys.rootPasswordFailedAttempts);
+        final failedAttempts = prefs.getInt(
+          PrefKeys.rootPasswordFailedAttempts,
+        );
         return RootPinPolicyResult.locked(
           lockType: type,
           lockRemaining: remaining,

@@ -117,8 +117,7 @@ Future<void> addTransactionToCart({
   if (name.isEmpty) return;
 
   final qty = tx.quantity > 0 ? tx.quantity : 1;
-  final unitPrice =
-      tx.unitPrice > 0 ? tx.unitPrice : (tx.amount.abs() / qty);
+  final unitPrice = tx.unitPrice > 0 ? tx.unitPrice : (tx.amount.abs() / qty);
   final now = DateTime.now();
 
   final newItem = ShoppingCartItem(
@@ -174,10 +173,18 @@ class DailyTransactionTile extends StatelessWidget {
     Color txColor;
     String prefix;
     switch (tx.type) {
-      case TransactionType.income:  txColor = AppColors.income;  prefix = '+';
-      case TransactionType.expense: txColor = AppColors.expense; prefix = '-';
-      case TransactionType.savings: txColor = AppColors.savings; prefix = '⊕';
-      case TransactionType.refund:  txColor = RefundUtils.color; prefix = '⊕';
+      case TransactionType.income:
+        txColor = AppColors.income;
+        prefix = '+';
+      case TransactionType.expense:
+        txColor = AppColors.expense;
+        prefix = '-';
+      case TransactionType.savings:
+        txColor = AppColors.savings;
+        prefix = '⊕';
+      case TransactionType.refund:
+        txColor = RefundUtils.color;
+        prefix = '⊕';
     }
 
     if (!isLandscape) {
@@ -209,12 +216,14 @@ class DailyTransactionTile extends StatelessWidget {
         : '${tx.mainCategory} · $sub';
     final memoText = tx.memo.trim().isEmpty ? '-' : tx.memo.trim();
     final cardCharged = tx.cardChargedAmount;
-    final cardText =
-        cardCharged == null ? '-' : '${numberFormat.format(cardCharged)}원';
+    final cardText = cardCharged == null
+        ? '-'
+        : '${numberFormat.format(cardCharged)}원';
     final baseAbs = tx.amount.abs();
     final hasMismatch =
         cardCharged != null && (cardCharged - baseAbs).abs() >= 1;
-    final discountAmount = (cardCharged != null &&
+    final discountAmount =
+        (cardCharged != null &&
             tx.type == TransactionType.expense &&
             cardCharged < baseAbs)
         ? (baseAbs - cardCharged)
@@ -223,24 +232,48 @@ class DailyTransactionTile extends StatelessWidget {
     return ListTile(
       dense: true,
       visualDensity: VisualDensity.compact,
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 4,
-      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       title: Row(
         children: [
-          Expanded(flex: 4, child: Text(tx.description,
-              maxLines: 1, overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontWeight: FontWeight.w600))),
+          Expanded(
+            flex: 4,
+            child: Text(
+              tx.description,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
           const SizedBox(width: 10),
-          Expanded(flex: 3, child: Text(categoryText,
-              maxLines: 1, overflow: TextOverflow.ellipsis, style: theme.textTheme.bodySmall)),
+          Expanded(
+            flex: 3,
+            child: Text(
+              categoryText,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodySmall,
+            ),
+          ),
           const SizedBox(width: 10),
-          Expanded(flex: 2, child: Text(tx.paymentMethod,
-              maxLines: 1, overflow: TextOverflow.ellipsis, style: theme.textTheme.bodySmall)),
+          Expanded(
+            flex: 2,
+            child: Text(
+              tx.paymentMethod,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodySmall,
+            ),
+          ),
           const SizedBox(width: 10),
-          Expanded(flex: 4, child: Text(memoText,
-              maxLines: 1, overflow: TextOverflow.ellipsis, style: theme.textTheme.bodySmall)),
+          Expanded(
+            flex: 4,
+            child: Text(
+              memoText,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodySmall,
+            ),
+          ),
           const SizedBox(width: 10),
           Text(
             '$prefix${numberFormat.format(tx.amount)}원',

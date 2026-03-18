@@ -16,51 +16,51 @@ class ConsumableInventoryService {
   Future<void> load() async {
     final parsed = await AppRepositories.consumableInventory.loadItems();
     items.value = parsed;
-    
+
     // 마이그레이션 자동 실행 (첫 실행 시에만)
     await _migrateFromFoodExpiryIfNeeded();
   }
-  
+
   /// FoodExpiry에서 데이터 마이그레이션 (자동)
   Future<void> _migrateFromFoodExpiryIfNeeded() async {
     final isMigrated = await FoodExpiryMigrationService.isMigrated();
     if (isMigrated) {
       return; // 이미 마이그레이션 됨
     }
-    
-    final pendingCount = 
+
+    final pendingCount =
         await FoodExpiryMigrationService.getPendingMigrationCount();
     if (pendingCount == 0) {
       // 마이그레이션할 데이터 없음
       await FoodExpiryMigrationService.markAsMigrated();
       return;
     }
-    
+
     try {
       debugPrint(
         '[ConsumableInventoryService] Starting FoodExpiry migration...',
       );
-      
+
       // 백업 생성
       await FoodExpiryMigrationService.backupFoodExpiryData();
-      
+
       // 데이터 로드 및 변환
-      final consumableItems = 
+      final consumableItems =
           await FoodExpiryMigrationService.loadAsConsumableItems();
-      
+
       if (consumableItems.isEmpty) {
         await FoodExpiryMigrationService.markAsMigrated();
         return;
       }
-      
+
       // 기존 데이터와 병합
       final merged = <String, ConsumableInventoryItem>{};
-      
+
       // 기존 Consumable 항목 추가
       for (final item in items.value) {
         merged[item.name.toLowerCase()] = item;
       }
-      
+
       // Food Expiry 항목 추가 (이름 기준 중복 제거)
       for (final item in consumableItems) {
         final key = item.name.toLowerCase();
@@ -77,10 +77,10 @@ class ConsumableInventoryService {
           );
         }
       }
-      
+
       items.value = merged.values.toList();
       await _save();
-      
+
       // 알림 스케줄 업데이트
       for (final item in items.value) {
         if (item.expiryDate != null) {
@@ -88,7 +88,7 @@ class ConsumableInventoryService {
           // (필요시 별도 로직 추가)
         }
       }
-      
+
       await FoodExpiryMigrationService.markAsMigrated();
       debugPrint(
         '[ConsumableInventoryService] FoodExpiry migration completed: '

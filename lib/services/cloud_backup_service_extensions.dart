@@ -12,24 +12,26 @@ extension CloudBackupServiceExtensions on CloudBackupService {
     try {
       final file = File(localFilePath);
       final fileSize = await file.length();
-      
-      _broadcastStatus(CloudBackupStatus(
-        backupId: backupId,
-        status: BackupStatusType.inProgress,
-        startTime: DateTime.now(),
-        endTime: null,
-        fileSize: fileSize,
-        errorMessage: null,
-        progressPercentage: 10.0,
-      ));
-      
+
+      _broadcastStatus(
+        CloudBackupStatus(
+          backupId: backupId,
+          status: BackupStatusType.inProgress,
+          startTime: DateTime.now(),
+          endTime: null,
+          fileSize: fileSize,
+          errorMessage: null,
+          progressPercentage: 10.0,
+        ),
+      );
+
       final config = await _getConfiguration();
-      
+
       // Simulate cloud upload (replace with actual provider implementation)
       await _simulateCloudUpload(file, cloudFileName, backupId, config);
-      
+
       await _recordBackupSuccess(backupId, fileSize);
-      
+
       return CloudBackupStatus(
         backupId: backupId,
         status: BackupStatusType.completed,
@@ -39,7 +41,6 @@ extension CloudBackupServiceExtensions on CloudBackupService {
         errorMessage: null,
         progressPercentage: 100.0,
       );
-      
     } catch (e) {
       return _createFailedStatus(backupId, 'Upload failed: $e');
     }
@@ -49,21 +50,13 @@ extension CloudBackupServiceExtensions on CloudBackupService {
   Future<Map<String, dynamic>> _downloadFromCloud(String backupId) async {
     try {
       final config = await _getConfiguration();
-      
+
       // Simulate cloud download (replace with actual provider implementation)
       final localPath = await _simulateCloudDownload(backupId, config);
-      
-      return {
-        'success': true,
-        'filePath': localPath,
-        'backupId': backupId,
-      };
-      
+
+      return {'success': true, 'filePath': localPath, 'backupId': backupId};
     } catch (e) {
-      return {
-        'success': false,
-        'error': 'Download failed: $e',
-      };
+      return {'success': false, 'error': 'Download failed: $e'};
     }
   }
 
@@ -77,20 +70,24 @@ extension CloudBackupServiceExtensions on CloudBackupService {
     final fileSize = await file.length();
     final chunkSize = CloudBackupHelper.calculateChunkSize(fileSize);
     final totalChunks = (fileSize / chunkSize).ceil();
-    
+
     for (int i = 0; i < totalChunks; i++) {
-      await Future.delayed(const Duration(milliseconds: 100)); // Simulate network delay
-      
+      await Future.delayed(
+        const Duration(milliseconds: 100),
+      ); // Simulate network delay
+
       final progress = ((i + 1) / totalChunks * 90.0) + 10.0;
-      _broadcastStatus(CloudBackupStatus(
-        backupId: backupId,
-        status: BackupStatusType.inProgress,
-        startTime: DateTime.now().subtract(Duration(seconds: i + 1)),
-        endTime: null,
-        fileSize: fileSize,
-        errorMessage: null,
-        progressPercentage: progress,
-      ));
+      _broadcastStatus(
+        CloudBackupStatus(
+          backupId: backupId,
+          status: BackupStatusType.inProgress,
+          startTime: DateTime.now().subtract(Duration(seconds: i + 1)),
+          endTime: null,
+          fileSize: fileSize,
+          errorMessage: null,
+          progressPercentage: progress,
+        ),
+      );
     }
   }
 
@@ -100,7 +97,7 @@ extension CloudBackupServiceExtensions on CloudBackupService {
     CloudBackupConfiguration config,
   ) async {
     await Future.delayed(const Duration(seconds: 2)); // Simulate download time
-    
+
     // Return a placeholder path (in real implementation, this would be the downloaded file)
     return '/tmp/downloaded_backup_$backupId.slb';
   }

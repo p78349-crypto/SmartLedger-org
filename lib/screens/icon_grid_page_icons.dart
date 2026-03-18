@@ -39,8 +39,9 @@ extension IconGridPageIcons on _IconGridPageState {
 
     final start = indexInGroup * chunkSize;
     if (start >= icons.length) return const <MainFeatureIcon>[];
-    final end =
-        (start + chunkSize) > icons.length ? icons.length : (start + chunkSize);
+    final end = (start + chunkSize) > icons.length
+        ? icons.length
+        : (start + chunkSize);
     return icons.sublist(start, end);
   }
 

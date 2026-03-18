@@ -25,16 +25,8 @@ part 'quick_stock_use_screen_build.dart';
 /// 상품별 단위/중량/가격 매핑
 const Map<String, _ProductUnitInfo> _productUnitMap = {
   '팽이버섯': _ProductUnitInfo(unit: '봉', weightPerUnit: 180, pricePerUnit: 2268),
-  '새송이버섯': _ProductUnitInfo(
-    unit: '팩',
-    weightPerUnit: 300,
-    pricePerUnit: 3500,
-  ),
-  '느타리버섯': _ProductUnitInfo(
-    unit: '봉',
-    weightPerUnit: 200,
-    pricePerUnit: 2500,
-  ),
+  '새송이버섯': _ProductUnitInfo(unit: '팩', weightPerUnit: 300, pricePerUnit: 3500),
+  '느타리버섯': _ProductUnitInfo(unit: '봉', weightPerUnit: 200, pricePerUnit: 2500),
   '양파': _ProductUnitInfo(unit: '개', weightPerUnit: 200, pricePerUnit: 500),
   '감자': _ProductUnitInfo(unit: '개', weightPerUnit: 150, pricePerUnit: 400),
   '당근': _ProductUnitInfo(unit: '개', weightPerUnit: 180, pricePerUnit: 600),
@@ -192,7 +184,11 @@ class _SealedSpeechAdapter {
 
   bool get isListening => false;
   Future<bool> initialize({dynamic onStatus, dynamic onError}) async => false;
-  Future<void> listen({dynamic onResult, dynamic listenOptions, dynamic localeId}) async {}
+  Future<void> listen({
+    dynamic onResult,
+    dynamic listenOptions,
+    dynamic localeId,
+  }) async {}
   Future<void> stop() async {}
 }
 

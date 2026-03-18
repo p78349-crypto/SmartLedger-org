@@ -5,10 +5,10 @@ import '../config/subscription_product_config.dart';
 import 'subscription_store_adapter.dart';
 
 class PlayStoreSubscriptionAdapter implements SubscriptionStoreAdapter {
-  PlayStoreSubscriptionAdapter({
-    Set<String>? productIds,
-  }) : _productIds =
-           productIds ?? SubscriptionProductConfig.productIdsForCurrentPlatform();
+  PlayStoreSubscriptionAdapter({Set<String>? productIds})
+    : _productIds =
+          productIds ??
+          SubscriptionProductConfig.productIdsForCurrentPlatform();
 
   final Set<String> _productIds;
 

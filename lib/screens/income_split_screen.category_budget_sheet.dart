@@ -4,10 +4,11 @@ part of 'income_split_screen.dart';
 /// Extension: category budget bottom sheet.
 extension IncomeSplitCategorySheet on _IncomeSplitScreenState {
   Future<void> _openCategoryBudgetSheet() async {
-    final categories = CategoryDefinitions.mainCategories
-        .where((c) => c != CategoryDefinitions.defaultCategory)
-        .toList()
-      ..add(CategoryDefinitions.defaultCategory);
+    final categories =
+        CategoryDefinitions.mainCategories
+            .where((c) => c != CategoryDefinitions.defaultCategory)
+            .toList()
+          ..add(CategoryDefinitions.defaultCategory);
 
     if (categories.isEmpty) {
       if (!mounted) return;
@@ -24,7 +25,8 @@ extension IncomeSplitCategorySheet on _IncomeSplitScreenState {
     for (final category in categories) {
       final amount = localBudgets[category] ?? 0;
       controllers[category] = TextEditingController(
-        text: amount > 0 ? CurrencyFormatter.currency.format(amount) : '');
+        text: amount > 0 ? CurrencyFormatter.currency.format(amount) : '',
+      );
       fieldKeys[category] = GlobalKey();
     }
 
@@ -38,8 +40,10 @@ extension IncomeSplitCategorySheet on _IncomeSplitScreenState {
           heightFactor: 0.95,
           child: StatefulBuilder(
             builder: (context, setSheetState) {
-              final allocated = localBudgets.values
-                  .fold<double>(0, (sum, v) => sum + v);
+              final allocated = localBudgets.values.fold<double>(
+                0,
+                (sum, v) => sum + v,
+              );
               final remaining = _budget - allocated;
               final hasBudget = _budget > 0;
               final isWithinBudget = !hasBudget || remaining >= 0;
@@ -62,16 +66,20 @@ extension IncomeSplitCategorySheet on _IncomeSplitScreenState {
                   if (!mounted) return;
                   final ctx = fieldKeys[category]?.currentContext;
                   if (ctx == null || !ctx.mounted) return;
-                  Scrollable.ensureVisible(ctx,
+                  Scrollable.ensureVisible(
+                    ctx,
                     duration: const Duration(milliseconds: 200),
-                    alignment: 0.2);
+                    alignment: 0.2,
+                  );
                 });
               }
 
               void clearAll() {
                 setSheetState(() {
                   localBudgets.clear();
-                  for (final c in controllers.values) { c.clear(); }
+                  for (final c in controllers.values) {
+                    c.clear();
+                  }
                 });
               }
 
@@ -91,20 +99,28 @@ extension IncomeSplitCategorySheet on _IncomeSplitScreenState {
                 child: SafeArea(
                   child: Padding(
                     padding: EdgeInsets.only(
-                      left: 12, right: 12, top: 8,
-                      bottom: 16 + MediaQuery.of(context).viewInsets.bottom),
+                      left: 12,
+                      right: 12,
+                      top: 8,
+                      bottom: 16 + MediaQuery.of(context).viewInsets.bottom,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('카테고리 배분',
+                            const Text(
+                              '카테고리 배분',
                               style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold)),
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                             IconButton(
                               onPressed: closeSheet,
-                              icon: const Icon(Icons.close)),
+                              icon: const Icon(Icons.close),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 12),
@@ -113,10 +129,14 @@ extension IncomeSplitCategorySheet on _IncomeSplitScreenState {
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
                               color: scheme.surfaceContainerLow,
-                              borderRadius: BorderRadius.circular(8)),
-                            child: const Text('예산 입력 시 초과 여부를 확인할 수 있습니다.',
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Text(
+                              '예산 입력 시 초과 여부를 확인할 수 있습니다.',
                               style: TextStyle(fontSize: 12),
-                              maxLines: 1, overflow: TextOverflow.ellipsis),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                         if (!hasBudget) const SizedBox(height: 8),
                         Container(
@@ -125,37 +145,61 @@ extension IncomeSplitCategorySheet on _IncomeSplitScreenState {
                             color: isWithinBudget
                                 ? scheme.primaryContainer
                                 : scheme.errorContainer,
-                            borderRadius: BorderRadius.circular(12)),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('지출 예산: ${CurrencyFormatter.format(_budget)}',
-                                style: const TextStyle(fontSize: 13)),
+                              Text(
+                                '지출 예산: ${CurrencyFormatter.format(_budget)}',
+                                style: const TextStyle(fontSize: 13),
+                              ),
                               const SizedBox(height: 8),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
-                                  const Text('배분 합계',
-                                    style: TextStyle(fontWeight: FontWeight.bold)),
-                                  Text(CurrencyFormatter.format(allocated),
-                                    style: TextStyle(fontWeight: FontWeight.bold,
+                                  const Text(
+                                    '배분 합계',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    CurrencyFormatter.format(allocated),
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
                                       color: isWithinBudget
-                                          ? scheme.primary : scheme.error)),
+                                          ? scheme.primary
+                                          : scheme.error,
+                                    ),
+                                  ),
                                 ],
                               ),
                               if (hasBudget) ...[
                                 const SizedBox(height: 6),
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text(remaining >= 0 ? '남은 예산' : '초과 금액',
-                                      style: TextStyle(fontWeight: FontWeight.bold,
+                                    Text(
+                                      remaining >= 0 ? '남은 예산' : '초과 금액',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
                                         color: remaining >= 0
-                                            ? scheme.primary : scheme.error)),
-                                    Text(CurrencyFormatter.formatSigned(remaining),
-                                      style: TextStyle(fontWeight: FontWeight.bold,
+                                            ? scheme.primary
+                                            : scheme.error,
+                                      ),
+                                    ),
+                                    Text(
+                                      CurrencyFormatter.formatSigned(remaining),
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
                                         color: remaining >= 0
-                                            ? scheme.primary : scheme.error)),
+                                            ? scheme.primary
+                                            : scheme.error,
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ],
@@ -175,8 +219,7 @@ extension IncomeSplitCategorySheet on _IncomeSplitScreenState {
                                 final node = FocusNode();
                                 node.addListener(() {
                                   if (!node.hasFocus) return;
-                                  setSheetState(() =>
-                                      activeCategory = cat);
+                                  setSheetState(() => activeCategory = cat);
                                   ensureVisibleFor(cat);
                                 });
                                 return node;
@@ -186,26 +229,35 @@ extension IncomeSplitCategorySheet on _IncomeSplitScreenState {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(cat, style: const TextStyle(
-                                      fontSize: 14, fontWeight: FontWeight.w600)),
+                                    Text(
+                                      cat,
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
                                     const SizedBox(height: 6),
                                     SmartInputField(
-                                      controller: ctrl, focusNode: fn,
+                                      controller: ctrl,
+                                      focusNode: fn,
                                       keyboardType: TextInputType.number,
-                                      textInputAction: index < categories.length - 1
+                                      textInputAction:
+                                          index < categories.length - 1
                                           ? TextInputAction.next
                                           : TextInputAction.done,
                                       inputFormatters: [
                                         FilteringTextInputFormatter.digitsOnly,
                                         _CurrencyInputFormatter(),
                                       ],
-                                      hint: '배분 금액', suffixText: '원',
+                                      hint: '배분 금액',
+                                      suffixText: '원',
                                       onChanged: (v) =>
                                           handleValueChange(cat, v),
                                       onFieldSubmitted: (_) {
                                         if (index < categories.length - 1) {
                                           FocusScope.of(context).requestFocus(
-                                            focusNodes[categories[index + 1]]);
+                                            focusNodes[categories[index + 1]],
+                                          );
                                         } else {
                                           FocusScope.of(context).unfocus();
                                         }
@@ -217,28 +269,28 @@ extension IncomeSplitCategorySheet on _IncomeSplitScreenState {
                             },
                           ),
                         ),
-                        if (activeCategory != null)
-                          const SizedBox(height: 12),
+                        if (activeCategory != null) const SizedBox(height: 12),
                         Row(
                           children: [
                             TextButton(
                               onPressed: localBudgets.isEmpty ? null : clearAll,
-                              child: const Text('모든 배분 초기화')),
+                              child: const Text('모든 배분 초기화'),
+                            ),
                             const Spacer(),
                             ElevatedButton.icon(
                               onPressed: () {
-                                final sanitized =
-                                    Map<String, double>.from(localBudgets)
-                                      ..removeWhere((_, v) => v <= 0);
+                                final sanitized = Map<String, double>.from(
+                                  localBudgets,
+                                )..removeWhere((_, v) => v <= 0);
                                 if (mounted) {
-                                  setState(() =>
-                                      _categoryBudgets = sanitized);
+                                  setState(() => _categoryBudgets = sanitized);
                                 }
                                 SnackbarUtils.showInfo(context, '배분이 적용되었습니다.');
                                 Navigator.of(context).pop(sanitized);
                               },
                               icon: const Icon(Icons.check),
-                              label: const Text('배분 적용')),
+                              label: const Text('배분 적용'),
+                            ),
                           ],
                         ),
                       ],
@@ -252,8 +304,12 @@ extension IncomeSplitCategorySheet on _IncomeSplitScreenState {
       },
     );
 
-    for (final n in focusNodes.values) { n.dispose(); }
-    for (final c in controllers.values) { c.dispose(); }
+    for (final n in focusNodes.values) {
+      n.dispose();
+    }
+    for (final c in controllers.values) {
+      c.dispose();
+    }
 
     if (result != null && mounted) {
       setState(() {

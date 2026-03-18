@@ -5,10 +5,7 @@ import '../utils/benefit_memo_utils.dart';
 class TxSearchPlan {
   final String ftsQuery;
   final TxSearchFilters filters;
-  const TxSearchPlan({
-    required this.ftsQuery,
-    required this.filters,
-  });
+  const TxSearchPlan({required this.ftsQuery, required this.filters});
 }
 
 /// 검색 필터 모델.
@@ -51,19 +48,14 @@ class TxSearchFilters {
 }
 
 /// 거래의 혜택별 금액 반환.
-Map<String, double> benefitByTypeForSearch(
-  Transaction tx,
-) {
+Map<String, double> benefitByTypeForSearch(Transaction tx) {
   final fromJson = tx.benefitByType;
   if (fromJson.isNotEmpty) return fromJson;
   return BenefitMemoUtils.parseBenefitByType(tx.memo);
 }
 
 /// [needles] 모두가 [haystack]에 포함되는지 확인.
-bool matchesAllContains(
-  String haystack,
-  List<String> needles,
-) {
+bool matchesAllContains(String haystack, List<String> needles) {
   final lower = haystack.toLowerCase();
   for (final n in needles) {
     if (!lower.contains(n.toLowerCase().trim())) {
@@ -74,10 +66,7 @@ bool matchesAllContains(
 }
 
 /// 거래가 검색 필터 조건에 맞는지 확인.
-bool matchesTxFilters(
-  Transaction tx,
-  TxSearchFilters f,
-) {
+bool matchesTxFilters(Transaction tx, TxSearchFilters f) {
   if (f.types.isNotEmpty && !f.types.contains(tx.type)) {
     return false;
   }
@@ -91,11 +80,7 @@ bool matchesTxFilters(
     }
   }
   if (f.startDate != null || f.endDate != null) {
-    final day = DateTime(
-      tx.date.year,
-      tx.date.month,
-      tx.date.day,
-    );
+    final day = DateTime(tx.date.year, tx.date.month, tx.date.day);
     if (f.startDate != null) {
       final s = DateTime(
         f.startDate!.year,
@@ -105,19 +90,12 @@ bool matchesTxFilters(
       if (day.isBefore(s)) return false;
     }
     if (f.endDate != null) {
-      final e = DateTime(
-        f.endDate!.year,
-        f.endDate!.month,
-        f.endDate!.day,
-      );
+      final e = DateTime(f.endDate!.year, f.endDate!.month, f.endDate!.day);
       if (day.isAfter(e)) return false;
     }
   }
   if (f.paymentContains.isNotEmpty &&
-      !matchesAllContains(
-        tx.paymentMethod,
-        f.paymentContains,
-      )) {
+      !matchesAllContains(tx.paymentMethod, f.paymentContains)) {
     return false;
   }
   if (f.storeContains.isNotEmpty) {
@@ -127,17 +105,13 @@ bool matchesTxFilters(
     }
   }
   if (f.categoryContains.isNotEmpty) {
-    final catText =
-        '${tx.mainCategory} ${tx.subCategory ?? ''}';
+    final catText = '${tx.mainCategory} ${tx.subCategory ?? ''}';
     if (!matchesAllContains(catText, f.categoryContains)) {
       return false;
     }
   }
   if (f.descriptionContains.isNotEmpty &&
-      !matchesAllContains(
-        tx.description,
-        f.descriptionContains,
-      )) {
+      !matchesAllContains(tx.description, f.descriptionContains)) {
     return false;
   }
   if (f.memoContains.isNotEmpty &&
@@ -149,8 +123,7 @@ bool matchesTxFilters(
       f.minBenefit != null ||
       f.maxBenefit != null) {
     final byType = benefitByTypeForSearch(tx);
-    final total =
-        byType.values.fold<double>(0, (a, b) => a + b);
+    final total = byType.values.fold<double>(0, (a, b) => a + b);
     if (f.benefitOnly && total <= 0) return false;
     if (f.pointsOnly) {
       final hasPoints = byType.keys.any((k) {

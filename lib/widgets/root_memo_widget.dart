@@ -98,7 +98,7 @@ class _RootMemoSectionState extends State<RootMemoSection> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                
+
                 // 내용 입력
                 TextField(
                   controller: contentController,
@@ -135,7 +135,10 @@ class _RootMemoSectionState extends State<RootMemoSection> {
                 ),
 
                 // 색상 선택
-                const Text('🎨 메모 색상', style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text(
+                  '🎨 메모 색상',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
@@ -162,13 +165,15 @@ class _RootMemoSectionState extends State<RootMemoSection> {
                       color: Colors.green.shade100,
                       label: '초록',
                       isSelected: selectedColor == 'green',
-                      onTap: () => setDialogState(() => selectedColor = 'green'),
+                      onTap: () =>
+                          setDialogState(() => selectedColor = 'green'),
                     ),
                     _ColorChip(
                       color: Colors.yellow.shade100,
                       label: '노랑',
                       isSelected: selectedColor == 'yellow',
-                      onTap: () => setDialogState(() => selectedColor = 'yellow'),
+                      onTap: () =>
+                          setDialogState(() => selectedColor = 'yellow'),
                     ),
                   ],
                 ),
@@ -184,7 +189,7 @@ class _RootMemoSectionState extends State<RootMemoSection> {
               onPressed: () async {
                 final title = titleController.text.trim();
                 final content = contentController.text.trim();
-                
+
                 if (title.isEmpty || content.isEmpty) {
                   SnackbarUtils.showError(context, '제목과 내용을 모두 입력해주세요');
                   return;
@@ -208,7 +213,7 @@ class _RootMemoSectionState extends State<RootMemoSection> {
                     color: selectedColor,
                   );
                 }
-                
+
                 Navigator.pop(context, true);
               },
               child: Text(memo == null ? '추가' : '수정'),
@@ -227,7 +232,7 @@ class _RootMemoSectionState extends State<RootMemoSection> {
       await _loadMemos();
       if (mounted) {
         SnackbarUtils.showSuccess(
-          context, 
+          context,
           memo == null ? '메모가 추가되었습니다' : '메모가 수정되었습니다',
         );
       }
@@ -236,11 +241,16 @@ class _RootMemoSectionState extends State<RootMemoSection> {
 
   Color? _getColorFromString(String? colorName) {
     switch (colorName) {
-      case 'red': return Colors.red.shade100;
-      case 'blue': return Colors.blue.shade100;
-      case 'green': return Colors.green.shade100;
-      case 'yellow': return Colors.yellow.shade100;
-      default: return null;
+      case 'red':
+        return Colors.red.shade100;
+      case 'blue':
+        return Colors.blue.shade100;
+      case 'green':
+        return Colors.green.shade100;
+      case 'yellow':
+        return Colors.yellow.shade100;
+      default:
+        return null;
     }
   }
 
@@ -248,7 +258,7 @@ class _RootMemoSectionState extends State<RootMemoSection> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final stats = _memoService.getStats();
-    
+
     return Card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -273,7 +283,9 @@ class _RootMemoSectionState extends State<RootMemoSection> {
                   onPressed: _addMemo,
                 ),
                 IconButton(
-                  icon: Icon(_isExpanded ? Icons.expand_less : Icons.expand_more),
+                  icon: Icon(
+                    _isExpanded ? Icons.expand_less : Icons.expand_more,
+                  ),
                   tooltip: _isExpanded ? '접기' : '펼치기',
                   onPressed: () => setState(() => _isExpanded = !_isExpanded),
                 ),
@@ -295,7 +307,11 @@ class _RootMemoSectionState extends State<RootMemoSection> {
                 child: Center(
                   child: Column(
                     children: [
-                      Icon(Icons.note_add, size: 48, color: Colors.grey.shade400),
+                      Icon(
+                        Icons.note_add,
+                        size: 48,
+                        color: Colors.grey.shade400,
+                      ),
                       const SizedBox(height: 8),
                       Text(
                         '아직 메모가 없습니다\n새 메모를 추가해보세요!',
@@ -323,7 +339,7 @@ class _RootMemoSectionState extends State<RootMemoSection> {
                   );
                 },
               ),
-            
+
             if (_memos.length > 3)
               Padding(
                 padding: const EdgeInsets.all(8),
@@ -407,7 +423,9 @@ class _MemoTile extends StatelessWidget {
               value: 'pin',
               child: Row(
                 children: [
-                  Icon(memo.isPinned ? Icons.push_pin_outlined : Icons.push_pin),
+                  Icon(
+                    memo.isPinned ? Icons.push_pin_outlined : Icons.push_pin,
+                  ),
                   const SizedBox(width: 8),
                   Text(memo.isPinned ? '고정 해제' : '상단 고정'),
                 ],
@@ -416,11 +434,7 @@ class _MemoTile extends StatelessWidget {
             const PopupMenuItem(
               value: 'edit',
               child: Row(
-                children: [
-                  Icon(Icons.edit),
-                  SizedBox(width: 8),
-                  Text('수정'),
-                ],
+                children: [Icon(Icons.edit), SizedBox(width: 8), Text('수정')],
               ),
             ),
             const PopupMenuItem(
@@ -436,9 +450,15 @@ class _MemoTile extends StatelessWidget {
           ],
           onSelected: (value) {
             switch (value) {
-              case 'pin': onPin(); break;
-              case 'edit': onTap(); break;
-              case 'delete': onDelete(); break;
+              case 'pin':
+                onPin();
+                break;
+              case 'edit':
+                onTap();
+                break;
+              case 'delete':
+                onDelete();
+                break;
             }
           },
         ),
@@ -471,9 +491,9 @@ class _ColorChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: color ?? Colors.grey.shade200,
           borderRadius: BorderRadius.circular(8),
-          border: isSelected 
-            ? Border.all(color: Colors.blue, width: 2)
-            : Border.all(color: Colors.grey.shade300),
+          border: isSelected
+              ? Border.all(color: Colors.blue, width: 2)
+              : Border.all(color: Colors.grey.shade300),
         ),
         child: Text(
           label,

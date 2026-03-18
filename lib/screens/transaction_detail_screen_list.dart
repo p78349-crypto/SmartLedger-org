@@ -9,8 +9,9 @@ extension TransactionDetailList on _TransactionDetailScreenState {
     ThemeData theme,
   ) {
     final widgets = <Widget>[];
-    final originalTransactions =
-        transactions.where((tx) => !tx.isRefund).toList();
+    final originalTransactions = transactions
+        .where((tx) => !tx.isRefund)
+        .toList();
 
     for (final tx in originalTransactions) {
       final refunds = TransactionService().getRefundsForTransaction(
@@ -23,13 +24,19 @@ extension TransactionDetailList on _TransactionDetailScreenState {
       final netExpense = _selectedType == TransactionType.expense
           ? getNetExpense(tx, refunds)
           : 0;
-      final showNetExpense = _selectedType == TransactionType.expense &&
+      final showNetExpense =
+          _selectedType == TransactionType.expense &&
           hasRefund &&
           netExpense > 0;
 
       widgets.add(
         _buildOriginalTxTile(
-          tx, theme, hasRefund, refundedQty, showNetExpense, netExpense,
+          tx,
+          theme,
+          hasRefund,
+          refundedQty,
+          showNetExpense,
+          netExpense,
         ),
       );
 
@@ -70,8 +77,7 @@ extension TransactionDetailList on _TransactionDetailScreenState {
             tx.description,
             style: TextStyle(
               decoration: hasRefund ? TextDecoration.lineThrough : null,
-              color:
-                  hasRefund ? theme.colorScheme.onSurfaceVariant : null,
+              color: hasRefund ? theme.colorScheme.onSurfaceVariant : null,
             ),
           ),
           if (showNetExpense || hasRefund)
@@ -144,14 +150,12 @@ extension TransactionDetailList on _TransactionDetailScreenState {
       margin: const EdgeInsets.only(left: 56),
       decoration: BoxDecoration(
         border: Border(
-          left:
-              BorderSide(color: Colors.green.withAlpha(128), width: 2),
+          left: BorderSide(color: Colors.green.withAlpha(128), width: 2),
         ),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.only(left: 12, right: 16),
-        leading:
-            Icon(IconCatalog.refund, size: 20, color: Colors.green[700]),
+        leading: Icon(IconCatalog.refund, size: 20, color: Colors.green[700]),
         title: Text(
           '환불 → $destination',
           style: theme.textTheme.bodyMedium?.copyWith(
@@ -228,12 +232,7 @@ extension TransactionDetailList on _TransactionDetailScreenState {
     );
   }
 
-  Widget _outlineBadge(
-    String text,
-    Color bg,
-    Color fg,
-    ThemeData theme,
-  ) {
+  Widget _outlineBadge(String text, Color bg, Color fg, ThemeData theme) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(

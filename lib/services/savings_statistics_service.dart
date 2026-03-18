@@ -72,7 +72,8 @@ class SavingsStatisticsService {
 
     // Reward: food-rescue medal (best-effort).
     try {
-      final hasUsed = totalUsedPrice > 0 ||
+      final hasUsed =
+          totalUsedPrice > 0 ||
           (usedIngredientsJson.trim().isNotEmpty &&
               usedIngredientsJson.trim() != '[]');
       if (hasUsed) {
@@ -99,23 +100,16 @@ class SavingsStatisticsService {
 
   /// 지출 감소 그래프: 월별 식비 지출 변화 데이터
   /// 반환: {'2025-12': 500000, '2026-01': 450000, ...}
-  Future<Result<Map<String, double>>>
-      calculateMonthlyFoodExpenses() async {
+  Future<Result<Map<String, double>>> calculateMonthlyFoodExpenses() async {
     try {
       const accountName = 'default';
       final service = TransactionService();
-      final transactions =
-          service.getTransactions(accountName);
+      final transactions = service.getTransactions(accountName);
       return Success(
-        SavingsStatisticsUtils
-            .calculateMonthlyFoodExpenses(
-          transactions,
-        ),
+        SavingsStatisticsUtils.calculateMonthlyFoodExpenses(transactions),
       );
     } catch (e) {
-      return Failure(StorageError(
-        '월별 식비 계산 실패: $e',
-      ));
+      return Failure(StorageError('월별 식비 계산 실패: $e'));
     }
   }
 
@@ -131,19 +125,13 @@ class SavingsStatisticsService {
     >
   >
   calculateSavingsCompare() async {
-    final expenseResult =
-        await calculateMonthlyFoodExpenses();
+    final expenseResult = await calculateMonthlyFoodExpenses();
     return expenseResult.when(
       success: (data) {
         try {
-          return Success(
-            SavingsStatisticsUtils
-                .compareSavings(data),
-          );
+          return Success(SavingsStatisticsUtils.compareSavings(data));
         } catch (e) {
-          return Failure(StorageError(
-            '절약 비교 계산 실패: $e',
-          ));
+          return Failure(StorageError('절약 비교 계산 실패: $e'));
         }
       },
       failure: Failure.new,

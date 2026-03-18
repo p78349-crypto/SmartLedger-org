@@ -142,8 +142,9 @@ class VoiceSpeechHandler {
           if (isMounted?.call() != true) return;
 
           final text = result.recognizedWords;
-          final displayScore =
-              _tempBuffer.isEmpty ? text : '$_tempBuffer $text';
+          final displayScore = _tempBuffer.isEmpty
+              ? text
+              : '$_tempBuffer $text';
 
           if (displayScore.isNotEmpty) {
             currentText = displayScore;
@@ -169,8 +170,7 @@ class VoiceSpeechHandler {
             _tempBuffer = displayScore;
 
             Future.delayed(const Duration(milliseconds: 1500), () {
-              if (isMounted?.call() == true &&
-                  currentText == displayScore) {
+              if (isMounted?.call() == true && currentText == displayScore) {
                 onVoiceCommand?.call(displayScore);
               }
             });

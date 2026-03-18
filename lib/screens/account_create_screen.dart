@@ -19,7 +19,8 @@ class AccountCreateScreen extends StatefulWidget {
 class _AccountCreateScreenState extends State<AccountCreateScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _passwordConfirmController = TextEditingController();
+  final TextEditingController _passwordConfirmController =
+      TextEditingController();
   bool _obscurePassword = true;
   bool _obscurePasswordConfirm = true;
 
@@ -140,7 +141,9 @@ class _AccountCreateScreenState extends State<AccountCreateScreen> {
                       child: const Text('취소'),
                     ),
                     FilledButton(
-                      onPressed: () => Navigator.of(dialogContext).pop(controller.text.trim()),
+                      onPressed: () => Navigator.of(
+                        dialogContext,
+                      ).pop(controller.text.trim()),
                       child: const Text('복구'),
                     ),
                   ],
@@ -148,7 +151,8 @@ class _AccountCreateScreenState extends State<AccountCreateScreen> {
               );
 
               if (key != null && key.isNotEmpty) {
-                final success = await DbEncryptionKeyManager.restoreKeyFromBackup(key);
+                final success =
+                    await DbEncryptionKeyManager.restoreKeyFromBackup(key);
                 if (!context.mounted) return;
                 if (success) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -275,28 +279,22 @@ class _AccountCreateScreenState extends State<AccountCreateScreen> {
                   SnackbarUtils.showWarning(context, '계정 이름을 입력해주세요');
                   return;
                 }
-                
+
                 // 비밀번호 검증
                 final password = _passwordController.text;
                 final passwordConfirm = _passwordConfirmController.text;
-                
+
                 if (password.isNotEmpty || passwordConfirm.isNotEmpty) {
                   if (password != passwordConfirm) {
-                    SnackbarUtils.showWarning(
-                      context,
-                      '비밀번호가 일치하지 않습니다',
-                    );
+                    SnackbarUtils.showWarning(context, '비밀번호가 일치하지 않습니다');
                     return;
                   }
                   if (password.length < 4) {
-                    SnackbarUtils.showWarning(
-                      context,
-                      '비밀번호는 최소 4자 이상이어야 합니다',
-                    );
+                    SnackbarUtils.showWarning(context, '비밀번호는 최소 4자 이상이어야 합니다');
                     return;
                   }
                 }
-                
+
                 final navigator = Navigator.of(context);
                 final name = AccountNameLanguageTag.applyForcedSuffix(
                   baseName,

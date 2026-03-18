@@ -12,7 +12,8 @@ part 'ceo_prediction_service_extensions.dart';
 /// CEO Prediction Service
 /// Provides predictive analytics and forecasting for executive dashboards
 class CeoPredictionService {
-  static final CeoPredictionService _instance = CeoPredictionService._internal();
+  static final CeoPredictionService _instance =
+      CeoPredictionService._internal();
   factory CeoPredictionService() => _instance;
   CeoPredictionService._internal();
 
@@ -24,24 +25,29 @@ class CeoPredictionService {
     try {
       final historicalData = await _getHistoricalData(startDate);
       final dailyPredictions = <CeoPredictionModel>[];
-      
+
       // Generate 7-day forecast
       for (int i = 0; i < 7; i++) {
         final targetDate = startDate.add(Duration(days: i));
-        final prediction = await _predictDailyMetrics(targetDate, historicalData);
+        final prediction = await _predictDailyMetrics(
+          targetDate,
+          historicalData,
+        );
         dailyPredictions.add(prediction);
       }
-      
+
       final weeklyTrends = _calculateWeeklyTrends(dailyPredictions);
-      final recommendations = _generateRecommendations(dailyPredictions, weeklyTrends);
-      
+      final recommendations = _generateRecommendations(
+        dailyPredictions,
+        weeklyTrends,
+      );
+
       return CeoWeeklyForecast(
         weekStartDate: startDate,
         dailyPredictions: dailyPredictions,
         weeklyTrends: weeklyTrends,
         recommendations: recommendations,
       );
-      
     } catch (e) {
       throw Exception('Failed to generate weekly forecast: $e');
     }
@@ -54,12 +60,12 @@ class CeoPredictionService {
   ) async {
     final transactions = historicalData['transactions'] as List<Transaction>;
     final assets = historicalData['assets'] as List<Asset>;
-    
+
     // Calculate base prediction using trend analysis
     final recentTransactions = transactions.take(30).toList();
     final cashFlowTrend = _calculateCashFlowTrend(recentTransactions);
     final predictedFlow = _extrapolateCashFlow(cashFlowTrend, targetDate);
-    
+
     // Calculate confidence based on data quality
     final variance = _calculateVariance(recentTransactions);
     final confidence = CeoPredictionHelper.calculateConfidenceLevel(
@@ -67,17 +73,17 @@ class CeoPredictionService {
       variance,
       cashFlowTrend,
     );
-    
+
     // Identify key influencing factors
     final keyFactors = _identifyKeyFactors(recentTransactions, assets);
-    
+
     // Assess risk levels
     final riskScore = CeoPredictionHelper.assessRiskLevel(
       assets,
       recentTransactions,
       variance,
     );
-    
+
     return CeoPredictionModel(
       targetDate: targetDate,
       predictedCashFlow: predictedFlow,
@@ -89,14 +95,16 @@ class CeoPredictionService {
 
   Future<Map<String, dynamic>> _getHistoricalData(DateTime fromDate) async {
     final startDate = fromDate.subtract(const Duration(days: 90));
-    final transactions = await _transactionService.getTransactionsBetween(startDate, fromDate);
+    final transactions = await _transactionService.getTransactionsBetween(
+      startDate,
+      fromDate,
+    );
     final assets = await _assetService.getAllAssets();
-    
+
     return {
       'transactions': transactions,
       'assets': assets,
       'dateRange': {'start': startDate, 'end': fromDate},
     };
   }
-
 }

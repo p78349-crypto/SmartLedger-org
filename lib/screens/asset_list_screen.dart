@@ -154,8 +154,8 @@ class _AssetListScreenState extends State<AssetListScreen> {
                         : null,
                   )
                 : isLandscape
-                    ? _buildLandscapeList(filteredAssets)
-                    : _buildPortraitList(filteredAssets),
+                ? _buildLandscapeList(filteredAssets)
+                : _buildPortraitList(filteredAssets),
           ),
         ],
       ),
@@ -167,10 +167,7 @@ class _AssetListScreenState extends State<AssetListScreen> {
     if (!_isSelectionMode || _selectedIds.isEmpty) return null;
     return BottomAppBar(
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16.0,
-          vertical: 8.0,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [

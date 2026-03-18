@@ -33,10 +33,7 @@ extension BackupServiceImport on BackupService {
       // 복원된 계정은 비밀번호 보호 없이 생성되며, 사용자가 필요시 새로 설정 가능
     }
 
-    final account = Account(
-      name: newAccountName, 
-      createdAt: createdAt,
-    );
+    final account = Account(name: newAccountName, createdAt: createdAt);
     final existing = AccountService().getAccountByName(newAccountName);
     if (existing != null) {
       throw Exception('이미 존재하는 계정명입니다');
@@ -85,30 +82,33 @@ extension BackupServiceImport on BackupService {
     // 거래 내역 복현
     final backupType = data['backupType'] as String? ?? 'full';
     final transactionType = data['transactionType'] as String? ?? 'all';
-    final privacyLevel = data['privacyLevel'] as String?;  // 'anonymous' = 개인정보 제거됨
-    
+    final privacyLevel =
+        data['privacyLevel'] as String?; // 'anonymous' = 개인정보 제거됨
+
     // WMS 전용 백업인 경우 조기 반환
     if (backupType == 'wms_only') {
       // WMS 데이터만 복원
       final wmsItems = data['wmsItems'] as List<dynamic>? ?? [];
       for (final itemJson in wmsItems) {
-        final item = ConsumableInventoryItem.fromJson(itemJson as Map<String, dynamic>);
+        final item = ConsumableInventoryItem.fromJson(
+          itemJson as Map<String, dynamic>,
+        );
         await ConsumableInventoryService.instance.addOrUpdateItem(item);
       }
-      
+
       // 감사 로그: WMS 백업 복원
       await _recordRestoreAuditLog(newAccountName, action: 'import_wms_only');
-      return;  // 다른 데이터는 복원하지 않음
+      return; // 다른 데이터는 복원하지 않음
     }
-    
+
     List<Transaction> txList = (data['transactions'] as List<dynamic>? ?? [])
         .map((t) => Transaction.fromJson(t as Map<String, dynamic>))
         .toList();
-    
+
     // 지출 백업: expense type만 필터링
     if (backupType == 'transactions_only' && transactionType == 'expense') {
       txList = txList.where((t) => t.type == TransactionType.expense).toList();
-      
+
       // 개인정보 제거 백업임을 사용자에게 알림
       if (privacyLevel == 'anonymous') {
         // 개인식별정보가 제거된 백업임을 기록
@@ -117,13 +117,14 @@ extension BackupServiceImport on BackupService {
         await prefs.setBool(key, true);
       }
     }
-    
+
     for (final t in txList) {
       await TransactionService().addTransaction(newAccountName, t);
     }
 
     // 자산 복원 (백업 타입 확인)
-    if (backupType != 'transactions_only') {  // 지출만 백업이 아니면 자산 복원
+    if (backupType != 'transactions_only') {
+      // 지출만 백업이 아니면 자산 복원
       final assetList = (data['assets'] as List<dynamic>? ?? [])
           .map((a) => Asset.fromJson(a as Map<String, dynamic>))
           .toList();
@@ -179,7 +180,7 @@ extension BackupServiceImport on BackupService {
     final allTrashList = (data['trashEntries'] as List<dynamic>? ?? [])
         .map((e) => TrashEntry.fromJson(e as Map<String, dynamic>))
         .toList();
-    
+
     List<TrashEntry> trashList = allTrashList;
     if (backupType == 'transactions_only') {
       // 지출 백업: 거래 관련 휴지통만
@@ -192,24 +193,25 @@ extension BackupServiceImport on BackupService {
           .where((e) => e.entityType == TrashEntityType.asset)
           .toList();
     }
-    
-    final processedTrashList = trashList
-        .map((entry) {
-          final updatedPayload = Map<String, dynamic>.from(entry.payload);
-          if (updatedPayload.containsKey('accountName')) {
-            updatedPayload['accountName'] = newAccountName;
-          }
-          return TrashEntry.forPayload(
-            id: entry.id,
-            entityId: entry.entityId,
-            accountName: newAccountName,
-            entityType: entry.entityType,
-            payload: updatedPayload,
-            deletedAt: entry.deletedAt,
-          );
-        })
-        .toList();
-    await TrashService().replaceAccountEntries(newAccountName, processedTrashList);
+
+    final processedTrashList = trashList.map((entry) {
+      final updatedPayload = Map<String, dynamic>.from(entry.payload);
+      if (updatedPayload.containsKey('accountName')) {
+        updatedPayload['accountName'] = newAccountName;
+      }
+      return TrashEntry.forPayload(
+        id: entry.id,
+        entityId: entry.entityId,
+        accountName: newAccountName,
+        entityType: entry.entityType,
+        payload: updatedPayload,
+        deletedAt: entry.deletedAt,
+      );
+    }).toList();
+    await TrashService().replaceAccountEntries(
+      newAccountName,
+      processedTrashList,
+    );
 
     // 쇼핑카트 데이터 복원 (지출 백업 또는 전체 백업일 때만)
     if (backupType != 'assets_only') {
@@ -347,7 +349,7 @@ extension BackupServiceImport on BackupService {
 
     // 글로벌 보안 규정: 복원 이력 기록 (감시 로그)
     await _recordRestoreAuditLog(newAccountName);
-    
+
     // 글로벌 보안 규정: 복원된 계정 재인증 필요 플래그 설정
     await _markAccountNeedsReauth(newAccountName);
   }
@@ -358,11 +360,11 @@ extension BackupServiceImport on BackupService {
     String action = 'account_restored',
   }) async {
     final prefs = await SharedPreferences.getInstance();
-    
+
     // 기존 로그 읽기
     final logJson = prefs.getString(PrefKeys.restoreAuditLog) ?? '[]';
     final List<dynamic> logs = json.decode(logJson) ?? [];
-    
+
     // 새 복원 기록 추가
     logs.add({
       'timestamp': DateTime.now().toIso8601String(),
@@ -370,30 +372,29 @@ extension BackupServiceImport on BackupService {
       'action': action,
       'requiresReauth': true,
     });
-    
+
     // 최근 100개 이력만 유지 (저장소 효율성)
     final trimmedLogs = logs.length > 100
         ? logs.sublist(logs.length - 100)
         : logs;
-    
+
     // 로그 저장
-    await prefs.setString(
-      PrefKeys.restoreAuditLog,
-      json.encode(trimmedLogs),
-    );
+    await prefs.setString(PrefKeys.restoreAuditLog, json.encode(trimmedLogs));
   }
 
   /// 복원된 계정에 재인증 필요 플래그 추가 (글로벌 규정: 복원 후 재인증)
   Future<void> _markAccountNeedsReauth(String accountName) async {
     final prefs = await SharedPreferences.getInstance();
-    
+
     // 재인증 필요 계정 목록 읽기
-    final reauthJson = prefs.getString(PrefKeys.restoredAccountsNeedReauth) ?? '[]';
-    final List<String> reauthAccounts = 
+    final reauthJson =
+        prefs.getString(PrefKeys.restoredAccountsNeedReauth) ?? '[]';
+    final List<String> reauthAccounts =
         (json.decode(reauthJson) as List<dynamic>?)
             ?.map((e) => e.toString())
-            .toList() ?? [];
-    
+            .toList() ??
+        [];
+
     // 아직 없으면 추가
     if (!reauthAccounts.contains(accountName)) {
       reauthAccounts.add(accountName);

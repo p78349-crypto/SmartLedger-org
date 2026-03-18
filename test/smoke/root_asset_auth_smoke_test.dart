@@ -20,9 +20,7 @@ void main() {
 
     await tester.pumpWidget(
       const MaterialApp(
-        home: RootAuthGate(
-          child: Scaffold(body: Text('ROOT_OPEN')),
-        ),
+        home: RootAuthGate(child: Scaffold(body: Text('ROOT_OPEN'))),
       ),
     );
     await tester.pumpAndSettle();
@@ -30,7 +28,9 @@ void main() {
     expect(find.text('ROOT_OPEN'), findsOneWidget);
   });
 
-  testWidgets('SMOKE(AUTH): AssetRouteAuthGate bypass opens child', (tester) async {
+  testWidgets('SMOKE(AUTH): AssetRouteAuthGate bypass opens child', (
+    tester,
+  ) async {
     SharedPreferences.setMockInitialValues(<String, Object>{
       PrefKeys.bypassSecurityForTesting: true,
       PrefKeys.assetAuthEnabled: true,
@@ -39,9 +39,7 @@ void main() {
 
     await tester.pumpWidget(
       const MaterialApp(
-        home: AssetRouteAuthGate(
-          child: Scaffold(body: Text('ASSET_OPEN')),
-        ),
+        home: AssetRouteAuthGate(child: Scaffold(body: Text('ASSET_OPEN'))),
       ),
     );
     await tester.pumpAndSettle();
@@ -49,110 +47,119 @@ void main() {
     expect(find.text('ASSET_OPEN'), findsOneWidget);
   });
 
-  testWidgets('SMOKE(AUTH): AssetRouteAuthGate blocks when subscription required but expired', (
+  testWidgets(
+    'SMOKE(AUTH): AssetRouteAuthGate blocks when subscription required but expired',
+    (tester) async {
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        PrefKeys.bypassSecurityForTesting: true,
+        PrefKeys.assetAuthEnabled: true,
+        PrefKeys.assetAuthRequired: true,
+      });
+
+      final now = DateTime.now();
+      await SubscriptionAccessService.saveState(
+        userId: 'smoke_sub_expired',
+        state: SubscriptionAccessState(
+          status: SubscriptionAccessStatus.expired,
+          expiresAtMs: now
+              .subtract(const Duration(days: 1))
+              .millisecondsSinceEpoch,
+        ),
+      );
+
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: AssetRouteAuthGate(
+            requiresSubscription: true,
+            subscriptionUserId: 'smoke_sub_expired',
+            child: Scaffold(body: Text('ASSET_OPEN')),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('구독 인증 필요'), findsOneWidget);
+      expect(find.text('ASSET_OPEN'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'SMOKE(AUTH): AssetRouteAuthGate allows when subscription required and active',
+    (tester) async {
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        PrefKeys.bypassSecurityForTesting: true,
+        PrefKeys.assetAuthEnabled: true,
+        PrefKeys.assetAuthRequired: true,
+      });
+
+      final now = DateTime.now();
+      await SubscriptionAccessService.saveState(
+        userId: 'smoke_sub_active',
+        state: SubscriptionAccessState(
+          status: SubscriptionAccessStatus.active,
+          expiresAtMs: now.add(const Duration(days: 7)).millisecondsSinceEpoch,
+        ),
+      );
+
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: AssetRouteAuthGate(
+            requiresSubscription: true,
+            subscriptionUserId: 'smoke_sub_active',
+            child: Scaffold(body: Text('ASSET_OPEN')),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('ASSET_OPEN'), findsOneWidget);
+      expect(find.text('구독 인증 필요'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'SMOKE(AUTH): Subscription blocked UI action button invokes callback',
+    (tester) async {
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        PrefKeys.bypassSecurityForTesting: true,
+        PrefKeys.assetAuthEnabled: true,
+        PrefKeys.assetAuthRequired: true,
+      });
+
+      final now = DateTime.now();
+      await SubscriptionAccessService.saveState(
+        userId: 'smoke_sub_action',
+        state: SubscriptionAccessState(
+          status: SubscriptionAccessStatus.expired,
+          expiresAtMs: now
+              .subtract(const Duration(days: 1))
+              .millisecondsSinceEpoch,
+        ),
+      );
+
+      var actionPressed = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: AssetRouteAuthGate(
+            requiresSubscription: true,
+            subscriptionUserId: 'smoke_sub_action',
+            onSubscriptionAction: () => actionPressed = true,
+            child: const Scaffold(body: Text('ASSET_OPEN')),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('구독 관리'), findsOneWidget);
+      await tester.tap(find.text('구독 관리'));
+      await tester.pump();
+      expect(actionPressed, isTrue);
+    },
+  );
+
+  testWidgets('SMOKE(AUTH): Main page ASSET slot shell renders', (
     tester,
   ) async {
-    SharedPreferences.setMockInitialValues(<String, Object>{
-      PrefKeys.bypassSecurityForTesting: true,
-      PrefKeys.assetAuthEnabled: true,
-      PrefKeys.assetAuthRequired: true,
-    });
-
-    final now = DateTime.now();
-    await SubscriptionAccessService.saveState(
-      userId: 'smoke_sub_expired',
-      state: SubscriptionAccessState(
-        status: SubscriptionAccessStatus.expired,
-        expiresAtMs: now.subtract(const Duration(days: 1)).millisecondsSinceEpoch,
-      ),
-    );
-
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: AssetRouteAuthGate(
-          requiresSubscription: true,
-          subscriptionUserId: 'smoke_sub_expired',
-          child: Scaffold(body: Text('ASSET_OPEN')),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    expect(find.text('구독 인증 필요'), findsOneWidget);
-    expect(find.text('ASSET_OPEN'), findsNothing);
-  });
-
-  testWidgets('SMOKE(AUTH): AssetRouteAuthGate allows when subscription required and active', (
-    tester,
-  ) async {
-    SharedPreferences.setMockInitialValues(<String, Object>{
-      PrefKeys.bypassSecurityForTesting: true,
-      PrefKeys.assetAuthEnabled: true,
-      PrefKeys.assetAuthRequired: true,
-    });
-
-    final now = DateTime.now();
-    await SubscriptionAccessService.saveState(
-      userId: 'smoke_sub_active',
-      state: SubscriptionAccessState(
-        status: SubscriptionAccessStatus.active,
-        expiresAtMs: now.add(const Duration(days: 7)).millisecondsSinceEpoch,
-      ),
-    );
-
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: AssetRouteAuthGate(
-          requiresSubscription: true,
-          subscriptionUserId: 'smoke_sub_active',
-          child: Scaffold(body: Text('ASSET_OPEN')),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    expect(find.text('ASSET_OPEN'), findsOneWidget);
-    expect(find.text('구독 인증 필요'), findsNothing);
-  });
-
-  testWidgets('SMOKE(AUTH): Subscription blocked UI action button invokes callback', (
-    tester,
-  ) async {
-    SharedPreferences.setMockInitialValues(<String, Object>{
-      PrefKeys.bypassSecurityForTesting: true,
-      PrefKeys.assetAuthEnabled: true,
-      PrefKeys.assetAuthRequired: true,
-    });
-
-    final now = DateTime.now();
-    await SubscriptionAccessService.saveState(
-      userId: 'smoke_sub_action',
-      state: SubscriptionAccessState(
-        status: SubscriptionAccessStatus.expired,
-        expiresAtMs: now.subtract(const Duration(days: 1)).millisecondsSinceEpoch,
-      ),
-    );
-
-    var actionPressed = false;
-    await tester.pumpWidget(
-      MaterialApp(
-        home: AssetRouteAuthGate(
-          requiresSubscription: true,
-          subscriptionUserId: 'smoke_sub_action',
-          onSubscriptionAction: () => actionPressed = true,
-          child: const Scaffold(body: Text('ASSET_OPEN')),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    expect(find.text('구독 관리'), findsOneWidget);
-    await tester.tap(find.text('구독 관리'));
-    await tester.pump();
-    expect(actionPressed, isTrue);
-  });
-
-  testWidgets('SMOKE(AUTH): Main page ASSET slot shell renders', (tester) async {
     SharedPreferences.setMockInitialValues(<String, Object>{
       PrefKeys.bypassSecurityForTesting: true,
     });
@@ -184,7 +191,10 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey<String>('main_icon_slot_4_0')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey<String>('main_icon_slot_4_0')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('SMOKE(AUTH): Main page can navigate to ROOT page (index 5)', (

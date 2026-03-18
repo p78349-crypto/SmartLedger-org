@@ -137,11 +137,7 @@ class _AccountStatsSearchScreenState extends State<AccountStatsSearchScreen> {
                       ? const Center(child: Text('검색어를 입력하세요.'))
                       : results.isEmpty
                       ? const Center(child: Text('검색 결과가 없습니다.'))
-                      : _buildResultsList(
-                          theme,
-                          results,
-                          isLandscape,
-                        ),
+                      : _buildResultsList(theme, results, isLandscape),
                 ),
               ],
             ),

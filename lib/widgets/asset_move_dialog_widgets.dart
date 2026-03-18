@@ -33,14 +33,8 @@ class AssetMoveFromCard extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-          Text(
-            fromAsset.category.label,
-            style: theme.textTheme.bodySmall,
-          ),
-          Text(
-            '잔액: $formattedBalance',
-            style: theme.textTheme.bodyMedium,
-          ),
+          Text(fromAsset.category.label, style: theme.textTheme.bodySmall),
+          Text('잔액: $formattedBalance', style: theme.textTheme.bodyMedium),
         ],
       ),
     );
@@ -74,10 +68,7 @@ class AssetMoveAmountField extends StatelessWidget {
         hintText: '0',
         border: OutlineInputBorder(),
       ),
-      keyboardType:
-          const TextInputType.numberWithOptions(
-        decimal: true,
-      ),
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
       inputFormatters: [CurrencyInputFormatter()],
     );
   }
@@ -151,12 +142,9 @@ class AssetMoveMemoField extends StatelessWidget {
           textInputAction: textInputAction,
           onEditingComplete: onEditingComplete,
           decoration: InputDecoration(
-            hintText:
-                '예: 채권 이자 기대, 주가 상승 예상, 긴급 자금 필요 등',
+            hintText: '예: 채권 이자 기대, 주가 상승 예상, 긴급 자금 필요 등',
             border: OutlineInputBorder(
-              borderSide: BorderSide(
-                color: Colors.red.shade300,
-              ),
+              borderSide: BorderSide(color: Colors.red.shade300),
             ),
           ),
           maxLines: 3,
@@ -195,9 +183,7 @@ class AssetMoveDatePicker extends StatelessWidget {
           labelText: '이동 날짜',
           border: OutlineInputBorder(),
         ),
-        child: Text(
-          moveDate.toString().split(' ')[0],
-        ),
+        child: Text(moveDate.toString().split(' ')[0]),
       ),
     );
   }

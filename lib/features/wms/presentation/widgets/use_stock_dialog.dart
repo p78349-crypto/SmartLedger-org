@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:smart_ledger/models/consumable_inventory_item.dart';
 
 /// Dialog for using stock from an inventory item.
-/// 
+///
 /// Allows user to specify amount and optional purpose.
 class UseStockDialog extends StatefulWidget {
   final ConsumableInventoryItem item;
   final Future<void> Function(double amount, String? purpose) onUseStock;
-  
+
   const UseStockDialog({
     required this.item,
     required this.onUseStock,
@@ -25,18 +25,18 @@ class _UseStockDialogState extends State<UseStockDialog> {
   final _amountController = TextEditingController();
   final _purposeController = TextEditingController();
   bool _isLoading = false;
-  
+
   @override
   void dispose() {
     _amountController.dispose();
     _purposeController.dispose();
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return AlertDialog(
       title: Text('Use Stock: ${widget.item.name}'),
       content: Form(
@@ -71,13 +71,15 @@ class _UseStockDialogState extends State<UseStockDialog> {
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Amount input
             TextFormField(
               controller: _amountController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               decoration: InputDecoration(
                 labelText: 'Amount to use',
                 suffixText: widget.item.unit,
@@ -88,27 +90,27 @@ class _UseStockDialogState extends State<UseStockDialog> {
                 if (value == null || value.isEmpty) {
                   return 'Please enter amount';
                 }
-                
+
                 final amount = double.tryParse(value);
                 if (amount == null) {
                   return 'Please enter a valid number';
                 }
-                
+
                 if (amount <= 0) {
                   return 'Amount must be greater than 0';
                 }
-                
+
                 if (amount > widget.item.currentStock) {
                   return 'Insufficient stock (available: ${widget.item.currentStock})';
                 }
-                
+
                 return null;
               },
               autofocus: true,
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Purpose input (optional)
             TextFormField(
               controller: _purposeController,
@@ -141,24 +143,24 @@ class _UseStockDialogState extends State<UseStockDialog> {
       ],
     );
   }
-  
+
   Future<void> _handleUseStock() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    
+
     setState(() {
       _isLoading = true;
     });
-    
+
     try {
       final amount = double.parse(_amountController.text);
-      final purpose = _purposeController.text.trim().isEmpty 
-          ? null 
+      final purpose = _purposeController.text.trim().isEmpty
+          ? null
           : _purposeController.text.trim();
-      
+
       await widget.onUseStock(amount, purpose);
-      
+
       if (mounted) {
         Navigator.of(context).pop(true);
       }
@@ -167,12 +169,9 @@ class _UseStockDialogState extends State<UseStockDialog> {
         setState(() {
           _isLoading = false;
         });
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
         );
       }
     }
@@ -187,9 +186,6 @@ Future<bool?> showUseStockDialog(
 ) {
   return showDialog<bool>(
     context: context,
-    builder: (context) => UseStockDialog(
-      item: item,
-      onUseStock: onUseStock,
-    ),
+    builder: (context) => UseStockDialog(item: item, onUseStock: onUseStock),
   );
 }

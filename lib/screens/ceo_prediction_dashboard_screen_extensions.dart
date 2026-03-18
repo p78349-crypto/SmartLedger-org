@@ -1,8 +1,8 @@
 part of 'ceo_prediction_dashboard_screen.dart';
 
 /// CEO 예측 대시보드 화면 확장 기능들
-extension CeoPredictionDashboardScreenExtensions on _CeoPredictionDashboardScreenState {
-  
+extension CeoPredictionDashboardScreenExtensions
+    on _CeoPredictionDashboardScreenState {
   Widget _buildSummaryCard() {
     return Card(
       child: Padding(
@@ -10,14 +10,26 @@ extension CeoPredictionDashboardScreenExtensions on _CeoPredictionDashboardScree
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('주간 예측 요약', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text(
+              '주간 예측 요약',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildMetricColumn('주간 총액', '₩${_formatCurrency(_weeklyForecast!.weeklyTrends['weekly_total'] ?? 0.0)}'),
-                _buildMetricColumn('일평균', '₩${_formatCurrency(_weeklyForecast!.weeklyTrends['daily_average'] ?? 0.0)}'),
-                _buildMetricColumn('신뢰도', '${(_weeklyForecast!.weeklyTrends['avg_confidence']! * 100).toInt()}%'),
+                _buildMetricColumn(
+                  '주간 총액',
+                  '₩${_formatCurrency(_weeklyForecast!.weeklyTrends['weekly_total'] ?? 0.0)}',
+                ),
+                _buildMetricColumn(
+                  '일평균',
+                  '₩${_formatCurrency(_weeklyForecast!.weeklyTrends['daily_average'] ?? 0.0)}',
+                ),
+                _buildMetricColumn(
+                  '신뢰도',
+                  '${(_weeklyForecast!.weeklyTrends['avg_confidence']! * 100).toInt()}%',
+                ),
               ],
             ),
           ],
@@ -27,16 +39,20 @@ extension CeoPredictionDashboardScreenExtensions on _CeoPredictionDashboardScree
   }
 
   Widget _buildTrendsCard() {
-    final trendStrength = _weeklyForecast!.weeklyTrends['trend_strength'] ?? 0.0;
+    final trendStrength =
+        _weeklyForecast!.weeklyTrends['trend_strength'] ?? 0.0;
     final isPositiveTrend = trendStrength > 0;
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('트렌드 분석', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text(
+              '트렌드 분석',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 12),
             Row(
               children: [
@@ -77,21 +93,26 @@ extension CeoPredictionDashboardScreenExtensions on _CeoPredictionDashboardScree
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('AI 권장사항', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text(
+              'AI 권장사항',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 12),
             if (_weeklyForecast!.recommendations.isEmpty)
               const Text('현재 특별한 권장사항이 없습니다.')
             else
-              ...(_weeklyForecast!.recommendations.map((recommendation) => Padding(
-                padding: const EdgeInsets.only(bottom: 8.0),
-                child: Row(
-                  children: [
-                    const Icon(Icons.lightbulb_outline, color: Colors.amber),
-                    const SizedBox(width: 8),
-                    Expanded(child: Text(recommendation)),
-                  ],
+              ...(_weeklyForecast!.recommendations.map(
+                (recommendation) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.lightbulb_outline, color: Colors.amber),
+                      const SizedBox(width: 8),
+                      Expanded(child: Text(recommendation)),
+                    ],
+                  ),
                 ),
-              ))),
+              )),
           ],
         ),
       ),
@@ -105,7 +126,10 @@ extension CeoPredictionDashboardScreenExtensions on _CeoPredictionDashboardScree
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('7일 예측 상세', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text(
+              '7일 예측 상세',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 12),
             ListView.builder(
               shrinkWrap: true,

@@ -20,19 +20,15 @@ mixin _DeepLinkHandlerCart on _DeepLinkHandlerBase {
     final accountName = accounts.first.name;
     await UserPrefService.setLastAccountName(accountName);
 
-    final locationService =
-        ProductLocationService.instance;
-    final locationResult =
-        await locationService.getLocation(
-          accountName: accountName,
-          productName: action.name,
-        );
-    final previousLocation =
-        locationResult.dataOrNull;
-    final finalLocation =
-        action.location?.isNotEmpty == true
-            ? action.location!
-            : (previousLocation ?? '');
+    final locationService = ProductLocationService.instance;
+    final locationResult = await locationService.getLocation(
+      accountName: accountName,
+      productName: action.name,
+    );
+    final previousLocation = locationResult.dataOrNull;
+    final finalLocation = action.location?.isNotEmpty == true
+        ? action.location!
+        : (previousLocation ?? '');
 
     final existingItems = await UserPrefService.getShoppingCartItems(
       accountName: accountName,

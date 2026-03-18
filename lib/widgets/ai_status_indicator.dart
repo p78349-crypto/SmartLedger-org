@@ -8,20 +8,17 @@ import '../config/ai_security_seal.dart';
 class AiStatusIndicator extends StatefulWidget {
   final AiFeature? feature;
   final bool showLabel;
-  
-  const AiStatusIndicator({
-    super.key,
-    this.feature,
-    this.showLabel = true,
-  });
+
+  const AiStatusIndicator({super.key, this.feature, this.showLabel = true});
 
   @override
   State<AiStatusIndicator> createState() => _AiStatusIndicatorState();
 }
 
 class _AiStatusIndicatorState extends State<AiStatusIndicator> {
-  final AiModelPreferencesService _prefsService = AiModelPreferencesService.instance;
-  
+  final AiModelPreferencesService _prefsService =
+      AiModelPreferencesService.instance;
+
   bool _aiEnabled = true;
   bool _preferOffline = true;
   bool _featureEnabled = true;
@@ -36,11 +33,11 @@ class _AiStatusIndicatorState extends State<AiStatusIndicator> {
     try {
       _aiEnabled = await _prefsService.aiEnabled;
       _preferOffline = await _prefsService.preferOfflineAi;
-      
+
       if (widget.feature != null) {
         _featureEnabled = await _prefsService.shouldUseAiFor(widget.feature!);
       }
-      
+
       if (mounted) setState(() {});
     } catch (e) {
       print('AI 상태 로드 실패: $e');
@@ -112,7 +109,7 @@ class _AiStatusIndicatorState extends State<AiStatusIndicator> {
 class AiFeatureStatus extends StatelessWidget {
   final String featureName;
   final AiFeature feature;
-  
+
   const AiFeatureStatus({
     super.key,
     required this.featureName,
@@ -125,10 +122,7 @@ class AiFeatureStatus extends StatelessWidget {
       child: ListTile(
         leading: const Icon(Icons.psychology),
         title: Text(featureName),
-        trailing: AiStatusIndicator(
-          feature: feature,
-          showLabel: true,
-        ),
+        trailing: AiStatusIndicator(feature: feature, showLabel: true),
         onTap: () {
           // AI 모델 선택 화면으로 이동
           Navigator.pushNamed(context, '/ai/model-selector');
@@ -147,8 +141,9 @@ class AiSystemStatusSummary extends StatefulWidget {
 }
 
 class _AiSystemStatusSummaryState extends State<AiSystemStatusSummary> {
-  final AiModelPreferencesService _prefsService = AiModelPreferencesService.instance;
-  
+  final AiModelPreferencesService _prefsService =
+      AiModelPreferencesService.instance;
+
   Map<String, dynamic> _statusSummary = {};
   bool _isLoading = true;
 
@@ -187,8 +182,9 @@ class _AiSystemStatusSummaryState extends State<AiSystemStatusSummary> {
     }
 
     final aiEnabled = _statusSummary['aiEnabled'] ?? false;
-    final modelPriority = _statusSummary['modelPriority'] as List<String>? ?? [];
-    
+    final modelPriority =
+        _statusSummary['modelPriority'] as List<String>? ?? [];
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -198,28 +194,46 @@ class _AiSystemStatusSummaryState extends State<AiSystemStatusSummary> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('🤖 AI 시스템 상태', 
-                           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                const Text(
+                  '🤖 AI 시스템 상태',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
                 IconButton(
-                  onPressed: () => Navigator.pushNamed(context, '/ai/model-selector'),
+                  onPressed: () =>
+                      Navigator.pushNamed(context, '/ai/model-selector'),
                   icon: const Icon(Icons.settings, size: 20),
                 ),
               ],
             ),
             const SizedBox(height: 12),
-            _buildSummaryRow('AI 기능', aiEnabled ? '활성화됨' : '비활성화됨', 
-                            aiEnabled ? Colors.green : Colors.grey),
+            _buildSummaryRow(
+              'AI 기능',
+              aiEnabled ? '활성화됨' : '비활성화됨',
+              aiEnabled ? Colors.green : Colors.grey,
+            ),
             if (modelPriority.isNotEmpty)
               _buildSummaryRow('우선 모델', modelPriority.first, Colors.blue),
-            _buildSummaryRow('CEO 예측', 
-                            _statusSummary['useAiForCeoPrediction'] == true ? 'AI 사용' : '전통적',
-                            _statusSummary['useAiForCeoPrediction'] == true ? Colors.purple : Colors.grey),
-            _buildSummaryRow('투자 참고정보', 
-                            _statusSummary['useAiForInvestment'] == true ? 'AI 사용' : '전통적',
-                            _statusSummary['useAiForInvestment'] == true ? Colors.purple : Colors.grey),
-            _buildSummaryRow('재무 분석', 
-                            _statusSummary['useAiForAnalytics'] == true ? 'AI 사용' : '전통적',
-                            _statusSummary['useAiForAnalytics'] == true ? Colors.purple : Colors.grey),
+            _buildSummaryRow(
+              'CEO 예측',
+              _statusSummary['useAiForCeoPrediction'] == true ? 'AI 사용' : '전통적',
+              _statusSummary['useAiForCeoPrediction'] == true
+                  ? Colors.purple
+                  : Colors.grey,
+            ),
+            _buildSummaryRow(
+              '투자 참고정보',
+              _statusSummary['useAiForInvestment'] == true ? 'AI 사용' : '전통적',
+              _statusSummary['useAiForInvestment'] == true
+                  ? Colors.purple
+                  : Colors.grey,
+            ),
+            _buildSummaryRow(
+              '재무 분석',
+              _statusSummary['useAiForAnalytics'] == true ? 'AI 사용' : '전통적',
+              _statusSummary['useAiForAnalytics'] == true
+                  ? Colors.purple
+                  : Colors.grey,
+            ),
           ],
         ),
       ),
@@ -230,15 +244,17 @@ class _AiSystemStatusSummaryState extends State<AiSystemStatusSummary> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,  
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label, style: const TextStyle(fontSize: 14)),
-          Text(value, 
-               style: TextStyle(
-                 fontSize: 14, 
-                 fontWeight: FontWeight.w500,
-                 color: valueColor,
-               )),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: valueColor,
+            ),
+          ),
         ],
       ),
     );
@@ -260,8 +276,13 @@ class _AiSystemStatusSummaryState extends State<AiSystemStatusSummary> {
                   children: [
                     Icon(Icons.security, color: Colors.red.shade700),
                     const SizedBox(width: 8),
-                    const Text('🔒 AI 시스템 상태', 
-                               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    const Text(
+                      '🔒 AI 시스템 상태',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ],
                 ),
                 const Icon(Icons.block, color: Colors.red, size: 20),

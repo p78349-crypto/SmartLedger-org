@@ -102,14 +102,14 @@ extension AssetTabScreenAuthDialogs on _AssetTabScreenState {
     try {
       final prefs = await SharedPreferences.getInstance();
 
-        final pinEnabled = prefs.getBool(PrefKeys.assetPinEnabled) ?? false;
+      final pinEnabled = prefs.getBool(PrefKeys.assetPinEnabled) ?? false;
       final passwordEnabled =
           prefs.getBool(PrefKeys.assetPasswordEnabled) ?? false;
       final biometricEnabled =
           prefs.getBool(PrefKeys.assetBiometricEnabled) ?? false;
 
-        final pinConfigured = _assetPinService.isPinConfigured(prefs);
-        final passwordConfigured = _assetPasswordService.isPasswordConfigured(
+      final pinConfigured = _assetPinService.isPinConfigured(prefs);
+      final passwordConfigured = _assetPasswordService.isPasswordConfigured(
         prefs,
       );
 

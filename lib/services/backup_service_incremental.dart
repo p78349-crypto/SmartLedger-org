@@ -34,7 +34,6 @@ extension BackupServiceIncremental on BackupService {
         'size': IncrementalBackupHelper.estimateBackupSize(snapshot.changes),
         'timestamp': DateTime.now().toIso8601String(),
       };
-      
     } catch (e) {
       return {
         'success': false,
@@ -50,11 +49,11 @@ extension BackupServiceIncremental on BackupService {
     bool enableCloudSync = false,
   }) async {
     final prefs = await SharedPreferences.getInstance();
-    
+
     await prefs.setBool('auto_incremental_backup', true);
     await prefs.setInt('backup_interval_hours', interval.inHours);
     await prefs.setBool('cloud_sync_enabled', enableCloudSync);
-    
+
     final nextBackup = DateTime.now().add(interval);
     await prefs.setString('next_backup_time', nextBackup.toIso8601String());
   }

@@ -2,7 +2,6 @@ part of 'ai_investment_advisor_screen.dart';
 
 /// AI 투자 참고정보 화면 유틸리티 메서드들 (완전 오프라인 기반)
 extension AiInvestmentAdvisorScreenUtils on _AiInvestmentAdvisorScreenState {
-  
   Widget _buildOfflineNoticeCard() {
     return Card(
       color: Colors.blue.shade50,
@@ -15,7 +14,10 @@ extension AiInvestmentAdvisorScreenUtils on _AiInvestmentAdvisorScreenState {
               children: [
                 const Icon(Icons.info, color: Colors.blue),
                 const SizedBox(width: 8),
-                const Text('오프라인 AI 분석', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                const Text(
+                  '오프라인 AI 분석',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
               ],
             ),
             const SizedBox(height: 8),
@@ -56,7 +58,14 @@ extension AiInvestmentAdvisorScreenUtils on _AiInvestmentAdvisorScreenState {
         children: [
           Text(title, style: const TextStyle(fontSize: 14, color: Colors.grey)),
           const SizedBox(height: 4),
-          Text(value, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: color)),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
         ],
       ),
     );
@@ -74,7 +83,10 @@ extension AiInvestmentAdvisorScreenUtils on _AiInvestmentAdvisorScreenState {
           valueColor: AlwaysStoppedAnimation<Color>(_getRiskColor(riskScore)),
         ),
         const SizedBox(height: 4),
-        Text('${(riskScore * 100).toInt()}%', style: const TextStyle(fontSize: 12)),
+        Text(
+          '${(riskScore * 100).toInt()}%',
+          style: const TextStyle(fontSize: 12),
+        ),
       ],
     );
   }
@@ -88,7 +100,9 @@ extension AiInvestmentAdvisorScreenUtils on _AiInvestmentAdvisorScreenState {
         LinearProgressIndicator(
           value: score,
           backgroundColor: Colors.grey.shade300,
-          valueColor: AlwaysStoppedAnimation<Color>(_getDiversificationColor(score)),
+          valueColor: AlwaysStoppedAnimation<Color>(
+            _getDiversificationColor(score),
+          ),
         ),
         const SizedBox(height: 4),
         Text('${(score * 100).toInt()}%', style: const TextStyle(fontSize: 12)),
@@ -98,7 +112,7 @@ extension AiInvestmentAdvisorScreenUtils on _AiInvestmentAdvisorScreenState {
 
   Widget _buildAllocationBar(String assetType, double percentage) {
     final displayName = _getAssetTypeDisplayName(assetType);
-    
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Row(
@@ -111,14 +125,19 @@ extension AiInvestmentAdvisorScreenUtils on _AiInvestmentAdvisorScreenState {
             child: LinearProgressIndicator(
               value: percentage / 100.0,
               backgroundColor: Colors.grey.shade300,
-              valueColor: AlwaysStoppedAnimation<Color>(_getAssetTypeColor(assetType)),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                _getAssetTypeColor(assetType),
+              ),
             ),
           ),
           const SizedBox(width: 8),
           SizedBox(
             width: 50,
-            child: Text('${percentage.toStringAsFixed(1)}%', 
-                        style: const TextStyle(fontSize: 12), textAlign: TextAlign.right),
+            child: Text(
+              '${percentage.toStringAsFixed(1)}%',
+              style: const TextStyle(fontSize: 12),
+              textAlign: TextAlign.right,
+            ),
           ),
         ],
       ),
@@ -160,7 +179,10 @@ extension AiInvestmentAdvisorScreenUtils on _AiInvestmentAdvisorScreenState {
             ],
           ),
           const SizedBox(height: 4),
-          Text(recommendation.reasoning, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+          Text(
+            recommendation.reasoning,
+            style: const TextStyle(fontSize: 12, color: Colors.grey),
+          ),
         ],
       ),
     );

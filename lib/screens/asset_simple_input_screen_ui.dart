@@ -63,7 +63,8 @@ extension _AssetSimpleInputScreenUi on _AssetSimpleInputScreenState {
                           hint: '예: 시중은행 입출금통장',
                           prefixIcon: const Icon(Icons.label),
                           textInputAction: TextInputAction.next,
-                          onEditingComplete: () => _amountFocusNode.requestFocus(),
+                          onEditingComplete: () =>
+                              _amountFocusNode.requestFocus(),
                         ),
                         const SizedBox(height: 12),
                         SmartInputField(
@@ -73,7 +74,8 @@ extension _AssetSimpleInputScreenUi on _AssetSimpleInputScreenState {
                           prefixIcon: const Icon(Icons.attach_money),
                           keyboardType: TextInputType.number,
                           textInputAction: TextInputAction.next,
-                          onEditingComplete: () => _locationFocusNode.requestFocus(),
+                          onEditingComplete: () =>
+                              _locationFocusNode.requestFocus(),
                         ),
                         const SizedBox(height: 12),
                         SmartInputField(
@@ -82,7 +84,8 @@ extension _AssetSimpleInputScreenUi on _AssetSimpleInputScreenState {
                           label: '위치(은행/앱/보관장소)',
                           prefixIcon: const Icon(Icons.location_on),
                           textInputAction: TextInputAction.next,
-                          onEditingComplete: () => _memoFocusNode.requestFocus(),
+                          onEditingComplete: () =>
+                              _memoFocusNode.requestFocus(),
                         ),
                         _buildSectionHeader('메모'),
                         SmartInputField(
@@ -91,7 +94,8 @@ extension _AssetSimpleInputScreenUi on _AssetSimpleInputScreenState {
                           label: '메모(선택)',
                           prefixIcon: const Icon(Icons.note),
                           textInputAction: TextInputAction.done,
-                          onEditingComplete: () => FocusScope.of(context).unfocus(),
+                          onEditingComplete: () =>
+                              FocusScope.of(context).unfocus(),
                           suffixIcon: _recentMemos.isEmpty
                               ? null
                               : PopupMenuButton<String>(

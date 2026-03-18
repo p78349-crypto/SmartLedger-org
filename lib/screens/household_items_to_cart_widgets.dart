@@ -25,10 +25,7 @@ class HouseholdItemTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: Row(
           children: [
-            Checkbox(
-              value: selected,
-              onChanged: onSelectedChanged,
-            ),
+            Checkbox(value: selected, onChanged: onSelectedChanged),
             Expanded(
               child: Text(
                 name,
@@ -98,9 +95,7 @@ class HouseholdCartBottomButton extends StatelessWidget {
                   )
                 : const Icon(Icons.shopping_cart),
             label: Text(
-              selectedCount == 0
-                  ? '항목을 선택해주세요'
-                  : '$selectedCount개 항목 장바구니에 추가',
+              selectedCount == 0 ? '항목을 선택해주세요' : '$selectedCount개 항목 장바구니에 추가',
             ),
           ),
         ),

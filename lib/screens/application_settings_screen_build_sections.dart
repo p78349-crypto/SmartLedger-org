@@ -8,25 +8,19 @@ extension ApplicationSettingsBuildSections on _ApplicationSettingsScreenState {
       color: scheme.surfaceContainerLow,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(24),
-        side: BorderSide(
-          color: scheme.outlineVariant.withValues(alpha: 0.5),
-        ),
+        side: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.5)),
       ),
       child: Column(
         children: [
           SwitchListTile(
             title: const Text('입력내용 기억'),
-            subtitle: const Text(
-              '상품명/결제수단/메모 입력내용을 저장해 다음에 불러옵니다.',
-            ),
+            subtitle: const Text('상품명/결제수단/메모 입력내용을 저장해 다음에 불러옵니다.'),
             value: _txRecentEnabled,
             onChanged: _setTxRecentEnabled,
           ),
           SwitchListTile(
             title: const Text('자동 채우기'),
-            subtitle: const Text(
-              '지출입력 화면에서 결제수단/메모를 최근 값으로 미리 채웁니다.',
-            ),
+            subtitle: const Text('지출입력 화면에서 결제수단/메모를 최근 값으로 미리 채웁니다.'),
             value: _txRecentAutofill,
             onChanged: _txRecentEnabled ? _setTxRecentAutofill : null,
           ),
@@ -67,9 +61,7 @@ extension ApplicationSettingsBuildSections on _ApplicationSettingsScreenState {
       color: scheme.surfaceContainerLow,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(24),
-        side: BorderSide(
-          color: scheme.outlineVariant.withValues(alpha: 0.5),
-        ),
+        side: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.5)),
       ),
       child: Column(
         children: [
@@ -132,9 +124,7 @@ extension ApplicationSettingsBuildSections on _ApplicationSettingsScreenState {
       color: scheme.surfaceContainerLow,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(24),
-        side: BorderSide(
-          color: scheme.outlineVariant.withValues(alpha: 0.5),
-        ),
+        side: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.5)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),

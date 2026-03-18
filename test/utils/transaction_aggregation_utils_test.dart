@@ -22,34 +22,41 @@ void main() {
       );
     }
 
-    test('isSavingsCountedAsExpense respects allocation with default fallback', () {
-      final assetSaving = tx(
-        id: 's1',
-        type: TransactionType.savings,
-        amount: 100,
-        savingsAllocation: SavingsAllocation.assetIncrease,
-      );
-      final expenseSaving = tx(
-        id: 's2',
-        type: TransactionType.savings,
-        amount: 100,
-        savingsAllocation: SavingsAllocation.expense,
-      );
-      final defaultSaving = tx(id: 's3', type: TransactionType.savings, amount: 100);
+    test(
+      'isSavingsCountedAsExpense respects allocation with default fallback',
+      () {
+        final assetSaving = tx(
+          id: 's1',
+          type: TransactionType.savings,
+          amount: 100,
+          savingsAllocation: SavingsAllocation.assetIncrease,
+        );
+        final expenseSaving = tx(
+          id: 's2',
+          type: TransactionType.savings,
+          amount: 100,
+          savingsAllocation: SavingsAllocation.expense,
+        );
+        final defaultSaving = tx(
+          id: 's3',
+          type: TransactionType.savings,
+          amount: 100,
+        );
 
-      expect(
-        TransactionAggregationUtils.isSavingsCountedAsExpense(assetSaving),
-        isFalse,
-      );
-      expect(
-        TransactionAggregationUtils.isSavingsCountedAsExpense(expenseSaving),
-        isTrue,
-      );
-      expect(
-        TransactionAggregationUtils.isSavingsCountedAsExpense(defaultSaving),
-        isFalse,
-      );
-    });
+        expect(
+          TransactionAggregationUtils.isSavingsCountedAsExpense(assetSaving),
+          isFalse,
+        );
+        expect(
+          TransactionAggregationUtils.isSavingsCountedAsExpense(expenseSaving),
+          isTrue,
+        );
+        expect(
+          TransactionAggregationUtils.isSavingsCountedAsExpense(defaultSaving),
+          isFalse,
+        );
+      },
+    );
 
     test('outflowAmount follows expense-like classification', () {
       expect(

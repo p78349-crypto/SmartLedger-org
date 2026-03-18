@@ -31,21 +31,15 @@ class PasswordKeyBackupApiClient {
   final String adminKey;
   final http.Client? _explicitClient;
 
-  Future<PasswordKeyBackupApiResponse> bootstrap(
-    Map<String, dynamic> payload,
-  ) {
+  Future<PasswordKeyBackupApiResponse> bootstrap(Map<String, dynamic> payload) {
     return _post('/key-backup/bootstrap', payload);
   }
 
-  Future<PasswordKeyBackupApiResponse> recover(
-    Map<String, dynamic> payload,
-  ) {
+  Future<PasswordKeyBackupApiResponse> recover(Map<String, dynamic> payload) {
     return _post('/key-backup/recover', payload);
   }
 
-  Future<PasswordKeyBackupApiResponse> rotate(
-    Map<String, dynamic> payload,
-  ) {
+  Future<PasswordKeyBackupApiResponse> rotate(Map<String, dynamic> payload) {
     return _post('/key-backup/rotate', payload);
   }
 
@@ -77,10 +71,7 @@ class PasswordKeyBackupApiClient {
         rawBody: response.body,
       );
     } catch (_) {
-      return const PasswordKeyBackupApiResponse(
-        statusCode: -1,
-        offline: true,
-      );
+      return const PasswordKeyBackupApiResponse(statusCode: -1, offline: true);
     } finally {
       if (_explicitClient == null) client.close();
     }

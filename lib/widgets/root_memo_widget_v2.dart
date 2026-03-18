@@ -37,9 +37,9 @@ class _RootMemoSectionV2State extends State<RootMemoSectionV2> {
 
   Future<void> _loadMemos() async {
     if (!mounted) return;
-    
+
     setState(() => _isLoading = true);
-    
+
     try {
       final memos = await _memoService.getAllMemos();
       if (mounted) {
@@ -140,7 +140,7 @@ class _RootMemoSectionV2State extends State<RootMemoSectionV2> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                
+
                 // 내용 입력
                 TextField(
                   controller: contentController,
@@ -169,7 +169,10 @@ class _RootMemoSectionV2State extends State<RootMemoSectionV2> {
                 ),
 
                 // 색상 선택
-                const Text('🎨 색상', style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text(
+                  '🎨 색상',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
@@ -196,13 +199,15 @@ class _RootMemoSectionV2State extends State<RootMemoSectionV2> {
                       color: Colors.green.shade100,
                       label: '초록',
                       isSelected: selectedColor == 'green',
-                      onTap: () => setDialogState(() => selectedColor = 'green'),
+                      onTap: () =>
+                          setDialogState(() => selectedColor = 'green'),
                     ),
                     _ColorChip(
                       color: Colors.yellow.shade100,
                       label: '노랑',
                       isSelected: selectedColor == 'yellow',
-                      onTap: () => setDialogState(() => selectedColor = 'yellow'),
+                      onTap: () =>
+                          setDialogState(() => selectedColor = 'yellow'),
                     ),
                   ],
                 ),
@@ -218,7 +223,7 @@ class _RootMemoSectionV2State extends State<RootMemoSectionV2> {
               onPressed: () async {
                 final title = titleController.text.trim();
                 final content = contentController.text.trim();
-                
+
                 if (title.isEmpty) {
                   SnackbarUtils.showError(context, '제목을 입력해주세요');
                   return;
@@ -246,7 +251,7 @@ class _RootMemoSectionV2State extends State<RootMemoSectionV2> {
                   );
                   resultId = success ? memo.id : null;
                 }
-                
+
                 Navigator.pop(context, resultId != null);
               },
               child: Text(memo == null ? '추가' : '수정'),
@@ -266,19 +271,25 @@ class _RootMemoSectionV2State extends State<RootMemoSectionV2> {
 
   Color? _getColorFromString(String? colorName) {
     switch (colorName) {
-      case 'red': return Colors.red.shade100;
-      case 'blue': return Colors.blue.shade100;
-      case 'green': return Colors.green.shade100;
-      case 'yellow': return Colors.yellow.shade100;
-      case 'purple': return Colors.purple.shade100;
-      default: return null;
+      case 'red':
+        return Colors.red.shade100;
+      case 'blue':
+        return Colors.blue.shade100;
+      case 'green':
+        return Colors.green.shade100;
+      case 'yellow':
+        return Colors.yellow.shade100;
+      case 'purple':
+        return Colors.purple.shade100;
+      default:
+        return null;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Card(
       margin: const EdgeInsets.all(16),
       child: Padding(
@@ -289,11 +300,7 @@ class _RootMemoSectionV2State extends State<RootMemoSectionV2> {
             // 헤더
             Row(
               children: [
-                Icon(
-                  Icons.note_alt,
-                  color: theme.primaryColor,
-                  size: 24,
-                ),
+                Icon(Icons.note_alt, color: theme.primaryColor, size: 24),
                 const SizedBox(width: 8),
                 Text(
                   'ROOT 메모',
@@ -309,9 +316,9 @@ class _RootMemoSectionV2State extends State<RootMemoSectionV2> {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 12),
-            
+
             // 메모 목록 또는 로딩
             if (_isLoading)
               const Center(
@@ -325,11 +332,7 @@ class _RootMemoSectionV2State extends State<RootMemoSectionV2> {
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   children: [
-                    Icon(
-                      Icons.note_add,
-                      size: 40,
-                      color: Colors.grey.shade400,
-                    ),
+                    Icon(Icons.note_add, size: 40, color: Colors.grey.shade400),
                     const SizedBox(height: 8),
                     Text(
                       '아직 메모가 없습니다\n첫 번째 메모를 추가해보세요!',
@@ -357,7 +360,7 @@ class _RootMemoSectionV2State extends State<RootMemoSectionV2> {
                   );
                 },
               ),
-            
+
               if (_memos.length > 3)
                 Padding(
                   padding: const EdgeInsets.all(8),
@@ -437,7 +440,9 @@ class _MemoTileV2 extends StatelessWidget {
                   child: Text(
                     memo.title,
                     style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: memo.isPinned ? FontWeight.bold : FontWeight.w500,
+                      fontWeight: memo.isPinned
+                          ? FontWeight.bold
+                          : FontWeight.w500,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -449,7 +454,11 @@ class _MemoTileV2 extends StatelessWidget {
                       value: 'pin',
                       child: Row(
                         children: [
-                          Icon(memo.isPinned ? Icons.push_pin_outlined : Icons.push_pin),
+                          Icon(
+                            memo.isPinned
+                                ? Icons.push_pin_outlined
+                                : Icons.push_pin,
+                          ),
                           const SizedBox(width: 8),
                           Text(memo.isPinned ? '고정 해제' : '상단 고정'),
                         ],
@@ -478,17 +487,23 @@ class _MemoTileV2 extends StatelessWidget {
                   ],
                   onSelected: (value) {
                     switch (value) {
-                      case 'pin': onPin(); break;
-                      case 'edit': onTap(); break;
-                      case 'delete': onDelete(); break;
+                      case 'pin':
+                        onPin();
+                        break;
+                      case 'edit':
+                        onTap();
+                        break;
+                      case 'delete':
+                        onDelete();
+                        break;
                     }
                   },
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 6),
-            
+
             // 내용
             Text(
               memo.content,
@@ -496,9 +511,9 @@ class _MemoTileV2 extends StatelessWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
-            
+
             const SizedBox(height: 6),
-            
+
             // 하단 정보
             Text(
               dateFormat.format(memo.updatedAt),
@@ -536,9 +551,9 @@ class _ColorChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: color ?? Colors.grey.shade200,
           borderRadius: BorderRadius.circular(6),
-          border: isSelected 
-            ? Border.all(color: Colors.blue, width: 2)
-            : Border.all(color: Colors.grey.shade300),
+          border: isSelected
+              ? Border.all(color: Colors.blue, width: 2)
+              : Border.all(color: Colors.grey.shade300),
         ),
         child: Text(
           label,

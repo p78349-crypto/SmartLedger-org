@@ -62,16 +62,14 @@ class _ShoppingRoutes {
         final a = args as AccountArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) =>
-              HouseholdQuickPickScreen(accountName: a.accountName),
+          builder: (_) => HouseholdQuickPickScreen(accountName: a.accountName),
         );
 
       case AppRoutes.householdItems:
         final a = args as AccountArgs;
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) =>
-              HouseholdItemsScreen(accountName: a.accountName),
+          builder: (_) => HouseholdItemsScreen(accountName: a.accountName),
         );
 
       case AppRoutes.consumableInventory:

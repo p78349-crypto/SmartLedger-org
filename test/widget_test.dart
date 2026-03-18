@@ -7,7 +7,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:smart_ledger/main.dart';
+import 'package:smart_ledger/app.dart';
 
 void main() {
   testWidgets('App builds and shows MaterialApp', (WidgetTester tester) async {

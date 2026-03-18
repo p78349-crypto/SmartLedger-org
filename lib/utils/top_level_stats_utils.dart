@@ -44,9 +44,9 @@ class TopLevelStatsUtils {
     outflows.sort((a, b) {
       final d = b.date.compareTo(a.date);
       if (d != 0) return d;
-      return TransactionAggregationUtils.outflowAmount(b).compareTo(
-        TransactionAggregationUtils.outflowAmount(a),
-      );
+      return TransactionAggregationUtils.outflowAmount(
+        b,
+      ).compareTo(TransactionAggregationUtils.outflowAmount(a));
     });
 
     return outflows.take(limit).map((tx) {

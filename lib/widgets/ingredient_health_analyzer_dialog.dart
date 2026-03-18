@@ -180,12 +180,9 @@ class _IngredientHealthAnalyzerDialogState
                             backgroundColor: getDialogScoreColor(
                               score,
                             ).withValues(alpha: 0.2),
-                            side: BorderSide(
-                              color: getDialogScoreColor(score),
-                            ),
+                            side: BorderSide(color: getDialogScoreColor(score)),
                             avatar: CircleAvatar(
-                              backgroundColor:
-                                  getDialogScoreColor(score),
+                              backgroundColor: getDialogScoreColor(score),
                               child: Text(
                                 '$score',
                                 style: const TextStyle(
@@ -252,5 +249,4 @@ class _IngredientHealthAnalyzerDialogState
       ),
     );
   }
-
 }
